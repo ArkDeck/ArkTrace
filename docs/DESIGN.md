@@ -1,11 +1,12 @@
 # ArkTrace 设计文档
 
 > 状态：Draft for Review  
-> 文档版本：0.1a  
+> 文档版本：0.1b  
 > 日期：2026-08-12  
 > 本轮范围：产品与技术设计；不包含开发任务拆分  
 > 配套规格：[SPECIFICATION.md](./SPECIFICATION.md)  
-> 0.1a 修订（2026-08-12）：§2.1 证据基线改锚 GitCode canonical upstream 并记录基线偏差；§11.1 新增 instant 事件语义；§24 新增发布门 1（上游重锚定）；§25 新增关注点 9–11
+> 0.1a 修订（2026-08-12）：§2.1 证据基线改锚 GitCode canonical upstream 并记录基线偏差；§11.1 新增 instant 事件语义；§24 新增发布门 1（上游重锚定）；§25 新增关注点 9–11  
+> 0.1b 修订（2026-08-12，Phase 0）：§2.1 完成 GitCode 重锚定（pin `447a0a49`），发布门 1 关闭；新增 [TRACE_STREAMER.md](./TRACE_STREAMER.md)
 
 ## 1. 文档目的
 
@@ -24,13 +25,12 @@ ArkTrace 是一个独立的 macOS 原生 Trace Workbench。它同时提供：
 ### 2.1 OpenHarmony SmartPerf Host
 
 - Canonical upstream（项目书指定）：[openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)
-- 镜像仓库（本轮实际审阅对象）：[OpenHarmony/developtools_smartperf_host @ Gitee](https://gitee.com/openharmony/developtools_smartperf_host)，[发布页](https://gitee.com/openharmony/developtools_smartperf_host/releases)
 - 官方说明：[SmartPerf Host 使用文档](https://gitee.com/openharmony/docs/blob/30904d2051d468bd681b08da17cbc6e87a77dbf1/en/device-dev/device-test/smartperf-host.md?skip_mobile=true)
-- 本轮审阅快照：Gitee 镜像 `master` @ `5c5afb0c479b070148d8a6e336120638a1a03930`（2025-09-12T06:05:21Z）
-- 快照 TraceStreamer 源码版本：`4.3.7`，发布标记 `2025/07/01`
+- 当前 pin（Phase 0 重锚定，2026-08-12）：GitCode `master` @ `447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`（2026-08-05T20:11:20+08:00，MR !429）
+- TraceStreamer 源码版本：`4.3.7`，发布标记 `2025/07/01`（pin 处与初始快照一致）
 - 仓库与 TraceStreamer 源文件许可证：Apache License 2.0
 
-基线偏差（2026-08-12 复查）：GitCode canonical master 在本轮审阅快照之后仍在演进——2026-08-06 前后仍有合并（PR #429 `fix:thread parse`，直接涉及 parser 行为）；截至 2026-08-12，GitCode master 的 `version.cpp` 仍为 `TRACE_STREAMER_VERSION = "4.3.7"`、`TRACE_STREAMER_PUBLISH_VERSION = "2025/07/01"`，即版本常量未变但 parser 代码已有快照之外的修复。本节其余结论对审阅快照成立；Phase 0 编码前必须对 GitCode master 重跑证据核对、以 GitCode 提交重新 pin revision（见 §24 发布门 1），并在 `TRACE_STREAMER.md` 与 ThirdParty manifest 中以 GitCode 为 canonical upstream 记录依赖。
+重锚定核对（2026-08-12，关闭发布门 1）：0.1a 初始审阅对象为 Gitee 镜像 `5c5afb0c`（2025-09-12），经确认是 GitCode master 的祖先提交，两仓同一历史线。`5c5afb0c..447a0a49` 共 306 个提交、54 个触及 trace_streamer，主要为新增能力表（network profiler、filesystem_io、timerfd_wakeup）、native_memory/hiperf 修复与 macOS 编译修复（2026-07-30 `fix:mac compiler`，说明 macx 构建被积极维护）。ArkTrace required 表中唯一列级变化：`sched_slice` 新增 `prev_itid`/`prev_state` 两列，由 `g_extendField` 开关控制（默认 `false`，默认导出 schema 不变），属 AT-DB-004 定义的 additive 兼容变化。`-e`、`-nm/--nometa`、`.ohos.ts` sidecar、`CREATE TABLE systuning_export.<t> AS SELECT` 导出机制、`meta` 表 `source_name`/`output_name` 绝对路径写入，均在 pin 处复核成立。构建先决条件（clang/gsed/Gitee-SSH 第三方拉取等）与 re-pin 流程见 [TRACE_STREAMER.md](./TRACE_STREAMER.md)。
 
 已确认：
 
@@ -907,7 +907,7 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 
 以下不是留给实现者自由猜测的设计问题，而是必须用真实证据关闭的工程门：
 
-1. 对 canonical upstream（GitCode）master 重跑 §2.1 证据核对，重新 pin TraceStreamer revision/版本（本轮结论基于 Gitee 镜像 2025-09-12 快照，GitCode 其后仍有 parser 修复合并）；
+1. ~~对 canonical upstream（GitCode）master 重跑 §2.1 证据核对，重新 pin TraceStreamer revision/版本~~——已关闭（2026-08-12，Phase 0）：重锚定至 GitCode master `447a0a49`，核对结论见 §2.1 与 [TRACE_STREAMER.md](./TRACE_STREAMER.md)；
 2. TraceStreamer 在当前 Apple silicon/macOS toolchain 的原生、可重现构建；
 3. binary redistribution 的完整第三方许可证清单；
 4. 至少一个可再分发真实 `.htrace`/`.ftrace` fixture；
