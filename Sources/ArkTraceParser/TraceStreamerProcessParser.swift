@@ -1,5 +1,6 @@
 import ArkTraceCore
 import CryptoKit
+import Darwin
 import Foundation
 
 /// Runs a pinned TraceStreamer executable as a child process (DESIGN §8).
@@ -71,9 +72,16 @@ public struct TraceStreamerProcessParser: TraceParser {
         return try result.get()
     }
 
-    public func parse(source: URL, destination: URL) async throws -> ParsedTrace {
+    public func parse(
+        source: URL,
+        destination: URL,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
+    ) async throws -> ParsedTrace {
+        progress?(.preparing)
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
+        progress?(.hashing)
         let prepared = try await Task.detached {
             try Self.prepareParse(
                 source: source,
@@ -82,12 +90,15 @@ public struct TraceStreamerProcessParser: TraceParser {
                 configuredManifestURL: configuredManifestURL
             )
         }.value
+        progress?(.cacheLookup)
         let result: Result<ParsedTrace, Error>
         do {
             result = .success(
                 try await Self.execute(
                     prepared: prepared,
-                    finalizationHook: finalizationHook
+                    finalizationHook: finalizationHook,
+                    progress: progress,
+                    prepareDatabase: prepareDatabase
                 )
             )
         } catch {
@@ -102,7 +113,9 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private static func execute(
         prepared: PreparedParse,
-        finalizationHook: (@Sendable () -> Void)?
+        finalizationHook: (@Sendable () -> Void)?,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ParsedTrace {
         let version = try await Self.reportedVersionOffCallerExecutor(
             executableURL: prepared.parserSnapshot.executableURL)
@@ -112,20 +125,47 @@ public struct TraceStreamerProcessParser: TraceParser {
             reportedVersion: version
         )
 
+        progress?(.parsing)
         let outcome = try await Self.runOffCallerExecutor(
             executable: prepared.parserSnapshot.executableURL,
-            arguments: [
-                prepared.sourceSnapshotURL.path,
-                "-e", prepared.outputURL.path,
-                "-nm",
-            ]
+            arguments: Self.invocationArguments(
+                source: prepared.sourceSnapshotURL,
+                output: prepared.outputURL
+            )
+        )
+        try Self.validateProcessOutcome(outcome, outputURL: prepared.outputURL)
+
+        let databasePreparation = try await Self.finalizeAndPromote(
+            prepared: prepared,
+            parserIdentity: parserIdentity,
+            finalizationHook: finalizationHook,
+            progress: progress,
+            prepareDatabase: prepareDatabase
+        )
+
+        return ParsedTrace(
+            databaseURL: prepared.destinationURL,
+            metadataSidecarURL: prepared.destinationMetadataURL,
+            parser: parserIdentity,
+            sourceSHA256: prepared.sourceSHA256,
+            sourceByteCount: prepared.sourceByteCount,
+            databasePreparation: databasePreparation
+        )
+    }
+
+    static func validateProcessOutcome(_ outcome: Outcome, outputURL: URL) throws {
+        let statusDiagnostic = Self.boundedFileDiagnostic(
+            at: URL(fileURLWithPath: outputURL.path + ".ohos.ts")
         )
         if outcome.cancelled {
             throw ArkTraceError(
                 code: .cancelled,
                 stage: .parsing,
                 message: "Trace parsing was cancelled",
-                retryable: true
+                retryable: true,
+                details: outcome.escalatedToSIGKILL
+                    ? ["termination": "sigkillAfterGrace"]
+                    : ["termination": "sigterm"]
             )
         }
         guard outcome.exitStatus == 0 else {
@@ -133,30 +173,31 @@ public struct TraceStreamerProcessParser: TraceParser {
                 code: .traceParseFailed,
                 stage: .parsing,
                 message: "trace_streamer exited with a failure status",
-                details: ["exitStatus": String(outcome.exitStatus)]
+                details: Self.diagnosticDetails(
+                    outcome: outcome,
+                    status: statusDiagnostic,
+                    exitStatus: outcome.exitStatus
+                )
             )
         }
-        guard Self.isRegularNonSymlinkFile(at: prepared.outputURL),
-            Self.hasSQLiteHeader(at: prepared.outputURL)
+        guard Self.isRegularNonSymlinkFile(at: outputURL),
+            Self.hasSQLiteHeader(at: outputURL)
         else {
             throw ArkTraceError(
                 code: .traceParseFailed,
                 stage: .parsing,
-                message: "trace_streamer exited 0 but produced no valid SQLite database"
+                message: "trace_streamer exited 0 but produced no valid SQLite database",
+                details: Self.diagnosticDetails(
+                    outcome: outcome,
+                    status: statusDiagnostic,
+                    exitStatus: outcome.exitStatus
+                )
             )
         }
+    }
 
-        try await Self.finalizeAndPromote(
-            prepared: prepared,
-            finalizationHook: finalizationHook
-        )
-
-        return ParsedTrace(
-            databaseURL: prepared.destinationURL,
-            parser: parserIdentity,
-            sourceSHA256: prepared.sourceSHA256,
-            sourceByteCount: prepared.sourceByteCount
-        )
+    static func invocationArguments(source: URL, output: URL) -> [String] {
+        [source.path, "-e", output.path, "-nm"]
     }
 
     // MARK: - Immutable input preparation
@@ -169,9 +210,11 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private struct PreparedParse: Sendable {
         let destinationURL: URL
+        let destinationMetadataURL: URL
         let destinationClaimURL: URL
         let workDirectory: URL
         let outputURL: URL
+        let outputMetadataURL: URL
         let sourceSnapshotURL: URL
         let sourceSHA256: String
         let sourceByteCount: Int64
@@ -184,7 +227,7 @@ public struct TraceStreamerProcessParser: TraceParser {
     private final class PromotionGate: @unchecked Sendable {
         private let lock = NSLock()
         private var cancelled = false
-        private var promoted = false
+        private var promotedFiles: [OwnedFile] = []
 
         func cancel() {
             lock.lock()
@@ -192,27 +235,42 @@ public struct TraceStreamerProcessParser: TraceParser {
             lock.unlock()
         }
 
-        func promote(_ operation: () throws -> Void) throws {
+        func promote(_ operation: () throws -> [OwnedFile]) throws {
             lock.lock()
             defer { lock.unlock() }
             guard !cancelled else { throw CancellationError() }
-            try operation()
-            promoted = true
+            promotedFiles = try operation()
         }
 
-        var didPromote: Bool {
+        var ownedPromotedFiles: [OwnedFile] {
             lock.lock()
             defer { lock.unlock() }
-            return promoted
+            return promotedFiles
         }
+    }
+
+    private struct FileIdentity: Equatable, Sendable {
+        let device: UInt64
+        let inode: UInt64
+    }
+
+    private struct OwnedFile: Sendable {
+        let url: URL
+        let identity: FileIdentity
     }
 
     private static func finalizeAndPromote(
         prepared: PreparedParse,
-        finalizationHook: (@Sendable () -> Void)?
-    ) async throws {
+        parserIdentity: TraceParserIdentity,
+        finalizationHook: (@Sendable () -> Void)?,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
+    ) async throws -> TraceDatabasePreparationResult {
         let gate = PromotionGate()
         let task = Task.detached {
+            try Task.checkCancellation()
+            let databasePreparation = try await prepareDatabase(prepared.outputURL, progress)
+            try Self.validate(databasePreparation: databasePreparation)
             try Task.checkCancellation()
             try Self.verify(snapshot: prepared.parserSnapshot)
             try Task.checkCancellation()
@@ -233,32 +291,84 @@ public struct TraceStreamerProcessParser: TraceParser {
             finalizationHook?()
             try Task.checkCancellation()
 
+            try Self.writeMetadataSidecar(
+                at: prepared.outputMetadataURL,
+                parser: parserIdentity,
+                sourceSHA256: prepared.sourceSHA256,
+                sourceByteCount: prepared.sourceByteCount,
+                databasePreparation: databasePreparation
+            )
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o400],
+                ofItemAtPath: prepared.outputURL.path
+            )
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o400],
+                ofItemAtPath: prepared.outputMetadataURL.path
+            )
+            try Self.synchronizeFile(at: prepared.outputURL)
+            try Self.synchronizeFile(at: prepared.outputMetadataURL)
+            try Self.synchronizeDirectory(at: prepared.workDirectory)
+            try Task.checkCancellation()
+
             try gate.promote {
-                guard !Self.pathEntryExists(prepared.destinationURL) else {
+                guard !Self.pathEntryExists(prepared.destinationURL),
+                    !Self.pathEntryExists(prepared.destinationMetadataURL)
+                else {
                     throw Self.destinationUnavailable(reason: "occupied")
                 }
+                var owned: [OwnedFile] = []
                 do {
+                    let metadataIdentity = try Self.ownedFile(
+                        at: prepared.outputMetadataURL
+                    ).identity
+                    let databaseIdentity = try Self.ownedFile(
+                        at: prepared.outputURL
+                    ).identity
+                    try FileManager.default.moveItem(
+                        at: prepared.outputMetadataURL,
+                        to: prepared.destinationMetadataURL
+                    )
+                    owned.append(
+                        OwnedFile(
+                            url: prepared.destinationMetadataURL,
+                            identity: metadataIdentity
+                        )
+                    )
                     try FileManager.default.moveItem(
                         at: prepared.outputURL,
                         to: prepared.destinationURL
                     )
+                    owned.append(
+                        OwnedFile(url: prepared.destinationURL, identity: databaseIdentity)
+                    )
+                    try Self.synchronizeDirectory(
+                        at: prepared.destinationURL.deletingLastPathComponent()
+                    )
+                    return owned
                 } catch {
+                    for file in owned.reversed() {
+                        Self.removeIfOwned(file)
+                    }
                     throw Self.destinationUnavailable(reason: "promotionFailed")
                 }
             }
+            return databasePreparation
         }
 
         do {
-            try await withTaskCancellationHandler {
-                try await task.value
+            return try await withTaskCancellationHandler {
+                let databasePreparation = try await task.value
                 try Task.checkCancellation()
+                return databasePreparation
             } onCancel: {
                 gate.cancel()
                 task.cancel()
             }
         } catch {
-            if gate.didPromote {
-                await removeOffCallerExecutor([prepared.destinationURL])
+            let promotedFiles = gate.ownedPromotedFiles
+            if !promotedFiles.isEmpty {
+                await removeOwnedFilesOffCallerExecutor(promotedFiles)
             }
             if error is CancellationError || Task.isCancelled {
                 throw cancelled(stage: .parsing)
@@ -297,6 +407,10 @@ public struct TraceStreamerProcessParser: TraceParser {
             throw destinationUnavailable(reason: "invalidURL")
         }
         let fm = FileManager.default
+        // Input symlinks are allowed for developer ergonomics, but are
+        // resolved exactly once to a regular readable target. Only the private
+        // copy made from that canonical target is hashed and parsed. Output
+        // files and Ready databases reject symlinks unconditionally.
         let canonicalSource = source.resolvingSymlinksInPath().standardizedFileURL
         let sourceAttributes = try? fm.attributesOfItem(atPath: canonicalSource.path)
         guard sourceAttributes?[.type] as? FileAttributeType == .typeRegular else {
@@ -325,10 +439,13 @@ public struct TraceStreamerProcessParser: TraceParser {
             throw destinationUnavailable(reason: "parentUnavailable")
         }
         let canonicalDestination = destinationParent.appendingPathComponent(destinationName)
+        let destinationMetadata = URL(
+            fileURLWithPath: canonicalDestination.path + ".arktrace.json"
+        )
         guard canonicalDestination != canonicalSource else {
             throw destinationUnavailable(reason: "sameAsSource")
         }
-        guard !pathEntryExists(canonicalDestination) else {
+        guard !pathEntryExists(canonicalDestination), !pathEntryExists(destinationMetadata) else {
             throw destinationUnavailable(reason: "alreadyExists")
         }
 
@@ -338,6 +455,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         )
         do {
             try Data().write(to: claimURL, options: .withoutOverwriting)
+            try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: claimURL.path)
         } catch {
             throw destinationUnavailable(reason: "inUse")
         }
@@ -350,6 +468,7 @@ public struct TraceStreamerProcessParser: TraceParser {
             let directory = destinationParent.appendingPathComponent(
                 ".arktrace-parser-\(UUID().uuidString)", isDirectory: true)
             try fm.createDirectory(at: directory, withIntermediateDirectories: false)
+            try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
             workDirectory = directory
 
             let parserSnapshot = try makeParserSnapshot(
@@ -374,9 +493,13 @@ public struct TraceStreamerProcessParser: TraceParser {
             let sourceIdentity = try sha256AndSize(at: sourceSnapshotURL)
             return PreparedParse(
                 destinationURL: canonicalDestination,
+                destinationMetadataURL: destinationMetadata,
                 destinationClaimURL: claimURL,
                 workDirectory: directory,
                 outputURL: directory.appendingPathComponent("output.partial.sqlite"),
+                outputMetadataURL: directory.appendingPathComponent(
+                    "output.partial.sqlite.arktrace.json"
+                ),
                 sourceSnapshotURL: sourceSnapshotURL,
                 sourceSHA256: sourceIdentity.sha256,
                 sourceByteCount: sourceIdentity.byteCount,
@@ -461,18 +584,40 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     // MARK: - Process execution
 
-    private struct Outcome {
+    struct BoundedDiagnostic: Sendable {
+        let data: Data
+        let observedByteCount: Int
+        let truncated: Bool
+    }
+
+    struct Outcome: Sendable {
         let exitStatus: Int32
         let cancelled: Bool
+        let escalatedToSIGKILL: Bool
+        let stdout: BoundedDiagnostic
+        let stderr: BoundedDiagnostic
     }
 
     private final class ProcessBox: @unchecked Sendable {
+        private enum State {
+            case notStarted
+            case running(pid_t)
+            case terminating(pid_t)
+            case killing(pid_t)
+            case exited
+        }
+
         private let lock = NSLock()
         private let process: Process
+        private let terminationGracePeriod: TimeInterval
         private var cancellationRequested = false
+        private var escalatedToSIGKILL = false
+        private var state: State = .notStarted
+        private var escalationWorkItem: DispatchWorkItem?
 
-        init(_ process: Process) {
+        init(_ process: Process, terminationGracePeriod: TimeInterval) {
             self.process = process
+            self.terminationGracePeriod = max(0, terminationGracePeriod)
         }
 
         func runIfNotCancelled() throws {
@@ -480,14 +625,66 @@ public struct TraceStreamerProcessParser: TraceParser {
             defer { lock.unlock() }
             guard !cancellationRequested else { throw CancellationError() }
             try process.run()
+            state = .running(process.processIdentifier)
         }
 
         func cancel() {
             lock.lock()
-            defer { lock.unlock() }
             cancellationRequested = true
-            if process.isRunning {
-                process.terminate()
+            guard case .running(let pid) = state, process.isRunning else {
+                lock.unlock()
+                return
+            }
+            state = .terminating(pid)
+            process.terminate()
+
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.escalateIfStillRunning(pid: pid)
+            }
+            escalationWorkItem = workItem
+            lock.unlock()
+            DispatchQueue.global(qos: .userInitiated).asyncAfter(
+                deadline: .now() + terminationGracePeriod,
+                execute: workItem
+            )
+        }
+
+        func waitUntilExit() -> Int32 {
+            process.waitUntilExit()
+            lock.lock()
+            state = .exited
+            escalationWorkItem?.cancel()
+            escalationWorkItem = nil
+            let status = process.terminationStatus
+            lock.unlock()
+            return status
+        }
+
+        var wasCancellationRequested: Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            return cancellationRequested
+        }
+
+        var didEscalateToSIGKILL: Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            return escalatedToSIGKILL
+        }
+
+        private func escalateIfStillRunning(pid: pid_t) {
+            lock.lock()
+            defer { lock.unlock() }
+            guard case .terminating(let expectedPID) = state,
+                expectedPID == pid,
+                process.processIdentifier == pid,
+                process.isRunning
+            else {
+                return
+            }
+            state = .killing(pid)
+            if Darwin.kill(pid, SIGKILL) == 0 {
+                escalatedToSIGKILL = true
             }
         }
     }
@@ -498,6 +695,8 @@ public struct TraceStreamerProcessParser: TraceParser {
         private let condition = NSCondition()
         private var buffer = Data()
         private let capacity: Int
+        private var observedByteCount = 0
+        private var truncated = false
         private var acceptsReadabilityCallbacks = true
         private var activeReadabilityCallbacks = 0
         let pipe = Pipe()
@@ -517,7 +716,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         /// then synchronously reads through EOF. Process termination and pipe
         /// delivery happen on different queues, so this barrier preserves a
         /// trailing version line that had not reached the handler yet.
-        func finishAndDrainToEOF() -> Data {
+        func finishAndDrainToEOF() -> BoundedDiagnostic {
             let handle = pipe.fileHandleForReading
             stopReadabilityHandler(waitForActiveCallback: true)
             while true {
@@ -528,10 +727,14 @@ public struct TraceStreamerProcessParser: TraceParser {
             return snapshot()
         }
 
-        func snapshot() -> Data {
+        func snapshot() -> BoundedDiagnostic {
             condition.lock()
             defer { condition.unlock() }
-            return buffer
+            return BoundedDiagnostic(
+                data: buffer,
+                observedByteCount: observedByteCount,
+                truncated: truncated
+            )
         }
 
         private func consumeAvailableData(from handle: FileHandle) {
@@ -582,57 +785,72 @@ public struct TraceStreamerProcessParser: TraceParser {
         }
 
         private func appendBoundedWhileLocked(_ chunk: Data) {
-            guard buffer.count < capacity else { return }
-            buffer.append(chunk.prefix(capacity - buffer.count))
+            let (total, overflow) = observedByteCount.addingReportingOverflow(chunk.count)
+            observedByteCount = overflow ? .max : total
+            guard buffer.count < capacity else {
+                truncated = true
+                return
+            }
+            let remaining = capacity - buffer.count
+            buffer.append(chunk.prefix(remaining))
+            if chunk.count > remaining {
+                truncated = true
+            }
         }
     }
 
-    private static func run(executable: URL, arguments: [String]) async throws -> Outcome {
+    static func run(
+        executable: URL,
+        arguments: [String],
+        diagnosticCapacity: Int = 65_536,
+        terminationGracePeriod: TimeInterval = 0.5
+    ) async throws -> Outcome {
         let process = Process()
         process.executableURL = executable
         process.arguments = arguments
-        let stdoutSink = BoundedPipeSink()
-        let stderrSink = BoundedPipeSink()
+        let stdoutSink = BoundedPipeSink(capacity: diagnosticCapacity)
+        let stderrSink = BoundedPipeSink(capacity: diagnosticCapacity)
         process.standardOutput = stdoutSink.pipe
         process.standardError = stderrSink.pipe
         process.standardInput = FileHandle.nullDevice
 
-        let box = ProcessBox(process)
-        let exitStatus: Int32 = try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { continuation in
-                process.terminationHandler = { finished in
-                    continuation.resume(returning: finished.terminationStatus)
-                }
-                do {
-                    try box.runIfNotCancelled()
-                } catch is CancellationError {
-                    process.terminationHandler = nil
-                    continuation.resume(
-                        throwing: ArkTraceError(
-                            code: .cancelled,
-                            stage: .parsing,
-                            message: "Trace parsing was cancelled",
-                            retryable: true
-                        )
-                    )
-                } catch {
-                    process.terminationHandler = nil
-                    continuation.resume(
-                        throwing: ArkTraceError(
-                            code: .traceStreamerUnavailable,
-                            stage: .parsing,
-                            message: "Failed to launch trace_streamer",
-                            retryable: true
-                        )
-                    )
-                }
+        let box = ProcessBox(process, terminationGracePeriod: terminationGracePeriod)
+        let exitStatus: Int32
+        do {
+            exitStatus = try await withTaskCancellationHandler {
+                try box.runIfNotCancelled()
+                return box.waitUntilExit()
+            } onCancel: {
+                box.cancel()
             }
-        } onCancel: {
-            box.cancel()
+        } catch is CancellationError {
+            stdoutSink.finish()
+            stderrSink.finish()
+            throw ArkTraceError(
+                code: .cancelled,
+                stage: .parsing,
+                message: "Trace parsing was cancelled",
+                retryable: true
+            )
+        } catch {
+            stdoutSink.finish()
+            stderrSink.finish()
+            throw ArkTraceError(
+                code: .traceStreamerUnavailable,
+                stage: .parsing,
+                message: "Failed to launch trace_streamer",
+                retryable: true
+            )
         }
-        stdoutSink.finish()
-        stderrSink.finish()
-        return Outcome(exitStatus: exitStatus, cancelled: Task.isCancelled)
+        let stdout = stdoutSink.finishAndDrainToEOF()
+        let stderr = stderrSink.finishAndDrainToEOF()
+        return Outcome(
+            exitStatus: exitStatus,
+            cancelled: box.wasCancellationRequested || Task.isCancelled,
+            escalatedToSIGKILL: box.didEscalateToSIGKILL,
+            stdout: stdout,
+            stderr: stderr
+        )
     }
 
     private static func runOffCallerExecutor(
@@ -650,33 +868,30 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func reportedVersion(executableURL: URL) async throws -> String {
-        let process = Process()
-        process.executableURL = executableURL
-        process.arguments = ["--version"]
-        let sink = BoundedPipeSink(capacity: 4096)
-        process.standardOutput = sink.pipe
-        process.standardError = sink.pipe
-        process.standardInput = FileHandle.nullDevice
-
-        try await withCheckedThrowingContinuation {
-            (continuation: CheckedContinuation<Void, Error>) in
-            process.terminationHandler = { _ in continuation.resume() }
-            do {
-                try process.run()
-            } catch {
-                process.terminationHandler = nil
-                continuation.resume(
-                    throwing: ArkTraceError(
-                        code: .traceStreamerUnavailable,
-                        stage: .preparing,
-                        message: "Failed to launch trace_streamer for --version",
-                        retryable: true
-                    )
-                )
-            }
+        let outcome: Outcome
+        do {
+            outcome = try await run(
+                executable: executableURL,
+                arguments: ["--version"],
+                diagnosticCapacity: 4_096
+            )
+        } catch let error as ArkTraceError where error.code == .cancelled {
+            throw cancelled(stage: .preparing)
+        } catch {
+            throw ArkTraceError(
+                code: .traceStreamerUnavailable,
+                stage: .preparing,
+                message: "Failed to launch trace_streamer for --version",
+                retryable: true
+            )
         }
-        let output = sink.finishAndDrainToEOF()
-        let text = String(data: output, encoding: .utf8) ?? ""
+        guard !outcome.cancelled else { throw cancelled(stage: .preparing) }
+        // Pinned TraceStreamer 4.3.7 reports its version and exits 1 for this
+        // informational mode. Identity is therefore established by bounded
+        // output parsing, not by pretending --version follows parse exit rules.
+        let text = (String(data: outcome.stdout.data, encoding: .utf8) ?? "")
+            + "\n"
+            + (String(data: outcome.stderr.data, encoding: .utf8) ?? "")
         guard let match = text.firstMatch(of: /version\s+([0-9][0-9A-Za-z.\-]*)/) else {
             throw Self.identityMismatch(field: "reportedVersion", reason: "unreported")
         }
@@ -803,6 +1018,156 @@ public struct TraceStreamerProcessParser: TraceParser {
         return header == Data("SQLite format 3".utf8) + Data([0])
     }
 
+    private static func boundedFileDiagnostic(
+        at url: URL,
+        capacity: Int = 65_536
+    ) -> BoundedDiagnostic? {
+        guard isRegularNonSymlinkFile(at: url),
+            let handle = try? FileHandle(forReadingFrom: url)
+        else {
+            return nil
+        }
+        defer { try? handle.close() }
+        let sample = (try? handle.read(upToCount: capacity + 1)) ?? Data()
+        return BoundedDiagnostic(
+            data: sample.prefix(capacity),
+            observedByteCount: sample.count,
+            truncated: sample.count > capacity
+        )
+    }
+
+    private static func diagnosticDetails(
+        outcome: Outcome,
+        status: BoundedDiagnostic?,
+        exitStatus: Int32
+    ) -> [String: String] {
+        var details = [
+            "exitStatus": String(exitStatus),
+            "stdoutCapturedBytes": String(outcome.stdout.data.count),
+            "stderrCapturedBytes": String(outcome.stderr.data.count),
+            "stdoutTruncated": String(outcome.stdout.truncated),
+            "stderrTruncated": String(outcome.stderr.truncated),
+        ]
+        if let status {
+            details["statusCapturedBytes"] = String(status.data.count)
+            details["statusTruncated"] = String(status.truncated)
+        }
+        return details
+    }
+
+    private static func validate(
+        databasePreparation: TraceDatabasePreparationResult
+    ) throws {
+        let adapter = databasePreparation.schemaAdapterVersion
+        guard !adapter.isEmpty, adapter.utf8.count <= 32,
+            adapter.utf8.allSatisfy({ byte in
+                (byte >= UInt8(ascii: "0") && byte <= UInt8(ascii: "9"))
+                    || (byte >= UInt8(ascii: "A") && byte <= UInt8(ascii: "Z"))
+                    || (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "z"))
+                    || byte == UInt8(ascii: ".") || byte == UInt8(ascii: "-")
+            }),
+            databasePreparation.schemaFingerprint.utf8.count == 64,
+            databasePreparation.schemaFingerprint.utf8.allSatisfy({ byte in
+                (byte >= UInt8(ascii: "0") && byte <= UInt8(ascii: "9"))
+                    || (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "f"))
+            }),
+            databasePreparation.indexVersion > 0,
+            databasePreparation.upstreamDatabaseSHA256.utf8.count == 64,
+            databasePreparation.upstreamDatabaseSHA256.utf8.allSatisfy({ byte in
+                (byte >= UInt8(ascii: "0") && byte <= UInt8(ascii: "9"))
+                    || (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "f"))
+            }),
+            databasePreparation.upstreamDatabaseByteCount > 0
+        else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .validating,
+                message: "Database preparation returned invalid bounded metadata"
+            )
+        }
+    }
+
+    private static func writeMetadataSidecar(
+        at url: URL,
+        parser: TraceParserIdentity,
+        sourceSHA256: String,
+        sourceByteCount: Int64,
+        databasePreparation: TraceDatabasePreparationResult
+    ) throws {
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.sortedKeys]
+            let data = try encoder.encode(
+                TraceDatabaseMetadataSidecar(
+                    formatVersion: 1,
+                    parser: parser,
+                    sourceSHA256: sourceSHA256,
+                    sourceByteCount: sourceByteCount,
+                    databasePreparation: databasePreparation
+                )
+            )
+            guard data.count <= 4_096 else {
+                throw stagingFinalizationFailure(reason: "metadataTooLarge")
+            }
+            try data.write(to: url, options: .withoutOverwriting)
+        } catch let error as ArkTraceError {
+            throw error
+        } catch {
+            throw stagingFinalizationFailure(reason: "metadataWrite")
+        }
+    }
+
+    private static func synchronizeFile(at url: URL) throws {
+        let descriptor = url.path.withCString {
+            Darwin.open($0, O_RDONLY | O_NOFOLLOW)
+        }
+        guard descriptor >= 0 else {
+            throw stagingFinalizationFailure(reason: "fileSyncOpen")
+        }
+        defer { Darwin.close(descriptor) }
+        guard Darwin.fsync(descriptor) == 0 else {
+            throw stagingFinalizationFailure(reason: "fileSync")
+        }
+    }
+
+    private static func synchronizeDirectory(at url: URL) throws {
+        let descriptor = url.path.withCString { Darwin.open($0, O_RDONLY) }
+        guard descriptor >= 0 else {
+            throw stagingFinalizationFailure(reason: "directorySyncOpen")
+        }
+        defer { Darwin.close(descriptor) }
+        guard Darwin.fsync(descriptor) == 0 else {
+            throw stagingFinalizationFailure(reason: "directorySync")
+        }
+    }
+
+    private static func fileIdentity(at url: URL) -> FileIdentity? {
+        var info = stat()
+        let result = url.path.withCString { Darwin.lstat($0, &info) }
+        guard result == 0, (info.st_mode & S_IFMT) == S_IFREG else { return nil }
+        return FileIdentity(device: UInt64(info.st_dev), inode: UInt64(info.st_ino))
+    }
+
+    private static func ownedFile(at url: URL) throws -> OwnedFile {
+        guard let identity = fileIdentity(at: url) else {
+            throw destinationUnavailable(reason: "promotedFileChanged")
+        }
+        return OwnedFile(url: url, identity: identity)
+    }
+
+    private static func removeIfOwned(_ file: OwnedFile) {
+        guard fileIdentity(at: file.url) == file.identity else { return }
+        try? FileManager.default.removeItem(at: file.url)
+    }
+
+    private static func removeOwnedFilesOffCallerExecutor(_ files: [OwnedFile]) async {
+        await Task.detached {
+            for file in files.reversed() {
+                removeIfOwned(file)
+            }
+        }.value
+    }
+
     private static func isRegularNonSymlinkFile(at url: URL) -> Bool {
         let values = try? url.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
         return values?.isRegularFile == true && values?.isSymbolicLink != true
@@ -855,6 +1220,16 @@ public struct TraceStreamerProcessParser: TraceParser {
             code: .traceParseFailed,
             stage: .preparing,
             message: "Unable to prepare private parser staging",
+            retryable: true,
+            details: ["reason": reason]
+        )
+    }
+
+    private static func stagingFinalizationFailure(reason: String) -> ArkTraceError {
+        ArkTraceError(
+            code: .traceParseFailed,
+            stage: .indexing,
+            message: "Unable to durably prepare the validated database",
             retryable: true,
             details: ["reason": reason]
         )

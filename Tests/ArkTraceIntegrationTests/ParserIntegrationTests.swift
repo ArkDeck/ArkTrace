@@ -96,6 +96,19 @@ final class ParserIntegrationTests: XCTestCase {
         }
     }
 
+    private final class StageRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stages: [TraceLoadingStage] = []
+
+        func append(_ stage: TraceLoadingStage) {
+            lock.withLock { stages.append(stage) }
+        }
+
+        func snapshot() -> [TraceLoadingStage] {
+            lock.withLock { stages }
+        }
+    }
+
     private static var repoRoot: URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // ParserIntegrationTests.swift
@@ -265,12 +278,50 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(ranges.first?.0, fixture.traceRange.startTs)
         XCTAssertEqual(ranges.first?.1, fixture.traceRange.endTs)
 
-        let databaseIdentity = try sha256AndSize(at: parsed.databaseURL)
-        XCTAssertEqual(databaseIdentity.sha256, fixture.databaseSHA256)
-        XCTAssertEqual(databaseIdentity.byteCount, fixture.databaseByteCount)
+        let indexNames = Set(try db.query(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+        ) { $0.text(0) }.compactMap { $0 })
+        XCTAssertTrue(
+            TraceDatabaseStagingPreparer.requiredIndexNames.isSubset(of: indexNames),
+            "missing versioned indexes: \(TraceDatabaseStagingPreparer.requiredIndexNames.subtracting(indexNames))"
+        )
+        let plans = [
+            ("SELECT ipid FROM process WHERE ipid = 1", "arktrace_v1_process_ipid"),
+            ("SELECT itid FROM thread WHERE itid = 1", "arktrace_v1_thread_itid"),
+            (
+                "SELECT ts FROM sched_slice WHERE itid = 1 AND ts >= 0",
+                "arktrace_v1_sched_slice_itid_ts"
+            ),
+            (
+                "SELECT ts FROM thread_state WHERE itid = 1 AND ts >= 0",
+                "arktrace_v1_thread_state_itid_ts"
+            ),
+            (
+                "SELECT ts FROM callstack WHERE callid = 1 AND ts >= 0",
+                "arktrace_v1_callstack_callid_ts"
+            ),
+        ]
+        for (sql, indexName) in plans {
+            let plan = try db.query("EXPLAIN QUERY PLAN \(sql)") {
+                $0.text(3) ?? ""
+            }.joined(separator: " ")
+            XCTAssertTrue(plan.contains(indexName), plan)
+        }
+
+        XCTAssertEqual(
+            parsed.databasePreparation.upstreamDatabaseSHA256,
+            fixture.databaseSHA256
+        )
+        XCTAssertEqual(
+            parsed.databasePreparation.upstreamDatabaseByteCount,
+            fixture.databaseByteCount
+        )
         let databaseBytes = try Data(contentsOf: parsed.databaseURL)
+        let sidecarBytes = try Data(contentsOf: parsed.metadataSidecarURL)
         XCTAssertNil(databaseBytes.range(of: Data(source.path.utf8)))
         XCTAssertNil(databaseBytes.range(of: Data(staging.path.utf8)))
+        XCTAssertNil(sidecarBytes.range(of: Data(source.path.utf8)))
+        XCTAssertNil(sidecarBytes.range(of: Data(staging.path.utf8)))
     }
 
     private func requireEnvironment() throws -> (binary: URL, fixture: URL) {
@@ -475,6 +526,7 @@ final class ParserIntegrationTests: XCTestCase {
         )
 
         let metadata = try await session.repository.metadata()
+        let parsed = await session.parsed
         XCTAssertGreaterThan(metadata.durationNs, 0, "trace must have a positive duration")
         XCTAssertEqual(metadata.traceSHA256.count, 64)
         XCTAssertEqual(metadata.schemaFingerprint.count, 64)
@@ -488,6 +540,21 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(metadata.parser.architecture, manifest.architecture)
         XCTAssertEqual(metadata.parser.adapterVersion, manifest.adapterVersion)
         XCTAssertEqual(metadata.parser.buildRecipeVersion, manifest.buildRecipeVersion)
+        XCTAssertEqual(parsed.databasePreparation.indexVersion, 1)
+        XCTAssertEqual(
+            parsed.databasePreparation.schemaFingerprint,
+            metadata.schemaFingerprint
+        )
+        let sidecarData = try Data(contentsOf: parsed.metadataSidecarURL)
+        let sidecar = try JSONDecoder().decode(
+            TraceDatabaseMetadataSidecar.self,
+            from: sidecarData
+        )
+        XCTAssertEqual(sidecar.parser, parsed.parser)
+        XCTAssertEqual(sidecar.sourceSHA256, parsed.sourceSHA256)
+        XCTAssertEqual(sidecar.databasePreparation, parsed.databasePreparation)
+        XCTAssertNil(sidecarData.range(of: Data(fixture.path.utf8)))
+        XCTAssertNil(sidecarData.range(of: Data(staging.path.utf8)))
 
         let processes = try await session.repository.processes(ProcessQuery())
         XCTAssertFalse(processes.items.isEmpty, "a real trace exposes at least one process")
@@ -498,6 +565,32 @@ final class ParserIntegrationTests: XCTestCase {
         let firstPid = processes.items[0].pid
         let filtered = try await session.repository.processes(try ProcessQuery(pid: firstPid))
         XCTAssertTrue(filtered.items.allSatisfy { $0.pid == firstPid })
+    }
+
+    func testPhase1ProgressReportsActualStagesInOrder() async throws {
+        let (binary, fixture) = try requireEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-progress-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let recorder = StageRecorder()
+
+        _ = try await TraceSession.open(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging,
+            progress: { recorder.append($0) }
+        )
+
+        XCTAssertEqual(recorder.snapshot(), [
+            .preparing,
+            .hashing,
+            .cacheLookup,
+            .parsing,
+            .validating,
+            .indexing,
+            .openingDatabase,
+            .ready,
+        ])
     }
 
     func testCancellationTerminatesParser() async throws {

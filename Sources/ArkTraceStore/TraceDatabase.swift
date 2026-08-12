@@ -1,4 +1,5 @@
 import ArkTraceCore
+import Darwin
 import Foundation
 import SQLite3
 
@@ -70,19 +71,37 @@ final class TraceDatabase {
 
     private var handle: OpaquePointer
 
-    init(url: URL, readOnly: Bool) throws {
+    init(url: URL, readOnly: Bool, createIfMissing: Bool = true) throws {
         var db: OpaquePointer?
-        let flags = readOnly ? SQLITE_OPEN_READONLY : (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE)
-        let rc = sqlite3_open_v2(url.path, &db, flags, nil)
+        // macOS exposes /var through a symlink. Resolve parent components but
+        // deliberately preserve the final component so SQLITE_OPEN_NOFOLLOW
+        // rejects a database-file symlink without rejecting canonical temp roots.
+        let parent = url.deletingLastPathComponent()
+        var canonicalParent = [CChar](repeating: 0, count: Int(PATH_MAX))
+        let resolved = parent.path.withCString {
+            Darwin.realpath($0, &canonicalParent)
+        }
+        let openURL = resolved.map {
+            URL(fileURLWithPath: String(cString: $0), isDirectory: true)
+                .appendingPathComponent(url.lastPathComponent)
+        } ?? url
+        var flags = readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE
+        if !readOnly, createIfMissing {
+            flags |= SQLITE_OPEN_CREATE
+        }
+        if readOnly || !createIfMissing {
+            flags |= SQLITE_OPEN_NOFOLLOW
+        }
+        let rc = sqlite3_open_v2(openURL.path, &db, flags, nil)
         guard rc == SQLITE_OK, let db else {
-            let message = db.map { String(cString: sqlite3_errmsg($0)) } ?? "cannot allocate"
             if let db {
                 sqlite3_close_v2(db)
             }
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .openingDatabase,
-                message: "Cannot open SQLite database: \(message)"
+                message: "Cannot open SQLite database",
+                details: ["sqliteCode": String(rc)]
             )
         }
         self.handle = db
@@ -105,7 +124,8 @@ final class TraceDatabase {
             throw ArkTraceError(
                 code: stage == .querying ? .queryFailed : .traceDatabaseInvalid,
                 stage: stage,
-                message: "Failed to prepare statement: \(String(cString: sqlite3_errmsg(handle)))"
+                message: "Failed to prepare internal SQLite statement",
+                details: ["sqliteCode": String(sqlite3_errcode(handle))]
             )
         }
         defer { sqlite3_finalize(statement) }
@@ -168,12 +188,28 @@ final class TraceDatabase {
 
     /// DDL/insert helper for staging migrations and test fixtures only.
     /// Never receives caller-supplied values (AT-DB-006).
-    func execute(_ sql: String) throws {
+    func execute(
+        _ sql: String,
+        stage: ArkTraceError.Stage = .openingDatabase
+    ) throws {
         guard sqlite3_exec(handle, sql, nil, nil, nil) == SQLITE_OK else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
-                stage: .openingDatabase,
-                message: "Failed to execute statement: \(String(cString: sqlite3_errmsg(handle)))"
+                stage: stage,
+                message: "Failed to execute internal SQLite statement",
+                details: ["sqliteCode": String(sqlite3_errcode(handle))]
+            )
+        }
+    }
+
+    func flush() throws {
+        let rc = sqlite3_db_cacheflush(handle)
+        guard rc == SQLITE_OK else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .indexing,
+                message: "Failed to flush staging SQLite pages",
+                details: ["sqliteCode": String(rc)]
             )
         }
     }

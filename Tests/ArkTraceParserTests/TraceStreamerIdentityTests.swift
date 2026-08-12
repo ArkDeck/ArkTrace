@@ -1,5 +1,6 @@
 import ArkTraceCore
 import CryptoKit
+import Darwin
 import Foundation
 import XCTest
 
@@ -111,6 +112,32 @@ final class TraceStreamerIdentityTests: XCTestCase {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
+    private func makeExecutableScript(_ body: String) throws -> (directory: URL, script: URL) {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-child-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        let script = directory.appendingPathComponent("fixture.zsh")
+        try Data(("#!/bin/zsh\n" + body).utf8).write(to: script, options: .withoutOverwriting)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o700],
+            ofItemAtPath: script.path
+        )
+        return (directory, script)
+    }
+
+    private func waitForPID(at url: URL) async throws -> pid_t {
+        for _ in 0..<2_000 {
+            if let data = try? Data(contentsOf: url),
+                let text = String(data: data, encoding: .utf8),
+                let pid = pid_t(text.trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                return pid
+            }
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        throw XCTSkip("child process did not publish its PID")
+    }
+
     func testBoundedPipeSinkDrainsTrailingVersionBytesThroughEOF() throws {
         for iteration in 0..<100 {
             let sink = TraceStreamerProcessParser.BoundedPipeSink(capacity: 4_096)
@@ -120,11 +147,166 @@ final class TraceStreamerIdentityTests: XCTestCase {
             try sink.pipe.fileHandleForWriting.close()
 
             XCTAssertEqual(
-                sink.finishAndDrainToEOF(),
+                sink.finishAndDrainToEOF().data,
                 payload,
                 "version tail was truncated on iteration \(iteration)"
             )
         }
+    }
+
+    func testChildInvocationUsesLiteralArgumentsAndFixedNoMetaFlag() async throws {
+        let fixture = try makeExecutableScript("""
+            for argument in "$@"; do
+                print -r -- "$argument"
+            done
+            """)
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let sentinel = fixture.directory.appendingPathComponent("shell-expanded")
+        let source = fixture.directory.appendingPathComponent(
+            "source; touch \(sentinel.path)"
+        )
+        let output = fixture.directory.appendingPathComponent("output.sqlite")
+        let arguments = TraceStreamerProcessParser.invocationArguments(
+            source: source,
+            output: output
+        )
+
+        let outcome = try await TraceStreamerProcessParser.run(
+            executable: fixture.script,
+            arguments: arguments
+        )
+        let captured = String(decoding: outcome.stdout.data, as: UTF8.self)
+            .split(separator: "\n")
+            .map(String.init)
+
+        XCTAssertEqual(outcome.exitStatus, 0)
+        XCTAssertEqual(captured, arguments)
+        XCTAssertEqual(arguments, [source.path, "-e", output.path, "-nm"])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: sentinel.path))
+    }
+
+    func testChildDiagnosticsRemainBoundedUnderLargeOutput() async throws {
+        let fixture = try makeExecutableScript("""
+            head -c 1048576 /dev/zero
+            head -c 1048576 /dev/zero >&2
+            """)
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+
+        let outcome = try await TraceStreamerProcessParser.run(
+            executable: fixture.script,
+            arguments: [],
+            diagnosticCapacity: 4_096
+        )
+
+        XCTAssertEqual(outcome.exitStatus, 0)
+        XCTAssertEqual(outcome.stdout.data.count, 4_096)
+        XCTAssertEqual(outcome.stderr.data.count, 4_096)
+        XCTAssertGreaterThanOrEqual(outcome.stdout.observedByteCount, 1_048_576)
+        XCTAssertGreaterThanOrEqual(outcome.stderr.observedByteCount, 1_048_576)
+        XCTAssertTrue(outcome.stdout.truncated)
+        XCTAssertTrue(outcome.stderr.truncated)
+    }
+
+    func testCancellationWaitsForSIGTERMExitAndReapsChild() async throws {
+        let fixture = try makeExecutableScript("""
+            trap 'exit 0' TERM
+            print -r -- $$ > "$1"
+            while true; do :; done
+            """)
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let pidFile = fixture.directory.appendingPathComponent("pid")
+        let task = Task {
+            try await TraceStreamerProcessParser.run(
+                executable: fixture.script,
+                arguments: [pidFile.path],
+                terminationGracePeriod: 0.25
+            )
+        }
+        let pid = try await waitForPID(at: pidFile)
+        task.cancel()
+        let outcome = try await task.value
+
+        XCTAssertTrue(outcome.cancelled)
+        XCTAssertFalse(outcome.escalatedToSIGKILL)
+        XCTAssertEqual(Darwin.kill(pid, 0), -1)
+        XCTAssertEqual(errno, ESRCH)
+    }
+
+    func testCancellationEscalatesIgnoredSIGTERMAndReapsChild() async throws {
+        let fixture = try makeExecutableScript("""
+            trap '' TERM
+            print -r -- $$ > "$1"
+            while true; do :; done
+            """)
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let pidFile = fixture.directory.appendingPathComponent("pid")
+        let task = Task {
+            try await TraceStreamerProcessParser.run(
+                executable: fixture.script,
+                arguments: [pidFile.path],
+                terminationGracePeriod: 0.05
+            )
+        }
+        let pid = try await waitForPID(at: pidFile)
+        task.cancel()
+        let outcome = try await task.value
+
+        XCTAssertTrue(outcome.cancelled)
+        XCTAssertTrue(outcome.escalatedToSIGKILL)
+        XCTAssertEqual(Darwin.kill(pid, 0), -1)
+        XCTAssertEqual(errno, ESRCH)
+    }
+
+    func testProcessOutcomeRejectsFailureMissingGarbageAndSymlinkOutput() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-output-validation-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let failed = try await TraceStreamerProcessParser.run(
+            executable: URL(fileURLWithPath: "/usr/bin/false"),
+            arguments: []
+        )
+        XCTAssertThrowsError(
+            try TraceStreamerProcessParser.validateProcessOutcome(
+                failed,
+                outputURL: directory.appendingPathComponent("missing.sqlite")
+            )
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .traceParseFailed)
+            XCTAssertEqual((error as? ArkTraceError)?.details["exitStatus"], "1")
+        }
+
+        let succeeded = try await TraceStreamerProcessParser.run(
+            executable: URL(fileURLWithPath: "/usr/bin/true"),
+            arguments: []
+        )
+        let missing = directory.appendingPathComponent("missing.sqlite")
+        XCTAssertThrowsError(
+            try TraceStreamerProcessParser.validateProcessOutcome(succeeded, outputURL: missing)
+        )
+
+        let garbage = directory.appendingPathComponent("garbage.sqlite")
+        try Data("not sqlite".utf8).write(to: garbage)
+        let status = URL(fileURLWithPath: garbage.path + ".ohos.ts")
+        try Data(repeating: 0x78, count: 100_000).write(to: status)
+        XCTAssertThrowsError(
+            try TraceStreamerProcessParser.validateProcessOutcome(succeeded, outputURL: garbage)
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceParseFailed)
+            XCTAssertEqual(error?.details["statusCapturedBytes"], "65536")
+            XCTAssertEqual(error?.details["statusTruncated"], "true")
+            XCTAssertFalse(error?.details.values.contains { $0.contains(directory.path) } == true)
+        }
+
+        let target = directory.appendingPathComponent("target.sqlite")
+        try (Data("SQLite format 3".utf8) + Data([0])).write(to: target)
+        let symlink = directory.appendingPathComponent("symlink.sqlite")
+        try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: target)
+        XCTAssertThrowsError(
+            try TraceStreamerProcessParser.validateProcessOutcome(succeeded, outputURL: symlink)
+        )
     }
 
     private func waitForPreparedSnapshots(in directory: URL) async throws -> Bool {
@@ -155,13 +337,36 @@ final class TraceStreamerIdentityTests: XCTestCase {
         destination: URL
     ) async -> ParseOutcome {
         do {
-            _ = try await parser.parse(source: source, destination: destination)
+            _ = try await parse(parser: parser, source: source, destination: destination)
             return .success
         } catch let error as ArkTraceError where error.code == .invalidArgument {
             return .invalidArgument
         } catch {
             return .unexpected
         }
+    }
+
+    nonisolated private static func parse(
+        parser: TraceStreamerProcessParser,
+        source: URL,
+        destination: URL
+    ) async throws -> ParsedTrace {
+        try await parser.parse(
+            source: source,
+            destination: destination,
+            progress: nil,
+            prepareDatabase: { _, progress in
+                progress?(.validating)
+                progress?(.indexing)
+                return TraceDatabasePreparationResult(
+                    schemaAdapterVersion: "test",
+                    schemaFingerprint: String(repeating: "0", count: 64),
+                    indexVersion: 1,
+                    upstreamDatabaseSHA256: String(repeating: "0", count: 64),
+                    upstreamDatabaseByteCount: 1
+                )
+            }
+        )
     }
 
     func testValidBinaryAndManifestProduceCompleteIdentity() async throws {
@@ -295,7 +500,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let destination = copy.directory.appendingPathComponent("new.sqlite")
 
         await assertIdentityMismatch {
-            _ = try await parser.parse(source: Self.fixtureURL, destination: destination)
+            _ = try await Self.parse(
+                parser: parser,
+                source: Self.fixtureURL,
+                destination: destination
+            )
         }
         XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
     }
@@ -312,13 +521,37 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
 
         do {
-            _ = try await parser.parse(source: source, destination: source)
+            _ = try await Self.parse(parser: parser, source: source, destination: source)
             XCTFail("expected destination rejection")
         } catch let error as ArkTraceError {
             XCTAssertEqual(error.code, .invalidArgument)
             XCTAssertEqual(error.details["reason"], "sameAsSource")
         }
         XCTAssertEqual(try Data(contentsOf: source), original)
+    }
+
+    func testSourceSymlinkResolvesOnceToImmutableSnapshotWithoutMutatingTarget() async throws {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-source-symlink-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let target = directory.appendingPathComponent("source-target.htrace")
+        let original = try Data(contentsOf: Self.fixtureURL)
+        try original.write(to: target)
+        let sourceLink = directory.appendingPathComponent("source-link.htrace")
+        try FileManager.default.createSymbolicLink(at: sourceLink, withDestinationURL: target)
+        let destination = directory.appendingPathComponent("trace.sqlite")
+
+        let parsed = try await Self.parse(
+            parser: try TraceStreamerProcessParser(executableURL: Self.binaryURL),
+            source: sourceLink,
+            destination: destination
+        )
+
+        XCTAssertEqual(parsed.sourceSHA256, sha256(original))
+        XCTAssertEqual(try Data(contentsOf: target), original)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: sourceLink.path))
     }
 
     func testExistingDestinationIsNeverOverwrittenOrDeleted() async throws {
@@ -333,13 +566,44 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
 
         do {
-            _ = try await parser.parse(source: Self.fixtureURL, destination: destination)
+            _ = try await Self.parse(
+                parser: parser,
+                source: Self.fixtureURL,
+                destination: destination
+            )
             XCTFail("expected destination rejection")
         } catch let error as ArkTraceError {
             XCTAssertEqual(error.code, .invalidArgument)
             XCTAssertEqual(error.details["reason"], "alreadyExists")
         }
         XCTAssertEqual(try Data(contentsOf: destination), sentinel)
+    }
+
+    func testExistingReadyMetadataSidecarIsNeverOverwrittenOrDeleted() async throws {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-existing-sidecar-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let sidecar = URL(fileURLWithPath: destination.path + ".arktrace.json")
+        let sentinel = Data("caller-owned-sidecar".utf8)
+        try sentinel.write(to: sidecar)
+        let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
+
+        do {
+            _ = try await Self.parse(
+                parser: parser,
+                source: Self.fixtureURL,
+                destination: destination
+            )
+            XCTFail("expected destination sidecar rejection")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .invalidArgument)
+            XCTAssertEqual(error.details["reason"], "alreadyExists")
+        }
+        XCTAssertEqual(try Data(contentsOf: sidecar), sentinel)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
     }
 
     func testConcurrentParsesCannotClaimTheSameDestination() async throws {
@@ -378,9 +642,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let destination = copy.directory.appendingPathComponent("trace.sqlite")
         let parser = try TraceStreamerProcessParser(executableURL: copy.binary)
 
-        let task = Task {
-            try await parser.parse(source: source, destination: destination)
-        }
+        async let parsing = Self.parse(
+            parser: parser,
+            source: source,
+            destination: destination
+        )
         let snapshotsReady = try await waitForPreparedSnapshots(in: copy.directory)
         XCTAssertTrue(
             snapshotsReady,
@@ -390,7 +656,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         try Data("mutated source".utf8).write(to: source, options: .atomic)
         try Data("mutated binary".utf8).write(to: copy.binary, options: .atomic)
 
-        let parsed = try await task.value
+        let parsed = try await parsing
         XCTAssertEqual(parsed.sourceSHA256, sha256(sourceBytes))
         XCTAssertEqual(parsed.sourceByteCount, Int64(sourceBytes.count))
         XCTAssertEqual(
@@ -416,7 +682,8 @@ final class TraceStreamerIdentityTests: XCTestCase {
                         executableURL: Self.binaryURL,
                         finalizationHook: { barrier.pauseUntilReleased() }
                     )
-                    _ = try await parser.parse(
+                    _ = try await Self.parse(
+                        parser: parser,
                         source: Self.fixtureURL,
                         destination: destination
                     )
@@ -428,6 +695,13 @@ final class TraceStreamerIdentityTests: XCTestCase {
                 }
             }
             await barrier.waitUntilReached()
+            XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+            XCTAssertFalse(
+                FileManager.default.fileExists(
+                    atPath: destination.path + ".arktrace.json"
+                ),
+                "Ready marker and metadata must remain invisible before finalization"
+            )
             group.cancelAll()
             barrier.resume()
             return await group.next() ?? .unexpected
@@ -436,6 +710,41 @@ final class TraceStreamerIdentityTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
         let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
         XCTAssertTrue(leftovers.isEmpty, "partial DB and destination claim must be cleaned")
+    }
+
+    func testDatabasePreparationFailureNeverPromotesReadyArtifacts() async throws {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-preparation-failure-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
+
+        do {
+            _ = try await parser.parse(
+                source: Self.fixtureURL,
+                destination: destination,
+                progress: nil,
+                prepareDatabase: { _, progress in
+                    progress?(.validating)
+                    throw ArkTraceError(
+                        code: .traceSchemaUnsupported,
+                        stage: .validating,
+                        message: "Injected staging validation failure"
+                    )
+                }
+            )
+            XCTFail("preparation failure must not return a Ready database")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceSchemaUnsupported)
+        }
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: destination.path + ".arktrace.json")
+        )
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: directory.path), [])
     }
 
     func testStagingFoundationErrorIsTypedAndDoesNotLeakAbsolutePath() async throws {
@@ -453,7 +762,8 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
 
         do {
-            _ = try await parser.parse(
+            _ = try await Self.parse(
+                parser: parser,
                 source: Self.fixtureURL,
                 destination: directory.appendingPathComponent("trace.sqlite")
             )

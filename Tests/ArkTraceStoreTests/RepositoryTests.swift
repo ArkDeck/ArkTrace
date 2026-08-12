@@ -1,9 +1,27 @@
 import ArkTraceCore
+import CryptoKit
 import XCTest
 
 @testable import ArkTraceStore
 
 final class RepositoryTests: XCTestCase {
+    private final class StageRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var values: [TraceLoadingStage] = []
+
+        func append(_ stage: TraceLoadingStage) {
+            lock.lock()
+            values.append(stage)
+            lock.unlock()
+        }
+
+        func snapshot() -> [TraceLoadingStage] {
+            lock.lock()
+            defer { lock.unlock() }
+            return values
+        }
+    }
+
     private var databaseURL: URL!
 
     private static let requiredEventTablesSQL = """
@@ -152,6 +170,14 @@ final class RepositoryTests: XCTestCase {
         return url
     }
 
+    private func sha256AndSize(at url: URL) throws -> (String, Int64) {
+        let data = try Data(contentsOf: url)
+        return (
+            SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined(),
+            Int64(data.count)
+        )
+    }
+
     private func assertRepositoryInitialization(
         at url: URL,
         failsWith code: ArkTraceError.Code,
@@ -186,6 +212,91 @@ final class RepositoryTests: XCTestCase {
                 $0.contains("process.start_ts") && $0.contains("precede trace start")
             }
         )
+    }
+
+    func testStagingPreparationCreatesVersionedIndexesAndPreservesRows() throws {
+        let upstreamIdentity = try sha256AndSize(at: databaseURL)
+        let beforeCounts = try TraceDatabase(url: databaseURL, readOnly: true).query(
+            """
+            SELECT
+                (SELECT COUNT(*) FROM process),
+                (SELECT COUNT(*) FROM thread),
+                (SELECT COUNT(*) FROM sched_slice),
+                (SELECT COUNT(*) FROM thread_state),
+                (SELECT COUNT(*) FROM callstack)
+            """
+        ) { row in (row.int64(0), row.int64(1), row.int64(2), row.int64(3), row.int64(4)) }
+
+        let stages = StageRecorder()
+        let preparation = try TraceDatabaseStagingPreparer.prepare(
+            databaseURL: databaseURL,
+            progress: { stages.append($0) }
+        )
+
+        XCTAssertEqual(preparation.indexVersion, 1)
+        XCTAssertEqual(preparation.schemaAdapterVersion, TraceSchemaAdapter.version)
+        XCTAssertEqual(preparation.schemaFingerprint.count, 64)
+        XCTAssertEqual(preparation.upstreamDatabaseSHA256, upstreamIdentity.0)
+        XCTAssertEqual(preparation.upstreamDatabaseByteCount, upstreamIdentity.1)
+        XCTAssertEqual(stages.snapshot(), [.validating, .indexing])
+
+        let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        let indexNames = Set(try db.query(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+        ) { $0.text(0) }.compactMap { $0 })
+        XCTAssertTrue(indexNames.isSuperset(of: [
+            "arktrace_v1_process_pid",
+            "arktrace_v1_process_ipid",
+            "arktrace_v1_thread_tid_ipid",
+            "arktrace_v1_thread_itid",
+            "arktrace_v1_sched_slice_ts_cpu",
+            "arktrace_v1_sched_slice_itid_ts",
+            "arktrace_v1_thread_state_itid_ts",
+            "arktrace_v1_callstack_callid_ts",
+        ]))
+        XCTAssertFalse(indexNames.contains("arktrace_v1_thread_state_ts_cpu"))
+        XCTAssertFalse(indexNames.contains("arktrace_v1_measure_filter_id_ts"))
+
+        let afterCounts = try db.query(
+            """
+            SELECT
+                (SELECT COUNT(*) FROM process),
+                (SELECT COUNT(*) FROM thread),
+                (SELECT COUNT(*) FROM sched_slice),
+                (SELECT COUNT(*) FROM thread_state),
+                (SELECT COUNT(*) FROM callstack)
+            """
+        ) { row in (row.int64(0), row.int64(1), row.int64(2), row.int64(3), row.int64(4)) }
+        XCTAssertEqual(beforeCounts.first?.0, afterCounts.first?.0)
+        XCTAssertEqual(beforeCounts.first?.1, afterCounts.first?.1)
+        XCTAssertEqual(beforeCounts.first?.2, afterCounts.first?.2)
+        XCTAssertEqual(beforeCounts.first?.3, afterCounts.first?.3)
+        XCTAssertEqual(beforeCounts.first?.4, afterCounts.first?.4)
+
+        let processPlan = try db.query(
+            "EXPLAIN QUERY PLAN SELECT ipid FROM process WHERE ipid = 1"
+        ) { $0.text(3) ?? "" }.joined(separator: " ")
+        let threadPlan = try db.query(
+            "EXPLAIN QUERY PLAN SELECT itid FROM thread WHERE itid = 1"
+        ) { $0.text(3) ?? "" }.joined(separator: " ")
+        XCTAssertTrue(processPlan.contains("arktrace_v1_process_ipid"), processPlan)
+        XCTAssertTrue(threadPlan.contains("arktrace_v1_thread_itid"), threadPlan)
+    }
+
+    func testReadyDatabaseOpenIsReadOnlyAndRejectsFinalSymlink() throws {
+        _ = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let reader = try TraceDatabase(url: databaseURL, readOnly: true)
+        XCTAssertThrowsError(
+            try reader.execute("INSERT INTO process VALUES (99, 99, 99, 'mutated', 0)")
+        )
+
+        let symlink = databaseURL.deletingLastPathComponent()
+            .appendingPathComponent("arktrace-ready-link-\(UUID().uuidString).sqlite")
+        try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: databaseURL)
+        defer { try? FileManager.default.removeItem(at: symlink) }
+        XCTAssertThrowsError(try TraceDatabase(url: symlink, readOnly: true)) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .traceDatabaseInvalid)
+        }
     }
 
     func testProcessDirectoryOrderingAndConversion() async throws {
@@ -623,6 +734,33 @@ final class RepositoryTests: XCTestCase {
             XCTAssertEqual(error?.details["reason"], "vmStepBudgetExceeded")
             XCTAssertEqual(error?.details["relationship"], "thread.ipid->process.ipid")
         }
+    }
+
+    func testStagingIdentityIndexesKeepLargeValidRelationshipWithinBudget() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 100000
+            )
+            INSERT INTO process SELECT value, value, 'process', 0 FROM ids;
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (1, 1, 'late valid target', 0, 100000);
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        XCTAssertNoThrow(try TraceDatabaseStagingPreparer.prepare(databaseURL: url))
+        let db = try TraceDatabase(url: url, readOnly: true)
+        let plan = try db.query(
+            "EXPLAIN QUERY PLAN SELECT ipid FROM process WHERE ipid = 100000"
+        ) { $0.text(3) ?? "" }.joined(separator: " ")
+        XCTAssertTrue(plan.contains("arktrace_v1_process_ipid"), plan)
     }
 
     func testTimeClampAndStorageDropsProduceBoundedQualityWarnings() async throws {
