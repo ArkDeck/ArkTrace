@@ -5,18 +5,36 @@ import SQLite3
 
 private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-private final class SQLiteVMProgressBudget {
-    private var callbacksRemaining: Int
+private final class SQLiteQueryProgressController {
+    private var callbacksRemaining: Int?
+    private let observesTaskCancellation: Bool
+    private let progressHook: (@Sendable () -> Void)?
     private(set) var exhausted = false
+    private(set) var cancelled = false
 
-    init(vmStepBudget: Int, callbackInterval: Int32) {
+    init(
+        vmStepBudget: Int?,
+        callbackInterval: Int32,
+        observesTaskCancellation: Bool,
+        progressHook: (@Sendable () -> Void)?
+    ) {
         let interval = Int(callbackInterval)
-        callbacksRemaining = max(1, (vmStepBudget + interval - 1) / interval)
+        callbacksRemaining = vmStepBudget.map {
+            max(1, ($0 + interval - 1) / interval)
+        }
+        self.observesTaskCancellation = observesTaskCancellation
+        self.progressHook = progressHook
     }
 
     func advance() -> Int32 {
-        callbacksRemaining -= 1
-        guard callbacksRemaining <= 0 else { return 0 }
+        progressHook?()
+        if observesTaskCancellation, Task.isCancelled {
+            cancelled = true
+            return 1
+        }
+        guard let remaining = callbacksRemaining else { return 0 }
+        callbacksRemaining = remaining - 1
+        guard remaining <= 1 else { return 0 }
         exhausted = true
         return 1
     }
@@ -25,13 +43,9 @@ private final class SQLiteVMProgressBudget {
 private let sqliteVMProgressCallback: @convention(c) (UnsafeMutableRawPointer?) -> Int32 = {
     context in
     guard let context else { return 1 }
-    return Unmanaged<SQLiteVMProgressBudget>.fromOpaque(context)
+    return Unmanaged<SQLiteQueryProgressController>.fromOpaque(context)
         .takeUnretainedValue()
         .advance()
-}
-
-private let sqliteTaskCancellationCallback: @convention(c) (UnsafeMutableRawPointer?) -> Int32 = {
-    _ in Task.isCancelled ? 1 : 0
 }
 
 /// Minimal SQLite3 wrapper. Not Sendable by design: an instance is owned by a
@@ -120,8 +134,13 @@ final class TraceDatabase {
         bindings: [Binding] = [],
         vmStepBudget: Int? = nil,
         stage: ArkTraceError.Stage = .querying,
+        observesTaskCancellation: Bool = false,
+        progressHook: (@Sendable () -> Void)? = nil,
         map: (Row) throws -> T
     ) throws -> [T] {
+        if observesTaskCancellation {
+            try Task.checkCancellation()
+        }
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(handle, sql, -1, &statement, nil) == SQLITE_OK, let statement
         else {
@@ -135,19 +154,27 @@ final class TraceDatabase {
         defer { sqlite3_finalize(statement) }
 
         let progressInterval: Int32 = 100
-        let progressBudget = vmStepBudget.map {
-            SQLiteVMProgressBudget(vmStepBudget: max(1, $0), callbackInterval: progressInterval)
+        let progressController: SQLiteQueryProgressController?
+        if vmStepBudget != nil || observesTaskCancellation || progressHook != nil {
+            progressController = SQLiteQueryProgressController(
+                vmStepBudget: vmStepBudget.map { max(1, $0) },
+                callbackInterval: progressInterval,
+                observesTaskCancellation: observesTaskCancellation,
+                progressHook: progressHook
+            )
+        } else {
+            progressController = nil
         }
-        if let progressBudget {
+        if let progressController {
             sqlite3_progress_handler(
                 handle,
                 progressInterval,
                 sqliteVMProgressCallback,
-                Unmanaged.passUnretained(progressBudget).toOpaque()
+                Unmanaged.passUnretained(progressController).toOpaque()
             )
         }
         defer {
-            if progressBudget != nil {
+            if progressController != nil {
                 sqlite3_progress_handler(handle, 0, nil, nil)
             }
         }
@@ -172,14 +199,27 @@ final class TraceDatabase {
 
         var results: [T] = []
         while true {
+            if observesTaskCancellation {
+                try Task.checkCancellation()
+            }
             switch sqlite3_step(statement) {
             case SQLITE_ROW:
                 results.append(try map(Row(statement: statement)))
             case SQLITE_DONE:
+                if observesTaskCancellation {
+                    try Task.checkCancellation()
+                }
                 return results
             case let rc:
-                if rc == SQLITE_INTERRUPT, progressBudget?.exhausted == true {
-                    throw VMInstructionBudgetExceeded()
+                if rc == SQLITE_INTERRUPT {
+                    if progressController?.cancelled == true
+                        || (observesTaskCancellation && Task.isCancelled)
+                    {
+                        throw CancellationError()
+                    }
+                    if progressController?.exhausted == true {
+                        throw VMInstructionBudgetExceeded()
+                    }
                 }
                 throw ArkTraceError(
                     code: stage == .querying ? .queryFailed : .traceDatabaseInvalid,
@@ -197,22 +237,36 @@ final class TraceDatabase {
         stage: ArkTraceError.Stage = .openingDatabase,
         observesTaskCancellation: Bool = false
     ) throws {
+        let progressController: SQLiteQueryProgressController?
         if observesTaskCancellation {
             try Task.checkCancellation()
+            let controller = SQLiteQueryProgressController(
+                vmStepBudget: nil,
+                callbackInterval: 1_000,
+                observesTaskCancellation: true,
+                progressHook: nil
+            )
+            progressController = controller
             sqlite3_progress_handler(
                 handle,
                 1_000,
-                sqliteTaskCancellationCallback,
-                nil
+                sqliteVMProgressCallback,
+                Unmanaged.passUnretained(controller).toOpaque()
             )
+        } else {
+            progressController = nil
         }
         defer {
             if observesTaskCancellation {
                 sqlite3_progress_handler(handle, 0, nil, nil)
             }
         }
-        let rc = sqlite3_exec(handle, sql, nil, nil, nil)
-        if rc == SQLITE_INTERRUPT, observesTaskCancellation, Task.isCancelled {
+        let rc = withExtendedLifetime(progressController) {
+            sqlite3_exec(handle, sql, nil, nil, nil)
+        }
+        if rc == SQLITE_INTERRUPT,
+            progressController?.cancelled == true || (observesTaskCancellation && Task.isCancelled)
+        {
             throw CancellationError()
         }
         guard rc == SQLITE_OK else {
@@ -237,9 +291,17 @@ final class TraceDatabase {
         }
     }
 
-    func quickCheckIsOK() -> Bool {
-        let result = try? query("PRAGMA quick_check(1)", stage: .validating) { $0.text(0) }
-        return result?.first == "ok"
+    func quickCheckIsOK(
+        stage: ArkTraceError.Stage = .validating,
+        progressHook: (@Sendable () -> Void)? = nil
+    ) throws -> Bool {
+        let result = try query(
+            "PRAGMA quick_check(1)",
+            stage: stage,
+            observesTaskCancellation: true,
+            progressHook: progressHook
+        ) { $0.text(0) }
+        return result.first == "ok"
     }
 
     func tableNames() throws -> Set<String> {

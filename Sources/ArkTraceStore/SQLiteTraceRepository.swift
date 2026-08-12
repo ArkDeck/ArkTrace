@@ -37,7 +37,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         source: TraceSourceDescriptor
     ) throws {
         let db = try TraceDatabase(url: databaseURL, readOnly: true)
-        guard db.quickCheckIsOK() else {
+        guard try db.quickCheckIsOK() else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .validating,

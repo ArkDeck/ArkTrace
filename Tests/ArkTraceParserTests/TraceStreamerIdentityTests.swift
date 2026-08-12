@@ -32,8 +32,13 @@ final class TraceStreamerIdentityTests: XCTestCase {
     private enum ParseOutcome: Sendable, Equatable {
         case success
         case cancelled
+        case cleanupFailed
         case invalidArgument
         case unexpected
+    }
+
+    private enum InjectedFailure: Error {
+        case cleanup
     }
 
     private static var repoRoot: URL {
@@ -389,6 +394,127 @@ final class TraceStreamerIdentityTests: XCTestCase {
         XCTAssertFalse(encoded.contains(Self.repoRoot.path))
     }
 
+    func testIdentityCancellationAfterVerificationIsTypedAndCleansSnapshot() async throws {
+        let copy = try makeWorkingCopy()
+        defer { try? FileManager.default.removeItem(at: copy.directory) }
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: copy.binary,
+            identitySnapshotParentDirectory: copy.directory,
+            identityVerificationHook: { barrier.pauseUntilReleased() },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await parser.identity()
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .preparing
+                {
+                    return .cancelled
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cancelled)
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: copy.directory.path)
+        XCTAssertFalse(
+            leftovers.contains { $0.hasPrefix(".arktrace-identity-") },
+            "cancelled identity verification must remove its private snapshot"
+        )
+    }
+
+    func testIdentityCancellationDuringCleanupIsTypedAndCleansSnapshot() async throws {
+        let copy = try makeWorkingCopy()
+        defer { try? FileManager.default.removeItem(at: copy.directory) }
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: copy.binary,
+            identitySnapshotParentDirectory: copy.directory,
+            identityCleanupHook: { barrier.pauseUntilReleased() },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await parser.identity()
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .preparing
+                {
+                    return .cancelled
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? ParseOutcome.unexpected
+        }
+
+        XCTAssertEqual(outcome, .cancelled)
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: copy.directory.path)
+        XCTAssertFalse(
+            leftovers.contains { $0.hasPrefix(".arktrace-identity-") },
+            "identity snapshot must already be deleted when cleanup resumes"
+        )
+    }
+
+    func testCancelledIdentityReportsCleanupFailureWhenSnapshotCannotBeRemoved() async throws {
+        let copy = try makeWorkingCopy()
+        defer { try? FileManager.default.removeItem(at: copy.directory) }
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: copy.binary,
+            identitySnapshotParentDirectory: copy.directory,
+            identityCleanupHook: { barrier.pauseUntilReleased() },
+            cleanupRemovalHook: { url in
+                if url.lastPathComponent.hasPrefix(".arktrace-identity-") {
+                    throw InjectedFailure.cleanup
+                }
+            },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await parser.identity()
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .traceParseFailed
+                        && error.stage == .preparing
+                        && error.details["reason"] == "identityCleanupFailed"
+                {
+                    return .cleanupFailed
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cleanupFailed)
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: copy.directory.path)
+        XCTAssertTrue(
+            leftovers.contains { $0.hasPrefix(".arktrace-identity-") },
+            "failed cleanup must be reported instead of returning CANCELLED"
+        )
+    }
+
     func testBinaryByteModificationFailsHashValidation() async throws {
         let copy = try makeWorkingCopy()
         defer { try? FileManager.default.removeItem(at: copy.directory) }
@@ -666,6 +792,55 @@ final class TraceStreamerIdentityTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
     }
 
+    func testCancellationDuringSourceSnapshotCleansPartialPreparation() async throws {
+        let copy = try makeWorkingCopy()
+        defer { try? FileManager.default.removeItem(at: copy.directory) }
+        let source = copy.directory.appendingPathComponent("source.htrace")
+        let sourceBytes = try Data(contentsOf: Self.fixtureURL)
+        try sourceBytes.write(to: source, options: .withoutOverwriting)
+        let sourceHash = sha256(sourceBytes)
+        let destination = copy.directory.appendingPathComponent("trace.sqlite")
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: copy.binary,
+            preparationChunkHook: { barrier.pauseUntilReleased() },
+            finalizationHook: nil
+        )
+
+        let outcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: source,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .preparing
+                {
+                    return .cancelled
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+        XCTAssertEqual(outcome, .cancelled)
+
+        XCTAssertEqual(sha256(try Data(contentsOf: source)), sourceHash)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: destination.path + ".arktrace.json")
+        )
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: copy.directory.path)
+        XCTAssertFalse(leftovers.contains { $0.hasPrefix(".arktrace-parser-") })
+        XCTAssertFalse(leftovers.contains(".trace.sqlite.arktrace-claim"))
+    }
+
     func testCancellationDuringFinalVerificationNeverPromotesDestination() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
@@ -688,7 +863,9 @@ final class TraceStreamerIdentityTests: XCTestCase {
                         destination: destination
                     )
                     return .success
-                } catch let error as ArkTraceError where error.code == .cancelled {
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .parsing
+                {
                     return .cancelled
                 } catch {
                     return .unexpected
@@ -710,6 +887,332 @@ final class TraceStreamerIdentityTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
         let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
         XCTAssertTrue(leftovers.isEmpty, "partial DB and destination claim must be cleaned")
+    }
+
+    func testCancellationDuringPostPromotionCleanupRollsBackOwnedReadyFiles() async throws {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-post-promote-cancel-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: Self.binaryURL,
+            parseCleanupHook: { barrier.pauseUntilReleased() },
+            finalizationHook: nil
+        )
+
+        let outcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: Self.fixtureURL,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .parsing
+                {
+                    return .cancelled
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
+            XCTAssertTrue(
+                FileManager.default.fileExists(atPath: destination.path + ".arktrace.json")
+            )
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cancelled)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: destination.path + ".arktrace.json")
+        )
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        XCTAssertTrue(leftovers.isEmpty, "Ready, claim, and work directory must be removed")
+    }
+
+    func testCancellationAtFinalReturnBoundaryRollsBackOwnedReadyFiles() async throws {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-final-boundary-cancel-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: Self.binaryURL,
+            parseFinalBoundaryHook: { barrier.pauseUntilReleased() },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: Self.fixtureURL,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .parsing
+                {
+                    return .cancelled
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
+            XCTAssertTrue(
+                FileManager.default.fileExists(atPath: destination.path + ".arktrace.json")
+            )
+            let published = try? FileManager.default.contentsOfDirectory(
+                atPath: directory.path
+            ).sorted()
+            XCTAssertEqual(
+                published,
+                [destination.lastPathComponent, destination.lastPathComponent + ".arktrace.json"]
+            )
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cancelled)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path + ".arktrace.json"))
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        XCTAssertTrue(leftovers.isEmpty, "final-boundary cancellation must rollback Ready")
+    }
+
+    func testCancelledRollbackProbeFailureKeepsReadyPrivateAndReportsStableFailure()
+        async throws
+    {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-probe-failure-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: Self.binaryURL,
+            parseFinalBoundaryHook: { barrier.pauseUntilReleased() },
+            ownedIdentityProbeHook: { url in
+                if url == destination { throw InjectedFailure.cleanup }
+            },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: Self.fixtureURL,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .traceParseFailed
+                        && error.stage == .parsing
+                        && error.details == ["reason": "readyRollbackFailed"]
+                        && !error.message.contains(directory.path)
+                        && !error.details.values.contains(where: { $0.contains(directory.path) })
+                {
+                    return .cleanupFailed
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cleanupFailed)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path + ".arktrace.json"))
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        XCTAssertEqual(leftovers.count, 1)
+        XCTAssertTrue(leftovers[0].hasPrefix(".arktrace-rollback-"))
+    }
+
+    func testPostPromotionRollbackDoesNotDeleteReplacementsCreatedAfterOwnershipMatch()
+        async throws
+    {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-post-promote-replaced-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let metadata = URL(fileURLWithPath: destination.path + ".arktrace.json")
+        let databaseReplacement = Data("replacement database owned by another session".utf8)
+        let metadataReplacement = Data("replacement metadata owned by another session".utf8)
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: Self.binaryURL,
+            parseCleanupHook: { barrier.pauseUntilReleased() },
+            ownedRemovalHook: { url in
+                let replacement: Data
+                if url == destination {
+                    replacement = databaseReplacement
+                } else if url == metadata {
+                    replacement = metadataReplacement
+                } else {
+                    throw InjectedFailure.cleanup
+                }
+                // The hook runs after the promoted inode has been atomically
+                // quarantined and matched, but before that private inode is
+                // unlinked. This is the old lstat -> remove TOCTOU window.
+                try replacement.write(to: url, options: .withoutOverwriting)
+            },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: Self.fixtureURL,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .cancelled && error.stage == .parsing
+                {
+                    return .cancelled
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? ParseOutcome.unexpected
+        }
+
+        XCTAssertEqual(outcome, .cancelled)
+        XCTAssertEqual(try Data(contentsOf: destination), databaseReplacement)
+        XCTAssertEqual(try Data(contentsOf: metadata), metadataReplacement)
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path).sorted()
+        XCTAssertEqual(leftovers, [destination.lastPathComponent, metadata.lastPathComponent])
+    }
+
+    func testCancelledParseReportsStagingCleanupFailureAndRollsBackReady() async throws {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cleanup-failure-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: Self.binaryURL,
+            parseCleanupHook: { barrier.pauseUntilReleased() },
+            cleanupRemovalHook: { url in
+                if url.lastPathComponent.hasPrefix(".arktrace-parser-") {
+                    throw InjectedFailure.cleanup
+                }
+            },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: Self.fixtureURL,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .traceParseFailed
+                        && error.stage == .parsing
+                        && error.details["reason"] == "stagingCleanupFailed"
+                {
+                    return .cleanupFailed
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cleanupFailed)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path + ".arktrace.json"))
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        XCTAssertEqual(leftovers.count, 1)
+        XCTAssertTrue(leftovers[0].hasPrefix(".arktrace-parser-"))
+    }
+
+    func testCancelledParseReportsReadyRollbackFailureAndKeepsPrivateQuarantine()
+        async throws
+    {
+        try requirePinnedFiles()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-rollback-failure-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let barrier = CancellationBarrier()
+        let parser = try TraceStreamerProcessParser(
+            executableURL: Self.binaryURL,
+            parseCleanupHook: { barrier.pauseUntilReleased() },
+            ownedRemovalHook: { url in
+                if url == destination { throw InjectedFailure.cleanup }
+            },
+            finalizationHook: nil
+        )
+
+        let outcome: ParseOutcome = await withTaskGroup(of: ParseOutcome.self) { group in
+            group.addTask {
+                do {
+                    _ = try await Self.parse(
+                        parser: parser,
+                        source: Self.fixtureURL,
+                        destination: destination
+                    )
+                    return .success
+                } catch let error as ArkTraceError where
+                    error.code == .traceParseFailed
+                        && error.stage == .parsing
+                        && error.details["reason"] == "readyRollbackFailed"
+                {
+                    return .cleanupFailed
+                } catch {
+                    return .unexpected
+                }
+            }
+            await barrier.waitUntilReached()
+            group.cancelAll()
+            barrier.resume()
+            return await group.next() ?? .unexpected
+        }
+
+        XCTAssertEqual(outcome, .cleanupFailed)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path + ".arktrace.json"))
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        XCTAssertEqual(leftovers.count, 1)
+        XCTAssertTrue(leftovers[0].hasPrefix(".arktrace-rollback-"))
     }
 
     func testDatabasePreparationFailureNeverPromotesReadyArtifacts() async throws {

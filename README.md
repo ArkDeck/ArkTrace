@@ -42,7 +42,7 @@ Phase 1 只提供 libraries/runtime，没有 `arktrace` executable 或 App UI；
 
 ## TraceStreamer 怎么获得
 
-ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer（Apache-2.0）。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；revision pin、构建脚本与许可证清单在 Phase 0/1 落入 `ThirdParty/TraceStreamer/` 与 `docs/TRACE_STREAMER.md`（DESIGN §24 发布门 1–3）。
+ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer（Apache-2.0）。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；Phase 0/1 已在 `ThirdParty/TraceStreamer/`、`Fixtures/traces/` 与 `docs/TRACE_STREAMER.md` 锁定 revision、构建脚本及 TraceStreamer/fixture 的 Apache-2.0 证据。完整第三方许可证 inventory 仍属 Phase 3 / P3-T10，DESIGN §24 发布门 3 保持开放。
 
 ## ArkDeck 怎么接入
 

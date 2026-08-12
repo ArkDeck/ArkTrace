@@ -21,6 +21,15 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private let configuredExecutableURL: URL
     private let configuredManifestURL: URL?
+    private let identitySnapshotParentDirectory: URL?
+    private let identityVerificationHook: (@Sendable () -> Void)?
+    private let identityCleanupHook: (@Sendable () -> Void)?
+    private let preparationChunkHook: (@Sendable () -> Void)?
+    private let parseCleanupHook: (@Sendable () -> Void)?
+    private let parseFinalBoundaryHook: (@Sendable () -> Void)?
+    private let cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
+    private let ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)?
+    private let ownedRemovalHook: (@Sendable (URL) throws -> Void)?
     private let finalizationHook: (@Sendable () -> Void)?
 
     /// Construction records configuration only. All filesystem access,
@@ -30,6 +39,15 @@ public struct TraceStreamerProcessParser: TraceParser {
         try self.init(
             executableURL: executableURL,
             manifestURL: manifestURL,
+            identitySnapshotParentDirectory: nil,
+            identityVerificationHook: nil,
+            identityCleanupHook: nil,
+            preparationChunkHook: nil,
+            parseCleanupHook: nil,
+            parseFinalBoundaryHook: nil,
+            cleanupRemovalHook: nil,
+            ownedIdentityProbeHook: nil,
+            ownedRemovalHook: nil,
             finalizationHook: nil
         )
     }
@@ -38,38 +56,103 @@ public struct TraceStreamerProcessParser: TraceParser {
     init(
         executableURL: URL,
         manifestURL: URL? = nil,
+        identitySnapshotParentDirectory: URL? = nil,
+        identityVerificationHook: (@Sendable () -> Void)? = nil,
+        identityCleanupHook: (@Sendable () -> Void)? = nil,
+        preparationChunkHook: (@Sendable () -> Void)? = nil,
+        parseCleanupHook: (@Sendable () -> Void)? = nil,
+        parseFinalBoundaryHook: (@Sendable () -> Void)? = nil,
+        cleanupRemovalHook: (@Sendable (URL) throws -> Void)? = nil,
+        ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)? = nil,
+        ownedRemovalHook: (@Sendable (URL) throws -> Void)? = nil,
         finalizationHook: (@Sendable () -> Void)?
     ) throws {
-        guard executableURL.isFileURL, manifestURL?.isFileURL != false else {
+        guard executableURL.isFileURL,
+            manifestURL?.isFileURL != false,
+            identitySnapshotParentDirectory?.isFileURL != false
+        else {
             throw Self.unavailable(reason: "invalidURL")
         }
         self.configuredExecutableURL = executableURL.standardizedFileURL
         self.configuredManifestURL = manifestURL?.standardizedFileURL
+        self.identitySnapshotParentDirectory = identitySnapshotParentDirectory?.standardizedFileURL
+        self.identityVerificationHook = identityVerificationHook
+        self.identityCleanupHook = identityCleanupHook
+        self.preparationChunkHook = preparationChunkHook
+        self.parseCleanupHook = parseCleanupHook
+        self.parseFinalBoundaryHook = parseFinalBoundaryHook
+        self.cleanupRemovalHook = cleanupRemovalHook
+        self.ownedIdentityProbeHook = ownedIdentityProbeHook
+        self.ownedRemovalHook = ownedRemovalHook
         self.finalizationHook = finalizationHook
     }
 
     public func identity() async throws -> TraceParserIdentity {
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
-        let snapshot = try await Task.detached {
+        let snapshotParentDirectory = identitySnapshotParentDirectory
+            ?? FileManager.default.temporaryDirectory
+        let identityVerificationHook = identityVerificationHook
+        let identityCleanupHook = identityCleanupHook
+        let cleanupRemovalHook = cleanupRemovalHook
+        let snapshotTask = Task.detached {
             try Self.makeParserSnapshot(
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
-                parentDirectory: FileManager.default.temporaryDirectory
+                parentDirectory: snapshotParentDirectory,
+                cleanupRemovalHook: cleanupRemovalHook
             )
-        }.value
+        }
+        let snapshot: ParserSnapshot
+        do {
+            snapshot = try await withTaskCancellationHandler {
+                try await snapshotTask.value
+            } onCancel: {
+                snapshotTask.cancel()
+            }
+        } catch {
+            if Self.isCleanupFailure(error) { throw error }
+            if error is CancellationError || Task.isCancelled {
+                throw Self.cancelled(stage: .preparing)
+            }
+            throw error
+        }
         let result: Result<TraceParserIdentity, Error>
         do {
             let version = try await Self.reportedVersionOffCallerExecutor(
                 executableURL: snapshot.executableURL)
             try Self.validateReportedVersion(version, manifest: snapshot.manifest)
-            try await Task.detached { try Self.verify(snapshot: snapshot) }.value
+            let verificationTask = Task.detached { try Self.verify(snapshot: snapshot) }
+            try await withTaskCancellationHandler {
+                try await verificationTask.value
+            } onCancel: {
+                verificationTask.cancel()
+            }
+            identityVerificationHook?()
+            try Task.checkCancellation()
             result = .success(Self.identity(manifest: snapshot.manifest, reportedVersion: version))
         } catch {
             result = .failure(error)
         }
-        await Self.removeOffCallerExecutor([snapshot.directory])
-        return try result.get()
+        do {
+            try await Self.removeOffCallerExecutor(
+                [snapshot.directory],
+                removalHook: cleanupRemovalHook,
+                completionHook: identityCleanupHook
+            )
+        } catch {
+            throw Self.cleanupFailure(stage: .preparing, reason: "identityCleanupFailed")
+        }
+        do {
+            try Task.checkCancellation()
+            return try result.get()
+        } catch {
+            if Self.isCleanupFailure(error) { throw error }
+            if error is CancellationError || Task.isCancelled {
+                throw Self.cancelled(stage: .preparing)
+            }
+            throw error
+        }
     }
 
     public func parse(
@@ -81,22 +164,46 @@ public struct TraceStreamerProcessParser: TraceParser {
         progress?(.preparing)
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
+        let preparationChunkHook = preparationChunkHook
+        let parseCleanupHook = parseCleanupHook
+        let parseFinalBoundaryHook = parseFinalBoundaryHook
+        let cleanupRemovalHook = cleanupRemovalHook
+        let ownedIdentityProbeHook = ownedIdentityProbeHook
+        let ownedRemovalHook = ownedRemovalHook
         progress?(.hashing)
-        let prepared = try await Task.detached {
+        let preparationTask = Task.detached {
             try Self.prepareParse(
                 source: source,
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
-                configuredManifestURL: configuredManifestURL
+                configuredManifestURL: configuredManifestURL,
+                preparationChunkHook: preparationChunkHook,
+                cleanupRemovalHook: cleanupRemovalHook
             )
-        }.value
+        }
+        let prepared: PreparedParse
+        do {
+            prepared = try await withTaskCancellationHandler {
+                try await preparationTask.value
+            } onCancel: {
+                preparationTask.cancel()
+            }
+        } catch {
+            if Self.isCleanupFailure(error) { throw error }
+            if error is CancellationError || Task.isCancelled {
+                throw Self.cancelled(stage: .preparing)
+            }
+            throw error
+        }
         progress?(.cacheLookup)
-        let result: Result<ParsedTrace, Error>
+        let result: Result<ExecutedParse, Error>
         do {
             result = .success(
                 try await Self.execute(
                     prepared: prepared,
                     finalizationHook: finalizationHook,
+                    ownedIdentityProbeHook: ownedIdentityProbeHook,
+                    ownedRemovalHook: ownedRemovalHook,
                     progress: progress,
                     prepareDatabase: prepareDatabase
                 )
@@ -104,19 +211,68 @@ public struct TraceStreamerProcessParser: TraceParser {
         } catch {
             result = .failure(error)
         }
-        await Self.removeOffCallerExecutor([
-            prepared.workDirectory,
-            prepared.destinationClaimURL,
-        ])
-        return try result.get()
+        let cleanupError: Error?
+        do {
+            try await Self.removeOffCallerExecutor(
+                [prepared.workDirectory, prepared.destinationClaimURL],
+                removalHook: cleanupRemovalHook,
+                completionHook: parseCleanupHook
+            )
+            cleanupError = nil
+        } catch {
+            cleanupError = error
+        }
+
+        let executed = try? result.get()
+        if cleanupError != nil, let executed {
+            do {
+                try await Self.removeOwnedFilesOffCallerExecutor(
+                    executed.ownedReadyFiles,
+                    identityProbeHook: ownedIdentityProbeHook,
+                    preRemovalHook: ownedRemovalHook
+                )
+            } catch {
+                throw Self.cleanupFailure(stage: .parsing, reason: "readyRollbackFailed")
+            }
+        }
+        if cleanupError != nil {
+            throw Self.cleanupFailure(stage: .parsing, reason: "stagingCleanupFailed")
+        }
+        do {
+            parseFinalBoundaryHook?()
+            try Task.checkCancellation()
+            return try result.get().parsed
+        } catch {
+            if Self.isCleanupFailure(error) { throw error }
+            if error is CancellationError || Task.isCancelled {
+                if let executed {
+                    do {
+                        try await Self.removeOwnedFilesOffCallerExecutor(
+                            executed.ownedReadyFiles,
+                            identityProbeHook: ownedIdentityProbeHook,
+                            preRemovalHook: ownedRemovalHook
+                        )
+                    } catch {
+                        throw Self.cleanupFailure(
+                            stage: .parsing,
+                            reason: "readyRollbackFailed"
+                        )
+                    }
+                }
+                throw Self.cancelled(stage: .parsing)
+            }
+            throw error
+        }
     }
 
     private static func execute(
         prepared: PreparedParse,
         finalizationHook: (@Sendable () -> Void)?,
+        ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)?,
+        ownedRemovalHook: (@Sendable (URL) throws -> Void)?,
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
-    ) async throws -> ParsedTrace {
+    ) async throws -> ExecutedParse {
         let version = try await Self.reportedVersionOffCallerExecutor(
             executableURL: prepared.parserSnapshot.executableURL)
         try Self.validateReportedVersion(version, manifest: prepared.parserSnapshot.manifest)
@@ -135,21 +291,26 @@ public struct TraceStreamerProcessParser: TraceParser {
         )
         try Self.validateProcessOutcome(outcome, outputURL: prepared.outputURL)
 
-        let databasePreparation = try await Self.finalizeAndPromote(
+        let finalized = try await Self.finalizeAndPromote(
             prepared: prepared,
             parserIdentity: parserIdentity,
             finalizationHook: finalizationHook,
+            ownedIdentityProbeHook: ownedIdentityProbeHook,
+            ownedRemovalHook: ownedRemovalHook,
             progress: progress,
             prepareDatabase: prepareDatabase
         )
 
-        return ParsedTrace(
-            databaseURL: prepared.destinationURL,
-            metadataSidecarURL: prepared.destinationMetadataURL,
-            parser: parserIdentity,
-            sourceSHA256: prepared.sourceSHA256,
-            sourceByteCount: prepared.sourceByteCount,
-            databasePreparation: databasePreparation
+        return ExecutedParse(
+            parsed: ParsedTrace(
+                databaseURL: prepared.destinationURL,
+                metadataSidecarURL: prepared.destinationMetadataURL,
+                parser: parserIdentity,
+                sourceSHA256: prepared.sourceSHA256,
+                sourceByteCount: prepared.sourceByteCount,
+                databasePreparation: finalized.preparation
+            ),
+            ownedReadyFiles: finalized.ownedReadyFiles
         )
     }
 
@@ -221,6 +382,16 @@ public struct TraceStreamerProcessParser: TraceParser {
         let parserSnapshot: ParserSnapshot
     }
 
+    private struct ExecutedParse: Sendable {
+        let parsed: ParsedTrace
+        let ownedReadyFiles: [OwnedFile]
+    }
+
+    private struct FinalizedDatabase: Sendable {
+        let preparation: TraceDatabasePreparationResult
+        let ownedReadyFiles: [OwnedFile]
+    }
+
     /// Serializes cancellation against the single atomic promotion. If
     /// cancellation wins, promotion cannot start. If rename wins, a later
     /// cancellation barrier can identify and remove only this owned output.
@@ -254,6 +425,19 @@ public struct TraceStreamerProcessParser: TraceParser {
         let inode: UInt64
     }
 
+    private enum FileIdentityProbe: Sendable {
+        case regular(FileIdentity)
+        case nonRegular
+        case absent
+        case inaccessible
+    }
+
+    private enum PathEntryStatus: Equatable {
+        case absent
+        case present
+        case inaccessible
+    }
+
     private struct OwnedFile: Sendable {
         let url: URL
         let identity: FileIdentity
@@ -263,9 +447,11 @@ public struct TraceStreamerProcessParser: TraceParser {
         prepared: PreparedParse,
         parserIdentity: TraceParserIdentity,
         finalizationHook: (@Sendable () -> Void)?,
+        ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)?,
+        ownedRemovalHook: (@Sendable (URL) throws -> Void)?,
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
-    ) async throws -> TraceDatabasePreparationResult {
+    ) async throws -> FinalizedDatabase {
         let gate = PromotionGate()
         let task = Task.detached {
             try Task.checkCancellation()
@@ -278,6 +464,8 @@ public struct TraceStreamerProcessParser: TraceParser {
             let sourceAfterParse: (sha256: String, byteCount: Int64)
             do {
                 sourceAfterParse = try Self.sha256AndSize(at: prepared.sourceSnapshotURL)
+            } catch is CancellationError {
+                throw CancellationError()
             } catch let error as ArkTraceError {
                 throw error
             } catch {
@@ -347,8 +535,17 @@ public struct TraceStreamerProcessParser: TraceParser {
                     )
                     return owned
                 } catch {
-                    for file in owned.reversed() {
-                        Self.removeIfOwned(file)
+                    do {
+                        try Self.removeOwnedFiles(
+                            owned,
+                            identityProbeHook: ownedIdentityProbeHook,
+                            preRemovalHook: ownedRemovalHook
+                        )
+                    } catch {
+                        throw Self.cleanupFailure(
+                            stage: .parsing,
+                            reason: "readyRollbackFailed"
+                        )
                     }
                     throw Self.destinationUnavailable(reason: "promotionFailed")
                 }
@@ -360,7 +557,10 @@ public struct TraceStreamerProcessParser: TraceParser {
             return try await withTaskCancellationHandler {
                 let databasePreparation = try await task.value
                 try Task.checkCancellation()
-                return databasePreparation
+                return FinalizedDatabase(
+                    preparation: databasePreparation,
+                    ownedReadyFiles: gate.ownedPromotedFiles
+                )
             } onCancel: {
                 gate.cancel()
                 task.cancel()
@@ -368,8 +568,17 @@ public struct TraceStreamerProcessParser: TraceParser {
         } catch {
             let promotedFiles = gate.ownedPromotedFiles
             if !promotedFiles.isEmpty {
-                await removeOwnedFilesOffCallerExecutor(promotedFiles)
+                do {
+                    try await removeOwnedFilesOffCallerExecutor(
+                        promotedFiles,
+                        identityProbeHook: ownedIdentityProbeHook,
+                        preRemovalHook: ownedRemovalHook
+                    )
+                } catch {
+                    throw cleanupFailure(stage: .parsing, reason: "readyRollbackFailed")
+                }
             }
+            if isCleanupFailure(error) { throw error }
             if error is CancellationError || Task.isCancelled {
                 throw cancelled(stage: .parsing)
             }
@@ -381,15 +590,21 @@ public struct TraceStreamerProcessParser: TraceParser {
         source: URL,
         destination: URL,
         configuredExecutableURL: URL,
-        configuredManifestURL: URL?
+        configuredManifestURL: URL?,
+        preparationChunkHook: (@Sendable () -> Void)?,
+        cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
     ) throws -> PreparedParse {
         do {
             return try prepareParseUnchecked(
                 source: source,
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
-                configuredManifestURL: configuredManifestURL
+                configuredManifestURL: configuredManifestURL,
+                preparationChunkHook: preparationChunkHook,
+                cleanupRemovalHook: cleanupRemovalHook
             )
+        } catch is CancellationError {
+            throw CancellationError()
         } catch let error as ArkTraceError {
             throw error
         } catch {
@@ -401,8 +616,11 @@ public struct TraceStreamerProcessParser: TraceParser {
         source: URL,
         destination: URL,
         configuredExecutableURL: URL,
-        configuredManifestURL: URL?
+        configuredManifestURL: URL?,
+        preparationChunkHook: (@Sendable () -> Void)?,
+        cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
     ) throws -> PreparedParse {
+        try Task.checkCancellation()
         guard source.isFileURL, destination.isFileURL else {
             throw destinationUnavailable(reason: "invalidURL")
         }
@@ -453,10 +671,24 @@ public struct TraceStreamerProcessParser: TraceParser {
             ".\(destinationName).arktrace-claim",
             isDirectory: false
         )
+        var createdClaim = false
         do {
             try Data().write(to: claimURL, options: .withoutOverwriting)
+            createdClaim = true
             try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: claimURL.path)
+            try Task.checkCancellation()
         } catch {
+            if createdClaim {
+                do {
+                    try removeStagingItems(
+                        [claimURL],
+                        removalHook: cleanupRemovalHook
+                    )
+                } catch {
+                    throw cleanupFailure(stage: .preparing, reason: "stagingCleanupFailed")
+                }
+            }
+            if error is CancellationError { throw error }
             throw destinationUnavailable(reason: "inUse")
         }
 
@@ -470,18 +702,22 @@ public struct TraceStreamerProcessParser: TraceParser {
             try fm.createDirectory(at: directory, withIntermediateDirectories: false)
             try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
             workDirectory = directory
+            try Task.checkCancellation()
 
             let parserSnapshot = try makeParserSnapshot(
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
                 parentDirectory: directory,
-                useParentDirectory: true
+                useParentDirectory: true,
+                cleanupRemovalHook: cleanupRemovalHook
             )
             let sourceSnapshotURL = directory.appendingPathComponent("source.trace")
-            try fm.copyItem(at: canonicalSource, to: sourceSnapshotURL)
-            try fm.setAttributes(
-                [.posixPermissions: 0o400],
-                ofItemAtPath: sourceSnapshotURL.path
+            try copyRegularFileCancellable(
+                from: canonicalSource,
+                to: sourceSnapshotURL,
+                permissions: 0o400,
+                chunkHook: preparationChunkHook,
+                cleanupRemovalHook: cleanupRemovalHook
             )
             guard isRegularNonSymlinkFile(at: sourceSnapshotURL) else {
                 throw ArkTraceError(
@@ -506,8 +742,14 @@ public struct TraceStreamerProcessParser: TraceParser {
                 parserSnapshot: parserSnapshot
             )
         } catch {
-            if let workDirectory { try? fm.removeItem(at: workDirectory) }
-            try? fm.removeItem(at: claimURL)
+            do {
+                try removeStagingItems(
+                    [workDirectory, claimURL].compactMap { $0 },
+                    removalHook: cleanupRemovalHook
+                )
+            } catch {
+                throw cleanupFailure(stage: .preparing, reason: "stagingCleanupFailed")
+            }
             throw error
         }
     }
@@ -516,15 +758,19 @@ public struct TraceStreamerProcessParser: TraceParser {
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
         parentDirectory: URL,
-        useParentDirectory: Bool = false
+        useParentDirectory: Bool = false,
+        cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
     ) throws -> ParserSnapshot {
         do {
             return try makeParserSnapshotUnchecked(
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
                 parentDirectory: parentDirectory,
-                useParentDirectory: useParentDirectory
+                useParentDirectory: useParentDirectory,
+                cleanupRemovalHook: cleanupRemovalHook
             )
+        } catch is CancellationError {
+            throw CancellationError()
         } catch let error as ArkTraceError {
             throw error
         } catch {
@@ -536,8 +782,10 @@ public struct TraceStreamerProcessParser: TraceParser {
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
         parentDirectory: URL,
-        useParentDirectory: Bool
+        useParentDirectory: Bool,
+        cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
     ) throws -> ParserSnapshot {
+        try Task.checkCancellation()
         let fm = FileManager.default
         let canonicalExecutable = configuredExecutableURL
             .resolvingSymlinksInPath().standardizedFileURL
@@ -565,10 +813,11 @@ public struct TraceStreamerProcessParser: TraceParser {
 
         do {
             let executableSnapshot = directory.appendingPathComponent("trace_streamer")
-            try fm.copyItem(at: canonicalExecutable, to: executableSnapshot)
-            try fm.setAttributes(
-                [.posixPermissions: 0o500],
-                ofItemAtPath: executableSnapshot.path
+            try copyRegularFileCancellable(
+                from: canonicalExecutable,
+                to: executableSnapshot,
+                permissions: 0o500,
+                cleanupRemovalHook: cleanupRemovalHook
             )
             try validate(manifest: manifest, executableURL: executableSnapshot)
             return ParserSnapshot(
@@ -577,7 +826,16 @@ public struct TraceStreamerProcessParser: TraceParser {
                 manifest: manifest
             )
         } catch {
-            if !useParentDirectory { try? fm.removeItem(at: directory) }
+            if !useParentDirectory {
+                do {
+                    try removeStagingItems(
+                        [directory],
+                        removalHook: cleanupRemovalHook
+                    )
+                } catch {
+                    throw cleanupFailure(stage: .preparing, reason: "identityCleanupFailed")
+                }
+            }
             throw error
         }
     }
@@ -938,6 +1196,8 @@ public struct TraceStreamerProcessParser: TraceParser {
         let hash: String
         do {
             hash = try sha256AndSize(at: executableURL).sha256
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             throw identityMismatch(field: "binarySHA256", reason: "unreadable")
         }
@@ -981,6 +1241,7 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func sha256AndSize(at url: URL) throws -> (sha256: String, byteCount: Int64) {
+        try Task.checkCancellation()
         guard let handle = try? FileHandle(forReadingFrom: url) else {
             throw ArkTraceError(
                 code: .traceFileUnreadable,
@@ -992,6 +1253,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         var hasher = SHA256()
         var total: Int64 = 0
         while true {
+            try Task.checkCancellation()
             guard let chunk = try handle.read(upToCount: 1 << 20), !chunk.isEmpty else { break }
             hasher.update(data: chunk)
             let (newTotal, overflow) = total.addingReportingOverflow(Int64(chunk.count))
@@ -1003,9 +1265,54 @@ public struct TraceStreamerProcessParser: TraceParser {
                 )
             }
             total = newTotal
+            try Task.checkCancellation()
         }
         let digest = hasher.finalize().map { String(format: "%02x", $0) }.joined()
         return (digest, total)
+    }
+
+    /// Copies through a private file descriptor in bounded chunks so parent
+    /// cancellation can stop large source/parser snapshots promptly. The
+    /// destination is created exclusively and removed on every failed copy.
+    private static func copyRegularFileCancellable(
+        from source: URL,
+        to destination: URL,
+        permissions: Int,
+        chunkHook: (@Sendable () -> Void)? = nil,
+        cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
+    ) throws {
+        try Task.checkCancellation()
+        try Data().write(to: destination, options: .withoutOverwriting)
+        do {
+            let input = try FileHandle(forReadingFrom: source)
+            defer { try? input.close() }
+            let output = try FileHandle(forWritingTo: destination)
+            defer { try? output.close() }
+
+            while true {
+                try Task.checkCancellation()
+                let chunk = try input.read(upToCount: 1 << 20) ?? Data()
+                guard !chunk.isEmpty else { break }
+                try output.write(contentsOf: chunk)
+                chunkHook?()
+                try Task.checkCancellation()
+            }
+            try FileManager.default.setAttributes(
+                [.posixPermissions: permissions],
+                ofItemAtPath: destination.path
+            )
+            try Task.checkCancellation()
+        } catch {
+            do {
+                try removeStagingItems(
+                    [destination],
+                    removalHook: cleanupRemovalHook
+                )
+            } catch {
+                throw cleanupFailure(stage: .preparing, reason: "stagingCleanupFailed")
+            }
+            throw error
+        }
     }
 
     private static func hasSQLiteHeader(at url: URL) -> Bool {
@@ -1142,10 +1449,22 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func fileIdentity(at url: URL) -> FileIdentity? {
+        guard case .regular(let identity) = fileIdentityProbe(at: url) else {
+            return nil
+        }
+        return identity
+    }
+
+    private static func fileIdentityProbe(at url: URL) -> FileIdentityProbe {
         var info = stat()
         let result = url.path.withCString { Darwin.lstat($0, &info) }
-        guard result == 0, (info.st_mode & S_IFMT) == S_IFREG else { return nil }
-        return FileIdentity(device: UInt64(info.st_dev), inode: UInt64(info.st_ino))
+        guard result == 0 else {
+            return errno == ENOENT ? .absent : .inaccessible
+        }
+        guard (info.st_mode & S_IFMT) == S_IFREG else { return .nonRegular }
+        return .regular(
+            FileIdentity(device: UInt64(info.st_dev), inode: UInt64(info.st_ino))
+        )
     }
 
     private static func ownedFile(at url: URL) throws -> OwnedFile {
@@ -1155,16 +1474,123 @@ public struct TraceStreamerProcessParser: TraceParser {
         return OwnedFile(url: url, identity: identity)
     }
 
-    private static func removeIfOwned(_ file: OwnedFile) {
-        guard fileIdentity(at: file.url) == file.identity else { return }
-        try? FileManager.default.removeItem(at: file.url)
+    /// Atomically moves the public directory entry to a unique private name
+    /// before inspecting or deleting it. This avoids the lstat(path) ->
+    /// unlink(path) race: a replacement created at the public path after the
+    /// rename is never passed to unlink or recursive Foundation removal.
+    private static func removeIfOwned(
+        _ file: OwnedFile,
+        identityProbeHook: (@Sendable (URL) throws -> Void)?,
+        preRemovalHook: (@Sendable (URL) throws -> Void)?
+    ) throws {
+        let parent = file.url.deletingLastPathComponent()
+        var quarantineURL: URL?
+        var renameError: Int32 = 0
+        for _ in 0..<8 {
+            let candidate = parent.appendingPathComponent(
+                ".arktrace-rollback-\(UUID().uuidString)",
+                isDirectory: false
+            )
+            let result = file.url.path.withCString { sourcePath in
+                candidate.path.withCString { quarantinePath in
+                    Darwin.renameatx_np(
+                        AT_FDCWD,
+                        sourcePath,
+                        AT_FDCWD,
+                        quarantinePath,
+                        UInt32(RENAME_EXCL)
+                    )
+                }
+            }
+            if result == 0 {
+                quarantineURL = candidate
+                break
+            }
+            renameError = errno
+            if renameError == ENOENT { return }
+            if renameError != EEXIST { break }
+        }
+        guard let quarantineURL else {
+            throw cleanupFailure(stage: .parsing, reason: "readyQuarantineFailed")
+        }
+
+        do {
+            try identityProbeHook?(file.url)
+        } catch {
+            throw cleanupFailure(stage: .parsing, reason: "readyIdentityProbeFailed")
+        }
+
+        let shouldRestore: Bool
+        switch fileIdentityProbe(at: quarantineURL) {
+        case .regular(let identity) where identity == file.identity:
+            shouldRestore = false
+        case .regular, .nonRegular:
+            shouldRestore = true
+        case .absent, .inaccessible:
+            throw cleanupFailure(stage: .parsing, reason: "readyIdentityProbeFailed")
+        }
+        if shouldRestore {
+            let restoreResult = quarantineURL.path.withCString { quarantinePath in
+                file.url.path.withCString { destinationPath in
+                    Darwin.renameatx_np(
+                        AT_FDCWD,
+                        quarantinePath,
+                        AT_FDCWD,
+                        destinationPath,
+                        UInt32(RENAME_EXCL)
+                    )
+                }
+            }
+            guard restoreResult == 0 else {
+                throw cleanupFailure(stage: .parsing, reason: "replacementRestoreFailed")
+            }
+            return
+        }
+
+        do {
+            try preRemovalHook?(file.url)
+        } catch {
+            throw cleanupFailure(stage: .parsing, reason: "readyRemovalFailed")
+        }
+        let unlinkResult = quarantineURL.path.withCString { Darwin.unlink($0) }
+        guard unlinkResult == 0 else {
+            throw cleanupFailure(stage: .parsing, reason: "readyRemovalFailed")
+        }
     }
 
-    private static func removeOwnedFilesOffCallerExecutor(_ files: [OwnedFile]) async {
-        await Task.detached {
-            for file in files.reversed() {
-                removeIfOwned(file)
+    private static func removeOwnedFiles(
+        _ files: [OwnedFile],
+        identityProbeHook: (@Sendable (URL) throws -> Void)?,
+        preRemovalHook: (@Sendable (URL) throws -> Void)?
+    ) throws {
+        var failed = false
+        for file in files.reversed() {
+            do {
+                try removeIfOwned(
+                    file,
+                    identityProbeHook: identityProbeHook,
+                    preRemovalHook: preRemovalHook
+                )
+            } catch {
+                failed = true
             }
+        }
+        if failed {
+            throw cleanupFailure(stage: .parsing, reason: "readyRollbackFailed")
+        }
+    }
+
+    private static func removeOwnedFilesOffCallerExecutor(
+        _ files: [OwnedFile],
+        identityProbeHook: (@Sendable (URL) throws -> Void)?,
+        preRemovalHook: (@Sendable (URL) throws -> Void)?
+    ) async throws {
+        try await Task.detached {
+            try removeOwnedFiles(
+                files,
+                identityProbeHook: identityProbeHook,
+                preRemovalHook: preRemovalHook
+            )
         }.value
     }
 
@@ -1174,8 +1600,14 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func pathEntryExists(_ url: URL) -> Bool {
-        FileManager.default.fileExists(atPath: url.path)
-            || (try? FileManager.default.destinationOfSymbolicLink(atPath: url.path)) != nil
+        pathEntryStatus(at: url) != .absent
+    }
+
+    private static func pathEntryStatus(at url: URL) -> PathEntryStatus {
+        var info = stat()
+        let result = url.path.withCString { Darwin.lstat($0, &info) }
+        if result == 0 { return .present }
+        return errno == ENOENT ? .absent : .inaccessible
     }
 
     private static func identityMismatch(field: String, reason: String) -> ArkTraceError {
@@ -1244,11 +1676,78 @@ public struct TraceStreamerProcessParser: TraceParser {
         )
     }
 
-    private static func removeOffCallerExecutor(_ urls: [URL]) async {
-        await Task.detached {
-            for url in urls {
-                try? FileManager.default.removeItem(at: url)
+    private static func cleanupFailure(
+        stage: ArkTraceError.Stage,
+        reason: String
+    ) -> ArkTraceError {
+        ArkTraceError(
+            code: .traceParseFailed,
+            stage: stage,
+            message: "Unable to safely clean parser-owned files",
+            retryable: true,
+            details: ["reason": reason]
+        )
+    }
+
+    private static func isCleanupFailure(_ error: Error) -> Bool {
+        guard let error = error as? ArkTraceError,
+            error.code == .traceParseFailed,
+            let reason = error.details["reason"]
+        else {
+            return false
+        }
+        return reason == "identityCleanupFailed"
+            || reason == "stagingCleanupFailed"
+            || reason == "readyRollbackFailed"
+            || reason == "readyQuarantineFailed"
+            || reason == "readyIdentityProbeFailed"
+            || reason == "replacementRestoreFailed"
+            || reason == "readyRemovalFailed"
+    }
+
+    private static func removeStagingItems(
+        _ urls: [URL],
+        removalHook: (@Sendable (URL) throws -> Void)?
+    ) throws {
+        var failed = false
+        for url in urls {
+            switch pathEntryStatus(at: url) {
+            case .absent:
+                continue
+            case .inaccessible:
+                failed = true
+                continue
+            case .present:
+                break
             }
+            do {
+                try removalHook?(url)
+                try FileManager.default.removeItem(at: url)
+                if pathEntryStatus(at: url) != .absent { failed = true }
+            } catch {
+                failed = true
+            }
+        }
+        if failed {
+            throw cleanupFailure(stage: .preparing, reason: "stagingCleanupFailed")
+        }
+    }
+
+    private static func removeOffCallerExecutor(
+        _ urls: [URL],
+        removalHook: (@Sendable (URL) throws -> Void)?,
+        completionHook: (@Sendable () -> Void)? = nil
+    ) async throws {
+        try await Task.detached {
+            let result: Result<Void, Error>
+            do {
+                try removeStagingItems(urls, removalHook: removalHook)
+                result = .success(())
+            } catch {
+                result = .failure(error)
+            }
+            completionHook?()
+            return try result.get()
         }.value
     }
 }

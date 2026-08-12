@@ -13,6 +13,7 @@ public enum TraceDatabaseStagingPreparer {
         let table: String
         let columns: [String]
         let bootstrapForValidation: Bool
+        let requiredForReady: Bool
     }
 
     private static let indexes = [
@@ -20,67 +21,90 @@ public enum TraceDatabaseStagingPreparer {
             name: "arktrace_v1_process_pid",
             table: "process",
             columns: ["pid"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_process_ipid",
             table: "process",
             columns: ["ipid"],
-            bootstrapForValidation: true
+            bootstrapForValidation: true,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_thread_tid_ipid",
             table: "thread",
             columns: ["tid", "ipid"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_thread_itid",
             table: "thread",
             columns: ["itid"],
-            bootstrapForValidation: true
+            bootstrapForValidation: true,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_sched_slice_ts_cpu",
             table: "sched_slice",
             columns: ["ts", "cpu"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_sched_slice_itid_ts",
             table: "sched_slice",
             columns: ["itid", "ts"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_thread_state_ts_cpu",
             table: "thread_state",
             columns: ["ts", "cpu"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: false
         ),
         IndexDefinition(
             name: "arktrace_v1_thread_state_itid_ts",
             table: "thread_state",
             columns: ["itid", "ts"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_callstack_callid_ts",
             table: "callstack",
             columns: ["callid", "ts"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_measure_filter_id_ts",
             table: "measure",
             columns: ["filter_id", "ts"],
-            bootstrapForValidation: false
+            bootstrapForValidation: false,
+            requiredForReady: false
         ),
     ]
 
     public static func prepare(
         databaseURL: URL,
         progress: TraceProgressHandler? = nil
+    ) throws -> TraceDatabasePreparationResult {
+        try prepare(
+            databaseURL: databaseURL,
+            progress: progress,
+            quickCheckProgressHook: nil
+        )
+    }
+
+    /// Internal synchronization seam for deterministic cancellation tests.
+    static func prepare(
+        databaseURL: URL,
+        progress: TraceProgressHandler? = nil,
+        quickCheckProgressHook: (@Sendable () -> Void)?
     ) throws -> TraceDatabasePreparationResult {
         progress?(.validating)
         try Task.checkCancellation()
@@ -91,7 +115,7 @@ public enum TraceDatabaseStagingPreparer {
             readOnly: false,
             createIfMissing: false
         )
-        guard db.quickCheckIsOK() else {
+        guard try db.quickCheckIsOK(progressHook: quickCheckProgressHook) else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .validating,
@@ -116,7 +140,10 @@ public enum TraceDatabaseStagingPreparer {
         progress?(.indexing)
         try recreateIndexes(indexes, availableColumns: available, in: db)
         try Task.checkCancellation()
-        guard db.quickCheckIsOK() else {
+        guard try db.quickCheckIsOK(
+            stage: .indexing,
+            progressHook: quickCheckProgressHook
+        ) else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .indexing,
@@ -136,7 +163,7 @@ public enum TraceDatabaseStagingPreparer {
     }
 
     public static var requiredIndexNames: Set<String> {
-        Set(indexes.filter { $0.table != "measure" }.map(\.name))
+        Set(indexes.filter(\.requiredForReady).map(\.name))
     }
 
     private static func availableColumns(
@@ -158,6 +185,20 @@ public enum TraceDatabaseStagingPreparer {
         let applicable = definitions.filter { definition in
             guard let columns = availableColumns[definition.table] else { return false }
             return definition.columns.allSatisfy(columns.contains)
+        }
+        let applicableNames = Set(applicable.map(\.name))
+        let missingRequired = definitions.filter {
+            $0.requiredForReady && !applicableNames.contains($0.name)
+        }
+        guard missingRequired.isEmpty else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .validating,
+                message: "Database schema cannot satisfy the Ready index contract",
+                details: [
+                    "missingIndexInputs": missingRequired.map(\.name).sorted().joined(separator: ",")
+                ]
+            )
         }
         guard !applicable.isEmpty else { return }
 

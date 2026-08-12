@@ -96,6 +96,28 @@ final class ParserIntegrationTests: XCTestCase {
         }
     }
 
+    private final class BlockingCancellationBarrier: @unchecked Sendable {
+        private let reached = DispatchSemaphore(value: 0)
+        private let release = DispatchSemaphore(value: 0)
+
+        func pauseUntilReleased() {
+            reached.signal()
+            release.wait()
+        }
+
+        private func waitBlocking() {
+            reached.wait()
+        }
+
+        func waitUntilReached() async {
+            await Task.detached { self.waitBlocking() }.value
+        }
+
+        func resume() {
+            release.signal()
+        }
+    }
+
     private final class StageRecorder: @unchecked Sendable {
         private let lock = NSLock()
         private var stages: [TraceLoadingStage] = []
@@ -264,7 +286,7 @@ final class ParserIntegrationTests: XCTestCase {
         )
 
         let db = try TraceDatabase(url: parsed.databaseURL, readOnly: true)
-        XCTAssertTrue(db.quickCheckIsOK())
+        XCTAssertTrue(try db.quickCheckIsOK())
         let tables = try db.tableNames()
         XCTAssertEqual(tables.count, evidence.schemaTableCount)
         XCTAssertEqual(tables.contains("meta"), fixture.metaTablePresent)
@@ -284,6 +306,10 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertTrue(
             TraceDatabaseStagingPreparer.requiredIndexNames.isSubset(of: indexNames),
             "missing versioned indexes: \(TraceDatabaseStagingPreparer.requiredIndexNames.subtracting(indexNames))"
+        )
+        XCTAssertTrue(
+            indexNames.contains("arktrace_v1_thread_state_ts_cpu"),
+            "locked upstream schema includes optional thread_state.cpu and must index it"
         )
         let plans = [
             ("SELECT ipid FROM process WHERE ipid = 1", "arktrace_v1_process_ipid"),
@@ -667,7 +693,7 @@ final class ParserIntegrationTests: XCTestCase {
             threadSampleCount: threads.items.count,
             threadSampleTruncated: threads.truncated,
             schemaTableCount: tables.count,
-            quickCheck: db.quickCheckIsOK() ? "ok" : "failed",
+            quickCheck: try db.quickCheckIsOK() ? "ok" : "failed",
             metaTablePresent: tables.contains("meta"),
             pathsAbsent: pathsAbsent,
             stages: recorder.snapshot().map(\.rawValue)
@@ -702,6 +728,48 @@ final class ParserIntegrationTests: XCTestCase {
         } catch is CancellationError {
             // Structured concurrency surfaced the cancellation directly.
         }
+    }
+
+    func testCancellationDuringStagingQuickCheckCannotPromoteReady() async throws {
+        let (binary, fixture) = try requireEnvironment()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-quick-check-cancel-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let destination = directory.appendingPathComponent("trace.sqlite")
+        let barrier = BlockingCancellationBarrier()
+        let parser = try TraceStreamerProcessParser(executableURL: binary)
+
+        let task = Task.detached {
+            try await parser.parse(
+                source: fixture,
+                destination: destination,
+                progress: nil,
+                prepareDatabase: { databaseURL, progress in
+                    try TraceDatabaseStagingPreparer.prepare(
+                        databaseURL: databaseURL,
+                        progress: progress,
+                        quickCheckProgressHook: { barrier.pauseUntilReleased() }
+                    )
+                }
+            )
+        }
+        await barrier.waitUntilReached()
+        task.cancel()
+        barrier.resume()
+
+        do {
+            _ = try await task.value
+            XCTFail("cancelled quick_check must not promote a Ready database")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: destination.path + ".arktrace.json")
+        )
+        let leftovers = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        XCTAssertTrue(leftovers.isEmpty, "partial DB and destination claim must be cleaned")
     }
 
     func testConcurrentSessionsSharingStagingRootUseDistinctDatabases() async throws {

@@ -52,7 +52,7 @@ final class RepositoryTests: XCTestCase {
             id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER, itid INTEGER, ipid INTEGER
         );
         CREATE TABLE thread_state (
-            id INTEGER, ts INTEGER, dur INTEGER, itid INTEGER, state TEXT
+            id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER, itid INTEGER, state TEXT
         );
         CREATE TABLE callstack (
             id INTEGER, ts INTEGER, dur INTEGER, callid INTEGER, name TEXT
@@ -75,7 +75,7 @@ final class RepositoryTests: XCTestCase {
                 "thread_state",
                 [
                     ("id", "INTEGER"), ("ts", "INTEGER"), ("dur", "INTEGER"),
-                    ("itid", "INTEGER"), ("state", "TEXT"),
+                    ("cpu", "INTEGER"), ("itid", "INTEGER"), ("state", "TEXT"),
                 ]
             ),
             (
@@ -274,10 +274,10 @@ final class RepositoryTests: XCTestCase {
             "arktrace_v1_thread_itid",
             "arktrace_v1_sched_slice_ts_cpu",
             "arktrace_v1_sched_slice_itid_ts",
+            "arktrace_v1_thread_state_ts_cpu",
             "arktrace_v1_thread_state_itid_ts",
             "arktrace_v1_callstack_callid_ts",
         ]))
-        XCTAssertFalse(indexNames.contains("arktrace_v1_thread_state_ts_cpu"))
         XCTAssertFalse(indexNames.contains("arktrace_v1_measure_filter_id_ts"))
 
         let afterCounts = try db.query(
@@ -304,6 +304,39 @@ final class RepositoryTests: XCTestCase {
         ) { $0.text(3) ?? "" }.joined(separator: " ")
         XCTAssertTrue(processPlan.contains("arktrace_v1_process_ipid"), processPlan)
         XCTAssertTrue(threadPlan.contains("arktrace_v1_thread_itid"), threadPlan)
+    }
+
+    func testStagingAllowsMissingOptionalReadyIndexColumn() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            \(Self.coreSchemaSQL())
+            \(Self.eventSchemaSQL(omitting: "thread_state.cpu"))
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: url)
+        XCTAssertEqual(preparation.indexVersion, 1)
+        let db = try TraceDatabase(url: url, readOnly: true)
+        let indexes = Set(try db.query(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+        ) { $0.text(0) }.compactMap { $0 })
+        XCTAssertTrue(indexes.contains("arktrace_v1_thread_state_itid_ts"))
+        XCTAssertFalse(indexes.contains("arktrace_v1_thread_state_ts_cpu"))
+        XCTAssertTrue(TraceDatabaseStagingPreparer.requiredIndexNames.isSubset(of: indexes))
+    }
+
+    func testQuickCheckDirectSQLiteErrorUsesRequestedStage() throws {
+        let checker = try TraceDatabase(url: databaseURL, readOnly: true)
+        let blocker = try TraceDatabase(url: databaseURL, readOnly: false)
+        try blocker.execute("BEGIN EXCLUSIVE")
+        defer { try? blocker.execute("ROLLBACK") }
+
+        XCTAssertThrowsError(try checker.quickCheckIsOK(stage: .indexing)) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error?.stage, .indexing)
+        }
     }
 
     func testReadyDatabaseOpenIsReadOnlyAndRejectsFinalSymlink() throws {
@@ -669,7 +702,7 @@ final class RepositoryTests: XCTestCase {
         try db.execute(
             """
             INSERT INTO sched_slice VALUES (1, 1000, 10, 0, 1, 1);
-            INSERT INTO thread_state VALUES (1, 1000, 10, 1, 'Running');
+            INSERT INTO thread_state VALUES (1, 1000, 10, 0, 1, 'Running');
             INSERT INTO callstack VALUES (1, 1000, 10, 1, 'slice');
             """
         )
@@ -1061,7 +1094,7 @@ final class RepositoryTests: XCTestCase {
     func testDynamicEventIdentityStorageClassesAreRejected() throws {
         let invalidRows = [
             "INSERT INTO sched_slice VALUES ('bad-id', 0, 1, 0, NULL, NULL);",
-            "INSERT INTO thread_state VALUES (1.5, 0, 1, NULL, 'Running');",
+            "INSERT INTO thread_state VALUES (1.5, 0, 1, 0, NULL, 'Running');",
             "INSERT INTO callstack VALUES (1, 0, 1, 'bad-callid', 'slice');",
         ]
         for invalidRow in invalidRows {
