@@ -12,3 +12,7 @@ xcuserdata/
 
 # Profiling / scratch
 *.profraw
+
+# Pinned TraceStreamer binary is built locally via scripts/build_trace_streamer.sh;
+# only the provenance manifest is committed.
+ThirdParty/TraceStreamer/macx/trace_streamer

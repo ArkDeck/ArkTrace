@@ -908,9 +908,9 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 以下不是留给实现者自由猜测的设计问题，而是必须用真实证据关闭的工程门：
 
 1. ~~对 canonical upstream（GitCode）master 重跑 §2.1 证据核对，重新 pin TraceStreamer revision/版本~~——已关闭（2026-08-12，Phase 0）：重锚定至 GitCode master `447a0a49`，核对结论见 §2.1 与 [TRACE_STREAMER.md](./TRACE_STREAMER.md)；
-2. TraceStreamer 在当前 Apple silicon/macOS toolchain 的原生、可重现构建；
+2. ~~TraceStreamer 在当前 Apple silicon/macOS toolchain 的原生、可重现构建~~——已关闭（2026-08-12，Phase 1）：原生 arm64 二进制构建成功（Apple clang 21；gn/ninja 为上游 darwin-x86 预编译件经 Rosetta 运行），配方固化于 `scripts/build_trace_streamer.sh`，provenance 记录于 `ThirdParty/TraceStreamer/macx/manifest.json`；浮动 third_party tip 以构建时 SHA 记入 manifest，完全预 pin 列为后续硬化项（见 TRACE_STREAMER.md §4）；
 3. binary redistribution 的完整第三方许可证清单；
-4. 至少一个可再分发真实 `.htrace`/`.ftrace` fixture；
+4. ~~至少一个可再分发真实 `.htrace`/`.ftrace` fixture~~——已关闭（2026-08-12，Phase 1）：Apache-2.0 的 `hiprofiler_data_ability.htrace`（557 KB，含进程目录数据）连同来源 NOTICE 提交至 `Fixtures/traces/`；含调度事件的更大 fixture 随 Phase 3 timeline 工作补充；
 5. required schema fingerprint 与真实 DB fixture；
 6. parser cancellation 在大 Trace 上无 orphan process/cache promotion；
 7. indexed viewport query 在 large trace 上满足规格目标；

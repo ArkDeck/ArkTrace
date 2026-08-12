@@ -1,0 +1,31 @@
+{
+  "name": "trace_streamer",
+  "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+  "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+  "reportedVersion": "4.3.7",
+  "binarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf",
+  "architecture": "arm64",
+  "buildRecipeVersion": "1",
+  "plugins": "hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower",
+  "localPatches": [
+    "faultloggerd dfx_elf.cpp: route pointer cast through uintptr_t (Apple clang rejects the truncating cast)"
+  ],
+  "thirdPartySources": "gitee https (diverged from gitcode; upstream patches target gitee tips)",
+  "thirdPartyRevisions": {
+    "bounds_checking_function": "2ae82839ecaaa7d031e66ccbd2076d671acfd615",
+    "bzip2": "e8e3b464e0b4f89e1f56ba10d7c29654043db91d",
+    "googletest": "51fcc68aa3150d8cd17087650598239a8646a2da",
+    "hiperf": "4c7c8c36779ab3ec5febb4c3616da64f1a63f38f",
+    "json": "3c3d8e61bde0f2e8aaa206a102e50fed7b9b2199",
+    "libbpf": "24eaa918f55ecff0348f9283be451b6612ba5193",
+    "llvm-project": "3cfb0bcc64ed3a74d10b55175cdbdff033d2d8db",
+    "profiler": "73d26bb5acfcafb2b1f4f94ead5640241d1e5f73",
+    "protobuf": "aceafed4cf26d7a6be8169ae887cc13b749d5515",
+    "sqlite": "d21e412dbc6f2cdde2e4c9828e2450fcfca4fbe9",
+    "zlib": "9a1de89f7c80f8fc811527dd57135b8b4c00a2e8",
+    "faultloggerd": "875786f2e3446e3efea8cbc9c4a9c1510ce2c1b9",
+    "c_utils": "634d5c9d0aa3642f697938c7e5706e53ec069ba1"
+  },
+  "hostToolchain": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+  "builtAt": "2026-08-12T05:00:32Z"
+}

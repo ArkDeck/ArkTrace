@@ -33,23 +33,24 @@ trace_streamer <trace-file> -e <output.db> [-nm]
 - `5c5afb0c..447a0a49`（306 提交，54 个触及 trace_streamer）对 required 表的唯一列级变化：`sched_slice` 新增 `prev_itid` INTEGER、`prev_state` TEXT 两列，且由 `g_extendField` 开关控制（`version.cpp` 默认 `false`）——**默认导出 schema 不变**；开启扩展字段的库属 AT-DB-004 的 additive 兼容输入；
 - 其余变化为新增能力表（network profiler、filesystem_io、timerfd_wakeup 等）与 native_memory / hiperf 修复，均不影响 required 集。
 
-## 4. macOS 构建（发布门 2 待实证）
+## 4. macOS 构建（Phase 1 实测配方）
 
-上游对 macOS（`macx`）有一级支持，且在积极维护（2026-07-30 `fix:mac compiler`）：
+在 Apple silicon（arm64，macOS 26.6，Apple clang 21）实测打通。可重现入口：
 
 ```bash
-cd smartperf_host/trace_streamer
-./build.sh            # release 产物：out/macx/trace_streamer
-./mac_depend.sh       # 把 libc++ 拷入 out/macx/lib 并 install_name_tool 重定位
+scripts/build_trace_streamer.sh
+# 产物：ThirdParty/TraceStreamer/macx/trace_streamer + manifest.json
 ```
 
-已确认的构建先决条件与风险（`build.sh`、`pare_third_party.sh`、`dl_tools.sh`、`doc/compile_trace_streamer.md`）：
+实测结论（修正 Phase 0 的预判）：
 
-1. 文档标称 macx 使用 clang/clang++ 14.0.3；实际 Apple silicon + 当前 Xcode toolchain 的兼容性必须实测（发布门 2）；
-2. darwin 下脚本使用 `gsed`（GNU sed，需 Homebrew 安装）；
-3. `pare_third_party.sh` 通过 **SSH 从 Gitee** 克隆 8 个 third_party 依赖（sqlite、protobuf、zlib、bzip2、googletest、json、libbpf、faultloggerd），需要 Gitee 账号 SSH 公钥；ArkTrace 的构建脚本应改为 https 克隆或镜像 + pin，避免把个人 SSH 凭据变成构建前提；
-4. `dl_tools.sh` 下载 gn/ninja 预编译工具——来源与哈希需要在可重现构建配方中固定；
-5. `mac_depend.sh` 从 `/usr` 拷贝 `libc+*.dylib`，分发形态（App bundle 内如何摆放）在打包阶段重新设计。
+1. **third_party 必须来自 Gitee 而非 GitCode**：两个镜像的 third_party 仓库已分叉（实测 faultloggerd、hiperf 两边 tip 不同），上游补丁（`prebuilts/patch_hiperf/*.patch`）只对 Gitee tip 生效。Gitee 支持匿名 https 克隆，**不需要 SSH key**——上游脚本写死的 `git@gitee.com:` 通过 `GIT_CONFIG_GLOBAL` 临时配置文件里的 `url.insteadOf` 透明改写为 https，同时把上游脚本的 `git config --global core.longpaths` 写入隔离在该临时文件中；
+2. **需要一行本地补丁**：faultloggerd 是浮动 `--depth=1` tip 且被无条件编译，其 `dfx_elf.cpp` 有一处指针到 `Elf32_Addr` 的截断转换被 Apple clang 拒绝——改为经 `uintptr_t` 的两段转换（构建脚本自动应用，模式不匹配时显式报错）；
+3. **插件裁剪**：`./build.sh -e hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower`——禁用 hiperf/ebpf/native_hook（ArkTrace 不消费 perf/malloc 栈数据，它们是脆弱 native unwinder 的唯一使用方）；
+4. `gsed` 实际未被 CLI 构建路径使用（脚本只赋值未引用），无需安装；
+5. `dl_tools.sh` 从 repo.huaweicloud.com 下载 **darwin-x86** 的 gn/ninja 预编译工具，经 Rosetta 2 运行（本机已确认可用）；产出的 trace_streamer 本体是原生 arm64；
+6. sqlite/protobuf 由上游 pin 到固定 SHA，其余 third_party 是浮动 tip——构建脚本把实际 checkout 的每个 SHA 记入 `manifest.json`，保证可追溯（AT-PARSE-002）；
+7. `mac_depend.sh` **不得执行**：现代 macOS 的 `/usr/lib/*.dylib` 已并入 dyld shared cache，该脚本 `find /usr` 找不到 libc++ 文件，却仍会把二进制的 libc++ 依赖改写为相对路径 `./lib/libc++.1.dylib`，直接损坏二进制。上游仓库中它恰好缺执行位而失败——`build.sh` 因此以非零退出，但二进制此时已完整链接。构建脚本以"新鲜二进制存在 + `--version` 可运行 + 未被改写依赖"为真实成功判据，并显式校验。
 
 ## 5. Re-pin 流程
 
