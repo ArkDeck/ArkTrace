@@ -1,8 +1,8 @@
 # ArkTrace Phase 1 任务清单
 
-> 状态：Active — 5/9 完成
+> 状态：Completed — 9/9 完成
 > 基线日期：2026-08-12
-> 基线提交：d77e16f（P1-T05 当前在 working tree，待提交）
+> 实现提交：`973a1d6`（P1-T05）、`ffd7595`（P1-T06/T07）、`4bf9bdb`（P1-T08）
 > 范围：Parser Vertical Slice
 > 规范基线：[DESIGN.md](./DESIGN.md)、[SPECIFICATION.md](./SPECIFICATION.md)、[TRACE_STREAMER.md](./TRACE_STREAMER.md)
 
@@ -37,17 +37,19 @@ Phase 1 的交付链路是：
 - **P1-T03：初始真实垂直链路。** 在 binary 落到默认路径后重新运行测试：19 条通过、0 失败、0 skip；真实 Parser integration 已覆盖 identity、parse → Store → metadata/process/thread 和基础 cancellation。
 - **P1-T04：Manifest identity 强绑定。** Parser 现已严格加载 manifest，校验 canonical binary、SHA-256、reported version、canonical upstream pin、Mach-O architecture、adapter/build recipe，并通过固定 App/CLI layout resolver 禁止 PATH fallback；review hardening 后 source/binary 使用私有不可变快照、destination 不覆盖已有文件、并发 session 使用唯一目录，取消与 Ready promotion 串行化，snapshot 文件错误无路径化，`--version` 在 termination 后同步排空 EOF，Store 对 schema/time/identity storage class fail closed；全量 47 tests 通过、0 失败、0 skip。
 - **P1-T05：真实 schema evidence。** 从 pinned upstream 引入 Apache-2.0 的 `trace_small_10.systrace` 与 `zlib.htrace`，分别锁定 44,037 `sched_slice` / 68,343 `thread_state` 与 3,067 `callstack`；两次导出 DB byte-identical，schema adapter v2 的 91-table length-prefixed fingerprint、source/DB SHA、range、per-fixture capabilities 与六张 required row counts 已进入 locked evidence；required declared affinity、非空/匹配 capability、bounded range/relationship/data-quality probes 已落地，relationship join 使用 VM-step budget，合法 quoted identifiers 全量进入 fingerprint；actual parser SHA/manifest/evidence/`metadata.parser` 已强绑定，fixture/license 实际字节 Git blob、evidence format 与 canonical provenance fail closed；全量 67 tests 通过、0 失败、0 skip，DESIGN 发布门 5 关闭。
+- **P1-T06：Parser lifecycle。** 子进程以直接 argv 固定 `-nm`，stdout/stderr/`.ohos.ts` diagnostics 有界；取消执行 TERM → 500 ms grace → 同 PID KILL 并显式 wait/reap，无 continuation double-resume；source symlink 只解析一次到 immutable snapshot，Ready output 拒绝 symlink，失败只清理 session-owned 文件。
+- **P1-T07：Atomic Ready。** private partial DB 在 promotion 前完成 raw DB provenance hash、quick_check、schema/range/relationship validation、`arktrace_v1_*` index migration、DB/sidecar/directory fsync；metadata sidecar 先移动，DB rename 作为 Ready marker，取消仅按 device/inode 删除本次产物；Repository read-only + `SQLITE_OPEN_NOFOLLOW` 打开。
+- **P1-T08：Mandatory gate。** `scripts/test_phase1.sh` fail closed 校验 binary/manifest/arm64、fixture/license SHA/byte count/Git blob，clean build 后运行真实 locked scheduling fixture；实测 81 tests、0 failed、0 skipped，并输出 4 KiB 内 machine evidence。
+- **P1-T09：Phase close。** README、TraceStreamer 实测记录、DESIGN、任务索引与 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md) 已按实际实现收口。
 - DESIGN 已按当前定义关闭发布门 2；真实 fixture 发布门也已关闭。
 
-### 仍未完成
+### Phase 1 后仍开放但不重开本阶段
 
 - build manifest 记录了 third-party SHA，但普通 build 尚不消费这些 pin；DESIGN 已将完全 pre-pin 定义为后续 hardening，不作为本轮重新打开发布门 2 的理由；
-- 当前 Parser 在 SQLite header 检查后先 promotion，Repository 打开时才做 quick_check/schema/range；完整 validate/index/fsync-before-promotion 顺序仍属于 P1-T07；
-- cancellation 当前只有 TERM，没有 bounded grace → KILL 与完整 wait/reap；且只由小 fixture 覆盖，不能关闭 P1-T06 或 large-trace 发布门 6；
-- README 与 TRACE_STREAMER.md 顶部状态仍有过时文字；
 - DESIGN 中发布门 3 仍是第三方许可证清单，当前仍开放；不能仅依据 e710e78 的 commit subject 将其视为关闭。
+- 发布门 6 仍要求 Phase 3 的 large-trace + cache promotion 证据；Phase 1 的 13 MiB fixture、TERM/KILL 与 atomic Ready 只关闭 P1-T06/T07/T08，不提前关闭该门。
 
-## 3. 剩余任务依赖
+## 3. 任务依赖（已完成）
 
 ~~~mermaid
 flowchart LR
@@ -58,7 +60,7 @@ flowchart LR
     T08 --> T09["P1-T09 Phase close"]
 ~~~
 
-P1-T04 已完成；P1-T05、P1-T06 可以并行。P1-T08 是唯一 Phase 1 总验收入口。
+依赖链已全部完成；`scripts/test_phase1.sh` 是 Phase 1 的唯一总验收入口。
 
 ## 4. 具体任务
 
@@ -195,7 +197,7 @@ P1-T04 已完成；P1-T05、P1-T06 可以并行。P1-T08 是唯一 Phase 1 总�
 
 ### P1-T06 — 加固子进程、staging、进度和 cancellation
 
-**状态：待开始。**
+**状态：完成。**
 **优先级：P0。**
 **关联：AT-PARSE-003～010、AC-AT-004/014。**
 
@@ -213,13 +215,13 @@ P1-T04 已完成；P1-T05、P1-T06 可以并行。P1-T08 是唯一 Phase 1 总�
 
 **测试**
 
-- [ ] fake executable 捕获 argv，证明 -nm 且无 shell；
-- [ ] nonzero、exit 0/no DB、garbage DB、symlink output；
-- [ ] 超大 stdout/stderr 仍保持有界；
-- [ ] TERM 后退出与忽略 TERM 两类取消；
-- [ ] cancel 后无 child、无 ready DB；
-- [ ] concurrent session 不出现旧结果覆盖新结果；
-- [ ] 原始 Trace hash 始终不变。
+- [x] fake executable 捕获 argv，证明 -nm 且无 shell；
+- [x] nonzero、exit 0/no DB、garbage DB、symlink output；
+- [x] 超大 stdout/stderr 仍保持有界；
+- [x] TERM 后退出与忽略 TERM 两类取消；
+- [x] cancel 后无 child、无 ready DB；
+- [x] concurrent session 不出现旧结果覆盖新结果；
+- [x] 原始 Trace hash 始终不变。
 
 **边界**
 
@@ -227,7 +229,7 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 ### P1-T07 — Index migration 与原子 Ready handoff
 
-**状态：待开始。**
+**状态：完成。**
 **优先级：P0。**
 **依赖：P1-T05、P1-T06。**
 **关联：AT-PARSE-007/008、AT-DB-009/010。**
@@ -250,13 +252,13 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 **测试**
 
-- [ ] ready DB 包含正确版本 indexes；
-- [ ] 在 P1-T05 的非空真实事件 fixture 上，EXPLAIN QUERY PLAN 证明 process/thread 以及 sched_slice/thread_state/callstack filters 使用目标 index；
-- [ ] required relationship probes 的 process(ipid)/thread(itid) target lookup 使用 arktrace identity index，并在 large fixture 上重新校准 250,000 VM-step budget；
-- [ ] Repository 写操作失败；
-- [ ] migration 中断只有 partial，没有 ready；
-- [ ] consumer 无法观察半迁移状态；
-- [ ] upstream rows 未被修改。
+- [x] ready DB 包含正确版本 indexes；
+- [x] 在 P1-T05 的非空真实事件 fixture 上，EXPLAIN QUERY PLAN 证明 process/thread 以及 sched_slice/thread_state/callstack filters 使用目标 index；
+- [x] required relationship probes 的 process(ipid)/thread(itid) target lookup 使用 arktrace identity index；10 万 process late-target 回归在既有 250,000 VM-step budget 内通过；
+- [x] Repository 写操作失败；
+- [x] migration 中断只有 partial，没有 ready；
+- [x] consumer 无法观察半迁移状态；
+- [x] upstream rows 未被修改。
 
 **边界**
 
@@ -264,7 +266,7 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 ### P1-T08 — 建立不可跳过的 Phase 1 gate
 
-**状态：待开始。**
+**状态：完成。**
 **优先级：P0。**
 **依赖：P1-T04、P1-T05、P1-T06、P1-T07。**
 **关联：SPEC §21.3、AC-AT-001/004/005/014。**
@@ -282,16 +284,16 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 **验收**
 
-- [ ] clean build 后 Phase gate 一条命令完成；
-- [ ] Core/Store/Parser integration 全绿；
-- [ ] 真实 integration 零 skip；
-- [ ] binary、manifest、fixture 任一漂移会使 gate 失败；
-- [ ] integration 必须使用真实 pinned TraceStreamer；
-- [ ] failure 可以定位 stage，但不泄漏 absolute path 或无界 parser log。
+- [x] clean build 后 Phase gate 一条命令完成；
+- [x] Core/Store/Parser integration 全绿；
+- [x] 真实 integration 零 skip；
+- [x] binary、manifest、fixture 任一漂移会使 gate 失败；
+- [x] integration 必须使用真实 pinned TraceStreamer；
+- [x] failure 可以定位 stage，但不泄漏 absolute path 或无界 parser log。
 
 ### P1-T09 — 文档收口并正式关闭 Phase 1
 
-**状态：待开始。**
+**状态：完成。**
 **优先级：P1。**
 **依赖：P1-T08。**
 
@@ -308,10 +310,10 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 **完成判据**
 
-- [ ] 新开发者只看 README 与 TRACE_STREAMER.md 即可重复 Phase 1；
-- [ ] 文档 hash/version/revision/arch 与实际一致；
-- [ ] Phase gate 通过且零 skip；
-- [ ] 未把 CLI、App、cache 或其他发布门误标完成。
+- [x] 新开发者只看 README 与 TRACE_STREAMER.md 即可重复 Phase 1；
+- [x] 文档 hash/version/revision/arch 与实际一致；
+- [x] Phase gate 通过且零 skip；
+- [x] 未把 CLI、App、cache 或其他发布门误标完成。
 
 ## 5. Phase 1 Exit Checklist
 
@@ -320,12 +322,12 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 - [x] P1-T03：真实 Parser → SQLite → Store 基础链路；
 - [x] P1-T04：Parser identity 与 manifest 强绑定；
 - [x] P1-T05：真实 DB/schema golden，发布门 5 关闭；
-- [ ] P1-T06：进程失败/取消路径收敛；
-- [ ] P1-T07：index migration、atomic ready、read-only open；
-- [ ] P1-T08：强制 real integration gate，零 skip；
-- [ ] P1-T09：README、依赖文档、evidence 与任务状态收口；
-- [ ] 原始 Trace 未修改，无 absolute path 泄漏；
-- [ ] 未引入 CLI、GUI、HDC、raw SQL agent API 或 LLM SDK。
+- [x] P1-T06：进程失败/取消路径收敛；
+- [x] P1-T07：index migration、atomic ready、read-only open；
+- [x] P1-T08：强制 real integration gate，零 skip；
+- [x] P1-T09：README、依赖文档、evidence 与任务状态收口；
+- [x] 原始 Trace 未修改，无 absolute path 泄漏；
+- [x] 未引入 CLI、GUI、HDC、raw SQL agent API 或 LLM SDK。
 
 ## 6. 非阻塞 Hardening Backlog
 

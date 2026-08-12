@@ -161,21 +161,31 @@ public enum TraceDatabaseStagingPreparer {
         }
         guard !applicable.isEmpty else { return }
 
-        try db.execute("BEGIN IMMEDIATE", stage: .indexing)
+        try db.execute(
+            "BEGIN IMMEDIATE",
+            stage: .indexing,
+            observesTaskCancellation: true
+        )
         do {
             for definition in applicable {
                 try Task.checkCancellation()
                 try db.execute(
                     "DROP INDEX IF EXISTS \(definition.name)",
-                    stage: .indexing
+                    stage: .indexing,
+                    observesTaskCancellation: true
                 )
                 try db.execute(
                     "CREATE INDEX \(definition.name) ON \(definition.table)"
                         + "(\(definition.columns.joined(separator: ", ")))",
-                    stage: .indexing
+                    stage: .indexing,
+                    observesTaskCancellation: true
                 )
             }
-            try db.execute("COMMIT", stage: .indexing)
+            try db.execute(
+                "COMMIT",
+                stage: .indexing,
+                observesTaskCancellation: true
+            )
         } catch {
             try? db.execute("ROLLBACK", stage: .indexing)
             throw error

@@ -7,6 +7,7 @@
 > 配套规格：[SPECIFICATION.md](./SPECIFICATION.md)  
 > 0.1a 修订（2026-08-12）：§2.1 证据基线改锚 GitCode canonical upstream 并记录基线偏差；§11.1 新增 instant 事件语义；§24 新增发布门 1（上游重锚定）；§25 新增关注点 9–11  
 > 0.1b 修订（2026-08-12，Phase 0）：§2.1 完成 GitCode 重锚定（pin `447a0a49`），发布门 1 关闭；新增 [TRACE_STREAMER.md](./TRACE_STREAMER.md)
+> Phase 1 实现注记（2026-08-12）：Parser/Store vertical slice、真实 schema evidence、staging validation/index/fsync、原子 Ready 与 mandatory zero-skip gate 已完成；验证见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)
 
 ## 1. 文档目的
 
@@ -314,7 +315,8 @@ protocol TraceParser: Sendable {
     func parse(
         source: URL,
         destination: URL,
-        cancellation: TraceCancellation
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ParsedTrace
 }
 ```
@@ -367,7 +369,7 @@ Process.arguments = [sourceSnapshotPath, "-e", privatePartialDatabasePath, "-nm"
 
 ### 8.5 取消
 
-取消解析时先向子进程发送终止信号，等待短暂 grace period，必要时只终止该已知 PID。取消与 atomic promotion 通过同一 gate 串行化；若移动先赢得竞态但调用任务在返回前已取消，只撤销本次拥有的 destination。Repository detached validation 返回后也再次检查调用任务的取消状态。未完成或已取消的 staging entry 永不保持 Ready，后续清理只触碰 session-owned temp directory。
+取消解析时先向子进程发送 TERM，等待 500 ms grace period，必要时只向同一已知且仍由该 `Process` 表示的 PID 发送 KILL，并显式 `waitUntilExit`/reap。实现不使用 checked continuation，因此自然退出与取消不存在 double-resume。取消与 atomic promotion 通过同一 gate 串行化；若移动先赢得竞态但调用任务在返回前已取消，只在 device/inode 仍匹配本次产物时撤销 destination 与 metadata sidecar。Repository detached validation 返回后也再次检查调用任务的取消状态。未完成或已取消的 staging entry 永不保持 Ready，后续清理只触碰 session-owned temp directory。
 
 ## 9. Schema Adapter 与数据库
 
@@ -429,10 +431,12 @@ protocol TraceRepository: Sendable {
 - `thread_state(itid, ts)`；
 - `callstack(callid, ts)`；
 - `process(pid)`；
+- `process(ipid)`；
 - `thread(tid, ipid)`；
+- `thread(itid)`；
 - counter 的 `(filter_id, ts)`。
 
-是否创建某一索引取决于 capability。索引 schema version 参与 cache key；索引失败不会降级成无界扫描，而是使 session 加载失败或明确降级某 capability。
+Phase 1 index version 为 `1`，名称统一使用 `arktrace_v1_*`。`process(ipid)`/`thread(itid)` bootstrap indexes 在 required relationship probe 前创建，使真实无索引 export 的 target lookup 保持在 VM-step budget 内；其余索引在 semantic validation 后迁移。不存在相应 optional table/column 时不创建该索引。索引 schema version 进入无路径 metadata sidecar，并在 Phase 2 参与 cache key；索引失败不会降级成无界扫描，而是使 session 加载失败。Ready 连接使用 read-only + 平台 `SQLITE_OPEN_NOFOLLOW`；macOS `/var` symlink 先以 POSIX `realpath` 规范化 parent，但 final database component 保持不解析，仍由 SQLite fail closed。
 
 ## 10. Trace Session 与 Cache
 

@@ -101,17 +101,24 @@ swift package clean
 if ! env \
     ARKTRACE_PHASE1_GATE=1 \
     ARKTRACE_PHASE1_EVIDENCE_OUTPUT="$machine_evidence" \
+    ARKTRACE_TRACE_STREAMER="$binary" \
     ARKTRACE_TEST_TRACE="$repository_root/Fixtures/traces/trace_small_10.systrace" \
     SWIFTPM_MODULECACHE_OVERRIDE="$gate_temporary_directory/module-cache" \
     CLANG_MODULE_CACHE_PATH="$gate_temporary_directory/module-cache" \
     swift test >"$test_log" 2>&1
 then
-    tail -n 120 "$test_log" >&2
+    sed \
+        -e "s|$repository_root|<repo>|g" \
+        -e "s|$gate_temporary_directory|<temp>|g" \
+        "$test_log" | tail -n 120 >&2
     fail "Swift test suite failed"
 fi
 
 if rg -qi 'skipped|XCTSkip' "$test_log"; then
-    tail -n 120 "$test_log" >&2
+    sed \
+        -e "s|$repository_root|<repo>|g" \
+        -e "s|$gate_temporary_directory|<temp>|g" \
+        "$test_log" | tail -n 120 >&2
     fail "Phase 1 gate must contain zero skipped tests"
 fi
 

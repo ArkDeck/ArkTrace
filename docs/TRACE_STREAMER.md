@@ -1,6 +1,6 @@
 # TraceStreamer 依赖记录
 
-> 状态：Phase 0 证据（2026-08-12）  
+> 状态：Phase 1 实测并由 mandatory gate 锁定（2026-08-12）
 > 本文回答：ArkTrace 用的是哪个 TraceStreamer revision、它如何构建、如何调用、有哪些必须绕开的行为。
 
 ## 1. Pinned upstream
@@ -12,7 +12,7 @@
 | TraceStreamer 版本 | `4.3.7`，发布标记 `2025/07/01`（`smartperf_host/trace_streamer/src/version.cpp`） |
 | 源码许可证 | Apache License 2.0（仓库根 LICENSE 与源文件头一致） |
 | 源码位置 | `smartperf_host/trace_streamer/` |
-| Binary SHA-256 / 构建架构 | 待发布门 2（首次真实构建）后填写 |
+| Binary SHA-256 / 构建架构 | `e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf` / Mach-O arm64 |
 
 Gitee 同名镜像与 GitCode 同一历史线（0.1a 初始审阅用的 Gitee `5c5afb0c` 是当前 pin 的祖先提交）；一切以 GitCode 为准。
 
@@ -51,6 +51,16 @@ scripts/build_trace_streamer.sh
 5. `dl_tools.sh` 从 repo.huaweicloud.com 下载 **darwin-x86** 的 gn/ninja 预编译工具，经 Rosetta 2 运行（本机已确认可用）；产出的 trace_streamer 本体是原生 arm64；
 6. sqlite/protobuf 由上游 pin 到固定 SHA，其余 third_party 是浮动 tip——构建脚本把实际 checkout 的每个 SHA 记入 `manifest.json`，保证可追溯（AT-PARSE-002）；
 7. `mac_depend.sh` **不得执行**：现代 macOS 的 `/usr/lib/*.dylib` 已并入 dyld shared cache，该脚本 `find /usr` 找不到 libc++ 文件，却仍会把二进制的 libc++ 依赖改写为相对路径 `./lib/libc++.1.dylib`，直接损坏二进制。上游仓库中它恰好缺执行位而失败——`build.sh` 因此以非零退出，但二进制此时已完整链接。构建脚本以"新鲜二进制存在 + `--version` 可运行 + 未被改写依赖"为真实成功判据，并显式校验。
+
+Phase 1 的 production adapter 还会在每次 identity/parse 前把 binary 与 source 复制到 session-owned `0700` staging，分别设为只读/可执行快照，并对真正执行/解析的快照计算 SHA。子进程取消采用 TERM → 500 ms grace → 同一已知 PID 的 KILL，并显式 wait/reap；stdout、stderr 与 `.ohos.ts` diagnostics 都有 64 KiB 上限。输入 symlink 只允许解析一次到 regular/readable target，Ready DB 与 sidecar 不允许 symlink。
+
+正式复验入口：
+
+```bash
+scripts/test_phase1.sh
+```
+
+该 gate 不接受 binary/manifest/fixture/license 缺失或漂移，也不允许 integration skip；它在 private partial DB 上完成 quick_check、schema/range/relationship validation、versioned index migration 与 fsync 后，才以 DB rename 作为 Ready marker。详细结果见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)。
 
 ## 5. Re-pin 流程
 

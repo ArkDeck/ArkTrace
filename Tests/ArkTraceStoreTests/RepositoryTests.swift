@@ -22,6 +22,29 @@ final class RepositoryTests: XCTestCase {
         }
     }
 
+    private final class IndexCancellationBarrier: @unchecked Sendable {
+        private let reached = DispatchSemaphore(value: 0)
+        private let release = DispatchSemaphore(value: 0)
+
+        func observe(_ stage: TraceLoadingStage) {
+            guard stage == .indexing else { return }
+            reached.signal()
+            release.wait()
+        }
+
+        private func waitBlocking() {
+            reached.wait()
+        }
+
+        func waitUntilReached() async {
+            await Task.detached { self.waitBlocking() }.value
+        }
+
+        func resume() {
+            release.signal()
+        }
+    }
+
     private var databaseURL: URL!
 
     private static let requiredEventTablesSQL = """
@@ -297,6 +320,36 @@ final class RepositoryTests: XCTestCase {
         XCTAssertThrowsError(try TraceDatabase(url: symlink, readOnly: true)) { error in
             XCTAssertEqual((error as? ArkTraceError)?.code, .traceDatabaseInvalid)
         }
+    }
+
+    func testCancellationBeforeFullIndexMigrationLeavesNoReadyIndexSet() async throws {
+        let barrier = IndexCancellationBarrier()
+        let databaseURL = try XCTUnwrap(databaseURL)
+        let task = Task.detached {
+            try TraceDatabaseStagingPreparer.prepare(
+                databaseURL: databaseURL,
+                progress: { barrier.observe($0) }
+            )
+        }
+        await barrier.waitUntilReached()
+        task.cancel()
+        barrier.resume()
+
+        do {
+            _ = try await task.value
+            XCTFail("cancelled index migration must not complete")
+        } catch is CancellationError {
+            // Expected: Parser treats this private DB as partial and removes it.
+        }
+
+        let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        let indexes = Set(try db.query(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+        ) { $0.text(0) }.compactMap { $0 })
+        XCTAssertTrue(indexes.contains("arktrace_v1_process_ipid"))
+        XCTAssertTrue(indexes.contains("arktrace_v1_thread_itid"))
+        XCTAssertFalse(indexes.contains("arktrace_v1_process_pid"))
+        XCTAssertFalse(indexes.contains("arktrace_v1_sched_slice_ts_cpu"))
     }
 
     func testProcessDirectoryOrderingAndConversion() async throws {

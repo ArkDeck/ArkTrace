@@ -30,6 +30,10 @@ private let sqliteVMProgressCallback: @convention(c) (UnsafeMutableRawPointer?) 
         .advance()
 }
 
+private let sqliteTaskCancellationCallback: @convention(c) (UnsafeMutableRawPointer?) -> Int32 = {
+    _ in Task.isCancelled ? 1 : 0
+}
+
 /// Minimal SQLite3 wrapper. Not Sendable by design: an instance is owned by a
 /// single repository actor (DESIGN §9.2) or a single test.
 final class TraceDatabase {
@@ -190,14 +194,33 @@ final class TraceDatabase {
     /// Never receives caller-supplied values (AT-DB-006).
     func execute(
         _ sql: String,
-        stage: ArkTraceError.Stage = .openingDatabase
+        stage: ArkTraceError.Stage = .openingDatabase,
+        observesTaskCancellation: Bool = false
     ) throws {
-        guard sqlite3_exec(handle, sql, nil, nil, nil) == SQLITE_OK else {
+        if observesTaskCancellation {
+            try Task.checkCancellation()
+            sqlite3_progress_handler(
+                handle,
+                1_000,
+                sqliteTaskCancellationCallback,
+                nil
+            )
+        }
+        defer {
+            if observesTaskCancellation {
+                sqlite3_progress_handler(handle, 0, nil, nil)
+            }
+        }
+        let rc = sqlite3_exec(handle, sql, nil, nil, nil)
+        if rc == SQLITE_INTERRUPT, observesTaskCancellation, Task.isCancelled {
+            throw CancellationError()
+        }
+        guard rc == SQLITE_OK else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: stage,
                 message: "Failed to execute internal SQLite statement",
-                details: ["sqliteCode": String(sqlite3_errcode(handle))]
+                details: ["sqliteCode": String(rc)]
             )
         }
     }
