@@ -1,6 +1,6 @@
 # ArkTrace Phase 2 任务清单
 
-> 状态：Active — P2-T01～T02 已完成，P2-T03 开始实施
+> 状态：Active — P2-T01～T03 已完成，P2-T04 开始实施
 > 阶段：CLI Vertical Slice
 > 验收目标：Agent 不依赖 UI 即可 inspect、summary、读取 process/thread
 
@@ -175,10 +175,22 @@ canonical-equivalent spellings 不合并。range 明确 null。真实 zlib fixtu
 
 **验收**
 
-- [ ] help/version 不解析 trace；
-- [ ] unknown/missing/conflicting flag 有稳定 usage error；
-- [ ] CLI 无 SwiftUI/AppKit dependency；
-- [ ] App/CLI 不复制 Parser/Store 逻辑。
+- [x] help/version 不解析 trace；
+- [x] unknown/missing/conflicting flag 有稳定 usage error；
+- [x] CLI 无 SwiftUI/AppKit dependency；
+- [x] App/CLI 不复制 Parser/Store 逻辑。
+
+实现证据（2026-08-13，独立 review clean）：SPM 新增 `ArkTraceCLI` library 与
+`arktrace` executable；CLI target 只依赖既有 Core/Parser/Runtime/Analysis，命令层仅承载
+argument parsing、human/machine presentation 和 typed exit mapping。五个 Phase 2 命令及全部
+global flags 已建立稳定 typed invocation；limits、paired range、filter conflict、duplicate、
+missing/unknown option 和 `--` terminator 均 fail closed。`--trace-streamer` 仅接受 absolute
+path，并通过既有 pinned resolver 产生 parser，真实 async `identity()` 负例证明不会绕过
+identity validation。help/version 在 executor 之前短路，不触碰 trace；stdout/stderr 及
+command executor 均可注入，生产 CLI 与业务 target 无 `print`、SwiftUI 或 AppKit。
+16 条 CLI regression 覆盖参数边界、稳定 usage error、writer 隔离、deterministic encoder 和
+全部 AT-CLI-009 status family。当前完整 Release/gate 均为 172 tests、0 failure、0 skip；
+locked parser/source/upstream/Ready SHA 与 schema fingerprint 未漂移。
 
 ### P2-T04 — 实现 Machine JSON 1.0 contract
 

@@ -1,0 +1,404 @@
+import ArkTraceCore
+import Foundation
+
+public struct CLIArgumentParser: Sendable {
+    private static let maximumArgumentCount = 256
+    private static let maximumArgumentBytes = 16 * 1_024
+
+    public init() {}
+
+    public func parse(_ arguments: [String]) throws -> CLIInvocation {
+        guard arguments.count <= Self.maximumArgumentCount,
+            arguments.allSatisfy({ $0.utf8.count <= Self.maximumArgumentBytes })
+        else {
+            throw CLIParsing.invalid("CLI argument budget was exceeded")
+        }
+
+        var json = false
+        var pretty = false
+        var noCache = false
+        var hasHelp = false
+        var hasVersion = false
+        var timeoutMs = CLILimits.defaultTimeoutMs
+        var maxRows = CLILimits.defaultMaxRows
+        var maxEvents = CLILimits.defaultMaxEvents
+        var maxOutputBytes = CLILimits.defaultMaxOutputBytes
+        var traceStreamerURL: URL?
+        var seen: Set<String> = []
+        var remaining: [String] = []
+        var terminatorReached = false
+        var index = 0
+
+        while index < arguments.count {
+            let token = arguments[index]
+            if terminatorReached {
+                remaining.append(token)
+                index += 1
+                continue
+            }
+            if token == "--" {
+                terminatorReached = true
+                remaining.append(token)
+                index += 1
+                continue
+            }
+            switch token {
+            case "--help", "-h":
+                try markOnce("--help", seen: &seen)
+                hasHelp = true
+            case "--version":
+                try markOnce(token, seen: &seen)
+                hasVersion = true
+            case "--json":
+                try markOnce(token, seen: &seen)
+                json = true
+            case "--pretty":
+                try markOnce(token, seen: &seen)
+                pretty = true
+            case "--no-cache":
+                try markOnce(token, seen: &seen)
+                noCache = true
+            case "--timeout-ms":
+                try markOnce(token, seen: &seen)
+                timeoutMs = try int64Value(after: token, in: arguments, index: &index)
+            case "--max-rows":
+                try markOnce(token, seen: &seen)
+                maxRows = try intValue(after: token, in: arguments, index: &index)
+            case "--max-events":
+                try markOnce(token, seen: &seen)
+                maxEvents = try intValue(after: token, in: arguments, index: &index)
+            case "--max-output-bytes":
+                try markOnce(token, seen: &seen)
+                maxOutputBytes = try intValue(after: token, in: arguments, index: &index)
+            case "--trace-streamer":
+                try markOnce(token, seen: &seen)
+                let path = try stringValue(after: token, in: arguments, index: &index)
+                guard path.utf8.count <= 4_096,
+                    (path as NSString).isAbsolutePath
+                else {
+                    throw CLIParsing.invalid("--trace-streamer requires an absolute path")
+                }
+                traceStreamerURL = URL(fileURLWithPath: path).standardizedFileURL
+            default:
+                if remaining.isEmpty, token.hasPrefix("-") {
+                    throw CLIParsing.invalid(
+                        "Unknown option",
+                        details: ["option": boundedToken(token)]
+                    )
+                }
+                remaining.append(token)
+            }
+            index += 1
+        }
+
+        guard !(hasHelp && hasVersion) else {
+            throw CLIParsing.invalid("--help and --version cannot be combined")
+        }
+
+        let limits = try CLILimits(
+            timeoutMs: timeoutMs,
+            maxRows: maxRows,
+            maxEvents: maxEvents,
+            maxOutputBytes: maxOutputBytes
+        )
+        let options = try CLIGlobalOptions(
+            json: json,
+            pretty: pretty,
+            limits: limits,
+            traceStreamerURL: traceStreamerURL,
+            noCache: noCache
+        )
+        if hasHelp || hasVersion {
+            try validateActionTail(remaining)
+            return CLIInvocation(options: options, command: hasHelp ? .help : .version)
+        }
+        if remaining.first == "--" {
+            remaining.removeFirst()
+        }
+        let command = try parseCommand(remaining, globalMaxRows: limits.maxRows)
+        return CLIInvocation(options: options, command: command)
+    }
+
+    /// Help/version skip command operand validation and all trace access, but
+    /// still reject option-looking tokens which were not recognized as valid
+    /// global syntax before the explicit `--` terminator.
+    private func validateActionTail(_ arguments: [String]) throws {
+        for token in arguments {
+            if token == "--" { return }
+            if token.hasPrefix("-") {
+                throw CLIParsing.invalid(
+                    "Unknown option",
+                    details: ["option": boundedToken(token)]
+                )
+            }
+        }
+    }
+
+    private func parseCommand(_ arguments: [String], globalMaxRows: Int) throws -> CLICommand {
+        guard let name = arguments.first else {
+            throw CLIParsing.invalid("A command is required")
+        }
+        let tail = Array(arguments.dropFirst())
+        switch name {
+        case "doctor":
+            var selfTest = false
+            var seen: Set<String> = []
+            var positionals: [String] = []
+            try parseLocal(tail) { option, _, _ in
+                guard option == "--self-test" else { return false }
+                try markOnce(option, seen: &seen)
+                selfTest = true
+                return true
+            } positional: { positionals.append($0) }
+            guard positionals.isEmpty else {
+                throw CLIParsing.invalid("doctor does not accept a trace operand")
+            }
+            return .doctor(selfTest: selfTest)
+        case "inspect":
+            var positionals: [String] = []
+            try parseLocal(tail) { _, _, _ in false } positional: { positionals.append($0) }
+            return .inspect(trace: try exactlyOneTrace(positionals, command: name))
+        case "summary":
+            return try parseSummary(tail)
+        case "processes":
+            return try parseProcesses(tail, globalMaxRows: globalMaxRows)
+        case "threads":
+            return try parseThreads(tail, globalMaxRows: globalMaxRows)
+        default:
+            throw CLIParsing.invalid(
+                "Unknown command",
+                details: ["command": boundedToken(name)]
+            )
+        }
+    }
+
+    private func parseSummary(_ arguments: [String]) throws -> CLICommand {
+        var start: Int64?
+        var end: Int64?
+        var seen: Set<String> = []
+        var positionals: [String] = []
+        try parseLocal(arguments) { option, values, index in
+            switch option {
+            case "--start-ns":
+                try markOnce(option, seen: &seen)
+                start = try int64Value(after: option, in: values, index: &index)
+            case "--end-ns":
+                try markOnce(option, seen: &seen)
+                end = try int64Value(after: option, in: values, index: &index)
+            default:
+                return false
+            }
+            return true
+        } positional: { positionals.append($0) }
+        let trace = try exactlyOneTrace(positionals, command: "summary")
+        guard (start == nil) == (end == nil) else {
+            throw CLIParsing.invalid("--start-ns and --end-ns must be provided together")
+        }
+        let range: TraceTimeRange?
+        if let start, let end {
+            range = try TraceTimeRange.query(startNs: start, endNs: end)
+        } else {
+            range = nil
+        }
+        return .summary(trace: trace, range: range)
+    }
+
+    private func parseProcesses(_ arguments: [String], globalMaxRows: Int) throws -> CLICommand {
+        var pid: Int64?
+        var name: String?
+        var limit = globalMaxRows
+        var seen: Set<String> = []
+        var positionals: [String] = []
+        try parseLocal(arguments) { option, values, index in
+            switch option {
+            case "--pid":
+                try markOnce(option, seen: &seen)
+                pid = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--name":
+                try markOnce(option, seen: &seen)
+                name = try boundedText(after: option, in: values, index: &index)
+            case "--limit":
+                try markOnce(option, seen: &seen)
+                limit = try localLimit(after: option, in: values, index: &index, maximum: globalMaxRows)
+            default:
+                return false
+            }
+            return true
+        } positional: { positionals.append($0) }
+        return .processes(
+            trace: try exactlyOneTrace(positionals, command: "processes"),
+            pid: pid,
+            name: name,
+            limit: limit
+        )
+    }
+
+    private func parseThreads(_ arguments: [String], globalMaxRows: Int) throws -> CLICommand {
+        var processKey: Int64?
+        var pid: Int64?
+        var threadKey: Int64?
+        var tid: Int64?
+        var name: String?
+        var limit = globalMaxRows
+        var seen: Set<String> = []
+        var positionals: [String] = []
+        try parseLocal(arguments) { option, values, index in
+            switch option {
+            case "--process-key":
+                try markOnce(option, seen: &seen)
+                processKey = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--pid":
+                try markOnce(option, seen: &seen)
+                pid = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--thread-key":
+                try markOnce(option, seen: &seen)
+                threadKey = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--tid":
+                try markOnce(option, seen: &seen)
+                tid = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--name":
+                try markOnce(option, seen: &seen)
+                name = try boundedText(after: option, in: values, index: &index)
+            case "--limit":
+                try markOnce(option, seen: &seen)
+                limit = try localLimit(after: option, in: values, index: &index, maximum: globalMaxRows)
+            default:
+                return false
+            }
+            return true
+        } positional: { positionals.append($0) }
+        guard processKey == nil || pid == nil else {
+            throw CLIParsing.invalid("--process-key and --pid are mutually exclusive")
+        }
+        guard threadKey == nil || tid == nil else {
+            throw CLIParsing.invalid("--thread-key and --tid are mutually exclusive")
+        }
+        return .threads(
+            trace: try exactlyOneTrace(positionals, command: "threads"),
+            processKey: processKey,
+            pid: pid,
+            threadKey: threadKey,
+            tid: tid,
+            name: name,
+            limit: limit
+        )
+    }
+
+    private func parseLocal(
+        _ arguments: [String],
+        option: (String, [String], inout Int) throws -> Bool,
+        positional: (String) -> Void
+    ) throws {
+        var index = 0
+        var terminatorReached = false
+        while index < arguments.count {
+            let token = arguments[index]
+            if token == "--", !terminatorReached {
+                terminatorReached = true
+            } else if token.hasPrefix("--"), !terminatorReached {
+                guard try option(token, arguments, &index) else {
+                    throw CLIParsing.invalid(
+                        "Unknown option",
+                        details: ["option": boundedToken(token)]
+                    )
+                }
+            } else {
+                positional(token)
+            }
+            index += 1
+        }
+    }
+
+    private func exactlyOneTrace(_ values: [String], command: String) throws -> String {
+        guard values.count == 1, !values[0].isEmpty else {
+            throw CLIParsing.invalid("\(command) requires exactly one trace operand")
+        }
+        return values[0]
+    }
+
+    private func markOnce(_ option: String, seen: inout Set<String>) throws {
+        guard seen.insert(option).inserted else {
+            throw CLIParsing.invalid(
+                "Option may only be specified once",
+                details: ["option": boundedToken(option)]
+            )
+        }
+    }
+
+    private func stringValue(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> String {
+        let next = index + 1
+        guard next < arguments.count, !arguments[next].hasPrefix("--") else {
+            throw CLIParsing.invalid(
+                "Option requires a value",
+                details: ["option": boundedToken(option)]
+            )
+        }
+        index = next
+        return arguments[next]
+    }
+
+    private func int64Value(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> Int64 {
+        let raw = try stringValue(after: option, in: arguments, index: &index)
+        guard let value = Int64(raw) else {
+            throw CLIParsing.invalid(
+                "Option requires an Int64 value",
+                details: ["option": boundedToken(option)]
+            )
+        }
+        return value
+    }
+
+    private func intValue(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> Int {
+        let raw = try stringValue(after: option, in: arguments, index: &index)
+        guard let value = Int(raw) else {
+            throw CLIParsing.invalid(
+                "Option requires an integer value",
+                details: ["option": boundedToken(option)]
+            )
+        }
+        return value
+    }
+
+    private func nonnegativeInt64(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> Int64 {
+        let value = try int64Value(after: option, in: arguments, index: &index)
+        guard value >= 0 else {
+            throw CLIParsing.invalid("Identity and PID/TID filters must be nonnegative")
+        }
+        return value
+    }
+
+    private func boundedText(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> String {
+        let value = try stringValue(after: option, in: arguments, index: &index)
+        guard !value.isEmpty, value.utf8.count <= 4_096 else {
+            throw CLIParsing.invalid("Text filter must contain 1...4096 UTF-8 bytes")
+        }
+        return value
+    }
+
+    private func localLimit(
+        after option: String,
+        in arguments: [String],
+        index: inout Int,
+        maximum: Int
+    ) throws -> Int {
+        let value = try intValue(after: option, in: arguments, index: &index)
+        guard value >= 1, value <= maximum else {
+            throw CLIParsing.invalid("--limit must be within 1...global maxRows")
+        }
+        return value
+    }
+
+    private func boundedToken(_ token: String) -> String {
+        String(token.unicodeScalars.prefix(128)).replacingOccurrences(of: "\n", with: " ")
+    }
+}

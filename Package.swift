@@ -12,6 +12,8 @@ let package = Package(
         .library(name: "ArkTraceStore", targets: ["ArkTraceStore"]),
         .library(name: "ArkTraceRuntime", targets: ["ArkTraceRuntime"]),
         .library(name: "ArkTraceAnalysis", targets: ["ArkTraceAnalysis"]),
+        .library(name: "ArkTraceCLI", targets: ["ArkTraceCLI"]),
+        .executable(name: "arktrace", targets: ["arktrace"]),
     ],
     targets: [
         .target(name: "ArkTraceCore"),
@@ -19,10 +21,21 @@ let package = Package(
         .target(name: "ArkTraceStore", dependencies: ["ArkTraceCore"]),
         .target(name: "ArkTraceRuntime", dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"]),
         .target(name: "ArkTraceAnalysis", dependencies: ["ArkTraceCore"]),
+        .target(
+            name: "ArkTraceCLI",
+            dependencies: [
+                "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime", "ArkTraceAnalysis",
+            ]
+        ),
+        .executableTarget(name: "arktrace", dependencies: ["ArkTraceCLI"]),
         .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"]),
         .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"]),
         .testTarget(name: "ArkTraceStoreTests", dependencies: ["ArkTraceStore"]),
         .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"]),
+        .testTarget(
+            name: "ArkTraceCLITests",
+            dependencies: ["ArkTraceCLI", "ArkTraceCore", "ArkTraceParser"]
+        ),
         .testTarget(
             name: "ArkTraceIntegrationTests",
             dependencies: [
