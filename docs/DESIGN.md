@@ -871,7 +871,7 @@ INTERNAL_ERROR
 
 ## 22. 分发与许可证
 
-ArkTrace 自身许可证在项目初始化时明确选择。TraceStreamer source/binary 以 Apache-2.0 notice 分发，但这不等于其全部第三方依赖已完成审计。
+ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck 一致）。TraceStreamer source/binary 以 Apache-2.0 notice 分发，但这不等于其全部第三方依赖已完成审计。
 
 发布前必须产出：
 
@@ -932,5 +932,5 @@ ArkTrace 自身许可证在项目初始化时明确选择。TraceStreamer source
 7. ArkDeck analyzer resolver 按 `analyzerRef` 选择多个 pinned binary 是否接受；
 8. 本地 cache 默认 20/16 GiB 水位是否需要调整；
 9. App 分发形态：是否启用 App Sandbox、Developer ID 直发还是 App Store、是否支持 Intel（universal binary）——影响 AT-APP-001 的 security-scoped bookmark、TraceStreamer 子进程调用、cache 路径与构建目标；
-10. ArkTrace 自身 LICENSE 的选择（建仓前必须确定，影响 THIRD_PARTY_NOTICES 与 fixture 再分发）；
+10. ~~ArkTrace 自身 LICENSE 的选择~~——已决：MIT（2026-08-12 建仓时随初始提交确定，见 §22）；
 11. 无障碍契约（AT-APP-009～012、AC-AT-016）保留为 0.1 DoD 硬门，还是分层交付（0.1 保留键盘可达与 focus 基线，完整 VoiceOver/Reduce Motion 契约移至 0.2）。
