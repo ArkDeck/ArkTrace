@@ -195,7 +195,6 @@ public struct TraceStreamerProcessParser: TraceParser {
             }
             throw error
         }
-        progress?(.cacheLookup)
         let result: Result<ExecutedParse, Error>
         do {
             result = .success(
@@ -1075,12 +1074,24 @@ public struct TraceStreamerProcessParser: TraceParser {
         let box = ProcessBox(process, terminationGracePeriod: terminationGracePeriod)
         let exitStatus: Int32
         do {
-            exitStatus = try await withTaskCancellationHandler {
-                try box.runIfNotCancelled()
-                return box.waitUntilExit()
+            try await withTaskCancellationHandler {
+                try await withCheckedThrowingContinuation {
+                    (continuation: CheckedContinuation<Void, Error>) in
+                    process.terminationHandler = { _ in continuation.resume() }
+                    do {
+                        try box.runIfNotCancelled()
+                    } catch {
+                        process.terminationHandler = nil
+                        continuation.resume(throwing: error)
+                    }
+                }
             } onCancel: {
                 box.cancel()
             }
+            // The termination handler has already fired, so this reap returns
+            // immediately instead of blocking a cooperative-executor thread
+            // for the child's lifetime; it also cancels a pending escalation.
+            exitStatus = box.waitUntilExit()
         } catch is CancellationError {
             stdoutSink.finish()
             stderrSink.finish()

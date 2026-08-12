@@ -22,7 +22,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 
 ## 构建与测试
 
-要求 Apple silicon Mac、Swift 6 toolchain，以及本地构建的 pinned TraceStreamer：
+要求 Apple silicon Mac、Swift 6 toolchain、`jq`（macOS 15 起随系统提供，更早版本 `brew install jq`），以及本地构建的 pinned TraceStreamer；Phase gate 的其余工具（`git`、`shasum`、`file`、`grep`）均为 macOS 自带：
 
 ```bash
 # 构建/更新 ThirdParty/TraceStreamer/macx/trace_streamer + manifest.json

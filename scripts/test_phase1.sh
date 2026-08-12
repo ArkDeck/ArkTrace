@@ -11,7 +11,6 @@ command -v jq >/dev/null 2>&1 || fail "jq is unavailable"
 command -v shasum >/dev/null 2>&1 || fail "shasum is unavailable"
 command -v git >/dev/null 2>&1 || fail "git is unavailable"
 command -v file >/dev/null 2>&1 || fail "file is unavailable"
-command -v rg >/dev/null 2>&1 || fail "rg is unavailable"
 
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd)
@@ -61,7 +60,7 @@ evidence_binary_sha=$(jq -er '.parser.binarySHA256' "$schema_evidence")
 [ "$actual_binary_sha" = "$evidence_binary_sha" ] \
     || fail "trace_streamer SHA does not match locked evidence"
 
-file -b "$binary" | rg -q 'Mach-O 64-bit executable arm64' \
+file -b "$binary" | grep -q 'Mach-O 64-bit executable arm64' \
     || fail "trace_streamer is not a native arm64 Mach-O executable"
 
 verify_locked_file() {
@@ -114,7 +113,9 @@ then
     fail "Swift test suite failed"
 fi
 
-if rg -qi 'skipped|XCTSkip' "$test_log"; then
+# Match XCTest's actual skip output (per-case line and run summary), not the
+# XCTSkip identifier, so test names containing "XCTSkip" cannot false-positive.
+if grep -Eq "' skipped \(|[0-9] tests? skipped" "$test_log"; then
     sed \
         -e "s|$repository_root|<repo>|g" \
         -e "s|$gate_temporary_directory|<temp>|g" \
@@ -122,7 +123,7 @@ if rg -qi 'skipped|XCTSkip' "$test_log"; then
     fail "Phase 1 gate must contain zero skipped tests"
 fi
 
-test_count=$(rg -o 'Executed [0-9]+ tests' "$test_log" | tail -n 1 | awk '{print $2}')
+test_count=$(grep -oE 'Executed [0-9]+ tests' "$test_log" | tail -n 1 | awk '{print $2}')
 [ -n "$test_count" ] && [ "$test_count" -gt 0 ] \
     || fail "could not determine a positive XCTest count"
 
@@ -153,7 +154,7 @@ jq -e '
     and .metaTablePresent == false
     and .pathsAbsent == true
     and .stages == [
-        "preparing", "hashing", "cacheLookup", "parsing", "validating",
+        "preparing", "hashing", "parsing", "validating",
         "indexing", "openingDatabase", "ready"
     ]
 ' "$machine_evidence" >/dev/null || fail "machine evidence contract failed"

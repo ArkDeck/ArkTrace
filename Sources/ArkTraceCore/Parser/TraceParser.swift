@@ -5,6 +5,7 @@ import Foundation
 public enum TraceLoadingStage: String, Codable, Sendable, CaseIterable {
     case preparing
     case hashing
+    /// Reserved for the Phase 2 content-addressed cache; Phase 1 never emits it.
     case cacheLookup
     case parsing
     case validating

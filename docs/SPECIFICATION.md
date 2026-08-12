@@ -184,7 +184,7 @@ failed
 cancelled
 ```
 
-只有 parser 能提供可靠完成比例时才显示 percentage；否则 stage 为 indeterminate。
+`cacheLookup` 只在 content-addressed cache 存在时（Phase 2 起）才会被观察到；Phase 1 链路没有 cache，不得发射该 stage。只有 parser 能提供可靠完成比例时才显示 percentage；否则 stage 为 indeterminate。
 
 ### AT-PARSE-007 成功判定
 

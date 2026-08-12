@@ -54,7 +54,7 @@ locked real trace
 - indexed Ready DB：10,997,760 bytes，SHA-256 `66aa6569cf4ef0d98703ee582da38233324f376eddc96d39776b78c77c8be7ae`；
 - duration：9,127,944,000 ns；52 processes；104 threads；91 schema tables；
 - `quick_check=ok`、`meta` absent、source/staging absolute paths absent；
-- stages：preparing → hashing → cacheLookup → parsing → validating → indexing → openingDatabase → ready。
+- stages：preparing → hashing → parsing → validating → indexing → openingDatabase → ready。
 
 Ready DB hash 是该次 gate 的运行证据；locked provenance 以建索引前的 raw exporter DB hash 为准，因为 ArkTrace indexes 会有意改变 derived DB 字节。
 
@@ -65,7 +65,7 @@ Ready DB hash 是该次 gate 的运行证据；locked provenance 以建索引前
 | AT-PARSE-001/003 | async `TraceParser`；直接 `Process.executableURL + arguments[]`；fake executable 证明 literal argv 与固定 `-nm`，无 shell expansion |
 | AT-PARSE-002/005 | async snapshot/hash/Mach-O/manifest validation；copy/hash 分块检查调用任务取消；actual binary、manifest、locked evidence 与 `metadata.parser` 强绑定 |
 | AT-PARSE-004 | `-nm`；DB/sidecar path absence byte scan；typed error 不回显 absolute path 或 raw parser output |
-| AT-PARSE-006 | eight actual success stages；failure/cancel terminal stage；无虚假 percentage |
+| AT-PARSE-006 | seven actual success stages（`cacheLookup` 保留给 Phase 2 content-addressed cache，Phase 1 不发射）；failure/cancel terminal stage；无虚假 percentage |
 | AT-PARSE-007/008 | regular non-symlink SQLite、quick_check、schema/range/relationships、indexes、fsync 完成后才以 DB rename 发布 Ready |
 | AT-PARSE-009 | preparation detached task 显式取消桥接与 partial/claim 清理；identity/parse 在最后一次 cleanup suspension 后重检取消，最终边界 check 抛出的 cancellation 与 owned Ready rollback 走同一控制流；TERM → 500 ms grace → same-PID KILL；wait/reap；cancel/promotion gate；Ready rollback 先以 exclusive rename 原子隔离，再用 exact/mismatch/absent/inaccessible probe 核验 device/inode；正常路径无 orphan/Ready partial，替换路径不被误删；注入的 cleanup/rollback/probe 失败返回稳定 `TRACE_PARSE_FAILED`，公开 Ready 路径保持隔离且不伪报 `CANCELLED` |
 | AT-PARSE-010 | upstream 模糊失败稳定映射为 `TRACE_PARSE_FAILED`；不伪造具体格式原因 |

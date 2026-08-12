@@ -610,7 +610,6 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(recorder.snapshot(), [
             .preparing,
             .hashing,
-            .cacheLookup,
             .parsing,
             .validating,
             .indexing,
