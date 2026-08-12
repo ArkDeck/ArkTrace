@@ -1,6 +1,6 @@
 # ArkTrace Phase 2 任务清单
 
-> 状态：Active — P2-T01 已完成，P2-T02 开始实施
+> 状态：Active — P2-T01～T02 已完成，P2-T03 开始实施
 > 阶段：CLI Vertical Slice
 > 验收目标：Agent 不依赖 UI 即可 inspect、summary、读取 process/thread
 
@@ -126,13 +126,37 @@ fingerprint 均未漂移。新增分布相对冻结 Phase 1 基线为 Store +4�
 
 **测试**
 
-- [ ] full/range summary；
-- [ ] empty/capability missing；
-- [ ] half-open/instant boundary；
-- [ ] duration/instant/open-ended 三类共享 predicate 的 SQL 与 in-memory golden；
-- [ ] Phase 3 event query 可直接复用同一 helper；
-- [ ] data-quality warnings；
-- [ ] 同一输入重复编码一致。
+- [x] full/range summary；
+- [x] empty/capability missing；
+- [x] half-open/instant boundary；
+- [x] duration/instant/open-ended 三类共享 predicate 的 SQL 与 in-memory golden；
+- [x] Phase 3 event query 可直接复用同一 helper；
+- [x] data-quality warnings；
+- [x] 同一输入重复编码一致。
+
+实现证据（2026-08-13，独立 review clean）：新增只依赖 ArkTraceCore 的
+`ArkTraceAnalysis` target；`TraceSummaryEngine` 支持 full/range、稳定 truncation section、
+unsupported 为 null、typed cancellation/deadline，并以 sorted-key JSON 重复编码得到相同
+bytes。Core repository contract 提供 deadline/row-bounded `TraceSummaryFacts`；Store 中唯一
+`TraceEventIntersection` 同时承载 duration half-open、instant 与 open-ended 语义，summary SQL
+与 in-memory reduction 只复用该 helper；P3 detail SQL 可直接复用同一 prepared/bound predicate。
+退化 analysis range 在 Analysis、
+Core 和 Store 边界均被拒绝；process/thread 的 NULL start lifecycle 不再被猜测为覆盖所有
+range，只报告可证明的 count 下界并携带 query-level data-quality warning。错误 storage class
+通过有界 quality probe 进入 evidence；负 duration 按
+AT-TIME-005 保留为合法 open-ended sentinel，不再误报“ignored”。所有 summary 输入表先按
+稳定 row identity 取 limit+1，再过滤、join 或内存归约；未检查尾部返回 lower-bound + truncation，
+10 万行 regression 在 1,000 VM-step budget 内完成且 query plan 无 temp B-tree；WITHOUT ROWID
+或 rowid alias 被遮蔽时以 `NOT INDEXED` 固定物理 B-tree/record 前缀。generated columns 通过
+`table_xinfo` 参与 alias 判断、hidden-kind fingerprint 与兼容性回归。one-shot timeout race 覆盖 metadata、Store 与 Analysis
+reduction，即使 protocol implementation 不合作也不阻塞公开 deadline，且 parent cancellation
+优先于并发 timeout，
+SQLite progress handler 在 deadline 时实际 interrupt；`stat` 无 timestamp，因此仅 full summary
+返回 bounded `eventCountBySource`，且只汇总 `stat_type=received`，其他类型进入 data-quality，
+过长/空字段以 warning+truncation 暴露；source 以原始 UTF-8 bytes 作为 BINARY identity，Unicode
+canonical-equivalent spellings 不合并。range 明确 null。真实 zlib fixture 已锁定 received 总数
+6,138、NULL thread lifecycle 下界、full/range named slice summary 与重复编码确定性。当前增量
+套件为 156 tests（Core 7、Parser 37、Store 54、Integration 48、Analysis 10）。
 
 ### P2-T03 — 建立 arktrace executable 与命令解析层
 

@@ -1,5 +1,6 @@
 import ArkTraceCore
 import ArkTraceParser
+import ArkTraceAnalysis
 import CryptoKit
 import Darwin
 import XCTest
@@ -920,6 +921,58 @@ final class ParserIntegrationTests: XCTestCase {
         let firstPid = processes.items[0].pid
         let filtered = try await session.repository.processes(try ProcessQuery(pid: firstPid))
         XCTAssertTrue(filtered.items.allSatisfy { $0.pid == firstPid })
+    }
+
+    func testRealTraceSummaryIsDeterministicAndRangeScoped() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-summary-real-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let session = try await TraceSession.open(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging
+        )
+        defer { Task { try? await session.close() } }
+        let repository = await session.repository
+        let engine = TraceSummaryEngine(repository: repository)
+        let fullRequest = try TraceSummaryRequest(
+            maximumRowsPerSection: 10_000,
+            timeout: .seconds(30)
+        )
+        let full = try await engine.summarize(fullRequest)
+        let metadata = try await repository.metadata()
+        XCTAssertEqual(full.durationNs, metadata.durationNs)
+        XCTAssertGreaterThan(full.processCount, 0)
+        XCTAssertEqual(full.threadCount, 0)
+        XCTAssertTrue(full.dataQuality.warnings.contains { $0.contains("threadCount is a lower bound") })
+        XCTAssertGreaterThan(full.namedSliceCount ?? 0, 0)
+        XCTAssertNil(full.cpuCount)
+        XCTAssertNil(full.cpuSliceCount)
+        XCTAssertNotNil(full.eventCountBySource)
+        XCTAssertEqual(full.eventCountBySource?.reduce(0) { $0 + $1.count }, 6_138)
+        XCTAssertTrue(full.dataQuality.warnings.contains { $0.contains("non-received") })
+
+        let midpoint = metadata.durationNs / 2
+        let scoped = try await engine.summarize(
+            try TraceSummaryRequest(
+                range: TraceTimeRange.query(startNs: 0, endNs: midpoint),
+                maximumRowsPerSection: 10_000,
+                timeout: .seconds(30)
+            )
+        )
+        XCTAssertEqual(scoped.durationNs, midpoint)
+        XCTAssertLessThanOrEqual(scoped.namedSliceCount ?? 0, full.namedSliceCount ?? 0)
+        XCTAssertEqual(scoped.threadCount, 0)
+        XCTAssertTrue(scoped.dataQuality.warnings.contains { $0.contains("lower bound") })
+        XCTAssertNil(scoped.eventCountBySource)
+
+        let first = try TraceSummaryJSONEncoder.encode(full)
+        let second = try TraceSummaryJSONEncoder.encode(
+            try await engine.summarize(fullRequest)
+        )
+        XCTAssertEqual(first, second)
+        try await session.close()
     }
 
     func testPhase1ProgressReportsActualStagesInOrder() async throws {

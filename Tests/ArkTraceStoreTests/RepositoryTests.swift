@@ -185,6 +185,85 @@ final class RepositoryTests: XCTestCase {
         )
     }
 
+    private func makeSummaryRepository(
+        extraSQL: String = ""
+    ) throws -> (SQLiteTraceRepository, URL) {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-summary-\(UUID().uuidString).sqlite")
+        do {
+            let db = try TraceDatabase(url: url, readOnly: false)
+            try db.execute(
+                """
+                CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+                INSERT INTO trace_range VALUES (1000, 2000);
+                CREATE TABLE process (
+                    ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER, end_ts INTEGER
+                );
+                INSERT INTO process VALUES (1, 100, 'old', 1050, 1200);
+                INSERT INTO process VALUES (2, 101, 'active', 1200, NULL);
+                INSERT INTO process VALUES (3, 102, 'future', 1500, 1900);
+                INSERT INTO process VALUES (4, 103, 'unknown-lifetime', NULL, NULL);
+                INSERT INTO process VALUES (5, 104, 'invalid-lifetime', 1500, 1400);
+                CREATE TABLE thread (
+                    itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER,
+                    end_ts INTEGER, ipid INTEGER
+                );
+                INSERT INTO thread VALUES (1, 100, 'old', 1050, 1200, 1);
+                INSERT INTO thread VALUES (2, 101, 'active', 1200, NULL, 2);
+                INSERT INTO thread VALUES (3, 102, 'future', 1500, 1900, 3);
+                INSERT INTO thread VALUES (4, 103, 'unknown-lifetime', NULL, NULL, 4);
+                INSERT INTO thread VALUES (5, 104, 'invalid-lifetime', 1500, 1400, 2);
+                CREATE TABLE sched_slice (
+                    id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER,
+                    itid INTEGER, ipid INTEGER
+                );
+                INSERT INTO sched_slice VALUES (1, 1100, 100, 0, 1, 1);
+                INSERT INTO sched_slice VALUES (2, 1200, 0, 1, 2, 2);
+                INSERT INTO sched_slice VALUES (3, 1250, -1, 2, 2, 2);
+                INSERT INTO sched_slice VALUES (4, 1400, 100, 3, 2, 2);
+                CREATE TABLE thread_state (
+                    id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER,
+                    itid INTEGER, state TEXT
+                );
+                INSERT INTO thread_state VALUES (1, 1100, 100, 0, 1, 'S');
+                INSERT INTO thread_state VALUES (2, 1200, 0, 1, 2, 'R');
+                INSERT INTO thread_state VALUES (3, 1300, 50, 2, 2, 'Running');
+                CREATE TABLE callstack (
+                    id INTEGER, ts INTEGER, dur INTEGER, callid INTEGER, name TEXT
+                );
+                INSERT INTO callstack VALUES (1, 1100, 100, 1, 'old');
+                INSERT INTO callstack VALUES (2, 1200, 200, 2, 'inside');
+                INSERT INTO callstack VALUES (3, 1400, 0, 3, 'right-boundary');
+                CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+                CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT);
+                CREATE TABLE process_measure_filter (id INTEGER, name TEXT);
+                INSERT INTO cpu_measure_filter VALUES (1, 'cpu');
+                INSERT INTO process_measure_filter VALUES (2, 'process');
+                INSERT INTO measure VALUES (1200, 1, 1);
+                INSERT INTO measure VALUES (1400, 1, 2);
+                CREATE TABLE stat (
+                    event_name TEXT, stat_type TEXT, count INTEGER,
+                    serverity TEXT, source TEXT
+                );
+                INSERT INTO stat VALUES ('a', 'received', 2, 'info', 'trace');
+                INSERT INTO stat VALUES ('b', 'received', 3, 'info', 'trace');
+                INSERT INTO stat VALUES ('c', 'received', 4, 'info', 'ftrace');
+                INSERT INTO stat VALUES ('broken', 'invalid_data', 2, 'warn', 'trace');
+                INSERT INTO stat VALUES ('negative', 'received', -5, 'warn', 'trace');
+                \(extraSQL)
+                """
+            )
+        }
+        return (
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            ),
+            url
+        )
+    }
+
     private func makeTemporaryDatabase(_ sql: String) throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("arktrace-test-\(UUID().uuidString).sqlite")
@@ -235,6 +314,460 @@ final class RepositoryTests: XCTestCase {
                 $0.contains("process.start_ts") && $0.contains("precede trace start")
             }
         )
+    }
+
+    func testSummaryFactsFullAndRangeUseSharedTemporalPredicate() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let full = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                maximumRowsPerSection: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        let metadata = try await repository.metadata()
+        XCTAssertFalse(metadata.dataQuality.warnings.contains {
+            $0.contains("sched_slice.dur") && $0.contains("negative")
+        })
+        XCTAssertTrue(metadata.dataQuality.warnings.contains { $0.contains("non-received") })
+        XCTAssertTrue(metadata.dataQuality.warnings.contains { $0.contains("negative") })
+        XCTAssertEqual(full.cpuCount, TraceBoundedCount(value: 4, truncated: false))
+        XCTAssertEqual(full.processCount, TraceBoundedCount(value: 3, truncated: true))
+        XCTAssertEqual(full.threadCount, TraceBoundedCount(value: 3, truncated: true))
+        XCTAssertEqual(full.cpuSliceCount?.value, 4)
+        XCTAssertEqual(full.threadStateCount?.value, 3)
+        XCTAssertEqual(full.namedSliceCount?.value, 3)
+        XCTAssertEqual(full.counterSeriesCount?.value, 2)
+        XCTAssertEqual(full.eventCountBySource?.items, [
+            TraceEventSourceCount(source: "ftrace", count: 4),
+            TraceEventSourceCount(source: "trace", count: 5),
+        ])
+        XCTAssertTrue(full.warnings.contains { $0.contains("processCount is a lower bound") })
+        XCTAssertTrue(full.warnings.contains { $0.contains("threadCount is a lower bound") })
+
+        let range = try TraceTimeRange.query(startNs: 200, endNs: 400)
+        let scoped = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                range: range,
+                maximumRowsPerSection: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(scoped.cpuCount?.value, 4, "CPU topology remains trace scoped")
+        XCTAssertEqual(scoped.processCount.value, 1)
+        XCTAssertEqual(scoped.threadCount.value, 1)
+        XCTAssertEqual(scoped.cpuSliceCount?.value, 2)
+        XCTAssertEqual(scoped.threadStateCount?.value, 2)
+        XCTAssertEqual(scoped.namedSliceCount?.value, 1)
+        XCTAssertEqual(scoped.counterSeriesCount?.value, 1)
+        XCTAssertNil(scoped.eventCountBySource, "stat has no timestamps to range-scope")
+
+        let inMemoryEvents: [(Int64, Int64?)] = [
+            (100, 100), (200, 0), (250, -1), (400, 100),
+        ]
+        XCTAssertEqual(
+            inMemoryEvents.filter {
+                TraceEventIntersection.intersects(
+                    eventStartNs: $0.0,
+                    durationNs: $0.1,
+                    query: range,
+                    traceDurationNs: 1_000
+                )
+            }.count,
+            Int(scoped.cpuSliceCount?.value ?? -1),
+            "Store SQL and the reusable in-memory golden must agree"
+        )
+    }
+
+    func testSummaryFactsAreBoundedAndReportTruncation() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let facts = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                maximumRowsPerSection: 1,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(facts.cpuCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.processCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.threadCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.cpuSliceCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.threadStateCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.namedSliceCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.counterSeriesCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.eventCountBySource?.truncated, true)
+    }
+
+    func testSummaryDeadlineInterruptsBeforeQueryStarts() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        do {
+            _ = try await repository.summaryFacts(
+                try TraceSummaryQuery(
+                    maximumRowsPerSection: 100,
+                    deadline: ContinuousClock.now
+                )
+            )
+            XCTFail("expired query deadline must fail")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .queryTimeout)
+            XCTAssertEqual(error.stage, .querying)
+            XCTAssertTrue(error.retryable)
+        }
+    }
+
+    func testSummaryDeadlineInterruptsSQLiteVMWork() throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        let deadline = ContinuousClock.now.advanced(by: .milliseconds(5))
+        XCTAssertThrowsError(
+            try db.query(
+                """
+                WITH RECURSIVE sequence(value) AS (
+                    SELECT 1
+                    UNION ALL
+                    SELECT value + 1 FROM sequence WHERE value < 1000000
+                )
+                SELECT SUM(value) FROM sequence
+                """,
+                stage: .querying,
+                observesTaskCancellation: true,
+                deadline: deadline,
+                progressHook: {
+                    while ContinuousClock.now < deadline {}
+                }
+            ) { $0.int64(0) }
+        ) { error in
+            let typed = error as? ArkTraceError
+            XCTAssertEqual(typed?.code, .queryTimeout)
+            XCTAssertEqual(typed?.stage, .querying)
+            XCTAssertEqual(typed?.retryable, true)
+        }
+    }
+
+    func testSummaryMissingEventCapabilitiesReturnNullNotZero() async throws {
+        let repository = try makeRepository()
+        let facts = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                maximumRowsPerSection: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertNil(facts.cpuCount)
+        XCTAssertNil(facts.cpuSliceCount)
+        XCTAssertNil(facts.threadStateCount)
+        XCTAssertNil(facts.namedSliceCount)
+        XCTAssertNil(facts.counterSeriesCount)
+        XCTAssertNil(facts.eventCountBySource)
+    }
+
+    func testSummaryQualityReportsDynamicallyTypedConsumedColumns() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+                INSERT INTO sched_slice VALUES (5, 1500, 10, 'bad-cpu', 2, 2);
+                INSERT INTO measure VALUES ('bad-ts', 1, 'bad-filter');
+                INSERT INTO cpu_measure_filter VALUES ('bad-filter-id', 'bad');
+                INSERT INTO process_measure_filter VALUES (3.5, 'bad');
+                INSERT INTO stat VALUES ('bad-count', 'received', 'bad', 'warn', 'trace');
+                INSERT INTO stat VALUES ('bad-stat-type', 7, 1, 'warn', 'trace');
+                """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let metadata = try await repository.metadata()
+        for column in [
+            "sched_slice.cpu", "measure.ts", "measure.filter_id", "stat.count",
+            "stat.stat_type", "cpu_measure_filter.id", "process_measure_filter.id",
+        ] {
+            XCTAssertTrue(
+                metadata.dataQuality.warnings.contains { $0.contains(column) },
+                "missing bounded quality evidence for \(column)"
+            )
+        }
+        let facts = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                maximumRowsPerSection: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(facts.cpuSliceCount?.value, 5)
+        XCTAssertEqual(facts.cpuCount?.value, 4)
+        XCTAssertEqual(facts.eventCountBySource?.items.first { $0.source == "trace" }?.count, 5)
+        XCTAssertEqual(facts.eventCountBySource?.truncated, true)
+        XCTAssertEqual(facts.counterSeriesCount?.truncated, true)
+    }
+
+    func testSQLiteTextReaderPreservesEmbeddedNULBytes() throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        let values = try db.query(
+            "SELECT CAST(x'610078' AS TEXT), CAST(x'610079' AS TEXT)",
+            stage: .querying
+        ) { ($0.text(0), $0.text(1)) }
+        XCTAssertEqual(values.first?.0, "a\0x")
+        XCTAssertEqual(values.first?.1, "a\0y")
+        XCTAssertNotEqual(values.first?.0, values.first?.1)
+    }
+
+    func testEventSourceCountsKeepBinaryDistinctUnicodeAndSignalUnsafeLengths()
+        async throws
+    {
+        let composed = "é"
+        let decomposed = "e\u{301}"
+        let oversizedSource = String(repeating: "s", count: 257)
+        let oversizedEvent = String(repeating: "e", count: 257)
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+                INSERT INTO stat VALUES ('unicode-a', 'received', 7, 'info', '\(composed)');
+                INSERT INTO stat VALUES ('unicode-b', 'received', 11, 'info', '\(decomposed)');
+                INSERT INTO stat VALUES ('empty-source', 'received', 13, 'info', '');
+                INSERT INTO stat VALUES ('long-source', 'received', 17, 'info', '\(oversizedSource)');
+                INSERT INTO stat VALUES ('\(oversizedEvent)', 'received', 19, 'info', 'long-event');
+                INSERT INTO stat VALUES ('invalid-utf8', 'received', 23, 'info', CAST(x'ff' AS TEXT));
+                """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let metadata = try await repository.metadata()
+        XCTAssertTrue(metadata.dataQuality.warnings.contains {
+            $0.contains("stat.source") && $0.contains("oversized")
+        })
+        XCTAssertTrue(metadata.dataQuality.warnings.contains {
+            $0.contains("stat.event_name") && $0.contains("oversized")
+        })
+        let facts = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                maximumRowsPerSection: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        let counts = try XCTUnwrap(facts.eventCountBySource)
+        XCTAssertTrue(counts.truncated, "excluded unsafe fields make the result a lower bound")
+        XCTAssertTrue(facts.warnings.contains { $0.contains("invalid UTF-8") })
+        let unicodeItems = counts.items.filter {
+            $0.source == composed || $0.source == decomposed
+        }
+        XCTAssertEqual(unicodeItems.count, 2)
+        XCTAssertEqual(
+            Set(unicodeItems.map { Data($0.source.utf8) }),
+            Set([Data(composed.utf8), Data(decomposed.utf8)])
+        )
+        XCTAssertEqual(unicodeItems.map(\.count).sorted(), [7, 11])
+    }
+
+    func testSummarySamplingShapesAreVMBoundedBeforeFilteringOrSorting() throws {
+        let (repository, url) = try makeSummaryRepository()
+        _ = repository
+        defer { try? FileManager.default.removeItem(at: url) }
+        let db = try TraceDatabase(url: url, readOnly: false, createIfMissing: false)
+        try db.execute(
+            """
+            WITH RECURSIVE n(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM n WHERE value < 100000
+            )
+            INSERT INTO stat(event_name, stat_type, count, serverity, source)
+            SELECT 'tail', 'received', 1, 'info', 'source' FROM n;
+            WITH RECURSIVE n(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM n WHERE value < 100000
+            )
+            INSERT INTO measure(ts, value, filter_id)
+            SELECT 1500, 1, 1 FROM n;
+            """
+        )
+        let statements = try [
+            ("thread", "SELECT start_ts FROM thread"),
+            ("stat", "SELECT source, count FROM stat"),
+            ("measure", "SELECT ts, filter_id FROM measure"),
+        ].map { table, prefix in
+            "\(prefix) \(try db.boundedSamplingOrderClause(of: table)) LIMIT 2"
+        }
+        for sql in statements {
+            XCTAssertNoThrow(
+                try db.query(sql, vmStepBudget: 1_000, stage: .querying) { _ in true },
+                "sampling must stop before scanning/sorting the uninspected tail"
+            )
+            let plan = try db.query("EXPLAIN QUERY PLAN \(sql)", stage: .querying) {
+                $0.text(3) ?? ""
+            }
+            XCTAssertFalse(plan.contains { $0.contains("TEMP B-TREE") })
+        }
+
+        try db.execute(
+            """
+            CREATE TABLE without_rowid_sample (
+                sequence INTEGER, source TEXT,
+                PRIMARY KEY(sequence, source)
+            ) WITHOUT ROWID;
+            INSERT INTO without_rowid_sample VALUES (2, 'b'), (1, 'a');
+            """
+        )
+        let withoutRowIDOrder = try db.boundedSamplingOrderClause(
+            of: "without_rowid_sample"
+        )
+        XCTAssertEqual(withoutRowIDOrder, "NOT INDEXED")
+        let ordered = try db.query(
+            "SELECT sequence FROM without_rowid_sample \(withoutRowIDOrder) LIMIT 1",
+            vmStepBudget: 1_000,
+            stage: .querying
+        ) { $0.int64(0) }
+        XCTAssertEqual(ordered, [1])
+
+        try db.execute(
+            """
+            CREATE TABLE mixed_direction_sample (
+                a INTEGER, b INTEGER,
+                PRIMARY KEY(a DESC, b ASC)
+            ) WITHOUT ROWID;
+            WITH RECURSIVE n(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM n WHERE value < 100000
+            )
+            INSERT INTO mixed_direction_sample(a, b) SELECT value, value FROM n;
+            """
+        )
+        let mixedOrder = try db.boundedSamplingOrderClause(
+            of: "mixed_direction_sample"
+        )
+        XCTAssertEqual(mixedOrder, "NOT INDEXED")
+        let mixedSQL = "SELECT a FROM mixed_direction_sample \(mixedOrder) LIMIT 2"
+        XCTAssertNoThrow(
+            try db.query(
+                mixedSQL, vmStepBudget: 1_000, stage: .querying
+            ) { $0.int64(0) }
+        )
+        let mixedPlan = try db.query(
+            "EXPLAIN QUERY PLAN \(mixedSQL)", stage: .querying
+        ) { $0.text(3) ?? "" }
+        XCTAssertFalse(mixedPlan.contains { $0.contains("TEMP B-TREE") })
+
+        try db.execute(
+            """
+            CREATE TABLE all_aliases_shadowed (
+                id INTEGER, rowid TEXT, _rowid_ TEXT, oid TEXT
+            );
+            INSERT INTO all_aliases_shadowed VALUES (1, 'r', 'u', 'o');
+            """
+        )
+        XCTAssertEqual(
+            try db.boundedSamplingOrderClause(of: "all_aliases_shadowed"),
+            "NOT INDEXED",
+            "additive shadow columns without a PK remain compatible"
+        )
+        XCTAssertEqual(
+            try db.query(
+                "SELECT id FROM all_aliases_shadowed NOT INDEXED LIMIT 1",
+                vmStepBudget: 1_000,
+                stage: .querying
+            ) { $0.int64(0) },
+            [1]
+        )
+
+        try db.execute(
+            """
+            CREATE TABLE generated_alias_sample (
+                id INTEGER,
+                rowid INTEGER GENERATED ALWAYS AS (id) VIRTUAL
+            );
+            WITH RECURSIVE n(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM n WHERE value < 100000
+            )
+            INSERT INTO generated_alias_sample(id) SELECT value FROM n;
+            """
+        )
+        let generatedOrder = try db.boundedSamplingOrderClause(
+            of: "generated_alias_sample"
+        )
+        XCTAssertEqual(generatedOrder, "ORDER BY _rowid_ ASC")
+        let generatedSQL =
+            "SELECT id FROM generated_alias_sample \(generatedOrder) LIMIT 2"
+        XCTAssertNoThrow(
+            try db.query(
+                generatedSQL, vmStepBudget: 1_000, stage: .querying
+            ) { $0.int64(0) }
+        )
+        let generatedPlan = try db.query(
+            "EXPLAIN QUERY PLAN \(generatedSQL)", stage: .querying
+        ) { $0.text(3) ?? "" }
+        XCTAssertFalse(generatedPlan.contains { $0.contains("TEMP B-TREE") })
+    }
+
+    func testSharedTemporalPredicateCoversHalfOpenInstantAndOpenEndedBoundaries()
+        throws
+    {
+        let query = try TraceTimeRange.query(startNs: 200, endNs: 400)
+        XCTAssertFalse(TraceEventIntersection.intersects(
+            eventStartNs: 100, durationNs: 100, query: query, traceDurationNs: 1_000
+        ))
+        XCTAssertTrue(TraceEventIntersection.intersects(
+            eventStartNs: 200, durationNs: 0, query: query, traceDurationNs: 1_000
+        ))
+        XCTAssertFalse(TraceEventIntersection.intersects(
+            eventStartNs: 400, durationNs: 0, query: query, traceDurationNs: 1_000
+        ))
+        XCTAssertTrue(TraceEventIntersection.intersects(
+            eventStartNs: 250, durationNs: nil, query: query, traceDurationNs: 1_000
+        ))
+        XCTAssertTrue(TraceEventIntersection.intersects(
+            eventStartNs: 250, durationNs: -1, query: query, traceDurationNs: 1_000
+        ))
+        XCTAssertFalse(TraceEventIntersection.intersects(
+            eventStartNs: 400, durationNs: -1, query: query, traceDurationNs: 1_000
+        ))
+        XCTAssertFalse(TraceEventIntersection.intersects(
+            eventStartNs: Int64.min,
+            durationNs: Int64.max,
+            query: query,
+            traceDurationNs: 1_000
+        ), "overflowing distance must not become an overlap")
+    }
+
+    func testSharedTemporalSQLPredicateMatchesInMemoryGoldenAtBoundariesAndExtremes()
+        throws
+    {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE events (id INTEGER, ts INTEGER, dur INTEGER);
+            INSERT INTO events VALUES (1, 100, 100);
+            INSERT INTO events VALUES (2, 200, 0);
+            INSERT INTO events VALUES (3, 250, -1);
+            INSERT INTO events VALUES (4, 250, NULL);
+            INSERT INTO events VALUES (5, 399, 1);
+            INSERT INTO events VALUES (6, 400, 0);
+            INSERT INTO events VALUES (7, -9223372036854775808, 9223372036854775807);
+            INSERT INTO events VALUES (8, 9223372036854775806, 1);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let db = try TraceDatabase(url: url, readOnly: true)
+        let cases: [(query: TraceTimeRange, traceEnd: Int64)] = [
+            (try TraceTimeRange.query(startNs: 200, endNs: 400), 1_000),
+            (try TraceTimeRange.query(startNs: 1, endNs: 2), .max),
+            (try TraceTimeRange.query(startNs: .max - 2, endNs: .max - 1), .max),
+        ]
+        let all = try db.query(
+            "SELECT id, ts, dur FROM events ORDER BY id",
+            stage: .querying
+        ) { ($0.int64(0)!, $0.int64(1)!, $0.int64(2)) }
+        for testCase in cases {
+            let sqlIDs = try db.query(
+                """
+                SELECT id FROM events
+                WHERE \(TraceEventIntersection.sqlPredicate)
+                ORDER BY id
+                """,
+                bindings: TraceEventIntersection.bindings(
+                    queryStart: testCase.query.startNs,
+                    queryEnd: testCase.query.endNs,
+                    traceEnd: testCase.traceEnd
+                ),
+                stage: .querying
+            ) { $0.int64(0)! }
+            let expected = all.compactMap { id, start, duration in
+                TraceEventIntersection.intersects(
+                    eventStartNs: start,
+                    durationNs: duration,
+                    queryStartNs: testCase.query.startNs,
+                    queryEndNs: testCase.query.endNs,
+                    traceEndNs: testCase.traceEnd
+                ) ? id : nil
+            }
+            XCTAssertEqual(sqlIDs, expected)
+        }
     }
 
     func testStagingPreparationCreatesVersionedIndexesAndPreservesRows() throws {
@@ -641,6 +1174,32 @@ final class RepositoryTests: XCTestCase {
         XCTAssertNotEqual(fingerprints[0], fingerprints[1])
     }
 
+    func testGeneratedColumnsParticipateInSchemaFingerprint() async throws {
+        let schemas = [
+            "CREATE TABLE additive (id INTEGER);",
+            "CREATE TABLE additive (id INTEGER, derived INTEGER GENERATED ALWAYS AS (id) VIRTUAL);",
+            "CREATE TABLE additive (id INTEGER, derived INTEGER GENERATED ALWAYS AS (id) STORED);",
+        ]
+        var fingerprints: [String] = []
+        for schema in schemas {
+            let url = try makeTemporaryDatabase(
+                """
+                \(Self.coreSchemaSQL())
+                \(Self.requiredEventTablesSQL)
+                \(schema)
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            let repository = try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+            fingerprints.append(try await repository.metadata().schemaFingerprint)
+        }
+        XCTAssertEqual(Set(fingerprints).count, 3)
+    }
+
     func testRequiredEventTablesAndColumnsAreEnforced() throws {
         let requirements = [
             "sched_slice", "sched_slice.id", "sched_slice.ts", "sched_slice.dur",
@@ -962,7 +1521,10 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(warnings.contains { $0.contains("process.start_ts") && $0.contains("exceed") })
         XCTAssertTrue(warnings.contains { $0.contains("process.start_ts") && $0.contains("non-INTEGER") })
         XCTAssertTrue(warnings.contains { $0.contains("callstack.ts") && $0.contains("non-INTEGER") })
-        XCTAssertTrue(warnings.contains { $0.contains("callstack.dur") && $0.contains("negative") })
+        XCTAssertFalse(
+            warnings.contains { $0.contains("callstack.dur") && $0.contains("negative") },
+            "negative duration is the valid AT-TIME-005 open-ended sentinel"
+        )
 
         let processes = try await repository.processes(ProcessQuery())
         XCTAssertEqual(processes.items.first { $0.pid == 1 }?.startNs, 0)

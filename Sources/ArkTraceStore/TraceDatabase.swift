@@ -18,14 +18,17 @@ public struct TraceDatabaseFileIdentity: Equatable, Sendable {
 private final class SQLiteQueryProgressController {
     private var callbacksRemaining: Int?
     private let observesTaskCancellation: Bool
+    private let deadline: ContinuousClock.Instant?
     private let progressHook: (@Sendable () -> Void)?
     private(set) var exhausted = false
     private(set) var cancelled = false
+    private(set) var timedOut = false
 
     init(
         vmStepBudget: Int?,
         callbackInterval: Int32,
         observesTaskCancellation: Bool,
+        deadline: ContinuousClock.Instant?,
         progressHook: (@Sendable () -> Void)?
     ) {
         let interval = Int(callbackInterval)
@@ -33,6 +36,7 @@ private final class SQLiteQueryProgressController {
             max(1, ($0 + interval - 1) / interval)
         }
         self.observesTaskCancellation = observesTaskCancellation
+        self.deadline = deadline
         self.progressHook = progressHook
     }
 
@@ -40,6 +44,10 @@ private final class SQLiteQueryProgressController {
         progressHook?()
         if observesTaskCancellation, Task.isCancelled {
             cancelled = true
+            return 1
+        }
+        if let deadline, ContinuousClock.now >= deadline {
+            timedOut = true
             return 1
         }
         guard let remaining = callbacksRemaining else { return 0 }
@@ -81,12 +89,22 @@ final class TraceDatabase {
         }
 
         func text(_ index: Int32) -> String? {
-            guard sqlite3_column_type(statement, index) != SQLITE_NULL,
-                let cString = sqlite3_column_text(statement, index)
+            guard let bytes = textBytes(index) else { return nil }
+            return String(data: bytes, encoding: .utf8)
+        }
+
+        func textBytes(_ index: Int32) -> Data? {
+            guard sqlite3_column_type(statement, index) == SQLITE_TEXT,
+                let bytes = sqlite3_column_text(statement, index)
             else {
                 return nil
             }
-            return String(cString: cString)
+            let count = Int(sqlite3_column_bytes(statement, index))
+            return Data(bytes: bytes, count: count)
+        }
+
+        func isNull(_ index: Int32) -> Bool {
+            sqlite3_column_type(statement, index) == SQLITE_NULL
         }
     }
 
@@ -95,6 +113,9 @@ final class TraceDatabase {
         let type: String
         let notNull: Bool
         let primaryKeyIndex: Int
+        /// 0 normal, 1 hidden virtual-table column, 2 VIRTUAL generated,
+        /// 3 STORED generated, following pragma_table_xinfo.
+        let hiddenKind: Int
     }
 
     private var handle: OpaquePointer
@@ -187,11 +208,15 @@ final class TraceDatabase {
         vmStepBudget: Int? = nil,
         stage: ArkTraceError.Stage = .querying,
         observesTaskCancellation: Bool = false,
+        deadline: ContinuousClock.Instant? = nil,
         progressHook: (@Sendable () -> Void)? = nil,
         map: (Row) throws -> T
     ) throws -> [T] {
         if observesTaskCancellation {
             try Task.checkCancellation()
+        }
+        if let deadline, ContinuousClock.now >= deadline {
+            throw Self.timeout(stage: stage)
         }
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(handle, sql, -1, &statement, nil) == SQLITE_OK, let statement
@@ -207,11 +232,14 @@ final class TraceDatabase {
 
         let progressInterval: Int32 = 100
         let progressController: SQLiteQueryProgressController?
-        if vmStepBudget != nil || observesTaskCancellation || progressHook != nil {
+        if vmStepBudget != nil || observesTaskCancellation || deadline != nil
+            || progressHook != nil
+        {
             progressController = SQLiteQueryProgressController(
                 vmStepBudget: vmStepBudget.map { max(1, $0) },
                 callbackInterval: progressInterval,
                 observesTaskCancellation: observesTaskCancellation,
+                deadline: deadline,
                 progressHook: progressHook
             )
         } else {
@@ -254,12 +282,19 @@ final class TraceDatabase {
             if observesTaskCancellation {
                 try Task.checkCancellation()
             }
+            if let deadline, ContinuousClock.now >= deadline {
+                sqlite3_interrupt(handle)
+                throw Self.timeout(stage: stage)
+            }
             switch sqlite3_step(statement) {
             case SQLITE_ROW:
                 results.append(try map(Row(statement: statement)))
             case SQLITE_DONE:
                 if observesTaskCancellation {
                     try Task.checkCancellation()
+                }
+                if let deadline, ContinuousClock.now >= deadline {
+                    throw Self.timeout(stage: stage)
                 }
                 return results
             case let rc:
@@ -268,6 +303,11 @@ final class TraceDatabase {
                         || (observesTaskCancellation && Task.isCancelled)
                     {
                         throw CancellationError()
+                    }
+                    if progressController?.timedOut == true
+                        || deadline.map({ ContinuousClock.now >= $0 }) == true
+                    {
+                        throw Self.timeout(stage: stage)
                     }
                     if progressController?.exhausted == true {
                         throw VMInstructionBudgetExceeded()
@@ -296,6 +336,7 @@ final class TraceDatabase {
                 vmStepBudget: nil,
                 callbackInterval: 1_000,
                 observesTaskCancellation: true,
+                deadline: nil,
                 progressHook: nil
             )
             progressController = controller
@@ -329,6 +370,15 @@ final class TraceDatabase {
                 details: ["sqliteCode": String(rc)]
             )
         }
+    }
+
+    private static func timeout(stage: ArkTraceError.Stage) -> ArkTraceError {
+        ArkTraceError(
+            code: .queryTimeout,
+            stage: stage,
+            message: "Trace query deadline was reached",
+            retryable: true
+        )
     }
 
     func flush() throws {
@@ -384,16 +434,81 @@ final class TraceDatabase {
     /// `PRAGMA table_info` cannot bind identifiers. Names discovered from
     /// sqlite_master are quoted by doubling embedded quotes so every legal
     /// SQLite table participates in the schema fingerprint.
-    func columns(of table: String) throws -> [ColumnInfo] {
+    func columns(
+        of table: String,
+        stage: ArkTraceError.Stage = .validating,
+        observesTaskCancellation: Bool = false,
+        deadline: ContinuousClock.Instant? = nil
+    ) throws -> [ColumnInfo] {
         let quotedTable = "\"\(table.replacingOccurrences(of: "\"", with: "\"\""))\""
-        return try query("PRAGMA table_info(\(quotedTable))", stage: .validating) { row in
+        return try query(
+            "PRAGMA table_xinfo(\(quotedTable))",
+            stage: stage,
+            observesTaskCancellation: observesTaskCancellation,
+            deadline: deadline
+        ) { row in
             ColumnInfo(
                 name: row.text(1) ?? "",
                 type: row.text(2) ?? "",
                 notNull: (row.int64(3) ?? 0) != 0,
-                primaryKeyIndex: Int(row.int64(5) ?? 0)
+                primaryKeyIndex: Int(row.int64(5) ?? 0),
+                hiddenKind: Int(row.int64(6) ?? 0)
             )
         }
+    }
+
+    /// Returns a deterministic bounded-prefix scan without assuming every
+    /// compatible SQLite table exposes a hidden `rowid`. Ordinary tables use
+    /// an unshadowed rowid alias. WITHOUT ROWID tables and ordinary tables
+    /// that shadow every alias use `NOT INDEXED` physical B-tree/record order.
+    func boundedSamplingOrderClause(
+        of table: String,
+        deadline: ContinuousClock.Instant? = nil
+    ) throws -> String {
+        guard Self.isSafeIdentifier(table) else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .querying,
+                message: "Summary sampling table is unsupported"
+            )
+        }
+        let columns = try columns(
+            of: table,
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        )
+        let names = Set(columns.map { $0.name.lowercased() })
+        let tableRows = try query(
+            """
+            SELECT wr FROM pragma_table_list(?)
+            WHERE schema = 'main' AND name = ? AND type = 'table'
+            LIMIT 2
+            """,
+            bindings: [.text(table), .text(table)],
+            vmStepBudget: 10_000,
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { $0.int64(0) }
+        guard tableRows.count == 1, let withoutRowID = tableRows[0] else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .querying,
+                message: "Summary sampling table identity is unavailable"
+            )
+        }
+        if withoutRowID == 0 {
+            for alias in ["rowid", "_rowid_", "oid"] where !names.contains(alias) {
+                return "ORDER BY \(alias) ASC"
+            }
+        }
+        // WITHOUT ROWID storage is already a stable primary-key B-tree, but
+        // pragma_table_xinfo does not expose each declared ASC/DESC direction.
+        // NOT INDEXED forces its physical record order and avoids a temp sort.
+        // It also preserves additive compatibility when all rowid aliases of
+        // an ordinary table are shadowed.
+        return "NOT INDEXED"
     }
 
     static func isSafeIdentifier(_ name: String) -> Bool {

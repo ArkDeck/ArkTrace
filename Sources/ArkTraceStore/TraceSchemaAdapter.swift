@@ -21,6 +21,7 @@ enum TraceSchemaAdapter {
         let traceEndTs: Int64
         let durationNs: Int64
         let warnings: [String]
+        let eventSourceCountsAvailable: Bool
     }
 
     private enum DeclaredAffinity: String {
@@ -202,6 +203,14 @@ enum TraceSchemaAdapter {
             cpuCounters: cpuCountersAvailable,
             processCounters: processCountersAvailable
         )
+        let eventSourceCountsAvailable = hasCompatibleTable(
+            "stat",
+            columns: [
+                .text("event_name"), .text("stat_type"), .integer("count"),
+                .text("source"),
+            ],
+            in: columnsByTable
+        )
 
         let range = try traceRange(db)
         try validateRequiredIdentities(db)
@@ -218,7 +227,8 @@ enum TraceSchemaAdapter {
             traceStartTs: range.start,
             traceEndTs: range.end,
             durationNs: range.duration,
-            warnings: warnings
+            warnings: warnings,
+            eventSourceCountsAvailable: eventSourceCountsAvailable
         )
     }
 
@@ -440,6 +450,13 @@ enum TraceSchemaAdapter {
         let column: String
     }
 
+    private struct StorageColumn {
+        let table: String
+        let column: String
+        let expectedType: String
+        let allowsNull: Bool
+    }
+
     /// Samples at most `semanticProbeLimit` rows per time column. The warnings
     /// make safe clamping/dropping observable while keeping open-time work
     /// independent of total trace size (DESIGN §7.1, AT-QUERY-008).
@@ -459,6 +476,7 @@ enum TraceSchemaAdapter {
             TimeColumn(table: "thread_state", column: "dur"),
             TimeColumn(table: "callstack", column: "ts"),
             TimeColumn(table: "callstack", column: "dur"),
+            TimeColumn(table: "measure", column: "ts"),
         ]
         var warnings: [String] = []
         for candidate in candidates {
@@ -474,16 +492,13 @@ enum TraceSchemaAdapter {
                     "\(qualifiedName): \(result.nonInteger) sampled non-INTEGER value(s) ignored"
                 )
             }
-            if result.beforeStart > 0 {
-                if candidate.column == "dur" {
-                    warnings.append(
-                        "\(qualifiedName): \(result.beforeStart) sampled negative duration value(s) ignored"
-                    )
-                } else {
-                    warnings.append(
-                        "\(qualifiedName): \(result.beforeStart) sampled value(s) precede trace start and are clamped"
-                    )
-                }
+            // Negative duration is the valid open-ended sentinel from
+            // AT-TIME-005. It is preserved by the shared event predicate and
+            // must not be mislabeled as ignored/corrupt data.
+            if candidate.column != "dur", result.beforeStart > 0 {
+                warnings.append(
+                    "\(qualifiedName): \(result.beforeStart) sampled value(s) precede trace start and are clamped"
+                )
             }
             if candidate.column != "dur", result.afterEnd > 0 {
                 warnings.append(
@@ -497,7 +512,153 @@ enum TraceSchemaAdapter {
                 )
             }
         }
+
+        let storageCandidates = [
+            StorageColumn(
+                table: "sched_slice", column: "cpu",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "measure", column: "filter_id",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "cpu_measure_filter", column: "id",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "process_measure_filter", column: "id",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "stat", column: "count",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "stat", column: "source",
+                expectedType: "text", allowsNull: false
+            ),
+            StorageColumn(
+                table: "stat", column: "event_name",
+                expectedType: "text", allowsNull: false
+            ),
+            StorageColumn(
+                table: "stat", column: "stat_type",
+                expectedType: "text", allowsNull: false
+            ),
+        ]
+        for candidate in storageCandidates {
+            guard columnsByTable[candidate.table]?.contains(where: {
+                $0.name == candidate.column
+            }) == true else { continue }
+            let result = try storageQualityProbe(db, column: candidate)
+            let qualifiedName = "\(candidate.table).\(candidate.column)"
+            if result.incompatible > 0 {
+                warnings.append(
+                    "\(qualifiedName): \(result.incompatible) sampled incompatible storage value(s) ignored"
+                )
+            }
+            if result.truncated {
+                warnings.append(
+                    "\(qualifiedName): quality probe truncated after \(semanticProbeLimit) rows; "
+                        + "remaining values were not inspected"
+                )
+            }
+        }
+        if columnsByTable["stat"]?.contains(where: { $0.name == "stat_type" }) == true,
+            columnsByTable["stat"]?.contains(where: { $0.name == "count" }) == true
+        {
+            let result = try statQualityProbe(db)
+            if result.nonReceived > 0 {
+                warnings.append(
+                    "stat.stat_type: \(result.nonReceived) sampled non-received row(s) excluded from event counts"
+                )
+            }
+            if result.negativeCount > 0 {
+                warnings.append(
+                    "stat.count: \(result.negativeCount) sampled negative value(s) excluded from event counts"
+                )
+            }
+            if result.invalidSourceLength > 0 {
+                warnings.append(
+                    "stat.source: \(result.invalidSourceLength) sampled empty or oversized value(s) excluded from event counts"
+                )
+            }
+            if result.invalidEventNameLength > 0 {
+                warnings.append(
+                    "stat.event_name: \(result.invalidEventNameLength) sampled oversized value(s) excluded from event counts"
+                )
+            }
+            if result.truncated {
+                warnings.append(
+                    "stat quality probe truncated after \(semanticProbeLimit) rows; remaining values were not inspected"
+                )
+            }
+        }
         return warnings
+    }
+
+    private static func storageQualityProbe(
+        _ db: TraceDatabase,
+        column: StorageColumn
+    ) throws -> (incompatible: Int64, truncated: Bool) {
+        let allowedNull = column.allowsNull ? " OR typeof(value) = 'null'" : ""
+        let rows = try db.query(
+            """
+            SELECT COUNT(*), COALESCE(SUM(CASE
+                WHEN NOT (typeof(value) = ?\(allowedNull)) THEN 1 ELSE 0 END), 0)
+            FROM (
+                SELECT \(column.column) AS value FROM \(column.table)
+                LIMIT \(semanticProbeLimit + 1) OFFSET 0
+            ) AS sampled
+            """,
+            bindings: [.text(column.expectedType)],
+            stage: .validating
+        ) { row in (row.int64(0) ?? 0, row.int64(1) ?? 0) }
+        let counts = rows[0]
+        return (min(counts.1, Int64(semanticProbeLimit)), counts.0 > semanticProbeLimit)
+    }
+
+    private static func statQualityProbe(
+        _ db: TraceDatabase
+    ) throws -> (
+        nonReceived: Int64,
+        negativeCount: Int64,
+        invalidSourceLength: Int64,
+        invalidEventNameLength: Int64,
+        truncated: Bool
+    ) {
+        let rows = try db.query(
+            """
+            SELECT COUNT(*),
+                COALESCE(SUM(CASE WHEN typeof(stat_type) = 'text'
+                    AND stat_type <> 'received' THEN 1 ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN typeof(count) = 'integer'
+                    AND count < 0 THEN 1 ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN typeof(source) = 'text'
+                    AND length(CAST(source AS BLOB)) NOT BETWEEN 1 AND 256
+                    THEN 1 ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN typeof(event_name) = 'text'
+                    AND length(CAST(event_name AS BLOB)) > 256
+                    THEN 1 ELSE 0 END), 0)
+            FROM (
+                SELECT stat_type, count, source, event_name FROM stat
+                LIMIT \(semanticProbeLimit + 1) OFFSET 0
+            ) AS sampled
+            """,
+            stage: .validating
+        ) { row in
+            (
+                row.int64(0) ?? 0, row.int64(1) ?? 0, row.int64(2) ?? 0,
+                row.int64(3) ?? 0, row.int64(4) ?? 0
+            )
+        }
+        let counts = rows[0]
+        let cap = Int64(semanticProbeLimit)
+        return (
+            min(counts.1, cap), min(counts.2, cap), min(counts.3, cap),
+            min(counts.4, cap), counts.0 > cap
+        )
     }
 
     private static func timeQualityProbe(
@@ -566,6 +727,13 @@ enum TraceSchemaAdapter {
                     appendLengthPrefixedUTF8(column.type, to: &record)
                     record.append(column.notNull ? 1 : 0)
                     appendUInt64(UInt64(column.primaryKeyIndex), to: &record)
+                    if column.hiddenKind != 0 {
+                        // Preserve the locked v2 fingerprint for ordinary
+                        // columns while making hidden/generated kinds part of
+                        // the uniquely length-delimited record.
+                        record.append(0x48)
+                        appendUInt64(UInt64(column.hiddenKind), to: &record)
+                    }
                     return record
                 }
             }

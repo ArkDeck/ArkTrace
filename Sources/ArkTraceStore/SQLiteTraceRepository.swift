@@ -200,7 +200,583 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         return page(rows, limit: query.limit)
     }
 
+    public func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts {
+        let relativeRange: TraceTimeRange
+        if let requested = query.range {
+            guard requested.startNs < requested.endNs,
+                requested.endNs <= validation.durationNs
+            else {
+                throw ArkTraceError(
+                    code: .invalidArgument,
+                    stage: .request,
+                    message: "Summary range is empty or exceeds trace duration"
+                )
+            }
+            relativeRange = requested
+        } else {
+            relativeRange = try TraceTimeRange.query(
+                startNs: 0,
+                endNs: validation.durationNs
+            )
+        }
+        let absoluteRange = try absoluteRange(relativeRange)
+        let limit = query.maximumRowsPerSection
+
+        // CPU count is trace topology, not a range-scoped event count in
+        // AT-AN-001. Every table is sampled by rowid before filtering or
+        // reduction, so the caller's budget bounds actual SQLite work.
+        let cpuCount = validation.capabilities.cpuScheduling
+            ? try boundedDistinctCPUCount(
+                limit: limit,
+                deadline: query.deadline
+            ) : nil
+        let process = try boundedDirectoryCount(
+            table: "process",
+            identityColumn: "ipid",
+            hasEndTimestamp: processHasEndTs,
+            range: absoluteRange,
+            limit: limit,
+            deadline: query.deadline
+        )
+        let thread = try boundedDirectoryCount(
+            table: "thread",
+            identityColumn: "itid",
+            hasEndTimestamp: threadHasEndTs,
+            range: absoluteRange,
+            limit: limit,
+            deadline: query.deadline
+        )
+        var warnings: [String] = []
+        if process.incomplete {
+            warnings.append(
+                "process lifecycle: unknown, invalid, or unchecked value(s) excluded; processCount is a lower bound"
+            )
+        }
+        if thread.incomplete {
+            warnings.append(
+                "thread lifecycle: unknown, invalid, or unchecked value(s) excluded; threadCount is a lower bound"
+            )
+        }
+
+        let cpuSliceCount = validation.capabilities.cpuScheduling
+            ? try boundedEventCount(
+                table: "sched_slice",
+                range: absoluteRange,
+                limit: limit,
+                deadline: query.deadline
+            ) : nil
+        let threadStateCount = validation.capabilities.threadStates
+            ? try boundedEventCount(
+                table: "thread_state",
+                range: absoluteRange,
+                limit: limit,
+                deadline: query.deadline
+            ) : nil
+        let namedSliceCount = validation.capabilities.namedSlices
+            ? try boundedEventCount(
+                table: "callstack",
+                range: absoluteRange,
+                limit: limit,
+                deadline: query.deadline
+            ) : nil
+        let counterSeriesCount = try boundedCounterSeriesCount(
+            range: absoluteRange,
+            limit: limit,
+            deadline: query.deadline
+        )
+        let eventCountBySource: TraceEventSourceCounts?
+        if query.range == nil, validation.eventSourceCountsAvailable {
+            let eventSourceSummary = try boundedEventSourceCounts(
+                limit: limit,
+                deadline: query.deadline
+            )
+            eventCountBySource = eventSourceSummary.counts
+            warnings.append(contentsOf: eventSourceSummary.warnings)
+        } else {
+            // `stat` has no timestamp and cannot honestly be range scoped.
+            eventCountBySource = nil
+        }
+
+        return TraceSummaryFacts(
+            cpuCount: cpuCount,
+            processCount: process.count,
+            threadCount: thread.count,
+            cpuSliceCount: cpuSliceCount,
+            threadStateCount: threadStateCount,
+            namedSliceCount: namedSliceCount,
+            counterSeriesCount: counterSeriesCount,
+            eventCountBySource: eventCountBySource,
+            warnings: warnings
+        )
+    }
+
     // MARK: - Helpers
+
+    private func absoluteRange(_ relativeRange: TraceTimeRange) throws
+        -> (start: Int64, end: Int64)
+    {
+        let (start, startOverflow) = validation.traceStartTs.addingReportingOverflow(
+            relativeRange.startNs
+        )
+        let (end, endOverflow) = validation.traceStartTs.addingReportingOverflow(
+            relativeRange.endNs
+        )
+        guard !startOverflow, !endOverflow,
+            start >= validation.traceStartTs,
+            end <= validation.traceEndTs
+        else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .querying,
+                message: "Summary range cannot be represented in database time"
+            )
+        }
+        return (start, end)
+    }
+
+    private func boundedEventCount(
+        table: String,
+        range: (start: Int64, end: Int64),
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceBoundedCount {
+        let order = try db.boundedSamplingOrderClause(of: table, deadline: deadline)
+        let rows = try db.query(
+            """
+            SELECT ts, dur FROM \(table)
+            \(order) LIMIT ?
+            """,
+            bindings: [.int64(Int64(limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in
+            EventSample(
+                start: row.int64(0),
+                duration: row.int64(1),
+                durationIsNull: row.isNull(1)
+            )
+        }
+        var count: Int64 = 0
+        var incomplete = rows.count > limit
+        for (index, row) in rows.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            guard let start = row.start,
+                row.duration != nil || row.durationIsNull
+            else {
+                incomplete = true
+                continue
+            }
+            if TraceEventIntersection.intersects(
+                eventStartNs: start,
+                durationNs: row.duration,
+                queryStartNs: range.start,
+                queryEndNs: range.end,
+                traceEndNs: validation.traceEndTs
+            ) {
+                count += 1
+            }
+        }
+        try checkQueryBoundary(deadline)
+        return TraceBoundedCount(value: count, truncated: incomplete)
+    }
+
+    private func boundedDistinctCPUCount(
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceBoundedCount {
+        let order = try db.boundedSamplingOrderClause(of: "sched_slice", deadline: deadline)
+        let rows = try db.query(
+            """
+            SELECT ts, dur, cpu FROM sched_slice
+            \(order) LIMIT ?
+            """,
+            bindings: [.int64(Int64(limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in
+            (
+                EventSample(
+                    start: row.int64(0), duration: row.int64(1),
+                    durationIsNull: row.isNull(1)
+                ),
+                row.int64(2)
+            )
+        }
+        var sampled: Set<Int64> = []
+        var incomplete = rows.count > limit
+        for (index, row) in rows.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            let event = row.0
+            guard let start = event.start,
+                event.duration != nil || event.durationIsNull,
+                let cpu = row.1
+            else {
+                incomplete = true
+                continue
+            }
+            if TraceEventIntersection.intersects(
+                eventStartNs: start,
+                durationNs: event.duration,
+                queryStartNs: validation.traceStartTs,
+                queryEndNs: validation.traceEndTs,
+                traceEndNs: validation.traceEndTs
+            ) {
+                sampled.insert(cpu)
+            }
+        }
+        try checkQueryBoundary(deadline)
+        return TraceBoundedCount(
+            value: Int64(sampled.count),
+            truncated: incomplete
+        )
+    }
+
+    private func boundedDirectoryCount(
+        table: String,
+        identityColumn: String,
+        hasEndTimestamp: Bool,
+        range: (start: Int64, end: Int64),
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> DirectorySummary {
+        let endSelection = hasEndTimestamp ? ", end_ts" : ", NULL"
+        let order = try db.boundedSamplingOrderClause(of: table, deadline: deadline)
+        let rows = try db.query(
+            """
+            SELECT \(identityColumn), start_ts\(endSelection) FROM \(table)
+            \(order) LIMIT ?
+            """,
+            bindings: [.int64(Int64(limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in
+            DirectorySample(
+                identity: row.int64(0),
+                start: row.int64(1),
+                startIsNull: row.isNull(1),
+                end: row.int64(2),
+                endIsNull: row.isNull(2)
+            )
+        }
+        var count: Int64 = 0
+        var incomplete = rows.count > limit
+        var unknownStart = false
+        for (index, row) in rows.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            guard row.identity != nil else { throw Self.invalidIdentity(table: table) }
+            guard let start = row.start else {
+                incomplete = true
+                unknownStart = unknownStart || row.startIsNull
+                continue
+            }
+            let endsAfterStart: Bool
+            if hasEndTimestamp {
+                if let end = row.end {
+                    guard end > start else {
+                        incomplete = true
+                        continue
+                    }
+                    endsAfterStart = end > range.start
+                } else if row.endIsNull {
+                    endsAfterStart = true
+                } else {
+                    incomplete = true
+                    continue
+                }
+            } else {
+                endsAfterStart = true
+            }
+            if start < range.end, endsAfterStart { count += 1 }
+        }
+        try checkQueryBoundary(deadline)
+        return DirectorySummary(
+            count: TraceBoundedCount(value: count, truncated: incomplete),
+            incomplete: incomplete || unknownStart
+        )
+    }
+
+    private func boundedCounterSeriesCount(
+        range: (start: Int64, end: Int64),
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceBoundedCount? {
+        guard validation.capabilities.cpuCounters
+            || validation.capabilities.processCounters
+        else { return nil }
+        let measureOrder = try db.boundedSamplingOrderClause(of: "measure", deadline: deadline)
+        let measures = try db.query(
+            """
+            SELECT ts, filter_id FROM measure
+            \(measureOrder) LIMIT ?
+            """,
+            bindings: [.int64(Int64(limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in
+            CounterMeasureSample(timestamp: row.int64(0), filterID: row.int64(1))
+        }
+        var filterSets: [(source: Int64, ids: Set<Int64>)] = []
+        var incomplete = measures.count > limit
+        if validation.capabilities.cpuCounters {
+            let sample = try boundedFilterIDs(
+                table: "cpu_measure_filter", limit: limit, deadline: deadline
+            )
+            filterSets.append((0, sample.ids))
+            incomplete = incomplete || sample.incomplete
+        }
+        if validation.capabilities.processCounters {
+            let sample = try boundedFilterIDs(
+                table: "process_measure_filter", limit: limit, deadline: deadline
+            )
+            filterSets.append((1, sample.ids))
+            incomplete = incomplete || sample.incomplete
+        }
+        var series: Set<CounterSeriesIdentity> = []
+        for (index, sample) in measures.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            guard let timestamp = sample.timestamp, let filterID = sample.filterID else {
+                incomplete = true
+                continue
+            }
+            guard timestamp >= range.start, timestamp < range.end else { continue }
+            for filter in filterSets where filter.ids.contains(filterID) {
+                series.insert(CounterSeriesIdentity(source: filter.source, series: filterID))
+            }
+        }
+        try checkQueryBoundary(deadline)
+        return TraceBoundedCount(
+            value: Int64(series.count),
+            truncated: incomplete
+        )
+    }
+
+    private func boundedFilterIDs(
+        table: String,
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> (ids: Set<Int64>, incomplete: Bool) {
+        let order = try db.boundedSamplingOrderClause(of: table, deadline: deadline)
+        let rows = try db.query(
+            "SELECT id FROM \(table) \(order) LIMIT ?",
+            bindings: [.int64(Int64(limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { $0.int64(0) }
+        var ids: Set<Int64> = []
+        var incomplete = rows.count > limit
+        for (index, value) in rows.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            if let value { ids.insert(value) } else { incomplete = true }
+        }
+        try checkQueryBoundary(deadline)
+        return (ids, incomplete)
+    }
+
+    private func boundedEventSourceCounts(
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> EventSourceSummary {
+        let order = try db.boundedSamplingOrderClause(of: "stat", deadline: deadline)
+        let rows = try db.query(
+            """
+            SELECT
+                CASE WHEN typeof(source) = 'text'
+                    AND length(CAST(source AS BLOB)) BETWEEN 1 AND 256
+                    THEN source ELSE NULL END,
+                CASE WHEN typeof(event_name) = 'text'
+                    AND length(CAST(event_name AS BLOB)) <= 256
+                    THEN event_name ELSE NULL END,
+                count,
+                CASE WHEN typeof(stat_type) = 'text' THEN 1 ELSE 0 END,
+                CASE WHEN typeof(stat_type) = 'text' AND stat_type = 'received'
+                    THEN 1 ELSE 0 END
+            FROM stat \(order) LIMIT ?
+            """,
+            bindings: [.int64(Int64(limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in
+            StatSample(
+                sourceBytes: row.textBytes(0),
+                eventNameValid: row.textBytes(1) != nil,
+                count: row.int64(2),
+                statTypeValid: row.int64(3) == 1,
+                received: row.int64(4) == 1
+            )
+        }
+        var totals: [Data: Int64] = [:]
+        var sourceStrings: [Data: String] = [:]
+        var incomplete = rows.count > limit
+        var invalidUTF8Count: Int64 = 0
+        for (index, row) in rows.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            guard row.statTypeValid else {
+                incomplete = true
+                continue
+            }
+            guard row.received else { continue }
+            guard let sourceBytes = row.sourceBytes,
+                row.eventNameValid,
+                let count = row.count,
+                count >= 0
+            else {
+                incomplete = true
+                continue
+            }
+            guard let source = String(data: sourceBytes, encoding: .utf8) else {
+                incomplete = true
+                invalidUTF8Count += 1
+                continue
+            }
+            let (total, overflow) = (totals[sourceBytes] ?? 0).addingReportingOverflow(count)
+            guard !overflow else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Trace stat count cannot be represented"
+                )
+            }
+            totals[sourceBytes] = total
+            sourceStrings[sourceBytes] = source
+        }
+        try checkQueryBoundary(deadline)
+        let orderedSources = try stableSortedDataKeys(
+            Array(totals.keys), deadline: deadline
+        )
+        var items: [TraceEventSourceCount] = []
+        items.reserveCapacity(orderedSources.count)
+        for (index, sourceBytes) in orderedSources.enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            items.append(
+                TraceEventSourceCount(
+                    source: sourceStrings[sourceBytes]!, count: totals[sourceBytes]!
+                )
+            )
+        }
+        try checkQueryBoundary(deadline)
+        return EventSourceSummary(
+            counts: TraceEventSourceCounts(items: items, truncated: incomplete),
+            warnings: invalidUTF8Count > 0
+                ? ["stat.source: \(invalidUTF8Count) sampled invalid UTF-8 value(s) excluded from event counts"]
+                : []
+        )
+    }
+
+    private func stableSortedDataKeys(
+        _ values: [Data],
+        deadline: ContinuousClock.Instant
+    ) throws -> [Data] {
+        guard values.count > 1 else { return values }
+        var source = values
+        var destination = values
+        var width = 1
+        var operations = 0
+        while width < source.count {
+            var lower = 0
+            while lower < source.count {
+                let middle = min(lower + width, source.count)
+                let upper = min(lower + width + width, source.count)
+                var left = lower
+                var right = middle
+                var output = lower
+                while left < middle || right < upper {
+                    if right >= upper || (left < middle
+                        && source[left].lexicographicallyPrecedes(source[right]))
+                    {
+                        destination[output] = source[left]
+                        left += 1
+                    } else {
+                        destination[output] = source[right]
+                        right += 1
+                    }
+                    output += 1
+                    operations += 1
+                    if operations.isMultiple(of: 1_024) {
+                        try checkQueryBoundary(deadline)
+                    }
+                }
+                lower = upper
+            }
+            swap(&source, &destination)
+            width = width > source.count / 2 ? source.count : width * 2
+            try checkQueryBoundary(deadline)
+        }
+        return source
+    }
+
+    private func boundedCount(_ raw: Int64?, limit: Int) throws -> TraceBoundedCount {
+        guard let raw, raw >= 0 else {
+            throw ArkTraceError(
+                code: .queryFailed,
+                stage: .querying,
+                message: "Trace count query returned an invalid value"
+            )
+        }
+        return TraceBoundedCount(
+            value: min(raw, Int64(limit)),
+            truncated: raw > Int64(limit)
+        )
+    }
+
+    private func checkQueryBoundary(_ deadline: ContinuousClock.Instant) throws {
+        try Task.checkCancellation()
+        guard ContinuousClock.now < deadline else {
+            throw ArkTraceError(
+                code: .queryTimeout,
+                stage: .querying,
+                message: "Trace query deadline was reached",
+                retryable: true
+            )
+        }
+    }
+
+    private struct CounterSeriesIdentity: Hashable {
+        let source: Int64
+        let series: Int64
+    }
+
+    private struct EventSample {
+        let start: Int64?
+        let duration: Int64?
+        let durationIsNull: Bool
+    }
+
+    private struct DirectorySample {
+        let identity: Int64?
+        let start: Int64?
+        let startIsNull: Bool
+        let end: Int64?
+        let endIsNull: Bool
+    }
+
+    private struct DirectorySummary {
+        let count: TraceBoundedCount
+        let incomplete: Bool
+    }
+
+    private struct CounterMeasureSample {
+        let timestamp: Int64?
+        let filterID: Int64?
+    }
+
+    private struct StatSample {
+        let sourceBytes: Data?
+        let eventNameValid: Bool
+        let count: Int64?
+        let statTypeValid: Bool
+        let received: Bool
+    }
+
+    private struct EventSourceSummary {
+        let counts: TraceEventSourceCounts
+        let warnings: [String]
+    }
 
     /// Absolute TraceStreamer time → trace-relative nanoseconds, clamped into
     /// `[0, durationNs]`. Only the Store sees absolute times (DESIGN §7.1).

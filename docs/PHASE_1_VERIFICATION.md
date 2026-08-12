@@ -93,6 +93,8 @@ Phase 1 上表是冻结的阶段完成证据，不随后续阶段新增测试改
 P2-T01 review findings 修复后重跑同一 `scripts/test_phase1.sh`：133 tests、0 failed、0 skipped；
 这是 Phase 2 additive regression 证据，详细增量记录于
 [PHASE_2_TASKS.md](./PHASE_2_TASKS.md)，不改写上述 94-test Phase 1 主表。
+P2-T02 summary/Analysis 垂直切片及 review 修复完成后再次重跑：156 tests、0 failed、
+0 skipped；locked parser/source/upstream/Ready SHA 与 schema fingerprint 均未漂移。
 
 ## 6. 已知限制与仍开放发布门
 
