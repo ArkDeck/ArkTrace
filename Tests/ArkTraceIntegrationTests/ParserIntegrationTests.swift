@@ -593,6 +593,92 @@ final class ParserIntegrationTests: XCTestCase {
         ])
     }
 
+    func testPhase1GateWritesBoundedMachineEvidenceWhenRequested() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["ARKTRACE_PHASE1_GATE"] == "1" else { return }
+        let outputPath = try XCTUnwrap(environment["ARKTRACE_PHASE1_EVIDENCE_OUTPUT"])
+        let outputURL = URL(fileURLWithPath: outputPath)
+        let (binary, fixture) = try requireEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-gate-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let recorder = StageRecorder()
+        let session = try await TraceSession.open(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging,
+            progress: { recorder.append($0) }
+        )
+        let parsed = await session.parsed
+        let metadata = try await session.repository.metadata()
+        let processes = try await session.repository.processes(ProcessQuery())
+        let threads = try await session.repository.threads(ThreadQuery())
+        let readyDatabase = try sha256AndSize(at: parsed.databaseURL)
+        let db = try TraceDatabase(url: parsed.databaseURL, readOnly: true)
+        let tables = try db.tableNames()
+        let databaseBytes = try Data(contentsOf: parsed.databaseURL)
+        let sidecarBytes = try Data(contentsOf: parsed.metadataSidecarURL)
+        let pathsAbsent = databaseBytes.range(of: Data(fixture.path.utf8)) == nil
+            && databaseBytes.range(of: Data(staging.path.utf8)) == nil
+            && sidecarBytes.range(of: Data(fixture.path.utf8)) == nil
+            && sidecarBytes.range(of: Data(staging.path.utf8)) == nil
+
+        struct GateEvidence: Encodable {
+            let formatVersion: Int
+            let parserBinarySHA256: String
+            let parserVersion: String
+            let sourceSHA256: String
+            let sourceByteCount: Int64
+            let upstreamDatabaseSHA256: String
+            let upstreamDatabaseByteCount: Int64
+            let readyDatabaseSHA256: String
+            let readyDatabaseByteCount: Int64
+            let schemaFingerprint: String
+            let schemaAdapterVersion: String
+            let indexVersion: Int
+            let durationNs: Int64
+            let processSampleCount: Int
+            let processSampleTruncated: Bool
+            let threadSampleCount: Int
+            let threadSampleTruncated: Bool
+            let schemaTableCount: Int
+            let quickCheck: String
+            let metaTablePresent: Bool
+            let pathsAbsent: Bool
+            let stages: [String]
+        }
+
+        let evidence = GateEvidence(
+            formatVersion: 1,
+            parserBinarySHA256: metadata.parser.binarySHA256,
+            parserVersion: metadata.parser.reportedVersion,
+            sourceSHA256: metadata.traceSHA256,
+            sourceByteCount: metadata.sourceByteCount,
+            upstreamDatabaseSHA256: parsed.databasePreparation.upstreamDatabaseSHA256,
+            upstreamDatabaseByteCount: parsed.databasePreparation.upstreamDatabaseByteCount,
+            readyDatabaseSHA256: readyDatabase.sha256,
+            readyDatabaseByteCount: readyDatabase.byteCount,
+            schemaFingerprint: metadata.schemaFingerprint,
+            schemaAdapterVersion: parsed.databasePreparation.schemaAdapterVersion,
+            indexVersion: parsed.databasePreparation.indexVersion,
+            durationNs: metadata.durationNs,
+            processSampleCount: processes.items.count,
+            processSampleTruncated: processes.truncated,
+            threadSampleCount: threads.items.count,
+            threadSampleTruncated: threads.truncated,
+            schemaTableCount: tables.count,
+            quickCheck: db.quickCheckIsOK() ? "ok" : "failed",
+            metaTablePresent: tables.contains("meta"),
+            pathsAbsent: pathsAbsent,
+            stages: recorder.snapshot().map(\.rawValue)
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let data = try encoder.encode(evidence)
+        XCTAssertLessThanOrEqual(data.count, 4_096)
+        try data.write(to: outputURL, options: .atomic)
+    }
+
     func testCancellationTerminatesParser() async throws {
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
