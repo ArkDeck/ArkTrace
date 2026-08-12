@@ -97,6 +97,13 @@ P2-T02 summary/Analysis 垂直切片及 review 修复完成后再次重跑：156
 0 skipped；locked parser/source/upstream/Ready SHA 与 schema fingerprint 均未漂移。
 P2-T03 CLI shell 实现候选完成后再次重跑：172 tests、0 failed、0 skipped；新增 16 条
 CLI parsing/presentation/exit-mapping regression，locked evidence 继续保持不变。
+P2-T04 Machine JSON 1.0 contract 初始候选完成后重跑：187 tests、0 failed、0 skipped；
+review 修复新增 lifecycle quality 分类、typed payload/provenance binding、共享 error policy、
+committed static golden 和 mapped executable SHA provenance 后再次重跑：210 tests、0 failed、
+0 skipped；locked parser/source/upstream/Ready SHA 与 schema fingerprint 继续保持不变。
+P2-T04 独立复审 findings 收口后再次重跑：218 tests、0 failed、0 skipped；新增同 session
+provenance/result binding、capability/nullability、最终提交取消、可执行文件等长原位修改、
+closed machine diagnostics/retry reasons 及完整 20-fixture golden 回归，locked evidence 未漂移。
 
 ## 6. 已知限制与仍开放发布门
 
@@ -104,7 +111,7 @@ CLI parsing/presentation/exit-mapping regression，locked evidence 继续保持�
 - 发布门 6（large Trace cancellation + Phase 2 cache promotion）仍开放，归 P3-T09；Phase 1 已证明 13 MiB fixture、忽略 TERM 的 child 和 session Ready promotion，但尚无长寿命 content-addressed cache。
 - 发布门 7（indexed large viewport query 性能）仍开放；Phase 1 只验证 index 存在、真实 query plan 与 10 万 identity target probe，不包含 viewport/event performance SLO。
 - counter capability 仍使用前 1,024 行两侧采样，可能保守 false；Phase 3/4 已登记顺序无关 sampling 改造。
-- data-quality truncation warning 目前是字符串且真实 trace 常为 warnings；typed category 在 Phase 2，duration 合理上界与负 duration open-ended 语义在 Phase 3。
+- data-quality 已由 P2-T04 实现候选提升为 typed category；duration 合理上界与负 duration open-ended 语义仍在 Phase 3。
 - source snapshot 在跨卷时可能产生完整复制 IO；large-trace gate 必须记录 source/staging filesystem 前提。
 - claim 文件的 stale-owner 策略随 Phase 2 长寿命 cache destination 实现；Phase 1 session destination 使用新 UUID，崩溃残留不被后续 session 复用。
 - build manifest 记录 third-party revisions，但普通 build 尚未完全消费 source/tool lock；分发前 hardening 见 `PHASE_1_TASKS.md` §6 与 P3-T10。

@@ -299,9 +299,15 @@ public struct TraceSummaryEngine: Sendable {
         let eventCounts = try facts.eventCountBySource.map {
             try Self.sortedEventCounts($0.items, deadline: deadline)
         }
-        let warnings = Array(
-            Set(metadata.dataQuality.warnings + facts.warnings)
-        ).sorted()
+        let combinedQuality = TraceDataQuality(
+            warnings: metadata.dataQuality.warnings + facts.warnings,
+            issues: metadata.dataQuality.issues + facts.qualityIssues
+        )
+        let qualityIssues = Array(Set(combinedQuality.issues)).sorted {
+            let lhs = ($0.category.rawValue, $0.scope ?? "", $0.count ?? Int64.min, $0.message ?? "")
+            let rhs = ($1.category.rawValue, $1.scope ?? "", $1.count ?? Int64.min, $1.message ?? "")
+            return lhs < rhs
+        }
         try Self.checkBoundary(deadline)
         return TraceSummary(
             range: range,
@@ -316,7 +322,7 @@ public struct TraceSummaryEngine: Sendable {
             eventCountBySource: eventCounts,
             capabilities: metadata.capabilities,
             schemaFingerprint: metadata.schemaFingerprint,
-            dataQuality: TraceDataQuality(warnings: warnings),
+            dataQuality: TraceDataQuality(issues: qualityIssues),
             truncatedSections: truncated
         )
     }
@@ -331,7 +337,12 @@ public struct TraceSummaryEngine: Sendable {
         var width = 1
         var operations = 0
         func ordered(_ lhs: TraceEventSourceCount, _ rhs: TraceEventSourceCount) -> Bool {
-            lhs.source != rhs.source ? lhs.source < rhs.source : lhs.count <= rhs.count
+            let lhsBytes = Data(lhs.source.utf8)
+            let rhsBytes = Data(rhs.source.utf8)
+            if lhsBytes != rhsBytes {
+                return lhsBytes.lexicographicallyPrecedes(rhsBytes)
+            }
+            return lhs.count <= rhs.count
         }
         while width < source.count {
             var lower = 0

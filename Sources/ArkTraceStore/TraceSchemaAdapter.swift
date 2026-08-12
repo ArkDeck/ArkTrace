@@ -20,7 +20,7 @@ enum TraceSchemaAdapter {
         let traceStartTs: Int64
         let traceEndTs: Int64
         let durationNs: Int64
-        let warnings: [String]
+        let dataQuality: TraceDataQuality
         let eventSourceCountsAvailable: Bool
     }
 
@@ -215,7 +215,7 @@ enum TraceSchemaAdapter {
         let range = try traceRange(db)
         try validateRequiredIdentities(db)
         try validateRequiredRelationships(db)
-        let warnings = try qualityWarnings(
+        let dataQuality = try qualityEvidence(
             db,
             range: range,
             columnsByTable: columnsByTable
@@ -227,7 +227,7 @@ enum TraceSchemaAdapter {
             traceStartTs: range.start,
             traceEndTs: range.end,
             durationNs: range.duration,
-            warnings: warnings,
+            dataQuality: dataQuality,
             eventSourceCountsAvailable: eventSourceCountsAvailable
         )
     }
@@ -460,11 +460,11 @@ enum TraceSchemaAdapter {
     /// Samples at most `semanticProbeLimit` rows per time column. The warnings
     /// make safe clamping/dropping observable while keeping open-time work
     /// independent of total trace size (DESIGN §7.1, AT-QUERY-008).
-    private static func qualityWarnings(
+    private static func qualityEvidence(
         _ db: TraceDatabase,
         range: (start: Int64, end: Int64, duration: Int64),
         columnsByTable: [String: [TraceDatabase.ColumnInfo]]
-    ) throws -> [String] {
+    ) throws -> TraceDataQuality {
         let candidates = [
             TimeColumn(table: "process", column: "start_ts"),
             TimeColumn(table: "process", column: "end_ts"),
@@ -478,7 +478,22 @@ enum TraceSchemaAdapter {
             TimeColumn(table: "callstack", column: "dur"),
             TimeColumn(table: "measure", column: "ts"),
         ]
-        var warnings: [String] = []
+        var issues: [TraceDataQualityIssue] = []
+        func record(
+            _ category: TraceDataQualityIssue.Category,
+            scope: String,
+            count: Int64?,
+            message: String
+        ) {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: category,
+                    scope: scope,
+                    count: count,
+                    message: message
+                )
+            )
+        }
         for candidate in candidates {
             guard columnsByTable[candidate.table]?.contains(where: {
                 $0.name == candidate.column
@@ -488,26 +503,38 @@ enum TraceSchemaAdapter {
             let result = try timeQualityProbe(db, column: candidate, range: range)
             let qualifiedName = "\(candidate.table).\(candidate.column)"
             if result.nonInteger > 0 {
-                warnings.append(
-                    "\(qualifiedName): \(result.nonInteger) sampled non-INTEGER value(s) ignored"
+                record(
+                    .droppedValue,
+                    scope: qualifiedName,
+                    count: result.nonInteger,
+                    message: "\(qualifiedName): \(result.nonInteger) sampled non-INTEGER value(s) ignored"
                 )
             }
             // Negative duration is the valid open-ended sentinel from
             // AT-TIME-005. It is preserved by the shared event predicate and
             // must not be mislabeled as ignored/corrupt data.
             if candidate.column != "dur", result.beforeStart > 0 {
-                warnings.append(
-                    "\(qualifiedName): \(result.beforeStart) sampled value(s) precede trace start and are clamped"
+                record(
+                    .clampedValue,
+                    scope: qualifiedName,
+                    count: result.beforeStart,
+                    message: "\(qualifiedName): \(result.beforeStart) sampled value(s) precede trace start and are clamped"
                 )
             }
             if candidate.column != "dur", result.afterEnd > 0 {
-                warnings.append(
-                    "\(qualifiedName): \(result.afterEnd) sampled value(s) exceed trace end and are clamped"
+                record(
+                    .clampedValue,
+                    scope: qualifiedName,
+                    count: result.afterEnd,
+                    message: "\(qualifiedName): \(result.afterEnd) sampled value(s) exceed trace end and are clamped"
                 )
             }
             if result.truncated {
-                warnings.append(
-                    "\(qualifiedName): quality probe truncated after \(semanticProbeLimit) rows; "
+                record(
+                    .probeTruncated,
+                    scope: qualifiedName,
+                    count: nil,
+                    message: "\(qualifiedName): quality probe truncated after \(semanticProbeLimit) rows; "
                         + "remaining values were not inspected"
                 )
             }
@@ -554,13 +581,19 @@ enum TraceSchemaAdapter {
             let result = try storageQualityProbe(db, column: candidate)
             let qualifiedName = "\(candidate.table).\(candidate.column)"
             if result.incompatible > 0 {
-                warnings.append(
-                    "\(qualifiedName): \(result.incompatible) sampled incompatible storage value(s) ignored"
+                record(
+                    .droppedValue,
+                    scope: qualifiedName,
+                    count: result.incompatible,
+                    message: "\(qualifiedName): \(result.incompatible) sampled incompatible storage value(s) ignored"
                 )
             }
             if result.truncated {
-                warnings.append(
-                    "\(qualifiedName): quality probe truncated after \(semanticProbeLimit) rows; "
+                record(
+                    .probeTruncated,
+                    scope: qualifiedName,
+                    count: nil,
+                    message: "\(qualifiedName): quality probe truncated after \(semanticProbeLimit) rows; "
                         + "remaining values were not inspected"
                 )
             }
@@ -570,32 +603,47 @@ enum TraceSchemaAdapter {
         {
             let result = try statQualityProbe(db)
             if result.nonReceived > 0 {
-                warnings.append(
-                    "stat.stat_type: \(result.nonReceived) sampled non-received row(s) excluded from event counts"
+                record(
+                    .droppedValue,
+                    scope: "stat.stat_type",
+                    count: result.nonReceived,
+                    message: "stat.stat_type: \(result.nonReceived) sampled non-received row(s) excluded from event counts"
                 )
             }
             if result.negativeCount > 0 {
-                warnings.append(
-                    "stat.count: \(result.negativeCount) sampled negative value(s) excluded from event counts"
+                record(
+                    .invalidValue,
+                    scope: "stat.count",
+                    count: result.negativeCount,
+                    message: "stat.count: \(result.negativeCount) sampled negative value(s) excluded from event counts"
                 )
             }
             if result.invalidSourceLength > 0 {
-                warnings.append(
-                    "stat.source: \(result.invalidSourceLength) sampled empty or oversized value(s) excluded from event counts"
+                record(
+                    .invalidValue,
+                    scope: "stat.source",
+                    count: result.invalidSourceLength,
+                    message: "stat.source: \(result.invalidSourceLength) sampled empty or oversized value(s) excluded from event counts"
                 )
             }
             if result.invalidEventNameLength > 0 {
-                warnings.append(
-                    "stat.event_name: \(result.invalidEventNameLength) sampled oversized value(s) excluded from event counts"
+                record(
+                    .invalidValue,
+                    scope: "stat.event_name",
+                    count: result.invalidEventNameLength,
+                    message: "stat.event_name: \(result.invalidEventNameLength) sampled oversized value(s) excluded from event counts"
                 )
             }
             if result.truncated {
-                warnings.append(
-                    "stat quality probe truncated after \(semanticProbeLimit) rows; remaining values were not inspected"
+                record(
+                    .probeTruncated,
+                    scope: "stat",
+                    count: nil,
+                    message: "stat quality probe truncated after \(semanticProbeLimit) rows; remaining values were not inspected"
                 )
             }
         }
-        return warnings
+        return TraceDataQuality(issues: issues)
     }
 
     private static func storageQualityProbe(

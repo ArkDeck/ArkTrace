@@ -94,7 +94,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             parser: parserIdentity,
             schemaFingerprint: validation.schemaFingerprint,
             capabilities: validation.capabilities,
-            dataQuality: TraceDataQuality(warnings: validation.warnings)
+            dataQuality: validation.dataQuality
         )
     }
 
@@ -246,15 +246,43 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             limit: limit,
             deadline: query.deadline
         )
-        var warnings: [String] = []
-        if process.incomplete {
-            warnings.append(
-                "process lifecycle: unknown, invalid, or unchecked value(s) excluded; processCount is a lower bound"
+        var qualityIssues: [TraceDataQualityIssue] = []
+        if process.tailUnchecked {
+            qualityIssues.append(
+                TraceDataQualityIssue(
+                    category: .probeTruncated,
+                    scope: "process.lifecycle",
+                    message: "process lifecycle: probe tail was not inspected; processCount is a lower bound"
+                )
             )
         }
-        if thread.incomplete {
-            warnings.append(
-                "thread lifecycle: unknown, invalid, or unchecked value(s) excluded; threadCount is a lower bound"
+        if process.invalidSampled > 0 {
+            qualityIssues.append(
+                TraceDataQualityIssue(
+                    category: .invalidValue,
+                    scope: "process.lifecycle",
+                    count: process.invalidSampled,
+                    message: "process lifecycle: invalid or unknown sampled value(s) excluded; processCount is a lower bound"
+                )
+            )
+        }
+        if thread.tailUnchecked {
+            qualityIssues.append(
+                TraceDataQualityIssue(
+                    category: .probeTruncated,
+                    scope: "thread.lifecycle",
+                    message: "thread lifecycle: probe tail was not inspected; threadCount is a lower bound"
+                )
+            )
+        }
+        if thread.invalidSampled > 0 {
+            qualityIssues.append(
+                TraceDataQualityIssue(
+                    category: .invalidValue,
+                    scope: "thread.lifecycle",
+                    count: thread.invalidSampled,
+                    message: "thread lifecycle: invalid or unknown sampled value(s) excluded; threadCount is a lower bound"
+                )
             )
         }
 
@@ -291,7 +319,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 deadline: query.deadline
             )
             eventCountBySource = eventSourceSummary.counts
-            warnings.append(contentsOf: eventSourceSummary.warnings)
+            qualityIssues.append(contentsOf: eventSourceSummary.qualityIssues)
         } else {
             // `stat` has no timestamp and cannot honestly be range scoped.
             eventCountBySource = nil
@@ -306,7 +334,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             namedSliceCount: namedSliceCount,
             counterSeriesCount: counterSeriesCount,
             eventCountBySource: eventCountBySource,
-            warnings: warnings
+            qualityIssues: qualityIssues
         )
     }
 
@@ -456,34 +484,32 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             DirectorySample(
                 identity: row.int64(0),
                 start: row.int64(1),
-                startIsNull: row.isNull(1),
                 end: row.int64(2),
                 endIsNull: row.isNull(2)
             )
         }
         var count: Int64 = 0
-        var incomplete = rows.count > limit
-        var unknownStart = false
+        let tailUnchecked = rows.count > limit
+        var invalidSampled: Int64 = 0
         for (index, row) in rows.prefix(limit).enumerated() {
             if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
             guard row.identity != nil else { throw Self.invalidIdentity(table: table) }
             guard let start = row.start else {
-                incomplete = true
-                unknownStart = unknownStart || row.startIsNull
+                invalidSampled += 1
                 continue
             }
             let endsAfterStart: Bool
             if hasEndTimestamp {
                 if let end = row.end {
                     guard end > start else {
-                        incomplete = true
+                        invalidSampled += 1
                         continue
                     }
                     endsAfterStart = end > range.start
                 } else if row.endIsNull {
                     endsAfterStart = true
                 } else {
-                    incomplete = true
+                    invalidSampled += 1
                     continue
                 }
             } else {
@@ -493,8 +519,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
         try checkQueryBoundary(deadline)
         return DirectorySummary(
-            count: TraceBoundedCount(value: count, truncated: incomplete),
-            incomplete: incomplete || unknownStart
+            count: TraceBoundedCount(
+                value: count,
+                truncated: tailUnchecked || invalidSampled > 0
+            ),
+            tailUnchecked: tailUnchecked,
+            invalidSampled: invalidSampled
         )
     }
 
@@ -662,9 +692,15 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         try checkQueryBoundary(deadline)
         return EventSourceSummary(
             counts: TraceEventSourceCounts(items: items, truncated: incomplete),
-            warnings: invalidUTF8Count > 0
-                ? ["stat.source: \(invalidUTF8Count) sampled invalid UTF-8 value(s) excluded from event counts"]
-                : []
+            qualityIssues: invalidUTF8Count > 0
+                ? [
+                    TraceDataQualityIssue(
+                        category: .invalidValue,
+                        scope: "stat.source",
+                        count: invalidUTF8Count,
+                        message: "stat.source: \(invalidUTF8Count) sampled invalid UTF-8 value(s) excluded from event counts"
+                    )
+                ] : []
         )
     }
 
@@ -750,14 +786,19 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
     private struct DirectorySample {
         let identity: Int64?
         let start: Int64?
-        let startIsNull: Bool
         let end: Int64?
         let endIsNull: Bool
     }
 
     private struct DirectorySummary {
         let count: TraceBoundedCount
-        let incomplete: Bool
+        /// `true` means limit+1 proved that rows beyond the inspected prefix
+        /// exist; it does not imply any sampled row is malformed.
+        let tailUnchecked: Bool
+        /// Number of sampled rows whose lifecycle cannot be interpreted.
+        /// This is distinct from an unchecked tail so machine output can
+        /// classify real data anomalies without parsing human messages.
+        let invalidSampled: Int64
     }
 
     private struct CounterMeasureSample {
@@ -775,7 +816,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
 
     private struct EventSourceSummary {
         let counts: TraceEventSourceCounts
-        let warnings: [String]
+        let qualityIssues: [TraceDataQualityIssue]
     }
 
     /// Absolute TraceStreamer time → trace-relative nanoseconds, clamped into

@@ -148,6 +148,39 @@ final class TraceSummaryTests: XCTestCase {
         XCTAssertEqual(request.maximumRowsPerSection, 100)
     }
 
+    func testEventSourcesUseRawUTF8IdentityAndOrdering() async throws {
+        let composed = "\u{00e9}"
+        let decomposed = "e\u{0301}"
+        let base = facts()
+        let unicodeFacts = TraceSummaryFacts(
+            cpuCount: base.cpuCount,
+            processCount: base.processCount,
+            threadCount: base.threadCount,
+            cpuSliceCount: base.cpuSliceCount,
+            threadStateCount: base.threadStateCount,
+            namedSliceCount: base.namedSliceCount,
+            counterSeriesCount: base.counterSeriesCount,
+            eventCountBySource: TraceEventSourceCounts(
+                items: [
+                    TraceEventSourceCount(source: composed, count: 7),
+                    TraceEventSourceCount(source: decomposed, count: 11),
+                ],
+                truncated: false
+            )
+        )
+        let repository = RepositoryStub(
+            metadata: metadata(),
+            facts: unicodeFacts
+        )
+
+        let result = try await TraceSummaryEngine(repository: repository).summarize(
+            try TraceSummaryRequest()
+        )
+
+        XCTAssertEqual(result.eventCountBySource?.map(\.source), [decomposed, composed])
+        XCTAssertEqual(result.eventCountBySource?.map(\.count), [11, 7])
+    }
+
     func testRangeSummaryUsesRangeDurationAndForwardsExactRange() async throws {
         let range = try TraceTimeRange.query(startNs: 100, endNs: 250)
         let repository = RepositoryStub(metadata: metadata(), facts: facts())
@@ -202,6 +235,52 @@ final class TraceSummaryTests: XCTestCase {
         let second = try TraceSummaryJSONEncoder.encode(try await engine.summarize(request))
         XCTAssertEqual(first, second)
         XCTAssertNil(String(decoding: first, as: UTF8.self).range(of: "generated"))
+    }
+
+    func testTypedQualityEvidenceMergesDeterministicallyWithoutMessageParsing() async throws {
+        let base = metadata(warnings: [])
+        let typedMetadata = TraceMetadata(
+            traceSHA256: base.traceSHA256,
+            sourceByteCount: base.sourceByteCount,
+            durationNs: base.durationNs,
+            sourceFormat: base.sourceFormat,
+            parser: base.parser,
+            schemaFingerprint: base.schemaFingerprint,
+            capabilities: base.capabilities,
+            dataQuality: TraceDataQuality(issues: [
+                TraceDataQualityIssue(
+                    category: .probeTruncated,
+                    scope: "thread.start_ts",
+                    message: "probe incomplete"
+                )
+            ])
+        )
+        let baseFacts = facts()
+        let typedFacts = TraceSummaryFacts(
+            cpuCount: baseFacts.cpuCount,
+            processCount: baseFacts.processCount,
+            threadCount: baseFacts.threadCount,
+            cpuSliceCount: baseFacts.cpuSliceCount,
+            threadStateCount: baseFacts.threadStateCount,
+            namedSliceCount: baseFacts.namedSliceCount,
+            counterSeriesCount: baseFacts.counterSeriesCount,
+            eventCountBySource: baseFacts.eventCountBySource,
+            qualityIssues: [
+                TraceDataQualityIssue(
+                    category: .referentialIntegrity,
+                    scope: "thread.ipid",
+                    count: 1,
+                    message: "reference unavailable"
+                )
+            ]
+        )
+        let result = try await TraceSummaryEngine(
+            repository: RepositoryStub(metadata: typedMetadata, facts: typedFacts)
+        ).summarize(try TraceSummaryRequest())
+        XCTAssertEqual(result.dataQuality.issues.map(\.category), [
+            .probeTruncated, .referentialIntegrity,
+        ])
+        XCTAssertFalse(result.dataQuality.issues.contains { $0.category == .unclassified })
     }
 
     func testOutOfTraceRangeIsRejectedBeforeStoreQuery() async throws {

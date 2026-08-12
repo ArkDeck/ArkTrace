@@ -34,7 +34,8 @@ let package = Package(
         .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"]),
         .testTarget(
             name: "ArkTraceCLITests",
-            dependencies: ["ArkTraceCLI", "ArkTraceCore", "ArkTraceParser"]
+            dependencies: ["ArkTraceCLI", "ArkTraceCore", "ArkTraceParser"],
+            resources: [.copy("Fixtures")]
         ),
         .testTarget(
             name: "ArkTraceIntegrationTests",

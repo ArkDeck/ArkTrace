@@ -314,6 +314,9 @@ final class RepositoryTests: XCTestCase {
                 $0.contains("process.start_ts") && $0.contains("precede trace start")
             }
         )
+        XCTAssertTrue(metadata.dataQuality.issues.contains {
+            $0.category == .clampedValue && $0.scope == "process.start_ts"
+        })
     }
 
     func testSummaryFactsFullAndRangeUseSharedTemporalPredicate() async throws {
@@ -344,6 +347,20 @@ final class RepositoryTests: XCTestCase {
         ])
         XCTAssertTrue(full.warnings.contains { $0.contains("processCount is a lower bound") })
         XCTAssertTrue(full.warnings.contains { $0.contains("threadCount is a lower bound") })
+        XCTAssertTrue(full.qualityIssues.contains {
+            $0.category == .invalidValue
+                && $0.scope == "process.lifecycle"
+                && $0.count == 2
+        })
+        XCTAssertTrue(full.qualityIssues.contains {
+            $0.category == .invalidValue
+                && $0.scope == "thread.lifecycle"
+                && $0.count == 2
+        })
+        XCTAssertFalse(full.qualityIssues.contains {
+            $0.category == .probeTruncated
+                && ($0.scope == "process.lifecycle" || $0.scope == "thread.lifecycle")
+        }, "fully inspected invalid lifecycle rows are anomalies, not probe truncation")
 
         let range = try TraceTimeRange.query(startNs: 200, endNs: 400)
         let scoped = try await repository.summaryFacts(
@@ -396,6 +413,16 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(facts.namedSliceCount, TraceBoundedCount(value: 1, truncated: true))
         XCTAssertEqual(facts.counterSeriesCount, TraceBoundedCount(value: 1, truncated: true))
         XCTAssertEqual(facts.eventCountBySource?.truncated, true)
+        for scope in ["process.lifecycle", "thread.lifecycle"] {
+            XCTAssertTrue(facts.qualityIssues.contains {
+                $0.category == .probeTruncated
+                    && $0.scope == scope
+                    && $0.count == nil
+            }, "the valid sampled prefix leaves only an unchecked tail for \(scope)")
+            XCTAssertFalse(facts.qualityIssues.contains {
+                $0.category == .invalidValue && $0.scope == scope
+            }, "an unchecked tail alone is not evidence of invalid data for \(scope)")
+        }
     }
 
     func testSummaryDeadlineInterruptsBeforeQueryStarts() async throws {
@@ -480,6 +507,18 @@ final class RepositoryTests: XCTestCase {
             XCTAssertTrue(
                 metadata.dataQuality.warnings.contains { $0.contains(column) },
                 "missing bounded quality evidence for \(column)"
+            )
+        }
+        for column in [
+            "sched_slice.cpu", "measure.ts", "measure.filter_id", "stat.count",
+            "stat.stat_type", "cpu_measure_filter.id", "process_measure_filter.id",
+        ] {
+            XCTAssertTrue(
+                metadata.dataQuality.issues.contains {
+                    ($0.category == .droppedValue || $0.category == .invalidValue)
+                        && $0.scope == column
+                },
+                "missing typed quality evidence for \(column)"
             )
         }
         let facts = try await repository.summaryFacts(
@@ -877,6 +916,42 @@ final class RepositoryTests: XCTestCase {
             let error = error as? ArkTraceError
             XCTAssertEqual(error?.code, .traceDatabaseInvalid)
             XCTAssertEqual(error?.stage, .indexing)
+        }
+    }
+
+    func testBindingFailureUsesStageCompatibleStableErrorCode() throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        let cases: [(ArkTraceError.Stage, ArkTraceError.Code)] = [
+            (.request, .internalError),
+            (.preparing, .internalError),
+            (.hashing, .internalError),
+            (.cacheLookup, .internalError),
+            (.parsing, .internalError),
+            (.validating, .traceDatabaseInvalid),
+            (.indexing, .traceDatabaseInvalid),
+            (.openingDatabase, .traceDatabaseInvalid),
+            (.querying, .queryFailed),
+            (.analyzing, .internalError),
+            (.encoding, .internalError),
+        ]
+        XCTAssertEqual(cases.count, ArkTraceError.Stage.allCases.count)
+
+        for (stage, expectedCode) in cases {
+            XCTAssertThrowsError(
+                try db.query(
+                    "SELECT ?",
+                    bindings: [.int64(1), .int64(2)],
+                    stage: stage
+                ) { $0.int64(0) },
+                "stage: \(stage.rawValue)"
+            ) { thrown in
+                let error = thrown as? ArkTraceError
+                XCTAssertEqual(error?.code, expectedCode)
+                XCTAssertEqual(error?.stage, stage)
+                // SQLITE_RANGE is the stable SQLite result code 25.
+                XCTAssertEqual(error?.details["sqliteCode"], "25")
+                XCTAssertNil(error?.publicContractViolation)
+            }
         }
     }
 
@@ -1569,6 +1644,16 @@ final class RepositoryTests: XCTestCase {
                 $0.contains("process.start_ts") && $0.contains("truncated after 1024 rows")
             }
         )
+        XCTAssertTrue(dataQuality.issues.contains {
+            $0.category == .probeTruncated
+                && $0.scope == "process.start_ts"
+                && $0.count == nil
+        })
+        XCTAssertTrue(dataQuality.issues.contains {
+            $0.category == .droppedValue
+                && $0.scope == "process.start_ts"
+                && $0.count == 1
+        })
     }
 
     func testThreadStartTimestampIsRequiredBySchemaAndQueryContract() throws {

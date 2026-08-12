@@ -141,6 +141,7 @@ public struct TraceSummaryFacts: Hashable, Codable, Sendable {
     /// Query-specific quality evidence, such as lifecycle rows whose overlap
     /// cannot be proven. Analysis merges these with trace-level metadata.
     public let warnings: [String]
+    public let qualityIssues: [TraceDataQualityIssue]
 
     public init(
         cpuCount: TraceBoundedCount?,
@@ -151,7 +152,8 @@ public struct TraceSummaryFacts: Hashable, Codable, Sendable {
         namedSliceCount: TraceBoundedCount?,
         counterSeriesCount: TraceBoundedCount?,
         eventCountBySource: TraceEventSourceCounts?,
-        warnings: [String] = []
+        warnings: [String] = [],
+        qualityIssues: [TraceDataQualityIssue] = []
     ) {
         self.cpuCount = cpuCount
         self.processCount = processCount
@@ -161,7 +163,9 @@ public struct TraceSummaryFacts: Hashable, Codable, Sendable {
         self.namedSliceCount = namedSliceCount
         self.counterSeriesCount = counterSeriesCount
         self.eventCountBySource = eventCountBySource
-        self.warnings = warnings
+        let quality = TraceDataQuality(warnings: warnings, issues: qualityIssues)
+        self.warnings = quality.warnings
+        self.qualityIssues = quality.issues
     }
 }
 

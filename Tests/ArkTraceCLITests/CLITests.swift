@@ -15,8 +15,14 @@ final class CLITests: XCTestCase {
             writer: helpWriter
         )
         XCTAssertEqual(helpStatus, 0)
-        XCTAssertTrue(helpWriter.stdoutString.hasPrefix("Usage: arktrace"))
-        XCTAssertTrue(helpWriter.stdoutString.hasSuffix("--version  --help\n"))
+        let helpDocument = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: helpWriter.stdoutData) as? [String: Any]
+        )
+        XCTAssertEqual(helpDocument["schemaVersion"] as? String, "1.0")
+        XCTAssertEqual(
+            ((helpDocument["request"] as? [String: Any])?["command"] as? String),
+            "help"
+        )
         XCTAssertEqual(helpWriter.stderrString, "")
 
         let versionWriter = MemoryWriter()
@@ -318,7 +324,7 @@ final class CLITests: XCTestCase {
         let value = Value(z: 2, a: "one")
         let compact = try CLIMachineEncoder().encode(value, pretty: false)
         XCTAssertEqual(compact, try CLIMachineEncoder().encode(value, pretty: false))
-        XCTAssertEqual(String(decoding: compact, as: UTF8.self), #"{"a":"one","z":2}"#)
+        XCTAssertEqual(String(decoding: compact, as: UTF8.self), #"{"a":"one","z":2}"# + "\n")
         let pretty = try CLIMachineEncoder().encode(value, pretty: true)
         XCTAssertTrue(String(decoding: pretty, as: UTF8.self).contains("\n"))
         XCTAssertNotEqual(pretty, CLIHumanRenderer().help())
@@ -350,6 +356,10 @@ private final class MemoryWriter: CLIOutputWriting, @unchecked Sendable {
 
     var stdoutString: String {
         lock.withLock { String(decoding: stdout, as: UTF8.self) }
+    }
+
+    var stdoutData: Data {
+        lock.withLock { stdout }
     }
 
     var stderrString: String {

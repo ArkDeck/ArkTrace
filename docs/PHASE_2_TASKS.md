@@ -1,6 +1,6 @@
 # ArkTrace Phase 2 任务清单
 
-> 状态：Active — P2-T01～T03 已完成，P2-T04 开始实施
+> 状态：Active — P2-T01～T04 已完成，下一项 P2-T05
 > 阶段：CLI Vertical Slice
 > 验收目标：Agent 不依赖 UI 即可 inspect、summary、读取 process/thread
 
@@ -211,13 +211,47 @@ locked parser/source/upstream/Ready SHA 与 schema fingerprint 未漂移。
 
 **验收**
 
-- [ ] success/empty/truncated/error golden；
-- [ ] 同输入 JSON bytes 一致；
-- [ ] no scientific-notation time；
-- [ ] stdout contamination 测试；
-- [ ] output budget 边界测试；
-- [ ] error retryability/stage/code 稳定。
-- [ ] 只有 probe 尾部未检查时 machine JSON 可与真实数据异常可靠区分。
+- [x] success/empty/truncated/error golden；
+- [x] 同输入 JSON bytes 一致；
+- [x] no scientific-notation time；
+- [x] stdout contamination 测试；
+- [x] output budget 边界测试；
+- [x] error retryability/stage/code 稳定。
+- [x] 只有 probe 尾部未检查时 machine JSON 可与真实数据异常可靠区分。
+
+**实现证据（2026-08-13，独立 review clean）**
+
+Machine JSON 使用 `schemaVersion: "1.0"` 的 typed success/error envelope；request echo
+不包含 source path。machine success 的构造入口为 module-internal，trace 命令只能消费同一
+`TraceSession` 生成的 opaque snapshot 与 bound query result；snapshot 闭环比较 source SHA/
+size、parser identity、database preparation、repository metadata 及 cache evidence，外部
+executor 不能拼接 metadata/preparation/result 或提交 raw JSON/stdout。Application 据此生成
+trace/provenance、每 command 封闭 result、data quality 与 truncation。所有 `*Ns` 字段使用
+JSON Int64 integer或 explicit null，并在单次 stdout commit 前完成 canonical encoding、
+byte-budget 检查和最终 cancellation 线性化；编码、contract、privacy、budget 或 cancellation
+失败均不会写半截/过期 success。`tool.buildRevision` 通过 mapped Mach-O vnode identity 绑定
+只读 fd；生产路径在稳定分块 SHA-256 前后核验同一 fd 的 size/mtime/ctime 快照，测试 seam
+另以第二次 SHA-256 确定性证明等长原位修改即使恢复 mtime 也会 fail closed；路径替换不改变
+已绑定 vnode 的结果，无法读取或证明 identity 时以 typed internal failure 收口，绝不输出
+`"unavailable"` success。
+
+Store/Analysis 同时把旧字符串 warning 提升为 typed quality evidence，machine contract 区分
+`probeTruncated`、`invalidValue`、`clampedValue`、`droppedValue` 和
+`referentialIntegrity`，并拒绝无法分类的 legacy warning。Machine quality 仅输出 closed
+category/scope/count，省略 Store 的自由诊断 prose；doctor check 使用 closed code/name，error
+details 按 code/key/value allowlist 输出，禁止 raw SQL、environment、path/log 渗入。Core 共享
+policy 固定每个 stable error code 的 allowed stage/retryability，非法组合在 machine boundary
+归一为 INTERNAL_ERROR；`TRACE_PARSE_FAILED` 仅在 reason 命中 reviewed transient token 白名单时
+允许条件重试，SQLite prepare/bind/step 也按实际 stage 生成契约一致的稳定 code。
+
+50 条 CLI regression 覆盖 exact typed results、同 session provenance/request/limit binding、
+capability/nullability、显式 null、Int64 极值、stdout/stderr 隔离、privacy、最终取消、全 error
+family、精确 output-budget 边界及 executable path replacement/equal-length mutation/read
+failure。20 份提交内 canonical golden 逐字节锁定五个命令各自的
+success/empty/truncated/typed-error；doctor 的 checks page 与 inspect 的 bounded data-quality
+probe 分别提供可达 truncation 语义，inspect empty 锁定无 optional capability 的合法结果。
+完整 Release 与不可跳过 gate 均为 218 tests、0 failure、0 skip，locked parser/source/
+upstream/Ready SHA 与 schema fingerprint 未漂移。
 
 ### P2-T05 — 实现 doctor/inspect/summary/processes/threads
 

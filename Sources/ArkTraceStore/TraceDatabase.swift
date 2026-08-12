@@ -222,7 +222,7 @@ final class TraceDatabase {
         guard sqlite3_prepare_v2(handle, sql, -1, &statement, nil) == SQLITE_OK, let statement
         else {
             throw ArkTraceError(
-                code: stage == .querying ? .queryFailed : .traceDatabaseInvalid,
+                code: Self.failureCode(for: stage),
                 stage: stage,
                 message: "Failed to prepare internal SQLite statement",
                 details: ["sqliteCode": String(sqlite3_errcode(handle))]
@@ -270,9 +270,10 @@ final class TraceDatabase {
             }
             guard rc == SQLITE_OK else {
                 throw ArkTraceError(
-                    code: .queryFailed,
+                    code: Self.failureCode(for: stage),
                     stage: stage,
-                    message: "Failed to bind parameter \(index)"
+                    message: "Failed to bind internal SQLite parameter",
+                    details: ["sqliteCode": String(rc)]
                 )
             }
         }
@@ -314,7 +315,7 @@ final class TraceDatabase {
                     }
                 }
                 throw ArkTraceError(
-                    code: stage == .querying ? .queryFailed : .traceDatabaseInvalid,
+                    code: Self.failureCode(for: stage),
                     stage: stage,
                     message: "Statement failed with SQLite code \(rc)"
                 )
@@ -379,6 +380,23 @@ final class TraceDatabase {
             message: "Trace query deadline was reached",
             retryable: true
         )
+    }
+
+    /// QUERY_FAILED is reserved for the public querying stage. Failures in
+    /// validation, indexing, or database opening describe an invalid database
+    /// transaction and must retain a code/stage tuple accepted by AT-ERR-003.
+    private static func failureCode(for stage: ArkTraceError.Stage) -> ArkTraceError.Code {
+        switch stage {
+        case .querying:
+            return .queryFailed
+        case .validating, .indexing, .openingDatabase:
+            return .traceDatabaseInvalid
+        case .request, .preparing, .hashing, .cacheLookup, .parsing, .analyzing, .encoding:
+            // These are not valid TraceDatabase operation stages. Keep an
+            // accidental internal caller from manufacturing a public tuple
+            // whose code and stage contradict each other.
+            return .internalError
+        }
     }
 
     func flush() throws {

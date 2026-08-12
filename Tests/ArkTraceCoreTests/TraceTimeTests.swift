@@ -66,4 +66,35 @@ final class TraceTimeTests: XCTestCase {
         XCTAssertEqual(ArkTraceError.Code.queryLimitExceeded.rawValue, "QUERY_LIMIT_EXCEEDED")
         XCTAssertEqual(ArkTraceError.Code.cancelled.rawValue, "CANCELLED")
     }
+
+    func testTypedDataQualityPreservesLegacyWarningsWithoutDuplicatingMessages() throws {
+        let issue = TraceDataQualityIssue(
+            category: .clampedValue,
+            scope: "process.start_ts",
+            count: 2,
+            message: "two values clamped"
+        )
+        let quality = TraceDataQuality(
+            warnings: ["two values clamped", "legacy warning"],
+            issues: [issue]
+        )
+        XCTAssertEqual(quality.status, .warnings)
+        XCTAssertEqual(quality.warnings, ["two values clamped", "legacy warning"])
+        XCTAssertEqual(quality.issues, [
+            issue,
+            TraceDataQualityIssue(category: .unclassified, message: "legacy warning"),
+        ])
+
+        let encoded = try JSONEncoder().encode(quality)
+        XCTAssertEqual(try JSONDecoder().decode(TraceDataQuality.self, from: encoded), quality)
+    }
+
+    func testLegacyDataQualityJSONDecodesFailClosedAsUnclassified() throws {
+        let data = Data(#"{"status":"warnings","warnings":["legacy"]}"#.utf8)
+        let decoded = try JSONDecoder().decode(TraceDataQuality.self, from: data)
+        XCTAssertEqual(decoded.status, .warnings)
+        XCTAssertEqual(decoded.issues, [
+            TraceDataQualityIssue(category: .unclassified, message: "legacy")
+        ])
+    }
 }

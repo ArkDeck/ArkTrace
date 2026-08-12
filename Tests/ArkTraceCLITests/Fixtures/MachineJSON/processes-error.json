@@ -1,0 +1,1 @@
+{"error":{"code":"QUERY_FAILED","details":{},"message":"The trace query failed.","retryable":false,"stage":"querying"},"request":{"command":"processes","parameters":{"limit":10000,"name":null,"pid":null}},"schemaVersion":"1.0","tool":{"buildRevision":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","name":"arktrace","version":"0.1.0"}}

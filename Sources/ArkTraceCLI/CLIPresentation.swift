@@ -1,4 +1,5 @@
 import ArkTraceCore
+import CoreFoundation
 import Foundation
 
 public struct CLIHumanRenderer: Sendable {
@@ -41,9 +42,92 @@ public struct CLIMachineEncoder: Sendable {
     public init() {}
 
     public func encode<T: Encodable>(_ value: T, pretty: Bool) throws -> Data {
+        try encode(value, pretty: pretty, maximumBytes: Int.max)
+    }
+
+    /// Fully materializes and validates one canonical UTF-8 document before
+    /// the caller attempts stdout. The byte budget includes the final newline.
+    public func encode<T: Encodable>(
+        _ value: T,
+        pretty: Bool,
+        maximumBytes: Int
+    ) throws -> Data {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = pretty ? [.sortedKeys, .prettyPrinted] : [.sortedKeys]
-        return try encoder.encode(value)
+        encoder.outputFormatting = pretty
+            ? [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
+            : [.sortedKeys, .withoutEscapingSlashes]
+        var data = try encoder.encode(value)
+        data.append(UInt8(ascii: "\n"))
+        try validateDocument(data, maximumBytes: maximumBytes)
+        return data
+    }
+
+    /// Validates one JSON object before the single stdout commit. Privacy is
+    /// enforced by typed envelope/result fields plus forbidden semantic keys;
+    /// arbitrary result strings are data and are never guessed to be paths or
+    /// SQL from their spelling.
+    public func validateDocument(_ data: Data, maximumBytes: Int) throws {
+        guard maximumBytes >= 0, data.count <= maximumBytes else {
+            throw ArkTraceError(
+                code: .outputLimitExceeded,
+                stage: .encoding,
+                message: "Machine output exceeds its byte budget",
+                retryable: true,
+                details: [
+                    "maximumBytes": String(max(0, maximumBytes)),
+                    "requiredBytes": String(data.count),
+                ]
+            )
+        }
+        guard !data.isEmpty, String(data: data, encoding: .utf8) != nil,
+            let object = try? JSONSerialization.jsonObject(with: data),
+            object is [String: Any]
+        else {
+            throw Self.encodingFailure(reason: "invalidDocument")
+        }
+        try Self.validateJSONValue(object, key: nil)
+    }
+
+    private static func validateJSONValue(_ value: Any, key: String?) throws {
+        if let object = value as? [String: Any] {
+            for (childKey, childValue) in object {
+                guard !Self.isForbiddenPrivacyKey(childKey) else {
+                    throw encodingFailure(reason: "forbiddenField")
+                }
+                try validateJSONValue(childValue, key: childKey)
+            }
+            return
+        }
+        if let array = value as? [Any] {
+            for child in array { try validateJSONValue(child, key: key) }
+            return
+        }
+        if let key, key.hasSuffix("Ns"), !(value is NSNull) {
+            guard let number = value as? NSNumber,
+                CFGetTypeID(number) != CFBooleanGetTypeID(),
+                !CFNumberIsFloatType(number),
+                Int64(number.stringValue) != nil
+            else {
+                throw encodingFailure(reason: "nonIntegerNanoseconds")
+            }
+        }
+    }
+
+    private static func isForbiddenPrivacyKey(_ key: String) -> Bool {
+        let value = key.lowercased()
+        return value == "path" || value.hasSuffix("path")
+            || value == "sql" || value.contains("rawsql")
+            || value == "environment" || value.contains("environmentdump")
+            || value == "stderr" || value.contains("parserlog")
+    }
+
+    private static func encodingFailure(reason: String) -> ArkTraceError {
+        ArkTraceError(
+            code: .internalError,
+            stage: .encoding,
+            message: "Machine output violates the encoding contract",
+            details: ["reason": reason]
+        )
     }
 }
 
@@ -65,12 +149,29 @@ public struct CLIFileOutputWriter: CLIOutputWriting {
 }
 
 public struct CLICommandOutput: Sendable {
+    /// Human-only presentation bytes. In `--json` mode the application ignores
+    /// these bytes and encodes `machinePayload` itself.
     public let stdout: Data
     public let stderr: Data
+    public let machinePayload: CLIMachineCommandPayload?
 
-    public init(stdout: Data = Data(), stderr: Data = Data()) {
+    public init(
+        stdout: Data = Data(),
+        stderr: Data = Data()
+    ) {
         self.stdout = stdout
         self.stderr = stderr
+        machinePayload = nil
+    }
+
+    init(
+        stdout: Data = Data(),
+        stderr: Data = Data(),
+        machinePayload: CLIMachineCommandPayload
+    ) {
+        self.stdout = stdout
+        self.stderr = stderr
+        self.machinePayload = machinePayload
     }
 }
 
@@ -84,7 +185,7 @@ public struct CLIUnavailableCommandExecutor: CLICommandExecuting {
     public func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
         throw ArkTraceError(
             code: .analysisUnsupported,
-            stage: .request,
+            stage: .analyzing,
             message: "This command is not available in the current CLI slice"
         )
     }

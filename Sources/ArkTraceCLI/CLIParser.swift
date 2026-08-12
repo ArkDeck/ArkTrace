@@ -7,6 +7,37 @@ public struct CLIArgumentParser: Sendable {
 
     public init() {}
 
+    /// Safe mode hint used only to choose the error presentation when full
+    /// parsing fails. It never reads a trace or resolves a path.
+    public static func requestsJSON(_ arguments: [String]) -> Bool {
+        machinePresentationHint(arguments).json
+    }
+
+    static func machinePresentationHint(
+        _ arguments: [String]
+    ) -> (json: Bool, pretty: Bool, maximumOutputBytes: Int) {
+        var json = false
+        var pretty = false
+        var maximumOutputBytes = CLILimits.defaultMaxOutputBytes
+        var index = 0
+        let bounded = Array(arguments.prefix(maximumArgumentCount + 1))
+        while index < bounded.count {
+            let token = bounded[index]
+            if token == "--" { break }
+            if token == "--json" { json = true }
+            if token == "--pretty" { pretty = true }
+            if token == "--max-output-bytes", index + 1 < bounded.count,
+                let value = Int(bounded[index + 1]),
+                (1_024...(64 * 1_024 * 1_024)).contains(value)
+            {
+                maximumOutputBytes = value
+                index += 1
+            }
+            index += 1
+        }
+        return (json, pretty && json, maximumOutputBytes)
+    }
+
     public func parse(_ arguments: [String]) throws -> CLIInvocation {
         guard arguments.count <= Self.maximumArgumentCount,
             arguments.allSatisfy({ $0.utf8.count <= Self.maximumArgumentBytes })

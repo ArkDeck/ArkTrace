@@ -54,6 +54,38 @@ public struct TraceCapabilities: Hashable, Codable, Sendable {
     }
 }
 
+/// Stable machine-readable quality evidence. Consumers branch on `category`;
+/// `message` is only supplemental human context and is never the semantic key.
+public struct TraceDataQualityIssue: Hashable, Codable, Sendable {
+    public enum Category: String, Codable, Sendable, CaseIterable {
+        case probeTruncated
+        case invalidValue
+        case clampedValue
+        case droppedValue
+        case referentialIntegrity
+        /// Compatibility category for library callers that still supply only
+        /// a human warning. Production Store/Analysis paths use specific kinds.
+        case unclassified
+    }
+
+    public let category: Category
+    public let scope: String?
+    public let count: Int64?
+    public let message: String?
+
+    public init(
+        category: Category,
+        scope: String? = nil,
+        count: Int64? = nil,
+        message: String? = nil
+    ) {
+        self.category = category
+        self.scope = scope
+        self.count = count
+        self.message = message
+    }
+}
+
 /// Data-quality signal carried by results instead of being logged away (AT-QUERY-008).
 public struct TraceDataQuality: Hashable, Codable, Sendable {
     public enum Status: String, Codable, Sendable {
@@ -63,10 +95,64 @@ public struct TraceDataQuality: Hashable, Codable, Sendable {
 
     public let status: Status
     public let warnings: [String]
+    public let issues: [TraceDataQualityIssue]
 
-    public init(warnings: [String] = []) {
-        self.status = warnings.isEmpty ? .ok : .warnings
-        self.warnings = warnings
+    public init() {
+        self.init(warnings: [], issues: [])
+    }
+
+    public init(warnings: [String]) {
+        self.init(warnings: warnings, issues: [])
+    }
+
+    public init(issues: [TraceDataQualityIssue]) {
+        self.init(warnings: [], issues: issues)
+    }
+
+    public init(
+        warnings: [String],
+        issues: [TraceDataQualityIssue]
+    ) {
+        var seenIssues: Set<TraceDataQualityIssue> = []
+        var combined = issues.filter { seenIssues.insert($0).inserted }
+        var representedMessages = Set(issues.compactMap(\.message))
+        for warning in warnings where representedMessages.insert(warning).inserted {
+            combined.append(
+                TraceDataQualityIssue(
+                    category: .unclassified,
+                    message: warning
+                )
+            )
+        }
+        self.status = combined.isEmpty ? .ok : .warnings
+        var seenMessages: Set<String> = []
+        self.warnings = combined.compactMap(\.message).filter {
+            seenMessages.insert($0).inserted
+        }
+        self.issues = combined
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case status
+        case warnings
+        case issues
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let warnings = try container.decodeIfPresent([String].self, forKey: .warnings) ?? []
+        let issues = try container.decodeIfPresent(
+            [TraceDataQualityIssue].self,
+            forKey: .issues
+        ) ?? []
+        self.init(warnings: warnings, issues: issues)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(status, forKey: .status)
+        try container.encode(warnings, forKey: .warnings)
+        try container.encode(issues, forKey: .issues)
     }
 }
 
