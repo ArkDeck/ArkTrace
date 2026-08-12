@@ -22,6 +22,7 @@ public struct TraceSourceDescriptor: Sendable {
 /// with limit+1 truncation detection (AT-QUERY-002); public times are
 /// trace-relative Int64 nanoseconds (AT-TIME-001/002).
 public actor SQLiteTraceRepository: TraceRepositoryProtocol {
+    public nonisolated let databaseFileIdentity: TraceDatabaseFileIdentity
     private let db: TraceDatabase
     private let parserIdentity: TraceParserIdentity
     private let source: TraceSourceDescriptor
@@ -34,9 +35,17 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
     public init(
         databaseURL: URL,
         parser: TraceParserIdentity,
-        source: TraceSourceDescriptor
+        source: TraceSourceDescriptor,
+        expectedPreparation: TraceDatabasePreparationResult? = nil
     ) throws {
         let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        guard let databaseFileIdentity = db.fileIdentity else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .openingDatabase,
+                message: "Ready database identity is unavailable"
+            )
+        }
         guard try db.quickCheckIsOK() else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
@@ -44,10 +53,27 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 message: "SQLite quick_check failed"
             )
         }
+        let validation = try TraceSchemaAdapter.validate(db)
+        if let expectedPreparation {
+            guard expectedPreparation.schemaAdapterVersion
+                == TraceDatabaseStagingPreparer.schemaAdapterVersion,
+                expectedPreparation.indexVersion == TraceDatabaseStagingPreparer.indexVersion,
+                expectedPreparation.schemaFingerprint == validation.schemaFingerprint
+            else {
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .openingDatabase,
+                    message: "Ready database identity does not match its preparation metadata"
+                )
+            }
+            try TraceDatabaseStagingPreparer.validateReadyIndexes(in: db)
+        }
+
         self.db = db
+        self.databaseFileIdentity = databaseFileIdentity
         self.parserIdentity = parser
         self.source = source
-        self.validation = try TraceSchemaAdapter.validate(db)
+        self.validation = validation
 
         let processColumns = Set(try db.columns(of: "process").map(\.name))
         let threadColumns = Set(try db.columns(of: "thread").map(\.name))

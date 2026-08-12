@@ -152,7 +152,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 3. session state machine 与真实 stage/progress/cancel；
 4. 打开新 trace 取消旧 parse/query/analysis，generation 隔离；
 5. typed error 本地化标题、原因、恢复动作、diagnostic disclosure；
-6. 实现 AT-CACHE-004：默认 20 GiB high / 16 GiB low，按 lastAccessed LRU 清理到 low watermark，只处理未被 active session 持有的 entry；
+6. 实现 AT-CACHE-004：先消费 P2-T01 的 `.owners/<name>.lock` liveness facts，在有界枚举、同一 key-lock/entry-lease、exclusive owner lock 与 exact identity 保护下隔离/回收 stale session/build 和 orphan marker；`.ready` evidence 只用于关联 Ready entry，不得当 stale private build 删除，未绑定 identity 的 `.creating` evidence 必须 fail closed（不得按 PID、时间或裸 UUID 盲删）；再按默认 20 GiB high / 16 GiB low 与 lastAccessed LRU 清理到 low watermark，只处理未被 active session 持有的 entry；
 7. Settings 显示 cache 大小/entry 数，安全 purge 未使用 entries；
 8. eviction/purge 永不删除原始 Trace，且不接受 root/home/broad/unresolved path；
 9. recent/cache 与 machine JSON 隐私边界分离。

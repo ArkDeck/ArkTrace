@@ -324,6 +324,14 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(indexes.contains("arktrace_v1_thread_state_itid_ts"))
         XCTAssertFalse(indexes.contains("arktrace_v1_thread_state_ts_cpu"))
         XCTAssertTrue(TraceDatabaseStagingPreparer.requiredIndexNames.isSubset(of: indexes))
+        XCTAssertNoThrow(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource,
+                expectedPreparation: preparation
+            )
+        )
     }
 
     func testQuickCheckDirectSQLiteErrorUsesRequestedStage() throws {
@@ -352,6 +360,83 @@ final class RepositoryTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: symlink) }
         XCTAssertThrowsError(try TraceDatabase(url: symlink, readOnly: true)) { error in
             XCTAssertEqual((error as? ArkTraceError)?.code, .traceDatabaseInvalid)
+        }
+    }
+
+    func testReadyDatabaseValidationRejectsMissingRequiredVersionedIndex() throws {
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("DROP INDEX arktrace_v1_process_pid")
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: databaseURL,
+                parser: Self.dummyParser,
+                source: Self.dummySource,
+                expectedPreparation: preparation
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error?.stage, .openingDatabase)
+        }
+    }
+
+    func testReadyDatabaseValidationRejectsSameNameIndexOnWrongColumns() throws {
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("DROP INDEX arktrace_v1_process_pid")
+        try writer.execute("CREATE INDEX arktrace_v1_process_pid ON process(ipid)")
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: databaseURL,
+                parser: Self.dummyParser,
+                source: Self.dummySource,
+                expectedPreparation: preparation
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error?.stage, .openingDatabase)
+        }
+    }
+
+    func testReadyDatabaseValidationRejectsSameColumnsWithWrongOrderSemantics() throws {
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("DROP INDEX arktrace_v1_process_pid")
+        try writer.execute("CREATE INDEX arktrace_v1_process_pid ON process(pid DESC)")
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: databaseURL,
+                parser: Self.dummyParser,
+                source: Self.dummySource,
+                expectedPreparation: preparation
+            )
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .traceDatabaseInvalid)
+            XCTAssertEqual((error as? ArkTraceError)?.stage, .openingDatabase)
+        }
+    }
+
+    func testReadyDatabaseValidationRequiresApplicableOptionalIndex() throws {
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("DROP INDEX arktrace_v1_thread_state_ts_cpu")
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: databaseURL,
+                parser: Self.dummyParser,
+                source: Self.dummySource,
+                expectedPreparation: preparation
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error?.stage, .openingDatabase)
         }
     }
 

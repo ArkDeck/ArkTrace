@@ -1,7 +1,11 @@
 import ArkTraceCore
 import ArkTraceParser
 import CryptoKit
+import Darwin
 import XCTest
+
+@_silgen_name("flock")
+private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 
 @testable import ArkTraceRuntime
 @testable import ArkTraceStore
@@ -128,6 +132,214 @@ final class ParserIntegrationTests: XCTestCase {
 
         func snapshot() -> [TraceLoadingStage] {
             lock.withLock { stages }
+        }
+    }
+
+    private final class CountingParser: TraceParser, @unchecked Sendable {
+        private let lock = NSLock()
+        private let base: TraceStreamerProcessParser
+        private var parseCalls = 0
+        private var identityCalls = 0
+        private var cacheIdentityCalls = 0
+        private let processCounterURL: URL?
+
+        init(base: TraceStreamerProcessParser, processCounterURL: URL? = nil) {
+            self.base = base
+            self.processCounterURL = processCounterURL
+        }
+
+        func identity() async throws -> TraceParserIdentity {
+            lock.withLock { identityCalls += 1 }
+            return try await base.identity()
+        }
+
+        func cacheIdentity() async throws -> TraceParserIdentity {
+            lock.withLock { cacheIdentityCalls += 1 }
+            return try await base.cacheIdentity()
+        }
+
+        func parse(
+            source: URL,
+            destination: URL,
+            progress: TraceProgressHandler?,
+            prepareDatabase: @escaping TraceDatabasePreparer
+        ) async throws -> ParsedTrace {
+            lock.withLock { parseCalls += 1 }
+            if let processCounterURL {
+                let descriptor = processCounterURL.path.withCString {
+                    Darwin.open($0, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, 0o600)
+                }
+                guard descriptor >= 0 else { throw CocoaError(.fileWriteUnknown) }
+                defer { _ = Darwin.close(descriptor) }
+                var marker = UInt8(ascii: "1")
+                guard Darwin.write(descriptor, &marker, 1) == 1,
+                    Darwin.fsync(descriptor) == 0
+                else { throw CocoaError(.fileWriteUnknown) }
+            }
+            return try await base.parse(
+                source: source,
+                destination: destination,
+                progress: progress,
+                prepareDatabase: prepareDatabase
+            )
+        }
+
+        func count() -> Int {
+            lock.withLock { parseCalls }
+        }
+
+        func identityCount() -> Int {
+            lock.withLock { identityCalls }
+        }
+
+        func cacheIdentityCount() -> Int {
+            lock.withLock { cacheIdentityCalls }
+        }
+    }
+
+    private final class PromotionBarrier: @unchecked Sendable {
+        private let lock = NSLock()
+        private let reached = DispatchSemaphore(value: 0)
+        private let release = DispatchSemaphore(value: 0)
+        private var observedURL: URL?
+
+        func pause(at url: URL) {
+            lock.withLock { observedURL = url }
+            reached.signal()
+            release.wait()
+        }
+
+        private func waitBlocking() {
+            reached.wait()
+        }
+
+        func waitUntilReached() async -> URL {
+            await Task.detached { self.waitBlocking() }.value
+            return lock.withLock { observedURL! }
+        }
+
+        func resume() {
+            release.signal()
+        }
+
+        func hasReached() -> Bool {
+            lock.withLock { observedURL != nil }
+        }
+    }
+
+    private final class OneShotSignal: @unchecked Sendable {
+        private let semaphore = DispatchSemaphore(value: 0)
+
+        func signal() {
+            semaphore.signal()
+        }
+
+        private func waitBlocking() {
+            semaphore.wait()
+        }
+
+        func wait() async {
+            await Task.detached { self.waitBlocking() }.value
+        }
+    }
+
+    private final class URLRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var value: URL?
+
+        func record(_ url: URL) {
+            lock.withLock { value = url }
+        }
+
+        func snapshot() -> URL? {
+            lock.withLock { value }
+        }
+    }
+
+    private final class OneShotFlag: @unchecked Sendable {
+        private let lock = NSLock()
+        private var available = true
+
+        func take() -> Bool {
+            lock.withLock {
+                guard available else { return false }
+                available = false
+                return true
+            }
+        }
+    }
+
+    private final class BlockingOneShotProbeFailure: @unchecked Sendable {
+        private let lock = NSLock()
+        private let reached = DispatchSemaphore(value: 0)
+        private let release = DispatchSemaphore(value: 0)
+        private var invocationCount = 0
+
+        func invoke(_: URL) throws {
+            let shouldFail = lock.withLock {
+                invocationCount += 1
+                return invocationCount == 1
+            }
+            guard shouldFail else { return }
+            reached.signal()
+            release.wait()
+            throw CocoaError(.fileReadNoPermission)
+        }
+
+        private func waitBlocking() {
+            reached.wait()
+        }
+
+        func waitUntilReached() async {
+            await Task.detached { self.waitBlocking() }.value
+        }
+
+        func resume() {
+            release.signal()
+        }
+
+        func count() -> Int {
+            lock.withLock { invocationCount }
+        }
+    }
+
+    private final class ProcessBox: @unchecked Sendable {
+        let process: Process
+        private let lock = NSLock()
+        private var terminationStatus: Int32?
+        private var waiters: [CheckedContinuation<Int32, Never>] = []
+
+        init(_ process: Process) {
+            self.process = process
+            process.terminationHandler = { [weak self] process in
+                self?.finish(status: process.terminationStatus)
+            }
+        }
+
+        func wait() async -> Int32 {
+            await withCheckedContinuation { continuation in
+                lock.lock()
+                if let terminationStatus {
+                    lock.unlock()
+                    continuation.resume(returning: terminationStatus)
+                } else {
+                    waiters.append(continuation)
+                    lock.unlock()
+                }
+            }
+        }
+
+        private func finish(status: Int32) {
+            lock.lock()
+            guard terminationStatus == nil else {
+                lock.unlock()
+                return
+            }
+            terminationStatus = status
+            let waiters = waiters
+            self.waiters.removeAll()
+            lock.unlock()
+            for waiter in waiters { waiter.resume(returning: status) }
         }
     }
 
@@ -358,6 +570,123 @@ final class ParserIntegrationTests: XCTestCase {
             throw XCTSkip("trace fixture not available; set ARKTRACE_TEST_TRACE")
         }
         return (binary, fixture)
+    }
+
+    private func requireCacheEnvironment() throws -> (binary: URL, fixture: URL) {
+        guard let binary = Self.traceStreamerURL() else {
+            throw XCTSkip("trace_streamer binary not available; set ARKTRACE_TRACE_STREAMER")
+        }
+        let fixture = Self.lockedFixtureURL(named: "zlib.htrace")
+        guard FileManager.default.isReadableFile(atPath: fixture.path) else {
+            throw XCTSkip("locked zlib trace fixture is unavailable")
+        }
+        return (binary, fixture)
+    }
+
+    private func permissions(at url: URL) throws -> mode_t {
+        var info = stat()
+        guard url.path.withCString({ Darwin.lstat($0, &info) }) == 0 else {
+            throw CocoaError(.fileReadNoSuchFile)
+        }
+        return info.st_mode & 0o777
+    }
+
+    private func publicSessionEntries(at root: URL) throws -> [String] {
+        try FileManager.default.contentsOfDirectory(atPath: root.path).filter {
+            $0.hasPrefix("session-") || $0.hasPrefix(".arktrace-cleanup-")
+        }
+    }
+
+    private func launchCacheWorker(
+        action: String,
+        root: URL,
+        binary: URL,
+        fixture: URL,
+        result: URL? = nil,
+        ready: URL? = nil,
+        release: URL? = nil,
+        counter: URL? = nil
+    ) throws -> ProcessBox {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+        process.arguments = [
+            "xctest",
+            "-XCTest",
+            "ArkTraceIntegrationTests.ParserIntegrationTests/testCacheCrossProcessWorker",
+            Bundle(for: ParserIntegrationTests.self).bundleURL.path,
+        ]
+        var environment = ProcessInfo.processInfo.environment
+        environment["ARKTRACE_CACHE_WORKER_ACTION"] = action
+        environment["ARKTRACE_CACHE_WORKER_ROOT"] = root.path
+        environment["ARKTRACE_CACHE_WORKER_BINARY"] = binary.path
+        environment["ARKTRACE_CACHE_WORKER_FIXTURE"] = fixture.path
+        environment["ARKTRACE_CACHE_WORKER_RESULT"] = result?.path
+        environment["ARKTRACE_CACHE_WORKER_READY"] = ready?.path
+        environment["ARKTRACE_CACHE_WORKER_RELEASE"] = release?.path
+        environment["ARKTRACE_CACHE_WORKER_COUNTER"] = counter?.path
+        process.environment = environment
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        let box = ProcessBox(process)
+        try process.run()
+        return box
+    }
+
+    private func waitForFile(_ url: URL, timeout: Duration = .seconds(10)) async throws {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while !FileManager.default.fileExists(atPath: url.path) {
+            guard ContinuousClock.now < deadline else {
+                throw CocoaError(.fileReadUnknown)
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func cacheMetadata(in cache: URL) throws -> TraceCacheMetadata {
+        let enumerator = try XCTUnwrap(
+            FileManager.default.enumerator(at: cache, includingPropertiesForKeys: nil)
+        )
+        var metadataURL: URL?
+        while let item = enumerator.nextObject() as? URL {
+            if item.lastPathComponent == "metadata.json" {
+                metadataURL = item
+                break
+            }
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(
+            TraceCacheMetadata.self,
+            from: Data(contentsOf: try XCTUnwrap(metadataURL))
+        )
+    }
+
+    private func canAcquireExclusiveLock(at url: URL) -> Bool {
+        let descriptor = url.path.withCString {
+            Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else { return false }
+        defer { _ = Darwin.close(descriptor) }
+        guard arkTraceTestFlock(descriptor, LOCK_EX | LOCK_NB) == 0 else { return false }
+        _ = arkTraceTestFlock(descriptor, LOCK_UN)
+        return true
+    }
+
+    private static func replacePromotionBuild(at build: URL) throws {
+        let displaced = build.deletingLastPathComponent()
+            .appendingPathComponent(
+                ".displaced-\(build.lastPathComponent)",
+                isDirectory: true
+            )
+        try FileManager.default.moveItem(at: build, to: displaced)
+        try FileManager.default.createDirectory(
+            at: build,
+            withIntermediateDirectories: false,
+            attributes: [.posixPermissions: 0o700]
+        )
+        try Data("replacement".utf8).write(
+            to: build.appendingPathComponent("marker")
+        )
     }
 
     func testParserIdentity() async throws {
@@ -822,7 +1151,1782 @@ final class ParserIntegrationTests: XCTestCase {
         } catch let error as ArkTraceError {
             XCTAssertEqual(error.code, .cancelled)
         }
-        let leftovers = (try? FileManager.default.contentsOfDirectory(atPath: staging.path)) ?? []
+        let leftovers = (try? publicSessionEntries(at: staging)) ?? []
         XCTAssertTrue(leftovers.isEmpty, "cancelled session directory must be removed")
+    }
+
+    func testContentCacheMissThenHitKeepsPathFreeMetadataAndActiveLease() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-hit-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+        let missStages = StageRecorder()
+
+        let first = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            progress: { missStages.append($0) },
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+        let firstParsed = await first.parsed
+        let firstMetadataValue = await first.cacheMetadata
+        let firstMetadata = try XCTUnwrap(firstMetadataValue)
+        let firstCacheHit = await first.cacheHit
+        XCTAssertFalse(firstCacheHit)
+        XCTAssertEqual(parser.count(), 1)
+        XCTAssertEqual(parser.identityCount(), 0)
+        XCTAssertEqual(parser.cacheIdentityCount(), 1)
+        XCTAssertEqual(missStages.snapshot(), [
+            .preparing, .hashing, .cacheLookup, .parsing, .validating,
+            .indexing, .openingDatabase, .ready,
+        ])
+        XCTAssertEqual(firstParsed.databaseURL.lastPathComponent, "database.sqlite")
+        XCTAssertEqual(firstParsed.metadataSidecarURL.lastPathComponent, "metadata.json")
+        XCTAssertEqual(firstMetadata.sourceSHA256, firstParsed.sourceSHA256)
+        XCTAssertEqual(firstMetadata.traceSHA256, firstParsed.sourceSHA256)
+        XCTAssertEqual(firstMetadata.sourceByteCount, firstParsed.sourceByteCount)
+        XCTAssertEqual(
+            firstMetadata.schemaFingerprint,
+            firstParsed.databasePreparation.schemaFingerprint
+        )
+        XCTAssertEqual(
+            firstMetadata.schemaAdapterVersion,
+            TraceDatabaseStagingPreparer.schemaAdapterVersion
+        )
+        XCTAssertEqual(
+            firstMetadata.indexSchemaVersion,
+            TraceDatabaseStagingPreparer.indexVersion
+        )
+        XCTAssertEqual(
+            firstMetadata.databasePreparation.schemaAdapterVersion,
+            TraceDatabaseStagingPreparer.schemaAdapterVersion
+        )
+        XCTAssertEqual(
+            firstMetadata.databasePreparation.indexVersion,
+            TraceDatabaseStagingPreparer.indexVersion
+        )
+        XCTAssertEqual(
+            firstMetadata.databaseByteCount,
+            try sha256AndSize(at: firstParsed.databaseURL).byteCount
+        )
+        XCTAssertEqual(firstMetadata.createdAt, Date(timeIntervalSince1970: 100))
+        XCTAssertEqual(firstMetadata.lastAccessedAt, Date(timeIntervalSince1970: 100))
+
+        let metadataBytes = try Data(contentsOf: firstParsed.metadataSidecarURL)
+        XCTAssertNil(metadataBytes.range(of: Data(fixture.path.utf8)))
+        XCTAssertNil(metadataBytes.range(of: Data(staging.path.utf8)))
+        XCTAssertNil(metadataBytes.range(of: Data(cache.path.utf8)))
+        let compatibleSidecar = try JSONDecoder().decode(
+            TraceDatabaseMetadataSidecar.self,
+            from: metadataBytes
+        )
+        XCTAssertEqual(compatibleSidecar.parser, firstParsed.parser)
+        XCTAssertEqual(compatibleSidecar.databasePreparation, firstParsed.databasePreparation)
+        XCTAssertEqual(try permissions(at: cache), 0o700)
+        XCTAssertEqual(
+            try permissions(at: firstParsed.databaseURL.deletingLastPathComponent()),
+            0o700
+        )
+        XCTAssertEqual(try permissions(at: firstParsed.databaseURL), 0o400)
+        XCTAssertEqual(try permissions(at: firstParsed.metadataSidecarURL), 0o400)
+        let contention = OneShotSignal()
+        let mutationBarrier = PromotionBarrier()
+        let mutationTask = Task {
+            try await TraceContentAddressedCache.withExclusiveEntryMutation(
+                cacheDirectory: cache,
+                key: firstMetadata.cacheKey,
+                contentionHook: { contention.signal() },
+                operation: { mutationBarrier.pause(at: $0) }
+            )
+        }
+        await contention.wait()
+        XCTAssertFalse(
+            mutationBarrier.hasReached(),
+            "an active session must hold the exclusive mutation guard outside"
+        )
+        try await first.close()
+        _ = await mutationBarrier.waitUntilReached()
+        mutationBarrier.resume()
+        try await mutationTask.value
+
+        let hitStages = StageRecorder()
+        let second = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            progress: { hitStages.append($0) },
+            now: { Date(timeIntervalSince1970: 200) }
+        )
+        let secondCacheHit = await second.cacheHit
+        XCTAssertTrue(secondCacheHit)
+        XCTAssertEqual(parser.count(), 1, "cache hit must not export the trace again")
+        XCTAssertEqual(parser.identityCount(), 0, "cache hit must not launch --version")
+        XCTAssertEqual(parser.cacheIdentityCount(), 2)
+        XCTAssertEqual(hitStages.snapshot(), [
+            .preparing, .hashing, .cacheLookup, .openingDatabase, .ready,
+        ])
+        let secondParsed = await second.parsed
+        XCTAssertEqual(secondParsed.databaseURL, firstParsed.databaseURL)
+        let secondMetadataValue = await second.cacheMetadata
+        let secondMetadata = try XCTUnwrap(secondMetadataValue)
+        XCTAssertEqual(secondMetadata.createdAt, Date(timeIntervalSince1970: 100))
+        XCTAssertEqual(secondMetadata.lastAccessedAt, Date(timeIntervalSince1970: 200))
+        XCTAssertTrue(
+            try publicSessionEntries(at: staging).isEmpty,
+            "source snapshots must not survive a successful cached open"
+        )
+        try await second.close()
+    }
+
+    func testConcurrentCachedOpenIsSingleFlight() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-single-flight-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+
+        async let first = TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        async let second = TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let sessions = try await [first, second]
+        XCTAssertEqual(parser.count(), 1)
+        let hitStates = await sessions.asyncMap { await $0.cacheHit }
+        XCTAssertEqual(hitStates.filter { !$0 }.count, 1)
+        XCTAssertEqual(hitStates.filter { $0 }.count, 1)
+        let paths = await sessions.asyncMap { await $0.parsed.databaseURL }
+        XCTAssertEqual(Set(paths).count, 1)
+        for session in sessions { try await session.close() }
+    }
+
+    func testCacheCrossProcessWorker() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard let action = environment["ARKTRACE_CACHE_WORKER_ACTION"] else { return }
+        let root = URL(fileURLWithPath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_ROOT"]))
+        let binary = URL(
+            fileURLWithPath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_BINARY"])
+        )
+        let fixture = URL(
+            fileURLWithPath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_FIXTURE"])
+        )
+        let result = environment["ARKTRACE_CACHE_WORKER_RESULT"].map(URL.init(fileURLWithPath:))
+        let ready = environment["ARKTRACE_CACHE_WORKER_READY"].map(URL.init(fileURLWithPath:))
+        let release = environment["ARKTRACE_CACHE_WORKER_RELEASE"].map(URL.init(fileURLWithPath:))
+        let counter = environment["ARKTRACE_CACHE_WORKER_COUNTER"].map(URL.init(fileURLWithPath:))
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary),
+            processCounterURL: counter
+        )
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+
+        let waitForRelease: @Sendable () -> Void = {
+            guard let release else { return }
+            while !FileManager.default.fileExists(atPath: release.path) {
+                Darwin.usleep(10_000)
+            }
+        }
+        let hooks: TraceCacheTestHooks
+        if action == "hold-key" {
+            hooks = TraceCacheTestHooks(afterKeyLock: { _ in
+                if let ready { try? Data("ready".utf8).write(to: ready) }
+                waitForRelease()
+            })
+        } else {
+            hooks = TraceCacheTestHooks()
+        }
+
+        let session = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            hooks: hooks
+        )
+        let hit = await session.cacheHit
+        var execChild: ProcessBox?
+        if action == "hold-lease" {
+            if let ready { try Data("ready".utf8).write(to: ready) }
+            waitForRelease()
+        } else if action == "cloexec" {
+            let child = Process()
+            child.executableURL = URL(fileURLWithPath: "/bin/sleep")
+            child.arguments = ["3"]
+            child.standardOutput = FileHandle.nullDevice
+            child.standardError = FileHandle.nullDevice
+            let childBox = ProcessBox(child)
+            try child.run()
+            execChild = childBox
+        }
+        try await session.close()
+        if let result {
+            try Data((hit ? "hit" : "miss").utf8).write(to: result)
+        }
+        if let execChild {
+            let execChildStatus = await execChild.wait()
+            XCTAssertEqual(execChildStatus, 0)
+        }
+    }
+
+    func testCrossProcessSingleFlightCancellationLeaseAndCLOEXEC() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-process-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+
+        let counter = root.appendingPathComponent("export.count")
+        let firstResult = root.appendingPathComponent("first.result")
+        let secondResult = root.appendingPathComponent("second.result")
+        let first = try launchCacheWorker(
+            action: "open",
+            root: root,
+            binary: binary,
+            fixture: fixture,
+            result: firstResult,
+            counter: counter
+        )
+        let second = try launchCacheWorker(
+            action: "open",
+            root: root,
+            binary: binary,
+            fixture: fixture,
+            result: secondResult,
+            counter: counter
+        )
+        async let firstStatus = first.wait()
+        async let secondStatus = second.wait()
+        let statuses = await [firstStatus, secondStatus]
+        XCTAssertEqual(statuses, [0, 0])
+        XCTAssertEqual(try Data(contentsOf: counter).count, 1)
+        XCTAssertEqual(
+            Set([
+                try String(contentsOf: firstResult, encoding: .utf8),
+                try String(contentsOf: secondResult, encoding: .utf8),
+            ]),
+            Set(["miss", "hit"])
+        )
+
+        // A separate process holds the per-key single-flight lock. The local
+        // waiter must observe cancellation without waiting for that process.
+        let waitRoot = root.appendingPathComponent("waiter", isDirectory: true)
+        let keyReady = root.appendingPathComponent("key.ready")
+        let keyRelease = root.appendingPathComponent("key.release")
+        let keyHolder = try launchCacheWorker(
+            action: "hold-key",
+            root: waitRoot,
+            binary: binary,
+            fixture: fixture,
+            ready: keyReady,
+            release: keyRelease
+        )
+        try await waitForFile(keyReady)
+        let waiter = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: waitRoot.appendingPathComponent("local-staging"),
+                cacheDirectory: waitRoot.appendingPathComponent("cache")
+            )
+        }
+        try await Task.sleep(for: .milliseconds(100))
+        let cancelStart = ContinuousClock.now
+        waiter.cancel()
+        do {
+            _ = try await waiter.value
+            XCTFail("cross-process key-lock waiter must cancel")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+            XCTAssertEqual(error.stage, .cacheLookup)
+        }
+        XCTAssertLessThan(cancelStart.duration(to: .now), .seconds(1))
+        try Data().write(to: keyRelease)
+        let keyHolderStatus = await keyHolder.wait()
+        XCTAssertEqual(keyHolderStatus, 0)
+
+        // A shared lease held by another process prevents mutation. Once the
+        // mutation enters, it retains key+exclusive lease until its closure
+        // finishes, so a third process cannot reopen the entry mid-mutation.
+        let leaseReady = root.appendingPathComponent("lease.ready")
+        let leaseRelease = root.appendingPathComponent("lease.release")
+        let leaseHolder = try launchCacheWorker(
+            action: "hold-lease",
+            root: root,
+            binary: binary,
+            fixture: fixture,
+            ready: leaseReady,
+            release: leaseRelease
+        )
+        try await waitForFile(leaseReady)
+        let metadata = try cacheMetadata(in: root.appendingPathComponent("cache"))
+        let contention = OneShotSignal()
+        let mutation = PromotionBarrier()
+        let mutationTask = Task {
+            try await TraceContentAddressedCache.withExclusiveEntryMutation(
+                cacheDirectory: root.appendingPathComponent("cache"),
+                key: metadata.cacheKey,
+                contentionHook: { contention.signal() },
+                operation: { mutation.pause(at: $0) }
+            )
+        }
+        await contention.wait()
+        XCTAssertFalse(mutation.hasReached())
+        try Data().write(to: leaseRelease)
+        let leaseHolderStatus = await leaseHolder.wait()
+        XCTAssertEqual(leaseHolderStatus, 0)
+        _ = await mutation.waitUntilReached()
+        let guardedResult = root.appendingPathComponent("guarded.result")
+        let guardedReader = try launchCacheWorker(
+            action: "open",
+            root: root,
+            binary: binary,
+            fixture: fixture,
+            result: guardedResult
+        )
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: guardedResult.path))
+        mutation.resume()
+        try await mutationTask.value
+        let guardedReaderStatus = await guardedReader.wait()
+        XCTAssertEqual(guardedReaderStatus, 0)
+        XCTAssertEqual(try String(contentsOf: guardedResult, encoding: .utf8), "hit")
+
+        // The lease descriptor is O_CLOEXEC. A long-lived exec child started
+        // by a cache holder must not keep the lease alive after its parent closes.
+        let cloexecResult = root.appendingPathComponent("cloexec.result")
+        let cloexecWorker = try launchCacheWorker(
+            action: "cloexec",
+            root: root,
+            binary: binary,
+            fixture: fixture,
+            result: cloexecResult
+        )
+        try await waitForFile(cloexecResult)
+        let mutationStart = ContinuousClock.now
+        try await TraceContentAddressedCache.withExclusiveEntryMutation(
+            cacheDirectory: root.appendingPathComponent("cache"),
+            key: metadata.cacheKey,
+            operation: { _ in }
+        )
+        XCTAssertLessThan(mutationStart.duration(to: .now), .seconds(1))
+        let cloexecStatus = await cloexecWorker.wait()
+        XCTAssertEqual(cloexecStatus, 0)
+    }
+
+    func testCorruptCacheIsQuarantinedAndRebuiltOnce() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-corrupt-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+
+        let first = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let databaseURL = await first.parsed.databaseURL
+        try await first.close()
+        try Data("not-a-sqlite-database".utf8).write(to: databaseURL, options: .atomic)
+
+        let rebuilt = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let rebuiltCacheHit = await rebuilt.cacheHit
+        XCTAssertFalse(rebuiltCacheHit)
+        XCTAssertEqual(parser.count(), 2)
+        XCTAssertTrue(try TraceDatabase(url: databaseURL, readOnly: true).quickCheckIsOK())
+        let corruptRoot = cache.appendingPathComponent(".corrupt", isDirectory: true)
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: corruptRoot.path).count,
+            1
+        )
+        try await rebuilt.close()
+    }
+
+    func testCacheKeyChangesForEveryStableIdentityDimensionAndHasNoDelimiterCollision()
+        throws
+    {
+        let trace = String(repeating: "a", count: 64)
+        let binary = String(repeating: "b", count: 64)
+        let base = try TraceCacheKey(
+            traceSHA256: trace,
+            parserBinarySHA256: binary,
+            upstreamRevision: "revision",
+            schemaAdapterVersion: "2",
+            indexSchemaVersion: 1
+        )
+        let variants = [
+            try TraceCacheKey(
+                traceSHA256: String(repeating: "c", count: 64),
+                parserBinarySHA256: binary,
+                upstreamRevision: "revision",
+                schemaAdapterVersion: "2",
+                indexSchemaVersion: 1
+            ),
+            try TraceCacheKey(
+                traceSHA256: trace,
+                parserBinarySHA256: String(repeating: "d", count: 64),
+                upstreamRevision: "revision",
+                schemaAdapterVersion: "2",
+                indexSchemaVersion: 1
+            ),
+            try TraceCacheKey(
+                traceSHA256: trace,
+                parserBinarySHA256: binary,
+                upstreamRevision: "revision-next",
+                schemaAdapterVersion: "2",
+                indexSchemaVersion: 1
+            ),
+            try TraceCacheKey(
+                traceSHA256: trace,
+                parserBinarySHA256: binary,
+                upstreamRevision: "revision",
+                schemaAdapterVersion: "3",
+                indexSchemaVersion: 1
+            ),
+            try TraceCacheKey(
+                traceSHA256: trace,
+                parserBinarySHA256: binary,
+                upstreamRevision: "revision",
+                schemaAdapterVersion: "2",
+                indexSchemaVersion: 2
+            ),
+        ]
+        XCTAssertTrue(variants.allSatisfy { $0 != base })
+        XCTAssertEqual(Set([base] + variants).count, variants.count + 1)
+
+        let left = try TraceCacheKey(
+            traceSHA256: trace,
+            parserBinarySHA256: binary,
+            upstreamRevision: "a|b",
+            schemaAdapterVersion: "c",
+            indexSchemaVersion: 1
+        )
+        let right = try TraceCacheKey(
+            traceSHA256: trace,
+            parserBinarySHA256: binary,
+            upstreamRevision: "a",
+            schemaAdapterVersion: "b|c",
+            indexSchemaVersion: 1
+        )
+        XCTAssertNotEqual(left.parserKey, right.parserKey)
+    }
+
+    func testCachePromotionIsInvisibleUntilAtomicRename() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-atomic-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+        let barrier = PromotionBarrier()
+        let task = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(beforePromotion: { barrier.pause(at: $0) })
+            )
+        }
+        let publicEntry = await barrier.waitUntilReached()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: publicEntry.appendingPathComponent("database.sqlite").path
+            )
+        )
+        barrier.resume()
+        let session = try await task.value
+        XCTAssertTrue(FileManager.default.fileExists(atPath: publicEntry.path))
+        try await session.close()
+    }
+
+    func testPrivateBuildSessionAndReadyEntryCarryCrashOwnerEvidence() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-owner-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let barrier = PromotionBarrier()
+        let task = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(beforePromotion: { barrier.pause(at: $0) })
+            )
+        }
+        let publicEntry = await barrier.waitUntilReached()
+        let sessionOwners = staging.appendingPathComponent(".owners", isDirectory: true)
+        let buildOwners = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let sessionMarker = try XCTUnwrap(
+            FileManager.default.contentsOfDirectory(
+                at: sessionOwners,
+                includingPropertiesForKeys: nil
+            ).first { $0.pathExtension == "lock" }
+        )
+        let buildMarker = try XCTUnwrap(
+            FileManager.default.contentsOfDirectory(
+                at: buildOwners,
+                includingPropertiesForKeys: nil
+            ).first { $0.pathExtension == "lock" }
+        )
+        XCTAssertFalse(canAcquireExclusiveLock(at: sessionMarker))
+        XCTAssertFalse(canAcquireExclusiveLock(at: buildMarker))
+        XCTAssertEqual(try permissions(at: sessionMarker), 0o600)
+        XCTAssertEqual(try permissions(at: buildMarker), 0o600)
+
+        barrier.resume()
+        let session = try await task.value
+        XCTAssertTrue(try FileManager.default.contentsOfDirectory(atPath: sessionOwners.path).isEmpty)
+        let readyOwners = try FileManager.default.contentsOfDirectory(
+            at: buildOwners,
+            includingPropertiesForKeys: nil
+        )
+        let readyMarker = try XCTUnwrap(readyOwners.first { $0.pathExtension == "lock" })
+        let readyEvidenceURL = try XCTUnwrap(
+            readyOwners.first { $0.pathExtension == "json" }
+        )
+        XCTAssertTrue(canAcquireExclusiveLock(at: readyMarker))
+        let readyEvidence = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: readyEvidenceURL))
+                as? [String: Any]
+        )
+        XCTAssertEqual(readyEvidence["state"] as? String, "ready")
+        let relativePath = try XCTUnwrap(readyEvidence["relativePath"] as? String)
+        XCTAssertEqual(cache.appendingPathComponent(relativePath), publicEntry)
+        try await session.close()
+    }
+
+    func testCancellationAfterPromotionQuarantinesOwnedReadyEntry() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-promote-cancel-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+        let barrier = PromotionBarrier()
+        let task = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(afterPromotion: { barrier.pause(at: $0) })
+            )
+        }
+        let publicEntry = await barrier.waitUntilReached()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: publicEntry.path))
+        task.cancel()
+        barrier.resume()
+        do {
+            _ = try await task.value
+            XCTFail("cancelled post-promotion open must not return Ready")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+            XCTAssertEqual(error.stage, .openingDatabase)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
+        let corruptRoot = cache.appendingPathComponent(".corrupt", isDirectory: true)
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: corruptRoot.path).count,
+            1
+        )
+        XCTAssertTrue(
+            try publicSessionEntries(at: staging).isEmpty
+        )
+    }
+
+    func testCancellationAtMissReadyHandoffRollsBackPublicEntry() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-handoff-cancel-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let handoff = PromotionBarrier()
+        let task = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforeReadyHandoff: { entry, _ in handoff.pause(at: entry) }
+                )
+            )
+        }
+        let publicEntry = await handoff.waitUntilReached()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: publicEntry.path))
+        task.cancel()
+        handoff.resume()
+        do {
+            _ = try await task.value
+            XCTFail("cancelled miss handoff must not return Ready")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+            XCTAssertEqual(error.stage, .openingDatabase)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(
+                atPath: cache.appendingPathComponent(".corrupt").path
+            ).count,
+            1
+        )
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
+    }
+
+    func testPromotionRejectsBuildPathReplacementAfterSourceIdentityCheck() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-source-swap-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let entryRecorder = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforePromotion: { entryRecorder.record($0) },
+                    promotionSourceValidated: { build in
+                        try Self.replacePromotionBuild(at: build)
+                    },
+                    beforePromotionBuildCleanup: { original in
+                        let movedAgain = original.deletingLastPathComponent()
+                            .appendingPathComponent(
+                                ".moved-again-\(original.lastPathComponent)",
+                                isDirectory: true
+                            )
+                        try FileManager.default.moveItem(at: original, to: movedAgain)
+                    }
+                )
+            )
+            XCTFail("a replaced promotion source must fail closed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheIO")
+        }
+        let publicEntry = try XCTUnwrap(entryRecorder.snapshot())
+        XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
+        let corruptRoot = cache.appendingPathComponent(".corrupt", isDirectory: true)
+        let quarantines = try FileManager.default.contentsOfDirectory(
+            at: corruptRoot,
+            includingPropertiesForKeys: nil
+        )
+        XCTAssertEqual(quarantines.count, 1)
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: quarantines[0].appendingPathComponent("marker").path
+            )
+        )
+        let buildStaging = cache.appendingPathComponent(".staging", isDirectory: true)
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(atPath: buildStaging.path)
+                .filter { $0 != ".owners" }
+                .isEmpty
+        )
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: buildStaging.appendingPathComponent(".owners").path
+            ).isEmpty
+        )
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
+    }
+
+    func testPromotionMismatchIsolationFailureRetainsOwnerEvidence() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-source-swap-fail-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let entryRecorder = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforePromotion: { entryRecorder.record($0) },
+                    rollbackInitialProbe: { _ in
+                        throw CocoaError(.fileWriteNoPermission)
+                    },
+                    promotionDestinationRenamed: { entry in
+                        try Self.replacePromotionBuild(at: entry)
+                    }
+                )
+            )
+            XCTFail("failed mismatch isolation must not return Ready")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheCleanupFailed")
+            XCTAssertFalse(error.message.contains(root.path))
+            XCTAssertFalse(error.details.values.contains { $0.contains(root.path) })
+        }
+        let publicEntry = try XCTUnwrap(entryRecorder.snapshot())
+        // The injected isolation failure leaves the exact unexpected public
+        // direntry visible, but the call fails closed and retains the original
+        // build plus its stale owner marker for a later safe retry.
+        XCTAssertTrue(FileManager.default.fileExists(atPath: publicEntry.path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: publicEntry.appendingPathComponent("marker").path
+            )
+        )
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: publicEntry.deletingLastPathComponent()
+                    .appendingPathComponent(
+                        ".displaced-\(publicEntry.lastPathComponent)",
+                        isDirectory: true
+                    ).path
+            )
+        )
+        let buildStaging = cache.appendingPathComponent(".staging", isDirectory: true)
+        let residuals = try FileManager.default.contentsOfDirectory(atPath: buildStaging.path)
+            .filter { $0 != ".owners" }
+        XCTAssertTrue(residuals.isEmpty)
+        let owners = try FileManager.default.contentsOfDirectory(
+            at: buildStaging.appendingPathComponent(".owners", isDirectory: true),
+            includingPropertiesForKeys: nil
+        )
+        let markers = owners.filter { $0.pathExtension == "lock" }
+        let evidenceFiles = owners.filter { $0.pathExtension == "json" }
+        XCTAssertEqual(markers.count, 1)
+        XCTAssertEqual(evidenceFiles.count, 1)
+        XCTAssertTrue(canAcquireExclusiveLock(at: markers[0]))
+        let evidenceData = try Data(contentsOf: evidenceFiles[0])
+        let evidence = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: evidenceData) as? [String: Any]
+        )
+        XCTAssertEqual(evidence["formatVersion"] as? Int, 1)
+        let relativePath = try XCTUnwrap(evidence["relativePath"] as? String)
+        let evidencedDirectory = cache.appendingPathComponent(relativePath)
+            .standardizedFileURL
+        let displacedOriginal = publicEntry.deletingLastPathComponent()
+            .appendingPathComponent(
+                ".displaced-\(publicEntry.lastPathComponent)",
+                isDirectory: true
+            ).standardizedFileURL
+        XCTAssertEqual(evidencedDirectory, displacedOriginal)
+        var evidencedInfo = stat()
+        XCTAssertEqual(
+            evidencedDirectory.path.withCString { Darwin.lstat($0, &evidencedInfo) },
+            0
+        )
+        XCTAssertEqual(
+            (evidence["device"] as? NSNumber)?.uint64Value,
+            UInt64(evidencedInfo.st_dev)
+        )
+        XCTAssertEqual(
+            (evidence["inode"] as? NSNumber)?.uint64Value,
+            UInt64(evidencedInfo.st_ino)
+        )
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: cache.appendingPathComponent(".corrupt").path
+            ).isEmpty
+        )
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
+    }
+
+    func testPromotionRelocationOutsideRecoveryRootPreservesSafeEvidence() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-outside-relocation-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        let outside = root.appendingPathComponent("outside-original", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    promotionSourceValidated: { build in
+                        try Self.replacePromotionBuild(at: build)
+                    },
+                    beforePromotionBuildCleanup: { original in
+                        try FileManager.default.moveItem(at: original, to: outside)
+                    }
+                )
+            )
+            XCTFail("root-external relocation must fail closed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheCleanupFailed")
+            XCTAssertFalse(error.message.contains(root.path))
+            XCTAssertFalse(error.details.values.contains { $0.contains(root.path) })
+        }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: outside.path))
+        var outsideInfo = stat()
+        XCTAssertEqual(outside.path.withCString { Darwin.lstat($0, &outsideInfo) }, 0)
+        let ownersRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let owners = try FileManager.default.contentsOfDirectory(
+            at: ownersRoot,
+            includingPropertiesForKeys: nil
+        )
+        let marker = try XCTUnwrap(owners.first { $0.pathExtension == "lock" })
+        let evidenceURL = try XCTUnwrap(owners.first { $0.pathExtension == "json" })
+        XCTAssertTrue(canAcquireExclusiveLock(at: marker))
+        let evidence = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: evidenceURL))
+                as? [String: Any]
+        )
+        let relativePath = try XCTUnwrap(evidence["relativePath"] as? String)
+        XCTAssertFalse(relativePath.isEmpty)
+        XCTAssertFalse(relativePath.hasPrefix("/"))
+        XCTAssertFalse(relativePath.split(separator: "/").contains(".."))
+        XCTAssertEqual(
+            (evidence["device"] as? NSNumber)?.uint64Value,
+            UInt64(outsideInfo.st_dev)
+        )
+        XCTAssertEqual(
+            (evidence["inode"] as? NSNumber)?.uint64Value,
+            UInt64(outsideInfo.st_ino)
+        )
+    }
+
+    func testPromotionEvidenceCommitRejectsRelocationToCacheSibling() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-evidence-sibling-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let publicEntry = URLRecorder()
+        let relocatedEntry = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforePromotion: { publicEntry.record($0) },
+                    beforePromotionEvidenceCommit: { entry in
+                        let sibling = cache.appendingPathComponent(
+                            ".post-promote-\(UUID().uuidString)",
+                            isDirectory: true
+                        )
+                        try FileManager.default.moveItem(at: entry, to: sibling)
+                        relocatedEntry.record(sibling)
+                    }
+                )
+            )
+            XCTFail("a relocated promoted entry must not be committed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheIO")
+        }
+        let entry = try XCTUnwrap(publicEntry.snapshot())
+        let sibling = try XCTUnwrap(relocatedEntry.snapshot())
+        XCTAssertFalse(FileManager.default.fileExists(atPath: entry.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: sibling.path))
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: cache.appendingPathComponent(".staging/.owners").path
+            ).isEmpty
+        )
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
+    }
+
+    func testPromotionEvidenceCommitOutsideRecoveryRootRetainsOwnerEvidence() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-evidence-outside-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        let outside = root.appendingPathComponent("outside-promoted", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let publicEntry = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforePromotion: { publicEntry.record($0) },
+                    beforePromotionEvidenceCommit: { entry in
+                        try FileManager.default.moveItem(at: entry, to: outside)
+                    }
+                )
+            )
+            XCTFail("a root-external promoted entry must fail closed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheCleanupFailed")
+            XCTAssertFalse(error.message.contains(root.path))
+            XCTAssertFalse(error.details.values.contains { $0.contains(root.path) })
+        }
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: try XCTUnwrap(publicEntry.snapshot()).path)
+        )
+        XCTAssertTrue(FileManager.default.fileExists(atPath: outside.path))
+        let ownersRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let owners = try FileManager.default.contentsOfDirectory(
+            at: ownersRoot,
+            includingPropertiesForKeys: nil
+        )
+        XCTAssertEqual(owners.filter { $0.pathExtension == "lock" }.count, 1)
+        let evidenceURL = try XCTUnwrap(owners.first { $0.pathExtension == "json" })
+        let evidence = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: evidenceURL))
+                as? [String: Any]
+        )
+        let relativePath = try XCTUnwrap(evidence["relativePath"] as? String)
+        XCTAssertFalse(relativePath.hasPrefix("/"))
+        XCTAssertFalse(relativePath.split(separator: "/").contains(".."))
+    }
+
+    func testPromotionRelocationAfterFinalIdentityCheckRetainsReadyEvidence() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-final-commit-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let publicEntry = URLRecorder()
+        let relocatedEntry = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforePromotion: { publicEntry.record($0) },
+                    afterPromotionFinalIdentityCheck: { entry in
+                        let sibling = cache.appendingPathComponent(
+                            ".after-final-check-\(UUID().uuidString)",
+                            isDirectory: true
+                        )
+                        try FileManager.default.moveItem(at: entry, to: sibling)
+                        try FileManager.default.copyItem(at: sibling, to: entry)
+                        relocatedEntry.record(sibling)
+                    }
+                )
+            )
+            XCTFail("a post-check relocation must not return a Ready session")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheIO")
+        }
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: try XCTUnwrap(publicEntry.snapshot()).path)
+        )
+        let sibling = try XCTUnwrap(relocatedEntry.snapshot())
+        XCTAssertFalse(FileManager.default.fileExists(atPath: sibling.path))
+        let ownersRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let owners = try FileManager.default.contentsOfDirectory(
+            at: ownersRoot,
+            includingPropertiesForKeys: nil
+        )
+        XCTAssertTrue(owners.isEmpty)
+    }
+
+    func testReadyHandoffRejectsValidPublicReplacement() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-handoff-swap-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let original = URLRecorder()
+        let relocated = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforeReadyHandoff: { entry, _ in
+                        original.record(entry)
+                        let sibling = cache.appendingPathComponent(
+                            ".handoff-original-\(UUID().uuidString)",
+                            isDirectory: true
+                        )
+                        do {
+                            try FileManager.default.moveItem(at: entry, to: sibling)
+                            try FileManager.default.copyItem(at: sibling, to: entry)
+                        } catch {
+                            XCTFail("failed to install deterministic handoff replacement")
+                            return
+                        }
+                        relocated.record(sibling)
+                    }
+                )
+            )
+            XCTFail("handoff must remain bound to the promoted directory inode")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheIO")
+        }
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: try XCTUnwrap(original.snapshot()).path)
+        )
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: try XCTUnwrap(relocated.snapshot()).path)
+        )
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: cache.appendingPathComponent(".staging/.owners").path
+            ).isEmpty
+        )
+    }
+
+    func testReadyHandoffRejectsRepositoryDirectoryABA() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-repository-aba-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let originalSibling = URLRecorder()
+        let replacementSibling = URLRecorder()
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    afterPromotion: { entry in
+                        let original = cache.appendingPathComponent(
+                            ".aba-original-\(UUID().uuidString)",
+                            isDirectory: true
+                        )
+                        do {
+                            try FileManager.default.moveItem(at: entry, to: original)
+                            try FileManager.default.copyItem(at: original, to: entry)
+                            originalSibling.record(original)
+                        } catch {
+                            XCTFail("failed to install ABA replacement")
+                        }
+                    },
+                    beforeReadyHandoff: { entry, _ in
+                        guard let original = originalSibling.snapshot() else {
+                            XCTFail("missing ABA original")
+                            return
+                        }
+                        let replacement = cache.appendingPathComponent(
+                            ".aba-replacement-\(UUID().uuidString)",
+                            isDirectory: true
+                        )
+                        do {
+                            try FileManager.default.moveItem(at: entry, to: replacement)
+                            try FileManager.default.moveItem(at: original, to: entry)
+                            replacementSibling.record(replacement)
+                        } catch {
+                            XCTFail("failed to restore ABA original")
+                        }
+                    }
+                )
+            )
+            XCTFail("repository connection must remain bound to the public database inode")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheIO")
+        }
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: try XCTUnwrap(replacementSibling.snapshot()).path
+            )
+        )
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
+    }
+
+    func testCacheMissReadyHandoffRejectsMetadataReplacement() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-miss-metadata-swap-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforeReadyHandoff: { entry, _ in
+                        let metadata = entry.appendingPathComponent("metadata.json")
+                        let original = cache.appendingPathComponent(
+                            ".miss-metadata-original-\(UUID().uuidString)"
+                        )
+                        do {
+                            try FileManager.default.moveItem(at: metadata, to: original)
+                            try FileManager.default.copyItem(at: original, to: metadata)
+                        } catch {
+                            XCTFail("failed to install metadata replacement")
+                        }
+                    }
+                )
+            )
+            XCTFail("miss handoff must remain bound to validated metadata bytes")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheIO")
+        }
+    }
+
+    func testCacheHitMetadataReplacementIsQuarantinedAndRebuilt() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-hit-metadata-swap-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+        let seeded = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        try await seeded.close()
+        let firstHandoff = OneShotFlag()
+        let reopened = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            hooks: TraceCacheTestHooks(
+                beforeReadyHandoff: { entry, _ in
+                    guard firstHandoff.take() else { return }
+                    let metadata = entry.appendingPathComponent("metadata.json")
+                    let original = cache.appendingPathComponent(
+                        ".hit-metadata-original-\(UUID().uuidString)"
+                    )
+                    do {
+                        try FileManager.default.moveItem(at: metadata, to: original)
+                        try FileManager.default.copyItem(at: original, to: metadata)
+                    } catch {
+                        XCTFail("failed to install metadata replacement")
+                    }
+                }
+            )
+        )
+        let wasHit = await reopened.cacheHit
+        XCTAssertFalse(wasHit)
+        XCTAssertEqual(parser.count(), 2)
+        try await reopened.close()
+    }
+
+    func testOwnerEvidenceReplacementFailurePreservesLastCommittedJSON() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-evidence-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let directory = try await TraceContentAddressedCache.createOwnedDirectory(
+            root: root,
+            prefix: "session-"
+        )
+        let previous = try Data(contentsOf: directory.ownerEvidenceURL)
+        do {
+            try TraceContentAddressedCache.updateOwnerEvidence(
+                for: directory,
+                beforeReplace: { temporary in
+                    let descriptor = temporary.path.withCString {
+                        Darwin.open($0, O_WRONLY | O_TRUNC | O_NOFOLLOW | O_CLOEXEC)
+                    }
+                    guard descriptor >= 0 else { throw CocoaError(.fileWriteUnknown) }
+                    defer { _ = Darwin.close(descriptor) }
+                    var partial = UInt8(ascii: "{")
+                    guard Darwin.write(descriptor, &partial, 1) == 1,
+                        Darwin.fsync(descriptor) == 0
+                    else { throw CocoaError(.fileWriteUnknown) }
+                    throw CocoaError(.fileWriteNoPermission)
+                }
+            )
+            XCTFail("injected evidence replace failure must throw")
+        } catch {}
+        let afterFailure = try Data(contentsOf: directory.ownerEvidenceURL)
+        XCTAssertEqual(afterFailure, previous)
+        let evidence = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: afterFailure) as? [String: Any]
+        )
+        XCTAssertEqual(evidence["formatVersion"] as? Int, 1)
+        XCTAssertEqual(
+            (evidence["device"] as? NSNumber)?.uint64Value,
+            directory.device
+        )
+        XCTAssertEqual(
+            (evidence["inode"] as? NSNumber)?.uint64Value,
+            directory.inode
+        )
+        try await TraceContentAddressedCache.removeOwnedDirectory(
+            directory,
+            removalHook: nil
+        )
+    }
+
+    func testOwnedDirectoryHandleCreationFailureCleansDirectoryAndEvidence() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-handle-fail-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        do {
+            _ = try await TraceContentAddressedCache.createOwnedDirectory(
+                root: root,
+                prefix: "session-",
+                handleCreationHook: { _ in throw CocoaError(.fileReadNoPermission) }
+            )
+            XCTFail("injected handle creation failure must throw")
+        } catch {}
+        let contents = try FileManager.default.contentsOfDirectory(atPath: root.path)
+        XCTAssertEqual(contents, [".owners"])
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: root.appendingPathComponent(".owners").path
+            ).isEmpty
+        )
+    }
+
+    func testOwnedDirectoryIdentityFailureDoesNotDeletePathReplacement() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-identity-swap-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let originalPath = URLRecorder()
+        do {
+            _ = try await TraceContentAddressedCache.createOwnedDirectory(
+                root: root,
+                prefix: "session-",
+                identityReadyHook: { directory in
+                    originalPath.record(directory)
+                    try Self.replacePromotionBuild(at: directory)
+                    throw CancellationError()
+                }
+            )
+            XCTFail("cancelled identity setup must not return an owned directory")
+        } catch is CancellationError {}
+        let replacement = try XCTUnwrap(originalPath.snapshot())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: replacement.path))
+        XCTAssertEqual(
+            try String(
+                contentsOf: replacement.appendingPathComponent("marker"),
+                encoding: .utf8
+            ),
+            "replacement"
+        )
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: replacement.deletingLastPathComponent()
+                    .appendingPathComponent(
+                        ".displaced-\(replacement.lastPathComponent)",
+                        isDirectory: true
+                    ).path
+            )
+        )
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: root.appendingPathComponent(".owners").path
+            ).isEmpty
+        )
+    }
+
+    func testInjectedInitialDirectoryOpenFailureRetainsBoundedCreatingEvidence() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-unbound-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        do {
+            _ = try await TraceContentAddressedCache.createOwnedDirectory(
+                root: root,
+                prefix: "session-",
+                injectDirectoryHandleOpenFailure: true
+            )
+            XCTFail("an unbound created directory must fail closed")
+        } catch is TraceStorageTransactionError {}
+        let residual = try XCTUnwrap(
+            FileManager.default.contentsOfDirectory(
+                at: root,
+                includingPropertiesForKeys: nil
+            ).first { $0.lastPathComponent.hasPrefix("session-") }
+        )
+        XCTAssertTrue(FileManager.default.fileExists(atPath: residual.path))
+        let ownersRoot = root.appendingPathComponent(".owners", isDirectory: true)
+        let owners = try FileManager.default.contentsOfDirectory(
+            at: ownersRoot,
+            includingPropertiesForKeys: nil
+        )
+        XCTAssertEqual(owners.filter { $0.pathExtension == "lock" }.count, 1)
+        let evidenceURL = try XCTUnwrap(owners.first { $0.pathExtension == "json" })
+        let evidence = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: evidenceURL))
+                as? [String: Any]
+        )
+        XCTAssertEqual(evidence["state"] as? String, "creating")
+        XCTAssertNil(evidence["device"])
+        XCTAssertNil(evidence["inode"])
+        let relativePath = try XCTUnwrap(evidence["relativePath"] as? String)
+        XCTAssertFalse(relativePath.isEmpty)
+        XCTAssertFalse(relativePath.hasPrefix("/"))
+        XCTAssertFalse(relativePath.split(separator: "/").contains(".."))
+    }
+
+    func testFirstReentrantDirectoryHookRunsAfterIdentityBinding() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-bound-swap-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let publicPath = URLRecorder()
+        let directory = try await TraceContentAddressedCache.createOwnedDirectory(
+            root: root,
+            prefix: "session-",
+            directoryBindingHook: { path in
+                publicPath.record(path)
+                try Self.replacePromotionBuild(at: path)
+            }
+        )
+        let replacement = try XCTUnwrap(publicPath.snapshot())
+        XCTAssertNotEqual(directory.url, replacement)
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: replacement.appendingPathComponent("marker").path
+            )
+        )
+        XCTAssertTrue(FileManager.default.fileExists(atPath: directory.url.path))
+        try await TraceContentAddressedCache.removeOwnedDirectory(
+            directory,
+            removalHook: nil
+        )
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.url.path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: replacement.appendingPathComponent("marker").path
+            )
+        )
+    }
+
+    func testOwnedDirectoryMkdirEEXISTNeverClaimsForeignDirectory() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-mkdir-race-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let foreign = URLRecorder()
+        do {
+            _ = try await TraceContentAddressedCache.createOwnedDirectory(
+                root: root,
+                prefix: "session-",
+                beforeDirectoryMkdirHook: { target in
+                    foreign.record(target)
+                    try FileManager.default.createDirectory(
+                        at: target,
+                        withIntermediateDirectories: false
+                    )
+                    try Data("foreign".utf8).write(
+                        to: target.appendingPathComponent("marker")
+                    )
+                }
+            )
+            XCTFail("mkdir EEXIST must not claim a foreign directory")
+        } catch {}
+        let target = try XCTUnwrap(foreign.snapshot())
+        XCTAssertEqual(
+            try String(contentsOf: target.appendingPathComponent("marker")),
+            "foreign"
+        )
+        XCTAssertTrue(
+            try FileManager.default.contentsOfDirectory(
+                atPath: root.appendingPathComponent(".owners").path
+            ).isEmpty
+        )
+    }
+
+    func testCacheLeaseCoversHitValidationThroughReadyHandoff() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-hit-lease-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+        let seeded = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let seededMetadata = await seeded.cacheMetadata
+        let metadata = try XCTUnwrap(seededMetadata)
+        try await seeded.close()
+
+        let validation = CancellationBarrier()
+        let openTask = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                repositoryValidationHook: { await validation.pauseUntilCancelled() }
+            )
+        }
+        await validation.waitUntilReached()
+        let contention = OneShotSignal()
+        let mutation = PromotionBarrier()
+        let mutationTask = Task {
+            try await TraceContentAddressedCache.withExclusiveEntryMutation(
+                cacheDirectory: cache,
+                key: metadata.cacheKey,
+                contentionHook: { contention.signal() },
+                operation: { mutation.pause(at: $0) }
+            )
+        }
+        await contention.wait()
+        XCTAssertFalse(mutation.hasReached())
+        openTask.cancel()
+        do {
+            _ = try await openTask.value
+            XCTFail("cancelled hit validation must not return Ready")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+        }
+        _ = await mutation.waitUntilReached()
+        mutation.resume()
+        try await mutationTask.value
+    }
+
+    func testCacheLeaseCoversMissPromotionThroughReadyHandoff() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-miss-lease-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let handoff = PromotionBarrier()
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+        let task = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    beforeReadyHandoff: { entry, _ in handoff.pause(at: entry) }
+                )
+            )
+        }
+        _ = await handoff.waitUntilReached()
+        XCTAssertFalse(task.isCancelled)
+        // The miss owns the key lock and exclusive lease through this barrier;
+        // an external mutation cannot enter before the Ready handoff finishes.
+        let metadataData = try Data(contentsOf: try XCTUnwrap(
+            FileManager.default.enumerator(at: cache, includingPropertiesForKeys: nil)?
+                .compactMap { $0 as? URL }
+                .first { $0.lastPathComponent == "metadata.json" }
+        ))
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let metadata = try decoder.decode(TraceCacheMetadata.self, from: metadataData)
+        let mutation = PromotionBarrier()
+        let mutationTask = Task {
+            try await TraceContentAddressedCache.withExclusiveEntryMutation(
+                cacheDirectory: cache,
+                key: metadata.cacheKey,
+                operation: { mutation.pause(at: $0) }
+            )
+        }
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertFalse(mutation.hasReached())
+        handoff.resume()
+        let session = try await task.value
+        try await session.close()
+        _ = await mutation.waitUntilReached()
+        mutation.resume()
+        try await mutationTask.value
+    }
+
+    func testCacheRollbackProbeFailureOverridesCancellationWithoutPaths() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-probe-fail-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let barrier = PromotionBarrier()
+        let task = Task {
+            try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cache,
+                hooks: TraceCacheTestHooks(
+                    afterPromotion: { barrier.pause(at: $0) },
+                    rollbackInitialProbe: { _ in throw CocoaError(.fileReadNoPermission) }
+                )
+            )
+        }
+        let publicEntry = await barrier.waitUntilReached()
+        task.cancel()
+        barrier.resume()
+        do {
+            _ = try await task.value
+            XCTFail("rollback probe failure must fail closed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.details["reason"], "cacheCleanupFailed")
+            XCTAssertFalse(error.message.contains(root.path))
+            XCTAssertFalse(error.details.values.contains { $0.contains(root.path) })
+        }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: publicEntry.path))
+    }
+
+    func testEphemeralSessionCloseRemovesReadyDatabase() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-ephemeral-close-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let session = try await TraceSession.open(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging,
+            storagePolicy: .ephemeral
+        )
+        let parsed = await session.parsed
+        let cacheHit = await session.cacheHit
+        XCTAssertFalse(cacheHit)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
+        try await session.close()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
+        XCTAssertTrue(
+            try publicSessionEntries(at: staging).isEmpty
+        )
+    }
+
+    func testEphemeralReadyHandoffRejectsDirectoryAndRepositoryABA() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-ephemeral-handoff-aba-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let publicPath = URLRecorder()
+        let originalSibling = URLRecorder()
+        do {
+            _ = try await TraceSession.open(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                repositoryValidationHook: {
+                    do {
+                        let entry = try XCTUnwrap(
+                            try FileManager.default.contentsOfDirectory(
+                                at: staging,
+                                includingPropertiesForKeys: nil
+                            ).first { $0.lastPathComponent.hasPrefix("session-") }
+                        )
+                        let sibling = staging.appendingPathComponent(
+                            ".ephemeral-original-\(UUID().uuidString)",
+                            isDirectory: true
+                        )
+                        try FileManager.default.moveItem(at: entry, to: sibling)
+                        try FileManager.default.copyItem(at: sibling, to: entry)
+                        publicPath.record(entry)
+                        originalSibling.record(sibling)
+                    } catch {
+                        XCTFail("failed to install ephemeral ABA replacement")
+                    }
+                }
+            )
+            XCTFail("ephemeral handoff must bind its directory and opened database")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error.stage, .openingDatabase)
+        }
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: try XCTUnwrap(publicPath.snapshot()).path)
+        )
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: try XCTUnwrap(originalSibling.snapshot()).path
+            )
+        )
+    }
+
+    func testEphemeralCloseFailureRetainsOwnershipForSerializedRetry() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-ephemeral-close-retry-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let probe = BlockingOneShotProbeFailure()
+        let session = try await TraceSession.open(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging,
+            repositoryValidationHook: nil,
+            directoryInitialProbeHook: { try probe.invoke($0) }
+        )
+        let parsed = await session.parsed
+        let first = Task { try await session.close() }
+        await probe.waitUntilReached()
+        let second = Task { try await session.close() }
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(probe.count(), 1)
+        probe.resume()
+        for close in [first, second] {
+            do {
+                try await close.value
+                XCTFail("all waiters must observe the shared cleanup failure")
+            } catch let error as ArkTraceError {
+                XCTAssertEqual(error.code, .traceParseFailed)
+                XCTAssertEqual(error.details["reason"], "sessionCleanupFailed")
+            }
+        }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
+        XCTAssertEqual(probe.count(), 1)
+
+        try await session.close()
+        XCTAssertEqual(probe.count(), 2)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
+    }
+
+    func testEphemeralStagingRootSymlinkIsRejectedWithoutWriteThrough() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-ephemeral-symlink-\(UUID().uuidString)")
+        let victim = root.appendingPathComponent("victim", isDirectory: true)
+        let stagingLink = root.appendingPathComponent("staging", isDirectory: true)
+        try FileManager.default.createDirectory(at: victim, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(at: stagingLink, withDestinationURL: victim)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        do {
+            _ = try await TraceSession.open(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: stagingLink,
+                storagePolicy: .ephemeral
+            )
+            XCTFail("ephemeral staging symlink must fail closed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceParseFailed)
+            XCTAssertEqual(error.stage, .preparing)
+        }
+        XCTAssertTrue(try FileManager.default.contentsOfDirectory(atPath: victim.path).isEmpty)
+    }
+
+    func testEphemeralCancellationCleanupFailureOverridesCancelled() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-ephemeral-cleanup-fail-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let barrier = CancellationBarrier()
+        let task = Task {
+            try await TraceSession.open(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                repositoryValidationHook: { await barrier.pauseUntilCancelled() },
+                directoryRemovalHook: { _ in throw CocoaError(.fileWriteNoPermission) }
+            )
+        }
+        await barrier.waitUntilReached()
+        task.cancel()
+        do {
+            _ = try await task.value
+            XCTFail("cleanup failure must override cancellation")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceParseFailed)
+            XCTAssertEqual(error.stage, .openingDatabase)
+            XCTAssertEqual(error.details["reason"], "sessionCleanupFailed")
+            XCTAssertFalse(error.message.contains(staging.path))
+            XCTAssertFalse(error.details.values.contains { $0.contains(staging.path) })
+        }
+        let publicSessions = try FileManager.default.contentsOfDirectory(atPath: staging.path)
+            .filter { $0.hasPrefix("session-") }
+        XCTAssertTrue(publicSessions.isEmpty)
+        let quarantines = try FileManager.default.contentsOfDirectory(atPath: staging.path)
+            .filter { $0.hasPrefix(".arktrace-cleanup-") }
+        XCTAssertEqual(quarantines.count, 1)
+    }
+
+    func testCacheRootSymlinkIsRejectedWithoutWritingThroughIt() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-symlink-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let victim = root.appendingPathComponent("victim", isDirectory: true)
+        let cacheLink = root.appendingPathComponent("cache", isDirectory: true)
+        try FileManager.default.createDirectory(at: victim, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(at: cacheLink, withDestinationURL: victim)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        do {
+            _ = try await TraceSession.openCached(
+                source: fixture,
+                parser: try TraceStreamerProcessParser(executableURL: binary),
+                stagingDirectory: staging,
+                cacheDirectory: cacheLink
+            )
+            XCTFail("cache root symlink must fail closed")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceCacheCorrupt)
+            XCTAssertEqual(error.stage, .cacheLookup)
+        }
+        XCTAssertTrue(
+            (try FileManager.default.contentsOfDirectory(atPath: victim.path)).isEmpty
+        )
+    }
+}
+
+private extension Array {
+    func asyncMap<T>(_ transform: (Element) async -> T) async -> [T] {
+        var result: [T] = []
+        result.reserveCapacity(count)
+        for element in self {
+            result.append(await transform(element))
+        }
+        return result
     }
 }

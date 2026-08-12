@@ -21,7 +21,7 @@ locked real trace
   → metadata/process/thread typed queries
 ```
 
-2026-08-12 的 clean gate 实测结果：94 tests、0 failed、0 skipped。Gate 在执行测试前验证 binary、manifest、architecture、fixture/license 的 SHA-256、byte count 与 Git blob OID；任一缺失或漂移都会 fail closed。
+2026-08-12 的 Phase 1 clean gate 实测结果：94 tests、0 failed、0 skipped。Gate 在执行测试前验证 binary、manifest、architecture、fixture/license 的 SHA-256、byte count 与 Git blob OID；任一缺失或漂移都会 fail closed。
 
 ## 2. 环境与 pinned identity
 
@@ -86,6 +86,13 @@ Ready DB hash 是该次 gate 的运行证据；locked provenance 以建索引前
 | 合计 | 94 |
 
 普通 `swift test` 允许在未安装本地 binary 时跳过昂贵 real integration，方便 contributor 运行纯单元测试；`scripts/test_phase1.sh` 明确禁止任何 skip，并把 locked scheduling fixture 注入所有真实 integration。
+
+### Current additive regression rerun
+
+Phase 1 上表是冻结的阶段完成证据，不随后续阶段新增测试改写。2026-08-13 在
+P2-T01 review findings 修复后重跑同一 `scripts/test_phase1.sh`：133 tests、0 failed、0 skipped；
+这是 Phase 2 additive regression 证据，详细增量记录于
+[PHASE_2_TASKS.md](./PHASE_2_TASKS.md)，不改写上述 94-test Phase 1 主表。
 
 ## 6. 已知限制与仍开放发布门
 

@@ -5,7 +5,7 @@ import Foundation
 public enum TraceLoadingStage: String, Codable, Sendable, CaseIterable {
     case preparing
     case hashing
-    /// Reserved for the Phase 2 content-addressed cache; Phase 1 never emits it.
+    /// Emitted by Runtime while the Phase 2 content-addressed cache is checked.
     case cacheLookup
     case parsing
     case validating
@@ -106,6 +106,10 @@ public struct ParsedTrace: Sendable {
 /// directory. Implementations must never delete or overwrite an existing path.
 public protocol TraceParser: Sendable {
     func identity() async throws -> TraceParserIdentity
+    /// Identity sufficient to locate an existing cache entry. This method
+    /// must validate the identity-bearing parser bytes without launching the
+    /// parser executable; a cache miss is where `parse` may launch it.
+    func cacheIdentity() async throws -> TraceParserIdentity
     func parse(
         source: URL,
         destination: URL,

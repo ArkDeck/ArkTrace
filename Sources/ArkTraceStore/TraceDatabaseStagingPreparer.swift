@@ -6,6 +6,9 @@ import Foundation
 /// it as a Ready database. Every identifier below is an ArkTrace constant;
 /// no caller or upstream text is interpolated into DDL.
 public enum TraceDatabaseStagingPreparer {
+    /// Public cache identity for the currently accepted TraceStreamer schema
+    /// contract. Runtime includes this value in every content-addressed key.
+    public static let schemaAdapterVersion = TraceSchemaAdapter.version
     public static let indexVersion = 1
 
     private struct IndexDefinition {
@@ -14,6 +17,26 @@ public enum TraceDatabaseStagingPreparer {
         let columns: [String]
         let bootstrapForValidation: Bool
         let requiredForReady: Bool
+        let unique: Bool
+        let partial: Bool
+
+        init(
+            name: String,
+            table: String,
+            columns: [String],
+            bootstrapForValidation: Bool,
+            requiredForReady: Bool,
+            unique: Bool = false,
+            partial: Bool = false
+        ) {
+            self.name = name
+            self.table = table
+            self.columns = columns
+            self.bootstrapForValidation = bootstrapForValidation
+            self.requiredForReady = requiredForReady
+            self.unique = unique
+            self.partial = partial
+        }
     }
 
     private static let indexes = [
@@ -166,13 +189,99 @@ public enum TraceDatabaseStagingPreparer {
         Set(indexes.filter(\.requiredForReady).map(\.name))
     }
 
+    /// Verifies the exact versioned Ready index contract without enumerating
+    /// arbitrary sqlite_master rows. Optional definitions become applicable
+    /// when their table and every indexed column are present in this schema.
+    static func validateReadyIndexes(in db: TraceDatabase) throws {
+        let available = try availableColumns(in: db)
+        let applicable = indexes.filter { definition in
+            guard let columns = available[definition.table] else { return false }
+            return definition.columns.allSatisfy(columns.contains)
+        }
+        let applicableNames = Set(applicable.map(\.name))
+        guard indexes.allSatisfy({ !$0.requiredForReady || applicableNames.contains($0.name) })
+        else {
+            throw invalidReadyIndexes()
+        }
+
+        for definition in applicable {
+            try Task.checkCancellation()
+            let rows = try db.query(
+                """
+                SELECT name, \"unique\", partial
+                FROM pragma_index_list(?)
+                WHERE name = ?
+                LIMIT 2
+                """,
+                bindings: [.text(definition.table), .text(definition.name)],
+                vmStepBudget: 25_000,
+                stage: .openingDatabase,
+                observesTaskCancellation: true
+            ) { row in
+                (row.text(0), row.int64(1), row.int64(2))
+            }
+            guard rows.count == 1,
+                rows[0].0 == definition.name,
+                rows[0].1 == (definition.unique ? 1 : 0),
+                rows[0].2 == (definition.partial ? 1 : 0)
+            else {
+                throw invalidReadyIndexes()
+            }
+
+            let columnRows = try db.query(
+                """
+                SELECT seqno, cid, name, desc, coll, key
+                FROM pragma_index_xinfo(?)
+                WHERE key = 1
+                ORDER BY seqno
+                LIMIT ?
+                """,
+                bindings: [
+                    .text(definition.name),
+                    .int64(Int64(definition.columns.count + 1)),
+                ],
+                vmStepBudget: 25_000,
+                stage: .openingDatabase,
+                observesTaskCancellation: true
+            ) { row in
+                (
+                    row.int64(0), row.int64(1), row.text(2),
+                    row.int64(3), row.text(4), row.int64(5)
+                )
+            }
+            guard columnRows.count == definition.columns.count else {
+                throw invalidReadyIndexes()
+            }
+            for (offset, expectedColumn) in definition.columns.enumerated() {
+                let actual = columnRows[offset]
+                guard actual.0 == Int64(offset),
+                    actual.1 != nil,
+                    actual.2 == expectedColumn,
+                    actual.3 == 0,
+                    actual.4?.uppercased() == "BINARY",
+                    actual.5 == 1
+                else {
+                    throw invalidReadyIndexes()
+                }
+            }
+        }
+    }
+
+    private static func invalidReadyIndexes() -> ArkTraceError {
+        ArkTraceError(
+            code: .traceDatabaseInvalid,
+            stage: .openingDatabase,
+            message: "Ready database index contract is invalid"
+        )
+    }
+
     private static func availableColumns(
         in db: TraceDatabase
     ) throws -> [String: Set<String>] {
-        let tables = try db.tableNames()
         var result: [String: Set<String>] = [:]
-        for table in tables where TraceDatabase.isSafeIdentifier(table) {
-            result[table] = Set(try db.columns(of: table).map(\.name))
+        for table in Set(indexes.map(\.table)) {
+            let columns = Set(try db.columns(of: table).map(\.name))
+            if !columns.isEmpty { result[table] = columns }
         }
         return result
     }

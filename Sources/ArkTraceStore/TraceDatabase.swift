@@ -5,6 +5,16 @@ import SQLite3
 
 private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
+public struct TraceDatabaseFileIdentity: Equatable, Sendable {
+    public let device: UInt64
+    public let inode: UInt64
+
+    public init(device: UInt64, inode: UInt64) {
+        self.device = device
+        self.inode = inode
+    }
+}
+
 private final class SQLiteQueryProgressController {
     private var callbacksRemaining: Int?
     private let observesTaskCancellation: Bool
@@ -88,6 +98,8 @@ final class TraceDatabase {
     }
 
     private var handle: OpaquePointer
+    private let bindingDescriptor: Int32?
+    let fileIdentity: TraceDatabaseFileIdentity?
 
     init(url: URL, readOnly: Bool, createIfMissing: Bool = true) throws {
         var db: OpaquePointer?
@@ -103,6 +115,42 @@ final class TraceDatabase {
             URL(fileURLWithPath: String(cString: $0), isDirectory: true)
                 .appendingPathComponent(url.lastPathComponent)
         } ?? url
+        let bindingDescriptor: Int32?
+        let sqliteOpenPath: String
+        let fileIdentity: TraceDatabaseFileIdentity?
+        if readOnly {
+            let descriptor = openURL.path.withCString {
+                Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+            }
+            guard descriptor >= 0 else {
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .openingDatabase,
+                    message: "Cannot open SQLite database"
+                )
+            }
+            var info = stat()
+            guard Darwin.fstat(descriptor, &info) == 0,
+                (info.st_mode & S_IFMT) == S_IFREG
+            else {
+                _ = Darwin.close(descriptor)
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .openingDatabase,
+                    message: "Cannot open SQLite database"
+                )
+            }
+            bindingDescriptor = descriptor
+            sqliteOpenPath = "/dev/fd/\(descriptor)"
+            fileIdentity = TraceDatabaseFileIdentity(
+                device: UInt64(info.st_dev),
+                inode: UInt64(info.st_ino)
+            )
+        } else {
+            bindingDescriptor = nil
+            sqliteOpenPath = openURL.path
+            fileIdentity = nil
+        }
         var flags = readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE
         if !readOnly, createIfMissing {
             flags |= SQLITE_OPEN_CREATE
@@ -110,11 +158,12 @@ final class TraceDatabase {
         if readOnly || !createIfMissing {
             flags |= SQLITE_OPEN_NOFOLLOW
         }
-        let rc = sqlite3_open_v2(openURL.path, &db, flags, nil)
+        let rc = sqlite3_open_v2(sqliteOpenPath, &db, flags, nil)
         guard rc == SQLITE_OK, let db else {
             if let db {
                 sqlite3_close_v2(db)
             }
+            if let bindingDescriptor { _ = Darwin.close(bindingDescriptor) }
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .openingDatabase,
@@ -123,10 +172,13 @@ final class TraceDatabase {
             )
         }
         self.handle = db
+        self.bindingDescriptor = bindingDescriptor
+        self.fileIdentity = fileIdentity
     }
 
     deinit {
         sqlite3_close_v2(handle)
+        if let bindingDescriptor { _ = Darwin.close(bindingDescriptor) }
     }
 
     func query<T>(

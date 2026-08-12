@@ -88,6 +88,20 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     public func identity() async throws -> TraceParserIdentity {
+        try await verifiedIdentity(launchesVersionProbe: true)
+    }
+
+    /// Cache lookup verifies the exact binary snapshot, manifest SHA and
+    /// Mach-O identity but does not execute `trace_streamer --version`. A miss
+    /// still runs the full parse path, which re-verifies the reported version
+    /// before producing a Ready database.
+    public func cacheIdentity() async throws -> TraceParserIdentity {
+        try await verifiedIdentity(launchesVersionProbe: false)
+    }
+
+    private func verifiedIdentity(
+        launchesVersionProbe: Bool
+    ) async throws -> TraceParserIdentity {
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
         let snapshotParentDirectory = identitySnapshotParentDirectory
@@ -119,9 +133,14 @@ public struct TraceStreamerProcessParser: TraceParser {
         }
         let result: Result<TraceParserIdentity, Error>
         do {
-            let version = try await Self.reportedVersionOffCallerExecutor(
-                executableURL: snapshot.executableURL)
-            try Self.validateReportedVersion(version, manifest: snapshot.manifest)
+            let version: String
+            if launchesVersionProbe {
+                version = try await Self.reportedVersionOffCallerExecutor(
+                    executableURL: snapshot.executableURL)
+                try Self.validateReportedVersion(version, manifest: snapshot.manifest)
+            } else {
+                version = snapshot.manifest.reportedVersion
+            }
             let verificationTask = Task.detached { try Self.verify(snapshot: snapshot) }
             try await withTaskCancellationHandler {
                 try await verificationTask.value

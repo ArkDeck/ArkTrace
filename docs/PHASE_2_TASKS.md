@@ -1,15 +1,15 @@
 # ArkTrace Phase 2 任务清单
 
-> 状态：Planned — Phase 1 Exit 后进入
+> 状态：Active — P2-T01 已完成，P2-T02 开始实施
 > 阶段：CLI Vertical Slice
 > 验收目标：Agent 不依赖 UI 即可 inspect、summary、读取 process/thread
 
 ## 1. 进入条件
 
-- [ ] [Phase 1](./PHASE_1_TASKS.md) Exit Checklist 全部完成；
-- [ ] real Parser integration 零 skip；
-- [ ] Parser identity、schema/index version 和 ready DB contract 稳定；
-- [ ] 不存在会改变 CLI JSON provenance 的未决 Phase 1 contract。
+- [x] [Phase 1](./PHASE_1_TASKS.md) Exit Checklist 全部完成；
+- [x] real Parser integration 零 skip；
+- [x] Parser identity、schema/index version 和 ready DB contract 稳定；
+- [x] 不存在会改变 CLI JSON provenance 的未决 Phase 1 contract。
 
 ## 2. 阶段输出
 
@@ -58,12 +58,55 @@ P2-T01、P2-T02、P2-T03 可以并行。
 
 **验收**
 
-- [ ] 第二次打开不启动 parser，inspect 返回 cacheHit=true；
-- [ ] parser/schema/index identity 改变产生新 entry；
-- [ ] concurrent open 只解析一次；
-- [ ] corrupt cache 不伪装成 input failure；
-- [ ] atomic promotion 后 consumer 看不到 partial entry；
-- [ ] cache/temp 权限仅当前用户。
+- [x] 第二次打开不启动 exporter parse，session 返回 cacheHit=true；
+- [x] parser/schema/index identity 改变产生新 entry；
+- [x] concurrent open 只解析一次；
+- [x] corrupt cache 不伪装成 input failure；
+- [x] atomic promotion 后 consumer 看不到 partial entry；
+- [x] cache/temp 权限仅当前用户。
+
+实现证据（2026-08-13，独立 review clean）：稳定 length-prefixed cache
+key、path-free metadata、统一 `key lock → entry lease` 锁序、跨进程 `flock`
+single-flight/cancellable waiter/CLOEXEC/active lease、private validation + `RENAME_EXCL`
+promotion、exact applicable Ready index contract、corrupt quarantine/rebuild、post-promotion
+owned-entry cancellation rollback 与 secure explicit ephemeral session close 均有确定性回归。
+最终 Ready handoff 在 cancellation 线性化点前保持 exclusive lease；ephemeral close 的
+owned cleanup 失败会保留 public/private residual 并序列化重试；promotion 用打开目录的
+`fstat` 固定 build identity，rename 前后都核验实际 direntry；拒绝路径替换时同时追踪
+原 build 的 descriptor-resolved residual 与 unexpected direntry，隔离失败则保留 owner
+marker/liveness evidence 并返回 typed cleanup failure。owned directory handle 会持有到
+cleanup 完成，路径再次移动时以 exact device/inode 在 cache recovery root 内最多枚举
+4,096 项重新定位；root 外位置 fail closed。稳定 `.lock` 与 evidence 分离，evidence 以
+同目录 temp fsync + atomic rename + parent fsync 的 bounded JSON 记录
+format/state/last-committed relative path；已绑定的 session/build/Ready 状态同时记录
+exact device/inode，供 P3-T05 在取得 exclusive owner lock 后有界恢复。首次目录
+open/fstat 尚未绑定时也先持久化 `.creating` 记录；初始 bind 失败时绝不从可替换路径
+fallback 推断 identity，且 mkdir 与首次真实 open/fstat 之间不执行可重入 callback，后续只能
+fail closed，不能按路径猜测删除。所有 session/build 私有目录同时创建
+`.owners/<name>.lock`，创建进程以
+`O_CLOEXEC` exclusive `flock` 持有；崩溃后内核释放锁，因此后续清理可区分 live/stale，
+而 P2-T01 不会盲删另一个进程的 active build。目录创建会 fsync 新目录与 parent，cache
+promotion 会 fsync source `.staging` 与 destination trace root 两侧。成功 promotion 将
+evidence 原子推进为 `.ready` 并保留，不在最终 identity check 后制造无 evidence 窗口。
+原 build live handle 一直保留到最终 Ready handoff；promoted validation、session cleanup
+与 handoff hook 后会在无 suspension 的 lease downgrade/return 边界再次核验 exact public
+directory inode。read-only SQLite 先以 `O_NOFOLLOW` descriptor 绑定 Ready database，
+再通过 `/dev/fd` 打开同一 inode；最终 handoff 同时核验 connection-bound database identity，
+并绑定实际读取或原子重写的 metadata inode，拒绝 validation 期间目录、database 或 metadata
+swap/restore 的 ABA。ephemeral/no-cache 路径复用相同的 live-directory、connection-bound DB
+及 parser sidecar identity handoff。首次 directory handle 无法建立时只保留
+`.creating` evidence 并返回 cleanup failure，不认领、不移动当前路径上的 replacement。
+
+Phase 2 按本任务交付 9 不提前实现自动清理；这些 owner/liveness facts 的首个消费者
+明确归 P3-T05：其 LRU/purge 开始前，在同一 key-lock/entry-lease 与 exact identity
+保护下有界回收已能取得 owner exclusive lock 的 stale session/build，同时清除 orphan
+owner marker；`.ready` 记录必须按 Ready entry 处理，不能当 stale private build 删除。
+P3-T05 不得仅凭 PID、时间或裸 UUID 判断 stale。
+
+当前回归（2026-08-13）：`CI=true swift test -c release` 与 debug gate 均为
+133 tests、0 failure；`scripts/test_phase1.sh` 为 133 tests、0 skipped，真实 fixture
+仍为 `quickCheck=ok`、indexVersion 1，parser/source/upstream DB/Ready DB SHA 与 schema
+fingerprint 均未漂移。新增分布相对冻结 Phase 1 基线为 Store +4、Integration +35。
 
 ### P2-T02 — 建立 ArkTraceAnalysis 与 deterministic summary
 
