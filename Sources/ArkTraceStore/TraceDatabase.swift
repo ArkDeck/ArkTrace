@@ -4,9 +4,38 @@ import SQLite3
 
 private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
+private final class SQLiteVMProgressBudget {
+    private var callbacksRemaining: Int
+    private(set) var exhausted = false
+
+    init(vmStepBudget: Int, callbackInterval: Int32) {
+        let interval = Int(callbackInterval)
+        callbacksRemaining = max(1, (vmStepBudget + interval - 1) / interval)
+    }
+
+    func advance() -> Int32 {
+        callbacksRemaining -= 1
+        guard callbacksRemaining <= 0 else { return 0 }
+        exhausted = true
+        return 1
+    }
+}
+
+private let sqliteVMProgressCallback: @convention(c) (UnsafeMutableRawPointer?) -> Int32 = {
+    context in
+    guard let context else { return 1 }
+    return Unmanaged<SQLiteVMProgressBudget>.fromOpaque(context)
+        .takeUnretainedValue()
+        .advance()
+}
+
 /// Minimal SQLite3 wrapper. Not Sendable by design: an instance is owned by a
 /// single repository actor (DESIGN §9.2) or a single test.
 final class TraceDatabase {
+    static let maximumSchemaTableCount = 4_096
+
+    struct VMInstructionBudgetExceeded: Error {}
+
     enum Binding {
         case int64(Int64)
         case text(String)
@@ -66,6 +95,7 @@ final class TraceDatabase {
     func query<T>(
         _ sql: String,
         bindings: [Binding] = [],
+        vmStepBudget: Int? = nil,
         stage: ArkTraceError.Stage = .querying,
         map: (Row) throws -> T
     ) throws -> [T] {
@@ -79,6 +109,24 @@ final class TraceDatabase {
             )
         }
         defer { sqlite3_finalize(statement) }
+
+        let progressInterval: Int32 = 100
+        let progressBudget = vmStepBudget.map {
+            SQLiteVMProgressBudget(vmStepBudget: max(1, $0), callbackInterval: progressInterval)
+        }
+        if let progressBudget {
+            sqlite3_progress_handler(
+                handle,
+                progressInterval,
+                sqliteVMProgressCallback,
+                Unmanaged.passUnretained(progressBudget).toOpaque()
+            )
+        }
+        defer {
+            if progressBudget != nil {
+                sqlite3_progress_handler(handle, 0, nil, nil)
+            }
+        }
 
         for (offset, binding) in bindings.enumerated() {
             let index = Int32(offset + 1)
@@ -106,6 +154,9 @@ final class TraceDatabase {
             case SQLITE_DONE:
                 return results
             case let rc:
+                if rc == SQLITE_INTERRUPT, progressBudget?.exhausted == true {
+                    throw VMInstructionBudgetExceeded()
+                }
                 throw ArkTraceError(
                     code: stage == .querying ? .queryFailed : .traceDatabaseInvalid,
                     stage: stage,
@@ -133,25 +184,36 @@ final class TraceDatabase {
     }
 
     func tableNames() throws -> Set<String> {
-        Set(
-            try query(
-                "SELECT name FROM sqlite_master WHERE type = 'table'",
-                stage: .validating
-            ) { $0.text(0) }.compactMap { $0 }
+        let sampledNames = try query(
+            """
+            SELECT name FROM sqlite_master
+            WHERE type = 'table'
+            LIMIT \(Self.maximumSchemaTableCount + 1)
+            """,
+            stage: .validating
+        ) { $0.text(0) }
+        guard sampledNames.count <= Self.maximumSchemaTableCount else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .validating,
+                message: "Database schema contains too many tables",
+                details: [
+                    "maximum": String(Self.maximumSchemaTableCount),
+                    "observedAtLeast": String(Self.maximumSchemaTableCount + 1),
+                ]
+            )
+        }
+        return Set(
+            sampledNames.compactMap { $0 }
         )
     }
 
-    /// `PRAGMA table_info` cannot bind identifiers, so table names are
-    /// restricted to a strict identifier alphabet before interpolation.
+    /// `PRAGMA table_info` cannot bind identifiers. Names discovered from
+    /// sqlite_master are quoted by doubling embedded quotes so every legal
+    /// SQLite table participates in the schema fingerprint.
     func columns(of table: String) throws -> [ColumnInfo] {
-        guard Self.isSafeIdentifier(table) else {
-            throw ArkTraceError(
-                code: .internalError,
-                stage: .validating,
-                message: "Unsafe table identifier"
-            )
-        }
-        return try query("PRAGMA table_info(\"\(table)\")", stage: .validating) { row in
+        let quotedTable = "\"\(table.replacingOccurrences(of: "\"", with: "\"\""))\""
+        return try query("PRAGMA table_info(\(quotedTable))", stage: .validating) { row in
             ColumnInfo(
                 name: row.text(1) ?? "",
                 type: row.text(2) ?? "",

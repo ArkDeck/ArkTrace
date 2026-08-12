@@ -6,6 +6,86 @@ import XCTest
 final class RepositoryTests: XCTestCase {
     private var databaseURL: URL!
 
+    private static let requiredEventTablesSQL = """
+        CREATE TABLE sched_slice (
+            id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER, itid INTEGER, ipid INTEGER
+        );
+        CREATE TABLE thread_state (
+            id INTEGER, ts INTEGER, dur INTEGER, itid INTEGER, state TEXT
+        );
+        CREATE TABLE callstack (
+            id INTEGER, ts INTEGER, dur INTEGER, callid INTEGER, name TEXT
+        );
+        """
+
+    private static func eventSchemaSQL(
+        omitting missing: String? = nil,
+        overridingTypes: [String: String] = [:]
+    ) -> String {
+        let definitions: [(table: String, columns: [(name: String, type: String)])] = [
+            (
+                "sched_slice",
+                [
+                    ("id", "INTEGER"), ("ts", "INTEGER"), ("dur", "INTEGER"),
+                    ("cpu", "INTEGER"), ("itid", "INTEGER"), ("ipid", "INTEGER"),
+                ]
+            ),
+            (
+                "thread_state",
+                [
+                    ("id", "INTEGER"), ("ts", "INTEGER"), ("dur", "INTEGER"),
+                    ("itid", "INTEGER"), ("state", "TEXT"),
+                ]
+            ),
+            (
+                "callstack",
+                [
+                    ("id", "INTEGER"), ("ts", "INTEGER"), ("dur", "INTEGER"),
+                    ("callid", "INTEGER"), ("name", "TEXT"),
+                ]
+            ),
+        ]
+        return definitions.compactMap { definition in
+            guard missing != definition.table else { return nil }
+            let columns = definition.columns
+                .filter { missing != "\(definition.table).\($0.name)" }
+                .map { column in
+                    let qualifiedName = "\(definition.table).\(column.name)"
+                    return "\(column.name) \(overridingTypes[qualifiedName] ?? column.type)"
+                }
+                .joined(separator: ", ")
+            return "CREATE TABLE \(definition.table) (\(columns));"
+        }.joined(separator: "\n")
+    }
+
+    private static func coreSchemaSQL(overridingTypes: [String: String] = [:]) -> String {
+        let definitions: [(table: String, columns: [(name: String, type: String)])] = [
+            ("trace_range", [("start_ts", "INTEGER"), ("end_ts", "INTEGER")]),
+            (
+                "process",
+                [
+                    ("ipid", "INTEGER"), ("pid", "INTEGER"), ("name", "TEXT"),
+                    ("start_ts", "INTEGER"),
+                ]
+            ),
+            (
+                "thread",
+                [
+                    ("itid", "INTEGER"), ("tid", "INTEGER"), ("name", "TEXT"),
+                    ("start_ts", "INTEGER"), ("ipid", "INTEGER"),
+                ]
+            ),
+        ]
+        let tables = definitions.map { definition in
+            let columns = definition.columns.map { column in
+                let qualifiedName = "\(definition.table).\(column.name)"
+                return "\(column.name) \(overridingTypes[qualifiedName] ?? column.type)"
+            }.joined(separator: ", ")
+            return "CREATE TABLE \(definition.table) (\(columns));"
+        }.joined(separator: "\n")
+        return tables + "\nINSERT INTO trace_range VALUES (0, 10);"
+    }
+
     private static let dummyParser = TraceParserIdentity(
         name: "trace_streamer",
         reportedVersion: "4.3.7",
@@ -45,6 +125,7 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO thread VALUES (1, 1, 100, 'main', 1100, 1900, 1, 1);
             INSERT INTO thread VALUES (2, 2, 101, 'worker', 1200, NULL, 1, 0);
             INSERT INTO thread VALUES (3, 3, 200, 'rs.main', 1000, 2000, 3, 1);
+            \(Self.requiredEventTablesSQL)
             """
         )
     }
@@ -96,7 +177,15 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(metadata.traceSHA256, Self.dummySource.traceSHA256)
         XCTAssertEqual(metadata.schemaFingerprint.count, 64)
         XCTAssertFalse(metadata.capabilities.cpuScheduling)
+        XCTAssertFalse(metadata.capabilities.threadStates)
         XCTAssertFalse(metadata.capabilities.namedSlices)
+        XCTAssertFalse(metadata.capabilities.cpuCounters)
+        XCTAssertFalse(metadata.capabilities.processCounters)
+        XCTAssertTrue(
+            metadata.dataQuality.warnings.contains {
+                $0.contains("process.start_ts") && $0.contains("precede trace start")
+            }
+        )
     }
 
     func testProcessDirectoryOrderingAndConversion() async throws {
@@ -163,6 +252,7 @@ final class RepositoryTests: XCTestCase {
             CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
             INSERT INTO trace_range VALUES (0, 10);
             CREATE TABLE process (id INTEGER, ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            \(Self.requiredEventTablesSQL)
             """
         )
         XCTAssertThrowsError(
@@ -189,10 +279,425 @@ final class RepositoryTests: XCTestCase {
         }
     }
 
-    func testAdditiveColumnsRemainCompatible() throws {
+    func testAdditiveColumnsRemainCompatible() async throws {
+        let before = try await makeRepository().metadata()
         let db = try TraceDatabase(url: databaseURL, readOnly: false)
         try db.execute("ALTER TABLE process ADD COLUMN some_future_column INTEGER")
-        XCTAssertNoThrow(try makeRepository(), "additive upstream columns must not break opening")
+        let after = try await makeRepository().metadata()
+        XCTAssertNotEqual(before.schemaFingerprint, after.schemaFingerprint)
+    }
+
+    func testQuotedTableAndColumnNamesParticipateInFingerprint() async throws {
+        let before = try await makeRepository().metadata().schemaFingerprint
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE "future-table with space" (
+                "value-name" INTEGER,
+                "quoted""column" TEXT
+            );
+            """
+        )
+        let after = try await makeRepository().metadata().schemaFingerprint
+        XCTAssertNotEqual(before, after)
+    }
+
+    func testSchemaTableCountFailsClosedAtBoundedLimit() throws {
+        let extraTableCount = TraceDatabase.maximumSchemaTableCount - 5
+        let extraTables = (0..<extraTableCount)
+            .map { "CREATE TABLE extra_\($0) (value INTEGER);" }
+            .joined(separator: "\n")
+        let url = try makeTemporaryDatabase(
+            """
+            BEGIN;
+            \(Self.coreSchemaSQL())
+            \(Self.requiredEventTablesSQL)
+            \(extraTables)
+            COMMIT;
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceSchemaUnsupported)
+            XCTAssertEqual(error?.details["maximum"], "4096")
+            XCTAssertEqual(error?.details["observedAtLeast"], "4097")
+        }
+    }
+
+    func testFingerprintEncodingCannotCollideOnDelimiterPlacement() async throws {
+        let schemas = [
+            "CREATE TABLE \"a|b\" (\"c\" TEXT);",
+            "CREATE TABLE \"a\" (\"b|c\" TEXT);",
+        ]
+        var fingerprints: [String] = []
+        for schema in schemas {
+            let url = try makeTemporaryDatabase(
+                """
+                \(Self.coreSchemaSQL())
+                \(Self.requiredEventTablesSQL)
+                \(schema)
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            let repository = try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+            fingerprints.append(try await repository.metadata().schemaFingerprint)
+        }
+
+        XCTAssertEqual(fingerprints.count, 2)
+        XCTAssertNotEqual(fingerprints[0], fingerprints[1])
+    }
+
+    func testRequiredEventTablesAndColumnsAreEnforced() throws {
+        let requirements = [
+            "sched_slice", "sched_slice.id", "sched_slice.ts", "sched_slice.dur",
+            "sched_slice.cpu", "sched_slice.itid", "sched_slice.ipid",
+            "thread_state", "thread_state.id", "thread_state.ts", "thread_state.dur",
+            "thread_state.itid", "thread_state.state",
+            "callstack", "callstack.id", "callstack.ts", "callstack.dur",
+            "callstack.callid", "callstack.name",
+        ]
+        for missing in requirements {
+            let url = try makeTemporaryDatabase(
+                """
+                CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+                INSERT INTO trace_range VALUES (0, 10);
+                CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+                CREATE TABLE thread (
+                    itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+                );
+                \(Self.eventSchemaSQL(omitting: missing))
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            XCTAssertThrowsError(
+                try SQLiteTraceRepository(
+                    databaseURL: url,
+                    parser: Self.dummyParser,
+                    source: Self.dummySource
+                ),
+                "missing \(missing) must fail closed"
+            ) { error in
+                let error = error as? ArkTraceError
+                XCTAssertEqual(error?.code, .traceSchemaUnsupported)
+                XCTAssertTrue(error?.details["missing"]?.contains(missing) == true)
+            }
+        }
+    }
+
+    func testRequiredDeclaredAffinitiesAreEnforced() throws {
+        let coreRequirements: [(name: String, incompatibleType: String)] = [
+            ("trace_range.start_ts", "TEXT"), ("trace_range.end_ts", "BLOB"),
+            ("process.ipid", "TEXT"), ("process.pid", "REAL"),
+            ("process.name", "BLOB"), ("process.start_ts", "TEXT"),
+            ("thread.itid", "TEXT"), ("thread.tid", "REAL"),
+            ("thread.name", "BLOB"), ("thread.start_ts", "TEXT"),
+            ("thread.ipid", "BLOB"),
+        ]
+        for requirement in coreRequirements {
+            let url = try makeTemporaryDatabase(
+                """
+                \(Self.coreSchemaSQL(
+                    overridingTypes: [requirement.name: requirement.incompatibleType]))
+                \(Self.requiredEventTablesSQL)
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            assertIncompatibleSchema(at: url, column: requirement.name)
+        }
+
+        let eventRequirements: [(name: String, incompatibleType: String)] = [
+            ("sched_slice.id", "TEXT"), ("sched_slice.ts", "BLOB"),
+            ("sched_slice.dur", "REAL"), ("sched_slice.cpu", "TEXT"),
+            ("sched_slice.itid", "BLOB"), ("sched_slice.ipid", "REAL"),
+            ("thread_state.id", "TEXT"), ("thread_state.ts", "BLOB"),
+            ("thread_state.dur", "REAL"), ("thread_state.itid", "TEXT"),
+            ("thread_state.state", "BLOB"),
+            ("callstack.id", "TEXT"), ("callstack.ts", "BLOB"),
+            ("callstack.dur", "REAL"), ("callstack.callid", "TEXT"),
+            ("callstack.name", "BLOB"),
+        ]
+        for requirement in eventRequirements {
+            let url = try makeTemporaryDatabase(
+                """
+                \(Self.coreSchemaSQL())
+                \(Self.eventSchemaSQL(
+                    overridingTypes: [requirement.name: requirement.incompatibleType]))
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            assertIncompatibleSchema(at: url, column: requirement.name)
+        }
+    }
+
+    func testIncompatibleDeclaredTypeErrorDetailsAreBounded() throws {
+        let attackerControlledType = String(repeating: "UNTRUSTED_TYPE_", count: 1_024)
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (
+                ipid \(attackerControlledType), pid INTEGER, name TEXT, start_ts INTEGER
+            );
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceSchemaUnsupported)
+            let details = error?.details["incompatible"] ?? ""
+            XCTAssertLessThan(details.utf8.count, 256)
+            XCTAssertFalse(details.contains("UNTRUSTED_TYPE"))
+            XCTAssertTrue(details.contains("declaredAffinity=NUMERIC"))
+        }
+    }
+
+    private func assertIncompatibleSchema(
+        at url: URL,
+        column: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            ),
+            "incompatible \(column) must fail closed",
+            file: file,
+            line: line
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceSchemaUnsupported, file: file, line: line)
+            XCTAssertTrue(
+                error?.details["incompatible"]?.contains(column) == true,
+                file: file,
+                line: line
+            )
+        }
+    }
+
+    func testCapabilitiesRequireCompatibleNonEmptyEventTables() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            INSERT INTO sched_slice VALUES (1, 1000, 10, 0, 1, 1);
+            INSERT INTO thread_state VALUES (1, 1000, 10, 1, 'Running');
+            INSERT INTO callstack VALUES (1, 1000, 10, 1, 'slice');
+            """
+        )
+
+        let capabilities = try await makeRepository().metadata().capabilities
+        XCTAssertTrue(capabilities.cpuScheduling)
+        XCTAssertTrue(capabilities.threadStates)
+        XCTAssertTrue(capabilities.namedSlices)
+        XCTAssertFalse(capabilities.cpuCounters)
+        XCTAssertFalse(capabilities.processCounters)
+    }
+
+    func testCounterCapabilitiesRequireMatchingBoundedFilterJoin() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT);
+            INSERT INTO measure VALUES (1000, 1, 100), (1000, 2, 200);
+            INSERT INTO cpu_measure_filter VALUES (101, 'disjoint cpu');
+            INSERT INTO process_measure_filter VALUES (201, 'disjoint process');
+            """
+        )
+
+        var capabilities = try await makeRepository().metadata().capabilities
+        XCTAssertFalse(capabilities.cpuCounters)
+        XCTAssertFalse(capabilities.processCounters)
+
+        try db.execute("INSERT INTO cpu_measure_filter VALUES (100, 'matched cpu')")
+        capabilities = try await makeRepository().metadata().capabilities
+        XCTAssertTrue(capabilities.cpuCounters)
+        XCTAssertFalse(capabilities.processCounters)
+
+        try db.execute("INSERT INTO process_measure_filter VALUES (200, 'matched process')")
+        capabilities = try await makeRepository().metadata().capabilities
+        XCTAssertTrue(capabilities.cpuCounters)
+        XCTAssertTrue(capabilities.processCounters)
+    }
+
+    func testBrokenRequiredRelationshipIsRejectedByBoundedProbe() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (1, 42, 'orphan', 0, 999);
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        assertRepositoryInitialization(at: url, failsWith: .traceSchemaUnsupported)
+    }
+
+    func testRequiredRelationshipCanResolveBeyondSourceProbeLimit() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 2000
+            )
+            INSERT INTO process SELECT value, value, 'process', 0 FROM ids;
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (1, 1, 'late target', 0, 2000);
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        XCTAssertNoThrow(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+        )
+    }
+
+    func testRequiredRelationshipFailsClosedWhenVMStepBudgetIsExceeded() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 100000
+            )
+            INSERT INTO process SELECT value, value, 'process', 0 FROM ids;
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (1, 1, 'missing target', 0, 100001);
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceSchemaUnsupported)
+            XCTAssertEqual(error?.details["reason"], "vmStepBudgetExceeded")
+            XCTAssertEqual(error?.details["relationship"], "thread.ipid->process.ipid")
+        }
+    }
+
+    func testTimeClampAndStorageDropsProduceBoundedQualityWarnings() async throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            INSERT INTO process VALUES (1, 1, 'before', -1);
+            INSERT INTO process VALUES (2, 2, 'after', 11);
+            INSERT INTO process VALUES (3, 3, 'wrong-type', 'abc');
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            INSERT INTO callstack VALUES (1, 'bad-ts', -1, 1, 'bad slice');
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let repository = try SQLiteTraceRepository(
+            databaseURL: url,
+            parser: Self.dummyParser,
+            source: Self.dummySource
+        )
+
+        let warnings = try await repository.metadata().dataQuality.warnings
+        XCTAssertTrue(warnings.contains { $0.contains("process.start_ts") && $0.contains("precede") })
+        XCTAssertTrue(warnings.contains { $0.contains("process.start_ts") && $0.contains("exceed") })
+        XCTAssertTrue(warnings.contains { $0.contains("process.start_ts") && $0.contains("non-INTEGER") })
+        XCTAssertTrue(warnings.contains { $0.contains("callstack.ts") && $0.contains("non-INTEGER") })
+        XCTAssertTrue(warnings.contains { $0.contains("callstack.dur") && $0.contains("negative") })
+
+        let processes = try await repository.processes(ProcessQuery())
+        XCTAssertEqual(processes.items.first { $0.pid == 1 }?.startNs, 0)
+        XCTAssertEqual(processes.items.first { $0.pid == 2 }?.startNs, 10)
+        XCTAssertNil(processes.items.first { $0.pid == 3 }?.startNs)
+    }
+
+    func testQualityWarningMarksProbeTruncation() async throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 1024
+            )
+            INSERT INTO process SELECT value, value, 'valid', 0 FROM ids;
+            INSERT INTO process VALUES (1025, 1025, 'bad-tail', 'not-a-timestamp');
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let repository = try SQLiteTraceRepository(
+            databaseURL: url,
+            parser: Self.dummyParser,
+            source: Self.dummySource
+        )
+
+        let dataQuality = try await repository.metadata().dataQuality
+        let warnings = dataQuality.warnings
+        XCTAssertEqual(dataQuality.status, .warnings)
+        XCTAssertTrue(
+            warnings.contains {
+                $0.contains("process.start_ts") && $0.contains("non-INTEGER")
+            }
+        )
+        XCTAssertTrue(
+            warnings.contains {
+                $0.contains("process.start_ts") && $0.contains("truncated after 1024 rows")
+            }
+        )
     }
 
     func testThreadStartTimestampIsRequiredBySchemaAndQueryContract() throws {
@@ -202,6 +707,7 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO trace_range VALUES (0, 10);
             CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
             CREATE TABLE thread (itid INTEGER, tid INTEGER, name TEXT, ipid INTEGER);
+            \(Self.requiredEventTablesSQL)
             """
         )
         defer { try? FileManager.default.removeItem(at: url) }
@@ -218,11 +724,59 @@ final class RepositoryTests: XCTestCase {
             CREATE TABLE thread (
                 itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
             );
+            \(Self.requiredEventTablesSQL)
             """
         )
         defer { try? FileManager.default.removeItem(at: url) }
 
         assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+    }
+
+    func testMultipleTraceRangesAreRejected() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10), (10, 20);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+    }
+
+    func testTraceRangeValidationMaterializesAtMostTwoRows() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            WITH RECURSIVE ranges(value) AS (
+                SELECT 0 UNION ALL SELECT value + 1 FROM ranges WHERE value < 9999
+            )
+            INSERT INTO trace_range SELECT value, value + 1 FROM ranges;
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            )
+        ) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error?.details["rowCount"], "2")
+        }
     }
 
     func testExtremeAbsoluteTimestampsClampWithoutOverflow() async throws {
@@ -238,6 +792,7 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO thread VALUES (
                 1, 42, 'extreme.main', -9223372036854775808, 1
             );
+            \(Self.requiredEventTablesSQL)
             """
         )
         defer { try? FileManager.default.removeItem(at: url) }
@@ -263,6 +818,7 @@ final class RepositoryTests: XCTestCase {
             CREATE TABLE thread (
                 itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
             );
+            \(Self.requiredEventTablesSQL)
             """
         )
         defer { try? FileManager.default.removeItem(at: url) }
@@ -280,6 +836,7 @@ final class RepositoryTests: XCTestCase {
                 itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
             );
             INSERT INTO thread VALUES (NULL, 42, 'invalid', 0, NULL);
+            \(Self.requiredEventTablesSQL)
             """
         )
         defer { try? FileManager.default.removeItem(at: url) }
@@ -301,6 +858,31 @@ final class RepositoryTests: XCTestCase {
                 CREATE TABLE thread (
                     itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
                 );
+                \(invalidRow)
+                \(Self.requiredEventTablesSQL)
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+        }
+    }
+
+    func testDynamicEventIdentityStorageClassesAreRejected() throws {
+        let invalidRows = [
+            "INSERT INTO sched_slice VALUES ('bad-id', 0, 1, 0, NULL, NULL);",
+            "INSERT INTO thread_state VALUES (1.5, 0, 1, NULL, 'Running');",
+            "INSERT INTO callstack VALUES (1, 0, 1, 'bad-callid', 'slice');",
+        ]
+        for invalidRow in invalidRows {
+            let url = try makeTemporaryDatabase(
+                """
+                CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+                INSERT INTO trace_range VALUES (0, 10);
+                CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+                CREATE TABLE thread (
+                    itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+                );
+                \(Self.requiredEventTablesSQL)
                 \(invalidRow)
                 """
             )

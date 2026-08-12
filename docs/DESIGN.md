@@ -253,7 +253,7 @@ Swift Package Manager 是 libraries、CLI 和测试的构建事实源；Xcode pr
 - 只有在 viewport 映射阶段，先减去 viewport origin 后才转换为 `Double`；
 - 输入数据库原始时间只存在于 Store adapter 内部。
 
-Store 把早于 `trace_range.start_ts` 的绝对时间临时 clamp 为 `0`，以表达抓取开始前已存在的 process/thread；晚于 `trace_range.end_ts` 的值可为展示安全 clamp 到 `durationNs`，但必须视为异常数据。非 identity 时间列若不是 SQLite `INTEGER` storage class，可以按 optional/缺失值丢弃。上述未来方向的 clamp 与丢弃都必须通过有界计数进入 `dataQuality.warnings`（计数达到上限时标记 truncated），不能只在展示结果中静默消失；required identity 仍然 fail closed。
+Store 把早于 `trace_range.start_ts` 的绝对时间临时 clamp 为 `0`，以表达抓取开始前已存在的 process/thread；晚于 `trace_range.end_ts` 的值可为展示安全 clamp 到 `durationNs`，但必须视为异常数据。非 identity 时间列若不是 SQLite `INTEGER` storage class，可以按 optional/缺失值丢弃。上述 clamp 与丢弃必须通过有界计数进入 `dataQuality.warnings`；probe 一旦还有未检查的尾部，无论已采样行是否发现异常都必须标记 truncated，不能把未检查数据报告为 `dataQuality.ok`。required identity 仍然 fail closed。
 
 核心值类型：
 
@@ -388,7 +388,7 @@ struct TraceSchemaCapabilities {
 }
 ```
 
-Schema fingerprint 是排序后的 table/column/type/PK 描述的 SHA-256。新增无关列是兼容变化；required 列缺失、类型语义改变或关键 join 不成立是 `TRACE_SCHEMA_UNSUPPORTED`。
+Schema fingerprint 是排序后的完整 table/column/type/PK 描述的 SHA-256；v2 preimage 使用固定域标记、版本、record count，并对每条 record 及其中每个 UTF-8 字段使用 64-bit length prefix，合法标识符或 declared type 中的 `|`、换行等字节不能造成序列化碰撞。来自 `sqlite_master` 的标识符统一按 SQLite 规则转义，带空格、连字符或引号的合法表/列不能被跳过；schema 最多允许 4,096 张表，枚举只读取 `LIMIT 4097`，超限返回 `TRACE_SCHEMA_UNSUPPORTED`。新增无关列是兼容变化；required 列缺失、SQLite declared affinity 与字段语义不兼容、或关键 join 不成立是 `TRACE_SCHEMA_UNSUPPORTED`。`trace_range` 唯一性只读取 `LIMIT 2`。required relationship source 最多采样 1,024 行，目标表不截断，整个 join 受 250,000 SQLite VM-step progress budget 约束；超预算 fail closed。事件 capability 只有在所需列 affinity 兼容且事件表非空时成立；optional counter capability 还必须在两侧有界样本内存在 `measure.filter_id → filter.id` 的真实 join，空表或互不相交的 filter ID 不能宣称完整能力。
 
 ### 9.2 Store
 
@@ -914,12 +914,13 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 1. ~~对 canonical upstream（GitCode）master 重跑 §2.1 证据核对，重新 pin TraceStreamer revision/版本~~——已关闭（2026-08-12，Phase 0）：重锚定至 GitCode master `447a0a49`，核对结论见 §2.1 与 [TRACE_STREAMER.md](./TRACE_STREAMER.md)；
 2. ~~TraceStreamer 在当前 Apple silicon/macOS toolchain 的原生、可重现构建~~——已关闭（2026-08-12，Phase 1）：原生 arm64 二进制构建成功（Apple clang 21；gn/ninja 为上游 darwin-x86 预编译件经 Rosetta 运行），配方固化于 `scripts/build_trace_streamer.sh`，provenance 记录于 `ThirdParty/TraceStreamer/macx/manifest.json`；浮动 third_party tip 以构建时 SHA 记入 manifest，完全预 pin 列为后续硬化项（见 TRACE_STREAMER.md §4）；
 3. binary redistribution 的完整第三方许可证清单；
-4. ~~至少一个可再分发真实 `.htrace`/`.ftrace` fixture~~——已关闭（2026-08-12，Phase 1）：Apache-2.0 的 `hiprofiler_data_ability.htrace`（557 KB，含进程目录数据）连同来源 NOTICE 提交至 `Fixtures/traces/`；含调度事件的更大 fixture 随 Phase 3 timeline 工作补充；
-5. required schema fingerprint 与真实 DB fixture；
+4. ~~至少一个可再分发真实 `.htrace`/`.ftrace` fixture~~——已关闭（2026-08-12，Phase 1）：Apache-2.0 的 `hiprofiler_data_ability.htrace`、`trace_small_10.systrace` 与 `zlib.htrace` 连同上游许可证/NOTICE 提交至 `Fixtures/traces/`；后两者分别提供非空 scheduling/state 与 named-slice 证据；
+5. ~~required schema fingerprint 与真实 DB fixture~~——已关闭（2026-08-12，P1-T05）：pinned TraceStreamer 从两个真实 fixture 重复导出 byte-identical `-nm` DB；schema adapter v2 的 91-table length-prefixed schema fingerprint 为 `cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3`，source/DB SHA、range、per-fixture capabilities 与六张 required table row counts 锁定在 `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`；real integration gate 同时把 actual executable SHA、manifest、evidence parser identity 与每次解析返回的 `metadata.parser` 绑定，并从 fixture/license 实际字节重算 Git blob OID 与 SHA 后重建验证；
 6. parser cancellation 在大 Trace 上无 orphan process/cache promotion；
 7. indexed viewport query 在 large trace 上满足规格目标；
 8. ArkDeck action-specific multi-analyzer resolver 不弱化 pinned identity；
-9. 一次真实链路：ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact。
+9. 一次真实链路：ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact；
+10. 一次真实调试闭环：baseline capture → structured analysis → Agent evidence-backed decision → 下一轮 ArkDeck typed request → follow-up capture → deterministic comparison。
 
 这些门的关闭结果应进入后续实现与验证报告；本轮不把它们拆成任务。
 

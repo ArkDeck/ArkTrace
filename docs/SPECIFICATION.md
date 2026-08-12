@@ -1418,11 +1418,12 @@ captured immutable trace Artifact lease
 
 ### AC-AT-015 Real debug evidence
 
-- GIVEN 一个真实 ArkDeck capture job 产生 Trace Artifact
-- WHEN ArkTrace summary/context 被 Agent 消费
-- THEN Agent 可以引用 process/thread/CPU/slice 的结构化证据
-- AND 不需要启动 GUI 或解析 human log
-- AND 后续动作仍只能作为 ArkDeck typed request 提交。
+- GIVEN 一个真实 ArkDeck baseline capture job 产生 immutable Trace Artifact，且成功标准在分析前已经记录
+- WHEN ArkTrace summary/context 被 Agent 消费，Agent 基于 process/thread/CPU/slice 结构化证据形成判断并提交下一轮 ArkDeck typed request
+- AND ArkDeck 执行该 request 后以可比较条件产生 follow-up Trace Artifact
+- THEN ArkTrace 使用同类 request/limits 生成 follow-up evidence，并对 baseline/follow-up 做 deterministic metric comparison
+- AND 全链路不需要启动 GUI、解析 human log、使用 fake Artifact 或绕过 ArkDeck typed boundary
+- AND 结论明确区分事实、推断、data quality/truncation 与 inconclusive 结果。
 
 ### AC-AT-016 Accessible timeline workflow
 

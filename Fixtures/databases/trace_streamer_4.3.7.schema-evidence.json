@@ -1,0 +1,88 @@
+{
+  "formatVersion": 1,
+  "upstream": {
+    "repository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+    "revision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "license": "Apache-2.0",
+    "licensePath": "Fixtures/traces/LICENSE.Apache-2.0.txt",
+    "licenseBlob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+    "licenseSHA256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "licenseByteCount": 11357
+  },
+  "parser": {
+    "reportedVersion": "4.3.7",
+    "binarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf",
+    "architecture": "arm64",
+    "adapterVersion": "1",
+    "buildRecipeVersion": "1"
+  },
+  "schemaAdapterVersion": "2",
+  "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+  "schemaTableCount": 91,
+  "fixtures": [
+    {
+      "name": "trace_small_10.systrace",
+      "upstreamPath": "smartperf_host/trace_streamer/test/resource/trace_small_10.systrace",
+      "upstreamBlob": "0c9acff0ca12c3501d4a4235a6dc4efbd95475d4",
+      "sourceSHA256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef",
+      "sourceByteCount": 13465993,
+      "databaseSHA256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93",
+      "databaseByteCount": 7344128,
+      "traceRange": {
+        "startTs": 88026692887000,
+        "endTs": 88035820831000,
+        "durationNs": 9127944000
+      },
+      "rowCounts": {
+        "trace_range": 1,
+        "process": 52,
+        "thread": 104,
+        "sched_slice": 44037,
+        "thread_state": 68343,
+        "callstack": 0
+      },
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": false,
+        "cpuCounters": false,
+        "processCounters": false
+      },
+      "quickCheck": "ok",
+      "metaTablePresent": false,
+      "deterministicExportRuns": 2
+    },
+    {
+      "name": "zlib.htrace",
+      "upstreamPath": "smartperf_host/trace_streamer/test/resource/zlib.htrace",
+      "upstreamBlob": "42775ede9bc79cea920760e8f6e3904b86fb711d",
+      "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+      "sourceByteCount": 67837,
+      "databaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+      "databaseByteCount": 917504,
+      "traceRange": {
+        "startTs": 535799774588000,
+        "endTs": 535831985215000,
+        "durationNs": 32210627000
+      },
+      "rowCounts": {
+        "trace_range": 1,
+        "process": 101,
+        "thread": 199,
+        "sched_slice": 0,
+        "thread_state": 0,
+        "callstack": 3067
+      },
+      "capabilities": {
+        "cpuScheduling": false,
+        "threadStates": false,
+        "namedSlices": true,
+        "cpuCounters": false,
+        "processCounters": false
+      },
+      "quickCheck": "ok",
+      "metaTablePresent": false,
+      "deterministicExportRuns": 2
+    }
+  ]
+}
