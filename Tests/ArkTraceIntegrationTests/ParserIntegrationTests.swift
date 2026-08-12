@@ -1,16 +1,37 @@
 import ArkTraceCore
 import ArkTraceParser
-import ArkTraceRuntime
 import ArkTraceStore
 import XCTest
+
+@testable import ArkTraceRuntime
 
 /// End-to-end vertical slice (SPEC §21.3): real trace → real pinned
 /// TraceStreamer process → SQLite → schema validation → typed queries.
 ///
-/// The TraceStreamer binary is not committed; the test resolves it from
-/// `ARKTRACE_TRACE_STREAMER` or the default `ThirdParty/TraceStreamer/macx`
-/// layout and skips when unavailable.
+/// The test resolves TraceStreamer from `ARKTRACE_TRACE_STREAMER` or the
+/// default `ThirdParty/TraceStreamer/macx` layout. A custom binary must carry
+/// its sibling pinned `manifest.json`.
 final class ParserIntegrationTests: XCTestCase {
+    private final class CancellationBarrier: @unchecked Sendable {
+        private let lock = NSLock()
+        private var reached = false
+
+        func pauseUntilCancelled() async {
+            lock.withLock { reached = true }
+            while !Task.isCancelled {
+                await Task.yield()
+            }
+        }
+
+        func waitUntilReached() async {
+            while true {
+                let current = lock.withLock { reached }
+                if current { return }
+                await Task.yield()
+            }
+        }
+    }
+
     private static var repoRoot: URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // ParserIntegrationTests.swift
@@ -54,7 +75,21 @@ final class ParserIntegrationTests: XCTestCase {
         let identity = try await parser.identity()
         XCTAssertEqual(identity.name, "trace_streamer")
         XCTAssertEqual(identity.binarySHA256.count, 64)
-        XCTAssertNotNil(identity.reportedVersion)
+        XCTAssertEqual(identity.reportedVersion, "4.3.7")
+        XCTAssertEqual(
+            identity.upstreamRepository,
+            TraceStreamerProcessParser.expectedUpstreamRepository
+        )
+        XCTAssertEqual(
+            identity.upstreamRevision,
+            TraceStreamerProcessParser.expectedUpstreamRevision
+        )
+        XCTAssertEqual(identity.architecture, "arm64")
+        XCTAssertEqual(identity.adapterVersion, TraceStreamerProcessParser.adapterVersion)
+        XCTAssertEqual(
+            identity.buildRecipeVersion,
+            TraceStreamerProcessParser.supportedBuildRecipeVersion
+        )
     }
 
     func testParseRealTraceAndQuery() async throws {
@@ -73,6 +108,16 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertGreaterThan(metadata.durationNs, 0, "trace must have a positive duration")
         XCTAssertEqual(metadata.traceSHA256.count, 64)
         XCTAssertEqual(metadata.schemaFingerprint.count, 64)
+        let manifest = try TraceStreamerManifest.load(
+            from: binary.deletingLastPathComponent().appendingPathComponent("manifest.json")
+        )
+        XCTAssertEqual(metadata.parser.binarySHA256, manifest.binarySHA256)
+        XCTAssertEqual(metadata.parser.reportedVersion, manifest.reportedVersion)
+        XCTAssertEqual(metadata.parser.upstreamRepository, manifest.upstreamRepository)
+        XCTAssertEqual(metadata.parser.upstreamRevision, manifest.upstreamRevision)
+        XCTAssertEqual(metadata.parser.architecture, manifest.architecture)
+        XCTAssertEqual(metadata.parser.adapterVersion, manifest.adapterVersion)
+        XCTAssertEqual(metadata.parser.buildRecipeVersion, manifest.buildRecipeVersion)
 
         let processes = try await session.repository.processes(ProcessQuery())
         XCTAssertFalse(processes.items.isEmpty, "a real trace exposes at least one process")
@@ -91,8 +136,8 @@ final class ParserIntegrationTests: XCTestCase {
             .appendingPathComponent("arktrace-cancel-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
 
-        let task = Task {
-            try await TraceSession.open(
+        let task = Task.detached {
+            return try await TraceSession.open(
                 source: fixture,
                 parser: try TraceStreamerProcessParser(executableURL: binary),
                 stagingDirectory: staging
@@ -108,5 +153,60 @@ final class ParserIntegrationTests: XCTestCase {
         } catch is CancellationError {
             // Structured concurrency surfaced the cancellation directly.
         }
+    }
+
+    func testConcurrentSessionsSharingStagingRootUseDistinctDatabases() async throws {
+        let (binary, fixture) = try requireEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-concurrent-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let parser = try TraceStreamerProcessParser(executableURL: binary)
+
+        async let first = TraceSession.open(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging
+        )
+        async let second = TraceSession.open(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging
+        )
+        let sessions = try await [first, second]
+        let firstURL = await sessions[0].parsed.databaseURL
+        let secondURL = await sessions[1].parsed.databaseURL
+
+        XCTAssertNotEqual(firstURL, secondURL)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: firstURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: secondURL.path))
+    }
+
+    func testCancellationDuringRepositoryValidationCannotReturnReadySession() async throws {
+        let (binary, fixture) = try requireEnvironment()
+        let staging = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-repository-cancel-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: staging) }
+        let barrier = CancellationBarrier()
+
+        let task = Task.detached {
+            let parser = try TraceStreamerProcessParser(executableURL: binary)
+            return try await TraceSession.open(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                repositoryValidationHook: { await barrier.pauseUntilCancelled() }
+            )
+        }
+        await barrier.waitUntilReached()
+        task.cancel()
+
+        do {
+            _ = try await task.value
+            XCTFail("cancelled repository validation must not return Ready")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+        }
+        let leftovers = (try? FileManager.default.contentsOfDirectory(atPath: staging.path)) ?? []
+        XCTAssertTrue(leftovers.isEmpty, "cancelled session directory must be removed")
     }
 }

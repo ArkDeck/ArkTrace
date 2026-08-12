@@ -99,12 +99,15 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             processHasThreadCount ? (processHasEndTs ? 5 : 4) : nil
 
         let rows = try db.query(sql, bindings: bindings) { row in
-            TraceProcess(
-                key: ProcessKey(ipid: row.int64(0) ?? 0),
-                pid: row.int64(1) ?? 0,
+            guard let ipid = row.int64(0), let pid = row.int64(1) else {
+                throw Self.invalidIdentity(table: "process")
+            }
+            return TraceProcess(
+                key: ProcessKey(ipid: ipid),
+                pid: pid,
                 name: row.text(2),
-                startNs: relative(row.int64(3)),
-                endNs: relative(endIndex.flatMap { row.int64($0) }),
+                startNs: try relative(row.int64(3)),
+                endNs: try relative(endIndex.flatMap { row.int64($0) }),
                 threadCount: threadCountIndex.flatMap { row.int64($0) }.map(Int.init)
             )
         }
@@ -153,15 +156,18 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             threadHasIsMainThread ? (threadHasEndTs ? 8 : 7) : nil
 
         let rows = try db.query(sql, bindings: bindings) { row in
-            TraceThread(
-                key: ThreadKey(itid: row.int64(0) ?? 0),
+            guard let itid = row.int64(0), let tid = row.int64(1) else {
+                throw Self.invalidIdentity(table: "thread")
+            }
+            return TraceThread(
+                key: ThreadKey(itid: itid),
                 processKey: row.int64(4).map(ProcessKey.init(ipid:)),
-                tid: row.int64(1) ?? 0,
+                tid: tid,
                 pid: row.int64(5),
                 name: row.text(2),
                 processName: row.text(6),
-                startNs: relative(row.int64(3)),
-                endNs: relative(endIndex.flatMap { row.int64($0) }),
+                startNs: try relative(row.int64(3)),
+                endNs: try relative(endIndex.flatMap { row.int64($0) }),
                 isMainThread: mainThreadIndex.flatMap { row.int64($0) }.map { $0 != 0 }
             )
         }
@@ -172,13 +178,32 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
 
     /// Absolute TraceStreamer time → trace-relative nanoseconds, clamped into
     /// `[0, durationNs]`. Only the Store sees absolute times (DESIGN §7.1).
-    private func relative(_ absolute: Int64?) -> Int64? {
-        absolute.map { value in
-            min(max(0, value - validation.traceStartTs), validation.durationNs)
+    private func relative(_ absolute: Int64?) throws -> Int64? {
+        guard let value = absolute else { return nil }
+        if value <= validation.traceStartTs { return 0 }
+        if value >= validation.traceEndTs { return validation.durationNs }
+
+        let (relative, overflow) = value.subtractingReportingOverflow(validation.traceStartTs)
+        guard !overflow, relative >= 0, relative <= validation.durationNs else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .querying,
+                message: "Trace timestamp cannot be represented relative to trace start"
+            )
         }
+        return relative
     }
 
     private func page<T>(_ rows: [T], limit: Int) -> BoundedPage<T> {
         BoundedPage(items: Array(rows.prefix(limit)), truncated: rows.count > limit)
+    }
+
+    private static func invalidIdentity(table: String) -> ArkTraceError {
+        ArkTraceError(
+            code: .traceDatabaseInvalid,
+            stage: .querying,
+            message: "Required trace identity is not an SQLite INTEGER",
+            details: ["table": table]
+        )
     }
 }

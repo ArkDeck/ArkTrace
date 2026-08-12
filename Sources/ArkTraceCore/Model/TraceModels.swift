@@ -2,26 +2,32 @@
 /// Machine output must never expose absolute paths; identity is hash/version based.
 public struct TraceParserIdentity: Hashable, Codable, Sendable {
     public let name: String
-    public let reportedVersion: String?
+    public let reportedVersion: String
     public let binarySHA256: String
-    public let upstreamRevision: String?
-    public let architecture: String?
+    public let upstreamRepository: String
+    public let upstreamRevision: String
+    public let architecture: String
     public let adapterVersion: String
+    public let buildRecipeVersion: String
 
     public init(
         name: String,
-        reportedVersion: String?,
+        reportedVersion: String,
         binarySHA256: String,
-        upstreamRevision: String?,
-        architecture: String?,
-        adapterVersion: String
+        upstreamRepository: String,
+        upstreamRevision: String,
+        architecture: String,
+        adapterVersion: String,
+        buildRecipeVersion: String
     ) {
         self.name = name
         self.reportedVersion = reportedVersion
         self.binarySHA256 = binarySHA256
+        self.upstreamRepository = upstreamRepository
         self.upstreamRevision = upstreamRevision
         self.architecture = architecture
         self.adapterVersion = adapterVersion
+        self.buildRecipeVersion = buildRecipeVersion
     }
 }
 

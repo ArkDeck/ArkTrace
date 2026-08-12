@@ -253,6 +253,8 @@ Swift Package Manager 是 libraries、CLI 和测试的构建事实源；Xcode pr
 - 只有在 viewport 映射阶段，先减去 viewport origin 后才转换为 `Double`；
 - 输入数据库原始时间只存在于 Store adapter 内部。
 
+Store 把早于 `trace_range.start_ts` 的绝对时间临时 clamp 为 `0`，以表达抓取开始前已存在的 process/thread；晚于 `trace_range.end_ts` 的值可为展示安全 clamp 到 `durationNs`，但必须视为异常数据。非 identity 时间列若不是 SQLite `INTEGER` storage class，可以按 optional/缺失值丢弃。上述未来方向的 clamp 与丢弃都必须通过有界计数进入 `dataQuality.warnings`（计数达到上限时标记 truncated），不能只在展示结果中静默消失；required identity 仍然 fail closed。
+
 核心值类型：
 
 ```swift
@@ -342,10 +344,10 @@ protocol TraceParser: Sendable {
 
 ```text
 Process.executableURL = pinned trace_streamer
-Process.arguments = [sourcePath, "-e", stagingDatabasePath, "-nm"]
+Process.arguments = [sourceSnapshotPath, "-e", privatePartialDatabasePath, "-nm"]
 ```
 
-不使用 `/bin/sh -c`，不拼 shell 字符串。`-nm` 避免上游 `meta` 表把用户绝对路径写入缓存数据库。ArkTrace 自己的无路径 metadata sidecar 保存 parser/tool provenance。
+不使用 `/bin/sh -c`，不拼 shell 字符串。Parser 先在 session-owned private temp 中生成 source 与 binary snapshot，hash/identity 和真正交给子进程的字节完全一致；原始文件后续变化不影响本次 provenance。子进程只写 private partial DB，最终校验与取消 gate 通过后才原子提升到此前不存在的 destination，不删除或覆盖 caller 文件。snapshot/staging 的 Foundation 错误统一映射为无绝对路径的 typed error。`-nm` 避免上游 `meta` 表把用户绝对路径写入缓存数据库。ArkTrace 自己的无路径 metadata sidecar 保存 parser/tool provenance。
 
 ### 8.4 解析成功判定
 
@@ -365,7 +367,7 @@ Process.arguments = [sourcePath, "-e", stagingDatabasePath, "-nm"]
 
 ### 8.5 取消
 
-取消解析时先向子进程发送终止信号，等待短暂 grace period，必要时只终止该已知 PID。未完成的 staging entry 永不提升，后续清理只触碰 session-owned temp directory。
+取消解析时先向子进程发送终止信号，等待短暂 grace period，必要时只终止该已知 PID。取消与 atomic promotion 通过同一 gate 串行化；若移动先赢得竞态但调用任务在返回前已取消，只撤销本次拥有的 destination。Repository detached validation 返回后也再次检查调用任务的取消状态。未完成或已取消的 staging entry 永不保持 Ready，后续清理只触碰 session-owned temp directory。
 
 ## 9. Schema Adapter 与数据库
 
@@ -391,6 +393,8 @@ Schema fingerprint 是排序后的 table/column/type/PK 描述的 SHA-256。新�
 ### 9.2 Store
 
 `TraceDatabase` 负责连接、statement 生命周期、interrupt 和 progress handler；`SQLiteTraceRepository` 实现 Core 中的 typed repository protocols。
+
+数值读取必须先检查 SQLite storage class；required process/thread identity 仅接受 `SQLITE_INTEGER`，不得依赖 `sqlite3_column_int64` 对 `NULL`、`TEXT` 或 `REAL` 的静默转换。
 
 ```swift
 protocol TraceRepository: Sendable {

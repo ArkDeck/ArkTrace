@@ -19,6 +19,7 @@ UPSTREAM_URL="https://gitcode.com/openharmony/developtools_smartperf_host.git"
 UPSTREAM_REVISION="447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
 PLUGINS="hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower"
 BUILD_RECIPE_VERSION="1"
+ADAPTER_VERSION="1"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="${ARKTRACE_TS_WORK_DIR:-$REPO_ROOT/.build/trace_streamer-upstream}"
@@ -96,7 +97,9 @@ mkdir -p "$STAGE_DIR"
 cp "$BINARY" "$STAGE_DIR/trace_streamer"
 BINARY_SHA256=$(shasum -a 256 "$STAGE_DIR/trace_streamer" | awk '{print $1}')
 REPORTED_VERSION=$(("$STAGE_DIR/trace_streamer" --version 2>&1 || true) | sed -n 's/.*version[[:space:]]*\([0-9][0-9A-Za-z.\-]*\).*/\1/p' | head -1)
-HOST_ARCH=$(uname -m)
+# Record the staged binary's Mach-O architecture, not the build host's uname.
+# Keep the ordering/format aligned with TraceStreamerBinaryInspector.
+BINARY_ARCH=$(/usr/bin/lipo -archs "$STAGE_DIR/trace_streamer" | tr ' ' '\n' | sort | paste -sd+ -)
 CLANG_VERSION=$(clang --version | head -1)
 BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
@@ -116,7 +119,8 @@ cat > "$STAGE_DIR/manifest.json" <<EOF
   "upstreamRevision": "$UPSTREAM_REVISION",
   "reportedVersion": "$REPORTED_VERSION",
   "binarySHA256": "$BINARY_SHA256",
-  "architecture": "$HOST_ARCH",
+  "architecture": "$BINARY_ARCH",
+  "adapterVersion": "$ADAPTER_VERSION",
   "buildRecipeVersion": "$BUILD_RECIPE_VERSION",
   "plugins": "$PLUGINS",
   "localPatches": [

@@ -16,8 +16,10 @@ final class TraceDatabase {
         let statement: OpaquePointer
 
         func int64(_ index: Int32) -> Int64? {
-            sqlite3_column_type(statement, index) == SQLITE_NULL
-                ? nil : sqlite3_column_int64(statement, index)
+            guard sqlite3_column_type(statement, index) == SQLITE_INTEGER else {
+                return nil
+            }
+            return sqlite3_column_int64(statement, index)
         }
 
         func text(_ index: Int32) -> String? {

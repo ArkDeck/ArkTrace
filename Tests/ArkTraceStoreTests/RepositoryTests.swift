@@ -10,9 +10,11 @@ final class RepositoryTests: XCTestCase {
         name: "trace_streamer",
         reportedVersion: "4.3.7",
         binarySHA256: String(repeating: "0", count: 64),
-        upstreamRevision: nil,
+        upstreamRepository: "https://example.invalid/trace_streamer.git",
+        upstreamRevision: String(repeating: "1", count: 40),
         architecture: "arm64",
-        adapterVersion: "1"
+        adapterVersion: "1",
+        buildRecipeVersion: "1"
     )
 
     private static let dummySource = TraceSourceDescriptor(
@@ -59,6 +61,33 @@ final class RepositoryTests: XCTestCase {
             parser: Self.dummyParser,
             source: Self.dummySource
         )
+    }
+
+    private func makeTemporaryDatabase(_ sql: String) throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-test-\(UUID().uuidString).sqlite")
+        let db = try TraceDatabase(url: url, readOnly: false)
+        try db.execute(sql)
+        return url
+    }
+
+    private func assertRepositoryInitialization(
+        at url: URL,
+        failsWith code: ArkTraceError.Code,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: url,
+                parser: Self.dummyParser,
+                source: Self.dummySource
+            ),
+            file: file,
+            line: line
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, code, file: file, line: line)
+        }
     }
 
     func testMetadata() async throws {
@@ -164,5 +193,133 @@ final class RepositoryTests: XCTestCase {
         let db = try TraceDatabase(url: databaseURL, readOnly: false)
         try db.execute("ALTER TABLE process ADD COLUMN some_future_column INTEGER")
         XCTAssertNoThrow(try makeRepository(), "additive upstream columns must not break opening")
+    }
+
+    func testThreadStartTimestampIsRequiredBySchemaAndQueryContract() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (itid INTEGER, tid INTEGER, name TEXT, ipid INTEGER);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        assertRepositoryInitialization(at: url, failsWith: .traceSchemaUnsupported)
+    }
+
+    func testOverflowingTraceRangeReturnsTypedDatabaseError() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (-9223372036854775808, 9223372036854775807);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+    }
+
+    func testExtremeAbsoluteTimestampsClampWithoutOverflow() async throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (-9223372036854775808, -9223372036854774808);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            INSERT INTO process VALUES (1, 42, 'extreme', 9223372036854775807);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (
+                1, 42, 'extreme.main', -9223372036854775808, 1
+            );
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let repository = try SQLiteTraceRepository(
+            databaseURL: url,
+            parser: Self.dummyParser,
+            source: Self.dummySource
+        )
+
+        let processes = try await repository.processes(ProcessQuery())
+        let threads = try await repository.threads(ThreadQuery())
+        XCTAssertEqual(processes.items.first?.startNs, 1_000)
+        XCTAssertEqual(threads.items.first?.startNs, 0)
+    }
+
+    func testNullProcessIdentityIsRejectedDuringValidation() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            INSERT INTO process VALUES (NULL, 42, 'invalid', 0);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+    }
+
+    func testNullThreadIdentityIsRejectedDuringValidation() throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 10);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (NULL, 42, 'invalid', 0, NULL);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+    }
+
+    func testTextAndRealIdentityStorageClassesAreRejected() throws {
+        let invalidRows = [
+            "INSERT INTO process VALUES ('abc', 42, 'invalid', 0);",
+            "INSERT INTO thread VALUES (1.5, 42, 'invalid', 0, NULL);",
+        ]
+        for invalidRow in invalidRows {
+            let url = try makeTemporaryDatabase(
+                """
+                CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+                INSERT INTO trace_range VALUES (0, 10);
+                CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+                CREATE TABLE thread (
+                    itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+                );
+                \(invalidRow)
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            assertRepositoryInitialization(at: url, failsWith: .traceDatabaseInvalid)
+        }
+    }
+
+    func testNullIdentityIntroducedAfterValidationStillCannotBecomeKeyZero() async throws {
+        let repository = try makeRepository()
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("UPDATE process SET ipid = NULL WHERE id = 1")
+
+        do {
+            _ = try await repository.processes(ProcessQuery())
+            XCTFail("expected invalid identity error")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceDatabaseInvalid)
+            XCTAssertEqual(error.details["table"], "process")
+        }
     }
 }

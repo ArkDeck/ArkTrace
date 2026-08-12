@@ -165,7 +165,7 @@ Machine output 不得暴露 absolute path。
 
 ### AT-PARSE-005 后台执行
 
-hash、parse、validate、index 不得在 MainActor 上执行。
+resolver/initializer 只保存配置；manifest 读取、binary/source snapshot、hash、Mach-O 检查、child-process launch、parse、validate、index 不得在 MainActor 上执行。
 
 ### AT-PARSE-006 状态
 
@@ -188,11 +188,11 @@ cancelled
 
 ### AT-PARSE-007 成功判定
 
-Process status 0 只是必要条件。成功还必须满足：regular SQLite file、`quick_check`、supported schema、valid trace range、index migration 和 atomic promotion。
+Process status 0 只是必要条件。成功还必须满足：regular SQLite file、`quick_check`、supported schema、valid trace range、index migration、最终 provenance 校验、未取消检查和 atomic promotion。最终校验及 promotion 即使在后台 executor 执行，也必须显式接收并检查调用任务的取消状态。
 
 ### AT-PARSE-008 Staging
 
-Parser 必须只写 session-owned staging directory。Ready entry 必须通过原子 rename/promotion 产生；半成品不得被 cache lookup 命中。
+Parser 必须只写 session-owned staging directory。`destination` 必须是 caller 创建的 session-owned directory 中尚不存在的文件；Parser 禁止删除或覆盖已有 destination，且 source 与 destination 必须不同。并发 session 即使共享 staging root 也必须分配不同子目录。Parser 只把 immutable source/binary snapshot 和 partial DB 放入私有 temp，验证 provenance 后通过原子 rename/promotion 产生 destination/Ready entry；半成品不得被 cache lookup 命中。创建私有目录、复制 snapshot、设置权限和 promotion 的 Foundation 错误必须归一化为无绝对路径的 `ArkTraceError`。
 
 ### AT-PARSE-009 Cancellation
 
@@ -204,6 +204,8 @@ Parser 必须只写 session-owned staging directory。Ready entry 必须通过�
 - 不覆盖后来打开的 session；
 - session-owned temp 可清理；
 - 原始 Trace 不变。
+
+取消状态必须与 promotion 串行化：取消先发生时禁止移动；若原子移动先完成、调用任务随后在返回 Ready 前观察到取消，只能撤销本次拥有的 destination。`TraceSession` 在 Parser 返回及 Repository 后台校验返回后都必须再次检查取消，取消的 session 不得返回 Ready。
 
 ### AT-PARSE-010 Unsupported format
 
@@ -225,8 +227,8 @@ CPU/Process/Thread/Slice MVP 至少要求：
 
 ```text
 trace_range(start_ts,end_ts)
-process(id/ipid,pid,name)
-thread(id/itid,tid,name,ipid)
+process(id/ipid,pid,name,start_ts)
+thread(id/itid,tid,name,start_ts,ipid)
 sched_slice(id,ts,dur,cpu,itid,ipid)
 thread_state(id,ts,dur,itid,state)
 callstack(id,ts,dur,callid,name)
@@ -240,7 +242,7 @@ callstack(id,ts,dur,callid,name)
 
 ### AT-DB-005 Integrity
 
-必须执行 `PRAGMA quick_check`。对 required range 和关键 identity join 必须有 bounded semantic probes。禁止对大表做无界完整 referential scan 作为每次打开前置。
+必须执行 `PRAGMA quick_check`。对 required range 和关键 identity join 必须有 bounded semantic probes。required process/thread identity 的值必须是 SQLite `INTEGER` storage class；`NULL`、`TEXT`、`REAL` 和其他会被 `sqlite3_column_int64` 静默转换的值必须拒绝。禁止对大表做无界完整 referential scan 作为每次打开前置。
 
 ### AT-DB-006 Prepared statements
 
@@ -439,7 +441,7 @@ Repository 应以 `limit + 1` 检测 truncation，对外最多返回 `limit`，�
 
 ### AT-QUERY-008 Data quality
 
-缺失引用、无效 duration、重叠 scheduling slice 和未知 state 必须进入 result `dataQuality`，不得只写日志。
+缺失引用、无效 duration、重叠 scheduling slice、未知 state、超出 trace range 的时间 clamp，以及非 identity 数值因错误 SQLite storage class 被丢弃，都必须通过有界计数进入 result `dataQuality`，不得只写日志。计数达到探测上限时必须标记 truncated；required identity 仍按 AT-DB-005 fail closed。
 
 ## 9. Timeline 与 LOD 规格
 

@@ -24,6 +24,8 @@ public struct ParsedTrace: Sendable {
 /// TraceStreamer-specific process or log types. Cancellation follows Swift
 /// structured concurrency: implementations must observe task cancellation,
 /// terminate any child process, and throw `ArkTraceError(code: .cancelled)`.
+/// `destination` is an absent file inside a caller-created, session-owned
+/// directory. Implementations must never delete or overwrite an existing path.
 public protocol TraceParser: Sendable {
     func identity() async throws -> TraceParserIdentity
     func parse(source: URL, destination: URL) async throws -> ParsedTrace

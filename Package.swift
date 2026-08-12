@@ -18,6 +18,7 @@ let package = Package(
         .target(name: "ArkTraceStore", dependencies: ["ArkTraceCore"]),
         .target(name: "ArkTraceRuntime", dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"]),
         .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"]),
+        .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"]),
         .testTarget(name: "ArkTraceStoreTests", dependencies: ["ArkTraceStore"]),
         .testTarget(
             name: "ArkTraceIntegrationTests",

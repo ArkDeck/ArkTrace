@@ -17,9 +17,8 @@ enum TraceSchemaAdapter {
         /// (DESIGN §7.1).
         let traceStartTs: Int64
         let traceEndTs: Int64
+        let durationNs: Int64
         let warnings: [String]
-
-        var durationNs: Int64 { traceEndTs - traceStartTs }
     }
 
     private struct RequiredTable {
@@ -30,7 +29,7 @@ enum TraceSchemaAdapter {
     private static let requiredTables: [RequiredTable] = [
         RequiredTable(name: "trace_range", columns: ["start_ts", "end_ts"]),
         RequiredTable(name: "process", columns: ["ipid", "pid", "name", "start_ts"]),
-        RequiredTable(name: "thread", columns: ["itid", "tid", "name", "ipid"]),
+        RequiredTable(name: "thread", columns: ["itid", "tid", "name", "start_ts", "ipid"]),
     ]
 
     static func validate(_ db: TraceDatabase) throws -> Validation {
@@ -75,6 +74,7 @@ enum TraceSchemaAdapter {
         )
 
         let range = try traceRange(db)
+        try validateRequiredIdentities(db)
         var warnings: [String] = []
         if !capabilities.cpuScheduling {
             warnings.append("sched_slice unavailable: CPU scheduling queries are disabled")
@@ -85,6 +85,7 @@ enum TraceSchemaAdapter {
             schemaFingerprint: fingerprint(of: columnsByTable),
             traceStartTs: range.start,
             traceEndTs: range.end,
+            durationNs: range.duration,
             warnings: warnings
         )
     }
@@ -99,7 +100,9 @@ enum TraceSchemaAdapter {
         return required.allSatisfy(names.contains)
     }
 
-    private static func traceRange(_ db: TraceDatabase) throws -> (start: Int64, end: Int64) {
+    private static func traceRange(
+        _ db: TraceDatabase
+    ) throws -> (start: Int64, end: Int64, duration: Int64) {
         let rows = try db.query(
             "SELECT start_ts, end_ts FROM trace_range",
             stage: .validating
@@ -114,7 +117,45 @@ enum TraceSchemaAdapter {
                 details: ["rowCount": String(rows.count)]
             )
         }
-        return (start, end)
+        let (duration, overflow) = end.subtractingReportingOverflow(start)
+        guard !overflow, duration > 0 else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .validating,
+                message: "trace_range duration exceeds supported Int64 nanoseconds"
+            )
+        }
+        return (start, end, duration)
+    }
+
+    /// Required identities must use SQLite's INTEGER storage class. SQLite's
+    /// numeric accessors coerce NULL/TEXT/REAL (for example, `"abc"` to 0),
+    /// which would merge unrelated rows into a forged identity.
+    private static func validateRequiredIdentities(_ db: TraceDatabase) throws {
+        let probes = [
+            (
+                table: "process",
+                predicate: "typeof(ipid) <> 'integer' OR typeof(pid) <> 'integer'"
+            ),
+            (
+                table: "thread",
+                predicate: "typeof(itid) <> 'integer' OR typeof(tid) <> 'integer'"
+            ),
+        ]
+        for probe in probes {
+            let invalid = try db.query(
+                "SELECT 1 FROM \(probe.table) WHERE \(probe.predicate) LIMIT 1",
+                stage: .validating
+            ) { _ in true }
+            guard invalid.isEmpty else {
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .validating,
+                    message: "Required trace identity is not an SQLite INTEGER",
+                    details: ["table": probe.table]
+                )
+            }
+        }
     }
 
     /// Fingerprint over sorted table/column/type/notnull/pk descriptions
