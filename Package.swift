@@ -24,7 +24,13 @@ let package = Package(
         .target(
             name: "ArkTraceCLI",
             dependencies: [
-                "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime", "ArkTraceAnalysis",
+                "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
+                "ArkTraceAnalysis",
+            ],
+            resources: [
+                .copy("../../Fixtures/traces/zlib.htrace"),
+                .copy("../../Fixtures/traces/LICENSE.Apache-2.0.txt"),
+                .copy("../../Fixtures/traces/NOTICE.md"),
             ]
         ),
         .executableTarget(name: "arktrace", dependencies: ["ArkTraceCLI"]),
@@ -34,7 +40,10 @@ let package = Package(
         .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"]),
         .testTarget(
             name: "ArkTraceCLITests",
-            dependencies: ["ArkTraceCLI", "ArkTraceCore", "ArkTraceParser"],
+            dependencies: [
+                "ArkTraceCLI", "ArkTraceCore", "ArkTraceParser", "ArkTraceStore",
+                "ArkTraceRuntime",
+            ],
             resources: [.copy("Fixtures")]
         ),
         .testTarget(

@@ -13,7 +13,7 @@ public struct CLIApplication: Sendable {
         parser: CLIArgumentParser = CLIArgumentParser(),
         renderer: CLIHumanRenderer = CLIHumanRenderer(),
         machineEncoder: CLIMachineEncoder = CLIMachineEncoder(),
-        executor: any CLICommandExecuting = CLIUnavailableCommandExecutor()
+        executor: any CLICommandExecuting = CLIProductionCommandExecutor()
     ) {
         self.parser = parser
         self.renderer = renderer

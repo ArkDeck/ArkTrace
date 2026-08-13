@@ -1,8 +1,26 @@
+import ArkTraceAnalysis
 import ArkTraceCore
+import ArkTraceStore
 import CoreFoundation
 import Foundation
 
+struct CLIHumanDoctorDetails: Sendable {
+    let toolVersion: String
+    let toolBuildRevision: String?
+    let operatingSystem: String
+    let architecture: String
+    let parserLocation: String
+    let parserIdentity: TraceParserIdentity?
+    let sqlite: TraceSQLiteRuntimeInfo
+    let cacheLocation: String
+    let cacheWritable: Bool
+    let cacheFreeBytes: UInt64
+    let schemaAdapterVersion: String
+}
+
 public struct CLIHumanRenderer: Sendable {
+    private static let maximumTerminalFieldBytes = 4_096
+
     public init() {}
 
     public func help() -> Data {
@@ -32,6 +50,141 @@ public struct CLIHumanRenderer: Sendable {
 
     public func error(_ error: ArkTraceError) -> Data {
         Data("error: \(error.code.rawValue): \(error.message)\n".utf8)
+    }
+
+    static func doctor(
+        _ page: BoundedPage<CLIMachineDoctorCheck>,
+        details: CLIHumanDoctorDetails
+    ) -> Data {
+        var lines = [
+            "ArkTrace doctor",
+            "Tool: \(terminalField(details.toolVersion)) build "
+                + "\(details.toolBuildRevision.map(terminalField) ?? "unavailable")",
+            "OS: \(terminalField(details.operatingSystem))",
+            "Architecture: \(terminalField(details.architecture))",
+            "TraceStreamer path: \(terminalField(details.parserLocation))",
+        ]
+        if let parser = details.parserIdentity {
+            lines += [
+                "TraceStreamer identity: \(terminalField(parser.reportedVersion)) "
+                    + "\(terminalField(parser.upstreamRevision))",
+                "TraceStreamer SHA-256: \(terminalField(parser.binarySHA256))",
+                "TraceStreamer architecture: \(terminalField(parser.architecture))",
+            ]
+        }
+        lines += [
+            "SQLite: \(terminalField(details.sqlite.version)) "
+                + "threadSafe=\(details.sqlite.isThreadSafe)",
+            "Cache: \(terminalField(details.cacheLocation)) writable=\(details.cacheWritable)"
+                + " freeBytes=\(details.cacheFreeBytes)",
+            "Schema adapter: \(terminalField(details.schemaAdapterVersion))",
+        ]
+        lines += page.items.map {
+            "[\(terminalField($0.status.rawValue))] \(terminalField($0.name))"
+        }
+        if page.truncated { lines.append("… checks truncated") }
+        return Data((lines.joined(separator: "\n") + "\n").utf8)
+    }
+
+    static func inspect(_ snapshot: CLIMachineTraceSnapshot) -> Data {
+        let metadata = snapshot.metadata
+        let capabilities = [
+            ("cpuScheduling", metadata.capabilities.cpuScheduling),
+            ("threadStates", metadata.capabilities.threadStates),
+            ("namedSlices", metadata.capabilities.namedSlices),
+            ("cpuCounters", metadata.capabilities.cpuCounters),
+            ("processCounters", metadata.capabilities.processCounters),
+        ].filter(\.1).map(\.0).joined(separator: ",")
+        return Data(([
+            "Trace SHA-256: \(metadata.traceSHA256)",
+            "Bytes: \(metadata.sourceByteCount)",
+            "Duration ns: \(metadata.durationNs)",
+            "Parser: \(metadata.parser.name) \(metadata.parser.reportedVersion)",
+            "Schema: \(metadata.schemaFingerprint)",
+            "Capabilities: \(capabilities.isEmpty ? "none" : capabilities)",
+            "Data quality: \(metadata.dataQuality.status.rawValue)",
+            "Cache hit: \(snapshot.cacheHit ? "yes" : "no")",
+        ].joined(separator: "\n") + "\n").utf8)
+    }
+
+    static func summary(_ summary: TraceSummary) -> Data {
+        func value(_ value: Int64?) -> String { value.map(String.init) ?? "unavailable" }
+        var lines = [
+            "Range ns: [\(summary.range.startNs), \(summary.range.endNs))",
+            "Duration ns: \(summary.durationNs)",
+            "CPUs: \(value(summary.cpuCount))",
+            "Processes: \(summary.processCount)",
+            "Threads: \(summary.threadCount)",
+            "CPU slices: \(value(summary.cpuSliceCount))",
+            "Thread states: \(value(summary.threadStateCount))",
+            "Named slices: \(value(summary.namedSliceCount))",
+            "Counter series: \(value(summary.counterSeriesCount))",
+        ]
+        if let counts = summary.eventCountBySource {
+            lines += counts.map {
+                "Event source \(terminalField($0.source)): \($0.count)"
+            }
+        }
+        if !summary.truncatedSections.isEmpty {
+            lines.append(
+                "Truncated: " + summary.truncatedSections.map(\.rawValue).joined(separator: ",")
+            )
+        }
+        return Data((lines.joined(separator: "\n") + "\n").utf8)
+    }
+
+    static func processes(_ page: BoundedPage<TraceProcess>) -> Data {
+        var lines = ["IPID\tPID\tNAME\tSTART_NS\tEND_NS\tTHREADS"]
+        lines += page.items.map {
+            "\($0.key.ipid)\t\($0.pid)\t\($0.name.map(terminalField) ?? "-")\t"
+                + "\($0.startNs.map(String.init) ?? "-")\t"
+                + "\($0.endNs.map(String.init) ?? "-")\t"
+                + "\($0.threadCount.map(String.init) ?? "-")"
+        }
+        if page.truncated { lines.append("… processes truncated") }
+        return Data((lines.joined(separator: "\n") + "\n").utf8)
+    }
+
+    static func threads(_ page: BoundedPage<TraceThread>) -> Data {
+        var lines = ["ITID\tIPID\tPID\tTID\tNAME\tSTART_NS\tEND_NS\tMAIN"]
+        lines += page.items.map {
+            "\($0.key.itid)\t\($0.processKey?.ipid.description ?? "-")\t"
+                + "\($0.pid.map(String.init) ?? "-")\t\($0.tid)\t"
+                + "\($0.name.map(terminalField) ?? "-")\t"
+                + "\($0.startNs.map(String.init) ?? "-")\t"
+                + "\($0.endNs.map(String.init) ?? "-")\t"
+                + "\($0.isMainThread.map(String.init) ?? "-")"
+        }
+        if page.truncated { lines.append("… threads truncated") }
+        return Data((lines.joined(separator: "\n") + "\n").utf8)
+    }
+
+    /// Trace strings are data, not terminal markup. Render control and format
+    /// scalars visibly and cap each expanded field so a single hostile value
+    /// cannot create an unbounded intermediate human-output row.
+    private static func terminalField(_ value: String) -> String {
+        var rendered = ""
+        var byteCount = 0
+        let ellipsis = "…"
+        let contentLimit = maximumTerminalFieldBytes - ellipsis.utf8.count
+
+        for scalar in value.unicodeScalars {
+            let component: String
+            switch scalar.properties.generalCategory {
+            case .control, .format, .lineSeparator, .paragraphSeparator:
+                component = "\\u{\(String(scalar.value, radix: 16, uppercase: true))}"
+            default:
+                component = String(scalar)
+            }
+            let componentBytes = component.utf8.count
+            guard byteCount + componentBytes <= contentLimit else {
+                rendered += ellipsis
+                return rendered
+            }
+            rendered += component
+            byteCount += componentBytes
+        }
+        return rendered
     }
 }
 

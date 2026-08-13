@@ -1096,6 +1096,22 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(Set(page.items.map(\.key.ipid)), [1, 2])
     }
 
+    // AC-AT-005: TID reuse also returns every stable internal thread identity.
+    func testTidReuseReturnsDistinctIdentitiesInStableOrder() async throws {
+        let databaseURL = try XCTUnwrap(databaseURL)
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute(
+            "INSERT INTO thread VALUES (4, 4, 200, 'reused', 1500, NULL, 3, 0)"
+        )
+
+        let page = try await makeRepository().threads(try ThreadQuery(tid: 200))
+
+        XCTAssertFalse(page.truncated)
+        XCTAssertEqual(page.items.map(\.tid), [200, 200])
+        XCTAssertEqual(page.items.map(\.key.itid), [3, 4])
+        XCTAssertEqual(page.items.map(\.processKey?.ipid), [3, 3])
+    }
+
     func testProcessLimitTruncation() async throws {
         let page = try await makeRepository().processes(try ProcessQuery(limit: 2))
         XCTAssertEqual(page.items.count, 2)

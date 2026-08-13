@@ -105,6 +105,11 @@ P2-T04 独立复审 findings 收口后再次重跑：218 tests、0 failed、0 sk
 provenance/result binding、capability/nullability、最终提交取消、可执行文件等长原位修改、
 closed machine diagnostics/retry reasons 及完整 20-fixture golden 回归，locked evidence 未漂移。
 
+P2-T05 production command executor 与真实五命令端到端接入及 review hardening 后再次重跑：
+225 tests、0 failed、0 skipped；bundled self-test fixture、human/JSON、empty/filter/range/limit、
+doctor failure 与 terminal escaping/session cleanup evidence 均为 Phase 2 additive coverage，
+Phase 1 冻结表仍不改写。
+
 ## 6. 已知限制与仍开放发布门
 
 - 发布门 3（完整第三方许可证清单）仍开放，归 P3-T10；当前只锁定 TraceStreamer/source fixtures 的 Apache-2.0 证据。

@@ -1,6 +1,6 @@
 # ArkTrace Phase 2 任务清单
 
-> 状态：Active — P2-T01～T04 已完成，下一项 P2-T05
+> 状态：Active — P2-T01～T05 已完成，下一项 P2-T06
 > 阶段：CLI Vertical Slice
 > 验收目标：Agent 不依赖 UI 即可 inspect、summary、读取 process/thread
 
@@ -281,11 +281,33 @@ upstream/Ready SHA 与 schema fingerprint 未漂移。
 
 **验收**
 
-- [ ] 五个命令的 human/JSON 成功路径；
-- [ ] empty result 是 success；
-- [ ] filter 使用 prepared binding；
-- [ ] process/thread 排序稳定且 limit+1 正确；
-- [ ] source absolute path 不进入 JSON。
+- [x] 五个命令的 human/JSON 成功路径；
+- [x] empty result 是 success；
+- [x] filter 使用 prepared binding；
+- [x] process/thread 排序稳定且 limit+1 正确；
+- [x] source absolute path 不进入 JSON。
+
+**实现证据（2026-08-13，独立 review clean）**
+
+`CLIProductionCommandExecutor` 已成为 `CLIApplication` 默认执行器：除 help/version 外，命令均
+使用同一 `TraceSession`/repository 打开、查询、构造 human 与 typed machine 输出，并在 stdout
+提交前完成 session close；close/cleanup 失败优先，不能返回 success。默认使用 content-addressed
+cache，`--no-cache` 使用 Runtime 的 ephemeral owned directory；doctor self-test 始终强制
+ephemeral/no-cache，确保每次都真实执行 parser。summary 将 range、maxRows 与 timeout 传入
+`TraceSummaryRequest`；process/thread 将所有 identity/PID/TID/name/limit 传入 Store prepared
+query，复用既有稳定排序和 limit+1。
+
+doctor 检查实际 tool build、OS/arch、pinned Parser manifest/identity、SQLite version/thread safety、
+cache writable/free bytes 与 schema adapter；human-only 输出 deployment/cache path。`--self-test`
+从 ArkTraceCLI resource bundle 读取提交内 Apache-2.0 `zlib.htrace`（bundle 同时携带许可证与
+NOTICE），真实执行 Parser → staging validation/index → repository → summary，不下载依赖或修改
+用户 Trace。Machine result 保持 path-free。
+
+新增 6 条 production executor regression，含五个命令 human/JSON、empty、filter/range/limit、
+self-test、doctor typed failure、terminal control escaping、session close/cleanup failure，并以 pinned
+TraceStreamer + real zlib fixture 逐个端到端执行五个命令。完整 Release 与不可跳过 gate均为
+225 tests、0 failure、0 skip；Store 另锁定同 TID 多 internal identity 的稳定顺序，locked
+parser/source/upstream/Ready SHA 与 schema fingerprint 未漂移。
 
 ### P2-T06 — 统一 deadline、signal、resource bound 与 exit status
 

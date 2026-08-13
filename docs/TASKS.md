@@ -1,8 +1,8 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-12 / Phase 1 实现至 `4bf9bdb`，文档收口随 P1-T09 提交
+> 状态基线：2026-08-13 / Phase 2 已完成 P2-T01～T05
 > 任务总数：57
-> 已完成：18（Phase 0 六项 + Phase 1 九项 + Phase 2 三项）
+> 已完成：20（Phase 0 六项 + Phase 1 九项 + Phase 2 五项）
 > 下一阶段：Phase 2 — CLI Vertical Slice
 
 ## 1. 阶段总览
@@ -11,7 +11,7 @@
 |---:|---|---:|---|---|---|
 | 0 | Evidence | 6 | Completed | 关键架构问题有真实证据，发布门 1 关闭 | [PHASE_0_TASKS.md](./PHASE_0_TASKS.md) |
 | 1 | Parser Vertical Slice | 9 | Completed，9/9 | real Trace → TraceStreamer → SQLite → Store → metadata | [PHASE_1_TASKS.md](./PHASE_1_TASKS.md) |
-| 2 | CLI Vertical Slice | 7 | Active，3/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
+| 2 | CLI Vertical Slice | 7 | Active，5/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
 | 3 | Native Viewer | 10 | Planned | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
 | 4 | Agent Query | 7 | Planned | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
 | 5 | ArkDeck Integration | 9 | Planned | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |

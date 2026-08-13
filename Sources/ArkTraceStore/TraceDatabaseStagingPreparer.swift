@@ -1,6 +1,20 @@
 import ArkTraceCore
 import CryptoKit
 import Foundation
+import SQLite3
+
+/// Bounded, path-free SQLite runtime facts used by `arktrace doctor`.
+public struct TraceSQLiteRuntimeInfo: Equatable, Sendable {
+    public let version: String
+    public let isThreadSafe: Bool
+
+    public static var current: TraceSQLiteRuntimeInfo {
+        TraceSQLiteRuntimeInfo(
+            version: String(cString: sqlite3_libversion()),
+            isThreadSafe: sqlite3_threadsafe() != 0
+        )
+    }
+}
 
 /// Validates and indexes a private parser output before the parser may expose
 /// it as a Ready database. Every identifier below is an ArkTrace constant;
