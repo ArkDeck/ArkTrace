@@ -1,6 +1,7 @@
 import ArkTraceAppSupport
 import ArkTraceCore
 import ArkTraceParser
+import CryptoKit
 import Darwin
 import Foundation
 import XCTest
@@ -80,17 +81,15 @@ final class AppDistributionTests: XCTestCase {
                 "ArkTrace-missing-\(UUID().uuidString).app", isDirectory: true
             )
             defer { try? FileManager.default.removeItem(at: bundle) }
-            let destination = bundle.appendingPathComponent(
-                "Contents/Resources/TraceStreamer", isDirectory: true
-            )
-            try FileManager.default.createDirectory(
-                at: destination, withIntermediateDirectories: true
-            )
             let retainedName = missingName == "trace_streamer"
                 ? "manifest.json" : "trace_streamer"
+            let retained = Self.bundleFile(named: retainedName, in: bundle)
+            try FileManager.default.createDirectory(
+                at: retained.deletingLastPathComponent(), withIntermediateDirectories: true
+            )
             try FileManager.default.copyItem(
                 at: source.appendingPathComponent(retainedName),
-                to: destination.appendingPathComponent(retainedName)
+                to: retained
             )
 
             XCTAssertThrowsError(
@@ -117,19 +116,20 @@ final class AppDistributionTests: XCTestCase {
                     "ArkTrace-invalid-\(UUID().uuidString).app", isDirectory: true
                 )
                 defer { try? FileManager.default.removeItem(at: bundle) }
-                let destination = bundle.appendingPathComponent(
-                    "Contents/Resources/TraceStreamer", isDirectory: true
-                )
-                try FileManager.default.createDirectory(
-                    at: destination, withIntermediateDirectories: true
-                )
                 for name in ["trace_streamer", "manifest.json"] where name != targetName {
+                    let retained = Self.bundleFile(named: name, in: bundle)
+                    try FileManager.default.createDirectory(
+                        at: retained.deletingLastPathComponent(), withIntermediateDirectories: true
+                    )
                     try FileManager.default.copyItem(
                         at: source.appendingPathComponent(name),
-                        to: destination.appendingPathComponent(name)
+                        to: retained
                     )
                 }
-                let target = destination.appendingPathComponent(targetName)
+                let target = Self.bundleFile(named: targetName, in: bundle)
+                try FileManager.default.createDirectory(
+                    at: target.deletingLastPathComponent(), withIntermediateDirectories: true
+                )
                 switch shape {
                 case .directory:
                     try FileManager.default.createDirectory(
@@ -160,6 +160,76 @@ final class AppDistributionTests: XCTestCase {
         }
     }
 
+    func testBundledResolverRejectsSymlinkedRequiredAncestorDirectories() throws {
+        let repository = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = repository.appendingPathComponent("ThirdParty/TraceStreamer/macx")
+        for ancestor in ["Helpers", "Resources/TraceStreamer"] {
+            let root = FileManager.default.temporaryDirectory.resolvingSymlinksInPath()
+                .appendingPathComponent(
+                    "ArkTrace-ancestor-\(UUID().uuidString)", isDirectory: true
+                )
+            let bundle = root.appendingPathComponent("ArkTrace.app", isDirectory: true)
+            let external = root.appendingPathComponent("external", isDirectory: true)
+            defer { try? FileManager.default.removeItem(at: root) }
+            try FileManager.default.createDirectory(at: bundle, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(at: external, withIntermediateDirectories: true)
+
+            if ancestor == "Helpers" {
+                try FileManager.default.copyItem(
+                    at: source.appendingPathComponent("trace_streamer"),
+                    to: external.appendingPathComponent("trace_streamer")
+                )
+                let resources = bundle.appendingPathComponent(
+                    "Contents/Resources/TraceStreamer", isDirectory: true
+                )
+                try FileManager.default.createDirectory(
+                    at: resources, withIntermediateDirectories: true
+                )
+                try FileManager.default.copyItem(
+                    at: source.appendingPathComponent("manifest.json"),
+                    to: resources.appendingPathComponent("manifest.json")
+                )
+                let helpers = bundle.appendingPathComponent("Contents/Helpers")
+                try FileManager.default.createDirectory(
+                    at: helpers.deletingLastPathComponent(), withIntermediateDirectories: true
+                )
+                try FileManager.default.createSymbolicLink(
+                    at: helpers, withDestinationURL: external
+                )
+            } else {
+                try FileManager.default.copyItem(
+                    at: source.appendingPathComponent("manifest.json"),
+                    to: external.appendingPathComponent("manifest.json")
+                )
+                let executable = Self.bundleFile(named: "trace_streamer", in: bundle)
+                try FileManager.default.createDirectory(
+                    at: executable.deletingLastPathComponent(), withIntermediateDirectories: true
+                )
+                try FileManager.default.copyItem(
+                    at: source.appendingPathComponent("trace_streamer"), to: executable
+                )
+                let traceStreamer = bundle.appendingPathComponent(
+                    "Contents/Resources/TraceStreamer"
+                )
+                try FileManager.default.createDirectory(
+                    at: traceStreamer.deletingLastPathComponent(), withIntermediateDirectories: true
+                )
+                try FileManager.default.createSymbolicLink(
+                    at: traceStreamer, withDestinationURL: external
+                )
+            }
+
+            XCTAssertThrowsError(
+                try ArkTraceBundledParserResolver(bundleURL: bundle).resolve()
+            ) { error in
+                XCTAssertEqual((error as? ArkTraceError)?.code, .traceStreamerUnavailable)
+            }
+        }
+    }
+
     func testBundledParserIdentityAndManifestDriftFailClosed() async throws {
         let root = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -170,17 +240,21 @@ final class AppDistributionTests: XCTestCase {
             "ArkTrace-\(UUID().uuidString).app", isDirectory: true
         )
         defer { try? FileManager.default.removeItem(at: bundle) }
-        let destination = bundle.appendingPathComponent(
-            "Contents/Resources/TraceStreamer", isDirectory: true
+        let executableURL = Self.bundleFile(named: "trace_streamer", in: bundle)
+        let manifestURL = Self.bundleFile(named: "manifest.json", in: bundle)
+        try FileManager.default.createDirectory(
+            at: executableURL.deletingLastPathComponent(), withIntermediateDirectories: true
         )
-        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: manifestURL.deletingLastPathComponent(), withIntermediateDirectories: true
+        )
         try FileManager.default.copyItem(
             at: sourceDirectory.appendingPathComponent("trace_streamer"),
-            to: destination.appendingPathComponent("trace_streamer")
+            to: executableURL
         )
         try FileManager.default.copyItem(
             at: sourceDirectory.appendingPathComponent("manifest.json"),
-            to: destination.appendingPathComponent("manifest.json")
+            to: manifestURL
         )
 
         let parser = try ArkTraceBundledParserResolver(bundleURL: bundle).resolve()
@@ -188,7 +262,6 @@ final class AppDistributionTests: XCTestCase {
         XCTAssertEqual(identity.reportedVersion, "4.3.7")
         XCTAssertEqual(identity.binarySHA256.count, 64)
 
-        let manifestURL = destination.appendingPathComponent("manifest.json")
         var object = try XCTUnwrap(
             JSONSerialization.jsonObject(with: Data(contentsOf: manifestURL))
                 as? [String: Any]
@@ -203,5 +276,71 @@ final class AppDistributionTests: XCTestCase {
         } catch let error as ArkTraceError {
             XCTAssertEqual(error.code, .traceStreamerIdentityMismatch)
         }
+    }
+
+    func testBundledResolverAcceptsManifestBoundDistributionSignedParserBytes() async throws {
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceDirectory = root.appendingPathComponent("ThirdParty/TraceStreamer/macx")
+        let bundle = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "ArkTrace-signed-helper-\(UUID().uuidString).app", isDirectory: true
+        )
+        defer { try? FileManager.default.removeItem(at: bundle) }
+        let executable = Self.bundleFile(named: "trace_streamer", in: bundle)
+        let manifest = Self.bundleFile(named: "manifest.json", in: bundle)
+        try FileManager.default.createDirectory(
+            at: executable.deletingLastPathComponent(), withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: manifest.deletingLastPathComponent(), withIntermediateDirectories: true
+        )
+        try FileManager.default.copyItem(
+            at: sourceDirectory.appendingPathComponent("trace_streamer"), to: executable
+        )
+        try FileManager.default.copyItem(
+            at: sourceDirectory.appendingPathComponent("manifest.json"), to: manifest
+        )
+        let unsignedSHA = try Self.sha256(at: executable)
+
+        let signer = Process()
+        signer.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        signer.arguments = [
+            "--force", "--sign", "-", "--identifier",
+            "dev.arktrace.trace-streamer.distribution-test", executable.path,
+        ]
+        signer.standardOutput = FileHandle.nullDevice
+        signer.standardError = FileHandle.nullDevice
+        try signer.run()
+        signer.waitUntilExit()
+        XCTAssertEqual(signer.terminationStatus, 0)
+
+        let signedSHA = try Self.sha256(at: executable)
+        XCTAssertNotEqual(signedSHA, unsignedSHA)
+        var object = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: manifest))
+                as? [String: Any]
+        )
+        object["binarySHA256"] = signedSHA
+        try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+            .write(to: manifest, options: .atomic)
+
+        let identity = try await ArkTraceBundledParserResolver(bundleURL: bundle)
+            .resolve().identity()
+        XCTAssertEqual(identity.binarySHA256, signedSHA)
+        XCTAssertEqual(identity.buildRecipeVersion, object["buildRecipeVersion"] as? String)
+    }
+
+    private static func sha256(at url: URL) throws -> String {
+        let data = try Data(contentsOf: url, options: [.mappedIfSafe])
+        return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private static func bundleFile(named name: String, in bundle: URL) -> URL {
+        if name == "trace_streamer" {
+            return TraceStreamerResolver.appBundleExecutableURL(bundleURL: bundle)
+        }
+        return TraceStreamerResolver.appBundleManifestURL(bundleURL: bundle)
     }
 }

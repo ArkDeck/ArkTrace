@@ -6,10 +6,19 @@ fail() {
     exit 1
 }
 
+bounded_build_failure() {
+    printf 'Xcode diagnostics withheld\n' >&2
+}
+
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$repo_root"
 
 scripts/test_phase2.sh
+scripts/test_trace_streamer_build_safety.sh
+scripts/test_license_verifier.sh
+scripts/test_htrace_integrity_verifier.sh
+scripts/test_phase3_benchmark_contract.sh
+scripts/test_phase3_distribution_contract.sh
 
 derived_data=$(mktemp -d /tmp/arktrace-phase3-app.XXXXXX)
 app_log=$(mktemp /tmp/arktrace-phase3-app-log.XXXXXX)
@@ -26,8 +35,9 @@ if ! xcodebuild -quiet \
     -derivedDataPath "$derived_data" \
     CODE_SIGN_IDENTITY=- \
     CODE_SIGNING_REQUIRED=YES \
-    build
+    build >"$app_log" 2>&1
 then
+    bounded_build_failure
     fail "Debug app build failed"
 fi
 
@@ -38,29 +48,44 @@ if ! xcodebuild -quiet \
     -derivedDataPath "$derived_data" \
     CODE_SIGN_IDENTITY=- \
     CODE_SIGNING_REQUIRED=YES \
-    build
+    build >>"$app_log" 2>&1
 then
+    bounded_build_failure
     fail "Release candidate app build failed"
 fi
 
 app="$derived_data/Build/Products/Debug/ArkTrace.app"
 release_app="$derived_data/Build/Products/Release/ArkTrace.app"
-bundled_parser="$app/Contents/Resources/TraceStreamer/trace_streamer"
+bundled_parser="$app/Contents/Helpers/trace_streamer"
 bundled_manifest="$app/Contents/Resources/TraceStreamer/manifest.json"
 
-codesign --verify --deep --strict "$app" || fail "Debug app signature is invalid"
-codesign --verify --deep --strict "$release_app" \
+codesign --verify --deep --strict "$app" >/dev/null 2>&1 \
+    || fail "Debug app signature is invalid"
+codesign --verify --deep --strict "$release_app" >/dev/null 2>&1 \
     || fail "Release candidate app signature is invalid"
-cmp ThirdParty/TraceStreamer/macx/trace_streamer "$bundled_parser" \
+cmp ThirdParty/TraceStreamer/macx/trace_streamer "$bundled_parser" >/dev/null 2>&1 \
     || fail "bundled parser bytes drifted"
-cmp ThirdParty/TraceStreamer/macx/manifest.json "$bundled_manifest" \
+cmp ThirdParty/TraceStreamer/macx/manifest.json "$bundled_manifest" >/dev/null 2>&1 \
     || fail "bundled parser manifest bytes drifted"
 cmp ThirdParty/TraceStreamer/macx/trace_streamer \
-    "$release_app/Contents/Resources/TraceStreamer/trace_streamer" \
+    "$release_app/Contents/Helpers/trace_streamer" >/dev/null 2>&1 \
     || fail "Release bundled parser bytes drifted"
 cmp ThirdParty/TraceStreamer/macx/manifest.json \
-    "$release_app/Contents/Resources/TraceStreamer/manifest.json" \
+    "$release_app/Contents/Resources/TraceStreamer/manifest.json" >/dev/null 2>&1 \
     || fail "Release bundled parser manifest bytes drifted"
+for candidate_app in "$app" "$release_app"; do
+    cmp LICENSE "$candidate_app/Contents/Resources/LICENSE" >/dev/null 2>&1 \
+        || fail "bundled ArkTrace product license bytes drifted"
+    cmp THIRD_PARTY_NOTICES.md \
+        "$candidate_app/Contents/Resources/THIRD_PARTY_NOTICES.md" >/dev/null 2>&1 \
+        || fail "bundled third-party notice bytes drifted"
+    cmp ThirdParty/TraceStreamer/license-inventory.json \
+        "$candidate_app/Contents/Resources/license-inventory.json" >/dev/null 2>&1 \
+        || fail "bundled license inventory bytes drifted"
+    diff -qr ThirdParty/TraceStreamer/LICENSES \
+        "$candidate_app/Contents/Resources/Licenses" >/dev/null \
+        || fail "bundled license text directory drifted"
+done
 bundled_version=$("$bundled_parser" --version 2>&1 || true)
 test "$bundled_version" = "version 4.3.7" \
     || fail "bundled parser version drifted"
@@ -141,9 +166,7 @@ app_pid=$!
 sleep 2
 if ! kill -0 "$app_pid" 2>/dev/null; then
     wait "$app_pid" || true
-    echo "Phase 3 Debug app did not remain running" >&2
-    tail -80 "$app_log" >&2
-    exit 1
+    fail "Debug app did not remain running"
 fi
 set +e
 kill -TERM "$app_pid" 2>/dev/null
@@ -152,14 +175,10 @@ wait "$app_pid"
 status=$?
 set -e
 if test "$kill_status" -ne 0; then
-    echo "Phase 3 Debug app exited between liveness check and termination" >&2
-    tail -80 "$app_log" >&2
-    exit 1
+    fail "Debug app exited between liveness check and termination"
 fi
 if test "$status" -ne 0 && test "$status" -ne 143; then
-    echo "Phase 3 Debug app terminated unexpectedly: $status" >&2
-    tail -80 "$app_log" >&2
-    exit 1
+    fail "Debug app terminated unexpectedly"
 fi
 
-echo "Phase 3 batch 1 gate passed: inherited Phase 2 + signed app + pinned parser"
+echo "Phase 3 batch 1 gate passed: inherited Phase 2 + ad-hoc app candidate + pinned parser"

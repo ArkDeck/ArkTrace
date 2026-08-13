@@ -1,6 +1,15 @@
 import ArkTraceCore
 import Foundation
 
+enum TracePerformanceQuery: Sendable {
+    case cpuDetail(TraceTimeRange, ContinuousClock.Instant)
+    case threadStateDetail(TraceTimeRange, ContinuousClock.Instant)
+    case namedSliceDetail(TraceTimeRange, ContinuousClock.Instant)
+    case cpuDensity(TraceTimeRange, ContinuousClock.Instant)
+    case threadStateDensity(TraceTimeRange, ContinuousClock.Instant)
+    case namedSliceDensity(TraceTimeRange, ContinuousClock.Instant)
+}
+
 /// What the repository knows about the original trace file; the exported
 /// database alone cannot provide this (and must not, see AT-PARSE-004).
 public struct TraceSourceDescriptor: Sendable {
@@ -48,7 +57,29 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         source: TraceSourceDescriptor,
         expectedPreparation: TraceDatabasePreparationResult? = nil
     ) throws {
-        let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        try self.init(
+            databaseURL: databaseURL,
+            parser: parser,
+            source: source,
+            expectedPreparation: expectedPreparation,
+            diagnosticQueryObserver: nil
+        )
+    }
+
+    /// Internal-only observer used to prove that performance plans are built
+    /// from the exact production repository statements rather than surrogate
+    /// SQL. It is intentionally absent from the public repository API.
+    init(
+        databaseURL: URL,
+        parser: TraceParserIdentity,
+        source: TraceSourceDescriptor,
+        expectedPreparation: TraceDatabasePreparationResult? = nil,
+        diagnosticQueryObserver: (@Sendable (String, Int) -> Void)?
+    ) throws {
+        let db = try TraceDatabase(
+            url: databaseURL, readOnly: true,
+            queryObserver: diagnosticQueryObserver
+        )
         guard let databaseFileIdentity = db.fileIdentity else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
@@ -124,6 +155,52 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             capabilities: validation.capabilities,
             dataQuality: validation.dataQuality
         )
+    }
+
+    /// Runs a production repository entry point while the diagnostic observer
+    /// attached to this repository records its exact SQL and binding count.
+    func performPerformanceQuery(_ query: TracePerformanceQuery) async throws {
+        switch query {
+            case .cpuDetail(let range, let deadline):
+                _ = try await cpuSlices(
+                    try CpuSliceQuery(range: range, cpu: 0, limit: 1, deadline: deadline)
+                )
+            case .threadStateDetail(let range, let deadline):
+                _ = try await threadStates(
+                    try ThreadStateQuery(
+                        range: range, threadKey: ThreadKey(itid: 1),
+                        limit: 1, deadline: deadline
+                    )
+                )
+            case .namedSliceDetail(let range, let deadline):
+                _ = try await slices(
+                    try TraceSliceQuery(
+                        range: range, threadKey: ThreadKey(itid: 1),
+                        limit: 1, deadline: deadline
+                    )
+                )
+            case .cpuDensity(let range, let deadline):
+                _ = try await density(
+                    try TraceDensityQuery(
+                        range: range, source: .cpu(0), bucketCount: 64,
+                        deadline: deadline
+                    )
+                )
+            case .threadStateDensity(let range, let deadline):
+                _ = try await density(
+                    try TraceDensityQuery(
+                        range: range, source: .threadState(ThreadKey(itid: 1)),
+                        bucketCount: 64, deadline: deadline
+                    )
+                )
+            case .namedSliceDensity(let range, let deadline):
+                _ = try await density(
+                    try TraceDensityQuery(
+                        range: range, source: .namedSlice(ThreadKey(itid: 1)),
+                        bucketCount: 64, deadline: deadline
+                    )
+                )
+        }
     }
 
     public func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess> {
@@ -1108,6 +1185,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
                     0 AS invalid_duration, 0 AS clamped_duration
                 FROM thread_state AS s
+                    INDEXED BY arktrace_v2_thread_state_itid_ts_id_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
                     AND typeof(s.itid) = 'integer' AND s.itid = ?
                 """
@@ -1202,26 +1280,10 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             """
             WITH sampled AS (
                 \(sampleSQL)
-            ), grouped AS (
-                SELECT bucket, thread_id, COUNT(*) AS event_count,
-                    SUM(clamped) AS clamped_count,
-                    SUM(invalid_duration) AS invalid_duration_count,
-                    SUM(clamped_duration) AS clamped_duration_count
-                FROM sampled GROUP BY bucket, thread_id
-            ), ranked AS (
-                SELECT bucket, thread_id, event_count, clamped_count,
-                    invalid_duration_count, clamped_duration_count,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY bucket
-                        ORDER BY event_count DESC, thread_id ASC
-                    ) AS rank
-                FROM grouped
             )
-            SELECT bucket, SUM(event_count),
-                MAX(CASE WHEN rank = 1 THEN thread_id ELSE NULL END),
-                SUM(clamped_count), SUM(invalid_duration_count),
-                SUM(clamped_duration_count)
-            FROM ranked GROUP BY bucket ORDER BY bucket ASC
+            SELECT bucket, COUNT(*), NULL,
+                SUM(clamped), SUM(invalid_duration), SUM(clamped_duration)
+            FROM sampled GROUP BY bucket ORDER BY bucket ASC
             """,
             bindings: bindings,
             observesTaskCancellation: true,
@@ -1306,6 +1368,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 TraceDataQualityIssue(
                     category: .unavailableValue,
                     scope: "timeline.density.occupancy"
+                )
+            )
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .unavailableValue,
+                    scope: "timeline.density.dominantThread"
                 )
             )
         }

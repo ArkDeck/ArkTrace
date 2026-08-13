@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "upstream": {
+    "repository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+    "revision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "license": "Apache-2.0",
+    "licensePath": "LICENSE",
+    "licenseBlob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+    "licenseSHA256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "licenseByteCount": 11357
+  },
+  "medium": {
+    "path": "smartperf_host/trace_streamer/test/resource/pbreader.htrace",
+    "blob": "854c3c2b9e37eb8cbdc1e9ab7ac0130adcf21043",
+    "sha256": "695a160f3c99472cc746a09c75ae70c2dcef2d0323028fdb39e02196e1e6a7f9",
+    "byteCount": 265032803,
+    "requiredRows": {
+      "process": 256,
+      "thread": 462,
+      "sched_slice": 206668,
+      "thread_state": 487664,
+      "callstack": 110799
+    }
+  },
+  "large": {
+    "minimumByteCount": 524288001,
+    "maximumByteCount": 2147483648,
+    "reviewedEvidencePath": "",
+    "reviewedEvidenceSHA256": "",
+    "requiredEnvironmentVariable": "ARKTRACE_LARGE_TRACE",
+    "policy": "An independently captured, redistributable, single type-0 protobuf-segment trace is required; multi-segment containers, padding, sparse files, concatenation, and duplicated packets are rejected."
+  }
+}

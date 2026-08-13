@@ -139,7 +139,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                     machinePayload: payload
                 )
             }
-        case .help, .version:
+        case .help, .version, .licenses:
             throw ArkTraceError(
                 code: .internalError,
                 stage: .request,

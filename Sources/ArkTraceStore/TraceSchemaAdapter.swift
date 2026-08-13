@@ -9,7 +9,8 @@ import Foundation
 enum TraceSchemaAdapter {
     static let version = "2"
     private static let semanticProbeLimit = 1_024
-    private static let relationshipVMInstructionBudget = 250_000
+    private static let relationshipVMInstructionBudget =
+        TraceDatabaseStagingPreparer.relationshipVMInstructionBudget
 
     struct Validation {
         let capabilities: TraceCapabilities
@@ -304,9 +305,9 @@ enum TraceSchemaAdapter {
             return try db.query(
                 """
                 SELECT 1
-                FROM measure AS sampled_measure
-                INNER JOIN \(filterTable) AS sampled_filter
-                    ON sampled_filter.id = sampled_measure.filter_id
+                FROM \(filterTable) AS sampled_filter
+                CROSS JOIN measure AS sampled_measure
+                    ON sampled_measure.filter_id = sampled_filter.id
                 WHERE typeof(sampled_measure.filter_id) = 'integer'
                     AND typeof(sampled_filter.id) = 'integer'
                 LIMIT 1

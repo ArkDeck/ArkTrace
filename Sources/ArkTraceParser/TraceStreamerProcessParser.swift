@@ -17,7 +17,8 @@ public struct TraceStreamerProcessParser: TraceParser {
         "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
     public static let expectedArchitecture = "arm64"
     public static let adapterVersion = "1"
-    public static let supportedBuildRecipeVersion = "1"
+    public static let supportedBuildRecipeVersion =
+        "600d94fae578f523ca2fd526f334b2a7c6febbaad03fea1135057357020fd18c"
 
     private let configuredExecutableURL: URL
     private let configuredManifestURL: URL?
@@ -31,6 +32,7 @@ public struct TraceStreamerProcessParser: TraceParser {
     private let ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)?
     private let ownedRemovalHook: (@Sendable (URL) throws -> Void)?
     private let finalizationHook: (@Sendable () -> Void)?
+    private let processDidLaunchHook: (@Sendable (pid_t) -> Void)?
 
     /// Construction records configuration only. All filesystem access,
     /// manifest decoding, hashing, and Mach-O inspection happens from the
@@ -48,7 +50,8 @@ public struct TraceStreamerProcessParser: TraceParser {
             cleanupRemovalHook: nil,
             ownedIdentityProbeHook: nil,
             ownedRemovalHook: nil,
-            finalizationHook: nil
+            finalizationHook: nil,
+            processDidLaunchHook: nil
         )
     }
 
@@ -65,7 +68,8 @@ public struct TraceStreamerProcessParser: TraceParser {
         cleanupRemovalHook: (@Sendable (URL) throws -> Void)? = nil,
         ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)? = nil,
         ownedRemovalHook: (@Sendable (URL) throws -> Void)? = nil,
-        finalizationHook: (@Sendable () -> Void)?
+        finalizationHook: (@Sendable () -> Void)?,
+        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil
     ) throws {
         guard executableURL.isFileURL,
             manifestURL?.isFileURL != false,
@@ -85,6 +89,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         self.ownedIdentityProbeHook = ownedIdentityProbeHook
         self.ownedRemovalHook = ownedRemovalHook
         self.finalizationHook = finalizationHook
+        self.processDidLaunchHook = processDidLaunchHook
     }
 
     public func identity() async throws -> TraceParserIdentity {
@@ -189,6 +194,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         let cleanupRemovalHook = cleanupRemovalHook
         let ownedIdentityProbeHook = ownedIdentityProbeHook
         let ownedRemovalHook = ownedRemovalHook
+        let processDidLaunchHook = processDidLaunchHook
         progress?(.hashing)
         let preparationTask = Task.detached {
             try Self.prepareParse(
@@ -222,6 +228,7 @@ public struct TraceStreamerProcessParser: TraceParser {
                     finalizationHook: finalizationHook,
                     ownedIdentityProbeHook: ownedIdentityProbeHook,
                     ownedRemovalHook: ownedRemovalHook,
+                    processDidLaunchHook: processDidLaunchHook,
                     progress: progress,
                     prepareDatabase: prepareDatabase
                 )
@@ -288,6 +295,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         finalizationHook: (@Sendable () -> Void)?,
         ownedIdentityProbeHook: (@Sendable (URL) throws -> Void)?,
         ownedRemovalHook: (@Sendable (URL) throws -> Void)?,
+        processDidLaunchHook: (@Sendable (pid_t) -> Void)?,
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ExecutedParse {
@@ -305,7 +313,8 @@ public struct TraceStreamerProcessParser: TraceParser {
             arguments: Self.invocationArguments(
                 source: prepared.sourceSnapshotURL,
                 output: prepared.outputURL
-            )
+            ),
+            processDidLaunchHook: processDidLaunchHook
         )
         try Self.validateProcessOutcome(outcome, outputURL: prepared.outputURL)
 
@@ -1079,7 +1088,8 @@ public struct TraceStreamerProcessParser: TraceParser {
         executable: URL,
         arguments: [String],
         diagnosticCapacity: Int = 65_536,
-        terminationGracePeriod: TimeInterval = 0.5
+        terminationGracePeriod: TimeInterval = 0.5,
+        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil
     ) async throws -> Outcome {
         let process = Process()
         process.executableURL = executable
@@ -1114,6 +1124,7 @@ public struct TraceStreamerProcessParser: TraceParser {
                     process.terminationHandler = { _ in continuation.resume() }
                     do {
                         try box.runIfNotCancelled()
+                        processDidLaunchHook?(process.processIdentifier)
                     } catch {
                         process.terminationHandler = nil
                         continuation.resume(throwing: error)
@@ -1158,10 +1169,15 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private static func runOffCallerExecutor(
         executable: URL,
-        arguments: [String]
+        arguments: [String],
+        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil
     ) async throws -> Outcome {
         let task = Task.detached {
-            try await run(executable: executable, arguments: arguments)
+            try await run(
+                executable: executable,
+                arguments: arguments,
+                processDidLaunchHook: processDidLaunchHook
+            )
         }
         return try await withTaskCancellationHandler {
             try await task.value

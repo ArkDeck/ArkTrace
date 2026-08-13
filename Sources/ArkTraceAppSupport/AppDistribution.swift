@@ -44,10 +44,15 @@ public struct ArkTraceBundledParserResolver: Sendable {
         let executableURL = TraceStreamerResolver.appBundleExecutableURL(
             bundleURL: bundleURL
         )
-        let manifestURL = executableURL.deletingLastPathComponent()
-            .appendingPathComponent("manifest.json", isDirectory: false)
-        guard Self.isRegularReadableFile(executableURL, executable: true),
-            Self.isRegularReadableFile(manifestURL, executable: false)
+        let manifestURL = TraceStreamerResolver.appBundleManifestURL(
+            bundleURL: bundleURL
+        )
+        guard Self.isRegularReadableFile(
+                executableURL, inside: bundleURL, executable: true
+            ),
+            Self.isRegularReadableFile(
+                manifestURL, inside: bundleURL, executable: false
+            )
         else {
             throw ArkTraceError(
                 code: .traceStreamerUnavailable,
@@ -56,21 +61,42 @@ public struct ArkTraceBundledParserResolver: Sendable {
                 retryable: true
             )
         }
-        return try TraceStreamerResolver(
-            appBundleURL: bundleURL,
-            cliExecutableURL: nil
-        ).resolve()
+        return try TraceStreamerProcessParser(
+            executableURL: executableURL,
+            manifestURL: manifestURL
+        )
     }
 
     private static func isRegularReadableFile(
         _ url: URL,
+        inside bundleURL: URL,
         executable: Bool
     ) -> Bool {
-        var info = stat()
-        let status = url.path.withCString { Darwin.lstat($0, &info) }
-        guard status == 0, (info.st_mode & S_IFMT) == S_IFREG else { return false }
+        let root = bundleURL.standardizedFileURL
+        let candidate = url.standardizedFileURL
+        let prefix = root.path.hasSuffix("/") ? root.path : root.path + "/"
+        guard candidate.path.hasPrefix(prefix),
+            Self.hasMode(root, expected: S_IFDIR)
+        else { return false }
+        let relative = candidate.path.dropFirst(prefix.count)
+        let components = relative.split(separator: "/", omittingEmptySubsequences: false)
+        guard !components.isEmpty,
+            components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." })
+        else { return false }
+        var current = root
+        for (index, component) in components.enumerated() {
+            current.appendPathComponent(String(component), isDirectory: false)
+            let expected = index == components.count - 1 ? S_IFREG : S_IFDIR
+            guard Self.hasMode(current, expected: expected) else { return false }
+        }
         let mode = executable ? (R_OK | X_OK) : R_OK
-        return url.path.withCString { Darwin.access($0, mode) } == 0
+        return candidate.path.withCString { Darwin.access($0, mode) } == 0
+    }
+
+    private static func hasMode(_ url: URL, expected: mode_t) -> Bool {
+        var info = stat()
+        return url.path.withCString { Darwin.lstat($0, &info) } == 0
+            && (info.st_mode & S_IFMT) == expected
     }
 }
 

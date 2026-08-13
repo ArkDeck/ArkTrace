@@ -2,11 +2,29 @@ import ArkTraceCore
 import Foundation
 
 public struct CLIApplication: Sendable {
+    struct LicenseSnapshot: Sendable {
+        let notice: Data
+        let productLicense: Data
+        let files: [CLIVerifiedLicenseFile]
+
+        static func load() throws -> LicenseSnapshot {
+            let inventory = try CLILicenseResources.inventoryData()
+            return LicenseSnapshot(
+                notice: try CLILicenseResources.noticeData(),
+                productLicense: try CLILicenseResources.productLicenseData(),
+                files: try CLILicenseResources.verifiedLicenseFiles(
+                    inventoryData: inventory
+                )
+            )
+        }
+    }
+
     private let parser: CLIArgumentParser
     private let renderer: CLIHumanRenderer
     private let machineEncoder: CLIMachineEncoder
     private let executor: any CLICommandExecuting
     private let machineToolProvider: @Sendable () throws -> CLIMachineTool
+    private let licenseProvider: @Sendable () throws -> LicenseSnapshot
     private let deadlineClock: CLIDeadlineClock
     private let beforeSuccessCommit: (@Sendable () -> Void)?
     private let beforeEncoding: (@Sendable () async throws -> Void)?
@@ -22,6 +40,7 @@ public struct CLIApplication: Sendable {
         self.machineEncoder = machineEncoder
         self.executor = executor
         machineToolProvider = Self.resolveCurrentMachineTool
+        licenseProvider = LicenseSnapshot.load
         deadlineClock = .continuous
         beforeSuccessCommit = nil
         beforeEncoding = nil
@@ -33,6 +52,7 @@ public struct CLIApplication: Sendable {
         machineEncoder: CLIMachineEncoder = CLIMachineEncoder(),
         executor: any CLICommandExecuting = CLIUnavailableCommandExecutor(),
         machineToolProvider: @escaping @Sendable () throws -> CLIMachineTool,
+        licenseProvider: @escaping @Sendable () throws -> LicenseSnapshot = LicenseSnapshot.load,
         deadlineClock: CLIDeadlineClock = .continuous,
         beforeSuccessCommit: (@Sendable () -> Void)? = nil,
         beforeEncoding: (@Sendable () async throws -> Void)? = nil
@@ -42,6 +62,7 @@ public struct CLIApplication: Sendable {
         self.machineEncoder = machineEncoder
         self.executor = executor
         self.machineToolProvider = machineToolProvider
+        self.licenseProvider = licenseProvider
         self.deadlineClock = deadlineClock
         self.beforeSuccessCommit = beforeSuccessCommit
         self.beforeEncoding = beforeEncoding
@@ -125,7 +146,7 @@ public struct CLIApplication: Sendable {
                         tool: try requiredMachineTool(machineTool),
                         result: .object([
                             "commands": .array([
-                                "doctor", "inspect", "summary", "processes", "threads",
+                                "doctor", "inspect", "summary", "processes", "threads", "licenses",
                             ].map(CLIJSONValue.string)),
                             "usage": .string("arktrace [global-options] <command> [command-options]"),
                         ])
@@ -171,6 +192,62 @@ public struct CLIApplication: Sendable {
                     try CLIOperationDeadline.check(operationDeadline, clock: deadlineClock)
                     try writer.writeStdout(output)
                 }
+            case .licenses:
+                let capturedMachineTool = machineTool
+                let output = try await CLIOperationDeadline.run(
+                    deadline: operationDeadline,
+                    clock: deadlineClock
+                ) {
+                    let snapshot = try licenseProvider()
+                    try Self.checkCancellation()
+                    if parsedInvocation.options.json {
+                        return try machineUtilityOutput(
+                            invocation: parsedInvocation,
+                            tool: try requiredMachineTool(capturedMachineTool),
+                            result: .object([
+                                "buildToolCount": .int64(Int64(CLILicenseResources.buildToolCount)),
+                                "componentCount": .int64(Int64(CLILicenseResources.componentCount)),
+                                "inventory": .string("license-inventory.json"),
+                                "licenseFiles": .array(snapshot.files.map { file in
+                                    .object([
+                                        "byteCount": .int64(Int64(file.byteCount)),
+                                        "licenseExpression": .string(file.licenseExpression),
+                                        "owner": .string(file.owner),
+                                        "resource": .string(file.resourcePath),
+                                        "sha256": .string(file.sha256),
+                                    ])
+                                }),
+                                "notice": .string("THIRD_PARTY_NOTICES.md"),
+                                "productLicense": .string("LICENSE"),
+                                "productLicenseBytes": .int64(Int64(snapshot.productLicense.count)),
+                            ])
+                        )
+                    }
+                    var human = Data("# ArkTrace Product License\n\n".utf8)
+                    human.append(snapshot.productLicense)
+                    human.append(Data("\n# ArkTrace Third-Party Notices\n\n".utf8))
+                    human.append(snapshot.notice)
+                    human.append(Data("\n# Bundled Third-Party License Files\n".utf8))
+                    for file in snapshot.files {
+                        try Self.checkCancellation()
+                        human.append(Data("\n## \(file.owner) — \(file.licenseExpression)\n".utf8))
+                        human.append(Data("Resource: \(file.resourcePath)\n\n".utf8))
+                        human.append(file.data)
+                        if human.last != UInt8(ascii: "\n") {
+                            human.append(UInt8(ascii: "\n"))
+                        }
+                    }
+                    try Self.validateOutputBudget(
+                        stdout: human,
+                        stderr: Data(),
+                        maximumBytes: parsedInvocation.options.limits.maxOutputBytes
+                    )
+                    return human
+                }
+                beforeSuccessCommit?()
+                try CLIOperationDeadline.check(operationDeadline, clock: deadlineClock)
+                if parsedInvocation.options.json { machineStdoutCommitAttempted = true }
+                try writer.writeStdout(output)
             default:
                 let capturedMachineTool = machineTool
                 let prepared = try await CLIOperationDeadline.run(

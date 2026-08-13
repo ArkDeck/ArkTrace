@@ -6,6 +6,9 @@ import SwiftUI
 public final class TimelineNSView: NSView {
     public var snapshot: TimelineSnapshot? {
         didSet {
+            let previousRenderedIdentity = Self.renderIdentity(
+                current: oldValue, previous: previousSnapshot
+            )
             if snapshot == nil {
                 previousSnapshot = nil
             } else if let oldValue, snapshot?.generation != oldValue.generation,
@@ -15,21 +18,113 @@ public final class TimelineNSView: NSView {
             } else if let snapshot, !snapshot.isLoading {
                 previousSnapshot = snapshot
             }
+            if previousRenderedIdentity != Self.renderIdentity(
+                current: snapshot, previous: previousSnapshot
+            ) {
+                densityPathCache = nil
+                detailPathCache = nil
+            }
             needsDisplay = true
         }
     }
-    public var selection: TraceTimeRange? { didSet { needsDisplay = true } }
+    public var selection: TraceTimeRange? {
+        didSet {
+            guard selection != oldValue else { return }
+            needsDisplay = true
+            if dragStartX == nil, !suppressAccessibilityNotifications {
+                postAccessibilityValueChanged()
+            }
+        }
+    }
+    public var selectedEventKey: EventKey? {
+        didSet {
+            guard selectedEventKey != oldValue else { return }
+            if let selectedEventKey {
+                focus(eventKey: selectedEventKey, notifyAccessibility: false)
+            }
+            needsDisplay = true
+            if !suppressAccessibilityNotifications { postAccessibilityValueChanged() }
+        }
+    }
     public var onSelectEvent: (@MainActor (EventKey?) -> Void)?
     public var onHoverEvent: (@MainActor (EventKey?) -> Void)?
     public var onSelectRange: (@MainActor (TraceTimeRange?) -> Void)?
     public var onViewportIntent: (@MainActor (TimelineViewportIntent) -> Void)?
+    public var onZoomSelection: (@MainActor () -> Void)?
+    public var onResetViewport: (@MainActor () -> Void)?
+    /// Trace-relative bounds used to suppress accessibility actions whose
+    /// clamped result would equal the current viewport.
+    public var interactionBounds: TraceTimeRange?
+
+    public private(set) var focusedEventKey: EventKey?
+    public private(set) var focusedTrackID: TimelineTrackID?
 
     private var previousSnapshot: TimelineSnapshot?
     private var dragStartX: CGFloat?
+    private var dragInitialSelection: TraceTimeRange?
+    private var suppressAccessibilityNotifications = false
     private var trackingAreaReference: NSTrackingArea?
+    private struct DensityPaths {
+        let backingScale: CGFloat
+        let paths: [CGPath?]
+    }
+
+    private struct DetailLabel {
+        let value: String
+        let frame: CGRect
+    }
+
+    private struct DetailPaths {
+        let backingScale: CGFloat
+        let paths: [DetailVisualStyle: CGPath]
+        let labels: [DetailLabel]
+        let events: [EventKey: (TimelineDetailPrimitive, CGRect)]
+    }
+
+    private var densityPathCache: DensityPaths?
+    private var detailPathCache: DetailPaths?
+    var accessibilityValueChangedHook: (() -> Void)?
+    var pathCacheBuildHook: ((_ kind: String, _ bucketCount: Int) -> Void)?
+
+    private enum DetailVisualStyle: Int, CaseIterable {
+        case running
+        case runnable
+        case blocked
+        case sleeping
+        case counter
+        case accent
+    }
+
+    private struct RenderIdentity: Equatable {
+        let generation: UInt64
+        let isLoading: Bool
+    }
 
     public override var isFlipped: Bool { true }
     public override var acceptsFirstResponder: Bool { true }
+    public override var focusRingMaskBounds: NSRect { bounds }
+
+    public override func drawFocusRingMask() {
+        bounds.fill()
+    }
+
+    public override func becomeFirstResponder() -> Bool {
+        needsDisplay = true
+        NSAccessibility.post(element: self, notification: .focusedUIElementChanged)
+        return true
+    }
+
+    public override func resignFirstResponder() -> Bool {
+        needsDisplay = true
+        return true
+    }
+
+    public override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        densityPathCache = nil
+        detailPathCache = nil
+        needsDisplay = true
+    }
 
     public override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
@@ -49,29 +144,41 @@ public final class TimelineNSView: NSView {
     public func event(at point: CGPoint) -> EventKey? {
         guard let source = displayedSnapshot else { return nil }
         let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
-        for track in source.tracks.reversed() {
-            guard TimelineGeometry.trackFrame(track).contains(point) else { continue }
-            for primitive in track.primitives.reversed() {
-                guard let key = primitive.selectableEventKey else { continue }
+        var candidate: (style: Int, order: Int, key: EventKey)?
+        var order = 0
+        for track in source.tracks {
+            for primitive in track.primitives {
+                defer { order += 1 }
+                guard TimelineGeometry.trackFrame(track).contains(point),
+                    case .detail(let detail) = primitive
+                else { continue }
                 let frame = TimelineGeometry.frame(
                     for: primitive, in: track,
                     viewport: source.viewport, backingScale: scale
                 )
-                if frame.insetBy(dx: -1, dy: -1).contains(point) { return key }
+                guard frame.insetBy(dx: -1, dy: -1).contains(point) else { continue }
+                let hit = (Self.visualStyle(for: detail.category).rawValue, order, detail.eventKey)
+                if candidate == nil || hit.0 > candidate!.style
+                    || (hit.0 == candidate!.style && hit.1 > candidate!.order)
+                {
+                    candidate = hit
+                }
             }
         }
-        return nil
+        return candidate?.key
     }
 
     public override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         if let selected = self.event(at: point) {
             dragStartX = nil
+            dragInitialSelection = nil
             onSelectRange?(nil)
             onSelectEvent?(selected)
         } else {
             onSelectEvent?(nil)
             dragStartX = point.x
+            dragInitialSelection = selection
         }
     }
 
@@ -95,7 +202,15 @@ public final class TimelineNSView: NSView {
 
     public override func mouseUp(with event: NSEvent) {
         if dragStartX != nil { mouseDragged(with: event) }
+        if dragStartX != nil { commitRangeSelectionAccessibilityChange(from: dragInitialSelection) }
         dragStartX = nil
+        dragInitialSelection = nil
+    }
+
+    /// Range drags update the visible selection synchronously, but expose only
+    /// the final semantic value to assistive technology.
+    func commitRangeSelectionAccessibilityChange(from previous: TraceTimeRange?) {
+        if selection != previous { postAccessibilityValueChanged() }
     }
 
     public override func mouseMoved(with event: NSEvent) {
@@ -124,6 +239,107 @@ public final class TimelineNSView: NSView {
         }
         guard let source = displayedSnapshot else { return }
         onViewportIntent?(.panPoints(horizontal, sourceViewport: source.viewport))
+    }
+
+    public override func keyDown(with event: NSEvent) {
+        let option = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            .contains(.option)
+        switch event.keyCode {
+        case 123:
+            performKeyboardCommand(option ? .panBackward : .previousEvent)
+        case 124:
+            performKeyboardCommand(option ? .panForward : .nextEvent)
+        case 125:
+            performKeyboardCommand(.nextTrack)
+        case 126:
+            performKeyboardCommand(.previousTrack)
+        default:
+            switch event.charactersIgnoringModifiers?.lowercased() {
+            case "+", "=": performKeyboardCommand(.zoomIn)
+            case "-", "_": performKeyboardCommand(.zoomOut)
+            case "\r", "\n": performKeyboardCommand(.selectFocusedEvent)
+            case "f": performKeyboardCommand(.zoomSelection)
+            case "0": performKeyboardCommand(.resetViewport)
+            case "\u{1b}": performKeyboardCommand(.clearSelection)
+            default:
+                super.keyDown(with: event)
+            }
+        }
+    }
+
+    /// Testable keyboard/accessibility command boundary. Every command is
+    /// synchronous and only considers primitives already in the bounded
+    /// immutable snapshot.
+    @discardableResult
+    public func performKeyboardCommand(_ command: TimelineKeyboardCommand) -> Bool {
+        switch command {
+        case .previousEvent:
+            return moveEvent(by: -1)
+        case .nextEvent:
+            return moveEvent(by: 1)
+        case .previousTrack:
+            return moveTrack(by: -1)
+        case .nextTrack:
+            return moveTrack(by: 1)
+        case .panBackward, .panForward:
+            guard let intent = viewportIntent(for: command), let onViewportIntent
+            else { return false }
+            onViewportIntent(intent)
+            return true
+        case .zoomIn, .zoomOut:
+            guard let intent = viewportIntent(for: command), let onViewportIntent
+            else { return false }
+            onViewportIntent(intent)
+            return true
+        case .selectFocusedEvent:
+            let previousFocusedEvent = focusedEventKey
+            let previousFocusedTrack = focusedTrackID
+            let previousSelectedEvent = selectedEventKey
+            let previousSelection = selection
+            suppressAccessibilityNotifications = true
+            if focusedEventKey == nil { _ = moveEvent(by: 1) }
+            guard let focusedEventKey else {
+                suppressAccessibilityNotifications = false
+                return false
+            }
+            selection = nil
+            selectedEventKey = focusedEventKey
+            suppressAccessibilityNotifications = false
+            onSelectRange?(nil)
+            onSelectEvent?(focusedEventKey)
+            let changed = previousFocusedEvent != self.focusedEventKey
+                || previousFocusedTrack != focusedTrackID
+                || previousSelectedEvent != selectedEventKey
+                || previousSelection != selection
+            if changed { postAccessibilityValueChanged() }
+            return changed
+        case .zoomSelection:
+            guard let source = displayedSnapshot, let selection,
+                selection != source.viewport.range, let onZoomSelection
+            else { return false }
+            onZoomSelection()
+            return true
+        case .resetViewport:
+            guard let source = displayedSnapshot, let interactionBounds,
+                source.viewport.range != interactionBounds, let onResetViewport
+            else { return false }
+            onResetViewport()
+            return true
+        case .clearSelection:
+            let semanticValueChanged = selectedEventKey != nil || focusedEventKey != nil
+                || focusedTrackID != nil || selection != nil
+            guard semanticValueChanged else { return false }
+            suppressAccessibilityNotifications = true
+            selectedEventKey = nil
+            focusedEventKey = nil
+            focusedTrackID = nil
+            selection = nil
+            suppressAccessibilityNotifications = false
+            onSelectEvent?(nil)
+            onSelectRange?(nil)
+            postAccessibilityValueChanged()
+            return true
+        }
     }
 
     public override func updateTrackingAreas() {
@@ -180,16 +396,12 @@ public final class TimelineNSView: NSView {
                     : NSColor.controlBackgroundColor.withAlphaComponent(0.45)).cgColor
             )
             context.fill(CGRect(x: 0, y: trackFrame.minY, width: bounds.width, height: trackFrame.height))
-            for primitive in track.primitives {
-                draw(
-                    primitive,
-                    frame: TimelineGeometry.frame(
-                        for: primitive, in: track,
-                        viewport: snapshot.viewport, backingScale: scale
-                    ),
-                    context: context
-                )
-            }
+        }
+        drawDensityOverlay(snapshot, backingScale: scale, context: context)
+        drawDetailOverlay(snapshot, backingScale: scale, context: context)
+        for track in snapshot.tracks {
+            let trackFrame = TimelineGeometry.trackFrame(track)
+            guard trackFrame.maxY >= dirtyRect.minY, trackFrame.minY <= dirtyRect.maxY else { continue }
             context.setStrokeColor(NSColor.separatorColor.withAlphaComponent(0.7).cgColor)
             context.setLineWidth(1 / scale)
             context.move(to: CGPoint(x: 0, y: trackFrame.maxY))
@@ -198,35 +410,131 @@ public final class TimelineNSView: NSView {
         }
     }
 
-    private func draw(
-        _ primitive: TimelinePrimitive,
-        frame: CGRect,
+    /// Density primitives are non-selectable and carry only intensity. Merge
+    /// all immutable tracks into eight snapshot-wide alpha paths. Hover,
+    /// focus, and selection redraws then perform eight fills instead of up to
+    /// eight fills per track, while retaining vector-sharp bucket boundaries.
+    private func drawDensityOverlay(
+        _ snapshot: TimelineSnapshot,
+        backingScale: CGFloat,
         context: CGContext
     ) {
-        switch primitive {
-        case .detail(let detail):
-            context.setFillColor(Self.color(for: detail.category).cgColor)
-            context.fill(frame)
-            guard let label = detail.label,
-                frame.width >= TimelineGeometry.minimumLabelWidth
-            else { return }
+        let cached: DensityPaths
+        if let densityPathCache, densityPathCache.backingScale == backingScale {
+            cached = densityPathCache
+        } else {
+            var paths = Array<CGMutablePath?>(repeating: nil, count: 8)
+            let minimumWidth = 1 / max(1, backingScale)
+            for track in snapshot.tracks where !track.primitives.isEmpty {
+                for primitive in track.primitives {
+                    guard case .density(let density) = primitive else { continue }
+                    let intensity = min(7, Int(log2(Double(max(1, density.bucket.eventCount)))))
+                    let path = paths[intensity] ?? CGMutablePath()
+                    let startX = TimelineGeometry.x(
+                        for: density.bucket.range.startNs, viewport: snapshot.viewport
+                    )
+                    let endX = TimelineGeometry.x(
+                        for: density.bucket.range.endNs, viewport: snapshot.viewport
+                    )
+                    path.addRect(
+                        CGRect(
+                            x: startX,
+                            y: TimelineGeometry.rulerHeight + CGFloat(track.y) + 3,
+                            width: max(minimumWidth, endX - startX),
+                            height: max(1, CGFloat(track.height) - 6)
+                        )
+                    )
+                    paths[intensity] = path
+                }
+            }
+            cached = DensityPaths(backingScale: backingScale, paths: paths)
+            densityPathCache = cached
+            pathCacheBuildHook?("density", paths.compactMap { $0 }.count)
+        }
+        for intensity in cached.paths.indices {
+            guard let path = cached.paths[intensity] else { continue }
+            let alpha = min(0.9, 0.18 + Double(intensity) * 0.1)
+            context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(alpha).cgColor)
+            context.addPath(path)
+            context.fillPath()
+        }
+    }
+
+    /// Detail event geometry is immutable within a snapshot. Batch its static
+    /// color fills by semantic category, retain the real event/frame mapping
+    /// for hit testing and focus outlines, and draw labels only for the few
+    /// sufficiently wide events. This keeps 20k-detail snapshots from issuing
+    /// one CoreGraphics fill call per event on every hover redraw.
+    private func drawDetailOverlay(
+        _ snapshot: TimelineSnapshot,
+        backingScale: CGFloat,
+        context: CGContext
+    ) {
+        let cached: DetailPaths
+        if let detailPathCache, detailPathCache.backingScale == backingScale {
+            cached = detailPathCache
+        } else {
+            var mutablePaths: [DetailVisualStyle: CGMutablePath] = [:]
+            var labels: [DetailLabel] = []
+            var events: [EventKey: (TimelineDetailPrimitive, CGRect)] = [:]
+            for track in snapshot.tracks {
+                for primitive in track.primitives {
+                    guard case .detail(let detail) = primitive else { continue }
+                    let frame = TimelineGeometry.frame(
+                        for: primitive,
+                        in: track,
+                        viewport: snapshot.viewport,
+                        backingScale: backingScale
+                    )
+                    let style = Self.visualStyle(for: detail.category)
+                    let path = mutablePaths[style] ?? CGMutablePath()
+                    path.addRect(frame)
+                    mutablePaths[style] = path
+                    events[detail.eventKey] = (detail, frame)
+                    if let label = detail.label,
+                        frame.width >= TimelineGeometry.minimumLabelWidth
+                    {
+                        labels.append(DetailLabel(value: label, frame: frame))
+                    }
+                }
+            }
+            cached = DetailPaths(
+                backingScale: backingScale,
+                paths: mutablePaths,
+                labels: labels,
+                events: events
+            )
+            detailPathCache = cached
+            pathCacheBuildHook?("detail", mutablePaths.count)
+        }
+        for style in DetailVisualStyle.allCases {
+            guard let path = cached.paths[style] else { continue }
+            context.setFillColor(Self.color(for: style).cgColor)
+            context.addPath(path)
+            context.fillPath()
+        }
+        let labelAttributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 9),
+            .foregroundColor: NSColor.white,
+        ]
+        for label in cached.labels {
             context.saveGState()
-            context.clip(to: frame.insetBy(dx: 1, dy: 1))
-            label.draw(
+            context.clip(to: label.frame.insetBy(dx: 1, dy: 1))
+            label.value.draw(
                 at: CGPoint(
-                    x: frame.minX + TimelineGeometry.horizontalLabelInset,
-                    y: frame.minY + max(1, (frame.height - 11) / 2)
+                    x: label.frame.minX + TimelineGeometry.horizontalLabelInset,
+                    y: label.frame.minY + max(1, (label.frame.height - 11) / 2)
                 ),
-                withAttributes: [
-                    .font: NSFont.systemFont(ofSize: 9),
-                    .foregroundColor: NSColor.white,
-                ]
+                withAttributes: labelAttributes
             )
             context.restoreGState()
-        case .density(let density):
-            let alpha = min(0.9, 0.18 + log2(Double(max(1, density.bucket.eventCount))) * 0.1)
-            context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(alpha).cgColor)
-            context.fill(frame)
+        }
+        var outlined = Set<EventKey>()
+        for key in [selectedEventKey, focusedEventKey].compactMap({ $0 }) {
+            guard outlined.insert(key).inserted,
+                let (detail, frame) = cached.events[key]
+            else { continue }
+            drawEventState(detail, frame: frame, context: context)
         }
     }
 
@@ -244,16 +552,382 @@ public final class TimelineNSView: NSView {
                 height: max(0, bounds.height - TimelineGeometry.rulerHeight)
             )
         )
+        context.saveGState()
+        context.setStrokeColor(NSColor.selectedControlColor.cgColor)
+        context.setLineWidth(2)
+        context.setLineDash(phase: 0, lengths: [5, 3])
+        context.stroke(
+            CGRect(
+                x: start + 1, y: TimelineGeometry.rulerHeight + 1,
+                width: max(0, max(1, end - start) - 2),
+                height: max(0, bounds.height - TimelineGeometry.rulerHeight - 2)
+            )
+        )
+        context.restoreGState()
     }
 
-    private static func color(for category: String?) -> NSColor {
+    private func drawEventState(
+        _ detail: TimelineDetailPrimitive,
+        frame: CGRect,
+        context: CGContext
+    ) {
+        let isSelected = detail.eventKey == selectedEventKey
+        let isFocused = detail.eventKey == focusedEventKey
+        guard isSelected || isFocused else { return }
+        context.saveGState()
+        context.setFillColor(NSColor.clear.cgColor)
+        context.setStrokeColor(
+            (isSelected ? NSColor.selectedControlTextColor : NSColor.keyboardFocusIndicatorColor)
+                .cgColor
+        )
+        context.setLineWidth(isSelected ? 3 : 2)
+        if isFocused && !isSelected {
+            context.setLineDash(phase: 0, lengths: [3, 2])
+        }
+        context.stroke(frame.insetBy(dx: 1, dy: 1))
+        context.restoreGState()
+    }
+
+    private struct FocusLocation {
+        let trackIndex: Int
+        let detail: TimelineDetailPrimitive
+    }
+
+    private func focusLocations(in trackIndex: Int) -> [FocusLocation] {
+        guard let source = displayedSnapshot, source.tracks.indices.contains(trackIndex)
+        else { return [] }
+        return source.tracks[trackIndex].primitives.compactMap { primitive in
+            guard case .detail(let detail) = primitive else { return nil }
+            return FocusLocation(trackIndex: trackIndex, detail: detail)
+        }.sorted {
+            if $0.detail.range.startNs != $1.detail.range.startNs {
+                return $0.detail.range.startNs < $1.detail.range.startNs
+            }
+            if $0.detail.eventKey.table.rawValue != $1.detail.eventKey.table.rawValue {
+                return $0.detail.eventKey.table.rawValue < $1.detail.eventKey.table.rawValue
+            }
+            return $0.detail.eventKey.rowID < $1.detail.eventKey.rowID
+        }
+    }
+
+    private func currentFocusLocation() -> FocusLocation? {
+        guard let source = displayedSnapshot else { return nil }
+        let key = focusedEventKey ?? selectedEventKey
+        guard let key else { return nil }
+        for (trackIndex, track) in source.tracks.enumerated() {
+            for primitive in track.primitives {
+                if case .detail(let detail) = primitive, detail.eventKey == key {
+                    return FocusLocation(trackIndex: trackIndex, detail: detail)
+                }
+            }
+        }
+        return nil
+    }
+
+    private func focusedDetail() -> TimelineDetailPrimitive? {
+        currentFocusLocation()?.detail
+    }
+
+    private func moveEvent(by delta: Int) -> Bool {
+        guard let source = displayedSnapshot else { return false }
+        let current = currentFocusLocation()
+        let trackIndex = current?.trackIndex
+            ?? source.tracks.firstIndex { track in
+                track.primitives.contains { $0.selectableEventKey != nil }
+            }
+        guard let trackIndex else { return false }
+        let locations = focusLocations(in: trackIndex)
+        guard !locations.isEmpty else { return false }
+        let index = current.flatMap { location in
+            locations.firstIndex { $0.detail.eventKey == location.detail.eventKey }
+        } ?? (delta < 0 ? locations.count : -1)
+        let target = min(max(0, index + delta), locations.count - 1)
+        return setFocus(locations[target])
+    }
+
+    private func canMoveEvent(by delta: Int) -> Bool {
+        guard let source = displayedSnapshot else { return false }
+        guard let current = currentFocusLocation() else {
+            return source.tracks.indices.contains(where: {
+                !focusLocations(in: $0).isEmpty
+            })
+        }
+        let locations = focusLocations(in: current.trackIndex)
+        guard let index = locations.firstIndex(where: {
+            $0.detail.eventKey == current.detail.eventKey
+        }) else { return false }
+        return locations.indices.contains(index + delta)
+    }
+
+    private func moveTrack(by delta: Int) -> Bool {
+        guard let source = displayedSnapshot else { return false }
+        let current = currentFocusLocation()
+        let origin = current?.trackIndex ?? (delta < 0 ? source.tracks.count : -1)
+        var candidate = origin + delta
+        while source.tracks.indices.contains(candidate) {
+            let locations = focusLocations(in: candidate)
+            if !locations.isEmpty {
+                let anchor = current?.detail.range.startNs
+                    ?? source.viewport.range.startNs
+                let nearest = locations.min {
+                    distance($0.detail.range.startNs, anchor)
+                        < distance($1.detail.range.startNs, anchor)
+                }!
+                return setFocus(nearest)
+            }
+            candidate += delta
+        }
+        return false
+    }
+
+    private func canMoveTrack(by delta: Int) -> Bool {
+        guard let source = displayedSnapshot else { return false }
+        let current = currentFocusLocation()
+        var candidate = (current?.trackIndex ?? (delta < 0 ? source.tracks.count : -1)) + delta
+        while source.tracks.indices.contains(candidate) {
+            if !focusLocations(in: candidate).isEmpty { return true }
+            candidate += delta
+        }
+        return false
+    }
+
+    private func viewportIntent(for command: TimelineKeyboardCommand) -> TimelineViewportIntent? {
+        guard let source = displayedSnapshot, let bounds = interactionBounds else { return nil }
+        switch command {
+        case .panBackward, .panForward:
+            let points = source.viewport.widthPoints * 0.1
+                * (command == .panBackward ? -1 : 1)
+            let raw = points * source.viewport.nsPerPoint
+            let delta: Int64
+            if raw >= Double(Int64.max) { delta = .max }
+            else if raw <= Double(Int64.min) { delta = .min }
+            else { delta = Int64(raw.rounded()) }
+            guard let target = try? TimelineInteraction.pan(
+                range: source.viewport.range, deltaNs: delta, within: bounds
+            ), target != source.viewport.range else { return nil }
+            return .panPoints(points, sourceViewport: source.viewport)
+        case .zoomIn, .zoomOut:
+            let anchor: Int64
+            if let selection {
+                anchor = selection.startNs + selection.durationNs / 2
+            } else if let focused = focusedDetail() {
+                anchor = focused.range.startNs
+            } else {
+                anchor = source.viewport.range.startNs
+                    + source.viewport.range.durationNs / 2
+            }
+            let scale = command == .zoomIn ? 0.5 : 2.0
+            guard let target = try? TimelineInteraction.zoom(
+                range: source.viewport.range, anchorNs: anchor,
+                scale: scale, within: bounds
+            ), target != source.viewport.range else { return nil }
+            return .zoom(anchorNs: anchor, scale: scale, sourceViewport: source.viewport)
+        default:
+            return nil
+        }
+    }
+
+    private func focus(eventKey: EventKey, notifyAccessibility: Bool = true) {
+        guard let source = displayedSnapshot else { return }
+        for (trackIndex, track) in source.tracks.enumerated() {
+            for primitive in track.primitives {
+                if case .detail(let detail) = primitive, detail.eventKey == eventKey {
+                    _ = setFocus(
+                        FocusLocation(trackIndex: trackIndex, detail: detail),
+                        notifyAccessibility: notifyAccessibility
+                    )
+                    return
+                }
+            }
+        }
+    }
+
+    private func setFocus(
+        _ location: FocusLocation,
+        notifyAccessibility: Bool = true
+    ) -> Bool {
+        guard focusedEventKey != location.detail.eventKey
+            || focusedTrackID != location.detail.trackID
+        else { return false }
+        focusedEventKey = location.detail.eventKey
+        focusedTrackID = location.detail.trackID
+        needsDisplay = true
+        if notifyAccessibility && !suppressAccessibilityNotifications {
+            postAccessibilityValueChanged()
+        }
+        return true
+    }
+
+    private func postAccessibilityValueChanged() {
+        accessibilityValueChangedHook?()
+        NSAccessibility.post(element: self, notification: .valueChanged)
+    }
+
+    private func distance(_ lhs: Int64, _ rhs: Int64) -> UInt64 {
+        let (value, overflow) = lhs.subtractingReportingOverflow(rhs)
+        if overflow { return UInt64.max }
+        return value == Int64.min ? UInt64.max : UInt64(abs(value))
+    }
+
+    public var accessibilitySummary: String {
+        guard let source = displayedSnapshot else { return "Timeline, no trace loaded" }
+        var fields = [
+            "Timeline",
+            "viewport \(Self.timeLabel(source.viewport.range.startNs)) to \(Self.timeLabel(source.viewport.range.endNs))",
+            "\(source.tracks.count) visible tracks",
+        ]
+        if let focused = currentFocusLocation() {
+            let title = source.tracks[focused.trackIndex].descriptor.title
+            fields.append("focused track \(title)")
+            fields.append(Self.accessibleEventDescription(focused.detail))
+        }
+        if let selectedEventKey {
+            fields.append(
+                "selected event \(selectedEventKey.table.rawValue) \(selectedEventKey.rowID)"
+            )
+        }
+        if let selection {
+            fields.append(
+                "selected range \(Self.timeLabel(selection.startNs)) to \(Self.timeLabel(selection.endNs))"
+            )
+        }
+        if source.isLoading { fields.append("loading") }
+        return fields.joined(separator: ", ")
+    }
+
+    public override func isAccessibilityElement() -> Bool { true }
+
+    public override func accessibilityRole() -> NSAccessibility.Role? { .group }
+
+    public override func accessibilityRoleDescription() -> String? { "timeline" }
+
+    public override func accessibilityLabel() -> String? { "Trace Timeline" }
+
+    public override func accessibilityValue() -> Any? { accessibilitySummary }
+
+    public override func accessibilityHelp() -> String? {
+        "Use arrow keys to move between real events and tracks, Return to select, Option-Left or Option-Right to pan, plus or minus to zoom, F to zoom the selected range, 0 to reset, and Escape to clear selection."
+    }
+
+    public override func accessibilityChildren() -> [Any]? {
+        // The bounded Timeline itself is the semantic element. Inspector and
+        // Search provide full/copyable and list navigation alternatives.
+        []
+    }
+
+    public override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
+        guard let source = displayedSnapshot else { return [] }
+        let hasEvents = source.tracks.contains { track in
+            track.primitives.contains { $0.selectableEventKey != nil }
+        }
+        var actions: [NSAccessibilityCustomAction] = []
+        if canMoveEvent(by: -1) {
+            actions.append(accessibilityAction("Previous event", .previousEvent))
+        }
+        if canMoveEvent(by: 1) {
+            actions.append(accessibilityAction("Next event", .nextEvent))
+        }
+        if canMoveTrack(by: -1) {
+            actions.append(accessibilityAction("Previous track", .previousTrack))
+        }
+        if canMoveTrack(by: 1) {
+            actions.append(accessibilityAction("Next track", .nextTrack))
+        }
+        if viewportIntent(for: .panBackward) != nil, onViewportIntent != nil {
+            actions.append(accessibilityAction("Pan backward", .panBackward))
+        }
+        if viewportIntent(for: .panForward) != nil, onViewportIntent != nil {
+            actions.append(accessibilityAction("Pan forward", .panForward))
+        }
+        if viewportIntent(for: .zoomIn) != nil, onViewportIntent != nil {
+            actions.append(accessibilityAction("Zoom in", .zoomIn))
+        }
+        if viewportIntent(for: .zoomOut) != nil, onViewportIntent != nil {
+            actions.append(accessibilityAction("Zoom out", .zoomOut))
+        }
+        if hasEvents && (focusedEventKey == nil || focusedEventKey != selectedEventKey
+            || selection != nil)
+        {
+            actions.append(accessibilityAction("Select focused event", .selectFocusedEvent))
+        }
+        if let selection, selection != source.viewport.range, onZoomSelection != nil {
+            actions.append(accessibilityAction("Zoom selected range", .zoomSelection))
+        }
+        if let interactionBounds, interactionBounds != source.viewport.range,
+            onResetViewport != nil
+        {
+            actions.append(accessibilityAction("Reset viewport", .resetViewport))
+        }
+        if selectedEventKey != nil || focusedEventKey != nil || focusedTrackID != nil
+            || selection != nil
+        {
+            actions.append(accessibilityAction("Clear selection", .clearSelection))
+        }
+        return actions
+    }
+
+    private func accessibilityAction(
+        _ name: String,
+        _ command: TimelineKeyboardCommand
+    ) -> NSAccessibilityCustomAction {
+        NSAccessibilityCustomAction(name: name) { [weak self] in
+            guard let self else { return false }
+            return self.performKeyboardCommand(command)
+        }
+    }
+
+    private static func accessibleEventDescription(
+        _ detail: TimelineDetailPrimitive
+    ) -> String {
+        if let inspector = detail.inspector {
+            var fields = [
+                inspector.name ?? inspector.type.rawValue,
+                "start \(timeLabel(inspector.range.startNs))",
+                inspector.isOpenEnded
+                    ? "open ended"
+                    : "duration \(timeLabel(inspector.semanticDurationNs ?? 0))",
+            ]
+            if let process = inspector.processName { fields.append("process \(process)") }
+            if let thread = inspector.threadName { fields.append("thread \(thread)") }
+            if let cpu = inspector.cpu { fields.append("CPU \(cpu)") }
+            return fields.joined(separator: ", ")
+        }
+        return "event \(detail.eventKey.table.rawValue) \(detail.eventKey.rowID), start \(timeLabel(detail.range.startNs)), duration \(timeLabel(detail.range.durationNs))"
+    }
+
+    private static func visualStyle(for category: String?) -> DetailVisualStyle {
         switch category {
-        case "running", "cpu": return .systemGreen
-        case "runnable": return .systemOrange
-        case "blocked": return .systemRed
-        case "sleeping": return .systemBlue
-        case "counter": return .systemPurple
-        default: return .controlAccentColor
+        case "running", "cpu": return .running
+        case "runnable": return .runnable
+        case "blocked": return .blocked
+        case "sleeping": return .sleeping
+        case "counter": return .counter
+        default: return .accent
+        }
+    }
+
+    private static func color(for style: DetailVisualStyle) -> NSColor {
+        switch style {
+        case .running: return .systemGreen
+        case .runnable: return .systemOrange
+        case .blocked: return .systemRed
+        case .sleeping: return .systemBlue
+        case .counter: return .systemPurple
+        case .accent: return .controlAccentColor
+        }
+    }
+
+    private static func renderIdentity(
+        current: TimelineSnapshot?, previous: TimelineSnapshot?
+    ) -> RenderIdentity? {
+        let displayed: TimelineSnapshot?
+        if current?.isLoading == true {
+            displayed = previous ?? current
+        } else {
+            displayed = current ?? previous
+        }
+        return displayed.map {
+            RenderIdentity(generation: $0.generation, isLoading: $0.isLoading)
         }
     }
 
@@ -275,44 +949,108 @@ public final class TimelineNSView: NSView {
 public struct TimelineView: NSViewRepresentable {
     public let snapshot: TimelineSnapshot?
     public let selection: TraceTimeRange?
+    public let selectedEventKey: EventKey?
+    public let focusRequestID: UInt64
     public let onSelectEvent: @MainActor (EventKey?) -> Void
     public let onHoverEvent: @MainActor (EventKey?) -> Void
     public let onSelectRange: @MainActor (TraceTimeRange?) -> Void
     public let onViewportIntent: @MainActor (TimelineViewportIntent) -> Void
+    public let onZoomSelection: @MainActor () -> Void
+    public let onResetViewport: @MainActor () -> Void
+    public let interactionBounds: TraceTimeRange?
 
     public init(
         snapshot: TimelineSnapshot?,
         selection: TraceTimeRange? = nil,
+        selectedEventKey: EventKey? = nil,
+        focusRequestID: UInt64 = 0,
+        interactionBounds: TraceTimeRange? = nil,
         onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
-        onViewportIntent: @escaping @MainActor (TimelineViewportIntent) -> Void = { _ in }
+        onViewportIntent: @escaping @MainActor (TimelineViewportIntent) -> Void = { _ in },
+        onZoomSelection: @escaping @MainActor () -> Void = {},
+        onResetViewport: @escaping @MainActor () -> Void = {}
     ) {
         self.snapshot = snapshot
         self.selection = selection
+        self.selectedEventKey = selectedEventKey
+        self.focusRequestID = focusRequestID
+        self.interactionBounds = interactionBounds
         self.onSelectEvent = onSelectEvent
         self.onHoverEvent = onHoverEvent
         self.onSelectRange = onSelectRange
         self.onViewportIntent = onViewportIntent
+        self.onZoomSelection = onZoomSelection
+        self.onResetViewport = onResetViewport
     }
 
     public func makeNSView(context: Context) -> TimelineNSView {
         let view = TimelineNSView(frame: .zero)
         view.snapshot = snapshot
         view.selection = selection
+        view.selectedEventKey = selectedEventKey
         view.onSelectEvent = onSelectEvent
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onViewportIntent = onViewportIntent
+        view.onZoomSelection = onZoomSelection
+        view.onResetViewport = onResetViewport
+        view.interactionBounds = interactionBounds
+        view.setAccessibilityIdentifier("arktrace.timeline")
+        view.focusRingType = .default
         return view
     }
 
     public func updateNSView(_ view: TimelineNSView, context: Context) {
         view.snapshot = snapshot
         view.selection = selection
+        view.selectedEventKey = selectedEventKey
         view.onSelectEvent = onSelectEvent
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onViewportIntent = onViewportIntent
+        view.onZoomSelection = onZoomSelection
+        view.onResetViewport = onResetViewport
+        view.interactionBounds = interactionBounds
+        if context.coordinator.lastFocusRequestID != focusRequestID {
+            context.coordinator.lastFocusRequestID = focusRequestID
+            DispatchQueue.main.async { [weak view] in
+                guard let view else { return }
+                view.requestKeyboardFocus()
+            }
+        }
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(lastFocusRequestID: focusRequestID)
+    }
+
+    public final class Coordinator {
+        var lastFocusRequestID: UInt64
+
+        init(lastFocusRequestID: UInt64) {
+            self.lastFocusRequestID = lastFocusRequestID
+        }
+    }
+}
+
+public extension TimelineNSView {
+    /// Shared focus restoration boundary used by the SwiftUI coordinator and
+    /// hosted-window accessibility regressions.
+    func requestKeyboardFocus() {
+        window?.makeFirstResponder(self)
+    }
+}
+
+public extension View {
+    /// ArkTrace's shared minimum interactive target. The visual treatment may
+    /// remain compact, while the actual hosted control frame is never smaller
+    /// than the reviewed 24×24 point accessibility floor.
+    func arktraceAccessibleTarget(
+        minimum: CGFloat = TimelineAccessibilityLayout.minimumTargetPoints
+    ) -> some View {
+        frame(minWidth: minimum, minHeight: minimum)
+            .contentShape(Rectangle())
     }
 }

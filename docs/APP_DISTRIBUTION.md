@@ -1,6 +1,8 @@
 # ArkTrace.app 0.1 distribution decision
 
-Status: reviewed implementation candidate for P3-T01 (2026-08-13).
+Status: reviewed App-shell decision plus P3-T08～T10 distribution candidate
+(2026-08-13). Developer ID/notarization and manual accessibility evidence remain
+external release gates until their exact artifacts are checked in.
 
 ## Target and signing
 
@@ -27,8 +29,9 @@ ArkTrace 0.1 is an offline local viewer.
 
 ## Parser bundle boundary
 
-The Xcode target copies exactly these reviewed inputs into
-`Contents/Resources/TraceStreamer/`:
+The Xcode target copies the executable into the standard nested-code location
+`Contents/Helpers/trace_streamer` and the non-code manifest into
+`Contents/Resources/TraceStreamer/manifest.json`:
 
 - `ThirdParty/TraceStreamer/macx/trace_streamer`;
 - `ThirdParty/TraceStreamer/macx/manifest.json`.
@@ -40,6 +43,20 @@ the App/CLI environment. Missing bytes return `TRACE_STREAMER_UNAVAILABLE`; mani
 hash, version, or provenance drift returns
 `TRACE_STREAMER_IDENTITY_MISMATCH`. The separate developer resolver accepts an
 explicit URL and is compiled only in Debug builds.
+
+The repository binary is the reproducible **unsigned** input. A distribution
+archive must sign the nested helper first with Developer ID, hardened runtime,
+and trusted timestamp. Because signing changes Mach-O bytes, the candidate
+builder then rewrites only `manifest.binarySHA256`, writes a bounded
+`distribution-signing.json` that binds unsigned SHA → signed SHA → build recipe
+→ exact Team ID/signing identity/certificate SHA-1, and finally re-signs the outer App. The packaging
+gate verifies that closure before notarization and again after extracting the
+final ZIP. Candidate App and final ZIP are first written to owner-bound private
+partial names; only a fully copied, signed, stapled, Gatekeeper-accepted artifact
+is atomically published under its final name. The final ZIP is created only after
+the App is notarized and stapled.
+Ad-hoc Debug/Release build smoke tests continue to compare the pre-distribution
+helper and manifest byte-for-byte with the repository inputs.
 
 ## Storage
 
@@ -57,3 +74,18 @@ Core, Parser, Store, Runtime, Analysis, or Rendering sources. The canonical App
 version/build/bundle identifier live in `Config/ArkTraceProduct.xcconfig`;
 `ArkTraceCore.ArkTraceProduct` is the checked SwiftPM/CLI mirror, while Info.plist
 expands the same Xcode build settings. Tests and the app gate fail closed on drift.
+
+## External release evidence
+
+`scripts/build_phase3_distribution_candidate.sh` creates the exact signed App
+for manual review. `scripts/package_phase3.sh` consumes that same App and a
+tracked evidence manifest under `Fixtures/release-evidence/`; it does not rebuild
+or silently substitute a candidate. The six required artifacts and their schema
+are documented in that directory. The reviewer key must match the independent,
+HEAD-locked trust root in `Config/ArkTraceReleaseReviewers.json`; a caller cannot
+self-provision a key or mutate the evidence/configuration during packaging. A missing Developer ID identity/team/profile,
+large-trace record, manual evidence artifact, notarization acceptance, staple,
+or Gatekeeper assessment causes the complete Phase 3 gate to fail closed.
+All distribution output roots must be physical owner-marked descendants of the
+repository `.build` directory or the physical system temporary root. External
+tool logs remain private; public failure diagnostics are bounded and path-redacted.

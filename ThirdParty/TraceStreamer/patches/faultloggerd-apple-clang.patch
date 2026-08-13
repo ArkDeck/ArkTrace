@@ -1,0 +1,13 @@
+diff --git a/interfaces/innerkits/unwinder/src/elf/dfx_elf.cpp b/interfaces/innerkits/unwinder/src/elf/dfx_elf.cpp
+--- a/interfaces/innerkits/unwinder/src/elf/dfx_elf.cpp
++++ b/interfaces/innerkits/unwinder/src/elf/dfx_elf.cpp
+@@ -559,7 +559,7 @@ bool DfxElf::Step(uintptr_t pc, uintptr_t sp, std::shared_ptr<DfxMaps> maps,
+             synthHdr.ehFramePtrEnc = DW_EH_PE_absptr |
+                 ((sizeof(ElfW(Addr)) == 4) ? DW_EH_PE_udata4 : DW_EH_PE_udata8); // 4 : four bytes
+             synthHdr.fdeCountEnc = DW_EH_PE_omit;
+             synthHdr.tableEnc = DW_EH_PE_omit;
+-            synthHdr.ehFrame = (ElfW(Addr))(shdr.offset + (char*)GetMmapPtr());
++            synthHdr.ehFrame = (ElfW(Addr))(uintptr_t)(shdr.offset + (char*)GetMmapPtr());
+             hdr = &synthHdr;
+         }
+         uintptr_t shdrBase = static_cast<uintptr_t>(loadBase + shdr.addr);

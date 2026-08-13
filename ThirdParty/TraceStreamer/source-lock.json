@@ -1,0 +1,34 @@
+{
+  "formatVersion": 1,
+  "upstream": {
+    "repository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+    "revision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
+  },
+  "tools": {
+    "gn": {
+      "url": "https://repo.huaweicloud.com/openharmony/compiler/gn/2024/darwin/gn-darwin-x86-20230425.tar.gz",
+      "sha256": "b33e54b462e1311838ee8bfe55948c0aa44d03bf2021b8dcfbb34b10ac3f9273",
+      "byteCount": 819194
+    },
+    "ninja": {
+      "url": "https://repo.huaweicloud.com/openharmony/compiler/ninja/1.11.0/darwin/ninja-darwin-x86-1.11.0.tar.gz",
+      "sha256": "5e5491af9f1c979b55fe4eb0912def8271d549a34827ec59792c8d2cee70f709",
+      "byteCount": 133456
+    }
+  },
+  "sources": [
+    {"name":"bounds_checking_function","path":"bounds_checking_function","repository":"https://gitee.com/openharmony/third_party_bounds_checking_function.git","revision":"2ae82839ecaaa7d031e66ccbd2076d671acfd615"},
+    {"name":"bzip2","path":"bzip2","repository":"https://gitee.com/openharmony/third_party_bzip2.git","revision":"e8e3b464e0b4f89e1f56ba10d7c29654043db91d"},
+    {"name":"googletest","path":"googletest","repository":"https://gitee.com/openharmony/third_party_googletest.git","revision":"51fcc68aa3150d8cd17087650598239a8646a2da"},
+    {"name":"hiperf","path":"hiperf","repository":"https://gitee.com/openharmony/developtools_hiperf.git","revision":"4c7c8c36779ab3ec5febb4c3616da64f1a63f38f"},
+    {"name":"json","path":"json","repository":"https://gitee.com/openharmony/third_party_json.git","revision":"3c3d8e61bde0f2e8aaa206a102e50fed7b9b2199"},
+    {"name":"libbpf","path":"libbpf","repository":"https://gitee.com/openharmony/third_party_libbpf.git","revision":"24eaa918f55ecff0348f9283be451b6612ba5193"},
+    {"name":"llvm-project","path":"llvm-project","repository":"https://gitee.com/openharmony/third_party_llvm-project.git","revision":"3cfb0bcc64ed3a74d10b55175cdbdff033d2d8db"},
+    {"name":"profiler","path":"profiler","repository":"https://gitee.com/openharmony/developtools_profiler.git","revision":"73d26bb5acfcafb2b1f4f94ead5640241d1e5f73"},
+    {"name":"protobuf","path":"protobuf","repository":"https://gitee.com/openharmony/third_party_protobuf.git","revision":"aceafed4cf26d7a6be8169ae887cc13b749d5515"},
+    {"name":"sqlite","path":"sqlite","repository":"https://gitee.com/openharmony/third_party_sqlite.git","revision":"d21e412dbc6f2cdde2e4c9828e2450fcfca4fbe9"},
+    {"name":"zlib","path":"zlib","repository":"https://gitee.com/openharmony/third_party_zlib.git","revision":"9a1de89f7c80f8fc811527dd57135b8b4c00a2e8"},
+    {"name":"faultloggerd","path":"hiviewdfx/faultloggerd","repository":"https://gitee.com/openharmony/hiviewdfx_faultloggerd.git","revision":"875786f2e3446e3efea8cbc9c4a9c1510ce2c1b9"},
+    {"name":"c_utils","path":"commonlibrary/c_utils","repository":"https://gitee.com/openharmony/commonlibrary_c_utils.git","revision":"634d5c9d0aa3642f697938c7e5706e53ec069ba1"}
+  ]
+}

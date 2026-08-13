@@ -263,6 +263,70 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertFalse(presentation.diagnostic.contains("/Users/"))
     }
 
+    func testAccessibilityAnnouncementsAreCoalescedAtMeaningfulBoundaries() async throws {
+        let suite = "ArkTraceA11yTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(identity: "a"),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "arktrace-a11y-\(UUID().uuidString).htrace"
+        )
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+
+        controller.open(source)
+        XCTAssertEqual(controller.accessibilityAnnouncement?.message, "Opening trace")
+        while controller.phase != .ready { await Task.yield() }
+        let ready = try XCTUnwrap(controller.accessibilityAnnouncement)
+        XCTAssertTrue(ready.message.hasPrefix("Trace loaded"))
+        XCTAssertEqual(ready.priority, .polite)
+
+        controller.hoverEvent(nil)
+        controller.handleViewportIntent(
+            .panPoints(1, sourceViewport: try XCTUnwrap(controller.snapshot?.viewport))
+        )
+        XCTAssertEqual(controller.accessibilityAnnouncement?.revision, ready.revision)
+
+        controller.search("no match")
+        while controller.isSearching { await Task.yield() }
+        let searched = try XCTUnwrap(controller.accessibilityAnnouncement)
+        XCTAssertEqual(searched.message, "Search found 0 results")
+        XCTAssertGreaterThan(searched.revision, ready.revision)
+        await controller.close()
+    }
+
+    func testInspectorCollapseRestoresFocusToDisclosure() {
+        XCTAssertEqual(
+            TraceViewerFocusPolicy.afterInspectorVisibilityChange(
+                current: .inspector, inspectorVisible: false
+            ),
+            .inspectorDisclosure
+        )
+        XCTAssertEqual(
+            TraceViewerFocusPolicy.afterInspectorVisibilityChange(
+                current: .timeline, inspectorVisible: false
+            ),
+            .timeline
+        )
+        XCTAssertEqual(
+            TraceViewerFocusPolicy.afterInspectorVisibilityChange(
+                current: .inspector, inspectorVisible: true
+            ),
+            .inspector
+        )
+    }
+
     func testReplacementImmediatelyHidesOldGenerationWhileNewOpenWaits() async throws {
         let suite = "ArkTraceReplacementTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

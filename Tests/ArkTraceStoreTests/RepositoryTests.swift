@@ -875,7 +875,7 @@ final class RepositoryTests: XCTestCase {
             progress: { stages.append($0) }
         )
 
-        XCTAssertEqual(preparation.indexVersion, 1)
+        XCTAssertEqual(preparation.indexVersion, TraceDatabaseStagingPreparer.indexVersion)
         XCTAssertEqual(preparation.schemaAdapterVersion, TraceSchemaAdapter.version)
         XCTAssertEqual(preparation.schemaFingerprint.count, 64)
         XCTAssertEqual(preparation.upstreamDatabaseSHA256, upstreamIdentity.0)
@@ -884,7 +884,7 @@ final class RepositoryTests: XCTestCase {
 
         let db = try TraceDatabase(url: databaseURL, readOnly: true)
         let indexNames = Set(try db.query(
-            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name GLOB 'arktrace_v*'"
         ) { $0.text(0) }.compactMap { $0 })
         XCTAssertTrue(indexNames.isSuperset(of: [
             "arktrace_v1_process_pid",
@@ -925,6 +925,97 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(threadPlan.contains("arktrace_v1_thread_itid"), threadPlan)
     }
 
+    func testPreparedDatabasePerformanceDiagnosticsAreBoundedAndIndexBacked() async throws {
+        let seed = try TraceDatabase(url: databaseURL, readOnly: false)
+        try seed.execute(
+            """
+            INSERT INTO sched_slice VALUES (1, 1100, 20, 0, 1, 1);
+            INSERT INTO thread_state VALUES (1, 1100, 20, 0, 1, 'Running');
+            INSERT INTO callstack VALUES (1, 1100, 20, 1, 'work');
+            """
+        )
+        _ = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let diagnostics = try await TraceDatabaseStagingPreparer.performanceDiagnostics(
+            databaseURL: databaseURL
+        )
+
+        XCTAssertEqual(diagnostics.relationshipVMInstructionBudget, 250_000)
+        XCTAssertEqual(diagnostics.relationshipProbeSteps.count, 4)
+        XCTAssertTrue(diagnostics.relationshipProbeSteps.values.allSatisfy {
+            $0 > 0 && $0 < diagnostics.relationshipVMInstructionBudget
+        })
+        XCTAssertFalse(diagnostics.usesAutomaticIndex)
+        XCTAssertEqual(
+            diagnostics.persistentIndexNames, diagnostics.applicableIndexNames
+        )
+        XCTAssertEqual(diagnostics.tableRowCounts, [
+            "process": 3, "thread": 3, "sched_slice": 1,
+            "thread_state": 1, "callstack": 1,
+        ])
+        XCTAssertTrue(Set(diagnostics.persistentIndexNames).isSuperset(of: [
+            "arktrace_v1_process_ipid",
+            "arktrace_v2_process_ipid_pid_name",
+            "arktrace_v1_thread_itid",
+            "arktrace_v2_thread_itid_tid_name_ipid",
+            "arktrace_v1_sched_slice_ts_cpu",
+            "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+            "arktrace_v1_thread_state_itid_ts",
+            "arktrace_v2_thread_state_itid_ts_id_dur",
+            "arktrace_v1_callstack_callid_ts",
+            "arktrace_v2_callstack_callid_ts_id_dur",
+        ]))
+        let planText = diagnostics.queryPlans.values.flatMap { $0 }.joined(separator: " ")
+        XCTAssertTrue(planText.contains("arktrace_v1_process_ipid"), planText)
+        XCTAssertTrue(planText.contains("arktrace_v1_thread_itid"), planText)
+        XCTAssertTrue(planText.contains("arktrace_v2_sched_slice_cpu_ts_id_dur_itid"), planText)
+        XCTAssertTrue(planText.contains("arktrace_v2_thread_state_itid_ts_id_dur"), planText)
+        XCTAssertTrue(planText.contains("arktrace_v2_callstack_callid_ts_id_dur"), planText)
+        let expectedEventIndexes = [
+            "viewport.cpu.detail": "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+            "viewport.cpu.density": "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+            "viewport.threadState.detail": "arktrace_v2_thread_state_itid_ts_cover_cpu",
+            "viewport.threadState.density": "arktrace_v2_thread_state_itid_ts_id_dur",
+            "viewport.namedSlice.detail": "arktrace_v2_callstack_callid_ts_id_dur",
+            "viewport.namedSlice.density": "arktrace_v2_callstack_callid_ts_id_dur",
+        ]
+        for (name, expectedIndex) in expectedEventIndexes {
+            let plan = try XCTUnwrap(diagnostics.queryPlans[name])
+            let eventSearch = try XCTUnwrap(plan.first { $0.contains("SEARCH s ") })
+            XCTAssertTrue(eventSearch.contains("COVERING INDEX"), "\(name): \(plan)")
+            XCTAssertTrue(eventSearch.contains(expectedIndex), "\(name): \(plan)")
+            XCTAssertFalse(plan.contains { $0.contains("AUTOMATIC") }, "\(name): \(plan)")
+        }
+        for name in [
+            "viewport.cpu.detail", "viewport.threadState.detail",
+            "viewport.namedSlice.detail",
+        ] {
+            let text = try XCTUnwrap(diagnostics.queryPlans[name]).joined(separator: " ")
+            XCTAssertTrue(text.contains("arktrace_v2_process_ipid_pid_name"), text)
+            XCTAssertTrue(text.contains("arktrace_v2_thread_itid_tid_name_ipid"), text)
+        }
+    }
+
+    func testReadyDatabaseValidationRejectsMismappedProductionCoveringIndex() throws {
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("DROP INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid")
+        try writer.execute(
+            "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid "
+                + "ON sched_slice(cpu, id, ts, dur, itid, ipid)"
+        )
+        XCTAssertThrowsError(
+            try SQLiteTraceRepository(
+                databaseURL: databaseURL,
+                parser: Self.dummyParser,
+                source: Self.dummySource,
+                expectedPreparation: preparation
+            )
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .traceDatabaseInvalid)
+            XCTAssertEqual((error as? ArkTraceError)?.stage, .openingDatabase)
+        }
+    }
+
     func testStagingAllowsMissingOptionalReadyIndexColumn() throws {
         let url = try makeTemporaryDatabase(
             """
@@ -935,10 +1026,10 @@ final class RepositoryTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: url) }
 
         let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: url)
-        XCTAssertEqual(preparation.indexVersion, 1)
+        XCTAssertEqual(preparation.indexVersion, TraceDatabaseStagingPreparer.indexVersion)
         let db = try TraceDatabase(url: url, readOnly: true)
         let indexes = Set(try db.query(
-            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name GLOB 'arktrace_v*'"
         ) { $0.text(0) }.compactMap { $0 })
         XCTAssertTrue(indexes.contains("arktrace_v1_thread_state_itid_ts"))
         XCTAssertFalse(indexes.contains("arktrace_v1_thread_state_ts_cpu"))
@@ -1117,7 +1208,7 @@ final class RepositoryTests: XCTestCase {
 
         let db = try TraceDatabase(url: databaseURL, readOnly: true)
         let indexes = Set(try db.query(
-            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name GLOB 'arktrace_v*'"
         ) { $0.text(0) }.compactMap { $0 })
         XCTAssertTrue(indexes.contains("arktrace_v1_process_ipid"))
         XCTAssertTrue(indexes.contains("arktrace_v1_thread_itid"))
@@ -2174,7 +2265,11 @@ final class RepositoryTests: XCTestCase {
                 range: range, source: .cpu(9), bucketCount: 8, deadline: deadline
             )
         )
-        XCTAssertEqual(density.buckets.first?.dominantThreadKey, ThreadKey(itid: -11))
+        XCTAssertNil(density.buckets.first?.dominantThreadKey)
+        XCTAssertTrue(density.dataQuality.issues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "timeline.density.dominantThread"
+        })
     }
 
     func testTypedEventQueriesShareHalfOpenInstantAndOpenEndedSemantics() async throws {

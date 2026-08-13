@@ -38,11 +38,13 @@ print_release_failure() {
     sed \
         -e "s|$repository_root|<repo>|g" \
         -e "s|$phase2_temporary_directory|<temp>|g" \
-        "$release_log" >"$sanitized_release_log"
+        "$release_log" \
+        | sed -E 's#(/[A-Za-z0-9._ -]+)+#<path>#g' \
+        | cut -c1-512 >"$sanitized_release_log"
     # Preserve every XCTest failure location before the bounded tail. Long
     # suites can otherwise push the actionable line out of the final window.
     grep -nE 'error: -\[|Test Case .* failed|fatal error|unexpected failure' \
-        "$sanitized_release_log" >&2 || true
+        "$sanitized_release_log" | tail -40 >&2 || true
     tail -n 160 "$sanitized_release_log" >&2
 }
 

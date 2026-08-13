@@ -20,6 +20,42 @@ public enum TraceAppRecoveryAction: String, Hashable, Codable, Sendable {
     case dismiss
 }
 
+public enum TraceAccessibilityPriority: String, Hashable, Codable, Sendable {
+    case polite
+    case urgent
+}
+
+public struct TraceAccessibilityAnnouncement: Hashable, Codable, Sendable {
+    public let revision: UInt64
+    public let message: String
+    public let priority: TraceAccessibilityPriority
+
+    public init(revision: UInt64, message: String, priority: TraceAccessibilityPriority) {
+        self.revision = revision
+        self.message = String(message.prefix(512))
+        self.priority = priority
+    }
+}
+
+public enum TraceViewerFocusRegion: String, Hashable, Sendable {
+    case sidebar
+    case search
+    case timeline
+    case inspector
+    case inspectorDisclosure
+    case errorRecovery
+}
+
+public enum TraceViewerFocusPolicy {
+    public static func afterInspectorVisibilityChange(
+        current: TraceViewerFocusRegion?,
+        inspectorVisible: Bool
+    ) -> TraceViewerFocusRegion? {
+        guard !inspectorVisible, current == .inspector else { return current }
+        return .inspectorDisclosure
+    }
+}
+
 public struct TraceAppErrorPresentation: Hashable, Sendable {
     public let title: String
     public let reason: String
@@ -116,6 +152,8 @@ public final class TraceDocumentController {
     public private(set) var recentDocuments: [TraceRecentDocument] = []
     public private(set) var errorPresentation: TraceAppErrorPresentation?
     public private(set) var cacheHit = false
+    public private(set) var accessibilityAnnouncement: TraceAccessibilityAnnouncement?
+    public private(set) var timelineFocusRequestID: UInt64 = 0
 
     @ObservationIgnored private let opener: TraceDocumentOpener
     @ObservationIgnored private let maintenance: TraceCacheMaintenance?
@@ -131,6 +169,7 @@ public final class TraceDocumentController {
     @ObservationIgnored private var searchGeneration: UInt64 = 0
     @ObservationIgnored private var catalogThreads: [TraceThread] = []
     @ObservationIgnored private var pendingSelectionKey: EventKey?
+    @ObservationIgnored private var announcementRevision: UInt64 = 0
 
     public convenience init(
         bundleURL: URL = Bundle.main.bundleURL,
@@ -196,6 +235,7 @@ public final class TraceDocumentController {
         sourceURL = url.standardizedFileURL
         phase = .loading(.preparing)
         errorPresentation = nil
+        announce("Opening trace")
         openTask = Task { [weak self] in
             await self?.performOpen(url.standardizedFileURL, generation: generation)
         }
@@ -210,6 +250,7 @@ public final class TraceDocumentController {
         cancelOutstandingWork()
         documentGeneration &+= 1
         phase = sourceURL == nil ? .idle : .loading(.cancelled)
+        announce("Opening cancelled")
     }
 
     public func close() async {
@@ -220,10 +261,12 @@ public final class TraceDocumentController {
             if let closing { try await closing.close() }
             document = nil
             resetDocumentState()
+            announce("Trace closed")
         } catch {
             let typed = Self.typed(error, stage: .openingDatabase)
             errorPresentation = TraceAppErrorPresentation(error: typed)
             phase = .failed
+            announce(errorPresentation?.title ?? "Trace close failed", priority: .urgent)
         }
     }
 
@@ -250,7 +293,9 @@ public final class TraceDocumentController {
     }
 
     public func hoverEvent(_ key: EventKey?) {
-        hoveredEvent = key.flatMap { inspector(for: $0) }
+        let value = key.flatMap { inspector(for: $0) }
+        guard value != hoveredEvent else { return }
+        hoveredEvent = value
     }
 
     public func selectRange(_ range: TraceTimeRange?) {
@@ -272,6 +317,7 @@ public final class TraceDocumentController {
                     guard let self, self.documentGeneration == generation,
                         self.selectedRange == range else { return }
                     self.rangeAnalysis = value
+                    self.announce("Range analysis complete")
                 }
             } catch {
                 self?.presentNonfatal(error, generation: generation)
@@ -300,6 +346,11 @@ public final class TraceDocumentController {
                     guard let self, self.searchGeneration == generation else { return }
                     self.searchResults = result
                     self.isSearching = false
+                    self.announce(
+                        result.truncated
+                            ? "Search found at least \(result.items.count) results"
+                            : "Search found \(result.items.count) results"
+                    )
                 }
             } catch {
                 await MainActor.run {
@@ -329,6 +380,7 @@ public final class TraceDocumentController {
             pendingSelectionKey = result.eventKey
         }
         if let range = result.range { revealRange(range) }
+        timelineFocusRequestID &+= 1
         scheduleSnapshot(preference: result.eventKey == nil ? .automatic : .detail)
     }
 
@@ -370,6 +422,8 @@ public final class TraceDocumentController {
         guard let bounds = try? traceBounds() else { return }
         setViewport(bounds)
     }
+
+    public var timelineBounds: TraceTimeRange? { try? traceBounds() }
 
     public func zoomIn() { zoomBy(scale: 0.5) }
 
@@ -463,15 +517,22 @@ public final class TraceDocumentController {
             recentDocuments = recentStore.documents()
             errorPresentation = nil
             phase = .ready
+            announce(
+                catalog.metadata.durationNs == 0
+                    ? "Trace loaded, no timed events"
+                    : "Trace loaded, \(catalog.groups.flatMap(\.tracks).filter { !$0.isCollapsed }.count) visible tracks"
+            )
         } catch {
             if let opened { try? await opened.close() }
             guard generation == documentGeneration else { return }
             let typed = Self.typed(error, stage: .openingDatabase)
             if typed.code == .cancelled || Task.isCancelled {
                 phase = .loading(.cancelled)
+                announce("Opening cancelled")
             } else {
                 errorPresentation = TraceAppErrorPresentation(error: typed)
                 phase = .failed
+                announce(errorPresentation?.title ?? "Trace failed", priority: .urgent)
             }
         }
     }
@@ -481,6 +542,7 @@ public final class TraceDocumentController {
         basedOn sourceViewport: TimelineViewport? = nil
     ) {
         guard let old = sourceViewport ?? snapshot?.viewport else { return }
+        guard range != old.range else { return }
         do {
             let viewport = try TimelineViewport(
                 range: range,
@@ -698,6 +760,19 @@ public final class TraceDocumentController {
         let typed = Self.typed(error, stage: .analyzing)
         guard typed.code != .cancelled else { return }
         errorPresentation = TraceAppErrorPresentation(error: typed)
+        announce(errorPresentation?.title ?? "Operation failed", priority: .urgent)
+    }
+
+    private func announce(
+        _ message: String,
+        priority: TraceAccessibilityPriority = .polite
+    ) {
+        announcementRevision &+= 1
+        accessibilityAnnouncement = TraceAccessibilityAnnouncement(
+            revision: announcementRevision,
+            message: message,
+            priority: priority
+        )
     }
 
     private static func typed(

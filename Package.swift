@@ -48,6 +48,10 @@ let package = Package(
                 .copy("../../Fixtures/traces/zlib.htrace"),
                 .copy("../../Fixtures/traces/LICENSE.Apache-2.0.txt"),
                 .copy("../../Fixtures/traces/NOTICE.md"),
+                .copy("../../LICENSE"),
+                .copy("../../THIRD_PARTY_NOTICES.md"),
+                .copy("../../ThirdParty/TraceStreamer/license-inventory.json"),
+                .copy("../../ThirdParty/TraceStreamer/LICENSES"),
             ]
         ),
         .executableTarget(name: "arktrace", dependencies: ["ArkTraceCLI"]),
@@ -81,7 +85,7 @@ let package = Package(
             name: "ArkTraceIntegrationTests",
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
-                "ArkTraceAnalysis",
+                "ArkTraceAnalysis", "ArkTraceRendering",
             ]
         ),
     ]

@@ -1,6 +1,8 @@
 import ArkTraceCore
-import ArkTraceParser
+@testable import ArkTraceParser
 import ArkTraceAnalysis
+import ArkTraceRendering
+import AppKit
 import CryptoKit
 import Darwin
 import XCTest
@@ -18,6 +20,26 @@ private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 /// default `ThirdParty/TraceStreamer/macx` layout. A custom binary must carry
 /// its sibling pinned `manifest.json`.
 final class ParserIntegrationTests: XCTestCase {
+    private final class PerformanceStageRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var instants: [TraceLoadingStage: ContinuousClock.Instant] = [:]
+
+        func record(_ stage: TraceLoadingStage) {
+            lock.withLock {
+                if instants[stage] == nil { instants[stage] = .now }
+            }
+        }
+
+        func milliseconds(
+            from start: TraceLoadingStage,
+            to end: TraceLoadingStage
+        ) -> Double? {
+            lock.withLock {
+                guard let start = instants[start], let end = instants[end] else { return nil }
+                return ParserIntegrationTests.milliseconds(start.duration(to: end))
+            }
+        }
+    }
     private struct SchemaEvidence: Decodable {
         struct Upstream: Decodable {
             let repository: String
@@ -120,6 +142,83 @@ final class ParserIntegrationTests: XCTestCase {
 
         func resume() {
             release.signal()
+        }
+    }
+
+    private final class BlockingStageBarrier: @unchecked Sendable {
+        private let target: TraceLoadingStage
+        private let lock = NSLock()
+        private let reached = DispatchSemaphore(value: 0)
+        private let release = DispatchSemaphore(value: 0)
+        private var didPause = false
+
+        init(_ target: TraceLoadingStage) {
+            self.target = target
+        }
+
+        func record(_ stage: TraceLoadingStage) {
+            guard stage == target else { return }
+            let shouldPause = lock.withLock {
+                guard !didPause else { return false }
+                didPause = true
+                return true
+            }
+            guard shouldPause else { return }
+            reached.signal()
+            release.wait()
+        }
+
+        private func waitBlocking() {
+            reached.wait()
+        }
+
+        func waitUntilReached() async {
+            await Task.detached { self.waitBlocking() }.value
+        }
+
+        func resume() {
+            release.signal()
+        }
+    }
+
+    private final class ProcessLaunchBarrier: @unchecked Sendable {
+        private let release = DispatchSemaphore(value: 0)
+
+        func record(_: pid_t) {
+            release.wait()
+        }
+
+        func resume() { release.signal() }
+    }
+
+    private enum ProcessLaunchEvent: Sendable {
+        case launched(pid_t)
+        case openCompleted
+    }
+
+    private enum ProcessLaunchWaitError: Error {
+        case timedOut
+        case eventStreamEnded
+    }
+
+    private static func firstProcessLaunchEvent(
+        from events: AsyncStream<ProcessLaunchEvent>,
+        timeout: Duration
+    ) async throws -> ProcessLaunchEvent {
+        try await withThrowingTaskGroup(of: ProcessLaunchEvent.self) { group in
+            group.addTask {
+                for await event in events { return event }
+                throw ProcessLaunchWaitError.eventStreamEnded
+            }
+            group.addTask {
+                try await Task.sleep(for: timeout)
+                throw ProcessLaunchWaitError.timedOut
+            }
+            guard let event = try await group.next() else {
+                throw ProcessLaunchWaitError.eventStreamEnded
+            }
+            group.cancelAll()
+            return event
         }
     }
 
@@ -434,10 +533,77 @@ final class ParserIntegrationTests: XCTestCase {
         repoRoot.appendingPathComponent("Fixtures/traces/\(name)")
     }
 
-    private func sha256AndSize(at url: URL) throws -> (sha256: String, byteCount: Int64) {
-        let data = try Data(contentsOf: url)
-        let hash = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
-        return (hash, Int64(data.count))
+    private func sha256AndSize(
+        at url: URL,
+        maximumByteCount: Int64 = .max,
+        afterOpen: (() throws -> Void)? = nil
+    ) throws -> (sha256: String, byteCount: Int64) {
+        let descriptor = url.path.withCString {
+            Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
+            throw ArkTraceError(
+                code: .internalError, stage: .hashing,
+                message: "Fixture could not be opened"
+            )
+        }
+        defer { _ = Darwin.close(descriptor) }
+        var initial = stat()
+        guard Darwin.fstat(descriptor, &initial) == 0,
+            initial.st_mode & S_IFMT == S_IFREG,
+            initial.st_size >= 0, initial.st_size <= maximumByteCount
+        else {
+            throw ArkTraceError(
+                code: .internalError, stage: .hashing,
+                message: "Fixture size or type is invalid"
+            )
+        }
+        try afterOpen?()
+        var hasher = SHA256()
+        var byteCount: Int64 = 0
+        var remaining = Int64(initial.st_size)
+        var buffer = [UInt8](repeating: 0, count: 1 << 20)
+        while remaining > 0 {
+            let requested = min(buffer.count, Int(remaining))
+            let count = buffer.withUnsafeMutableBytes {
+                Darwin.read(descriptor, $0.baseAddress, requested)
+            }
+            if count < 0, errno == EINTR { continue }
+            guard count > 0 else {
+                throw ArkTraceError(
+                    code: .internalError,
+                    stage: .hashing,
+                    message: "Fixture changed while hashing"
+                )
+            }
+            byteCount += Int64(count)
+            remaining -= Int64(count)
+            hasher.update(data: Data(buffer.prefix(count)))
+        }
+        var extra: UInt8 = 0
+        guard Darwin.read(descriptor, &extra, 1) == 0 else {
+            throw ArkTraceError(
+                code: .internalError, stage: .hashing,
+                message: "Fixture grew while hashing"
+            )
+        }
+        var final = stat()
+        guard Darwin.fstat(descriptor, &final) == 0,
+            initial.st_dev == final.st_dev,
+            initial.st_ino == final.st_ino,
+            initial.st_size == final.st_size,
+            initial.st_mtimespec.tv_sec == final.st_mtimespec.tv_sec,
+            initial.st_mtimespec.tv_nsec == final.st_mtimespec.tv_nsec,
+            initial.st_ctimespec.tv_sec == final.st_ctimespec.tv_sec,
+            initial.st_ctimespec.tv_nsec == final.st_ctimespec.tv_nsec
+        else {
+            throw ArkTraceError(
+                code: .internalError, stage: .hashing,
+                message: "Fixture changed while hashing"
+            )
+        }
+        let hash = hasher.finalize().map { String(format: "%02x", $0) }.joined()
+        return (hash, byteCount)
     }
 
     private static func milliseconds(_ duration: Duration) -> Double {
@@ -451,6 +617,87 @@ final class ParserIntegrationTests: XCTestCase {
         let sorted = values.sorted()
         let rank = max(0, min(sorted.count - 1, Int(ceil(Double(sorted.count) * fraction)) - 1))
         return sorted[rank]
+    }
+
+    func testPhase3PerformanceEvidenceWindowsClampExtremeEventRanges() throws {
+        let nearMaximum = try TraceTimeRange.query(
+            startNs: Int64.max - 10, endNs: Int64.max
+        )
+        let maximumWindow = try Self.clampedWindow(
+            around: nearMaximum,
+            padding: 50_000_000,
+            traceDurationNs: Int64.max
+        )
+        XCTAssertEqual(maximumWindow.endNs, Int64.max)
+        XCTAssertGreaterThan(maximumWindow.endNs, maximumWindow.startNs)
+
+        let origin = try TraceTimeRange.query(startNs: 0, endNs: 1)
+        let originWindow = try Self.clampedWindow(
+            around: origin,
+            padding: 50_000_000,
+            traceDurationNs: 100
+        )
+        XCTAssertEqual(originWindow, try TraceTimeRange.query(startNs: 0, endNs: 100))
+    }
+
+    func testPhase3StreamingIdentityRejectsGrowthBeyondInitialSize() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-identity-growth-\(UUID().uuidString)")
+        let file = root.appendingPathComponent("trace")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("initial".utf8).write(to: file)
+        XCTAssertThrowsError(try sha256AndSize(
+            at: file,
+            maximumByteCount: 1_024,
+            afterOpen: {
+                let handle = try FileHandle(forWritingTo: file)
+                try handle.seekToEnd()
+                try handle.write(contentsOf: Data(repeating: 0x41, count: 64))
+                try handle.close()
+            }
+        ))
+    }
+
+    func testProcessLaunchWaitStopsWhenOpenCompletesBeforeLaunchHook() async throws {
+        let (events, continuation) = AsyncStream.makeStream(of: ProcessLaunchEvent.self)
+        continuation.yield(.openCompleted)
+        continuation.finish()
+        let start = ContinuousClock.now
+        let event = try await Self.firstProcessLaunchEvent(
+            from: events, timeout: .seconds(1)
+        )
+        guard case .openCompleted = event else {
+            return XCTFail("completion must win when no process was launched")
+        }
+        XCTAssertLessThan(start.duration(to: .now), .milliseconds(250))
+    }
+
+    private static func clampedWindow(
+        around range: TraceTimeRange,
+        padding: Int64,
+        traceDurationNs: Int64
+    ) throws -> TraceTimeRange {
+        let startCandidate = range.startNs.subtractingReportingOverflow(padding)
+        let endCandidate = range.endNs.addingReportingOverflow(padding)
+        let start = max(0, startCandidate.overflow ? 0 : startCandidate.partialValue)
+        let end = min(
+            traceDurationNs,
+            endCandidate.overflow ? traceDurationNs : endCandidate.partialValue
+        )
+        if end > start { return try TraceTimeRange.query(startNs: start, endNs: end) }
+        let fallbackStart = min(max(0, range.startNs), max(0, traceDurationNs - 1))
+        return try TraceTimeRange.query(
+            startNs: fallbackStart,
+            endNs: traceDurationNs
+        )
+    }
+
+    func testPhase3ViewportPercentilesDoNotDiluteAutomaticLoaderTail() {
+        let sixFastQueryFamilies = Array(repeating: 1.0, count: 120)
+        let loader = Array(repeating: 2.0, count: 18) + [700.0, 900.0]
+        XCTAssertEqual(Self.percentile(sixFastQueryFamilies + loader, fraction: 0.95), 2.0)
+        XCTAssertEqual(Self.percentile(loader, fraction: 0.95), 700.0)
     }
 
     private static func sysctlString(_ name: String) -> String? {
@@ -550,7 +797,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(ranges.first?.1, fixture.traceRange.endTs)
 
         let indexNames = Set(try db.query(
-            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'arktrace_v1_%'"
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name GLOB 'arktrace_v*'"
         ) { $0.text(0) }.compactMap { $0 })
         XCTAssertTrue(
             TraceDatabaseStagingPreparer.requiredIndexNames.isSubset(of: indexNames),
@@ -573,7 +820,7 @@ final class ParserIntegrationTests: XCTestCase {
             ),
             (
                 "SELECT ts FROM callstack WHERE callid = 1 AND ts >= 0",
-                "arktrace_v1_callstack_callid_ts"
+                "arktrace_v2_callstack_callid_ts_id_dur"
             ),
         ]
         for (sql, indexName) in plans {
@@ -990,7 +1237,10 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(metadata.parser.architecture, manifest.architecture)
         XCTAssertEqual(metadata.parser.adapterVersion, manifest.adapterVersion)
         XCTAssertEqual(metadata.parser.buildRecipeVersion, manifest.buildRecipeVersion)
-        XCTAssertEqual(parsed.databasePreparation.indexVersion, 1)
+        XCTAssertEqual(
+            parsed.databasePreparation.indexVersion,
+            TraceDatabaseStagingPreparer.indexVersion
+        )
         XCTAssertEqual(
             parsed.databasePreparation.schemaFingerprint,
             metadata.schemaFingerprint
@@ -1188,7 +1438,9 @@ final class ParserIntegrationTests: XCTestCase {
         let (binary, fixture) = try requireCacheEnvironment()
         let parser = try TraceStreamerProcessParser(executableURL: binary)
         let parserIdentity = try await parser.identity()
-        let traceIdentity = try sha256AndSize(at: fixture)
+        let traceIdentity = try sha256AndSize(
+            at: fixture, maximumByteCount: 2_147_483_648
+        )
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("arktrace-phase2-benchmark-\(UUID().uuidString)")
         let staging = root.appendingPathComponent("staging", isDirectory: true)
@@ -1291,6 +1543,826 @@ final class ParserIntegrationTests: XCTestCase {
         let data = try encoder.encode(evidence)
         XCTAssertLessThanOrEqual(data.count, 4_096)
         try data.write(to: outputURL, options: .atomic)
+    }
+
+    func testPhase3GateWritesViewportPerformanceEvidenceWhenRequested() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["ARKTRACE_PHASE3_GATE"] == "1" else { return }
+        let fixtureClass = environment["ARKTRACE_PHASE3_FIXTURE_CLASS"] ?? "medium"
+        XCTAssertTrue(["medium", "large"].contains(fixtureClass))
+        let outputURL = URL(fileURLWithPath: try XCTUnwrap(
+            environment["ARKTRACE_PHASE3_EVIDENCE_OUTPUT"]
+        ))
+        let fixture = URL(fileURLWithPath: try XCTUnwrap(
+            environment["ARKTRACE_PHASE3_TRACE"]
+                ?? environment["ARKTRACE_PHASE3_MEDIUM_TRACE"]
+        ))
+        let parserURL = URL(fileURLWithPath: try XCTUnwrap(
+            environment["ARKTRACE_TRACE_STREAMER"]
+        ))
+        let fixtureBytes = try XCTUnwrap(
+            fixture.resourceValues(forKeys: [.fileSizeKey]).fileSize
+        )
+        if fixtureClass == "large" {
+            XCTAssertGreaterThan(fixtureBytes, 500 * 1_024 * 1_024)
+            XCTAssertLessThanOrEqual(fixtureBytes, 2 * 1_024 * 1_024 * 1_024)
+        } else {
+            XCTAssertGreaterThan(fixtureBytes, 50 * 1_024 * 1_024)
+            XCTAssertLessThanOrEqual(fixtureBytes, 500 * 1_024 * 1_024)
+        }
+
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-phase3-benchmark-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = try TraceStreamerProcessParser(executableURL: parserURL)
+        let parserIdentity = try await parser.identity()
+        let stages = PerformanceStageRecorder()
+        let coldStart = ContinuousClock.now
+        let cold = try await TraceSession.open(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            storagePolicy: .contentAddressed(cacheDirectory: cache),
+            progress: { stages.record($0) }
+        )
+        let coldOpenMs = Self.milliseconds(coldStart.duration(to: .now))
+        let coldWasCacheHit = await cold.cacheHit
+        XCTAssertFalse(coldWasCacheHit)
+        let metadata = try await cold.repository.metadata()
+        let parsed = await cold.parsed
+        let coldCacheMetadata = await cold.cacheMetadata
+        let cacheMetadata = try XCTUnwrap(coldCacheMetadata)
+        XCTAssertTrue(metadata.capabilities.cpuScheduling)
+        XCTAssertTrue(metadata.capabilities.threadStates)
+        XCTAssertTrue(metadata.capabilities.namedSlices)
+        let fullRange = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
+        let probeDeadline = ContinuousClock.now.advanced(by: .seconds(30))
+        let cpuProbe = try await cold.repository.cpuSlices(
+            try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+        )
+        let stateProbe = try await cold.repository.threadStates(
+            try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+        )
+        let sliceProbe = try await cold.repository.slices(
+            try TraceSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+        )
+        let firstCPU = try XCTUnwrap(cpuProbe.items.first)
+        let firstState = try XCTUnwrap(stateProbe.items.first)
+        let firstSlice = try XCTUnwrap(sliceProbe.items.first)
+        let densityProbes = [
+            try await cold.repository.density(
+                try TraceDensityQuery(
+                    range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 64,
+                    deadline: probeDeadline
+                )
+            ),
+            try await cold.repository.density(
+                try TraceDensityQuery(
+                    range: fullRange, source: .threadState(firstState.threadKey),
+                    bucketCount: 64, deadline: probeDeadline
+                )
+            ),
+            try await cold.repository.density(
+                try TraceDensityQuery(
+                    range: fullRange, source: .namedSlice(firstSlice.threadKey),
+                    bucketCount: 64, deadline: probeDeadline
+                )
+            ),
+        ]
+        XCTAssertTrue(densityProbes.allSatisfy {
+            $0.capabilityAvailable && $0.buckets.reduce(0) { $0 + $1.eventCount } > 0
+        })
+        try await cold.close()
+
+        let iterations = 20
+        var cacheOpenMs: [Double] = []
+        var cacheHashMs: [Double] = []
+        var cacheValidationMs: [Double] = []
+        var directoryMs: [Double] = []
+        let viewportMeasurementNames = [
+            "cpuDetail", "threadStateDetail", "namedSliceDetail",
+            "cpuDensity", "threadStateDensity", "namedSliceDensity", "automaticLoader",
+        ]
+        var viewportMeasurements = Dictionary(
+            uniqueKeysWithValues: viewportMeasurementNames.map { ($0, [Double]()) }
+        )
+        var contextMs: [Double] = []
+        var analysisMs: [Double] = []
+        var measuredRows: [String: Int64] = [:]
+        var lastSnapshot: TimelineSnapshot?
+        var lastInteractionSnapshot: TimelineSnapshot?
+        var cpuTracks = [firstCPU.cpu]
+        for cpu in Int64(0)..<64 where cpuTracks.count < 6 && !cpuTracks.contains(cpu) {
+            cpuTracks.append(cpu)
+        }
+        let tracks = cpuTracks.map {
+            TrackDescriptor(title: "CPU \($0)", source: .cpu($0))
+        } + [
+            TrackDescriptor(
+                title: "Thread state \(firstState.threadKey.itid)",
+                source: .threadState(firstState.threadKey)
+            ),
+            TrackDescriptor(
+                title: "Named slices",
+                source: .namedSlice(firstSlice.threadKey)
+            ),
+        ]
+        XCTAssertEqual(tracks.count, 8)
+        let contextRange = try Self.clampedWindow(
+            around: firstCPU.range,
+            padding: 50_000_000,
+            traceDurationNs: metadata.durationNs
+        )
+        let loader = TimelineSnapshotLoader()
+        for iteration in 0..<iterations {
+            let hitStages = PerformanceStageRecorder()
+            let openStart = ContinuousClock.now
+            let session = try await TraceSession.open(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                storagePolicy: .contentAddressed(cacheDirectory: cache),
+                progress: { hitStages.record($0) }
+            )
+            cacheOpenMs.append(Self.milliseconds(openStart.duration(to: .now)))
+            cacheHashMs.append(
+                hitStages.milliseconds(from: .hashing, to: .cacheLookup) ?? -1
+            )
+            cacheValidationMs.append(
+                hitStages.milliseconds(from: .openingDatabase, to: .ready) ?? -1
+            )
+            let wasCacheHit = await session.cacheHit
+            XCTAssertTrue(wasCacheHit)
+
+            let directoryStart = ContinuousClock.now
+            let processPage = try await session.repository.processes(
+                try ProcessQuery(
+                    limit: 1_024,
+                    deadline: ContinuousClock.now.advanced(by: .seconds(5))
+                )
+            )
+            let threadPage = try await session.repository.threads(
+                try ThreadQuery(
+                    limit: 1_024,
+                    deadline: ContinuousClock.now.advanced(by: .seconds(5))
+                )
+            )
+            directoryMs.append(Self.milliseconds(directoryStart.duration(to: .now)))
+            XCTAssertFalse(processPage.items.isEmpty)
+            XCTAssertFalse(threadPage.items.isEmpty)
+
+            let contextDeadline = ContinuousClock.now.advanced(by: .seconds(10))
+            let contextStartTime = ContinuousClock.now
+            let contextCPU = try await session.repository.cpuSlices(
+                try CpuSliceQuery(
+                    range: contextRange, limit: 10_000, deadline: contextDeadline
+                )
+            )
+            let contextStates = try await session.repository.threadStates(
+                try ThreadStateQuery(
+                    range: contextRange, limit: 10_000, deadline: contextDeadline
+                )
+            )
+            let contextSlices = try await session.repository.slices(
+                try TraceSliceQuery(
+                    range: contextRange, limit: 10_000, deadline: contextDeadline
+                )
+            )
+            let contextBytes = try JSONEncoder().encode(contextCPU.items).count
+                + JSONEncoder().encode(contextStates.items).count
+                + JSONEncoder().encode(contextSlices.items).count
+            XCTAssertGreaterThan(contextCPU.items.count, 0)
+            XCTAssertLessThanOrEqual(contextBytes, 8 * 1_024 * 1_024)
+            contextMs.append(Self.milliseconds(contextStartTime.duration(to: .now)))
+
+            let analysisStart = ContinuousClock.now
+            let analysis = try await TraceRangeAnalysisEngine(
+                repository: session.repository
+            ).analyze(
+                try TraceRangeAnalysisRequest(
+                    range: contextRange, timeout: .seconds(10)
+                )
+            )
+            analysisMs.append(Self.milliseconds(analysisStart.duration(to: .now)))
+            XCTAssertFalse(analysis.cpuUtilization.isEmpty)
+
+            let generation = UInt64(iteration + 1)
+            let viewport = try TimelineViewport(
+                range: fullRange,
+                widthPoints: 2_000,
+                heightPoints: 640,
+                generation: generation
+            )
+            let request = try ViewportRequest(
+                viewport: viewport,
+                tracks: tracks,
+                pixelWidth: 2_000,
+                generation: generation,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+            let viewportDeadline = ContinuousClock.now.advanced(by: .seconds(10))
+            var queryStart = ContinuousClock.now
+            let detailCPU = try await session.repository.cpuSlices(
+                try CpuSliceQuery(
+                    range: fullRange, cpu: firstCPU.cpu, limit: 2_000,
+                    deadline: viewportDeadline
+                )
+            )
+            viewportMeasurements["cpuDetail", default: []].append(
+                Self.milliseconds(queryStart.duration(to: .now))
+            )
+            queryStart = ContinuousClock.now
+            let detailState = try await session.repository.threadStates(
+                try ThreadStateQuery(
+                    range: fullRange, threadKey: firstState.threadKey, limit: 2_000,
+                    deadline: viewportDeadline
+                )
+            )
+            viewportMeasurements["threadStateDetail", default: []].append(
+                Self.milliseconds(queryStart.duration(to: .now))
+            )
+            queryStart = ContinuousClock.now
+            let detailSlice = try await session.repository.slices(
+                try TraceSliceQuery(
+                    range: fullRange, threadKey: firstSlice.threadKey, limit: 2_000,
+                    deadline: viewportDeadline
+                )
+            )
+            viewportMeasurements["namedSliceDetail", default: []].append(
+                Self.milliseconds(queryStart.duration(to: .now))
+            )
+            queryStart = ContinuousClock.now
+            let densityCPU = try await session.repository.density(
+                try TraceDensityQuery(
+                    range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 2_000,
+                    deadline: viewportDeadline
+                )
+            )
+            viewportMeasurements["cpuDensity", default: []].append(
+                Self.milliseconds(queryStart.duration(to: .now))
+            )
+            queryStart = ContinuousClock.now
+            let densityState = try await session.repository.density(
+                try TraceDensityQuery(
+                    range: fullRange, source: .threadState(firstState.threadKey),
+                    bucketCount: 2_000, deadline: viewportDeadline
+                )
+            )
+            viewportMeasurements["threadStateDensity", default: []].append(
+                Self.milliseconds(queryStart.duration(to: .now))
+            )
+            queryStart = ContinuousClock.now
+            let densitySlice = try await session.repository.density(
+                try TraceDensityQuery(
+                    range: fullRange, source: .namedSlice(firstSlice.threadKey),
+                    bucketCount: 2_000, deadline: viewportDeadline
+                )
+            )
+            viewportMeasurements["namedSliceDensity", default: []].append(
+                Self.milliseconds(queryStart.duration(to: .now))
+            )
+            let densityCounts = [densityCPU, densityState, densitySlice].map {
+                $0.buckets.reduce(Int64(0)) { $0 + $1.eventCount }
+            }
+            XCTAssertTrue([
+                detailCPU.items.count, detailState.items.count, detailSlice.items.count,
+            ].allSatisfy { $0 > 0 })
+            XCTAssertTrue(densityCounts.allSatisfy { $0 > 0 })
+            measuredRows = [
+                "cpuDetail": Int64(detailCPU.items.count),
+                "threadStateDetail": Int64(detailState.items.count),
+                "namedSliceDetail": Int64(detailSlice.items.count),
+                "cpuDensityEvents": densityCounts[0],
+                "threadStateDensityEvents": densityCounts[1],
+                "namedSliceDensityEvents": densityCounts[2],
+                "contextEvents": Int64(
+                    contextCPU.items.count + contextStates.items.count
+                        + contextSlices.items.count
+                ),
+            ]
+            let loaderStart = ContinuousClock.now
+            let snapshot = try await loader.load(request, repository: session.repository)
+            viewportMeasurements["automaticLoader", default: []].append(
+                Self.milliseconds(loaderStart.duration(to: .now))
+            )
+            let loaded = try XCTUnwrap(snapshot)
+            XCTAssertLessThanOrEqual(loaded.primitiveCount, 20_000)
+            XCTAssertLessThanOrEqual(
+                loaded.tracks.flatMap(\.primitives).filter {
+                    if case .density = $0 { return true }
+                    return false
+                }.count,
+                2_000 * 2 * tracks.count
+            )
+            XCTAssertTrue(loaded.tracks.contains {
+                $0.descriptor.source == .threadState(firstState.threadKey)
+                    && !$0.primitives.isEmpty
+            })
+            XCTAssertTrue(loaded.tracks.contains {
+                $0.descriptor.source == .namedSlice(firstSlice.threadKey)
+                    && !$0.primitives.isEmpty
+            })
+            lastSnapshot = loaded
+            if iteration == iterations - 1 {
+                let interactionRange = try Self.clampedWindow(
+                    around: firstCPU.range,
+                    padding: 1_000_000,
+                    traceDurationNs: metadata.durationNs
+                )
+                let interactionViewport = try TimelineViewport(
+                    range: interactionRange,
+                    widthPoints: 2_000,
+                    heightPoints: 160,
+                    generation: 10_000
+                )
+                let interactionRequest = try ViewportRequest(
+                    viewport: interactionViewport,
+                    tracks: [tracks[0]],
+                    pixelWidth: 2_000,
+                    generation: interactionViewport.generation,
+                    deadline: ContinuousClock.now.advanced(by: .seconds(5))
+                )
+                let interactionResult = try await loader.load(
+                    interactionRequest, repository: session.repository
+                )
+                let interaction = try XCTUnwrap(interactionResult)
+                XCTAssertFalse(
+                    interaction.tracks.flatMap(\.primitives)
+                        .compactMap(\.selectableEventKey).isEmpty,
+                    "interaction frame evidence requires a real detail event"
+                )
+                lastInteractionSnapshot = interaction
+            }
+            try await session.close()
+        }
+
+        let finalSnapshot = try XCTUnwrap(lastSnapshot)
+        let interactionSnapshot = try XCTUnwrap(lastInteractionSnapshot)
+        let frameFamilies = try await Self.drawDurations(
+            snapshot: finalSnapshot,
+            interactionSnapshot: interactionSnapshot,
+            iterations: iterations
+        )
+        let steadyFrameMs = frameFamilies.steady
+        let selectionFrameMs = frameFamilies.selection
+        let panFrameMs = frameFamilies.pan
+        let rebuildFrameMs = frameFamilies.rebuild
+        let diagnostics = try await TraceDatabaseStagingPreparer.performanceDiagnostics(
+            databaseURL: parsed.databaseURL
+        )
+        XCTAssertFalse(diagnostics.usesAutomaticIndex)
+        XCTAssertEqual(
+            diagnostics.persistentIndexNames, diagnostics.applicableIndexNames
+        )
+        XCTAssertTrue(diagnostics.relationshipProbeSteps.values.allSatisfy {
+            $0 < diagnostics.relationshipVMInstructionBudget
+        })
+
+        let cacheP95 = Self.percentile(cacheOpenMs, fraction: 0.95)
+        let directoryP95 = Self.percentile(directoryMs, fraction: 0.95)
+        struct LatencyEvidence: Encodable {
+            let sampleCount: Int
+            let p50Ms: Double
+            let p95Ms: Double
+        }
+        let viewportLatency = try Dictionary(uniqueKeysWithValues:
+            viewportMeasurementNames.map { name in
+                let samples = try XCTUnwrap(viewportMeasurements[name])
+                XCTAssertEqual(samples.count, iterations)
+                return (
+                    name,
+                    LatencyEvidence(
+                        sampleCount: samples.count,
+                        p50Ms: Self.percentile(samples, fraction: 0.50),
+                        p95Ms: Self.percentile(samples, fraction: 0.95)
+                    )
+                )
+            }
+        )
+        let viewportP95 = try XCTUnwrap(viewportLatency.values.map(\.p95Ms).max())
+        let viewportP50 = try XCTUnwrap(viewportLatency.values.map(\.p50Ms).max())
+        let frameP95 = Self.percentile(steadyFrameMs, fraction: 0.95)
+        let selectionFrameP95 = Self.percentile(selectionFrameMs, fraction: 0.95)
+        let panFrameP95 = Self.percentile(panFrameMs, fraction: 0.95)
+        let rebuildFrameP95 = Self.percentile(rebuildFrameMs, fraction: 0.95)
+        let contextP95 = Self.percentile(contextMs, fraction: 0.95)
+        let analysisP95 = Self.percentile(analysisMs, fraction: 0.95)
+        var usage = rusage()
+        _ = getrusage(RUSAGE_SELF, &usage)
+        let peakRSSBytes = Int64(usage.ru_maxrss)
+        XCTAssertLessThanOrEqual(
+            cacheP95, 1_000,
+            "cacheOpen p50/p95/max=\(Self.percentile(cacheOpenMs, fraction: 0.50))/"
+                + "\(cacheP95)/\(cacheOpenMs.max() ?? -1), hash p50/p95="
+                + "\(Self.percentile(cacheHashMs, fraction: 0.50))/"
+                + "\(Self.percentile(cacheHashMs, fraction: 0.95)), validation p50/p95="
+                + "\(Self.percentile(cacheValidationMs, fraction: 0.50))/"
+                + "\(Self.percentile(cacheValidationMs, fraction: 0.95))"
+        )
+        XCTAssertLessThanOrEqual(directoryP95, 150)
+        XCTAssertLessThanOrEqual(
+            viewportP95, fixtureClass == "large" ? 500 : 250,
+            "viewportP95ByFamily=" + viewportMeasurementNames.map {
+                "\($0)=\(viewportLatency[$0]?.p95Ms ?? -1)"
+            }.joined(separator: ",")
+        )
+        XCTAssertLessThanOrEqual(contextP95, fixtureClass == "large" ? 2_000 : 1_000)
+        XCTAssertLessThanOrEqual(analysisP95, fixtureClass == "large" ? 5_000 : 3_000)
+        XCTAssertLessThanOrEqual(
+            frameP95, 16.7,
+            "steady frame p50/p95/max=\(Self.percentile(steadyFrameMs, fraction: 0.50))/"
+                + "\(frameP95)/\(steadyFrameMs.max() ?? -1), shape="
+                + finalSnapshot.tracks.map { track in
+                    let detail = track.primitives.reduce(0) {
+                        if case .detail = $1 { return $0 + 1 }
+                        return $0
+                    }
+                    let density = track.primitives.count - detail
+                    return "\(track.descriptor.id.rawValue):d\(detail)/b\(density)"
+                }.joined(separator: ",")
+        )
+        XCTAssertLessThanOrEqual(selectionFrameP95, 16.7)
+        XCTAssertLessThanOrEqual(panFrameP95, 16.7)
+        XCTAssertLessThanOrEqual(rebuildFrameP95, 250)
+        XCTAssertLessThanOrEqual(peakRSSBytes, 1_610_612_736)
+        XCTAssertTrue(measuredRows.values.allSatisfy { $0 > 0 })
+        let parseMs = try XCTUnwrap(stages.milliseconds(from: .parsing, to: .validating))
+        let validationMs = try XCTUnwrap(stages.milliseconds(from: .validating, to: .indexing))
+        let indexMs = try XCTUnwrap(stages.milliseconds(from: .indexing, to: .openingDatabase))
+        XCTAssertGreaterThanOrEqual(parseMs, 0)
+        XCTAssertGreaterThanOrEqual(validationMs, 0)
+        XCTAssertGreaterThanOrEqual(indexMs, 0)
+        XCTAssertGreaterThan(cacheMetadata.databaseByteCount, 0)
+
+        struct Phase3Evidence: Encodable {
+            struct Machine: Encodable {
+                let model: String
+                let architecture: String
+                let operatingSystem: String
+                let physicalMemoryBytes: UInt64
+            }
+            let formatVersion: Int
+            let arkTraceVersion: String
+            let arkTraceBaseRevision: String
+            let arkTraceSourceTreeSHA256: String
+            let arkTraceTestBinarySHA256: String
+            let workingTreeDirty: Bool
+            let machine: Machine
+            let fixtureClass: String
+            let traceSHA256: String
+            let traceByteCount: Int64
+            let traceDurationNs: Int64
+            let fixtureProvenanceSHA256: String
+            let fixtureProvenanceSource: String
+            let fixtureLicenseSHA256: String
+            let parserBinarySHA256: String
+            let parserVersion: String
+            let parserUpstreamRevision: String
+            let databaseByteCount: Int64
+            let coldOpenMs: Double
+            let parseMs: Double
+            let validationMs: Double
+            let indexMs: Double
+            let iterations: Int
+            let cacheOpenP50Ms: Double
+            let cacheOpenP95Ms: Double
+            let metadataDirectoryP50Ms: Double
+            let metadataDirectoryP95Ms: Double
+            let viewportP50Ms: Double
+            let viewportP95Ms: Double
+            let viewportLatency: [String: LatencyEvidence]
+            let frameP50Ms: Double
+            let frameP95Ms: Double
+            let selectionFrameP50Ms: Double
+            let selectionFrameP95Ms: Double
+            let panFrameP50Ms: Double
+            let panFrameP95Ms: Double
+            let rebuildFrameP50Ms: Double
+            let rebuildFrameP95Ms: Double
+            let contextP50Ms: Double
+            let contextP95Ms: Double
+            let rangeAnalysisP50Ms: Double
+            let rangeAnalysisP95Ms: Double
+            let peakRSSBytes: Int64
+            let maximumPrimitives: Int
+            let capabilities: TraceCapabilities
+            let measuredRows: [String: Int64]
+            let diagnostics: TraceDatabasePerformanceDiagnostics
+        }
+        let evidence = Phase3Evidence(
+            formatVersion: 3,
+            arkTraceVersion: ArkTraceProduct.version,
+            arkTraceBaseRevision: environment["ARKTRACE_BASE_REVISION"] ?? "unknown",
+            arkTraceSourceTreeSHA256: try XCTUnwrap(
+                environment["ARKTRACE_SOURCE_TREE_SHA256"]
+            ),
+            // XCTest is launched by Xcode's `xctest` runner, so argv[0] is
+            // the runner (and may itself be a symlink), not the ArkTrace test
+            // bundle whose bytes exercised this candidate. Bind evidence to
+            // the loaded bundle executable instead.
+            arkTraceTestBinarySHA256: try sha256AndSize(
+                at: try XCTUnwrap(Bundle(for: type(of: self)).executableURL)
+            ).sha256,
+            workingTreeDirty: environment["ARKTRACE_WORKTREE_DIRTY"] == "1",
+            machine: .init(
+                model: Self.sysctlString("hw.model") ?? "unknown",
+                architecture: Self.machineArchitecture(),
+                operatingSystem: ProcessInfo.processInfo.operatingSystemVersionString,
+                physicalMemoryBytes: ProcessInfo.processInfo.physicalMemory
+            ),
+            fixtureClass: fixtureClass,
+            traceSHA256: metadata.traceSHA256,
+            traceByteCount: metadata.sourceByteCount,
+            traceDurationNs: metadata.durationNs,
+            fixtureProvenanceSHA256: try XCTUnwrap(
+                environment["ARKTRACE_PHASE3_PROVENANCE_SHA256"]
+            ),
+            fixtureProvenanceSource: try XCTUnwrap(
+                environment["ARKTRACE_PHASE3_PROVENANCE_SOURCE"]
+            ),
+            fixtureLicenseSHA256: try XCTUnwrap(
+                environment["ARKTRACE_PHASE3_FIXTURE_LICENSE_SHA256"]
+            ),
+            parserBinarySHA256: parserIdentity.binarySHA256,
+            parserVersion: parserIdentity.reportedVersion,
+            parserUpstreamRevision: parserIdentity.upstreamRevision,
+            databaseByteCount: cacheMetadata.databaseByteCount,
+            coldOpenMs: coldOpenMs,
+            parseMs: parseMs,
+            validationMs: validationMs,
+            indexMs: indexMs,
+            iterations: iterations,
+            cacheOpenP50Ms: Self.percentile(cacheOpenMs, fraction: 0.50),
+            cacheOpenP95Ms: cacheP95,
+            metadataDirectoryP50Ms: Self.percentile(directoryMs, fraction: 0.50),
+            metadataDirectoryP95Ms: directoryP95,
+            viewportP50Ms: viewportP50,
+            viewportP95Ms: viewportP95,
+            viewportLatency: viewportLatency,
+            frameP50Ms: Self.percentile(steadyFrameMs, fraction: 0.50),
+            frameP95Ms: frameP95,
+            selectionFrameP50Ms: Self.percentile(selectionFrameMs, fraction: 0.50),
+            selectionFrameP95Ms: selectionFrameP95,
+            panFrameP50Ms: Self.percentile(panFrameMs, fraction: 0.50),
+            panFrameP95Ms: panFrameP95,
+            rebuildFrameP50Ms: Self.percentile(rebuildFrameMs, fraction: 0.50),
+            rebuildFrameP95Ms: rebuildFrameP95,
+            contextP50Ms: Self.percentile(contextMs, fraction: 0.50),
+            contextP95Ms: contextP95,
+            rangeAnalysisP50Ms: Self.percentile(analysisMs, fraction: 0.50),
+            rangeAnalysisP95Ms: analysisP95,
+            peakRSSBytes: peakRSSBytes,
+            maximumPrimitives: 20_000,
+            capabilities: metadata.capabilities,
+            measuredRows: measuredRows,
+            diagnostics: diagnostics
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let data = try encoder.encode(evidence)
+        XCTAssertLessThanOrEqual(data.count, 32_768)
+        try data.write(to: outputURL, options: .atomic)
+    }
+
+    func testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["ARKTRACE_PHASE3_LARGE_CANCELLATION"] == "1" else { return }
+        let fixture = URL(fileURLWithPath: try XCTUnwrap(
+            environment["ARKTRACE_PHASE3_TRACE"]
+        ))
+        let parserURL = URL(fileURLWithPath: try XCTUnwrap(
+            environment["ARKTRACE_TRACE_STREAMER"]
+        ))
+        let evidenceURL = URL(fileURLWithPath: try XCTUnwrap(
+            environment["ARKTRACE_PHASE3_LARGE_CANCELLATION_EVIDENCE"]
+        ))
+        let fixtureBytes = try XCTUnwrap(
+            fixture.resourceValues(forKeys: [.fileSizeKey]).fileSize
+        )
+        XCTAssertGreaterThan(fixtureBytes, 500 * 1_024 * 1_024)
+        XCTAssertLessThanOrEqual(fixtureBytes, 2 * 1_024 * 1_024 * 1_024)
+
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-phase3-large-cancel-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let launchBarrier = ProcessLaunchBarrier()
+        let (launchEvents, launchContinuation) = AsyncStream.makeStream(
+            of: ProcessLaunchEvent.self
+        )
+        let parser = try TraceStreamerProcessParser(
+            executableURL: parserURL,
+            finalizationHook: nil,
+            processDidLaunchHook: {
+                launchContinuation.yield(.launched($0))
+                launchBarrier.record($0)
+            }
+        )
+        let task = Task {
+            defer {
+                launchContinuation.yield(.openCompleted)
+                launchContinuation.finish()
+            }
+            return try await TraceSession.open(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                storagePolicy: .contentAddressed(cacheDirectory: cache)
+            )
+        }
+        let launchEvent: ProcessLaunchEvent
+        do {
+            launchEvent = try await Self.firstProcessLaunchEvent(
+                from: launchEvents, timeout: .seconds(300)
+            )
+        } catch {
+            task.cancel()
+            launchBarrier.resume()
+            _ = await task.result
+            XCTFail("large parse did not reach a running child within its bounded wait")
+            return
+        }
+        guard case .launched(let launchedPID) = launchEvent else {
+            launchBarrier.resume()
+            let result = await task.result
+            if case .success(let session) = result { try? await session.close() }
+            XCTFail("large parse completed before launching the parser child: \(result)")
+            return
+        }
+        XCTAssertEqual(Darwin.kill(launchedPID, 0), 0)
+        task.cancel()
+        launchBarrier.resume()
+        var observedCancellation = false
+        do {
+            _ = try await task.value
+            XCTFail("cancelled large parse must not return Ready")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .cancelled)
+            observedCancellation = error.code == .cancelled
+        } catch is CancellationError {
+            observedCancellation = true
+        }
+        errno = 0
+        XCTAssertEqual(Darwin.kill(launchedPID, 0), -1)
+        XCTAssertEqual(errno, ESRCH)
+
+        let residuals = FileManager.default.enumerator(
+            at: root,
+            includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey],
+            options: []
+        )?.compactMap { element -> String? in
+            guard let url = element as? URL else { return nil }
+            return String(url.path.dropFirst(root.path.count + 1))
+        } ?? []
+        XCTAssertFalse(residuals.contains { $0.split(separator: "/").contains("database.sqlite") })
+        XCTAssertFalse(residuals.contains { $0.split(separator: "/").contains("metadata.json") })
+        XCTAssertFalse(residuals.contains { path in
+            path.split(separator: "/").contains { component in
+                component.hasPrefix("session-")
+                    || component.hasPrefix("entry-")
+                    || component.hasPrefix("cancelled-")
+                    || component.hasPrefix("displaced-")
+            }
+        })
+        XCTAssertFalse(residuals.contains { $0.hasPrefix(".owners/") })
+        XCTAssertTrue(observedCancellation)
+        let traceIdentity = try sha256AndSize(
+            at: fixture, maximumByteCount: 2_147_483_648
+        )
+        struct CancellationEvidence: Encodable {
+            let formatVersion: Int
+            let fixtureClass: String
+            let traceSHA256: String
+            let traceByteCount: Int64
+            let testExecuted: Bool
+            let cancellationObserved: Bool
+            let residualCount: Int
+        }
+        let evidence = CancellationEvidence(
+            formatVersion: 1,
+            fixtureClass: "large",
+            traceSHA256: traceIdentity.sha256,
+            traceByteCount: traceIdentity.byteCount,
+            testExecuted: true,
+            cancellationObserved: observedCancellation,
+            residualCount: residuals.count
+        )
+        let data = try JSONEncoder().encode(evidence)
+        XCTAssertLessThanOrEqual(data.count, 4_096)
+        try data.write(to: evidenceURL, options: .atomic)
+    }
+
+    @MainActor
+    private static func drawDurations(
+        snapshot: TimelineSnapshot,
+        interactionSnapshot: TimelineSnapshot,
+        iterations: Int
+    ) throws -> (steady: [Double], selection: [Double], pan: [Double], rebuild: [Double]) {
+        let width = max(1, Int(snapshot.viewport.widthPoints))
+        let height = max(1, Int(snapshot.viewport.heightPoints))
+        guard let bitmap = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: width,
+            pixelsHigh: height,
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ), let context = NSGraphicsContext(bitmapImageRep: bitmap) else {
+            let failed = [Double.infinity]
+            return (failed, failed, failed, failed)
+        }
+        let view = TimelineNSView(frame: NSRect(x: 0, y: 0, width: width, height: height))
+        let interactionView = TimelineNSView(
+            frame: NSRect(x: 0, y: 0, width: width, height: height)
+        )
+        view.snapshot = snapshot
+        interactionView.snapshot = interactionSnapshot
+        // Exclude one-time AppKit/CoreGraphics glyph and immutable snapshot
+        // path construction from the steady-state 60 fps frame distribution.
+        for _ in 0..<2 {
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = context
+            view.draw(view.bounds)
+            context.cgContext.flush()
+            NSGraphicsContext.restoreGraphicsState()
+        }
+        func draw(_ target: TimelineNSView = view) -> Double {
+            let start = ContinuousClock.now
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = context
+            target.draw(target.bounds)
+            context.cgContext.flush()
+            NSGraphicsContext.restoreGraphicsState()
+            return milliseconds(start.duration(to: .now))
+        }
+        var steady: [Double] = []
+        var selection: [Double] = []
+        var pan: [Double] = []
+        var rebuild: [Double] = []
+        steady.reserveCapacity(iterations)
+        selection.reserveCapacity(iterations)
+        pan.reserveCapacity(iterations)
+        rebuild.reserveCapacity(iterations)
+        let eventKeys = interactionSnapshot.tracks.flatMap(\.primitives)
+            .compactMap(\.selectableEventKey)
+        let selectableEvent = try XCTUnwrap(
+            eventKeys.first,
+            "frame evidence requires a real selectable detail event"
+        )
+        let originalRange = interactionSnapshot.viewport.range
+        let shift = max(1, originalRange.durationNs / 20)
+        let forwardStart = originalRange.startNs.addingReportingOverflow(shift)
+        let forwardEnd = originalRange.endNs.addingReportingOverflow(shift)
+        let shiftedRange: TraceTimeRange
+        if !forwardStart.overflow, !forwardEnd.overflow {
+            shiftedRange = try TraceTimeRange.query(
+                startNs: forwardStart.partialValue,
+                endNs: forwardEnd.partialValue
+            )
+        } else {
+            shiftedRange = try TraceTimeRange.query(
+                startNs: originalRange.startNs - shift,
+                endNs: originalRange.endNs - shift
+            )
+        }
+        for iteration in 0..<iterations {
+            steady.append(draw())
+            interactionView.selectedEventKey = iteration.isMultiple(of: 2)
+                ? selectableEvent : nil
+            selection.append(draw(interactionView))
+            let panGeneration = interactionSnapshot.generation &+ UInt64(iteration * 2 + 1)
+            let panViewport = try TimelineViewport(
+                range: iteration.isMultiple(of: 2) ? shiftedRange : originalRange,
+                widthPoints: interactionSnapshot.viewport.widthPoints,
+                heightPoints: interactionSnapshot.viewport.heightPoints,
+                generation: panGeneration
+            )
+            interactionView.snapshot = TimelineSnapshot(
+                viewport: panViewport,
+                tracks: interactionSnapshot.tracks,
+                generation: panGeneration,
+                dataQuality: interactionSnapshot.dataQuality,
+                isLoading: interactionSnapshot.isLoading
+            )
+            pan.append(draw(interactionView))
+            let generation = snapshot.generation &+ UInt64(iteration + 1)
+            view.snapshot = TimelineSnapshot(
+                viewport: snapshot.viewport,
+                tracks: snapshot.tracks,
+                generation: generation,
+                dataQuality: snapshot.dataQuality,
+                isLoading: snapshot.isLoading
+            )
+            rebuild.append(draw())
+        }
+        return (steady, selection, pan, rebuild)
     }
 
     func testCancellationTerminatesParser() async throws {

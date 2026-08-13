@@ -1,6 +1,6 @@
 # ArkTrace Phase 3 任务清单
 
-> 状态：Active — P3-T01～T07 已完成并通过独立 review；已 review 7/10
+> 状态：Active — P3-T01～T07 已完成并通过独立 review；P3-T08～T10 已实现候选并等待统一 review，其中 large/notarization/manual a11y 证据仍开放
 > 阶段：Native Viewer
 > 验收目标：ArkTrace.app 可以实际替代浏览器完成基础 Trace 查看
 
@@ -234,11 +234,12 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **验收**
 
-- [ ] 只用键盘完成真实工作流；
-- [ ] VoiceOver 可读 selected event/range；
-- [ ] 最小窗口和长本地化字符串关键 control 可达；
-- [ ] target 不重叠；
-- [ ] AC-AT-016 通过。
+- [x] 键盘 command/focus policy、真实 event navigation 与 target size 有无窗口 regression；
+- [x] bounded accessibility group 可读 focused/selected event 与 range，仅在动作确实可改变当前语义时暴露 event/track、pan、zoom、selection/reset actions，不为全量 event 建 node；
+- [ ] 在签名 App 上人工完成 keyboard-only 与 VoiceOver walkthrough；
+- [ ] 最小窗口和长本地化字符串的人工检查；
+- [x] 真实 hosted AppKit/SwiftUI control 的 target hard floor 24×24、Tab/focus restoration，以及 focus ring、非纯颜色 selection 与 Reduce Motion 分支由代码/测试锁定；
+- [ ] AC-AT-016 的人工 App 证据完成。
 
 ### P3-T09 — 真实性能、large cancellation 与 viewport 发布门
 
@@ -258,6 +259,14 @@ P3-T01、P3-T02、P3-T05 可以并行。
 8. 在真实 large trace 上记录 relationship probe VM steps；验证 P1-T07 identity index 后的 query plan，并重新评估 250,000 步预算对病态大但合法 process/thread 目录的误伤边界；
 9. 发布门 6/7 证据必须明确记录预算值、是否触发 auto-index/持久 index，以及超预算的稳定错误行为。
 
+**候选证据**
+
+- [x] 许可锁定的 265,032,803-byte medium fixture 跑通 parse/index/cache-open/directory/viewport/frame/RSS；
+- [x] index schema v2 的 CPU/thread-state/named-slice viewport 均命中 persistent covering index，relationship probe 11k～25k steps，未触发 automatic index；
+- [x] medium gate 消费精确 row counts、非空 CPU/state/slice detail+density、context、analysis、RSS，并分别记录真实 detail selection、pan、steady 与 rebuild frame；对 Store 实际执行的六类 production SQL 锁 exact applicable v2 covering plan；最新冻结数值记入 verification 文档；
+- [ ] 独立采集、可再分发、恰好一个 type-0 protobuf segment，且非 padding/拼接/重复 packet 的 >500 MiB large trace；多 segment 在缺少可验证 session chain 时 fail closed；
+- [ ] 在上述 large trace 上关闭 cancellation orphan/cache promotion 与 gate 6/7。
+
 ### P3-T10 — Build hardening、App tests、许可证、打包和文档
 
 **优先级：P1。**
@@ -274,6 +283,17 @@ P3-T01、P3-T02、P3-T05 可以并行。
 6. Developer ID/TestFlight/App Store 对应签名/notarization smoke test；
 7. README App 使用说明、screenshots、已知限制；
 8. scripts/test_phase3.sh 运行 Phase 1–3 gate。
+
+**候选证据**
+
+- [x] 13 个 source dependency + GN/Ninja URL/SHA/bytes + standalone patch + HTTPS rewrite 全锁定；
+- [x] content-derived recipe 与 fresh clean-build byte identity 已验证；
+- [x] 14 个 source component、2 个 build tool 的 exact license bytes、notice、App/CLI licenses 已校验；
+- [x] Debug/Release App bundle、empty entitlement、parser/manifest/license exact-copy gate 已落地；
+- [x] distribution contract regression 锁定 nested helper inner-first signing、exact certificate/Team/Authority、unsigned→signed manifest provenance、人工 artifact/hash 绑定、private-partial 复验后 atomic publish 与 staple-before-final-ZIP；
+- [ ] Developer ID identity/team/notary profile 与 notarized/stapled artifact（本机当前无 identity）；
+- [ ] 签名候选的实际 App screenshot 与人工 VoiceOver walkthrough；
+- [x] 完整 gate 对 large trace/notarization 缺失 fail closed，不以 skip 关闭发布门。
 
 ## 5. Exit Checklist
 

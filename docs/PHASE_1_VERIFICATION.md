@@ -116,15 +116,21 @@ encoding/tool-provenance deadline、post-promotion cache rollback、SIGINT/secon
 benchmark evidence。locked parser/source/upstream/Ready SHA 与 schema fingerprint 继续保持不变；
 该批统一独立 review 已 clean，此处仍不改写 Phase 1 冻结主表。
 
+P3-T08～T10 implementation candidate 的 index schema v2、accessibility、performance/build/license
+增量完成后再次重跑：317 tests、0 failed、0 skipped；raw exporter SHA 与 schema fingerprint 保持
+锁定值，indexVersion 变为 2，新增 covering indexes 后本次 derived Ready DB 为 17,440,768 bytes、
+SHA-256 `51fce2c4cca6b65f661862ee3b89ac53f150f6f91784afb7fd2fa2fddf8aa033`。这是 Phase 3
+additive evidence，不改写 94-test Phase 1 主表。
+
 ## 6. 已知限制与仍开放发布门
 
-- 发布门 3（完整第三方许可证清单）仍开放，归 P3-T10；当前只锁定 TraceStreamer/source fixtures 的 Apache-2.0 证据。
+- 发布门 3 仍开放等待 P3-T10 统一独立 review；完整 source-closure inventory、exact license bytes、App/CLI notice 已形成候选证据。
 - 发布门 6（large Trace cancellation + Phase 2 cache promotion）仍开放，归 P3-T09；Phase 1 已证明 13 MiB fixture、忽略 TERM 的 child 和 session Ready promotion，但尚无长寿命 content-addressed cache。
 - 发布门 7（indexed large viewport query 性能）仍开放；Phase 1 只验证 index 存在、真实 query plan 与 10 万 identity target probe，不包含 viewport/event performance SLO。
-- counter capability 仍使用前 1,024 行两侧采样，可能保守 false；Phase 3/4 已登记顺序无关 sampling 改造。
-- data-quality 已由 P2-T04 实现候选提升为 typed category；duration 合理上界与负 duration open-ended 语义仍在 Phase 3。
+- counter capability 已改为顺序无关、budgeted filter identity 检查，重复/跨 scope identity fail closed；旧限制仅保留为历史记录。
+- data-quality 已使用 typed category，duration 合理上界、负 duration open-ended 与 counter duration 语义已有 Phase 3 regression。
 - source snapshot 在跨卷时可能产生完整复制 IO；large-trace gate 必须记录 source/staging filesystem 前提。
 - claim 文件的 stale-owner 策略随 Phase 2 长寿命 cache destination 实现；Phase 1 session destination 使用新 UUID，崩溃残留不被后续 session 复用。
-- build manifest 记录 third-party revisions，但普通 build 尚未完全消费 source/tool lock；分发前 hardening 见 `PHASE_1_TASKS.md` §6 与 P3-T10。
+- source/tool lock、standalone patch、tool archive hashes 与 content-derived recipe 已形成 P3-T10 候选；双 clean-build 已在独立私有 work roots 实跑并产生相同 unsigned binary。
 
 这些限制没有被误标为 Phase 1 或对应发布门已经完成。

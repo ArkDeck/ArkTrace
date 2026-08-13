@@ -7,6 +7,41 @@ import Foundation
 import XCTest
 
 final class ProductionCommandExecutorTests: XCTestCase {
+    func testLicensesDeadlineCancelsAndDrainsFailingResourcePreparation() async throws {
+        let deadlineClock = ManualCLIDeadlineClock()
+        let barrier = BlockingLicenseProvider()
+        let application = CLIApplication(
+            machineToolProvider: {
+                try CLIMachineTool(
+                    name: ArkTraceCLITool.name,
+                    version: ArkTraceCLITool.version,
+                    buildRevision: String(repeating: "a", count: 64)
+                )
+            },
+            licenseProvider: { try barrier.load() },
+            deadlineClock: deadlineClock.clock
+        )
+        let writer = TestOutputWriter()
+        let operation = Task {
+            await application.run(
+                arguments: ["--json", "--timeout-ms", "5000", "licenses"],
+                writer: writer
+            )
+        }
+        await barrier.waitUntilReached()
+        deadlineClock.expire()
+        let status = await operation.value
+        XCTAssertEqual(status, 7)
+        XCTAssertTrue(barrier.finished)
+        let object = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: writer.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (object["error"] as? [String: Any])?["code"] as? String,
+            "QUERY_TIMEOUT"
+        )
+    }
+
     func testCLITimeoutDrainsCacheRollbackBeforeReturning() async throws {
         let repositoryRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -453,6 +488,31 @@ final class ProductionCommandExecutorTests: XCTestCase {
             },
             deadlineClock: deadlineClock
         )
+    }
+}
+
+private final class BlockingLicenseProvider: @unchecked Sendable {
+    private let reached = DispatchSemaphore(value: 0)
+    private let lock = NSLock()
+    private var didFinish = false
+
+    var finished: Bool { lock.withLock { didFinish } }
+
+    func load() throws -> CLIApplication.LicenseSnapshot {
+        reached.signal()
+        while !Task.isCancelled { usleep(1_000) }
+        lock.withLock { didFinish = true }
+        throw ArkTraceError(
+            code: .internalError,
+            stage: .encoding,
+            message: "fixture resource failed"
+        )
+    }
+
+    private func waitBlocking() { reached.wait() }
+
+    func waitUntilReached() async {
+        await Task.detached { self.waitBlocking() }.value
     }
 }
 

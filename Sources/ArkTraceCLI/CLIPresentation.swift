@@ -29,6 +29,7 @@ public struct CLIHumanRenderer: Sendable {
             Usage: arktrace [global-options] <command> [command-options]
 
             Commands:
+              licenses
               doctor [--self-test]
               inspect <trace>
               summary <trace> [--start-ns <n> --end-ns <n>]

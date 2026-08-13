@@ -16,6 +16,80 @@ public struct TraceSQLiteRuntimeInfo: Equatable, Sendable {
     }
 }
 
+/// Bounded, machine-readable evidence for the Phase 3 large-viewport gate.
+/// Plans contain only ArkTrace-owned SQL/index identifiers, never input paths.
+public struct TraceDatabasePerformanceDiagnostics: Codable, Sendable {
+    public let relationshipVMInstructionBudget: Int
+    public let relationshipProbeSteps: [String: Int]
+    public let queryPlans: [String: [String]]
+    public let usesAutomaticIndex: Bool
+    public let applicableIndexNames: [String]
+    public let persistentIndexNames: [String]
+    public let tableRowCounts: [String: Int64]
+
+    public init(
+        relationshipVMInstructionBudget: Int,
+        relationshipProbeSteps: [String: Int],
+        queryPlans: [String: [String]],
+        usesAutomaticIndex: Bool,
+        applicableIndexNames: [String],
+        persistentIndexNames: [String],
+        tableRowCounts: [String: Int64]
+    ) {
+        self.relationshipVMInstructionBudget = relationshipVMInstructionBudget
+        self.relationshipProbeSteps = relationshipProbeSteps
+        self.queryPlans = queryPlans
+        self.usesAutomaticIndex = usesAutomaticIndex
+        self.applicableIndexNames = applicableIndexNames
+        self.persistentIndexNames = persistentIndexNames
+        self.tableRowCounts = tableRowCounts
+    }
+}
+
+final class TracePerformanceSQLCapture: @unchecked Sendable {
+    private let lock = NSLock()
+    private var captured: [(String, Int)] = []
+
+    func record(_ sql: String, bindingCount: Int) {
+        lock.lock()
+        captured.append((sql, bindingCount))
+        lock.unlock()
+    }
+
+    func reset() {
+        lock.lock()
+        captured.removeAll(keepingCapacity: true)
+        lock.unlock()
+    }
+
+    func productionStatement() throws -> (String, [TraceDatabase.Binding]) {
+        lock.lock()
+        let value = captured
+        lock.unlock()
+        let candidates = value.filter {
+            $0.0.contains("FROM sched_slice AS s")
+                || $0.0.contains("FROM thread_state AS s")
+                || $0.0.contains("FROM callstack AS s")
+        }
+        guard candidates.count == 1, let statement = candidates.first else {
+            throw ArkTraceError(
+                code: .internalError,
+                stage: .validating,
+                message: "Production SQL diagnostic capture was not exact",
+                details: [
+                    "reason": "performanceSQLCaptureMismatch",
+                    "observed": String(value.count),
+                    "candidates": String(candidates.count),
+                ]
+            )
+        }
+        return (
+            statement.0,
+            Array(repeating: TraceDatabase.Binding.int64(0), count: statement.1)
+        )
+    }
+}
+
 /// Validates and indexes a private parser output before the parser may expose
 /// it as a Ready database. Every identifier below is an ArkTrace constant;
 /// no caller or upstream text is interpolated into DDL.
@@ -23,7 +97,8 @@ public enum TraceDatabaseStagingPreparer {
     /// Public cache identity for the currently accepted TraceStreamer schema
     /// contract. Runtime includes this value in every content-addressed key.
     public static let schemaAdapterVersion = TraceSchemaAdapter.version
-    public static let indexVersion = 1
+    public static let indexVersion = 2
+    public static let relationshipVMInstructionBudget = 250_000
 
     private struct IndexDefinition {
         let name: String
@@ -69,6 +144,13 @@ public enum TraceDatabaseStagingPreparer {
             requiredForReady: true
         ),
         IndexDefinition(
+            name: "arktrace_v2_process_ipid_pid_name",
+            table: "process",
+            columns: ["ipid", "pid", "name"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
             name: "arktrace_v1_thread_tid_ipid",
             table: "thread",
             columns: ["tid", "ipid"],
@@ -83,11 +165,34 @@ public enum TraceDatabaseStagingPreparer {
             requiredForReady: true
         ),
         IndexDefinition(
+            name: "arktrace_v2_thread_itid_tid_name_ipid",
+            table: "thread",
+            columns: ["itid", "tid", "name", "ipid"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
             name: "arktrace_v1_sched_slice_ts_cpu",
             table: "sched_slice",
             columns: ["ts", "cpu"],
             bootstrapForValidation: false,
             requiredForReady: true
+        ),
+        IndexDefinition(
+            name: "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+            table: "sched_slice",
+            columns: ["cpu", "ts", "id", "dur", "itid", "ipid"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
+            name: "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+            table: "sched_slice",
+            columns: [
+                "cpu", "ts", "id", "dur", "itid", "ipid", "end_state", "priority",
+            ],
+            bootstrapForValidation: false,
+            requiredForReady: false
         ),
         IndexDefinition(
             name: "arktrace_v1_sched_slice_itid_ts",
@@ -111,6 +216,20 @@ public enum TraceDatabaseStagingPreparer {
             requiredForReady: true
         ),
         IndexDefinition(
+            name: "arktrace_v2_thread_state_itid_ts_id_dur",
+            table: "thread_state",
+            columns: ["itid", "ts", "id", "dur", "state"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
+            name: "arktrace_v2_thread_state_itid_ts_cover_cpu",
+            table: "thread_state",
+            columns: ["itid", "ts", "id", "dur", "state", "cpu"],
+            bootstrapForValidation: false,
+            requiredForReady: false
+        ),
+        IndexDefinition(
             name: "arktrace_v1_callstack_callid_ts",
             table: "callstack",
             columns: ["callid", "ts"],
@@ -118,10 +237,41 @@ public enum TraceDatabaseStagingPreparer {
             requiredForReady: true
         ),
         IndexDefinition(
+            name: "arktrace_v2_callstack_callid_ts_id_dur",
+            table: "callstack",
+            columns: ["callid", "ts", "id", "dur", "name"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
+            name: "arktrace_v2_callstack_callid_ts_cover_optional",
+            table: "callstack",
+            columns: [
+                "callid", "ts", "id", "dur", "name", "cat", "depth", "parent_id",
+                "cookie",
+            ],
+            bootstrapForValidation: false,
+            requiredForReady: false
+        ),
+        IndexDefinition(
             name: "arktrace_v1_measure_filter_id_ts",
             table: "measure",
             columns: ["filter_id", "ts"],
-            bootstrapForValidation: false,
+            bootstrapForValidation: true,
+            requiredForReady: false
+        ),
+        IndexDefinition(
+            name: "arktrace_v2_cpu_measure_filter_id",
+            table: "cpu_measure_filter",
+            columns: ["id"],
+            bootstrapForValidation: true,
+            requiredForReady: false
+        ),
+        IndexDefinition(
+            name: "arktrace_v2_process_measure_filter_id",
+            table: "process_measure_filter",
+            columns: ["id"],
+            bootstrapForValidation: true,
             requiredForReady: false
         ),
     ]
@@ -201,6 +351,176 @@ public enum TraceDatabaseStagingPreparer {
 
     public static var requiredIndexNames: Set<String> {
         Set(indexes.filter(\.requiredForReady).map(\.name))
+    }
+
+    /// Exact index closure applicable to a database's actual optional-column
+    /// set. Release evidence uses this rather than a prefix or subset check.
+    public static func applicableIndexNames(databaseURL: URL) throws -> [String] {
+        let db = try TraceDatabase(
+            url: databaseURL, readOnly: true, createIfMissing: false
+        )
+        let available = try availableColumns(in: db)
+        return indexes.filter { definition in
+            guard let tableColumns = available[definition.table] else { return false }
+            return Set(definition.columns).isSubset(of: tableColumns)
+        }.map(\.name).sorted()
+    }
+
+    /// Replays the bounded relationship probes and representative viewport
+    /// plans against an already prepared database. This diagnostic does not
+    /// mutate the DB and is consumed only by release gates.
+    public static func performanceDiagnostics(
+        databaseURL: URL
+    ) async throws -> TraceDatabasePerformanceDiagnostics {
+        let db = try TraceDatabase(url: databaseURL, readOnly: true, createIfMissing: false)
+        let relationships = [
+            (
+                name: "thread.ipid->process.ipid",
+                sourceTable: "thread", sourceColumn: "ipid",
+                targetTable: "process", targetColumn: "ipid"
+            ),
+            (
+                name: "sched_slice.itid->thread.itid",
+                sourceTable: "sched_slice", sourceColumn: "itid",
+                targetTable: "thread", targetColumn: "itid"
+            ),
+            (
+                name: "sched_slice.ipid->process.ipid",
+                sourceTable: "sched_slice", sourceColumn: "ipid",
+                targetTable: "process", targetColumn: "ipid"
+            ),
+            (
+                name: "thread_state.itid->thread.itid",
+                sourceTable: "thread_state", sourceColumn: "itid",
+                targetTable: "thread", targetColumn: "itid"
+            ),
+        ]
+        var relationshipSteps: [String: Int] = [:]
+        var plans: [String: [String]] = [:]
+        for relationship in relationships {
+            let sql = """
+                SELECT 1
+                FROM (
+                    SELECT \(relationship.sourceColumn) AS identity
+                    FROM \(relationship.sourceTable)
+                    LIMIT 1024 OFFSET 0
+                ) AS sampled
+                LEFT JOIN \(relationship.targetTable) AS target
+                    ON target.\(relationship.targetColumn) = sampled.identity
+                WHERE typeof(sampled.identity) = 'integer'
+                    AND sampled.identity <> 0
+                    AND target.\(relationship.targetColumn) IS NULL
+                LIMIT 1
+                """
+            var steps = 0
+            _ = try db.query(
+                sql,
+                vmStepBudget: relationshipVMInstructionBudget,
+                vmStepObserver: { steps = $0 },
+                stage: .validating
+            ) { _ in true }
+            relationshipSteps[relationship.name] = steps
+            plans[relationship.name] = try explain(sql, bindings: [], in: db)
+        }
+
+        let diagnosticParser = TraceParserIdentity(
+            name: "performance-diagnostic", reportedVersion: "1",
+            binarySHA256: String(repeating: "0", count: 64),
+            upstreamRepository: "https://invalid.example/diagnostic",
+            upstreamRevision: String(repeating: "0", count: 40),
+            architecture: "diagnostic", adapterVersion: "diagnostic",
+            buildRecipeVersion: String(repeating: "0", count: 64)
+        )
+        let capture = TracePerformanceSQLCapture()
+        let repository = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: diagnosticParser,
+            source: TraceSourceDescriptor(
+                traceSHA256: String(repeating: "0", count: 64),
+                sourceByteCount: 0
+            ),
+            diagnosticQueryObserver: { sql, count in
+                capture.record(sql, bindingCount: count)
+            }
+        )
+        let metadata = try await repository.metadata()
+        guard metadata.durationNs > 0 else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .validating,
+                message: "Performance diagnostic requires a non-empty trace"
+            )
+        }
+        let range = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(30))
+        func capturePlan(_ name: String, _ query: TracePerformanceQuery) async throws {
+            capture.reset()
+            try await repository.performPerformanceQuery(query)
+            let statement = try capture.productionStatement()
+            plans[name] = try explain(statement.0, bindings: statement.1, in: db)
+        }
+
+        try await capturePlan("viewport.cpu.detail", .cpuDetail(range, deadline))
+        try await capturePlan(
+            "viewport.threadState.detail", .threadStateDetail(range, deadline)
+        )
+        try await capturePlan(
+            "viewport.namedSlice.detail", .namedSliceDetail(range, deadline)
+        )
+        try await capturePlan("viewport.cpu.density", .cpuDensity(range, deadline))
+        try await capturePlan(
+            "viewport.threadState.density", .threadStateDensity(range, deadline)
+        )
+        try await capturePlan(
+            "viewport.namedSlice.density", .namedSliceDensity(range, deadline)
+        )
+
+        let expectedNames = try applicableIndexNames(databaseURL: databaseURL)
+        let placeholders = Array(repeating: "?", count: expectedNames.count)
+            .joined(separator: ",")
+        let persistentNames = try db.query(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name IN (\(placeholders)) LIMIT \(expectedNames.count)",
+            bindings: expectedNames.map(TraceDatabase.Binding.text),
+            stage: .validating
+        ) { $0.text(0) }.compactMap { $0 }.sorted()
+        let flattenedPlans = plans.values.flatMap { $0 }
+        var tableRowCounts: [String: Int64] = [:]
+        for table in ["process", "thread", "sched_slice", "thread_state", "callstack"] {
+            let rows = try db.query(
+                "SELECT COUNT(*) FROM \(table)", stage: .validating
+            ) { $0.int64(0) }
+            guard let count = rows.first ?? nil else {
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .validating,
+                    message: "Performance row-count evidence is unavailable"
+                )
+            }
+            tableRowCounts[table] = count
+        }
+        return TraceDatabasePerformanceDiagnostics(
+            relationshipVMInstructionBudget: relationshipVMInstructionBudget,
+            relationshipProbeSteps: relationshipSteps,
+            queryPlans: plans,
+            usesAutomaticIndex: flattenedPlans.contains {
+                $0.localizedCaseInsensitiveContains("AUTOMATIC")
+            },
+            applicableIndexNames: expectedNames,
+            persistentIndexNames: persistentNames,
+            tableRowCounts: tableRowCounts
+        )
+    }
+
+    private static func explain(
+        _ sql: String,
+        bindings: [TraceDatabase.Binding],
+        in db: TraceDatabase
+    ) throws -> [String] {
+        try db.query(
+            "EXPLAIN QUERY PLAN \(sql)",
+            bindings: bindings,
+            stage: .validating
+        ) { $0.text(3) }.compactMap { $0 }.prefix(64).map { String($0.prefix(512)) }
     }
 
     /// Verifies the exact versioned Ready index contract without enumerating

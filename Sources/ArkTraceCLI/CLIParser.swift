@@ -206,6 +206,15 @@ public struct CLIArgumentParser: Sendable {
         }
         let tail = Array(arguments.dropFirst())
         switch name {
+        case "licenses":
+            var positionals: [String] = []
+            try parseLocal(tail, optionsTerminated: optionsTerminated) { _, _, _ in
+                false
+            } positional: { positionals.append($0) }
+            guard positionals.isEmpty else {
+                throw CLIParsing.invalid("licenses does not accept operands")
+            }
+            return .licenses
         case "doctor":
             var selfTest = false
             var seen: Set<String> = []

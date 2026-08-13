@@ -67,33 +67,29 @@ public actor TimelineSnapshotLoader {
         repository: any TraceRepositoryProtocol,
         qualityIssues: inout [TraceDataQualityIssue]
     ) async throws -> [TimelinePrimitive] {
-        let estimate = try await repository.density(
+        // Fetch the bounded density candidate once. Automatic LOD previously
+        // issued a one-bucket estimate and then repeated the same indexed scan
+        // for the real buckets, doubling full-viewport work per visible track.
+        // One bucket per sixteen logical points keeps an eight-track overview
+        // bounded to roughly half the horizontal point count in aggregate.
+        // The buckets
+        // are deliberately non-selectable and rendering may expand one across
+        // several pixels; exact domain ranges and event counts stay intact.
+        let bucketLimit = max(1, min(max(1, request.pixelWidth / 16), budget))
+        let density = try await repository.density(
             TraceDensityQuery(
                 range: request.viewport.range,
                 source: track.source.densitySource,
-                bucketCount: 1,
+                bucketCount: bucketLimit,
                 deadline: request.deadline
             )
         )
-        qualityIssues.append(contentsOf: estimate.dataQuality.issues)
-        guard estimate.capabilityAvailable else { return [] }
-        let estimatedCount = estimate.buckets.reduce(Int64(0)) { $0 + $1.eventCount }
+        qualityIssues.append(contentsOf: density.dataQuality.issues)
+        guard density.capabilityAvailable else { return [] }
+        let estimatedCount = density.buckets.reduce(Int64(0)) { $0 + $1.eventCount }
         let useDensity = request.preference == .density
             || (request.preference == .automatic && estimatedCount > Int64(budget))
         if useDensity {
-            let bucketLimit = max(
-                1,
-                min(request.pixelWidth * 2, budget)
-            )
-            let density = try await repository.density(
-                TraceDensityQuery(
-                    range: request.viewport.range,
-                    source: track.source.densitySource,
-                    bucketCount: bucketLimit,
-                    deadline: request.deadline
-                )
-            )
-            qualityIssues.append(contentsOf: density.dataQuality.issues)
             return density.buckets.prefix(bucketLimit).map {
                 .density(TimelineDensityPrimitive(trackID: track.id, bucket: $0))
             }

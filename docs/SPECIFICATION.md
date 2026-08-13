@@ -480,6 +480,10 @@ Density bucket 至少包含：
 ```
 
 无法可靠计算某字段时为 null，并在 capability/data quality 中说明。
+当前 Store 为保持 viewport 聚合严格有界，不额外执行按 thread 的窗口排序；
+`dominantThreadKey` 返回 null，并以 `unavailableValue/timeline.density.dominantThread`
+说明该字段不可用。`occupiedNs`/`utilization` 同理由
+`unavailableValue/timeline.density.occupancy` 说明。
 
 ### AT-LOD-004 无全量预载
 
@@ -771,6 +775,20 @@ Machine consumer 以 typed `error.code` 为主，process status 只做粗分类�
 
 CLI 收到 SIGINT/SIGTERM 后必须触发 structured cancellation；再次信号可以强制退出，但不得提升未完成 cache。
 
+### AT-CLI-011 licenses
+
+```text
+arktrace licenses [--json]
+```
+
+`licenses` 不打开 Trace、不启动 parser、不读写 cache。成功前必须解析 bundled exact inventory，
+逐一验证 ArkTrace MIT license、third-party notice，以及 inventory 引用的全部 license resource 的
+regular-file identity、byte count 与 SHA-256。human output 包含产品 license、notice 和每个第三方
+license 的 reviewed bytes；Machine `result.licenseFiles[]` 以稳定 path 顺序返回
+`owner/licenseExpression/resource/sha256/byteCount`，不得输出绝对 bundle path。缺失、symlink、路径逃逸、
+额外 inventory key 或 bytes 漂移均 fail closed。command 遵守同一 deadline、combined output byte
+budget、单 document commit 与 typed exit contract。
+
 ## 13. Machine JSON Contract
 
 ### 13.1 成功 envelope
@@ -874,6 +892,9 @@ stdout JSON 必须完整、UTF-8、最后可以有一个 newline。禁止输出�
 ### AT-JSON-008 Golden compatibility
 
 每个 command 至少有 success、empty、truncated、typed error 的 golden fixture。
+对没有集合或分页语义、因而不存在合法 empty/truncated 状态的 informational command，禁止
+伪造不可达状态；其适用矩阵改为 success 加 typed failure。`licenses` 属于该例外，必须至少锁定
+success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立资源漂移回归覆盖另一种。
 
 ## 14. App 规格
 
@@ -1466,7 +1487,7 @@ captured immutable trace Artifact lease
 
 ### 23.2 CLI
 
-- `doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`；
+- `doctor`、`licenses`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`；
 - 所有 Agent command 支持 `--json`；
 - stable envelope/error/exit status；
 - timeout/row/event/byte bounds；

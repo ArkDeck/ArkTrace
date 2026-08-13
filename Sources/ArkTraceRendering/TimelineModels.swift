@@ -1,4 +1,5 @@
 import ArkTraceCore
+import CoreGraphics
 
 public struct TimelineTrackID: Hashable, Codable, Sendable, Comparable {
     public let rawValue: String
@@ -116,6 +117,30 @@ public enum TimelineDetailPreference: String, Codable, Sendable {
 public enum TimelineViewportIntent: Sendable {
     case panPoints(Double, sourceViewport: TimelineViewport)
     case zoom(anchorNs: Int64, scale: Double, sourceViewport: TimelineViewport)
+}
+
+/// Bounded keyboard actions supported by the single Timeline accessibility
+/// element. Navigation never materializes events outside the current snapshot.
+public enum TimelineKeyboardCommand: Hashable, Sendable {
+    case previousEvent
+    case nextEvent
+    case previousTrack
+    case nextTrack
+    case panBackward
+    case panForward
+    case zoomIn
+    case zoomOut
+    case selectFocusedEvent
+    case zoomSelection
+    case resetViewport
+    case clearSelection
+}
+
+public enum TimelineAccessibilityLayout {
+    /// AT-APP-011 hard floor for every custom interactive target.
+    public static let minimumTargetPoints: CGFloat = 24
+    /// Desktop primary-toolbar target used by the native App shell.
+    public static let primaryToolbarTargetPoints: CGFloat = 40
 }
 
 public enum TimelineInteraction {

@@ -680,6 +680,7 @@ CLI 与 App 使用同一 `TraceSession` 和 repository。命令集：
 
 ```text
 doctor
+licenses
 inspect
 summary
 processes
@@ -689,7 +690,10 @@ context
 analyze
 ```
 
-所有 agent-facing command 支持 `--json`、deadline 和输出限制。JSON 模式下 stdout 只包含一个 JSON document，日志只写 stderr。
+`licenses` 是不读取 Trace、parser、cache 的 informational command；它仍使用同一 Machine
+envelope、deadline 与合并输出预算，并在成功前逐字节验证 inventory 引用的每个 bundled
+license resource。所有 agent-facing command 支持 `--json`、deadline 和输出限制。JSON 模式下
+stdout 只包含一个 JSON document，日志只写 stderr。
 
 ### 15.2 Envelope
 

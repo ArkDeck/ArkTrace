@@ -80,6 +80,7 @@ public struct CLIGlobalOptions: Equatable, Sendable {
 public enum CLICommand: Equatable, Sendable {
     case help
     case version
+    case licenses
     case doctor(selfTest: Bool)
     case inspect(trace: String)
     case summary(trace: String, range: TraceTimeRange?)

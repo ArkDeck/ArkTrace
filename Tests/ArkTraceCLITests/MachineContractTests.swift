@@ -1000,7 +1000,8 @@ final class MachineContractTests: XCTestCase {
             "sched_slice.value", "sched_slice.identity", "sched_slice.overlap",
             "thread_state.value", "thread_state.identity", "thread_state.state",
             "callstack.value", "callstack.identity", "measure.optional",
-            "timeline.density.occupancy", "timeline.counter",
+            "timeline.density.occupancy", "timeline.density.dominantThread",
+            "timeline.counter",
             "timeline.counter.duration",
         ] {
             XCTAssertNoThrow(try CLIMachineDataQuality(TraceDataQuality(issues: [

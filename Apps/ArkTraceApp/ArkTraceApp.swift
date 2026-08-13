@@ -26,8 +26,13 @@ struct ArkTraceNativeApp: App {
         }
 
         Settings {
-            TraceCacheSettingsView(controller: controller)
-                .frame(width: 460, height: 260)
+            TabView {
+                TraceCacheSettingsView(controller: controller)
+                    .tabItem { Label("Cache", systemImage: "internaldrive") }
+                TraceLicensesView()
+                    .tabItem { Label("Licenses", systemImage: "doc.text") }
+            }
+            .frame(width: 640, height: 480)
         }
     }
 
@@ -46,6 +51,8 @@ struct ArkTraceNativeApp: App {
 
 private struct TraceViewerRootView: View {
     @Bindable var controller: TraceDocumentController
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @FocusState private var focusRegion: TraceViewerFocusRegion?
     @State private var searchText = ""
     @State private var showInspector = true
     @State private var showDiagnostics = false
@@ -65,11 +72,21 @@ private struct TraceViewerRootView: View {
                     }
                 }
                 .onChange(of: geometry.size.width, initial: true) { _, width in
-                    if width < 760 { showInspector = false }
+                    if width < 760 {
+                        focusRegion = TraceViewerFocusPolicy.afterInspectorVisibilityChange(
+                            current: focusRegion,
+                            inspectorVisible: false
+                        )
+                        showInspector = false
+                    }
                 }
             }
         }
         .toolbar { toolbar }
+        .frame(minWidth: 640, minHeight: 480)
+        .transaction { transaction in
+            if reduceMotion { transaction.animation = nil }
+        }
         .dropDestination(for: URL.self) { urls, _ in
             guard let first = urls.first(where: \.isFileURL) else { return false }
             controller.open(first)
@@ -80,6 +97,10 @@ private struct TraceViewerRootView: View {
                 errorBanner(error)
                     .padding(12)
             }
+        }
+        .onChange(of: controller.accessibilityAnnouncement) { _, announcement in
+            guard let announcement else { return }
+            postAccessibilityAnnouncement(announcement)
         }
     }
 
@@ -95,6 +116,7 @@ private struct TraceViewerRootView: View {
                                 .lineLimit(1)
                         }
                         .buttonStyle(.plain)
+                        .arktraceAccessibleTarget()
                     }
                 }
             }
@@ -120,6 +142,7 @@ private struct TraceViewerRootView: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .arktraceAccessibleTarget()
                         }
                         if controller.searchResults.truncated {
                             Text("More matches exist")
@@ -150,6 +173,7 @@ private struct TraceViewerRootView: View {
                                     )
                                 )
                                 .toggleStyle(.checkbox)
+                                .arktraceAccessibleTarget()
                             }
                         }
                     } label: {
@@ -161,10 +185,13 @@ private struct TraceViewerRootView: View {
                             }
                         }
                     }
+                    .arktraceAccessibleTarget()
                 }
             }
         }
         .listStyle(.sidebar)
+        .focusSection()
+        .focused($focusRegion, equals: .sidebar)
     }
 
     @ViewBuilder
@@ -178,6 +205,7 @@ private struct TraceViewerRootView: View {
             } actions: {
                 Button("Open Trace…", action: presentOpenPanel)
                     .buttonStyle(.borderedProminent)
+                    .arktraceAccessibleTarget()
             }
         case .failed where controller.snapshot == nil:
             ContentUnavailableView(
@@ -192,11 +220,17 @@ private struct TraceViewerRootView: View {
                         TimelineView(
                             snapshot: snapshot,
                             selection: controller.selectedRange,
+                            selectedEventKey: controller.selectedEvent?.key,
+                            focusRequestID: controller.timelineFocusRequestID,
+                            interactionBounds: controller.timelineBounds,
                             onSelectEvent: controller.selectEvent,
                             onHoverEvent: controller.hoverEvent,
                             onSelectRange: controller.selectRange,
-                            onViewportIntent: controller.handleViewportIntent
+                            onViewportIntent: controller.handleViewportIntent,
+                            onZoomSelection: controller.zoomToSelection,
+                            onResetViewport: controller.resetViewport
                         )
+                        .focused($focusRegion, equals: .timeline)
                         .frame(
                             minWidth: max(420, snapshot.viewport.widthPoints),
                             minHeight: max(
@@ -212,8 +246,9 @@ private struct TraceViewerRootView: View {
                     HStack(spacing: 8) {
                         ProgressView().controlSize(.small)
                         Text(stageLabel(stage))
-                        Button("Cancel") { controller.cancel() }
-                            .buttonStyle(.link)
+                    Button("Cancel") { controller.cancel() }
+                        .buttonStyle(.link)
+                        .arktraceAccessibleTarget()
                     }
                     .padding(10)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
@@ -229,11 +264,16 @@ private struct TraceViewerRootView: View {
                 HStack {
                     Text("Inspector").font(.headline)
                     Spacer()
-                    Button { showInspector = false } label: {
+                    Button {
+                        focusRegion = .inspectorDisclosure
+                        showInspector = false
+                    } label: {
                         Image(systemName: "sidebar.trailing")
                     }
                     .buttonStyle(.plain)
                     .help("Hide Inspector")
+                    .accessibilityLabel("Hide Inspector")
+                    .arktraceAccessibleTarget()
                 }
                 Divider()
                 if let event = controller.selectedEvent {
@@ -261,6 +301,8 @@ private struct TraceViewerRootView: View {
             }
             .padding(14)
         }
+        .focusSection()
+        .focused($focusRegion, equals: .inspector)
     }
 
     @ToolbarContentBuilder
@@ -269,36 +311,49 @@ private struct TraceViewerRootView: View {
             Button(action: presentOpenPanel) {
                 Label("Open", systemImage: "folder")
             }
+            .primaryToolbarTarget()
             Button { controller.reload() } label: {
                 Label("Reload", systemImage: "arrow.clockwise")
             }
             .disabled(controller.sourceURL == nil)
+            .primaryToolbarTarget()
             TextField("Search PID, TID, process, thread, or slice", text: $searchText)
                 .textFieldStyle(.roundedBorder)
                 .frame(minWidth: 220, idealWidth: 300)
+                .arktraceAccessibleTarget()
                 .onSubmit { controller.search(searchText) }
                 .onChange(of: searchText) { _, value in
                     if value.isEmpty { controller.search("") }
                 }
+                .focused($focusRegion, equals: .search)
             Button { controller.zoomToSelection() } label: {
                 Label("Zoom Selection", systemImage: "viewfinder")
             }
             .disabled(controller.selectedRange == nil)
+            .primaryToolbarTarget()
             Button { controller.zoomIn() } label: {
                 Label("Zoom In", systemImage: "plus.magnifyingglass")
             }
             .disabled(controller.snapshot == nil)
+            .primaryToolbarTarget()
             Button { controller.zoomOut() } label: {
                 Label("Zoom Out", systemImage: "minus.magnifyingglass")
             }
             .disabled(controller.snapshot == nil)
+            .primaryToolbarTarget()
             Button { controller.resetViewport() } label: {
                 Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass")
             }
+            .primaryToolbarTarget()
             if !showInspector {
-                Button { showInspector = true } label: {
+                Button {
+                    showInspector = true
+                    focusRegion = .inspector
+                } label: {
                     Label("Show Inspector", systemImage: "sidebar.trailing")
                 }
+                .focused($focusRegion, equals: .inspectorDisclosure)
+                .primaryToolbarTarget()
             }
         }
     }
@@ -312,14 +367,18 @@ private struct TraceViewerRootView: View {
                     .font(.caption.monospaced())
                     .textSelection(.enabled)
             }
+            .arktraceAccessibleTarget()
             HStack {
                 switch error.recoveryAction {
                 case .retry:
                     Button("Retry") { controller.reload() }
+                        .arktraceAccessibleTarget()
                 case .chooseAnotherFile:
                     Button("Choose Another File…", action: presentOpenPanel)
+                        .arktraceAccessibleTarget()
                 case .openCacheSettings:
                     SettingsLink { Text("Cache Settings…") }
+                        .arktraceAccessibleTarget()
                 case .dismiss:
                     EmptyView()
                 }
@@ -330,6 +389,7 @@ private struct TraceViewerRootView: View {
         .frame(maxWidth: 460, alignment: .leading)
         .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 10))
         .shadow(radius: 8, y: 3)
+        .focused($focusRegion, equals: .errorRecovery)
     }
 
     @MainActor
@@ -340,6 +400,22 @@ private struct TraceViewerRootView: View {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
         if panel.runModal() == .OK, let url = panel.url { controller.open(url) }
+    }
+
+    private func postAccessibilityAnnouncement(
+        _ announcement: TraceAccessibilityAnnouncement
+    ) {
+        NSAccessibility.post(
+            element: NSApp!,
+            notification: .announcementRequested,
+            userInfo:
+            [
+                .announcement: announcement.message,
+                .priority: NSNumber(
+                    value: announcement.priority == .urgent ? 90 : 50
+                ),
+            ]
+        )
     }
 }
 
@@ -456,9 +532,11 @@ private struct TraceCacheSettingsView: View {
                     Button("Refresh") {
                         Task { await controller.refreshCacheInventory() }
                     }
+                    .arktraceAccessibleTarget()
                     Button("Purge Unused Entries", role: .destructive) {
                         Task { await controller.purgeUnusedCache() }
                     }
+                    .arktraceAccessibleTarget()
                     Spacer()
                 }
             }
@@ -469,6 +547,66 @@ private struct TraceCacheSettingsView: View {
         .formStyle(.grouped)
         .padding()
         .task { await controller.refreshCacheInventory() }
+    }
+}
+
+private struct TraceLicensesView: View {
+    private let productLicense = Self.loadTextResource(
+        named: "LICENSE", extension: nil, maximumBytes: 32 * 1_024
+    )
+    private let notice = Self.loadTextResource(
+        named: "THIRD_PARTY_NOTICES", extension: "md", maximumBytes: 128 * 1_024
+    )
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Open Source Licenses")
+                .font(.title2.weight(.semibold))
+            Text("ArkTrace includes a pinned TraceStreamer build and its reviewed source closure.")
+                .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("ArkTrace — MIT License").font(.headline)
+                    Text(productLicense)
+                    Divider()
+                    Text("Third-Party Notices").font(.headline)
+                    Text(notice)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .textSelection(.enabled)
+                .font(.body.monospaced())
+            }
+            .accessibilityLabel("ArkTrace and third-party license notices")
+            HStack {
+                Button("Show License Files in Finder") {
+                    guard let url = Bundle.main.resourceURL?
+                        .appendingPathComponent("Licenses", isDirectory: true)
+                    else { return }
+                    NSWorkspace.shared.activateFileViewerSelecting([url])
+                }
+                .arktraceAccessibleTarget()
+                Spacer()
+                Text("14 reviewed components")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding()
+    }
+
+    private static func loadTextResource(
+        named name: String,
+        extension fileExtension: String?,
+        maximumBytes: Int
+    ) -> String {
+        guard let url = Bundle.main.url(forResource: name, withExtension: fileExtension),
+            let data = try? ArkTraceBoundedRegularFile.read(
+                at: url, maximumByteCount: maximumBytes
+            ),
+            let text = String(data: data, encoding: .utf8)
+        else {
+            return "License resources are unavailable in this build."
+        }
+        return text
     }
 }
 
@@ -484,6 +622,16 @@ private func stageLabel(_ stage: TraceLoadingStage) -> String {
     case .ready: "Ready"
     case .failed: "Failed"
     case .cancelled: "Cancelled"
+    }
+}
+
+private extension View {
+    func primaryToolbarTarget() -> some View {
+        frame(
+            minWidth: TimelineAccessibilityLayout.primaryToolbarTargetPoints,
+            minHeight: TimelineAccessibilityLayout.primaryToolbarTargetPoints
+        )
+        .contentShape(Rectangle())
     }
 }
 

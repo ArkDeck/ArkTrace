@@ -33,9 +33,11 @@ print_test_failure() {
     sed \
         -e "s|$repository_root|<repo>|g" \
         -e "s|$gate_temporary_directory|<temp>|g" \
-        "$test_log" >"$sanitized_test_log"
+        "$test_log" \
+        | sed -E 's#(/[A-Za-z0-9._ -]+)+#<path>#g' \
+        | cut -c1-512 >"$sanitized_test_log"
     grep -nE 'error: -\[|Test Case .* failed|fatal error|unexpected failure' \
-        "$sanitized_test_log" >&2 || true
+        "$sanitized_test_log" | tail -40 >&2 || true
     tail -n 120 "$sanitized_test_log" >&2
 }
 
@@ -51,7 +53,7 @@ jq -e '
     and .reportedVersion == "4.3.7"
     and .architecture == "arm64"
     and .adapterVersion == "1"
-    and .buildRecipeVersion == "1"
+    and (.buildRecipeVersion | test("^[0-9a-f]{64}$"))
     and (.binarySHA256 | test("^[0-9a-f]{64}$"))
 ' "$manifest" >/dev/null || fail "manifest format or pinned identity drifted"
 
@@ -66,10 +68,14 @@ jq -e '
 actual_binary_sha=$(shasum -a 256 "$binary" | awk '{print $1}')
 manifest_binary_sha=$(jq -er '.binarySHA256' "$manifest")
 evidence_binary_sha=$(jq -er '.parser.binarySHA256' "$schema_evidence")
+manifest_recipe=$(jq -er '.buildRecipeVersion' "$manifest")
+evidence_recipe=$(jq -er '.parser.buildRecipeVersion' "$schema_evidence")
 [ "$actual_binary_sha" = "$manifest_binary_sha" ] \
     || fail "trace_streamer SHA does not match manifest"
 [ "$actual_binary_sha" = "$evidence_binary_sha" ] \
     || fail "trace_streamer SHA does not match locked evidence"
+[ "$manifest_recipe" = "$evidence_recipe" ] \
+    || fail "trace_streamer recipe does not match locked evidence"
 
 file -b "$binary" | grep -q 'Mach-O 64-bit executable arm64' \
     || fail "trace_streamer is not a native arm64 Mach-O executable"
@@ -149,7 +155,7 @@ jq -e '
     and (.readyDatabaseSHA256 | test("^[0-9a-f]{64}$"))
     and (.schemaFingerprint | test("^[0-9a-f]{64}$"))
     and .schemaAdapterVersion == "2"
-    and .indexVersion == 1
+    and .indexVersion == 2
     and .testCount > 0
     and .skippedTestCount == 0
     and .durationNs > 0

@@ -1394,7 +1394,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let app = URL(fileURLWithPath: "/Applications/ArkTrace.app")
         XCTAssertEqual(
             TraceStreamerResolver.appBundleExecutableURL(bundleURL: app).path,
-            "/Applications/ArkTrace.app/Contents/Resources/TraceStreamer/trace_streamer"
+            "/Applications/ArkTrace.app/Contents/Helpers/trace_streamer"
+        )
+        XCTAssertEqual(
+            TraceStreamerResolver.appBundleManifestURL(bundleURL: app).path,
+            "/Applications/ArkTrace.app/Contents/Resources/TraceStreamer/manifest.json"
         )
         XCTAssertEqual(
             TraceStreamerResolver.cliLibexecURL(

@@ -112,7 +112,8 @@ public enum TraceDataQualityScope {
         "process_measure_filter.id", "process_measure_filter.name",
         "process_measure_filter.ipid", "process_measure_filter.unit",
         "stat", "stat.count", "stat.source", "stat.event_name", "stat.stat_type",
-        "timeline.density.occupancy", "timeline.counter",
+        "timeline.density.occupancy", "timeline.density.dominantThread",
+        "timeline.counter",
         "timeline.counter.duration",
     ]
 

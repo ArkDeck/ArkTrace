@@ -72,6 +72,22 @@ final class GoldenFixtureTests: XCTestCase {
                 ))
             ))
         }
+        fixtures.append(GoldenCase(
+            name: "licenses-success",
+            arguments: ["--json", "licenses"],
+            expectedStatus: 0,
+            executor: GoldenExecutor(payload: try goldenPayload(
+                command: "doctor", scenario: "success"
+            ))
+        ))
+        fixtures.append(GoldenCase(
+            name: "licenses-error",
+            arguments: ["--json", "--max-output-bytes", "1024", "licenses"],
+            expectedStatus: 7,
+            executor: GoldenExecutor(payload: try goldenPayload(
+                command: "doctor", scenario: "success"
+            ))
+        ))
         return fixtures
     }
 

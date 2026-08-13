@@ -1,7 +1,7 @@
 # arktrace CLI
 
 `arktrace` 是 ArkTrace 的本地、确定性命令行入口。Phase 2 提供
-`doctor`、`inspect`、`summary`、`processes` 和 `threads`；`query`、`context`
+`doctor`、`licenses`、`inspect`、`summary`、`processes` 和 `threads`；`query`、`context`
 与 `analyze` 属于 Phase 4，当前不会以 raw SQL 或占位实现提前暴露。
 
 ## 安装与构建
@@ -51,6 +51,23 @@ arktrace [global-options] <command> [command-options]
 生效，不能用放宽其中一项绕过其他预算。
 
 ## 命令
+
+### licenses
+
+```bash
+arktrace licenses
+arktrace --json licenses
+```
+
+此命令不读取 Trace、不启动 parser、不访问 cache。每次成功前都会解析 bundled inventory，校验
+ArkTrace MIT license、third-party notice 和 inventory 引用的全部 18 个 license 文件的路径、
+byte count 与 SHA-256。human output 包含这些 reviewed bytes；Machine result 返回稳定排序的
+`licenseFiles[]`，每项固定为 `owner`、`licenseExpression`、`resource`、`sha256` 与 `byteCount`。
+Machine resource 仅为 `LICENSES/<name>`，不包含 bundle absolute path。任何资源缺失、symlink、路径
+逃逸、inventory 额外字段或 bytes 漂移均返回 typed nonzero error。`--timeout-ms` 与
+`--max-output-bytes` 同样适用；`licenses` 不接受 operand 或 command-specific option。
+此命令没有集合查询的 empty/truncated 语义；Machine 兼容性固定 success 与 typed failure 两态，
+不会为了凑齐不可达状态而输出伪 empty/truncated result。
 
 ### doctor
 

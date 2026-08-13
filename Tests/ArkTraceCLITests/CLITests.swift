@@ -1,4 +1,4 @@
-import ArkTraceCLI
+@testable import ArkTraceCLI
 import ArkTraceCore
 import ArkTraceParser
 import Foundation
@@ -146,6 +146,13 @@ final class CLITests: XCTestCase {
 
     func testCommandFiltersAndDefaultLimitsParse() throws {
         XCTAssertEqual(
+            try CLIArgumentParser().parse(["licenses"]).command,
+            .licenses
+        )
+        XCTAssertThrowsError(try CLIArgumentParser().parse(["licenses", "unexpected"])) {
+            XCTAssertEqual(($0 as? ArkTraceError)?.code, .invalidArgument)
+        }
+        XCTAssertEqual(
             try CLIArgumentParser().parse(["doctor", "--self-test"]).command,
             .doctor(selfTest: true)
         )
@@ -178,6 +185,142 @@ final class CLITests: XCTestCase {
             try CLIArgumentParser().parse(["processes", "trace"]).command,
             .processes(trace: "trace", pid: nil, name: nil, limit: 10_000)
         )
+    }
+
+    func testLicensesCommandReturnsBundledReviewedResourcesWithoutExecutingTraceWork() async throws {
+        let inventory = try CLILicenseResources.inventoryData()
+        let notice = try CLILicenseResources.noticeData()
+        XCTAssertEqual(notice.count, CLILicenseResources.noticeByteCount)
+        let licenseFiles = try CLILicenseResources.verifiedLicenseFiles(
+            inventoryData: inventory
+        )
+        let productLicense = try CLILicenseResources.productLicenseData()
+        XCTAssertEqual(productLicense.count, 1_078)
+        XCTAssertTrue(String(decoding: productLicense, as: UTF8.self).hasPrefix("MIT License\n"))
+        let inventoryObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: inventory) as? [String: Any]
+        )
+        XCTAssertEqual(inventoryObject["formatVersion"] as? Int, 1)
+        XCTAssertEqual(
+            (inventoryObject["components"] as? [[String: Any]])?.count,
+            CLILicenseResources.componentCount
+        )
+        XCTAssertEqual(
+            (inventoryObject["buildTools"] as? [[String: Any]])?.count,
+            CLILicenseResources.buildToolCount
+        )
+        XCTAssertEqual(licenseFiles.count, CLILicenseResources.licenseFileCount)
+        XCTAssertEqual(Set(licenseFiles.map(\.resourcePath)).count, licenseFiles.count)
+
+        let temporary = FileManager.default.temporaryDirectory.resolvingSymlinksInPath()
+            .appendingPathComponent(
+            "arktrace-license-runtime-\(UUID().uuidString)", isDirectory: true
+        )
+        try FileManager.default.createDirectory(at: temporary, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: temporary) }
+        for file in licenseFiles {
+            try file.data.write(
+                to: temporary.appendingPathComponent(
+                    String(file.resourcePath.dropFirst("LICENSES/".count))
+                )
+            )
+        }
+        let missing = temporary.appendingPathComponent(
+            String(try XCTUnwrap(licenseFiles.first).resourcePath.dropFirst("LICENSES/".count))
+        )
+        try FileManager.default.removeItem(at: missing)
+        XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
+            inventoryData: inventory, licenseDirectoryURL: temporary
+        ))
+
+        for file in licenseFiles {
+            try file.data.write(
+                to: temporary.appendingPathComponent(
+                    String(file.resourcePath.dropFirst("LICENSES/".count))
+                ),
+                options: .atomic
+            )
+        }
+        try Data("undeclared\n".utf8).write(
+            to: temporary.appendingPathComponent("unexpected.txt")
+        )
+        XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
+            inventoryData: inventory, licenseDirectoryURL: temporary
+        ))
+        try FileManager.default.removeItem(
+            at: temporary.appendingPathComponent("unexpected.txt")
+        )
+
+        let ancestorRoot = temporary.deletingLastPathComponent()
+            .appendingPathComponent("license-ancestor-\(UUID().uuidString)", isDirectory: true)
+        let realParent = ancestorRoot.appendingPathComponent("real", isDirectory: true)
+        let realLicenses = realParent.appendingPathComponent("LICENSES", isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: realLicenses, withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: ancestorRoot) }
+        for file in licenseFiles {
+            try file.data.write(
+                to: realLicenses.appendingPathComponent(
+                    String(file.resourcePath.dropFirst("LICENSES/".count))
+                )
+            )
+        }
+        let linkedParent = ancestorRoot.appendingPathComponent("linked", isDirectory: true)
+        try FileManager.default.createSymbolicLink(at: linkedParent, withDestinationURL: realParent)
+        XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
+            inventoryData: inventory,
+            licenseDirectoryURL: linkedParent.appendingPathComponent("LICENSES")
+        ))
+
+        let noticeURL = ancestorRoot.appendingPathComponent("THIRD_PARTY_NOTICES.md")
+        try notice.write(to: noticeURL)
+        XCTAssertEqual(try CLILicenseResources.noticeData(resourceURL: noticeURL), notice)
+        var driftedNotice = notice
+        driftedNotice[driftedNotice.startIndex] ^= 1
+        try driftedNotice.write(to: noticeURL, options: .atomic)
+        XCTAssertThrowsError(try CLILicenseResources.noticeData(resourceURL: noticeURL))
+        try Data("drift\n".utf8).write(to: missing)
+        XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
+            inventoryData: inventory, licenseDirectoryURL: temporary
+        ))
+
+        let executor = RecordingExecutor()
+        let application = CLIApplication(executor: executor)
+        let humanWriter = MemoryWriter()
+        let humanStatus = await application.run(
+            arguments: ["licenses"], writer: humanWriter
+        )
+        XCTAssertEqual(humanStatus, 0)
+        XCTAssertTrue(humanWriter.stdoutString.contains("# ArkTrace Product License"))
+        XCTAssertTrue(humanWriter.stdoutString.contains("MIT License"))
+        XCTAssertTrue(humanWriter.stdoutString.contains("# ArkTrace Third-Party Notices"))
+        XCTAssertTrue(humanWriter.stdoutString.contains("# Bundled Third-Party License Files"))
+        XCTAssertTrue(humanWriter.stdoutString.contains("LICENSES/trace_streamer-Apache-2.0.txt"))
+        XCTAssertEqual(humanWriter.stderrString, "")
+
+        let machineWriter = MemoryWriter()
+        let machineStatus = await application.run(
+            arguments: ["--json", "licenses"], writer: machineWriter
+        )
+        XCTAssertEqual(machineStatus, 0)
+        let document = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: machineWriter.stdoutData) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (document["request"] as? [String: Any])?["command"] as? String,
+            "licenses"
+        )
+        let result = try XCTUnwrap(document["result"] as? [String: Any])
+        XCTAssertEqual(result["buildToolCount"] as? Int, CLILicenseResources.buildToolCount)
+        XCTAssertEqual(result["componentCount"] as? Int, CLILicenseResources.componentCount)
+        XCTAssertEqual(result["inventory"] as? String, "license-inventory.json")
+        XCTAssertEqual((result["licenseFiles"] as? [[String: Any]])?.count, 18)
+        XCTAssertEqual(result["notice"] as? String, "THIRD_PARTY_NOTICES.md")
+        XCTAssertEqual(result["productLicense"] as? String, "LICENSE")
+        XCTAssertEqual(result["productLicenseBytes"] as? Int, 1_078)
+        let executorCallCount = await executor.callCount
+        XCTAssertEqual(executorCallCount, 0)
     }
 
     func testTerminatorAllowsTraceOperandBeginningWithDashes() throws {

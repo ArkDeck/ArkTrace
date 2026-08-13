@@ -5,10 +5,10 @@ macOS 原生 OpenHarmony Trace Workbench：同一套核心同时服务人（原�
 ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Trace 解析为本地 SQLite，在其上提供：
 
 - **ArkTrace.app** — SwiftUI + CoreGraphics 原生 Timeline Viewer（CPU / Process / Thread / Slice / Counter、Zoom / Pan / Search / Inspector）
-- **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；Phase 2 已实现 `doctor` / `inspect` / `summary` / `processes` / `threads`，`query` / `context` / `analyze` 归 Phase 4
+- **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；Phase 2 已实现 `doctor` / `inspect` / `summary` / `processes` / `threads`，Phase 3 增加 fail-closed `licenses`，`query` / `context` / `analyze` 归 Phase 4
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T07 已通过独立 review（2026-08-13）。** 当前仓库可构建真实 Trace → pinned TraceStreamer → content-addressed cache → Store/Analysis → human/Machine JSON CLI 链路，并已加入 native App shell、typed event query、bounded Timeline LOD、session/file/cache UI、Viewer composition、Search 与 Inspector；P3-T08～T10 仍开放。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T07 已通过独立 review，P3-T08～T10 为待统一 review 的实现候选（2026-08-13）。** 键盘/VoiceOver contract、真实 medium 性能门、完全锁定的 TraceStreamer 构建配方和第三方许可证清单已落地；独立采集且可再分发的 >500 MiB large trace、Developer ID/notarization 与人工 VoiceOver 工作流证据仍是明确的外部发布阻塞，发布门 6/7 尚未关闭。
 
 ## 文档
 
@@ -41,8 +41,12 @@ scripts/test_phase1.sh
 # Phase 2 正式验收候选：Phase 1 + Release CLI contract/signal/benchmark gate
 scripts/test_phase2.sh
 
-# Phase 3 当前 gate：Phase 2 + signed App/parser bundle/document types/smoke
+# Phase 3 本地批次 gate：Phase 2 + signed App/parser bundle/document types/smoke
 scripts/test_phase3_batch1.sh
+
+# Phase 3 完整发布 gate：再执行 parser 双 clean-build、medium/large benchmark、
+# large cancellation 以及 Developer ID/notarization；缺少外部输入时 fail closed
+scripts/test_phase3.sh
 ```
 
 `scripts/test_phase1.sh` 会在测试前校验 binary、manifest、arm64 architecture、fixture/license SHA/byte count/Git blob；缺失或漂移直接失败。通过后输出不超过 4 KiB 的 machine evidence。TraceStreamer binary 是本机构建产物并被 `.gitignore` 排除，不能只 clone 仓库后跳过构建。
@@ -55,15 +59,30 @@ scripts/test_phase3_batch1.sh
 .build/release/arktrace --json summary trace.htrace
 .build/release/arktrace --json processes trace.htrace --limit 100
 .build/release/arktrace --json threads trace.htrace --pid 42 --limit 100
+.build/release/arktrace licenses
 ```
 
 默认使用 content-addressed cache；`--no-cache` 使用 session-owned ephemeral DB。Machine JSON
 stdout 只提交一个完整 document，typed error 与 exit status、limits、signal/cancellation 和隐私
-契约见 [docs/CLI.md](docs/CLI.md)。ArkTrace.app UI 仍属 Phase 3。
+契约见 [docs/CLI.md](docs/CLI.md)。
+
+## ArkTrace.app 使用
+
+用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过
+File → Open、Finder Open With、拖放或 Recent 打开 `.htrace` / `.ftrace` / `.systrace`；
+Reload 会重新打开当前原始 Trace。Sidebar 控制 track，Timeline 支持鼠标/触控板 pan/zoom、
+range selection 与真实 event selection，Search 可按 PID/TID/process/thread/slice 定位，
+Inspector 显示 event 或 range analysis。键盘基线包括方向键切换 event/track、Option+方向键
+平移、`+`/`-` 缩放、Return 选择、`F` 缩放 selection、`0` 重置及 Escape 清除。
+
+Settings → Licenses 展示 ArkTrace MIT license 与随 App 打包的 third-party notice；CLI 的
+`arktrace licenses` 输出同一组经锁定的资源。当前已知限制是首发仅支持 Apple silicon/macOS 14+，不含 capture/device/network
+能力；large-trace 和 notarized distribution 仍须提供上述外部发布证据。实际 App 截图和
+人工 VoiceOver walkthrough 将与签名候选一并记录，自动 UI 控制不可用时不会用合成图替代。
 
 ## TraceStreamer 怎么获得
 
-ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer（Apache-2.0）。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；Phase 0/1 已在 `ThirdParty/TraceStreamer/`、`Fixtures/traces/` 与 `docs/TRACE_STREAMER.md` 锁定 revision、构建脚本及 TraceStreamer/fixture 的 Apache-2.0 证据。完整第三方许可证 inventory 仍属 Phase 3 / P3-T10，DESIGN §24 发布门 3 保持开放。
+ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；`source-lock.json` 锁定 upstream、13 个 source dependency 和 GN/Ninja artifact，独立 patch 与构建脚本共同生成 content-derived recipe identity。`scripts/test_trace_streamer_reproducibility.sh` 要求两个 fresh worktree 产出 byte-identical binary。完整 source-closure inventory、exact license bytes 与 notice 已落地，但发布门 3 只会在本批独立 review 通过后关闭。
 
 ## ArkDeck 怎么接入
 
@@ -71,4 +90,4 @@ ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer（Apache-2.
 
 ## License
 
-[MIT](LICENSE)。捆绑分发的 TraceStreamer 及其第三方依赖的声明随首个捆绑构建交付于 `THIRD_PARTY_NOTICES.md`。
+[MIT](LICENSE)。捆绑 TraceStreamer 的 14 个 source components、2 个 build tools、许可证表达式与 exact license bytes 见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 `ThirdParty/TraceStreamer/license-inventory.json`；`scripts/verify_licenses.sh` 对清单、source lock 与文件 SHA/大小做 fail-closed 校验。

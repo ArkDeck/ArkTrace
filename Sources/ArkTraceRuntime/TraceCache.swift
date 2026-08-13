@@ -1487,10 +1487,18 @@ enum TraceContentAddressedCache {
         }
         var hasher = SHA256()
         var total: Int64 = 0
-        var buffer = [UInt8](repeating: 0, count: 1 << 20)
+        // Data.SubSequence is a zero-copy DataProtocol view. The previous
+        // Array.prefix -> Data conversion copied every 1 MiB chunk before
+        // hashing, making a warm cache lookup spend most of its budget in
+        // allocator/memcpy work rather than SHA-256. A larger reusable Data
+        // buffer keeps the required streaming stable identity while avoiding
+        // that second pass over every source byte.
+        var buffer = Data(count: 1 << 20)
         while true {
             try Task.checkCancellation()
-            let count = Darwin.read(input, &buffer, buffer.count)
+            let count = buffer.withUnsafeMutableBytes { rawBuffer in
+                Darwin.read(input, rawBuffer.baseAddress, rawBuffer.count)
+            }
             guard count >= 0 else {
                 throw ArkTraceError(
                     code: .traceFileUnreadable,
@@ -1499,7 +1507,7 @@ enum TraceContentAddressedCache {
                 )
             }
             if count == 0 { break }
-            let chunk = Data(buffer.prefix(count))
+            let chunk = buffer.prefix(count)
             hasher.update(data: chunk)
             if destination != nil {
                 try writeAll(chunk, descriptor: output)

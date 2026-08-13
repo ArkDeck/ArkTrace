@@ -286,7 +286,7 @@ public struct CLIMachineRequest: Hashable, Codable, Sendable {
 
     static func hint(for arguments: [String]) -> CLIMachineRequest {
         let names: Set<String> = [
-            "doctor", "inspect", "summary", "processes", "threads",
+            "doctor", "inspect", "summary", "processes", "threads", "licenses",
             "query", "context", "analyze",
         ]
         let command = CLIArgumentParser.boundedPresentationArguments(arguments).first(where: {
@@ -312,6 +312,8 @@ public extension CLIInvocation {
             return try CLIMachineRequest(command: "help")
         case .version:
             return try CLIMachineRequest(command: "version")
+        case .licenses:
+            return try CLIMachineRequest(command: "licenses")
         case .doctor(let selfTest):
             return try CLIMachineRequest(
                 command: "doctor",

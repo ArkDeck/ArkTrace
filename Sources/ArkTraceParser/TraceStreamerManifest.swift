@@ -32,10 +32,12 @@ public struct TraceStreamerManifest: Codable, Equatable, Sendable {
     /// Loads the exact manifest schema. Decode and validation errors are
     /// deliberately collapsed to a typed, path-free identity error.
     public static func load(from url: URL) throws -> TraceStreamerManifest {
-        let values = try? url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
-        guard values?.isRegularFile == true, let size = values?.fileSize, size <= 1_048_576,
-            let data = try? Data(contentsOf: url, options: [.mappedIfSafe])
-        else {
+        let data: Data
+        do {
+            data = try ArkTraceBoundedRegularFile.read(
+                at: url, maximumByteCount: 1_048_576
+            )
+        } catch {
             throw manifestError(reason: "unavailable")
         }
 
@@ -216,7 +218,10 @@ public struct TraceStreamerResolver: Sendable {
 
         let appCandidate = Self.appBundleExecutableURL(bundleURL: appBundleURL)
         if FileManager.default.fileExists(atPath: appCandidate.path) {
-            return try TraceStreamerProcessParser(executableURL: appCandidate)
+            return try TraceStreamerProcessParser(
+                executableURL: appCandidate,
+                manifestURL: Self.appBundleManifestURL(bundleURL: appBundleURL)
+            )
         }
 
         if let cliExecutableURL,
@@ -237,9 +242,16 @@ public struct TraceStreamerResolver: Sendable {
     public static func appBundleExecutableURL(bundleURL: URL) -> URL {
         bundleURL
             .appendingPathComponent("Contents", isDirectory: true)
+            .appendingPathComponent("Helpers", isDirectory: true)
+            .appendingPathComponent("trace_streamer", isDirectory: false)
+    }
+
+    public static func appBundleManifestURL(bundleURL: URL) -> URL {
+        bundleURL
+            .appendingPathComponent("Contents", isDirectory: true)
             .appendingPathComponent("Resources", isDirectory: true)
             .appendingPathComponent("TraceStreamer", isDirectory: true)
-            .appendingPathComponent("trace_streamer", isDirectory: false)
+            .appendingPathComponent("manifest.json", isDirectory: false)
     }
 
     public static func cliLibexecURL(cliExecutableURL: URL) -> URL? {

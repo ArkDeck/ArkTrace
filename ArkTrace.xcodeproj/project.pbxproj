@@ -139,15 +139,23 @@
 			inputPaths = (
 				"$(SRCROOT)/ThirdParty/TraceStreamer/macx/trace_streamer",
 				"$(SRCROOT)/ThirdParty/TraceStreamer/macx/manifest.json",
+				"$(SRCROOT)/LICENSE",
+				"$(SRCROOT)/THIRD_PARTY_NOTICES.md",
+				"$(SRCROOT)/ThirdParty/TraceStreamer/license-inventory.json",
+				"$(SRCROOT)/ThirdParty/TraceStreamer/LICENSES",
 			);
 			name = "Copy Pinned TraceStreamer Bytes";
 			outputPaths = (
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/TraceStreamer/trace_streamer",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Helpers/trace_streamer",
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/TraceStreamer/manifest.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/LICENSE",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/THIRD_PARTY_NOTICES.md",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/license-inventory.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Licenses",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\ndestination=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TraceStreamer\"\n/bin/mkdir -p \"${destination}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/trace_streamer\" \"${destination}/trace_streamer\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/manifest.json\" \"${destination}/manifest.json\"\n/bin/chmod 755 \"${destination}/trace_streamer\"\n/bin/chmod 644 \"${destination}/manifest.json\"\n";
+			shellScript = "set -eu\nresources=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nhelpers=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\nmanifest_dir=\"${resources}/TraceStreamer\"\n/bin/mkdir -p \"${helpers}\" \"${manifest_dir}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/trace_streamer\" \"${helpers}/trace_streamer\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/manifest.json\" \"${manifest_dir}/manifest.json\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/LICENSE\" \"${resources}/LICENSE\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/THIRD_PARTY_NOTICES.md\" \"${resources}/THIRD_PARTY_NOTICES.md\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/license-inventory.json\" \"${resources}/license-inventory.json\"\n/bin/rm -rf \"${resources}/Licenses\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/LICENSES\" \"${resources}/Licenses\"\n/bin/chmod 755 \"${helpers}/trace_streamer\"\n/bin/chmod 644 \"${manifest_dir}/manifest.json\" \"${resources}/LICENSE\" \"${resources}/THIRD_PARTY_NOTICES.md\" \"${resources}/license-inventory.json\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -6,12 +6,12 @@
   "binarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf",
   "architecture": "arm64",
   "adapterVersion": "1",
-  "buildRecipeVersion": "1",
+  "buildRecipeVersion": "600d94fae578f523ca2fd526f334b2a7c6febbaad03fea1135057357020fd18c",
   "plugins": "hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower",
   "localPatches": [
-    "faultloggerd dfx_elf.cpp: route pointer cast through uintptr_t (Apple clang rejects the truncating cast)"
+    "patches/faultloggerd-apple-clang.patch"
   ],
-  "thirdPartySources": "gitee https (diverged from gitcode; upstream patches target gitee tips)",
+  "thirdPartySources": "source-lock.json exact revisions over HTTPS",
   "thirdPartyRevisions": {
     "bounds_checking_function": "2ae82839ecaaa7d031e66ccbd2076d671acfd615",
     "bzip2": "e8e3b464e0b4f89e1f56ba10d7c29654043db91d",
@@ -28,5 +28,5 @@
     "c_utils": "634d5c9d0aa3642f697938c7e5706e53ec069ba1"
   },
   "hostToolchain": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
-  "builtAt": "2026-08-12T05:00:32Z"
+  "builtAt": "2026-08-13T10:35:27Z"
 }

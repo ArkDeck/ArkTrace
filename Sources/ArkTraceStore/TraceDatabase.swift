@@ -73,7 +73,7 @@ final class TraceDatabase {
 
     struct VMInstructionBudgetExceeded: Error {}
 
-    enum Binding {
+    enum Binding: Sendable {
         case int64(Int64)
         case text(String)
     }
@@ -120,9 +120,15 @@ final class TraceDatabase {
 
     private var handle: OpaquePointer
     private let bindingDescriptor: Int32?
+    private let queryObserver: (@Sendable (String, Int) -> Void)?
     let fileIdentity: TraceDatabaseFileIdentity?
 
-    init(url: URL, readOnly: Bool, createIfMissing: Bool = true) throws {
+    init(
+        url: URL,
+        readOnly: Bool,
+        createIfMissing: Bool = true,
+        queryObserver: (@Sendable (String, Int) -> Void)? = nil
+    ) throws {
         var db: OpaquePointer?
         // macOS exposes /var through a symlink. Resolve parent components but
         // deliberately preserve the final component so SQLITE_OPEN_NOFOLLOW
@@ -195,6 +201,7 @@ final class TraceDatabase {
         self.handle = db
         self.bindingDescriptor = bindingDescriptor
         self.fileIdentity = fileIdentity
+        self.queryObserver = queryObserver
     }
 
     deinit {
@@ -206,12 +213,14 @@ final class TraceDatabase {
         _ sql: String,
         bindings: [Binding] = [],
         vmStepBudget: Int? = nil,
+        vmStepObserver: ((Int) -> Void)? = nil,
         stage: ArkTraceError.Stage = .querying,
         observesTaskCancellation: Bool = false,
         deadline: ContinuousClock.Instant? = nil,
         progressHook: (@Sendable () -> Void)? = nil,
         map: (Row) throws -> T
     ) throws -> [T] {
+        queryObserver?(sql, bindings.count)
         if observesTaskCancellation {
             try Task.checkCancellation()
         }
@@ -228,7 +237,12 @@ final class TraceDatabase {
                 details: ["sqliteCode": String(sqlite3_errcode(handle))]
             )
         }
-        defer { sqlite3_finalize(statement) }
+        defer {
+            if let vmStepObserver {
+                vmStepObserver(Int(sqlite3_stmt_status(statement, SQLITE_STMTSTATUS_VM_STEP, 0)))
+            }
+            sqlite3_finalize(statement)
+        }
 
         let progressInterval: Int32 = 100
         let progressController: SQLiteQueryProgressController?
