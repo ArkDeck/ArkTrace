@@ -279,6 +279,32 @@ public struct TraceLongSlice: Hashable, Codable, Sendable {
     public let tid: Int64?
     public let processName: String?
     public let threadName: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case key, range, name, category, processKey, threadKey, pid, tid
+        case processName, threadName
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(key, forKey: .key)
+        try values.encode(range, forKey: .range)
+        try values.encode(name, forKey: .name)
+        if let category { try values.encode(category, forKey: .category) }
+        else { try values.encodeNil(forKey: .category) }
+        if let processKey { try values.encode(processKey, forKey: .processKey) }
+        else { try values.encodeNil(forKey: .processKey) }
+        if let threadKey { try values.encode(threadKey, forKey: .threadKey) }
+        else { try values.encodeNil(forKey: .threadKey) }
+        if let pid { try values.encode(pid, forKey: .pid) }
+        else { try values.encodeNil(forKey: .pid) }
+        if let tid { try values.encode(tid, forKey: .tid) }
+        else { try values.encodeNil(forKey: .tid) }
+        if let processName { try values.encode(processName, forKey: .processName) }
+        else { try values.encodeNil(forKey: .processName) }
+        if let threadName { try values.encode(threadName, forKey: .threadName) }
+        else { try values.encodeNil(forKey: .threadName) }
+    }
 }
 
 public struct TraceRangeAnalysis: Hashable, Codable, Sendable {

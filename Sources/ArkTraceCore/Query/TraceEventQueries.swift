@@ -55,6 +55,7 @@ public struct CpuSliceQuery: Sendable {
 
 public struct ThreadStateQuery: Sendable {
     public let range: TraceTimeRange
+    public let cpu: Int64?
     public let processKey: ProcessKey?
     public let pid: Int64?
     public let threadKey: ThreadKey?
@@ -66,6 +67,7 @@ public struct ThreadStateQuery: Sendable {
 
     public init(
         range: TraceTimeRange,
+        cpu: Int64? = nil,
         processKey: ProcessKey? = nil,
         pid: Int64? = nil,
         threadKey: ThreadKey? = nil,
@@ -85,6 +87,7 @@ public struct ThreadStateQuery: Sendable {
             )
         }
         self.range = range
+        self.cpu = cpu
         self.processKey = processKey
         self.pid = pid
         self.threadKey = threadKey
@@ -183,6 +186,8 @@ public struct CounterQuery: Sendable {
     public let filterID: Int64?
     public let cpu: Int64?
     public let processKey: ProcessKey?
+    public let pid: Int64?
+    public let name: CounterNameFilter?
     public let limit: Int
     public let deadline: ContinuousClock.Instant
 
@@ -191,23 +196,46 @@ public struct CounterQuery: Sendable {
         filterID: Int64? = nil,
         cpu: Int64? = nil,
         processKey: ProcessKey? = nil,
+        pid: Int64? = nil,
+        name: CounterNameFilter? = nil,
         limit: Int = 10_000,
         deadline: ContinuousClock.Instant
     ) throws {
         try TraceEventQueryValidation.range(range)
         try TraceEventQueryValidation.limit(limit)
-        guard cpu == nil || processKey == nil else {
+        guard cpu == nil || (processKey == nil && pid == nil) else {
             throw ArkTraceError(
                 code: .invalidArgument,
                 stage: .request,
                 message: "Counter query accepts one scope at a time"
             )
         }
+        if let name {
+            let text: String
+            switch name {
+            case .exact(let value), .prefix(let value), .contains(let value): text = value
+            }
+            guard !text.isEmpty, text.utf8.count <= 256 else {
+                throw ArkTraceError(
+                    code: .invalidArgument,
+                    stage: .request,
+                    message: "counter name filter must be 1...256 UTF-8 bytes"
+                )
+            }
+        }
         self.range = range
         self.filterID = filterID
         self.cpu = cpu
         self.processKey = processKey
+        self.pid = pid
+        self.name = name
         self.limit = limit
         self.deadline = deadline
     }
+}
+
+public enum CounterNameFilter: Hashable, Sendable {
+    case exact(String)
+    case prefix(String)
+    case contains(String)
 }

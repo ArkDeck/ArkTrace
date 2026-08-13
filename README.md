@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；Phase 2 已实现 `doctor` / `inspect` / `summary` / `processes` / `threads`，Phase 3 增加 fail-closed `licenses`，`query` / `context` / `analyze` 归 Phase 4
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T07 已通过独立 review，P3-T08～T10 为待统一 review 的实现候选（2026-08-13）。** 键盘/VoiceOver contract、真实 medium 性能门、完全锁定的 TraceStreamer 构建配方和第三方许可证清单已落地；独立采集且可再分发的 >500 MiB large trace、Developer ID/notarization 与人工 VoiceOver 工作流证据仍是明确的外部发布阻塞，发布门 6/7 尚未关闭。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T10 实现及流水提前实施的 P4-T01～T03 均已通过独立 review，Phase 3 外部发布门证据仍开放（2026-08-14）。** 键盘/VoiceOver contract、真实 medium 性能门、完全锁定的 TraceStreamer 构建配方和第三方许可证清单已落地；独立采集且可再分发的 >500 MiB large trace、Developer ID/notarization 与人工 VoiceOver 工作流证据仍是明确的外部发布阻塞，发布门 6/7 尚未关闭。
 
 ## 文档
 
@@ -20,7 +20,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 | [docs/CLI.md](docs/CLI.md) | arktrace 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
 | [docs/PHASE_1_VERIFICATION.md](docs/PHASE_1_VERIFICATION.md) | Phase 1 requirement、fixture、hash、测试与已知限制证据 |
 | [docs/PHASE_2_VERIFICATION.md](docs/PHASE_2_VERIFICATION.md) | Phase 2 CLI contract、gate 与 cached-open benchmark 证据 |
-| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T07 的已 review 验证证据 |
+| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T10 的已 review 实现证据与仍开放外部门 |
 | [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision、构建配方、identity 与调用约束 |
 
 ## 构建与测试

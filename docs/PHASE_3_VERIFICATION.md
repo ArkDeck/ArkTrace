@@ -1,6 +1,6 @@
 # ArkTrace Phase 3 verification
 
-> 状态：P3-T01～T07 已通过统一独立 review；P3-T08～T10 实现候选待统一 review，外部门证据仍开放
+> 状态：P3-T01～T10 实现均已通过统一独立 review；人工 accessibility、独立 large fixture 与 Developer ID/notary 外部门证据仍开放
 > 日期：2026-08-14
 
 ## 范围
@@ -59,7 +59,7 @@ Inspector。P3-T08～T10、Phase 3 Exit 及发布门 3/6/7 仍为开放，不得
   parser/manifest、empty entitlement、Release-only API boundary、built Info.plist 的
   htrace/systrace/trace document registration/Open With contract 与无交互启动 smoke。
 
-## P3-T08～T10 待 review 候选证据
+## P3-T08～T10 已 review 的实现证据（外部门开放）
 
 - Accessibility：Timeline 是单个 bounded accessibility group，暴露 focused track、真实
   selected/focused event、viewport/range 与当前状态下确实可执行的 custom actions（含 pan/zoom），不为 event array 建 accessibility

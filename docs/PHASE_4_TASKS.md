@@ -1,6 +1,6 @@
 # ArkTrace Phase 4 任务清单
 
-> 状态：Planned — Phase 3 Exit 后进入
+> 状态：Planned — P4-T01～T03 已按 TASKS 流水规则完成实现与统一独立 review；Phase 3 Exit 与外部门仍是正式进入/Exit 前置条件
 > 阶段：Agent Query
 > 验收目标：Agent 无需解析 UI 或 human log，即可获得 bounded、deterministic Trace evidence
 
@@ -49,6 +49,7 @@ P4-T01 和 P4-T02 可以并行。
 
 **优先级：P0。**
 **关联：AT-QUERY-001～008、AT-CLI-006、AC-AT-006/010/017。**
+**状态：Completed — implementation review clean.**
 
 **交付**
 
@@ -64,16 +65,17 @@ P4-T01 和 P4-T02 可以并行。
 
 **验收**
 
-- [ ] 每个 view 的 success/empty/truncated/error；
-- [ ] touching boundary 与 instant query；
-- [ ] filter injection negative test；
-- [ ] deterministic startNs/eventKey order；
-- [ ] 不存在 arktrace sql 或 raw SQL escape hatch。
+- [x] 每个 view 的 success/empty/truncated/error；
+- [x] touching boundary 与 instant query；
+- [x] filter injection negative test；
+- [x] deterministic startNs/eventKey order；
+- [x] 不存在 arktrace sql 或 raw SQL escape hatch。
 
 ### P4-T02 — 完成确定性 Analysis Engine
 
 **优先级：P0。**
 **关联：AT-AN-002～009、AC-AT-009/013。**
+**状态：Completed — implementation review clean.**
 
 **交付**
 
@@ -89,19 +91,20 @@ P4-T01 和 P4-T02 可以并行。
 
 **测试**
 
-- [ ] clipped overlap、multi-CPU、overlap >100% warning；
-- [ ] ranking tie-break；
-- [ ] unknown state 保留；
-- [ ] unsupported scheduling latency；
-- [ ] percentile golden；
-- [ ] instant 计 count、不计 occupiedNs；
-- [ ] 同输入 result bytes 一致。
+- [x] clipped overlap、multi-CPU、overlap >100% warning；
+- [x] ranking tie-break；
+- [x] unknown state 保留；
+- [x] unsupported scheduling latency；
+- [x] percentile golden；
+- [x] instant 计 count、不计 occupiedNs；
+- [x] 同输入 result bytes 一致。
 
 ### P4-T03 — 实现 bounded TraceContext builder
 
 **优先级：P0。**
 **依赖：P4-T01/P4-T02。**
 **关联：AT-CTX-001～005、AC-AT-008。**
+**状态：Completed — implementation review clean.**
 
 **交付**
 
@@ -118,12 +121,12 @@ P4-T01 和 P4-T02 可以并行。
 
 **验收**
 
-- [ ] symmetric/asymmetric window normalization；
-- [ ] referential closure；
-- [ ] each-section truncation；
-- [ ] deterministic repeated output；
-- [ ] 8 MiB boundary和最小 envelope failure；
-- [ ] context 从不退化为 raw dump。
+- [x] symmetric/asymmetric window normalization；
+- [x] referential closure；
+- [x] each-section truncation；
+- [x] deterministic repeated output；
+- [x] 8 MiB boundary和最小 envelope failure；
+- [x] context 从不退化为 raw dump。
 
 ### P4-T04 — 实现 query/context/analyze CLI
 
@@ -227,3 +230,13 @@ P4-T01 和 P4-T02 可以并行。
 - [ ] real trace gate 零 skip；
 - [ ] context/analysis benchmark 有真实结果；
 - [ ] AC-AT-008/009/010/013 通过；AC-AT-015 的完整真实闭环由 Phase 6 验收。
+
+## 6. P4-T01～T03 已 review 的流水证据（2026-08-14）
+
+- closed `TraceAgentQueryView` 只有 `cpuSlices/threadStates/slices/counters`；所有 range、identity、state/name/duration/depth/filter 条件经 typed query 构造并由 Store prepared binding 消费，无 raw SQL API；
+- `TraceDeterministicAnalysisEngine` 对 CPU、process、thread、state、named slice、scheduling 与 hot interval 使用独立 Store budget，固定 nearest-rank percentile、公开 hot score components，并对同输入输出 stable JSON bytes；
+- `TraceContextBuilder` 支持 timestamp before/after 与 explicit range，统一 event retention、directory referential closure、section truncation；使用可按 budget 短路、可响应 deadline/cancel 的 exact JSON byte-count traversal 决定 retention，再只对已证明可容纳的最终候选物化一次 canonical JSON；
+- 统一 review 的 findings 已全部关闭：counter 改为全局事件序、Analysis 补齐 kind/effective parameters 与完整稳定总序、Runnable→Running 精确相邻证据、整数 hot buckets、open-ended duration、动态 SQLite storage、引用/预算区分、重复 identity typed failure 与公开 Codable fail-closed 均有 regression；
+- 新增 15 个 Analysis batch regressions、1 个 Store 动态 storage regression，并扩展现有 Store 时间语义回归；冻结完整 `CI=true swift test -c release` 为 **333 tests、0 failure**；
+- 继承的 `scripts/test_phase3_batch1.sh` 同样以 **333 tests、0 skip** 通过，真实 fixture 的 parser SHA、quick_check、schema fingerprint 与 locked evidence 均未漂移；
+- 独立 reviewer 结论为 P0/P1/P2/P3 全 clean。本节只关闭 P4-T01～T03，不关闭 Phase 4 Exit，也不改写 Phase 3 Gate 3/6/7 的 Open 状态。

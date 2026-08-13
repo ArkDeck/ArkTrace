@@ -33,6 +33,11 @@ public struct TraceTimeRange: Hashable, Codable, Sendable {
     public let startNs: Int64
     public let endNs: Int64
 
+    private enum CodingKeys: String, CodingKey {
+        case startNs
+        case endNs
+    }
+
     /// Event range: `0 <= startNs <= endNs`.
     public init(startNs: Int64, endNs: Int64) throws {
         guard startNs >= 0, startNs <= endNs else {
@@ -44,6 +49,16 @@ public struct TraceTimeRange: Hashable, Codable, Sendable {
         }
         self.startNs = startNs
         self.endNs = endNs
+    }
+
+    /// Decoding is an input boundary too. Reuse the validated initializer so
+    /// synthesized `Decodable` cannot construct a negative or reversed range.
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            startNs: values.decode(Int64.self, forKey: .startNs),
+            endNs: values.decode(Int64.self, forKey: .endNs)
+        )
     }
 
     /// Caller-supplied query range: strictly `0 <= startNs < endNs` (AT-TIME-003).

@@ -530,7 +530,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             traceEnd: validation.traceEndTs
         )
         if let value = query.cpu {
-            conditions.append("s.cpu = ?")
+            conditions.append("typeof(s.cpu) = 'integer' AND s.cpu = ?")
             bindings.append(.int64(value))
         }
         if let value = query.processKey {
@@ -667,12 +667,17 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         _ query: ThreadStateQuery
     ) async throws -> TraceEventPage<ThreadStateInterval> {
         guard validation.capabilities.threadStates else { return .unavailable }
+        if query.cpu != nil, !threadStateHasCPU { return .unavailable }
         let range = try validatedAbsoluteRange(query.range)
         var conditions = [TraceEventIntersection.sqlPredicate(alias: "s")]
         var bindings = TraceEventIntersection.bindings(
             queryStart: range.start, queryEnd: range.end,
             traceEnd: validation.traceEndTs
         )
+        if let value = query.cpu {
+            conditions.append("typeof(s.cpu) = 'integer' AND s.cpu = ?")
+            bindings.append(.int64(value))
+        }
         if let value = query.processKey {
             conditions.append("t.ipid = ?")
             bindings.append(.int64(value.ipid))
@@ -840,7 +845,32 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             }
         }
         if let value = query.minimumDurationNs {
-            conditions.append("s.dur >= ?")
+            conditions.append(
+                """
+                CASE
+                    WHEN s.ts >= ? THEN 0
+                    WHEN s.dur IS NULL OR s.dur < 0
+                        THEN ? - MAX(s.ts, ?)
+                    WHEN s.dur = 0 THEN 0
+                    WHEN s.ts < ? THEN
+                        CASE
+                            WHEN s.dur <= ? - s.ts THEN 0
+                            WHEN s.dur >= ? - s.ts THEN ?
+                            ELSE s.dur - (? - s.ts)
+                        END
+                    ELSE MIN(s.dur, ? - s.ts)
+                END >= ?
+                """
+            )
+            bindings.append(.int64(validation.traceEndTs))
+            bindings.append(.int64(validation.traceEndTs))
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            bindings.append(.int64(validation.durationNs))
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
             bindings.append(.int64(value))
         }
         if let value = query.depth {
@@ -983,7 +1013,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let processAvailable = validation.capabilities.processCounters
         guard cpuAvailable || processAvailable else { return .unavailable }
         if query.cpu != nil, !cpuAvailable { return .unavailable }
-        if query.processKey != nil, !processAvailable { return .unavailable }
+        if query.processKey != nil || query.pid != nil, !processAvailable { return .unavailable }
         let range = try validatedAbsoluteRange(query.range)
         guard let rowID = try db.unshadowedRowIDAlias(
             of: "measure", deadline: query.deadline
@@ -997,10 +1027,11 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
         var samples: [CounterResultRow] = []
         var sourceTruncated = false
-        if cpuAvailable, query.processKey == nil {
+        if cpuAvailable, query.processKey == nil, query.pid == nil {
             let result = try counterRows(
                 filterTable: "cpu_measure_filter", scopeColumn: "cpu",
-                scopeValue: query.cpu, filterID: query.filterID,
+                scopeValue: query.cpu, filterID: query.filterID, pid: nil,
+                name: query.name,
                 hasUnit: cpuFilterHasUnit,
                 rowID: rowID, range: range, limit: query.limit,
                 deadline: query.deadline, sourceOrder: 0
@@ -1012,6 +1043,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             let result = try counterRows(
                 filterTable: "process_measure_filter", scopeColumn: "ipid",
                 scopeValue: query.processKey?.ipid, filterID: query.filterID,
+                pid: query.pid, name: query.name,
                 hasUnit: processFilterHasUnit,
                 rowID: rowID, range: range, limit: query.limit,
                 deadline: query.deadline, sourceOrder: 1
@@ -1031,6 +1063,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var pids: [CounterSeriesKey: Int64] = [:]
         var processNames: [CounterSeriesKey: String] = [:]
         var invalidOptionalValues: Int64 = 0
+        var missingProcessReferences: Int64 = 0
         var counterQuality = EventQuality()
         var seenSampleKeys: Set<EventKey> = []
         for (index, row) in selected.enumerated() {
@@ -1047,6 +1080,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 )
             }
             invalidOptionalValues += row.invalidOptionalValueCount
+            missingProcessReferences += row.missingProcessReferenceCount
             let normalized = try normalizedCounterSample(
                 row, quality: &counterQuality
             )
@@ -1106,6 +1140,15 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     category: .clampedValue,
                     scope: "measure.dur",
                     count: counterQuality.clampedDuration
+                )
+            )
+        }
+        if missingProcessReferences > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .referentialIntegrity,
+                    scope: "process_measure_filter.ipid",
+                    count: missingProcessReferences
                 )
             )
         }
@@ -1496,11 +1539,19 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             return EventInterval(start: start, end: start, openEnded: false)
         }
         let (absoluteEnd, overflow) = timestamp.addingReportingOverflow(duration)
-        if overflow || duration > validation.durationNs || absoluteEnd > validation.traceEndTs {
+        if overflow {
             quality.clampedDuration += 1
             return EventInterval(start: start, end: validation.durationNs, openEnded: false)
         }
-        let end = try requiredRelative(absoluteEnd)
+        let clampedAbsoluteEnd = min(
+            validation.traceEndTs,
+            max(validation.traceStartTs, absoluteEnd)
+        )
+        if timestamp < validation.traceStartTs
+            || absoluteEnd != clampedAbsoluteEnd {
+            quality.clampedDuration += 1
+        }
+        let end = try requiredRelative(clampedAbsoluteEnd)
         guard end >= start else {
             quality.invalidTime += 1
             return nil
@@ -1598,6 +1649,8 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         scopeColumn: String,
         scopeValue: Int64?,
         filterID: Int64?,
+        pid: Int64?,
+        name: CounterNameFilter?,
         hasUnit: Bool,
         rowID: String,
         range: (start: Int64, end: Int64),
@@ -1622,6 +1675,30 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             conditions.append("f.\(scopeColumn) = ?")
             bindings.append(.int64(scopeValue))
         }
+        if let pid {
+            guard filterTable == "process_measure_filter" else {
+                throw ArkTraceError(
+                    code: .invalidArgument,
+                    stage: .request,
+                    message: "PID filtering requires process counters"
+                )
+            }
+            conditions.append("p.pid = ?")
+            bindings.append(.int64(pid))
+        }
+        if let name {
+            switch name {
+            case .exact(let text):
+                conditions.append("f.name = ?")
+                bindings.append(.text(text))
+            case .prefix(let text):
+                conditions.append("f.name LIKE ? ESCAPE '\\'")
+                bindings.append(.text(Self.escapedLike(text) + "%"))
+            case .contains(let text):
+                conditions.append("f.name LIKE ? ESCAPE '\\'")
+                bindings.append(.text("%" + Self.escapedLike(text) + "%"))
+            }
+        }
         bindings.append(.int64(Int64(limit) + 1))
         let durationSelection = measureHasDuration
             ? "CASE WHEN typeof(m.dur) = 'integer' THEN m.dur ELSE NULL END"
@@ -1643,6 +1720,9 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             ? "CASE WHEN typeof(p.name) = 'text' "
                 + "AND length(CAST(p.name AS BLOB)) <= 4096 THEN p.name ELSE NULL END"
             : "NULL"
+        let missingProcessSelection = isProcessScope
+            ? "CASE WHEN f.ipid <> 0 AND p.ipid IS NULL THEN 1 ELSE 0 END"
+            : "0"
         var invalidValueTerms: [String] = []
         if measureHasDuration {
             invalidValueTerms.append(
@@ -1672,7 +1752,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             SELECT m.\(rowID), m.ts, m.value, f.id, f.name, f.\(scopeColumn),
                 \(durationSelection), \(durationStateSelection),
                 \(unitSelection), \(invalidSelection),
-                \(pidSelection), \(processNameSelection)
+                \(pidSelection), \(processNameSelection), \(missingProcessSelection)
             FROM measure AS m
             INNER JOIN \(filterTable) AS f ON f.id = m.filter_id
             \(processJoin)
@@ -1702,7 +1782,8 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 unit: row.text(8),
                 invalidOptionalValueCount: row.int64(9) ?? 0,
                 pid: row.int64(10),
-                processName: row.text(11)
+                processName: row.text(11),
+                missingProcessReferenceCount: row.int64(12) ?? 0
             )
         }
         return (Array(rows.prefix(limit)), rows.count > limit)
@@ -2330,6 +2411,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let invalidOptionalValueCount: Int64
         let pid: Int64?
         let processName: String?
+        let missingProcessReferenceCount: Int64
     }
 
     private enum CounterDurationState: Int64 {

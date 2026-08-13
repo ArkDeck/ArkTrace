@@ -250,6 +250,20 @@ public struct TraceProcess: Codable, Sendable, Hashable {
         self.endNs = endNs
         self.threadCount = threadCount
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case key, pid, name, startNs, endNs, threadCount
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(key, forKey: .key)
+        try values.encode(pid, forKey: .pid)
+        try values.encodeNullable(name, forKey: .name)
+        try values.encodeNullable(startNs, forKey: .startNs)
+        try values.encodeNullable(endNs, forKey: .endNs)
+        try values.encodeNullable(threadCount, forKey: .threadCount)
+    }
 }
 
 public struct TraceThread: Codable, Sendable, Hashable {
@@ -283,5 +297,33 @@ public struct TraceThread: Codable, Sendable, Hashable {
         self.startNs = startNs
         self.endNs = endNs
         self.isMainThread = isMainThread
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case key, processKey, tid, pid, name, processName
+        case startNs, endNs, isMainThread
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(key, forKey: .key)
+        try values.encodeNullable(processKey, forKey: .processKey)
+        try values.encode(tid, forKey: .tid)
+        try values.encodeNullable(pid, forKey: .pid)
+        try values.encodeNullable(name, forKey: .name)
+        try values.encodeNullable(processName, forKey: .processName)
+        try values.encodeNullable(startNs, forKey: .startNs)
+        try values.encodeNullable(endNs, forKey: .endNs)
+        try values.encodeNullable(isMainThread, forKey: .isMainThread)
+    }
+}
+
+private extension KeyedEncodingContainer {
+    mutating func encodeNullable<T: Encodable>(
+        _ value: T?,
+        forKey key: Key
+    ) throws {
+        if let value { try encode(value, forKey: key) }
+        else { try encodeNil(forKey: key) }
     }
 }

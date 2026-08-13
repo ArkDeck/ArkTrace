@@ -2186,11 +2186,28 @@ final class RepositoryTests: XCTestCase {
         XCTAssertNil(unboundSlice.processKey)
 
         let writer = try TraceDatabase(url: url, readOnly: false)
+        try writer.execute("UPDATE process_measure_filter SET ipid = 999 WHERE id = 2")
+        let missingCounterProcess = try await repository.counters(
+            CounterQuery(range: range, filterID: 2, limit: 10, deadline: deadline)
+        )
+        XCTAssertEqual(
+            missingCounterProcess.items.first?.processKey,
+            ProcessKey(ipid: 999)
+        )
+        XCTAssertTrue(missingCounterProcess.dataQuality.issues.contains {
+            $0.category == .referentialIntegrity
+                && $0.scope == "process_measure_filter.ipid"
+                && $0.count == 1
+        })
+
         try writer.execute("UPDATE process_measure_filter SET ipid = 0 WHERE id = 2")
         let counters = try await repository.counters(
             CounterQuery(range: range, filterID: 2, limit: 10, deadline: deadline)
         )
         XCTAssertNil(counters.items.first?.processKey)
+        XCTAssertFalse(counters.dataQuality.issues.contains {
+            $0.scope == "process_measure_filter.ipid"
+        })
 
         let density = try await repository.density(
             TraceDensityQuery(
@@ -2273,7 +2290,17 @@ final class RepositoryTests: XCTestCase {
     }
 
     func testTypedEventQueriesShareHalfOpenInstantAndOpenEndedSemantics() async throws {
-        let (repository, url) = try makeSummaryRepository()
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            INSERT INTO callstack VALUES (8, 1250, NULL, 2, 'open-null');
+            INSERT INTO callstack VALUES (9, 1260, -1, 2, 'open-negative');
+            INSERT INTO callstack VALUES (
+                10, 1900, 9223372036854775807, 2, 'oversized-positive'
+            );
+            INSERT INTO callstack VALUES (11, 900, 200, 2, 'pre-trace-positive');
+            INSERT INTO callstack VALUES (12, 0, 1500, 2, 'far-pre-trace-positive');
+            """
+        )
         defer { try? FileManager.default.removeItem(at: url) }
         let deadline = ContinuousClock.now.advanced(by: .seconds(5))
         let range = try TraceTimeRange.query(startNs: 150, endNs: 400)
@@ -2308,9 +2335,75 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(slices.items.map(\.name), ["inside"])
         XCTAssertEqual(slices.items.first?.threadKey, ThreadKey(itid: 2))
 
+        let longOpenEnded = try await repository.slices(
+            TraceSliceQuery(
+                range: range,
+                name: .prefix("open-"),
+                minimumDurationNs: 500,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(longOpenEnded.items.map(\.key.rowID), [8, 9])
+        XCTAssertTrue(longOpenEnded.items.allSatisfy(\.isOpenEnded))
+
+        let clampedPositive = try await repository.slices(
+            TraceSliceQuery(
+                range: try TraceTimeRange.query(startNs: 850, endNs: 1_000),
+                name: .exact("oversized-positive"),
+                minimumDurationNs: 100,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(clampedPositive.items.map(\.key.rowID), [10])
+
+        let preTraceTooShort = try await repository.slices(
+            TraceSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 150),
+                name: .exact("pre-trace-positive"),
+                minimumDurationNs: 150,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertTrue(preTraceTooShort.items.isEmpty)
+        let preTraceExact = try await repository.slices(
+            TraceSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 150),
+                name: .exact("pre-trace-positive"),
+                minimumDurationNs: 100,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(preTraceExact.items.map(\.key.rowID), [11])
+
+        let farPreTraceExact = try await repository.slices(
+            TraceSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 500),
+                name: .exact("far-pre-trace-positive"),
+                minimumDurationNs: 500,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(farPreTraceExact.items.map(\.range.durationNs), [500])
+        let farPreTraceTooShort = try await repository.slices(
+            TraceSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 500),
+                name: .exact("far-pre-trace-positive"),
+                minimumDurationNs: 501,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertTrue(farPreTraceTooShort.items.isEmpty)
+
         let rightTouch = try await repository.slices(
             TraceSliceQuery(
                 range: try TraceTimeRange.query(startNs: 300, endNs: 400),
+                name: .exact("inside"),
                 limit: 10,
                 deadline: deadline
             )
@@ -2488,10 +2581,67 @@ final class RepositoryTests: XCTestCase {
         )
         XCTAssertEqual(limited.items.map(\.key.rowID), [1, 2])
         XCTAssertTrue(limited.truncated)
+
+        let stateOnCPU = try await repository.threadStates(
+            ThreadStateQuery(range: range, cpu: 2, limit: 10, deadline: deadline)
+        )
+        XCTAssertEqual(stateOnCPU.items.map(\.key.rowID), [3])
+    }
+
+    func testThreadStateCPUFilterRequiresIntegerDynamicStorage() async throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (1000, 2000);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            INSERT INTO process VALUES (1, 10, 'p', 1000);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            INSERT INTO thread VALUES (1, 11, 't', 1000, 1);
+            CREATE TABLE sched_slice (
+                id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER,
+                itid INTEGER, ipid INTEGER
+            );
+            CREATE TABLE thread_state (
+                id INTEGER, ts INTEGER, dur INTEGER, cpu TEXT,
+                itid INTEGER, state TEXT
+            );
+            INSERT INTO thread_state VALUES (1, 1100, 10, '2', 1, 'Running');
+            CREATE TABLE callstack (
+                id INTEGER, ts INTEGER, dur INTEGER, callid INTEGER, name TEXT
+            );
+            CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let repository = try SQLiteTraceRepository(
+            databaseURL: url, parser: Self.dummyParser, source: Self.dummySource
+        )
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        let filtered = try await repository.threadStates(
+            ThreadStateQuery(range: range, cpu: 2, limit: 10, deadline: deadline)
+        )
+        XCTAssertTrue(filtered.items.isEmpty)
+        let unfiltered = try await repository.threadStates(
+            ThreadStateQuery(range: range, limit: 10, deadline: deadline)
+        )
+        XCTAssertNil(unfiltered.items.first?.cpu)
+        XCTAssertTrue(unfiltered.dataQuality.issues.contains {
+            $0.category == .droppedValue && $0.scope == "thread_state.value"
+        })
     }
 
     func testCounterQueriesAreCapabilityAwareScopedAndStable() async throws {
-        let (repository, url) = try makeSummaryRepository()
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            INSERT INTO process_measure_filter VALUES (3, '100% literal', 2);
+            INSERT INTO measure VALUES (1450, 3, 3);
+            """
+        )
         defer { try? FileManager.default.removeItem(at: url) }
         let deadline = ContinuousClock.now.advanced(by: .seconds(5))
         let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
@@ -2514,6 +2664,31 @@ final class RepositoryTests: XCTestCase {
             )
         )
         XCTAssertEqual(process.items.first?.filterID, 2)
+
+        let byPIDAndName = try await repository.counters(
+            CounterQuery(
+                range: range, pid: 101, name: .exact("process"),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(byPIDAndName.items.map(\.filterID), [2])
+        XCTAssertEqual(byPIDAndName.items.first?.pid, 101)
+
+        let escaped = try await repository.counters(
+            CounterQuery(
+                range: range, pid: 101, name: .prefix("100%"),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(escaped.items.map(\.filterID), [3])
+
+        let injection = try await repository.counters(
+            CounterQuery(
+                range: range, name: .exact("' OR 1=1 --"),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertTrue(injection.items.isEmpty)
     }
 
     func testCounterDurationUsesSharedIntersectionClampAndSentinelSemantics() async throws {
