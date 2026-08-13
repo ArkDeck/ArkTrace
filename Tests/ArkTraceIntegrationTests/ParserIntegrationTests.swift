@@ -597,6 +597,64 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertNil(databaseBytes.range(of: Data(staging.path.utf8)))
         XCTAssertNil(sidecarBytes.range(of: Data(source.path.utf8)))
         XCTAssertNil(sidecarBytes.range(of: Data(staging.path.utf8)))
+
+        let fullRange = try TraceTimeRange.query(
+            startNs: 0,
+            endNs: metadata.durationNs
+        )
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        if metadata.capabilities.cpuScheduling {
+            let slices = try await session.repository.cpuSlices(
+                CpuSliceQuery(
+                    range: fullRange,
+                    limit: 8,
+                    deadline: deadline
+                )
+            )
+            XCTAssertTrue(slices.capabilityAvailable)
+            XCTAssertFalse(slices.items.isEmpty)
+            XCTAssertTrue(zip(slices.items, slices.items.dropFirst()).allSatisfy {
+                $0.startNs < $1.startNs
+                    || ($0.startNs == $1.startNs && $0.key.rowID < $1.key.rowID)
+            })
+            XCTAssertTrue(slices.items.allSatisfy { $0.key.table == .schedSlice })
+
+            let states = try await session.repository.threadStates(
+                ThreadStateQuery(
+                    range: fullRange,
+                    limit: 8,
+                    deadline: deadline
+                )
+            )
+            XCTAssertTrue(states.capabilityAvailable)
+            XCTAssertFalse(states.items.isEmpty)
+        }
+        if metadata.capabilities.namedSlices {
+            let slices = try await session.repository.slices(
+                TraceSliceQuery(
+                    range: fullRange,
+                    limit: 8,
+                    deadline: deadline
+                )
+            )
+            XCTAssertTrue(slices.capabilityAvailable)
+            XCTAssertFalse(slices.items.isEmpty)
+            XCTAssertTrue(slices.items.allSatisfy { $0.key.table == .callstack })
+        }
+        if metadata.capabilities.cpuScheduling || metadata.capabilities.namedSlices {
+            let densitySource: TraceDensitySource = metadata.capabilities.cpuScheduling
+                ? .cpu(0) : .namedSlice(ThreadKey(itid: 1))
+            let density = try await session.repository.density(
+                TraceDensityQuery(
+                    range: fullRange,
+                    source: densitySource,
+                    bucketCount: 32,
+                    deadline: deadline
+                )
+            )
+            XCTAssertTrue(density.capabilityAvailable)
+            XCTAssertLessThanOrEqual(density.buckets.count, 32)
+        }
     }
 
     private func requireEnvironment() throws -> (binary: URL, fixture: URL) {

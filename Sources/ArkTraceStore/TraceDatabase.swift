@@ -490,13 +490,7 @@ final class TraceDatabase {
                 message: "Summary sampling table is unsupported"
             )
         }
-        let columns = try columns(
-            of: table,
-            stage: .querying,
-            observesTaskCancellation: true,
-            deadline: deadline
-        )
-        let names = Set(columns.map { $0.name.lowercased() })
+        let rowIDAlias = try unshadowedRowIDAlias(of: table, deadline: deadline)
         let tableRows = try query(
             """
             SELECT wr FROM pragma_table_list(?)
@@ -516,10 +510,8 @@ final class TraceDatabase {
                 message: "Summary sampling table identity is unavailable"
             )
         }
-        if withoutRowID == 0 {
-            for alias in ["rowid", "_rowid_", "oid"] where !names.contains(alias) {
-                return "ORDER BY \(alias) ASC"
-            }
+        if withoutRowID == 0, let rowIDAlias {
+            return "ORDER BY \(rowIDAlias) ASC"
         }
         // WITHOUT ROWID storage is already a stable primary-key B-tree, but
         // pragma_table_xinfo does not expose each declared ASC/DESC direction.
@@ -527,6 +519,43 @@ final class TraceDatabase {
         // It also preserves additive compatibility when all rowid aliases of
         // an ordinary table are shadowed.
         return "NOT INDEXED"
+    }
+
+    /// Returns an unshadowed SQLite row identity alias for ordinary tables.
+    /// Generated/hidden additive columns participate through table_xinfo, so
+    /// callers never mistake a user column for SQLite's stable record ID.
+    func unshadowedRowIDAlias(
+        of table: String,
+        deadline: ContinuousClock.Instant? = nil
+    ) throws -> String? {
+        guard Self.isSafeIdentifier(table) else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .querying,
+                message: "Event identity table is unsupported"
+            )
+        }
+        let columns = try columns(
+            of: table,
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        )
+        let names = Set(columns.map { $0.name.lowercased() })
+        let tableRows = try query(
+            """
+            SELECT wr FROM pragma_table_list(?)
+            WHERE schema = 'main' AND name = ? AND type = 'table'
+            LIMIT 2
+            """,
+            bindings: [.text(table), .text(table)],
+            vmStepBudget: 10_000,
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { $0.int64(0) }
+        guard tableRows.count == 1, tableRows[0] == 0 else { return nil }
+        return ["rowid", "_rowid_", "oid"].first { !names.contains($0) }
     }
 
     static func isSafeIdentifier(_ name: String) -> Bool {

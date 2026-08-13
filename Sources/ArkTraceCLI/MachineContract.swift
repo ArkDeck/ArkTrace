@@ -405,16 +405,7 @@ public struct CLIMachineDataQualityWarning: Hashable, Codable, Sendable {
         return allowedScopes.contains(value)
     }
 
-    private static let allowedScopes: Set<String> = [
-        "process.start_ts", "process.end_ts", "process.lifecycle",
-        "thread.start_ts", "thread.end_ts", "thread.ipid", "thread.lifecycle",
-        "sched_slice.ts", "sched_slice.dur", "sched_slice.cpu",
-        "thread_state.ts", "thread_state.dur",
-        "callstack.ts", "callstack.dur",
-        "measure.ts", "measure.filter_id",
-        "cpu_measure_filter.id", "process_measure_filter.id",
-        "stat", "stat.count", "stat.source", "stat.event_name", "stat.stat_type",
-    ]
+    private static let allowedScopes = TraceDataQualityScope.machineAllowed
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)

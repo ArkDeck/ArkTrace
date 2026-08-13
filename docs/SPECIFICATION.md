@@ -373,6 +373,12 @@ struct TraceSlice: Codable, Sendable {
 
 Counter series 必须包含稳定 filter ID、name、scope、optional CPU/process key、unit（已知时）。未知 unit 必须为 null，不得猜测。Sample 包含 `timestampNs`、`value` 和 optional duration。
 
+Counter duration 使用与其他事件相同的 half-open/instant/open-ended 规则：上游 schema
+没有 `measure.dur` 时 sample 是 instant（`durationNs = 0`）；列存在时，NULL 或负值
+是 open-ended sentinel（`durationNs = null`），正值在 trace end 处安全 clamp 后输出有效
+trace-relative duration。查询必须按 interval 相交，而不是只按 sample start 落入 range；被 clamp
+或因动态 storage 不兼容而降级的 duration 必须进入 typed dataQuality。
+
 ### AT-MODEL-001 Row 隔离
 
 SQLite row type 不得越过 Store module public boundary。

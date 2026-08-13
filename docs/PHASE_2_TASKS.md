@@ -237,7 +237,8 @@ byte-budget 检查和最终 cancellation 线性化；编码、contract、privacy
 
 Store/Analysis 同时把旧字符串 warning 提升为 typed quality evidence，machine contract 区分
 `probeTruncated`、`invalidValue`、`clampedValue`、`droppedValue` 和
-`referentialIntegrity`，并拒绝无法分类的 legacy warning。Machine quality 仅输出 closed
+`referentialIntegrity`；Phase 3 的字段级 capability 又以 additive `unavailableValue` 表达，
+并拒绝无法分类的 legacy warning。Machine quality 仅输出 closed
 category/scope/count，省略 Store 的自由诊断 prose；doctor check 使用 closed code/name，error
 details 按 code/key/value allowlist 输出，禁止 raw SQL、environment、path/log 渗入。Core 共享
 policy 固定每个 stable error code 的 allowed stage/retryability，非法组合在 machine boundary
@@ -344,7 +345,7 @@ Machine/human encoding、combined stdout/stderr byte check 与最终 commit boun
 `CLISignalMonitor` 用 async-signal-safe C pipe shim 捕获 SIGINT/SIGTERM，再由 Dispatch read source
 处理：handler 安装到 source activation 的信号也会缓存在 pipe；第一次取消顶层 Task，第二次才
 `_exit(128 + signal)`；gate 的实际 Release executable 得到 SIGINT status 8 / typed `CANCELLED`，
-连续 SIGTERM 得到 143。`CLIExitStatus` 穷举全部 stable error code 的 2～9 family。summary 的
+首次 SIGINT 与后续 SIGTERM 会得到与实际第二个 handler 信号对应的 130 或 143。两个不同标准信号避免了相同非实时信号在尚未调度时被 POSIX 合并；两者同时 pending 时 Darwin 不保证 handler 顺序，因此 gate 验证的是“第一次 structured cancel，后续信号按 `128 + signal` 强退”契约。`CLIExitStatus` 穷举全部 stable error code 的 2～9 family。summary 的
 directory budget 与 event budget 已拆为 `maxRows`/`maxEvents`，Store sampling、Analysis request 与
 Machine payload validation 全链路独立；output budget 同时约束 stdout + stderr，JSON 仍单次提交。
 

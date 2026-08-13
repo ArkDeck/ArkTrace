@@ -189,13 +189,28 @@ enum TraceSchemaAdapter {
         let cpuCountersAvailable = try hasCompatibleJoinRows(
             db,
             filterTable: "cpu_measure_filter",
+            scopeColumn: .integer("cpu"),
             in: columnsByTable
         )
         let processCountersAvailable = try hasCompatibleJoinRows(
             db,
             filterTable: "process_measure_filter",
+            scopeColumn: .integer("ipid"),
             in: columnsByTable
         )
+        if cpuCountersAvailable {
+            try validateUniqueCounterFilterIdentity(
+                db, filterTable: "cpu_measure_filter"
+            )
+        }
+        if processCountersAvailable {
+            try validateUniqueCounterFilterIdentity(
+                db, filterTable: "process_measure_filter"
+            )
+        }
+        if cpuCountersAvailable, processCountersAvailable {
+            try validateDisjointCounterFilterIdentities(db)
+        }
         let capabilities = TraceCapabilities(
             cpuScheduling: schedulingAvailable,
             threadStates: threadStatesAvailable,
@@ -266,41 +281,133 @@ enum TraceSchemaAdapter {
     }
 
     /// Counter capability requires an actual relationship, not merely two
-    /// non-empty tables. Both inputs are capped so a damaged database cannot
-    /// turn schema opening into an unbounded join scan.
+    /// non-empty tables. The VM budget bounds adversarial work without making
+    /// capability depend on whichever rows SQLite happens to return in the
+    /// first 1,024 physical records.
     private static func hasCompatibleJoinRows(
         _ db: TraceDatabase,
         filterTable: String,
+        scopeColumn: RequiredColumn,
         in columnsByTable: [String: [TraceDatabase.ColumnInfo]]
     ) throws -> Bool {
         guard TraceDatabase.isSafeIdentifier(filterTable),
             hasCompatibleTable("measure", columns: measureColumns, in: columnsByTable),
             hasCompatibleTable(
                 filterTable,
-                columns: measureFilterColumns,
+                columns: measureFilterColumns + [scopeColumn],
                 in: columnsByTable
             )
         else {
             return false
         }
-        return try db.query(
-            """
-            SELECT 1
-            FROM (
-                SELECT filter_id FROM measure
-                LIMIT \(semanticProbeLimit) OFFSET 0
-            ) AS sampled_measure
-            INNER JOIN (
-                SELECT id FROM \(filterTable)
-                LIMIT \(semanticProbeLimit) OFFSET 0
-            ) AS sampled_filter
-                ON sampled_filter.id = sampled_measure.filter_id
-            WHERE typeof(sampled_measure.filter_id) = 'integer'
-                AND typeof(sampled_filter.id) = 'integer'
-            LIMIT 1
-            """,
-            stage: .validating
-        ) { _ in true }.isEmpty == false
+        do {
+            return try db.query(
+                """
+                SELECT 1
+                FROM measure AS sampled_measure
+                INNER JOIN \(filterTable) AS sampled_filter
+                    ON sampled_filter.id = sampled_measure.filter_id
+                WHERE typeof(sampled_measure.filter_id) = 'integer'
+                    AND typeof(sampled_filter.id) = 'integer'
+                LIMIT 1
+                """,
+                vmStepBudget: relationshipVMInstructionBudget,
+                stage: .validating
+            ) { _ in true }.isEmpty == false
+        } catch is TraceDatabase.VMInstructionBudgetExceeded {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .validating,
+                message: "Counter capability relationship exceeds validation budget",
+                details: [
+                    "reason": "vmStepBudgetExceeded",
+                    "relationship": "measure.filter_id->\(filterTable).id",
+                ]
+            )
+        }
+    }
+
+    /// A measure identity must resolve to exactly one filter row. Duplicate
+    /// IDs would duplicate the same EventKey and make name/unit selection
+    /// depend on SQLite's plan order, so ambiguity is a schema failure.
+    private static func validateUniqueCounterFilterIdentity(
+        _ db: TraceDatabase,
+        filterTable: String
+    ) throws {
+        guard TraceDatabase.isSafeIdentifier(filterTable) else { return }
+        do {
+            let duplicate = try db.query(
+                """
+                SELECT 1 FROM (
+                    SELECT id FROM \(filterTable)
+                    WHERE typeof(id) = 'integer'
+                    GROUP BY id HAVING COUNT(*) > 1
+                    LIMIT 1
+                )
+                """,
+                vmStepBudget: relationshipVMInstructionBudget,
+                stage: .validating
+            ) { _ in true }
+            guard duplicate.isEmpty else {
+                throw ArkTraceError(
+                    code: .traceSchemaUnsupported,
+                    stage: .validating,
+                    message: "Counter filter identity is ambiguous",
+                    details: [
+                        "reason": "duplicateFilterIdentity",
+                        "table": filterTable,
+                    ]
+                )
+            }
+        } catch is TraceDatabase.VMInstructionBudgetExceeded {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .validating,
+                message: "Counter filter identity validation exceeds budget",
+                details: [
+                    "reason": "vmStepBudgetExceeded",
+                    "relationship": "\(filterTable).id->unique",
+                ]
+            )
+        }
+    }
+
+    private static func validateDisjointCounterFilterIdentities(
+        _ db: TraceDatabase
+    ) throws {
+        do {
+            let ambiguous = try db.query(
+                """
+                SELECT 1
+                FROM cpu_measure_filter AS cpu
+                INNER JOIN process_measure_filter AS process
+                    ON cpu.id = process.id
+                WHERE typeof(cpu.id) = 'integer'
+                    AND typeof(process.id) = 'integer'
+                LIMIT 1
+                """,
+                vmStepBudget: relationshipVMInstructionBudget,
+                stage: .validating
+            ) { _ in true }
+            guard ambiguous.isEmpty else {
+                throw ArkTraceError(
+                    code: .traceSchemaUnsupported,
+                    stage: .validating,
+                    message: "Counter filter identity is ambiguous across scopes",
+                    details: ["reason": "duplicateFilterIdentity"]
+                )
+            }
+        } catch is TraceDatabase.VMInstructionBudgetExceeded {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .validating,
+                message: "Counter filter scope validation exceeds budget",
+                details: [
+                    "reason": "vmStepBudgetExceeded",
+                    "relationship": "counterFilter.id->scope",
+                ]
+            )
+        }
     }
 
     private static func traceRange(
@@ -546,16 +653,64 @@ enum TraceSchemaAdapter {
                 expectedType: "integer", allowsNull: false
             ),
             StorageColumn(
+                table: "thread_state", column: "cpu",
+                expectedType: "integer", allowsNull: true
+            ),
+            StorageColumn(
+                table: "callstack", column: "depth",
+                expectedType: "integer", allowsNull: true
+            ),
+            StorageColumn(
+                table: "callstack", column: "parent_id",
+                expectedType: "integer", allowsNull: true
+            ),
+            StorageColumn(
+                table: "callstack", column: "cookie",
+                expectedType: "integer", allowsNull: true
+            ),
+            StorageColumn(
                 table: "measure", column: "filter_id",
                 expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "measure", column: "value",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "measure", column: "dur",
+                expectedType: "integer", allowsNull: true
             ),
             StorageColumn(
                 table: "cpu_measure_filter", column: "id",
                 expectedType: "integer", allowsNull: false
             ),
             StorageColumn(
+                table: "cpu_measure_filter", column: "name",
+                expectedType: "text", allowsNull: false
+            ),
+            StorageColumn(
+                table: "cpu_measure_filter", column: "cpu",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "cpu_measure_filter", column: "unit",
+                expectedType: "text", allowsNull: true
+            ),
+            StorageColumn(
                 table: "process_measure_filter", column: "id",
                 expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "process_measure_filter", column: "name",
+                expectedType: "text", allowsNull: false
+            ),
+            StorageColumn(
+                table: "process_measure_filter", column: "ipid",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "process_measure_filter", column: "unit",
+                expectedType: "text", allowsNull: true
             ),
             StorageColumn(
                 table: "stat", column: "count",

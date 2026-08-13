@@ -3,8 +3,8 @@ import ArkTraceParser
 import Foundation
 
 public enum ArkTraceCLITool {
-    public static let name = "arktrace"
-    public static let version = "0.1.0"
+    public static let name = ArkTraceProduct.commandName
+    public static let version = ArkTraceProduct.version
 }
 
 public struct CLILimits: Equatable, Sendable {

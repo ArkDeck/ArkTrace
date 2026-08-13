@@ -1,4 +1,5 @@
 import ArkTraceCore
+import ArkTraceCLI
 import CryptoKit
 import XCTest
 
@@ -235,10 +236,10 @@ final class RepositoryTests: XCTestCase {
                 INSERT INTO callstack VALUES (2, 1200, 200, 2, 'inside');
                 INSERT INTO callstack VALUES (3, 1400, 0, 3, 'right-boundary');
                 CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
-                CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT);
-                CREATE TABLE process_measure_filter (id INTEGER, name TEXT);
-                INSERT INTO cpu_measure_filter VALUES (1, 'cpu');
-                INSERT INTO process_measure_filter VALUES (2, 'process');
+                CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+                CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+                INSERT INTO cpu_measure_filter VALUES (1, 'cpu', 0);
+                INSERT INTO process_measure_filter VALUES (2, 'process', 2);
                 INSERT INTO measure VALUES (1200, 1, 1);
                 INSERT INTO measure VALUES (1400, 1, 2);
                 CREATE TABLE stat (
@@ -538,8 +539,8 @@ final class RepositoryTests: XCTestCase {
             extraSQL: """
                 INSERT INTO sched_slice VALUES (5, 1500, 10, 'bad-cpu', 2, 2);
                 INSERT INTO measure VALUES ('bad-ts', 1, 'bad-filter');
-                INSERT INTO cpu_measure_filter VALUES ('bad-filter-id', 'bad');
-                INSERT INTO process_measure_filter VALUES (3.5, 'bad');
+                INSERT INTO cpu_measure_filter VALUES ('bad-filter-id', 'bad', 0);
+                INSERT INTO process_measure_filter VALUES (3.5, 'bad', 1);
                 INSERT INTO stat VALUES ('bad-count', 'received', 'bad', 'warn', 'trace');
                 INSERT INTO stat VALUES ('bad-stat-type', 7, 1, 'warn', 'trace');
                 """
@@ -1501,11 +1502,11 @@ final class RepositoryTests: XCTestCase {
         try db.execute(
             """
             CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
-            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT);
-            CREATE TABLE process_measure_filter (id INTEGER, name TEXT);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
             INSERT INTO measure VALUES (1000, 1, 100), (1000, 2, 200);
-            INSERT INTO cpu_measure_filter VALUES (101, 'disjoint cpu');
-            INSERT INTO process_measure_filter VALUES (201, 'disjoint process');
+            INSERT INTO cpu_measure_filter VALUES (101, 'disjoint cpu', 0);
+            INSERT INTO process_measure_filter VALUES (201, 'disjoint process', 1);
             """
         )
 
@@ -1513,15 +1514,115 @@ final class RepositoryTests: XCTestCase {
         XCTAssertFalse(capabilities.cpuCounters)
         XCTAssertFalse(capabilities.processCounters)
 
-        try db.execute("INSERT INTO cpu_measure_filter VALUES (100, 'matched cpu')")
+        try db.execute("INSERT INTO cpu_measure_filter VALUES (100, 'matched cpu', 0)")
         capabilities = try await makeRepository().metadata().capabilities
         XCTAssertTrue(capabilities.cpuCounters)
         XCTAssertFalse(capabilities.processCounters)
 
-        try db.execute("INSERT INTO process_measure_filter VALUES (200, 'matched process')")
+        try db.execute("INSERT INTO process_measure_filter VALUES (200, 'matched process', 1)")
         capabilities = try await makeRepository().metadata().capabilities
         XCTAssertTrue(capabilities.cpuCounters)
         XCTAssertTrue(capabilities.processCounters)
+    }
+
+    func testCounterCapabilityFindsMatchingIdentityBeyondLegacyProbePrefix() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO measure VALUES (1000, 1, 5000);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 1024
+            )
+            INSERT INTO cpu_measure_filter
+                SELECT value, 'prefix', 0 FROM ids;
+            INSERT INTO cpu_measure_filter VALUES (5000, 'tail match', 7);
+            """
+        )
+
+        let repository = try makeRepository()
+        let metadata = try await repository.metadata()
+        XCTAssertTrue(metadata.capabilities.cpuCounters)
+        let result = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 10),
+                filterID: 5000,
+                cpu: 7,
+                limit: 10,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(result.items.first?.name, "tail match")
+    }
+
+    func testCounterCapabilityBudgetExhaustionFailsClosedInsteadOfReportingUnavailable() throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO measure VALUES (1000, 1, 100001);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 100000
+            )
+            INSERT INTO cpu_measure_filter
+                SELECT value, 'large valid filter table', 0 FROM ids;
+            """
+        )
+
+        XCTAssertThrowsError(try makeRepository()) { error in
+            let error = error as? ArkTraceError
+            XCTAssertEqual(error?.code, .traceSchemaUnsupported)
+            XCTAssertEqual(error?.stage, .validating)
+            XCTAssertEqual(error?.details["reason"], "vmStepBudgetExceeded")
+            XCTAssertEqual(
+                error?.details["relationship"],
+                "measure.filter_id->cpu_measure_filter.id"
+            )
+        }
+    }
+
+    func testDuplicateCounterFilterIdentityFailsClosedAcrossRowsAndScopes() throws {
+        for extraSQL in [
+            "INSERT INTO cpu_measure_filter VALUES (1, 'ambiguous', 7);",
+            "INSERT INTO process_measure_filter VALUES (1, 'cross-scope', 2);",
+        ] {
+            let url = try makeTemporaryDatabase(
+                """
+                CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+                INSERT INTO trace_range VALUES (1000, 2000);
+                CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+                INSERT INTO process VALUES (2, 101, 'app', 1000);
+                CREATE TABLE thread (
+                    itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+                );
+                \(Self.requiredEventTablesSQL)
+                CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+                CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+                CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+                INSERT INTO cpu_measure_filter VALUES (1, 'canonical', 0);
+                INSERT INTO process_measure_filter VALUES (2, 'process', 2);
+                INSERT INTO measure VALUES (1200, 1, 1), (1200, 2, 2);
+                \(extraSQL)
+                """
+            )
+            defer { try? FileManager.default.removeItem(at: url) }
+            XCTAssertThrowsError(
+                try SQLiteTraceRepository(
+                    databaseURL: url,
+                    parser: Self.dummyParser,
+                    source: Self.dummySource
+                )
+            ) { error in
+                let typed = error as? ArkTraceError
+                XCTAssertEqual(typed?.code, .traceSchemaUnsupported)
+                XCTAssertEqual(typed?.stage, .validating)
+                XCTAssertEqual(typed?.details["reason"], "duplicateFilterIdentity")
+            }
+        }
     }
 
     func testBrokenRequiredRelationshipIsRejectedByBoundedProbe() throws {
@@ -1920,6 +2021,686 @@ final class RepositoryTests: XCTestCase {
         } catch let error as ArkTraceError {
             XCTAssertEqual(error.code, .traceDatabaseInvalid)
             XCTAssertEqual(error.details["table"], "process")
+        }
+    }
+
+    func testZeroDirectorySentinelIsOmittedInsteadOfBecomingStableKey() async throws {
+        let repository = try makeRepository()
+        let writer = try TraceDatabase(url: databaseURL, readOnly: false)
+        try writer.execute("UPDATE process SET ipid = 0 WHERE id = 1")
+        let processes = try await repository.processes(ProcessQuery())
+        XCTAssertFalse(processes.items.contains { $0.key.ipid == 0 })
+
+        try writer.execute("UPDATE process SET ipid = 1 WHERE id = 1")
+        try writer.execute("UPDATE thread SET itid = 0 WHERE id = 1")
+        let threads = try await repository.threads(ThreadQuery())
+        XCTAssertFalse(threads.items.contains { $0.key.itid == 0 })
+    }
+
+    func testZeroRelationshipSentinelNeverBecomesEventOrDensityIdentity() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            INSERT INTO sched_slice VALUES (10, 1600, 20, 7, 0, 0);
+            INSERT INTO thread_state VALUES (10, 1600, 20, 7, 0, 'R');
+            INSERT INTO callstack VALUES (10, 1600, 20, 0, 'unbound');
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let cpu = try await repository.cpuSlices(
+            CpuSliceQuery(range: range, cpu: 7, limit: 10, deadline: deadline)
+        )
+        let unboundCPU = try XCTUnwrap(cpu.items.first)
+        XCTAssertNil(unboundCPU.threadKey)
+        XCTAssertNil(unboundCPU.processKey)
+
+        let states = try await repository.threadStates(
+            ThreadStateQuery(range: range, limit: 10, deadline: deadline)
+        )
+        XCTAssertFalse(states.items.contains { $0.key.rowID == 10 })
+        XCTAssertTrue(states.truncated)
+        XCTAssertTrue(states.dataQuality.issues.contains {
+            $0.category == .droppedValue && $0.scope == "thread_state.value"
+        })
+
+        let slices = try await repository.slices(
+            TraceSliceQuery(
+                range: range, name: .exact("unbound"), limit: 10, deadline: deadline
+            )
+        )
+        let unboundSlice = try XCTUnwrap(slices.items.first)
+        XCTAssertNil(unboundSlice.threadKey)
+        XCTAssertNil(unboundSlice.processKey)
+
+        let writer = try TraceDatabase(url: url, readOnly: false)
+        try writer.execute("UPDATE process_measure_filter SET ipid = 0 WHERE id = 2")
+        let counters = try await repository.counters(
+            CounterQuery(range: range, filterID: 2, limit: 10, deadline: deadline)
+        )
+        XCTAssertNil(counters.items.first?.processKey)
+
+        let density = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .cpu(7), bucketCount: 8, deadline: deadline
+            )
+        )
+        XCTAssertEqual(density.buckets.reduce(0) { $0 + $1.eventCount }, 1)
+        XCTAssertNil(density.buckets.first?.dominantThreadKey)
+    }
+
+    func testNegativeInternalIdentitiesRemainStableAcrossQueries() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            INSERT INTO process VALUES (-10, 900, 'negative-process', 1500, NULL);
+            INSERT INTO thread VALUES (
+                -11, 901, 'negative-thread', 1500, NULL, -10
+            );
+            INSERT INTO sched_slice VALUES (20, 1600, 25, 9, -11, -10);
+            INSERT INTO thread_state VALUES (20, 1600, 25, 9, -11, 'Running');
+            INSERT INTO callstack VALUES (20, 1600, 25, -11, 'negative-slice');
+            INSERT INTO process_measure_filter
+                VALUES (20, 'negative-counter', -10);
+            INSERT INTO measure VALUES (1650, 5, 20);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let processes = try await repository.processes(ProcessQuery())
+        XCTAssertTrue(processes.items.contains { $0.key == ProcessKey(ipid: -10) })
+        let threads = try await repository.threads(ThreadQuery())
+        let thread = try XCTUnwrap(
+            threads.items.first { $0.key == ThreadKey(itid: -11) }
+        )
+        XCTAssertEqual(thread.processKey, ProcessKey(ipid: -10))
+
+        let cpu = try await repository.cpuSlices(
+            CpuSliceQuery(range: range, cpu: 9, limit: 10, deadline: deadline)
+        )
+        XCTAssertEqual(cpu.items.first?.threadKey, ThreadKey(itid: -11))
+        XCTAssertEqual(cpu.items.first?.processKey, ProcessKey(ipid: -10))
+
+        let states = try await repository.threadStates(
+            ThreadStateQuery(
+                range: range, threadKey: ThreadKey(itid: -11),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(states.items.first?.threadKey, ThreadKey(itid: -11))
+
+        let slices = try await repository.slices(
+            TraceSliceQuery(
+                range: range, threadKey: ThreadKey(itid: -11),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(slices.items.first?.threadKey, ThreadKey(itid: -11))
+        XCTAssertEqual(slices.items.first?.processKey, ProcessKey(ipid: -10))
+
+        let counters = try await repository.counters(
+            CounterQuery(
+                range: range, filterID: 20,
+                processKey: ProcessKey(ipid: -10),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(counters.items.first?.processKey, ProcessKey(ipid: -10))
+
+        let density = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .cpu(9), bucketCount: 8, deadline: deadline
+            )
+        )
+        XCTAssertEqual(density.buckets.first?.dominantThreadKey, ThreadKey(itid: -11))
+    }
+
+    func testTypedEventQueriesShareHalfOpenInstantAndOpenEndedSemantics() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 150, endNs: 400)
+
+        let cpu = try await repository.cpuSlices(
+            CpuSliceQuery(range: range, limit: 10, deadline: deadline)
+        )
+        XCTAssertTrue(cpu.capabilityAvailable)
+        XCTAssertEqual(cpu.items.map(\.key.rowID), [1, 2, 3])
+        XCTAssertTrue(cpu.items[1].isInstant)
+        XCTAssertTrue(cpu.items[2].isOpenEnded)
+        XCTAssertEqual(cpu.items[2].endNs, 1_000)
+
+        let states = try await repository.threadStates(
+            ThreadStateQuery(
+                range: range, state: .running, limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(states.items.map(\.key.rowID), [3])
+        XCTAssertEqual(states.items.first?.state, "Running")
+        XCTAssertEqual(states.items.first?.normalizedState, .running)
+
+        let slices = try await repository.slices(
+            TraceSliceQuery(
+                range: range,
+                name: .contains("in"),
+                minimumDurationNs: 150,
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(slices.items.map(\.name), ["inside"])
+        XCTAssertEqual(slices.items.first?.threadKey, ThreadKey(itid: 2))
+
+        let rightTouch = try await repository.slices(
+            TraceSliceQuery(
+                range: try TraceTimeRange.query(startNs: 300, endNs: 400),
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(rightTouch.items.map(\.key.rowID), [2])
+    }
+
+    func testTypedEventModelsPopulateEveryCompatibleOptionalField() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            ALTER TABLE sched_slice ADD COLUMN end_state TEXT;
+            ALTER TABLE sched_slice ADD COLUMN priority INTEGER;
+            UPDATE sched_slice SET end_state = 'R', priority = 42 WHERE id = 1;
+            ALTER TABLE callstack ADD COLUMN cat TEXT;
+            ALTER TABLE callstack ADD COLUMN depth INTEGER;
+            ALTER TABLE callstack ADD COLUMN parent_id INTEGER;
+            ALTER TABLE callstack ADD COLUMN cookie INTEGER;
+            UPDATE callstack
+                SET cat = 'io', depth = 3, parent_id = 1, cookie = 99
+                WHERE id = 2;
+            ALTER TABLE measure ADD COLUMN dur INTEGER;
+            UPDATE measure SET dur = 25 WHERE filter_id = 1;
+            ALTER TABLE cpu_measure_filter ADD COLUMN unit TEXT;
+            ALTER TABLE process_measure_filter ADD COLUMN unit TEXT;
+            UPDATE cpu_measure_filter SET unit = 'cycles' WHERE id = 1;
+            UPDATE process_measure_filter SET unit = 'bytes' WHERE id = 2;
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let cpu = try await repository.cpuSlices(
+            CpuSliceQuery(range: range, cpu: 0, limit: 10, deadline: deadline)
+        )
+        let cpuSlice = try XCTUnwrap(cpu.items.first)
+        XCTAssertEqual(cpuSlice.threadName, "old")
+        XCTAssertEqual(cpuSlice.processName, "old")
+        XCTAssertEqual(cpuSlice.endState, "R")
+        XCTAssertEqual(cpuSlice.priority, 42)
+
+        let states = try await repository.threadStates(
+            ThreadStateQuery(range: range, rawState: "Running", limit: 10, deadline: deadline)
+        )
+        let state = try XCTUnwrap(states.items.first)
+        XCTAssertEqual(state.threadKey, ThreadKey(itid: 2))
+        XCTAssertEqual(state.state, "Running")
+        XCTAssertEqual(state.normalizedState, .running)
+
+        let slices = try await repository.slices(
+            TraceSliceQuery(range: range, name: .exact("inside"), limit: 10, deadline: deadline)
+        )
+        let slice = try XCTUnwrap(slices.items.first)
+        XCTAssertEqual(slice.category, "io")
+        XCTAssertEqual(slice.depth, 3)
+        XCTAssertEqual(slice.parentEventKey, EventKey(table: .callstack, rowID: 1))
+        XCTAssertTrue(slice.isAsync)
+
+        let counters = try await repository.counters(
+            CounterQuery(range: range, limit: 10, deadline: deadline)
+        )
+        let cpuCounter = try XCTUnwrap(counters.items.first { $0.scope == .cpu })
+        XCTAssertEqual(cpuCounter.cpu, 0)
+        XCTAssertNil(cpuCounter.processKey)
+        XCTAssertEqual(cpuCounter.unit, "cycles")
+        XCTAssertEqual(cpuCounter.samples.first?.durationNs, 25)
+        let processCounter = try XCTUnwrap(counters.items.first { $0.scope == .process })
+        XCTAssertNil(processCounter.cpu)
+        XCTAssertEqual(processCounter.processKey, ProcessKey(ipid: 2))
+        XCTAssertEqual(processCounter.unit, "bytes")
+        XCTAssertNil(processCounter.samples.first?.durationNs)
+    }
+
+    func testWrongDynamicOptionalNumericStorageProducesTypedEventQuality() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            ALTER TABLE callstack ADD COLUMN depth INTEGER;
+            ALTER TABLE callstack ADD COLUMN parent_id INTEGER;
+            ALTER TABLE callstack ADD COLUMN cookie INTEGER;
+            UPDATE thread_state SET cpu = 'bad-cpu' WHERE id = 3;
+            UPDATE callstack
+                SET depth = 'bad-depth', parent_id = 'bad-parent', cookie = 'bad-cookie'
+                WHERE id = 2;
+            ALTER TABLE measure ADD COLUMN dur INTEGER;
+            UPDATE measure SET dur = 'bad-duration' WHERE filter_id = 1;
+            ALTER TABLE cpu_measure_filter ADD COLUMN unit TEXT;
+            UPDATE cpu_measure_filter SET unit = X'FF' WHERE id = 1;
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let writer = try TraceDatabase(url: url, readOnly: false)
+        try writer.execute(
+            """
+            UPDATE process SET pid = 'bad-pid' WHERE ipid = 2;
+            UPDATE thread SET tid = 'bad-tid' WHERE itid = 2;
+            """
+        )
+
+        let states = try await repository.threadStates(
+            ThreadStateQuery(range: range, rawState: "Running", limit: 10, deadline: deadline)
+        )
+        XCTAssertNil(states.items.first?.cpu)
+        XCTAssertNil(states.items.first?.pid)
+        XCTAssertNil(states.items.first?.tid)
+        XCTAssertTrue(states.truncated)
+        XCTAssertTrue(states.dataQuality.issues.contains {
+            $0.category == .droppedValue && $0.scope == "thread_state.value"
+                && ($0.count ?? 0) >= 3
+        })
+
+        let slices = try await repository.slices(
+            TraceSliceQuery(range: range, name: .exact("inside"), limit: 10, deadline: deadline)
+        )
+        XCTAssertNil(slices.items.first?.depth)
+        XCTAssertNil(slices.items.first?.parentEventKey)
+        XCTAssertFalse(slices.items.first?.isAsync ?? true)
+        XCTAssertTrue(slices.truncated)
+        XCTAssertTrue(slices.dataQuality.issues.contains {
+            $0.category == .droppedValue && $0.scope == "callstack.value"
+                && ($0.count ?? 0) >= 5
+        })
+
+        let counters = try await repository.counters(
+            CounterQuery(range: range, cpu: 0, limit: 10, deadline: deadline)
+        )
+        XCTAssertNil(counters.items.first?.unit)
+        XCTAssertEqual(
+            counters.items.first?.samples.first?.durationNs,
+            0,
+            "an incompatible optional duration is dropped and retained as an instant"
+        )
+        XCTAssertTrue(counters.truncated)
+        XCTAssertTrue(counters.dataQuality.issues.contains {
+            $0.category == .droppedValue && $0.scope == "measure.optional"
+                && ($0.count ?? 0) == 2
+        })
+    }
+
+    func testTypedEventFiltersAreBoundEscapedOrderedAndLimited() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            INSERT INTO callstack VALUES (4, 1300, 10, 2, '100% literal');
+            INSERT INTO callstack VALUES (5, 1300, 10, 2, '100x literal');
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let escaped = try await repository.slices(
+            TraceSliceQuery(
+                range: range,
+                name: .prefix("100%"),
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(escaped.items.map(\.key.rowID), [4])
+
+        let injection = try await repository.slices(
+            TraceSliceQuery(
+                range: range,
+                name: .exact("' OR 1=1 --"),
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertTrue(injection.items.isEmpty)
+
+        let limited = try await repository.slices(
+            TraceSliceQuery(range: range, limit: 2, deadline: deadline)
+        )
+        XCTAssertEqual(limited.items.map(\.key.rowID), [1, 2])
+        XCTAssertTrue(limited.truncated)
+    }
+
+    func testCounterQueriesAreCapabilityAwareScopedAndStable() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let cpu = try await repository.counters(
+            CounterQuery(range: range, cpu: 0, limit: 10, deadline: deadline)
+        )
+        XCTAssertTrue(cpu.capabilityAvailable)
+        XCTAssertEqual(cpu.items.count, 1)
+        XCTAssertEqual(cpu.items[0].filterID, 1)
+        XCTAssertEqual(cpu.items[0].samples.map(\.timestampNs), [200])
+        XCTAssertEqual(cpu.items[0].samples.first?.key.table, .measure)
+
+        let process = try await repository.counters(
+            CounterQuery(
+                range: range,
+                processKey: ProcessKey(ipid: 2),
+                limit: 10,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(process.items.first?.filterID, 2)
+    }
+
+    func testCounterDurationUsesSharedIntersectionClampAndSentinelSemantics() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            ALTER TABLE measure ADD COLUMN dur INTEGER;
+            DELETE FROM measure;
+            INSERT INTO measure VALUES (1050, 1, 1, 200);
+            INSERT INTO measure VALUES (1200, 2, 1, 0);
+            INSERT INTO measure VALUES (1300, 3, 1, NULL);
+            INSERT INTO measure VALUES (1400, 4, 1, -1);
+            INSERT INTO measure VALUES (1500, 5, 1, 9223372036854775807);
+            INSERT INTO measure VALUES (1600, 6, 1, 'bad-duration');
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+
+        let touching = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 250, endNs: 300),
+                cpu: 0, limit: 20, deadline: deadline
+            )
+        )
+        XCTAssertFalse(touching.items.flatMap(\.samples).contains { $0.value == 1 })
+
+        let overlap = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 200, endNs: 225),
+                cpu: 0, limit: 20, deadline: deadline
+            )
+        )
+        XCTAssertEqual(overlap.items.flatMap(\.samples).map(\.value), [1, 2])
+        XCTAssertEqual(overlap.items.flatMap(\.samples).first?.durationNs, 200)
+
+        let full = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                cpu: 0, limit: 20, deadline: deadline
+            )
+        )
+        let byValue = Dictionary(
+            uniqueKeysWithValues: full.items.flatMap(\.samples).map { ($0.value, $0) }
+        )
+        XCTAssertEqual(byValue[2]?.durationNs, 0)
+        XCTAssertNil(byValue[3]?.durationNs)
+        XCTAssertNil(byValue[4]?.durationNs)
+        XCTAssertEqual(byValue[5]?.durationNs, 500)
+        XCTAssertEqual(byValue[6]?.durationNs, 0)
+        XCTAssertTrue(full.truncated)
+        XCTAssertTrue(full.dataQuality.issues.contains {
+            $0.category == .clampedValue && $0.scope == "measure.dur" && $0.count == 1
+        })
+        XCTAssertTrue(full.dataQuality.issues.contains {
+            $0.category == .droppedValue && $0.scope == "measure.optional"
+                && $0.count == 1
+        })
+    }
+
+    func testCounterDensitySharesPositiveAndOpenEndedDurationIntersection() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            ALTER TABLE measure ADD COLUMN dur INTEGER;
+            DELETE FROM measure;
+            INSERT INTO measure VALUES (1050, 11, 1, 200);
+            INSERT INTO measure VALUES (1050, 22, 2, -1);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 100, endNs: 200)
+
+        let cpuDetail = try await repository.counters(
+            CounterQuery(
+                range: range, filterID: 1, cpu: 0,
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(cpuDetail.items.flatMap(\.samples).map(\.value), [11])
+        let cpuDensity = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .cpuCounter(filterID: 1, cpu: 0),
+                bucketCount: 4, deadline: deadline
+            )
+        )
+        XCTAssertEqual(cpuDensity.buckets.reduce(0) { $0 + $1.eventCount }, 1)
+
+        let processDetail = try await repository.counters(
+            CounterQuery(
+                range: range, filterID: 2,
+                processKey: ProcessKey(ipid: 2),
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(processDetail.items.flatMap(\.samples).map(\.value), [22])
+        let processDensity = try await repository.density(
+            TraceDensityQuery(
+                range: range,
+                source: .processCounter(
+                    filterID: 2, processKey: ProcessKey(ipid: 2)
+                ),
+                bucketCount: 4, deadline: deadline
+            )
+        )
+        XCTAssertEqual(processDensity.buckets.reduce(0) { $0 + $1.eventCount }, 1)
+        for quality in [cpuDensity.dataQuality, processDensity.dataQuality] {
+            XCTAssertFalse(quality.issues.contains { $0.category == .unclassified })
+            XCTAssertNoThrow(try CLIMachineDataQuality(quality))
+        }
+    }
+
+    func testCounterDensityReportsInvalidDurationBeyondSemanticProbePrefix() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            ALTER TABLE measure ADD COLUMN dur INTEGER;
+            DELETE FROM measure;
+            WITH RECURSIVE n(x) AS (
+                SELECT 1
+                UNION ALL
+                SELECT x + 1 FROM n WHERE x < 1024
+            )
+            INSERT INTO measure
+                SELECT 1000, x, 1, 0 FROM n;
+            INSERT INTO measure VALUES (1600, 11, 1, 'bad-cpu-duration');
+            INSERT INTO measure VALUES (1550, 33, 1, 9223372036854775807);
+            INSERT INTO measure VALUES (1650, 22, 2, 'bad-process-duration');
+            INSERT INTO measure VALUES (1575, 44, 2, 5000);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 500, endNs: 700)
+
+        let cpu = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .cpuCounter(filterID: 1, cpu: 0),
+                bucketCount: 4, deadline: deadline
+            )
+        )
+        let process = try await repository.density(
+            TraceDensityQuery(
+                range: range,
+                source: .processCounter(
+                    filterID: 2, processKey: ProcessKey(ipid: 2)
+                ),
+                bucketCount: 4, deadline: deadline
+            )
+        )
+        for result in [cpu, process] {
+            XCTAssertEqual(result.buckets.reduce(0) { $0 + $1.eventCount }, 2)
+            XCTAssertTrue(result.dataQuality.issues.contains {
+                $0.category == .droppedValue
+                    && $0.scope == "timeline.counter.duration"
+                    && $0.count == 1
+            })
+            XCTAssertTrue(result.dataQuality.issues.contains {
+                $0.category == .clampedValue
+                    && $0.scope == "timeline.counter.duration"
+                    && $0.count == 1
+            })
+            XCTAssertTrue(result.dataQuality.issues.contains {
+                $0.category == .unavailableValue
+                    && $0.scope == "timeline.density.occupancy"
+            })
+            let machine = try CLIMachineDataQuality(result.dataQuality)
+            XCTAssertEqual(
+                machine.warnings.filter {
+                    $0.scope == "timeline.counter.duration"
+                        && $0.category == .droppedValue
+                }.map(\.count),
+                [1]
+            )
+            XCTAssertEqual(
+                machine.warnings.filter {
+                    $0.scope == "timeline.counter.duration"
+                        && $0.category == .clampedValue
+                }.map(\.count),
+                [1]
+            )
+        }
+    }
+
+    func testEventQualityReportsOversizedPositiveDurationButNotOpenEndedSentinel() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: "INSERT INTO sched_slice VALUES (5, 1300, 5000, 0, 2, 2);"
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let page = try await repository.cpuSlices(
+            CpuSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 10,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(
+            page.dataQuality.issues.contains {
+                $0.category == .clampedValue && $0.scope == "sched_slice.dur"
+                    && $0.count == 1
+            }
+        )
+        XCTAssertEqual(page.items.first { $0.key.rowID == 3 }?.isOpenEnded, true)
+    }
+
+    func testDensityAggregationIsBucketBoundedAndHasNoEventIdentity() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let result = try await repository.density(
+            TraceDensityQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                source: .cpu(1),
+                bucketCount: 8,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(result.capabilityAvailable)
+        XCTAssertLessThanOrEqual(result.buckets.count, 8)
+        XCTAssertEqual(result.buckets.reduce(0) { $0 + $1.eventCount }, 1)
+        XCTAssertTrue(result.buckets.allSatisfy {
+            $0.occupiedNs == nil && $0.utilization == nil
+        })
+        XCTAssertTrue(result.dataQuality.issues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "timeline.density.occupancy"
+        })
+        XCTAssertNoThrow(try CLIMachineDataQuality(result.dataQuality))
+    }
+
+    func testDensityExtremeTimestampClampsBeforeIntegerSubtraction() async throws {
+        let start = Int64.max - 1_000
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (\(start), \(Int64.max));
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            INSERT INTO sched_slice
+                VALUES (1, \(Int64.min), -1, 7, 0, 0);
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let repository = try SQLiteTraceRepository(
+            databaseURL: url, parser: Self.dummyParser, source: Self.dummySource
+        )
+        let result = try await repository.density(
+            TraceDensityQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                source: .cpu(7),
+                bucketCount: 8,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(result.buckets.first?.range.startNs, 0)
+        XCTAssertEqual(result.buckets.first?.eventCount, 1)
+        XCTAssertNil(result.buckets.first?.dominantThreadKey)
+        XCTAssertTrue(result.dataQuality.issues.contains {
+            $0.category == .clampedValue && $0.scope == "sched_slice.ts"
+                && $0.count == 1
+        })
+    }
+
+    func testEventQueriesRespectCapabilityDeadlineAndCancellation() async throws {
+        let unavailable = try await makeRepository().cpuSlices(
+            CpuSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 10),
+                deadline: ContinuousClock.now.advanced(by: .seconds(1))
+            )
+        )
+        XCTAssertFalse(unavailable.capabilityAvailable)
+        XCTAssertTrue(unavailable.items.isEmpty)
+
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        do {
+            _ = try await repository.slices(
+                TraceSliceQuery(
+                    range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                    deadline: ContinuousClock.now
+                )
+            )
+            XCTFail("expected deadline")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .queryTimeout)
+        }
+
+        let task = Task {
+            while !Task.isCancelled { await Task.yield() }
+            return try await repository.cpuSlices(
+                CpuSliceQuery(
+                    range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                    deadline: ContinuousClock.now.advanced(by: .seconds(5))
+                )
+            )
+        }
+        task.cancel()
+        do {
+            _ = try await task.value
+            XCTFail("expected cancellation")
+        } catch is CancellationError {
+            // Expected typed Swift cancellation at the repository boundary.
         }
     }
 }

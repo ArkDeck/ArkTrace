@@ -197,4 +197,37 @@ public protocol TraceRepositoryProtocol: Sendable {
     func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess>
     func threads(_ query: ThreadQuery) async throws -> BoundedPage<TraceThread>
     func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts
+    func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice>
+    func threadStates(
+        _ query: ThreadStateQuery
+    ) async throws -> TraceEventPage<ThreadStateInterval>
+    func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice>
+    func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries>
+    func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult
+}
+
+/// Additive event APIs do not force summary-only adapters to manufacture
+/// event data. Production Store overrides every method.
+public extension TraceRepositoryProtocol {
+    func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
+        .unavailable
+    }
+
+    func threadStates(
+        _ query: ThreadStateQuery
+    ) async throws -> TraceEventPage<ThreadStateInterval> {
+        .unavailable
+    }
+
+    func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice> {
+        .unavailable
+    }
+
+    func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries> {
+        .unavailable
+    }
+
+    func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
+        .unavailable
+    }
 }

@@ -970,6 +970,10 @@ final class MachineContractTests: XCTestCase {
                 TraceDataQualityIssue(category: .clampedValue, scope: "process.start_ts"),
                 TraceDataQualityIssue(category: .droppedValue, scope: "stat.source"),
                 TraceDataQualityIssue(category: .referentialIntegrity, scope: "thread.ipid"),
+                TraceDataQualityIssue(
+                    category: .unavailableValue,
+                    scope: "timeline.density.occupancy"
+                ),
             ])),
             pretty: false,
             maximumBytes: 8_192
@@ -977,6 +981,27 @@ final class MachineContractTests: XCTestCase {
         let text = String(decoding: encoded, as: UTF8.self)
         for category in TraceDataQualityIssue.Category.allCases where category != .unclassified {
             XCTAssertTrue(text.contains("\"category\":\"\(category.rawValue)\""))
+        }
+        for consumedScope in [
+            "thread_state.cpu", "callstack.depth", "callstack.parent_id",
+            "callstack.cookie", "measure.value", "measure.dur",
+            "cpu_measure_filter.name", "cpu_measure_filter.cpu",
+            "cpu_measure_filter.unit", "process_measure_filter.name",
+            "process_measure_filter.ipid", "process_measure_filter.unit",
+            "sched_slice.value", "sched_slice.identity", "sched_slice.overlap",
+            "thread_state.value", "thread_state.identity", "thread_state.state",
+            "callstack.value", "callstack.identity", "measure.optional",
+            "timeline.density.occupancy", "timeline.counter",
+            "timeline.counter.duration",
+        ] {
+            XCTAssertNoThrow(try CLIMachineDataQuality(TraceDataQuality(issues: [
+                TraceDataQualityIssue(category: .droppedValue, scope: consumedScope, count: 1)
+            ])), consumedScope)
+        }
+        for eventScope in TraceDataQualityScope.machineAllowed {
+            XCTAssertNoThrow(try CLIMachineDataQuality(TraceDataQuality(issues: [
+                TraceDataQualityIssue(category: .invalidValue, scope: eventScope, count: 1)
+            ])), eventScope)
         }
         XCTAssertThrowsError(
             try CLIMachineDataQuality(TraceDataQuality(warnings: ["legacy warning"]))

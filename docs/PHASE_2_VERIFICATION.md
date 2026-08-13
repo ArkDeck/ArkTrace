@@ -65,11 +65,11 @@ metadata measurement 位于成功 open 后。最终 clean gate 实测：
    与零 skip 约束；
 2. 执行完整 Release XCTest，Phase 2 benchmark test 写出 ≤4 KiB sorted-key machine evidence；
 3. 用实际 Release `arktrace` 验证 malformed argument、wrong parser、timeout、output overflow、
-   SIGINT cancellation 与第二次 SIGTERM force；
+   SIGINT cancellation 与 SIGINT + SIGTERM second-signal force；不使用可能被 POSIX 合并的背靠背同类非实时信号，并接受 Darwin 对同时 pending 异类信号的两种合法 handler 顺序；
 4. 验证 human/JSON 使用同一 Core error code，并输出 path-free bounded summary evidence。
 
 最终 gate：237 tests、0 failure、0 skip；actual CLI status evidence 为 malformed 2、wrong parser 4、
-timeout/output limit 7、SIGINT cancel 8、second SIGTERM 143。统一独立 review 已 clean；Phase 1 的
+timeout/output limit 7、SIGINT cancel 8、second-signal force 130/143（按实际强退信号记录）。统一独立 review 已 clean；Phase 1 的
 94-test 冻结主表不会被 Phase 2 additive tests 改写。
 
 ## 5. 仍开放边界

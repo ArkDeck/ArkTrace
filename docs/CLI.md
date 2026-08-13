@@ -118,7 +118,8 @@ stdout 只会原子提交一个完整 UTF-8 JSON document。编码或 byte budge
 success；若最小 error envelope 也放不下，stdout 保持空。log/diagnostic 只写 stderr。
 
 Typed data-quality category 包括 `probeTruncated`、`invalidValue`、`clampedValue`、
-`droppedValue` 和 `referentialIntegrity`，下游不能解析 human warning 文案判断语义。
+`droppedValue`、`referentialIntegrity` 和 `unavailableValue`，下游不能解析 human warning
+文案判断语义。
 
 ## Exit status 与信号
 

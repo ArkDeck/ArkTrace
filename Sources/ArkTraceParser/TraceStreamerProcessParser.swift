@@ -1084,6 +1084,21 @@ public struct TraceStreamerProcessParser: TraceParser {
         let process = Process()
         process.executableURL = executable
         process.arguments = arguments
+        // The pinned parser is a local pure transformation. Never let an App,
+        // shell, test runner, or injected DYLD_* variable influence child
+        // loading or executable selection. The executable is always an
+        // immutable private snapshot, so its parent is a trusted writable
+        // per-invocation current/TMP directory. Never derive cwd from an
+        // arbitrary source argument: literal filenames may contain separators
+        // and the parser must not resolve ambient paths through cwd.
+        let workingDirectory = executable.deletingLastPathComponent()
+        process.currentDirectoryURL = workingDirectory
+        process.environment = [
+            "LANG": "C",
+            "LC_ALL": "C",
+            "PATH": "/usr/bin:/bin",
+            "TMPDIR": workingDirectory.path,
+        ]
         let stdoutSink = BoundedPipeSink(capacity: diagnosticCapacity)
         let stderrSink = BoundedPipeSink(capacity: diagnosticCapacity)
         process.standardOutput = stdoutSink.pipe

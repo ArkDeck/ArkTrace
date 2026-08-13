@@ -1,0 +1,9 @@
+// Canonical native product identity. ArkTraceProduct is the checked Swift
+// mirror consumed by SPM/CLI; AppDistributionTests fail closed on drift.
+ARKTRACE_PRODUCT_VERSION = 0.1.0
+ARKTRACE_PRODUCT_BUILD = 1
+ARKTRACE_BUNDLE_IDENTIFIER = com.arktrace.ArkTrace
+
+MARKETING_VERSION = $(ARKTRACE_PRODUCT_VERSION)
+CURRENT_PROJECT_VERSION = $(ARKTRACE_PRODUCT_BUILD)
+PRODUCT_BUNDLE_IDENTIFIER = $(ARKTRACE_BUNDLE_IDENTIFIER)

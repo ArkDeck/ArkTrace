@@ -12,6 +12,8 @@ let package = Package(
         .library(name: "ArkTraceStore", targets: ["ArkTraceStore"]),
         .library(name: "ArkTraceRuntime", targets: ["ArkTraceRuntime"]),
         .library(name: "ArkTraceAnalysis", targets: ["ArkTraceAnalysis"]),
+        .library(name: "ArkTraceRendering", targets: ["ArkTraceRendering"]),
+        .library(name: "ArkTraceAppSupport", targets: ["ArkTraceAppSupport"]),
         .library(name: "ArkTraceCLI", targets: ["ArkTraceCLI"]),
         .executable(name: "arktrace", targets: ["arktrace"]),
     ],
@@ -21,6 +23,14 @@ let package = Package(
         .target(name: "ArkTraceStore", dependencies: ["ArkTraceCore"]),
         .target(name: "ArkTraceRuntime", dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"]),
         .target(name: "ArkTraceAnalysis", dependencies: ["ArkTraceCore"]),
+        .target(
+            name: "ArkTraceRendering",
+            dependencies: ["ArkTraceCore"]
+        ),
+        .target(
+            name: "ArkTraceAppSupport",
+            dependencies: ["ArkTraceCore", "ArkTraceParser"]
+        ),
         .target(
             name: "ArkTraceSignalShim",
             publicHeadersPath: "include"
@@ -40,8 +50,19 @@ let package = Package(
         .executableTarget(name: "arktrace", dependencies: ["ArkTraceCLI"]),
         .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"]),
         .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"]),
-        .testTarget(name: "ArkTraceStoreTests", dependencies: ["ArkTraceStore"]),
+        .testTarget(
+            name: "ArkTraceStoreTests",
+            dependencies: ["ArkTraceStore", "ArkTraceCLI"]
+        ),
         .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"]),
+        .testTarget(
+            name: "ArkTraceRenderingTests",
+            dependencies: ["ArkTraceRendering"]
+        ),
+        .testTarget(
+            name: "ArkTraceAppSupportTests",
+            dependencies: ["ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser"]
+        ),
         .testTarget(
             name: "ArkTraceCLITests",
             dependencies: [

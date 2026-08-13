@@ -1,0 +1,227 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		010000000000000000000001 /* ArkTraceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* ArkTraceApp.swift */; };
+		010000000000000000000004 /* ArkTraceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000001 /* ArkTraceCore */; };
+		010000000000000000000005 /* ArkTraceRendering in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000002 /* ArkTraceRendering */; };
+		010000000000000000000006 /* ArkTraceAppSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000003 /* ArkTraceAppSupport */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		020000000000000000000001 /* ArkTraceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArkTraceApp.swift; sourceTree = "<group>"; };
+		020000000000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		020000000000000000000003 /* ArkTraceApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ArkTraceApp.entitlements; sourceTree = "<group>"; };
+		020000000000000000000004 /* trace_streamer */ = {isa = PBXFileReference; lastKnownFileType = compiled.mach-o.executable; name = trace_streamer; path = ThirdParty/TraceStreamer/macx/trace_streamer; sourceTree = SOURCE_ROOT; };
+		020000000000000000000005 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ThirdParty/TraceStreamer/macx/manifest.json; sourceTree = SOURCE_ROOT; };
+		020000000000000000000006 /* ArkTrace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArkTrace.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		020000000000000000000007 /* ArkTraceProduct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ArkTraceProduct.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		040000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				010000000000000000000004 /* ArkTraceCore in Frameworks */,
+				010000000000000000000005 /* ArkTraceRendering in Frameworks */,
+				010000000000000000000006 /* ArkTraceAppSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		050000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				050000000000000000000002 /* ArkTraceApp */,
+				050000000000000000000005 /* Config */,
+				050000000000000000000003 /* TraceStreamer */,
+				050000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		050000000000000000000002 /* ArkTraceApp */ = {
+			isa = PBXGroup;
+			children = (
+				020000000000000000000001 /* ArkTraceApp.swift */,
+				020000000000000000000002 /* Info.plist */,
+				020000000000000000000003 /* ArkTraceApp.entitlements */,
+			);
+			path = Apps/ArkTraceApp;
+			sourceTree = SOURCE_ROOT;
+		};
+		050000000000000000000003 /* TraceStreamer */ = {
+			isa = PBXGroup;
+			children = (
+				020000000000000000000004 /* trace_streamer */,
+				020000000000000000000005 /* manifest.json */,
+			);
+			name = TraceStreamer;
+			sourceTree = "<group>";
+		};
+		050000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (020000000000000000000006 /* ArkTrace.app */);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		050000000000000000000005 /* Config */ = {
+			isa = PBXGroup;
+			children = (020000000000000000000007 /* ArkTraceProduct.xcconfig */);
+			path = Config;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		060000000000000000000001 /* ArkTraceApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0A0000000000000000000002 /* Build configuration list for PBXNativeTarget "ArkTraceApp" */;
+			buildPhases = (
+				0B0000000000000000000001 /* Sources */,
+				040000000000000000000001 /* Frameworks */,
+				030000000000000000000001 /* Copy Pinned TraceStreamer Bytes */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = ArkTraceApp;
+			packageProductDependencies = (
+				090000000000000000000001 /* ArkTraceCore */,
+				090000000000000000000002 /* ArkTraceRendering */,
+				090000000000000000000003 /* ArkTraceAppSupport */,
+			);
+			productName = ArkTrace;
+			productReference = 020000000000000000000006 /* ArkTrace.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		070000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {060000000000000000000001 = {CreatedOnToolsVersion = 26.6;};};
+			};
+			buildConfigurationList = 0A0000000000000000000001 /* Build configuration list for PBXProject "ArkTrace" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = 050000000000000000000001;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (080000000000000000000001 /* XCLocalSwiftPackageReference "." */);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 050000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (060000000000000000000001 /* ArkTraceApp */);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		030000000000000000000001 /* Copy Pinned TraceStreamer Bytes */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = (
+				"$(SRCROOT)/ThirdParty/TraceStreamer/macx/trace_streamer",
+				"$(SRCROOT)/ThirdParty/TraceStreamer/macx/manifest.json",
+			);
+			name = "Copy Pinned TraceStreamer Bytes";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/TraceStreamer/trace_streamer",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/TraceStreamer/manifest.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\ndestination=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TraceStreamer\"\n/bin/mkdir -p \"${destination}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/trace_streamer\" \"${destination}/trace_streamer\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/manifest.json\" \"${destination}/manifest.json\"\n/bin/chmod 755 \"${destination}/trace_streamer\"\n/bin/chmod 644 \"${destination}/manifest.json\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0B0000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (010000000000000000000001 /* ArkTraceApp.swift in Sources */);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0C0000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; SDKROOT = macosx; SWIFT_VERSION = 6.0;}; name = Debug;};
+		0C0000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; SDKROOT = macosx; SWIFT_VERSION = 6.0;}; name = Release;};
+		0C0000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 020000000000000000000007 /* ArkTraceProduct.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_ENTITLEMENTS = Apps/ArkTraceApp/ArkTraceApp.entitlements;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Apps/ArkTraceApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_NAME = ArkTrace;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		0C0000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 020000000000000000000007 /* ArkTraceProduct.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_ENTITLEMENTS = Apps/ArkTraceApp/ArkTraceApp.entitlements;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Apps/ArkTraceApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_NAME = ArkTrace;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0A0000000000000000000001 /* Build configuration list for PBXProject "ArkTrace" */ = {isa = XCConfigurationList; buildConfigurations = (0C0000000000000000000001, 0C0000000000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+		0A0000000000000000000002 /* Build configuration list for PBXNativeTarget "ArkTraceApp" */ = {isa = XCConfigurationList; buildConfigurations = (0C0000000000000000000003, 0C0000000000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		080000000000000000000001 /* XCLocalSwiftPackageReference "." */ = {isa = XCLocalSwiftPackageReference; relativePath = .;};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		090000000000000000000001 /* ArkTraceCore */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceCore;};
+		090000000000000000000002 /* ArkTraceRendering */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceRendering;};
+		090000000000000000000003 /* ArkTraceAppSupport */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceAppSupport;};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 070000000000000000000001 /* Project object */;
+}

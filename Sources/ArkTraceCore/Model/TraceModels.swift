@@ -63,6 +63,9 @@ public struct TraceDataQualityIssue: Hashable, Codable, Sendable {
         case clampedValue
         case droppedValue
         case referentialIntegrity
+        /// A typed field or aggregate is intentionally unavailable for this
+        /// result even though the surrounding capability is usable.
+        case unavailableValue
         /// Compatibility category for library callers that still supply only
         /// a human warning. Production Store/Analysis paths use specific kinds.
         case unclassified
@@ -83,6 +86,40 @@ public struct TraceDataQualityIssue: Hashable, Codable, Sendable {
         self.scope = scope
         self.count = count
         self.message = message
+    }
+}
+
+/// Closed machine-facing vocabulary for quality scopes emitted by ArkTrace.
+/// Store and presentation boundaries share this fact source so a new typed
+/// warning cannot silently become an encoding failure.
+public enum TraceDataQualityScope {
+    public static let machineAllowed: Set<String> = [
+        "process.start_ts", "process.end_ts", "process.lifecycle",
+        "thread.start_ts", "thread.end_ts", "thread.ipid", "thread.lifecycle",
+        "sched_slice.ts", "sched_slice.dur", "sched_slice.cpu",
+        "sched_slice.value", "sched_slice.identity", "sched_slice.overlap",
+        "thread_state.ts", "thread_state.dur", "thread_state.cpu",
+        "thread_state.value", "thread_state.identity", "thread_state.state",
+        "callstack.ts", "callstack.dur", "callstack.depth",
+        "callstack.parent_id", "callstack.cookie", "callstack.value",
+        "callstack.identity",
+        "measure.ts", "measure.filter_id", "measure.value", "measure.dur",
+        "measure.optional",
+        "cpu_measure_filter.id", "cpu_measure_filter.name",
+        "cpu_measure_filter.cpu", "cpu_measure_filter.unit",
+        "process_measure_filter.id", "process_measure_filter.name",
+        "process_measure_filter.ipid", "process_measure_filter.unit",
+        "stat", "stat.count", "stat.source", "stat.event_name", "stat.stat_type",
+        "timeline.density.occupancy", "timeline.counter",
+        "timeline.counter.duration",
+    ]
+
+    public static func eventValue(table: String) -> String {
+        "\(table).value"
+    }
+
+    public static func eventIdentity(table: String) -> String {
+        "\(table).identity"
     }
 }
 

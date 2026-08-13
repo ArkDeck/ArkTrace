@@ -1,16 +1,16 @@
 # ArkTrace Phase 3 任务清单
 
-> 状态：Planned — Phase 2 Exit 后进入
+> 状态：Active — 4/10 完成，下一批 P3-T05～T07
 > 阶段：Native Viewer
 > 验收目标：ArkTrace.app 可以实际替代浏览器完成基础 Trace 查看
 
 ## 1. 进入条件
 
-- [ ] Phase 2 CLI/Runtime/Cache/JSON contract 稳定；
-- [ ] real trace 可经共享 Runtime 打开；
-- [ ] P1-T05 已引入并验证至少包含非零 CPU scheduling 和 named slice 行的可再分发 fixture；
-- [ ] App 分发形态、Sandbox、Developer ID/App Store、Intel 支持形成 review 决策；
-- [ ] DESIGN §25.11 的无障碍契约分层形成 review 决策；若改变当前 SPEC/DoD，必须先同步修订规范再调整 P3-T08/Exit。
+- [x] Phase 2 CLI/Runtime/Cache/JSON contract 稳定；
+- [x] real trace 可经共享 Runtime 打开；
+- [x] P1-T05 已引入并验证至少包含非零 CPU scheduling 和 named slice 行的可再分发 fixture；
+- [x] App 分发形态、Sandbox、Developer ID/App Store、Intel 支持形成待独立 review 的决策候选，见 [APP_DISTRIBUTION.md](./APP_DISTRIBUTION.md)；
+- [x] DESIGN §25.11 的无障碍决策候选保留当前 0.1 硬门，未降低 SPEC/DoD；
 
 ## 2. 阶段输出
 
@@ -57,10 +57,10 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **验收**
 
-- [ ] signed Debug app 可启动并解析 bundled parser identity；
-- [ ] bundle 缺失/drift 显示 typed unavailable；
-- [ ] App 不复制 Core/Store/Parser；
-- [ ] sandbox/签名方案与 child process 实测，不只写设计。
+- [x] signed Debug app 可启动并解析 bundled parser identity；
+- [x] bundle 缺失/drift 显示 typed unavailable；
+- [x] App 不复制 Core/Store/Parser；
+- [x] sandbox/签名方案与 child process 实测，不只写设计。
 
 ### P3-T02 — 扩展 typed event repository
 
@@ -79,16 +79,18 @@ P3-T01、P3-T02、P3-T05 可以并行。
 8. 不提供返回整个 event table 的 public API；
 9. counter capability/query 必须用顺序无关的 filter identity 选择（例如 bounded `DISTINCT filter_id` 或确定性排序），不得依赖无 `ORDER BY` 的前 1,024 行交叉采样；用含真实 counter 且匹配 identity 位于尾部的 fixture 验证。
 10. 事件语义落地时为 duration quality 定义 trace-relative 合理上界；异常大的正 `dur` 必须进入 typed dataQuality，同时保留 AT-TIME-005 负值 open-ended sentinel 的合法语义。
+11. counter filter ID 在单表内必须唯一且在 CPU/process scope 间不歧义；counter `dur` 缺列映射 instant、NULL/负值映射 open-ended，正值按共享相交语义和 trace end clamp，Renderer 消费同一规范化 duration。
 
 **测试**
 
-- [ ] 每类 event 的真实 DB fixture；
-- [ ] range touching/instant/open-ended；
-- [ ] filters、injection、order、limit；
-- [ ] cancel/timeout；
-- [ ] capability unavailable；
-- [ ] counter filter identity 位于第 1,024 行之后仍不会被误判为 unavailable。
-- [ ] 超过 trace duration/合理事件上界的正 duration 产生 typed warning，合法 open-ended sentinel 不误报。
+- [x] locked 真实 DB fixture 覆盖 scheduling/state/named-slice，counter 成功与 unavailable 路径由同 schema SQLite fixture 覆盖；
+- [x] range touching/instant/open-ended；
+- [x] filters、injection、order、limit；
+- [x] cancel/timeout；
+- [x] capability unavailable；
+- [x] counter filter identity 位于第 1,024 行之后仍不会被误判为 unavailable。
+- [x] 超过 trace duration/合理事件上界的正 duration 产生 typed warning，合法 open-ended sentinel 不误报。
+- [x] 重复/跨 scope counter filter identity fail closed；counter duration 的 touching/overlap/instant/open-ended/overflow 与 Renderer range 有回归。
 
 ### P3-T03 — 实现 TimelineViewport、track model 与两级 LOD
 
@@ -109,11 +111,11 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **验收**
 
-- [ ] zoomed-out primitive 数不随 trace 总事件线性增长；
-- [ ] density bucket count ≤ pixelWidth×2/track；
-- [ ] instant event 在 detail mode 保留；
-- [ ] stale query 不覆盖新 viewport；
-- [ ] open/expand/pan/zoom 无全表 preload。
+- [x] zoomed-out primitive 数不随 trace 总事件线性增长；
+- [x] density bucket count ≤ pixelWidth×2/track；
+- [x] instant event 在 detail mode 保留；
+- [x] stale query 不覆盖新 viewport；
+- [x] open/expand/pan/zoom 无全表 preload。
 
 ### P3-T04 — 实现 NSView/CoreGraphics Timeline renderer
 
@@ -134,11 +136,11 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **验收**
 
-- [ ] visual frame 与 hit target 偏差 ≤1 point；
-- [ ] 20000 primitives 下交互仍响应；
-- [ ] selection 只对应真实 event；
-- [ ] pan/zoom input 不同步等待 DB；
-- [ ] 没有数十万 SwiftUI Rectangle/View。
+- [x] visual frame 与 hit target 偏差 ≤1 point；
+- [x] 20000 primitives 下的 renderer model 仍为单个 NSView 与有界 primitive array；真实 frame/p95 仍归 P3-T09 gate；
+- [x] selection 只对应真实 event；
+- [x] pan/zoom input 不同步等待 DB；
+- [x] 没有数十万 SwiftUI Rectangle/View。
 
 ### P3-T05 — 接入 App session、file handling 与 cache UI
 

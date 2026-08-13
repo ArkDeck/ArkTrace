@@ -52,21 +52,28 @@ public enum TraceEventIntersection {
 
     /// SQL uses only fixed adapter column names. Every range/trace boundary is
     /// represented by `?` and supplied through `bindings` below (AT-DB-006).
-    static let sqlPredicate = """
-        typeof(ts) = 'integer'
-        AND (dur IS NULL OR typeof(dur) = 'integer')
+    static let sqlPredicate = sqlPredicate()
+
+    /// Generates the shared predicate with an optional trusted adapter alias.
+    /// Callers must pass only a Store-owned SQL identifier.
+    static func sqlPredicate(alias: String? = nil) -> String {
+        let prefix = alias.map { "\($0)." } ?? ""
+        return """
+        typeof(\(prefix)ts) = 'integer'
+        AND (\(prefix)dur IS NULL OR typeof(\(prefix)dur) = 'integer')
         AND (
-            (dur = 0 AND ts >= ? AND ts < ?)
+            (\(prefix)dur = 0 AND \(prefix)ts >= ? AND \(prefix)ts < ?)
             OR (
-                (dur IS NULL OR dur < 0)
-                AND ts < ? AND ? > ?
+                (\(prefix)dur IS NULL OR \(prefix)dur < 0)
+                AND \(prefix)ts < ? AND ? > ?
             )
             OR (
-                dur > 0 AND ts < ?
-                AND (ts > ? OR dur > ? - ts)
+                \(prefix)dur > 0 AND \(prefix)ts < ?
+                AND (\(prefix)ts > ? OR \(prefix)dur > ? - \(prefix)ts)
             )
         )
         """
+    }
 
     static func bindings(
         queryStart: Int64,

@@ -193,13 +193,22 @@ env CFFIXED_USER_HOME="$cli_user_root" "$arktrace" --json --no-cache \
     >"$forced_stdout" 2>"$forced_stderr" &
 forced_pid=$!
 sleep 0.10
-kill -TERM "$forced_pid" 2>/dev/null || fail "force process exited before first SIGTERM"
-kill -TERM "$forced_pid" 2>/dev/null || fail "force process exited before second SIGTERM"
+# Standard signals of the same number may coalesce while pending. Use two
+# different supported signals so this gate proves first-signal structured
+# cancellation followed by force, rather than depending on scheduler timing
+# between two back-to-back SIGTERMs. When both are pending, Darwin does not
+# promise handler delivery order, so the force status may correspond to either
+# captured signal.
+kill -INT "$forced_pid" 2>/dev/null || fail "force process exited before first signal"
+kill -TERM "$forced_pid" 2>/dev/null || fail "force process exited before second signal"
 set +e
 wait "$forced_pid"
 forced_status=$?
 set -e
-[ "$forced_status" -eq 143 ] || fail "second SIGTERM did not force status 143"
+case "$forced_status" in
+    130|143) ;;
+    *) fail "second signal did not force status 130/143 (actual $forced_status)" ;;
+esac
 
 jq \
     --argjson testCount "$test_count" \
@@ -208,7 +217,7 @@ jq \
     --argjson timeoutStatus 7 \
     --argjson outputLimitStatus 7 \
     --argjson cancelStatus 8 \
-    --argjson secondSignalStatus 143 '
+    --argjson secondSignalStatus "$forced_status" '
     . + {
         testCount: $testCount,
         skippedTestCount: 0,

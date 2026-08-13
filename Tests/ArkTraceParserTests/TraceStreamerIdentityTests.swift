@@ -190,6 +190,70 @@ final class TraceStreamerIdentityTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: sentinel.path))
     }
 
+    func testChildEnvironmentRejectsAmbientPathAndDYLDForIdentityAndRealParse() async throws {
+        try requirePinnedFiles()
+        let fixture = try makeExecutableScript("""
+            print -r -- "path=$PATH"
+            print -r -- "dyld=${DYLD_INSERT_LIBRARIES-unset}"
+            print -r -- "sentinel=${ARKTRACE_PARENT_SECRET-unset}"
+            """)
+        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+
+        let keysAndValues = [
+            "PATH": fixture.directory.path,
+            "DYLD_INSERT_LIBRARIES": "/tmp/arktrace-missing-injected-library.dylib",
+            "DYLD_PRINT_ENV": "1",
+            "ARKTRACE_PARENT_SECRET": "must-not-reach-child",
+        ]
+        let previous = Dictionary(uniqueKeysWithValues: keysAndValues.keys.map {
+            ($0, ProcessInfo.processInfo.environment[$0])
+        })
+        for (key, value) in keysAndValues { setenv(key, value, 1) }
+        defer {
+            for (key, value) in previous {
+                if let value { setenv(key, value, 1) } else { unsetenv(key) }
+            }
+        }
+
+        let direct = try await TraceStreamerProcessParser.run(
+            executable: URL(fileURLWithPath: "/usr/bin/env"),
+            arguments: []
+        )
+        let childEnvironment = Dictionary(uniqueKeysWithValues:
+            String(decoding: direct.stdout.data, as: UTF8.self)
+                .split(separator: "\n")
+                .compactMap { line -> (String, String)? in
+                    let fields = line.split(separator: "=", maxSplits: 1).map(String.init)
+                    guard fields.count == 2 else { return nil }
+                    return (fields[0], fields[1])
+                }
+        )
+        XCTAssertEqual(childEnvironment["PATH"], "/usr/bin:/bin")
+        XCTAssertNil(childEnvironment["DYLD_INSERT_LIBRARIES"])
+        XCTAssertNil(childEnvironment["DYLD_PRINT_ENV"])
+        XCTAssertNil(childEnvironment["ARKTRACE_PARENT_SECRET"])
+        XCTAssertEqual(
+            Set(childEnvironment.keys),
+            Set(["LANG", "LC_ALL", "PATH", "TMPDIR"])
+        )
+        XCTAssertFalse(String(decoding: direct.stderr.data, as: UTF8.self).contains("DYLD"))
+
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "arktrace-environment-\(UUID().uuidString)", isDirectory: true
+        )
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
+        let identity = try await parser.identity()
+        XCTAssertEqual(identity.reportedVersion, "4.3.7")
+        let parsed = try await Self.parse(
+            parser: parser,
+            source: Self.fixtureURL,
+            destination: directory.appendingPathComponent("trace.sqlite")
+        )
+        XCTAssertTrue(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
+    }
+
     func testChildDiagnosticsRemainBoundedUnderLargeOutput() async throws {
         let fixture = try makeExecutableScript("""
             head -c 1048576 /dev/zero

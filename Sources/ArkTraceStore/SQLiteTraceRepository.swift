@@ -31,6 +31,16 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
     private let processHasThreadCount: Bool
     private let threadHasEndTs: Bool
     private let threadHasIsMainThread: Bool
+    private let schedSliceHasEndState: Bool
+    private let schedSliceHasPriority: Bool
+    private let threadStateHasCPU: Bool
+    private let callstackHasDepth: Bool
+    private let callstackHasCategory: Bool
+    private let callstackHasParentID: Bool
+    private let callstackHasCookie: Bool
+    private let measureHasDuration: Bool
+    private let cpuFilterHasUnit: Bool
+    private let processFilterHasUnit: Bool
 
     public init(
         databaseURL: URL,
@@ -77,10 +87,28 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
 
         let processColumns = Set(try db.columns(of: "process").map(\.name))
         let threadColumns = Set(try db.columns(of: "thread").map(\.name))
+        let schedSliceColumns = Set(try db.columns(of: "sched_slice").map(\.name))
+        let threadStateColumns = Set(try db.columns(of: "thread_state").map(\.name))
+        let callstackColumns = Set(try db.columns(of: "callstack").map(\.name))
+        let measureColumns = Set(try db.columns(of: "measure").map(\.name))
+        let cpuFilterColumns = Set(try db.columns(of: "cpu_measure_filter").map(\.name))
+        let processFilterColumns = Set(
+            try db.columns(of: "process_measure_filter").map(\.name)
+        )
         self.processHasEndTs = processColumns.contains("end_ts")
         self.processHasThreadCount = processColumns.contains("thread_count")
         self.threadHasEndTs = threadColumns.contains("end_ts")
         self.threadHasIsMainThread = threadColumns.contains("is_main_thread")
+        self.schedSliceHasEndState = schedSliceColumns.contains("end_state")
+        self.schedSliceHasPriority = schedSliceColumns.contains("priority")
+        self.threadStateHasCPU = threadStateColumns.contains("cpu")
+        self.callstackHasDepth = callstackColumns.contains("depth")
+        self.callstackHasCategory = callstackColumns.contains("cat")
+        self.callstackHasParentID = callstackColumns.contains("parent_id")
+        self.callstackHasCookie = callstackColumns.contains("cookie")
+        self.measureHasDuration = measureColumns.contains("dur")
+        self.cpuFilterHasUnit = cpuFilterColumns.contains("unit")
+        self.processFilterHasUnit = processFilterColumns.contains("unit")
     }
 
     // MARK: - TraceRepositoryProtocol
@@ -104,7 +132,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         if processHasThreadCount { select.append("thread_count") }
 
         var sql = "SELECT \(select.joined(separator: ", ")) FROM process"
-        var conditions: [String] = []
+        var conditions = ["(ipid IS NULL OR ipid <> 0)"]
         var bindings: [TraceDatabase.Binding] = []
         if let pid = query.pid {
             conditions.append("pid = ?")
@@ -114,9 +142,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             conditions.append("name = ?")
             bindings.append(.text(name))
         }
-        if !conditions.isEmpty {
-            sql += " WHERE " + conditions.joined(separator: " AND ")
-        }
+        sql += " WHERE " + conditions.joined(separator: " AND ")
         sql += " ORDER BY pid ASC, ipid ASC LIMIT ?"
         bindings.append(.int64(Int64(query.limit) + 1))
 
@@ -154,7 +180,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             SELECT \(select.joined(separator: ", "))
             FROM thread t LEFT JOIN process p ON t.ipid = p.ipid
             """
-        var conditions: [String] = []
+        var conditions = ["(t.itid IS NULL OR t.itid <> 0)"]
         var bindings: [TraceDatabase.Binding] = []
         if let processKey = query.processKey {
             conditions.append("t.ipid = ?")
@@ -176,9 +202,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             conditions.append("t.name = ?")
             bindings.append(.text(name))
         }
-        if !conditions.isEmpty {
-            sql += " WHERE " + conditions.joined(separator: " AND ")
-        }
+        sql += " WHERE " + conditions.joined(separator: " AND ")
         sql += " ORDER BY (p.pid IS NULL) ASC, p.pid ASC, t.tid ASC, t.itid ASC LIMIT ?"
         bindings.append(.int64(Int64(query.limit) + 1))
 
@@ -197,7 +221,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             }
             return TraceThread(
                 key: ThreadKey(itid: itid),
-                processKey: row.int64(4).map(ProcessKey.init(ipid:)),
+                processKey: Self.processKey(row.int64(4)),
                 tid: tid,
                 pid: row.int64(5),
                 name: row.text(2),
@@ -349,7 +373,1214 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         )
     }
 
+    public func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
+        guard validation.capabilities.cpuScheduling else { return .unavailable }
+        let range = try validatedAbsoluteRange(query.range)
+        var conditions = [TraceEventIntersection.sqlPredicate(alias: "s")]
+        var bindings = TraceEventIntersection.bindings(
+            queryStart: range.start, queryEnd: range.end,
+            traceEnd: validation.traceEndTs
+        )
+        if let value = query.cpu {
+            conditions.append("s.cpu = ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.processKey {
+            conditions.append("s.ipid = ?")
+            bindings.append(.int64(value.ipid))
+        }
+        if let value = query.pid {
+            conditions.append("p.pid = ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.threadKey {
+            conditions.append("s.itid = ?")
+            bindings.append(.int64(value.itid))
+        }
+        if let value = query.tid {
+            conditions.append("t.tid = ?")
+            bindings.append(.int64(value))
+        }
+        bindings.append(.int64(Int64(query.limit) + 1))
+
+        let endStateSelection = schedSliceHasEndState
+            ? "CASE WHEN typeof(s.end_state) = 'text' "
+                + "AND length(CAST(s.end_state AS BLOB)) <= 256 "
+                + "THEN s.end_state ELSE NULL END"
+            : "NULL"
+        let prioritySelection = schedSliceHasPriority
+            ? "CASE WHEN typeof(s.priority) = 'integer' THEN s.priority ELSE NULL END"
+            : "NULL"
+        var invalidValueTerms = [
+            "CASE WHEN p.pid IS NOT NULL AND typeof(p.pid) <> 'integer' THEN 1 ELSE 0 END",
+            "CASE WHEN t.tid IS NOT NULL AND typeof(t.tid) <> 'integer' THEN 1 ELSE 0 END",
+            "CASE WHEN p.name IS NOT NULL AND (typeof(p.name) <> 'text' "
+                + "OR length(CAST(p.name AS BLOB)) > 4096) THEN 1 ELSE 0 END",
+            "CASE WHEN t.name IS NOT NULL AND (typeof(t.name) <> 'text' "
+                + "OR length(CAST(t.name AS BLOB)) > 4096) THEN 1 ELSE 0 END",
+        ]
+        if schedSliceHasEndState {
+            invalidValueTerms.append(
+                "CASE WHEN s.end_state IS NOT NULL AND (typeof(s.end_state) <> 'text' "
+                    + "OR length(CAST(s.end_state AS BLOB)) > 256) THEN 1 ELSE 0 END"
+            )
+        }
+        if schedSliceHasPriority {
+            invalidValueTerms.append(
+                "CASE WHEN s.priority IS NOT NULL AND typeof(s.priority) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+            )
+        }
+
+        let rows = try db.query(
+            """
+            SELECT s.id, s.ts, s.dur, s.cpu, s.ipid, s.itid,
+                p.pid, t.tid,
+                CASE WHEN typeof(p.name) = 'text'
+                    AND length(CAST(p.name AS BLOB)) <= 4096 THEN p.name ELSE NULL END,
+                CASE WHEN typeof(t.name) = 'text'
+                    AND length(CAST(t.name AS BLOB)) <= 4096 THEN t.name ELSE NULL END,
+                \(endStateSelection), \(prioritySelection),
+                CASE WHEN s.ipid IS NOT NULL AND s.ipid <> 0
+                    AND p.ipid IS NULL THEN 1 ELSE 0 END,
+                CASE WHEN s.itid IS NOT NULL AND s.itid <> 0
+                    AND t.itid IS NULL THEN 1 ELSE 0 END,
+                \(invalidValueTerms.joined(separator: " + "))
+            FROM sched_slice AS s
+            LEFT JOIN process AS p ON p.ipid = s.ipid
+            LEFT JOIN thread AS t ON t.itid = s.itid
+            WHERE \(conditions.joined(separator: " AND "))
+            ORDER BY s.ts ASC, s.id ASC LIMIT ?
+            """,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row in
+            EventRow(
+                id: row.int64(0), timestamp: row.int64(1), duration: row.int64(2),
+                durationIsNull: row.isNull(2), number: row.int64(3),
+                processKey: row.int64(4), threadKey: row.int64(5),
+                pid: row.int64(6), tid: row.int64(7), text: row.text(8),
+                secondaryText: row.text(9), tertiaryText: row.text(10),
+                depth: nil, auxiliaryNumber: row.int64(11), parentID: nil,
+                isAsync: false,
+                missingProcess: row.int64(12) == 1,
+                missingThread: row.int64(13) == 1,
+                invalidOptionalValueCount: row.int64(14) ?? 0
+            )
+        }
+        var items: [CpuSlice] = []
+        var quality = EventQuality()
+        for (index, row) in rows.prefix(query.limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
+            guard let id = row.id else { throw Self.invalidIdentity(table: "sched_slice") }
+            quality.invalidNumeric += row.invalidOptionalValueCount
+            guard let cpu = row.number else {
+                quality.invalidNumeric += 1
+                continue
+            }
+            let interval = try eventInterval(
+                timestamp: row.timestamp, duration: row.duration,
+                durationIsNull: row.durationIsNull, table: "sched_slice", quality: &quality
+            )
+            guard let interval else { continue }
+            quality.missingReference += (row.missingProcess ? 1 : 0)
+                + (row.missingThread ? 1 : 0)
+            items.append(
+                CpuSlice(
+                    key: EventKey(table: .schedSlice, rowID: id),
+                    range: try TraceTimeRange(
+                        startNs: interval.start, endNs: interval.end
+                    ),
+                    cpu: cpu,
+                    threadKey: Self.threadKey(row.threadKey),
+                    processKey: Self.processKey(row.processKey),
+                    tid: row.tid, pid: row.pid,
+                    threadName: row.secondaryText, processName: row.text,
+                    endState: row.tertiaryText, priority: row.auxiliaryNumber,
+                    isOpenEnded: interval.openEnded
+                )
+            )
+        }
+        quality.schedulingOverlap = overlappingSliceCount(items)
+        try checkQueryBoundary(query.deadline)
+        return eventPage(
+            items: items, sourceRows: rows.count, limit: query.limit,
+            table: "sched_slice", quality: quality
+        )
+    }
+
+    public func threadStates(
+        _ query: ThreadStateQuery
+    ) async throws -> TraceEventPage<ThreadStateInterval> {
+        guard validation.capabilities.threadStates else { return .unavailable }
+        let range = try validatedAbsoluteRange(query.range)
+        var conditions = [TraceEventIntersection.sqlPredicate(alias: "s")]
+        var bindings = TraceEventIntersection.bindings(
+            queryStart: range.start, queryEnd: range.end,
+            traceEnd: validation.traceEndTs
+        )
+        if let value = query.processKey {
+            conditions.append("t.ipid = ?")
+            bindings.append(.int64(value.ipid))
+        }
+        if let value = query.pid {
+            conditions.append("p.pid = ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.threadKey {
+            conditions.append("s.itid = ?")
+            bindings.append(.int64(value.itid))
+        }
+        if let value = query.tid {
+            conditions.append("t.tid = ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.rawState {
+            conditions.append("s.state = ?")
+            bindings.append(.text(value))
+        }
+        if let value = query.state {
+            conditions.append(Self.normalizedStatePredicate(value, column: "s.state"))
+        }
+        bindings.append(.int64(Int64(query.limit) + 1))
+        let cpuSelection = threadStateHasCPU
+            ? "CASE WHEN typeof(s.cpu) = 'integer' THEN s.cpu ELSE NULL END"
+            : "NULL"
+        var invalidValueTerms = [
+            "CASE WHEN s.itid IS NULL OR typeof(s.itid) <> 'integer' "
+                + "OR s.itid = 0 THEN 1 ELSE 0 END",
+            "CASE WHEN p.pid IS NOT NULL AND typeof(p.pid) <> 'integer' THEN 1 ELSE 0 END",
+            "CASE WHEN t.tid IS NOT NULL AND typeof(t.tid) <> 'integer' THEN 1 ELSE 0 END",
+        ]
+        if threadStateHasCPU {
+            invalidValueTerms.append(
+                "CASE WHEN s.cpu IS NOT NULL AND typeof(s.cpu) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+            )
+        }
+        let rows = try db.query(
+            """
+            SELECT s.id, s.ts, s.dur, \(cpuSelection), t.ipid, s.itid,
+                p.pid, t.tid,
+                CASE WHEN typeof(s.state) = 'text'
+                    AND length(CAST(s.state AS BLOB)) <= 256
+                    THEN s.state ELSE NULL END,
+                CASE WHEN s.itid IS NOT NULL AND s.itid <> 0
+                    AND t.itid IS NULL THEN 1 ELSE 0 END,
+                \(invalidValueTerms.joined(separator: " + "))
+            FROM thread_state AS s
+            LEFT JOIN thread AS t ON t.itid = s.itid
+            LEFT JOIN process AS p ON p.ipid = t.ipid
+            WHERE \(conditions.joined(separator: " AND "))
+            ORDER BY s.ts ASC, s.id ASC LIMIT ?
+            """,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row in
+            EventRow(
+                id: row.int64(0), timestamp: row.int64(1), duration: row.int64(2),
+                durationIsNull: row.isNull(2), number: row.int64(3),
+                processKey: row.int64(4), threadKey: row.int64(5),
+                pid: row.int64(6), tid: row.int64(7), text: row.text(8),
+                secondaryText: nil, tertiaryText: nil, depth: nil,
+                auxiliaryNumber: nil, parentID: nil, isAsync: false,
+                missingProcess: false, missingThread: row.int64(9) == 1,
+                invalidOptionalValueCount: row.int64(10) ?? 0
+            )
+        }
+        var items: [ThreadStateInterval] = []
+        var quality = EventQuality()
+        for (index, row) in rows.prefix(query.limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
+            guard let id = row.id else { throw Self.invalidIdentity(table: "thread_state") }
+            quality.invalidNumeric += row.invalidOptionalValueCount
+            guard let threadKey = row.threadKey, threadKey != 0 else { continue }
+            guard let rawState = row.text else {
+                quality.invalidText += 1
+                continue
+            }
+            let interval = try eventInterval(
+                timestamp: row.timestamp, duration: row.duration,
+                durationIsNull: row.durationIsNull, table: "thread_state", quality: &quality
+            )
+            guard let interval else { continue }
+            let normalizedState = Self.normalizeState(rawState)
+            if normalizedState == nil { quality.unknownState += 1 }
+            quality.missingReference += row.missingThread ? 1 : 0
+            items.append(
+                ThreadStateInterval(
+                    key: EventKey(table: .threadState, rowID: id),
+                    range: try TraceTimeRange(
+                        startNs: interval.start, endNs: interval.end
+                    ),
+                    threadKey: ThreadKey(itid: threadKey),
+                    state: rawState, normalizedState: normalizedState,
+                    cpu: row.number, tid: row.tid, pid: row.pid,
+                    isOpenEnded: interval.openEnded
+                )
+            )
+        }
+        try checkQueryBoundary(query.deadline)
+        return eventPage(
+            items: items, sourceRows: rows.count, limit: query.limit,
+            table: "thread_state", quality: quality
+        )
+    }
+
+    public func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice> {
+        guard validation.capabilities.namedSlices else { return .unavailable }
+        if query.depth != nil, !callstackHasDepth {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .querying,
+                message: "Named-slice depth is unavailable in this trace schema",
+                details: ["missingCapability": "namedSliceDepth"]
+            )
+        }
+        let range = try validatedAbsoluteRange(query.range)
+        var conditions = [TraceEventIntersection.sqlPredicate(alias: "s")]
+        var bindings = TraceEventIntersection.bindings(
+            queryStart: range.start, queryEnd: range.end,
+            traceEnd: validation.traceEndTs
+        )
+        if let value = query.processKey {
+            conditions.append("t.ipid = ?")
+            bindings.append(.int64(value.ipid))
+        }
+        if let value = query.pid {
+            conditions.append("p.pid = ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.threadKey {
+            conditions.append("s.callid = ?")
+            bindings.append(.int64(value.itid))
+        }
+        if let value = query.tid {
+            conditions.append("t.tid = ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.name {
+            switch value {
+            case .exact(let text):
+                conditions.append("s.name = ?")
+                bindings.append(.text(text))
+            case .prefix(let text):
+                conditions.append("s.name LIKE ? ESCAPE '\\'")
+                bindings.append(.text(Self.escapedLike(text) + "%"))
+            case .contains(let text):
+                conditions.append("s.name LIKE ? ESCAPE '\\'")
+                bindings.append(.text("%" + Self.escapedLike(text) + "%"))
+            }
+        }
+        if let value = query.minimumDurationNs {
+            conditions.append("s.dur >= ?")
+            bindings.append(.int64(value))
+        }
+        if let value = query.depth {
+            conditions.append("typeof(s.depth) = 'integer' AND s.depth = ?")
+            bindings.append(.int64(value))
+        }
+        bindings.append(.int64(Int64(query.limit) + 1))
+        let depthSelection = callstackHasDepth
+            ? "CASE WHEN typeof(s.depth) = 'integer' THEN s.depth ELSE NULL END"
+            : "NULL"
+        let categorySelection = callstackHasCategory
+            ? "CASE WHEN typeof(s.cat) = 'text' "
+                + "AND length(CAST(s.cat AS BLOB)) <= 1024 THEN s.cat ELSE NULL END"
+            : "NULL"
+        let parentSelection = callstackHasParentID
+            ? "CASE WHEN typeof(s.parent_id) = 'integer' "
+                + "AND s.parent_id > 0 AND s.parent_id <> 4294967295 "
+                + "THEN s.parent_id ELSE NULL END"
+            : "NULL"
+        let asyncSelection = callstackHasCookie
+            ? "CASE WHEN typeof(s.cookie) = 'integer' AND s.cookie <> 0 THEN 1 ELSE 0 END"
+            : "0"
+        var invalidValueTerms = [
+            "CASE WHEN p.pid IS NOT NULL AND typeof(p.pid) <> 'integer' THEN 1 ELSE 0 END",
+            "CASE WHEN t.tid IS NOT NULL AND typeof(t.tid) <> 'integer' THEN 1 ELSE 0 END",
+        ]
+        if callstackHasDepth {
+            invalidValueTerms.append(
+                "CASE WHEN s.depth IS NOT NULL AND typeof(s.depth) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+            )
+        }
+        if callstackHasCategory {
+            invalidValueTerms.append(
+                "CASE WHEN s.cat IS NOT NULL AND (typeof(s.cat) <> 'text' "
+                    + "OR length(CAST(s.cat AS BLOB)) > 1024) THEN 1 ELSE 0 END"
+            )
+        }
+        if callstackHasParentID {
+            invalidValueTerms.append(
+                "CASE WHEN s.parent_id IS NOT NULL AND typeof(s.parent_id) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+            )
+        }
+        if callstackHasCookie {
+            invalidValueTerms.append(
+                "CASE WHEN s.cookie IS NOT NULL AND typeof(s.cookie) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+            )
+        }
+        let rows = try db.query(
+            """
+            SELECT s.id, s.ts, s.dur, s.callid, t.ipid, p.pid, t.tid,
+                CASE WHEN typeof(s.name) = 'text'
+                    AND length(CAST(s.name AS BLOB)) <= 4096
+                    THEN s.name ELSE NULL END,
+                \(categorySelection), \(depthSelection),
+                \(parentSelection), \(asyncSelection),
+                CASE WHEN s.callid IS NOT NULL AND s.callid <> 0
+                    AND t.itid IS NULL THEN 1 ELSE 0 END,
+                \(invalidValueTerms.joined(separator: " + "))
+            FROM callstack AS s
+            LEFT JOIN thread AS t ON t.itid = s.callid
+            LEFT JOIN process AS p ON p.ipid = t.ipid
+            WHERE \(conditions.joined(separator: " AND "))
+            ORDER BY s.ts ASC, s.id ASC LIMIT ?
+            """,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row in
+            EventRow(
+                id: row.int64(0), timestamp: row.int64(1), duration: row.int64(2),
+                durationIsNull: row.isNull(2), number: nil,
+                processKey: row.int64(4), threadKey: row.int64(3),
+                pid: row.int64(5), tid: row.int64(6), text: row.text(7),
+                secondaryText: row.text(8), tertiaryText: nil, depth: row.int64(9),
+                auxiliaryNumber: nil, parentID: row.int64(10),
+                isAsync: row.int64(11) == 1,
+                missingProcess: false, missingThread: row.int64(12) == 1,
+                invalidOptionalValueCount: row.int64(13) ?? 0
+            )
+        }
+        var items: [TraceSlice] = []
+        var quality = EventQuality()
+        for (index, row) in rows.prefix(query.limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
+            guard let id = row.id else {
+                throw Self.invalidIdentity(table: "callstack")
+            }
+            quality.invalidNumeric += row.invalidOptionalValueCount
+            guard let name = row.text else {
+                quality.invalidText += 1
+                continue
+            }
+            let interval = try eventInterval(
+                timestamp: row.timestamp, duration: row.duration,
+                durationIsNull: row.durationIsNull, table: "callstack", quality: &quality
+            )
+            guard let interval else { continue }
+            quality.missingReference += row.missingThread ? 1 : 0
+            items.append(
+                TraceSlice(
+                    key: EventKey(table: .callstack, rowID: id),
+                    range: try TraceTimeRange(
+                        startNs: interval.start, endNs: interval.end
+                    ),
+                    threadKey: Self.threadKey(row.threadKey),
+                    processKey: Self.processKey(row.processKey),
+                    name: name, category: row.secondaryText, depth: row.depth,
+                    parentEventKey: row.parentID.map {
+                        EventKey(table: .callstack, rowID: $0)
+                    },
+                    isAsync: row.isAsync, isOpenEnded: interval.openEnded
+                )
+            )
+        }
+        try checkQueryBoundary(query.deadline)
+        return eventPage(
+            items: items, sourceRows: rows.count, limit: query.limit,
+            table: "callstack", quality: quality
+        )
+    }
+
+    public func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries> {
+        let cpuAvailable = validation.capabilities.cpuCounters
+        let processAvailable = validation.capabilities.processCounters
+        guard cpuAvailable || processAvailable else { return .unavailable }
+        if query.cpu != nil, !cpuAvailable { return .unavailable }
+        if query.processKey != nil, !processAvailable { return .unavailable }
+        let range = try validatedAbsoluteRange(query.range)
+        guard let rowID = try db.unshadowedRowIDAlias(
+            of: "measure", deadline: query.deadline
+        ) else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .querying,
+                message: "Counter samples have no stable row identity",
+                details: ["missingCapability": "counterSampleIdentity"]
+            )
+        }
+        var samples: [CounterResultRow] = []
+        var sourceTruncated = false
+        if cpuAvailable, query.processKey == nil {
+            let result = try counterRows(
+                filterTable: "cpu_measure_filter", scopeColumn: "cpu",
+                scopeValue: query.cpu, filterID: query.filterID,
+                hasUnit: cpuFilterHasUnit,
+                rowID: rowID, range: range, limit: query.limit,
+                deadline: query.deadline, sourceOrder: 0
+            )
+            samples.append(contentsOf: result.rows)
+            sourceTruncated = sourceTruncated || result.truncated
+        }
+        if processAvailable, query.cpu == nil {
+            let result = try counterRows(
+                filterTable: "process_measure_filter", scopeColumn: "ipid",
+                scopeValue: query.processKey?.ipid, filterID: query.filterID,
+                hasUnit: processFilterHasUnit,
+                rowID: rowID, range: range, limit: query.limit,
+                deadline: query.deadline, sourceOrder: 1
+            )
+            samples.append(contentsOf: result.rows)
+            sourceTruncated = sourceTruncated || result.truncated
+        }
+        samples.sort {
+            ($0.timestamp, $0.rowID, $0.sourceOrder, $0.filterID)
+                < ($1.timestamp, $1.rowID, $1.sourceOrder, $1.filterID)
+        }
+        let totalTruncated = sourceTruncated || samples.count > query.limit
+        let selected = samples.prefix(query.limit)
+        var grouped: [CounterSeriesKey: [CounterSample]] = [:]
+        var names: [CounterSeriesKey: String] = [:]
+        var units: [CounterSeriesKey: String] = [:]
+        var invalidOptionalValues: Int64 = 0
+        var counterQuality = EventQuality()
+        var seenSampleKeys: Set<EventKey> = []
+        for (index, row) in selected.enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
+            let key = CounterSeriesKey(
+                sourceOrder: row.sourceOrder, filterID: row.filterID, scopeID: row.scopeID
+            )
+            let eventKey = EventKey(table: .measure, rowID: row.rowID)
+            guard seenSampleKeys.insert(eventKey).inserted else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Counter filter identity produced a duplicate sample"
+                )
+            }
+            invalidOptionalValues += row.invalidOptionalValueCount
+            let normalized = try normalizedCounterSample(
+                row, quality: &counterQuality
+            )
+            grouped[key, default: []].append(
+                CounterSample(
+                    key: eventKey,
+                    timestampNs: normalized.timestampNs, value: row.value,
+                    durationNs: normalized.durationNs
+                )
+            )
+            names[key] = row.name
+            units[key] = row.unit
+        }
+        let orderedKeys = grouped.keys.sorted {
+            ($0.sourceOrder, $0.scopeID, $0.filterID)
+                < ($1.sourceOrder, $1.scopeID, $1.filterID)
+        }
+        let series = orderedKeys.map { key in
+            CounterSeries(
+                filterID: key.filterID,
+                name: names[key]!,
+                scope: key.sourceOrder == 0 ? .cpu : .process,
+                cpu: key.sourceOrder == 0 ? key.scopeID : nil,
+                processKey: key.sourceOrder == 1
+                    ? Self.processKey(key.scopeID) : nil,
+                unit: units[key],
+                samples: grouped[key]!
+            )
+        }
+        try checkQueryBoundary(query.deadline)
+        var issues = validation.dataQuality.issues
+        if invalidOptionalValues > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .droppedValue,
+                    scope: "measure.optional",
+                    count: invalidOptionalValues
+                )
+            )
+        }
+        if counterQuality.clampedTimestamp > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .clampedValue,
+                    scope: "measure.ts",
+                    count: counterQuality.clampedTimestamp
+                )
+            )
+        }
+        if counterQuality.clampedDuration > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .clampedValue,
+                    scope: "measure.dur",
+                    count: counterQuality.clampedDuration
+                )
+            )
+        }
+        return TraceEventPage(
+            items: series,
+            truncated: totalTruncated || invalidOptionalValues > 0
+                || counterQuality.invalidTime > 0,
+            capabilityAvailable: true,
+            dataQuality: TraceDataQuality(issues: issues)
+        )
+    }
+
+    public func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
+        let range = try validatedAbsoluteRange(query.range)
+        let (quotient, remainder) = query.range.durationNs.quotientAndRemainder(
+            dividingBy: Int64(query.bucketCount)
+        )
+        let bucketWidth = quotient + (remainder == 0 ? 0 : 1)
+        guard bucketWidth > 0 else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Density bucket width is invalid"
+            )
+        }
+
+        var bindings: [TraceDatabase.Binding] = [
+            .int64(range.start), .int64(range.start), .int64(bucketWidth),
+        ]
+        let sampleSQL: String
+        let timeQualityScope: String
+        let counterInvalidDurationSelection = measureHasDuration
+            ? "CASE WHEN m.dur IS NOT NULL AND typeof(m.dur) <> 'integer' "
+                + "THEN 1 ELSE 0 END"
+            : "0"
+        let counterClampedDurationSelection = measureHasDuration
+            ? "CASE WHEN typeof(m.dur) = 'integer' AND m.dur > 0 "
+                + "AND (m.dur > ? OR m.ts + m.dur > ?) THEN 1 ELSE 0 END"
+            : "0"
+        switch query.source {
+        case .cpu(let cpu):
+            guard validation.capabilities.cpuScheduling else { return .unavailable }
+            timeQualityScope = "sched_slice.ts"
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            bindings.append(contentsOf: TraceEventIntersection.bindings(
+                queryStart: range.start, queryEnd: range.end,
+                traceEnd: validation.traceEndTs
+            ))
+            bindings.append(.int64(cpu))
+            sampleSQL = """
+                SELECT MIN(\(query.bucketCount - 1), MAX(0,
+                        CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
+                    )) AS bucket,
+                    s.itid AS thread_id,
+                    CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    0 AS invalid_duration, 0 AS clamped_duration
+                FROM sched_slice AS s
+                WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
+                    AND typeof(s.cpu) = 'integer' AND s.cpu = ?
+                """
+        case .threadState(let threadKey):
+            guard validation.capabilities.threadStates else { return .unavailable }
+            timeQualityScope = "thread_state.ts"
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            bindings.append(contentsOf: TraceEventIntersection.bindings(
+                queryStart: range.start, queryEnd: range.end,
+                traceEnd: validation.traceEndTs
+            ))
+            bindings.append(.int64(threadKey.itid))
+            sampleSQL = """
+                SELECT MIN(\(query.bucketCount - 1), MAX(0,
+                        CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
+                    )) AS bucket,
+                    s.itid AS thread_id,
+                    CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    0 AS invalid_duration, 0 AS clamped_duration
+                FROM thread_state AS s
+                WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
+                    AND typeof(s.itid) = 'integer' AND s.itid = ?
+                """
+        case .namedSlice(let threadKey):
+            guard validation.capabilities.namedSlices else { return .unavailable }
+            timeQualityScope = "callstack.ts"
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            bindings.append(contentsOf: TraceEventIntersection.bindings(
+                queryStart: range.start, queryEnd: range.end,
+                traceEnd: validation.traceEndTs
+            ))
+            bindings.append(.int64(threadKey.itid))
+            sampleSQL = """
+                SELECT MIN(\(query.bucketCount - 1), MAX(0,
+                        CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
+                    )) AS bucket,
+                    s.callid AS thread_id,
+                    CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    0 AS invalid_duration, 0 AS clamped_duration
+                FROM callstack AS s
+                WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
+                    AND typeof(s.callid) = 'integer' AND s.callid = ?
+                """
+        case .cpuCounter(let filterID, let cpu):
+            guard validation.capabilities.cpuCounters else { return .unavailable }
+            timeQualityScope = "measure.ts"
+            let timeFilter = counterTimeFilter(range: range)
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            if measureHasDuration {
+                bindings.append(.int64(validation.durationNs))
+                bindings.append(.int64(validation.traceEndTs))
+            }
+            bindings.append(contentsOf: timeFilter.bindings)
+            bindings.append(.int64(filterID))
+            if let cpu { bindings.append(.int64(cpu)) }
+            sampleSQL = """
+                SELECT MIN(\(query.bucketCount - 1), MAX(0,
+                        CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
+                    )) AS bucket,
+                    NULL AS thread_id,
+                    CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    \(counterInvalidDurationSelection) AS invalid_duration,
+                    \(counterClampedDurationSelection) AS clamped_duration
+                FROM measure AS m
+                INNER JOIN cpu_measure_filter AS f ON f.id = m.filter_id
+                WHERE typeof(m.ts) = 'integer'
+                    AND typeof(m.filter_id) = 'integer'
+                    AND typeof(f.id) = 'integer' AND typeof(f.cpu) = 'integer'
+                    AND \(timeFilter.predicate)
+                    AND f.id = ? \(cpu == nil ? "" : "AND f.cpu = ?")
+                """
+        case .processCounter(let filterID, let processKey):
+            guard validation.capabilities.processCounters else { return .unavailable }
+            timeQualityScope = "measure.ts"
+            let timeFilter = counterTimeFilter(range: range)
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            if measureHasDuration {
+                bindings.append(.int64(validation.durationNs))
+                bindings.append(.int64(validation.traceEndTs))
+            }
+            bindings.append(contentsOf: timeFilter.bindings)
+            bindings.append(.int64(filterID))
+            if let processKey { bindings.append(.int64(processKey.ipid)) }
+            sampleSQL = """
+                SELECT MIN(\(query.bucketCount - 1), MAX(0,
+                        CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
+                    )) AS bucket,
+                    NULL AS thread_id,
+                    CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    \(counterInvalidDurationSelection) AS invalid_duration,
+                    \(counterClampedDurationSelection) AS clamped_duration
+                FROM measure AS m
+                INNER JOIN process_measure_filter AS f ON f.id = m.filter_id
+                WHERE typeof(m.ts) = 'integer'
+                    AND typeof(m.filter_id) = 'integer'
+                    AND typeof(f.id) = 'integer' AND typeof(f.ipid) = 'integer'
+                    AND \(timeFilter.predicate)
+                    AND f.id = ? \(processKey == nil ? "" : "AND f.ipid = ?")
+                """
+        }
+
+        let rows = try db.query(
+            """
+            WITH sampled AS (
+                \(sampleSQL)
+            ), grouped AS (
+                SELECT bucket, thread_id, COUNT(*) AS event_count,
+                    SUM(clamped) AS clamped_count,
+                    SUM(invalid_duration) AS invalid_duration_count,
+                    SUM(clamped_duration) AS clamped_duration_count
+                FROM sampled GROUP BY bucket, thread_id
+            ), ranked AS (
+                SELECT bucket, thread_id, event_count, clamped_count,
+                    invalid_duration_count, clamped_duration_count,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY bucket
+                        ORDER BY event_count DESC, thread_id ASC
+                    ) AS rank
+                FROM grouped
+            )
+            SELECT bucket, SUM(event_count),
+                MAX(CASE WHEN rank = 1 THEN thread_id ELSE NULL END),
+                SUM(clamped_count), SUM(invalid_duration_count),
+                SUM(clamped_duration_count)
+            FROM ranked GROUP BY bucket ORDER BY bucket ASC
+            """,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row in
+            (
+                row.int64(0), row.int64(1), row.int64(2),
+                row.int64(3), row.int64(4), row.int64(5)
+            )
+        }
+        var buckets: [TraceDensityBucket] = []
+        var clampedTimestampCount: Int64 = 0
+        var invalidCounterDurationCount: Int64 = 0
+        var clampedCounterDurationCount: Int64 = 0
+        buckets.reserveCapacity(rows.count)
+        for (index, row) in rows.enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
+            guard let bucket = row.0, let count = row.1,
+                bucket >= 0, bucket < Int64(query.bucketCount), count >= 0
+            else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Density aggregation returned an invalid bucket"
+                )
+            }
+            let (offset, offsetOverflow) = bucket.multipliedReportingOverflow(by: bucketWidth)
+            let (start, startOverflow) = query.range.startNs.addingReportingOverflow(offset)
+            let (candidateEnd, endOverflow) = start.addingReportingOverflow(bucketWidth)
+            guard !offsetOverflow, !startOverflow else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Density bucket cannot be represented"
+                )
+            }
+            let end = endOverflow ? query.range.endNs : min(candidateEnd, query.range.endNs)
+            clampedTimestampCount += row.3 ?? 0
+            invalidCounterDurationCount += row.4 ?? 0
+            clampedCounterDurationCount += row.5 ?? 0
+            buckets.append(
+                TraceDensityBucket(
+                    range: try TraceTimeRange.query(startNs: start, endNs: end),
+                    eventCount: count,
+                    occupiedNs: nil,
+                    utilization: nil,
+                    dominantThreadKey: Self.threadKey(row.2)
+                )
+            )
+        }
+        try checkQueryBoundary(query.deadline)
+        var issues = validation.dataQuality.issues
+        if clampedTimestampCount > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .clampedValue,
+                    scope: timeQualityScope,
+                    count: clampedTimestampCount
+                )
+            )
+        }
+        if invalidCounterDurationCount > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .droppedValue,
+                    scope: "timeline.counter.duration",
+                    count: invalidCounterDurationCount
+                )
+            )
+        }
+        if clampedCounterDurationCount > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .clampedValue,
+                    scope: "timeline.counter.duration",
+                    count: clampedCounterDurationCount
+                )
+            )
+        }
+        if !buckets.isEmpty {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .unavailableValue,
+                    scope: "timeline.density.occupancy"
+                )
+            )
+        }
+        return TraceDensityResult(
+            buckets: buckets,
+            capabilityAvailable: true,
+            dataQuality: TraceDataQuality(issues: issues)
+        )
+    }
+
     // MARK: - Helpers
+
+    private func validatedAbsoluteRange(
+        _ range: TraceTimeRange
+    ) throws -> (start: Int64, end: Int64) {
+        guard range.startNs < range.endNs, range.endNs <= validation.durationNs else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Event query range is empty or exceeds trace duration"
+            )
+        }
+        return try absoluteRange(range)
+    }
+
+    private func requiredRelative(_ timestamp: Int64) throws -> Int64 {
+        guard let value = try relative(timestamp) else {
+            throw ArkTraceError(
+                code: .queryFailed,
+                stage: .querying,
+                message: "Counter timestamp is unavailable"
+            )
+        }
+        return value
+    }
+
+    /// Counter duration uses the same half-open/instant/open-ended semantics
+    /// as other events. A schema without `measure.dur` is an instant series;
+    /// NULL/negative values remain open-ended as `durationNs == nil`.
+    private func normalizedCounterSample(
+        _ row: CounterResultRow,
+        quality: inout EventQuality
+    ) throws -> (timestampNs: Int64, durationNs: Int64?) {
+        switch row.durationState {
+        case .absent:
+            return (try requiredRelative(row.timestamp), 0)
+        case .invalid:
+            // The optional value is already counted by the SQL projection.
+            // Treat the retained sample as an instant instead of turning an
+            // incompatible value into an open-ended interval.
+            return (try requiredRelative(row.timestamp), 0)
+        case .null:
+            let interval = try eventInterval(
+                timestamp: row.timestamp,
+                duration: nil,
+                durationIsNull: true,
+                table: "measure",
+                quality: &quality
+            )
+            guard let interval else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Counter timestamp is unavailable"
+                )
+            }
+            return (interval.start, nil)
+        case .integer:
+            let interval = try eventInterval(
+                timestamp: row.timestamp,
+                duration: row.duration,
+                durationIsNull: false,
+                table: "measure",
+                quality: &quality
+            )
+            guard let interval else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Counter interval is unavailable"
+                )
+            }
+            if interval.openEnded { return (interval.start, nil) }
+            let (duration, overflow) = interval.end.subtractingReportingOverflow(
+                interval.start
+            )
+            guard !overflow, duration >= 0 else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Counter duration cannot be represented"
+                )
+            }
+            return (interval.start, duration)
+        }
+    }
+
+    private func eventInterval(
+        timestamp: Int64?,
+        duration: Int64?,
+        durationIsNull: Bool,
+        table: String,
+        quality: inout EventQuality
+    ) throws -> EventInterval? {
+        guard let timestamp, duration != nil || durationIsNull else {
+            quality.invalidTime += 1
+            return nil
+        }
+        let start = try requiredRelative(timestamp)
+        if timestamp < validation.traceStartTs || timestamp > validation.traceEndTs {
+            quality.clampedTimestamp += 1
+        }
+        guard let duration else {
+            return EventInterval(start: start, end: validation.durationNs, openEnded: true)
+        }
+        if duration < 0 {
+            return EventInterval(start: start, end: validation.durationNs, openEnded: true)
+        }
+        if duration == 0 {
+            return EventInterval(start: start, end: start, openEnded: false)
+        }
+        let (absoluteEnd, overflow) = timestamp.addingReportingOverflow(duration)
+        if overflow || duration > validation.durationNs || absoluteEnd > validation.traceEndTs {
+            quality.clampedDuration += 1
+            return EventInterval(start: start, end: validation.durationNs, openEnded: false)
+        }
+        let end = try requiredRelative(absoluteEnd)
+        guard end >= start else {
+            quality.invalidTime += 1
+            return nil
+        }
+        return EventInterval(start: start, end: end, openEnded: false)
+    }
+
+    private func eventPage<T: Sendable>(
+        items: [T],
+        sourceRows: Int,
+        limit: Int,
+        table: String,
+        quality: EventQuality
+    ) -> TraceEventPage<T> {
+        var issues = validation.dataQuality.issues
+        if quality.invalidNumeric > 0 || quality.invalidText > 0 || quality.invalidTime > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .droppedValue,
+                    scope: TraceDataQualityScope.eventValue(table: table),
+                    count: quality.invalidNumeric + quality.invalidText + quality.invalidTime
+                )
+            )
+        }
+        if quality.clampedTimestamp > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .clampedValue,
+                    scope: "\(table).ts",
+                    count: quality.clampedTimestamp
+                )
+            )
+        }
+        if quality.clampedDuration > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .clampedValue,
+                    scope: "\(table).dur",
+                    count: quality.clampedDuration
+                )
+            )
+        }
+        if quality.missingReference > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .referentialIntegrity,
+                    scope: TraceDataQualityScope.eventIdentity(table: table),
+                    count: quality.missingReference
+                )
+            )
+        }
+        if quality.unknownState > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .invalidValue,
+                    scope: "thread_state.state",
+                    count: quality.unknownState
+                )
+            )
+        }
+        if quality.schedulingOverlap > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .invalidValue,
+                    scope: "sched_slice.overlap",
+                    count: quality.schedulingOverlap
+                )
+            )
+        }
+        return TraceEventPage(
+            items: items,
+            truncated: sourceRows > limit
+                || quality.invalidNumeric > 0 || quality.invalidText > 0
+                || quality.invalidTime > 0,
+            capabilityAvailable: true,
+            dataQuality: TraceDataQuality(issues: issues)
+        )
+    }
+
+    private func overlappingSliceCount(_ slices: [CpuSlice]) -> Int64 {
+        var lastEndByCPU: [Int64: Int64] = [:]
+        var overlaps: Int64 = 0
+        for slice in slices {
+            let effectiveEnd = slice.isInstant ? slice.startNs : slice.endNs
+            if let lastEnd = lastEndByCPU[slice.cpu], slice.startNs < lastEnd {
+                overlaps += 1
+            }
+            lastEndByCPU[slice.cpu] = max(lastEndByCPU[slice.cpu] ?? .min, effectiveEnd)
+        }
+        return overlaps
+    }
+
+    private func counterRows(
+        filterTable: String,
+        scopeColumn: String,
+        scopeValue: Int64?,
+        filterID: Int64?,
+        hasUnit: Bool,
+        rowID: String,
+        range: (start: Int64, end: Int64),
+        limit: Int,
+        deadline: ContinuousClock.Instant,
+        sourceOrder: Int64
+    ) throws -> (rows: [CounterResultRow], truncated: Bool) {
+        var conditions = [
+            "typeof(m.ts) = 'integer'", "typeof(m.value) = 'integer'",
+            "typeof(m.filter_id) = 'integer'", "typeof(f.id) = 'integer'",
+            "typeof(f.\(scopeColumn)) = 'integer'", "typeof(f.name) = 'text'",
+            "length(CAST(f.name AS BLOB)) <= 256",
+        ]
+        let timeFilter = counterTimeFilter(range: range)
+        conditions.append(timeFilter.predicate)
+        var bindings = timeFilter.bindings
+        if let filterID {
+            conditions.append("f.id = ?")
+            bindings.append(.int64(filterID))
+        }
+        if let scopeValue {
+            conditions.append("f.\(scopeColumn) = ?")
+            bindings.append(.int64(scopeValue))
+        }
+        bindings.append(.int64(Int64(limit) + 1))
+        let durationSelection = measureHasDuration
+            ? "CASE WHEN typeof(m.dur) = 'integer' THEN m.dur ELSE NULL END"
+            : "0"
+        let durationStateSelection = measureHasDuration
+            ? "CASE WHEN m.dur IS NULL THEN 1 "
+                + "WHEN typeof(m.dur) = 'integer' THEN 2 ELSE 3 END"
+            : "0"
+        let unitSelection = hasUnit
+            ? "CASE WHEN typeof(f.unit) = 'text' "
+                + "AND length(CAST(f.unit AS BLOB)) <= 256 THEN f.unit ELSE NULL END"
+            : "NULL"
+        var invalidValueTerms: [String] = []
+        if measureHasDuration {
+            invalidValueTerms.append(
+                "CASE WHEN m.dur IS NOT NULL AND typeof(m.dur) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+            )
+        }
+        if hasUnit {
+            invalidValueTerms.append(
+                "CASE WHEN f.unit IS NOT NULL AND (typeof(f.unit) <> 'text' "
+                    + "OR length(CAST(f.unit AS BLOB)) > 256) THEN 1 ELSE 0 END"
+            )
+        }
+        let invalidSelection = invalidValueTerms.isEmpty
+            ? "0" : invalidValueTerms.joined(separator: " + ")
+        let rows = try db.query(
+            """
+            SELECT m.\(rowID), m.ts, m.value, f.id, f.name, f.\(scopeColumn),
+                \(durationSelection), \(durationStateSelection),
+                \(unitSelection), \(invalidSelection)
+            FROM measure AS m
+            INNER JOIN \(filterTable) AS f ON f.id = m.filter_id
+            WHERE \(conditions.joined(separator: " AND "))
+            ORDER BY m.ts ASC, m.\(rowID) ASC LIMIT ?
+            """,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row -> CounterResultRow in
+            guard let rowID = row.int64(0), let timestamp = row.int64(1),
+                let value = row.int64(2), let filterID = row.int64(3),
+                let name = row.text(4), let scopeID = row.int64(5)
+            else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Counter sample has incompatible storage"
+                )
+            }
+            return CounterResultRow(
+                rowID: rowID, timestamp: timestamp, value: value,
+                filterID: filterID, name: name, scopeID: scopeID,
+                sourceOrder: sourceOrder, duration: row.int64(6),
+                durationState: CounterDurationState(rawValue: row.int64(7) ?? 3)
+                    ?? .invalid,
+                unit: row.text(8),
+                invalidOptionalValueCount: row.int64(9) ?? 0
+            )
+        }
+        return (Array(rows.prefix(limit)), rows.count > limit)
+    }
+
+    /// Counter detail and density must agree on interval intersection. A
+    /// schema without measure.dur contains instant samples. If an optional
+    /// duration has an incompatible dynamic storage class, retain that row as
+    /// an instant; bounded quality evidence reports the dropped value.
+    private func counterTimeFilter(
+        range: (start: Int64, end: Int64)
+    ) -> (predicate: String, bindings: [TraceDatabase.Binding]) {
+        guard measureHasDuration else {
+            return (
+                "m.ts >= ? AND m.ts < ?",
+                [.int64(range.start), .int64(range.end)]
+            )
+        }
+        return (
+            """
+            (
+                ((m.dur IS NULL OR typeof(m.dur) = 'integer') AND (
+                    \(TraceEventIntersection.sqlPredicate(alias: "m"))
+                ))
+                OR (
+                    m.dur IS NOT NULL AND typeof(m.dur) <> 'integer'
+                    AND m.ts >= ? AND m.ts < ?
+                )
+            )
+            """,
+            TraceEventIntersection.bindings(
+                queryStart: range.start,
+                queryEnd: range.end,
+                traceEnd: validation.traceEndTs
+            ) + [.int64(range.start), .int64(range.end)]
+        )
+    }
+
+    private static func escapedLike(_ text: String) -> String {
+        text.replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
+    }
+
+    /// TraceStreamer uses zero for an absent relationship. Never let that
+    /// sentinel cross the Store boundary as a forged stable identity.
+    private static func processKey(_ raw: Int64?) -> ProcessKey? {
+        guard let raw, raw != 0 else { return nil }
+        return ProcessKey(ipid: raw)
+    }
+
+    /// TraceStreamer uses zero for an absent relationship. Never let that
+    /// sentinel cross the Store boundary as a forged stable identity.
+    private static func threadKey(_ raw: Int64?) -> ThreadKey? {
+        guard let raw, raw != 0 else { return nil }
+        return ThreadKey(itid: raw)
+    }
+
+    private static func normalizeState(_ raw: String) -> TraceThreadState? {
+        switch raw.uppercased() {
+        case "RUNNING": return .running
+        case "R", "R+", "RUNNABLE", "READY": return .runnable
+        case "S", "SLEEPING", "SLEEP": return .sleeping
+        case "D", "BLOCKED", "UNINTERRUPTIBLE": return .blocked
+        case "T", "STOPPED": return .stopped
+        default: return nil
+        }
+    }
+
+    private static func normalizedStatePredicate(
+        _ state: TraceThreadState,
+        column: String
+    ) -> String {
+        switch state {
+        case .running: return "UPPER(\(column)) IN ('RUNNING')"
+        case .runnable: return "UPPER(\(column)) IN ('R', 'R+', 'RUNNABLE', 'READY')"
+        case .sleeping: return "UPPER(\(column)) IN ('S', 'SLEEPING', 'SLEEP')"
+        case .blocked: return "UPPER(\(column)) IN ('D', 'BLOCKED', 'UNINTERRUPTIBLE')"
+        case .stopped: return "UPPER(\(column)) IN ('T', 'STOPPED')"
+        }
+    }
 
     private func absoluteRange(_ relativeRange: TraceTimeRange) throws
         -> (start: Int64, end: Int64)
@@ -504,7 +1735,10 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var invalidSampled: Int64 = 0
         for (index, row) in rows.prefix(limit).enumerated() {
             if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
-            guard row.identity != nil else { throw Self.invalidIdentity(table: table) }
+            guard let identity = row.identity else {
+                throw Self.invalidIdentity(table: table)
+            }
+            if identity == 0 { continue }
             guard let start = row.start else {
                 invalidSampled += 1
                 continue
@@ -786,6 +2020,74 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
     private struct CounterSeriesIdentity: Hashable {
         let source: Int64
         let series: Int64
+    }
+
+    private struct EventRow {
+        let id: Int64?
+        let timestamp: Int64?
+        let duration: Int64?
+        let durationIsNull: Bool
+        let number: Int64?
+        let processKey: Int64?
+        let threadKey: Int64?
+        let pid: Int64?
+        let tid: Int64?
+        let text: String?
+        let secondaryText: String?
+        let tertiaryText: String?
+        let depth: Int64?
+        let auxiliaryNumber: Int64?
+        let parentID: Int64?
+        let isAsync: Bool
+        let missingProcess: Bool
+        let missingThread: Bool
+        let invalidOptionalValueCount: Int64
+    }
+
+    private struct EventInterval {
+        let start: Int64
+        let end: Int64
+        let openEnded: Bool
+    }
+
+    private struct EventQuality {
+        var invalidNumeric: Int64 = 0
+        var invalidText: Int64 = 0
+        var invalidTime: Int64 = 0
+        var clampedTimestamp: Int64 = 0
+        var clampedDuration: Int64 = 0
+        var missingReference: Int64 = 0
+        var unknownState: Int64 = 0
+        var schedulingOverlap: Int64 = 0
+    }
+
+    private struct CounterResultRow {
+        let rowID: Int64
+        let timestamp: Int64
+        let value: Int64
+        let filterID: Int64
+        let name: String
+        let scopeID: Int64
+        let sourceOrder: Int64
+        let duration: Int64?
+        let durationState: CounterDurationState
+        let unit: String?
+        let invalidOptionalValueCount: Int64
+    }
+
+    private enum CounterDurationState: Int64 {
+        /// Optional column is absent; counter samples are instants.
+        case absent = 0
+        /// SQL NULL is the AT-TIME-005 open-ended sentinel.
+        case null = 1
+        case integer = 2
+        case invalid = 3
+    }
+
+    private struct CounterSeriesKey: Hashable {
+        let sourceOrder: Int64
+        let filterID: Int64
+        let scopeID: Int64
     }
 
     private struct EventSample {
