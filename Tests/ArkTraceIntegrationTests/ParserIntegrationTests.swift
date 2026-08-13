@@ -1670,11 +1670,48 @@ final class ParserIntegrationTests: XCTestCase {
             ),
         ]
         XCTAssertEqual(tracks.count, 8)
-        let contextRange = try Self.clampedWindow(
-            around: firstCPU.range,
-            padding: 50_000_000,
-            traceDurationNs: metadata.durationNs
+        let contextTimestampNs: Int64 = 10_200_000_000
+        let contextWindowBeforeNs: Int64 = 50_000_000
+        let contextWindowAfterNs: Int64 = 50_000_000
+        let contextRange = try TraceTimeRange.query(
+            startNs: 10_150_000_000,
+            endNs: 10_250_000_000
         )
+        XCTAssertGreaterThanOrEqual(metadata.durationNs, contextRange.endNs)
+        let contextRequest = try TraceContextRequest(
+            time: .timestamp(
+                timestampNs: contextTimestampNs,
+                windowBeforeNs: contextWindowBeforeNs,
+                windowAfterNs: contextWindowAfterNs
+            )
+        )
+        // AT-PERF-006 freezes one reproducible range-analysis workload rather
+        // than allowing the measured window or budgets to drift with a probe.
+        // These are the CLI effective defaults for a reviewed 10.1...10.3 s
+        // range: global maxRows/maxEvents 10k, local limit 1k, 30 s timeout.
+        let analysisRange = try TraceTimeRange.query(
+            startNs: 10_100_000_000,
+            endNs: 10_300_000_000
+        )
+        XCTAssertGreaterThanOrEqual(metadata.durationNs, analysisRange.endNs)
+        let analysisMaximumRows = 10_000
+        let analysisRequest = try TraceDeterministicAnalysisRequest(
+            range: analysisRange,
+            maximumCPUSlices: 10_000,
+            maximumProcessSlices: 10_000,
+            maximumThreadSlices: 10_000,
+            maximumStateIntervals: 10_000,
+            maximumNamedSlices: 10_000,
+            maximumSchedulingEvents: 10_000,
+            maximumHotEvents: 10_000,
+            topProcessLimit: 1_000,
+            topThreadLimit: 1_000,
+            longSliceLimit: 1_000,
+            schedulingSampleLimit: 1_000,
+            hotIntervalLimit: 1_000,
+            timeout: .seconds(30)
+        )
+        var analysisParameters: TraceDeterministicAnalysisParameters?
         let loader = TimelineSnapshotLoader()
         for iteration in 0..<iterations {
             let hitStages = PerformanceStageRecorder()
@@ -1713,40 +1750,37 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertFalse(processPage.items.isEmpty)
             XCTAssertFalse(threadPage.items.isEmpty)
 
-            let contextDeadline = ContinuousClock.now.advanced(by: .seconds(10))
             let contextStartTime = ContinuousClock.now
-            let contextCPU = try await session.repository.cpuSlices(
-                try CpuSliceQuery(
-                    range: contextRange, limit: 10_000, deadline: contextDeadline
-                )
-            )
-            let contextStates = try await session.repository.threadStates(
-                try ThreadStateQuery(
-                    range: contextRange, limit: 10_000, deadline: contextDeadline
-                )
-            )
-            let contextSlices = try await session.repository.slices(
-                try TraceSliceQuery(
-                    range: contextRange, limit: 10_000, deadline: contextDeadline
-                )
-            )
-            let contextBytes = try JSONEncoder().encode(contextCPU.items).count
-                + JSONEncoder().encode(contextStates.items).count
-                + JSONEncoder().encode(contextSlices.items).count
-            XCTAssertGreaterThan(contextCPU.items.count, 0)
+            let context = try await TraceContextBuilder(
+                repository: session.repository
+            ).build(contextRequest)
+            XCTAssertEqual(context.range, contextRange)
+            let contextBytes = try context.encoded(
+                maximumBytes: 8 * 1_024 * 1_024
+            ).count
+            let contextEvents = context.cpuSlices.count
+                + context.threadStates.count
+                + context.slices.count
+                + context.counters.reduce(0) { $0 + $1.samples.count }
+            XCTAssertGreaterThan(contextEvents, 0)
             XCTAssertLessThanOrEqual(contextBytes, 8 * 1_024 * 1_024)
             contextMs.append(Self.milliseconds(contextStartTime.duration(to: .now)))
 
             let analysisStart = ContinuousClock.now
-            let analysis = try await TraceRangeAnalysisEngine(
+            let analysis = try await TraceDeterministicAnalysisEngine(
                 repository: session.repository
-            ).analyze(
-                try TraceRangeAnalysisRequest(
-                    range: contextRange, timeout: .seconds(10)
-                )
-            )
+            ).analyze(analysisRequest).retainingRows(maximumRows: analysisMaximumRows)
+            analysisParameters = analysis.parameters
             analysisMs.append(Self.milliseconds(analysisStart.duration(to: .now)))
             XCTAssertFalse(analysis.cpuUtilization.isEmpty)
+            let analysisRows = analysis.cpuUtilization.count
+                + analysis.topProcesses.count
+                + analysis.topThreads.count
+                + analysis.longSlices.count
+                + analysis.threadStateDistribution.count
+                + analysis.schedulingLatency.topSamples.count
+                + analysis.hotIntervals.count
+            XCTAssertGreaterThan(analysisRows, 0)
 
             let generation = UInt64(iteration + 1)
             let viewport = try TimelineViewport(
@@ -1837,10 +1871,9 @@ final class ParserIntegrationTests: XCTestCase {
                 "cpuDensityEvents": densityCounts[0],
                 "threadStateDensityEvents": densityCounts[1],
                 "namedSliceDensityEvents": densityCounts[2],
-                "contextEvents": Int64(
-                    contextCPU.items.count + contextStates.items.count
-                        + contextSlices.items.count
-                ),
+                "contextBytes": Int64(contextBytes),
+                "contextEvents": Int64(contextEvents),
+                "deterministicAnalysisRows": Int64(analysisRows),
             ]
             let loaderStart = ContinuousClock.now
             let snapshot = try await loader.load(request, repository: session.repository)
@@ -1997,6 +2030,28 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertGreaterThan(cacheMetadata.databaseByteCount, 0)
 
         struct Phase3Evidence: Encodable {
+            struct ContextWorkload: Encodable {
+                struct Time: Encodable {
+                    let timestampNs: Int64
+                    let windowBeforeNs: Int64
+                    let windowAfterNs: Int64
+                }
+                let name: String
+                let time: Time
+                let normalizedRange: TraceTimeRange
+                let filters: TraceAgentQueryFilters
+                let maximumEvents: Int
+                let maximumRows: Int
+                let maximumOutputBytes: Int
+                let timeoutSeconds: Int64
+                let timeoutAttoseconds: Int64
+            }
+            struct AnalysisWorkload: Encodable {
+                let name: String
+                let range: TraceTimeRange
+                let globalMaximumRows: Int
+                let parameters: TraceDeterministicAnalysisParameters
+            }
             struct Machine: Encodable {
                 let model: String
                 let architecture: String
@@ -2043,8 +2098,10 @@ final class ParserIntegrationTests: XCTestCase {
             let rebuildFrameP95Ms: Double
             let contextP50Ms: Double
             let contextP95Ms: Double
-            let rangeAnalysisP50Ms: Double
-            let rangeAnalysisP95Ms: Double
+            let deterministicAnalysisP50Ms: Double
+            let deterministicAnalysisP95Ms: Double
+            let contextWorkload: ContextWorkload
+            let analysisWorkload: AnalysisWorkload
             let peakRSSBytes: Int64
             let maximumPrimitives: Int
             let capabilities: TraceCapabilities
@@ -2111,8 +2168,29 @@ final class ParserIntegrationTests: XCTestCase {
             rebuildFrameP95Ms: rebuildFrameP95,
             contextP50Ms: Self.percentile(contextMs, fraction: 0.50),
             contextP95Ms: contextP95,
-            rangeAnalysisP50Ms: Self.percentile(analysisMs, fraction: 0.50),
-            rangeAnalysisP95Ms: analysisP95,
+            deterministicAnalysisP50Ms: Self.percentile(analysisMs, fraction: 0.50),
+            deterministicAnalysisP95Ms: analysisP95,
+            contextWorkload: .init(
+                name: "timestamp-default-v1",
+                time: .init(
+                    timestampNs: contextTimestampNs,
+                    windowBeforeNs: contextWindowBeforeNs,
+                    windowAfterNs: contextWindowAfterNs
+                ),
+                normalizedRange: contextRange,
+                filters: contextRequest.filters,
+                maximumEvents: contextRequest.maximumEvents,
+                maximumRows: contextRequest.maximumRows,
+                maximumOutputBytes: contextRequest.maximumOutputBytes,
+                timeoutSeconds: contextRequest.timeout.components.seconds,
+                timeoutAttoseconds: contextRequest.timeout.components.attoseconds
+            ),
+            analysisWorkload: .init(
+                name: "agent-range-default-v1",
+                range: analysisRange,
+                globalMaximumRows: analysisMaximumRows,
+                parameters: try XCTUnwrap(analysisParameters)
+            ),
             peakRSSBytes: peakRSSBytes,
             maximumPrimitives: 20_000,
             capabilities: metadata.capabilities,

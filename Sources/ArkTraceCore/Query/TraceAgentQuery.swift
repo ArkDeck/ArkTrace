@@ -1,6 +1,6 @@
 /// Closed, Agent-facing event views. Adding a view is a versioned contract
 /// change; callers cannot name a table, column, SQL fragment, or expression.
-public enum TraceAgentQueryView: String, Codable, CaseIterable, Sendable {
+public enum TraceAgentQueryView: String, Codable, CaseIterable, Hashable, Sendable {
     case cpuSlices
     case threadStates
     case slices
@@ -127,6 +127,33 @@ public struct TraceAgentQueryFilters: Hashable, Codable, Sendable {
             counterFilterID: values.decodeIfPresent(Int64.self, forKey: .counterFilterID)
         )
     }
+
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try Self.encodeNullable(cpu, to: &values, forKey: .cpu)
+        try Self.encodeNullable(processKey, to: &values, forKey: .processKey)
+        try Self.encodeNullable(pid, to: &values, forKey: .pid)
+        try Self.encodeNullable(threadKey, to: &values, forKey: .threadKey)
+        try Self.encodeNullable(tid, to: &values, forKey: .tid)
+        try Self.encodeNullable(rawState, to: &values, forKey: .rawState)
+        try Self.encodeNullable(normalizedState, to: &values, forKey: .normalizedState)
+        try Self.encodeNullable(name, to: &values, forKey: .name)
+        try values.encode(nameMatch, forKey: .nameMatch)
+        try Self.encodeNullable(
+            minimumDurationNs, to: &values, forKey: .minimumDurationNs
+        )
+        try Self.encodeNullable(depth, to: &values, forKey: .depth)
+        try Self.encodeNullable(counterFilterID, to: &values, forKey: .counterFilterID)
+    }
+
+    private static func encodeNullable<T: Encodable>(
+        _ value: T?,
+        to values: inout KeyedEncodingContainer<CodingKeys>,
+        forKey key: CodingKeys
+    ) throws {
+        if let value { try values.encode(value, forKey: key) }
+        else { try values.encodeNil(forKey: key) }
+    }
 }
 
 public struct TraceAgentQueryRequest: Sendable {
@@ -159,11 +186,44 @@ public struct TraceAgentQueryRequest: Sendable {
                 message: "Agent query limit or timeout is invalid"
             )
         }
+        try Self.validate(filters, for: view)
         self.view = view
         self.range = range
         self.filters = filters
         self.limit = limit
         self.timeout = timeout
+    }
+
+    private static func validate(
+        _ filters: TraceAgentQueryFilters,
+        for view: TraceAgentQueryView
+    ) throws {
+        let invalid: Bool
+        switch view {
+        case .cpuSlices:
+            invalid = filters.rawState != nil || filters.normalizedState != nil
+                || filters.name != nil || filters.minimumDurationNs != nil
+                || filters.depth != nil || filters.counterFilterID != nil
+        case .threadStates:
+            invalid = filters.name != nil || filters.minimumDurationNs != nil
+                || filters.depth != nil || filters.counterFilterID != nil
+        case .slices:
+            invalid = filters.cpu != nil || filters.rawState != nil
+                || filters.normalizedState != nil || filters.counterFilterID != nil
+        case .counters:
+            invalid = filters.threadKey != nil || filters.tid != nil
+                || filters.rawState != nil || filters.normalizedState != nil
+                || filters.minimumDurationNs != nil || filters.depth != nil
+                || (filters.cpu != nil
+                    && (filters.processKey != nil || filters.pid != nil))
+        }
+        guard !invalid else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Agent query filter is not supported by the selected view"
+            )
+        }
     }
 }
 
@@ -224,6 +284,7 @@ public struct TraceAgentCounterEvent: Hashable, Codable, Sendable {
 public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
     public let view: TraceAgentQueryView
     public let range: TraceTimeRange
+    public let filters: TraceAgentQueryFilters
     public let capabilityAvailable: Bool
     public let truncated: Bool
     public let dataQuality: TraceDataQuality
@@ -235,6 +296,7 @@ public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
     public init(
         view: TraceAgentQueryView,
         range: TraceTimeRange,
+        filters: TraceAgentQueryFilters = .none,
         capabilityAvailable: Bool,
         truncated: Bool,
         dataQuality: TraceDataQuality,
@@ -263,6 +325,7 @@ public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
         }
         self.view = view
         self.range = range
+        self.filters = filters
         self.capabilityAvailable = capabilityAvailable
         self.truncated = truncated
         self.dataQuality = dataQuality
@@ -282,7 +345,7 @@ public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case view, range, capabilityAvailable, truncated, dataQuality
+        case view, range, filters, capabilityAvailable, truncated, dataQuality
         case cpuSlices, threadStates, slices, counters
     }
 
@@ -308,6 +371,7 @@ public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
         try self.init(
             view: view,
             range: values.decode(TraceTimeRange.self, forKey: .range),
+            filters: values.decode(TraceAgentQueryFilters.self, forKey: .filters),
             capabilityAvailable: values.decode(Bool.self, forKey: .capabilityAvailable),
             truncated: values.decode(Bool.self, forKey: .truncated),
             dataQuality: values.decode(TraceDataQuality.self, forKey: .dataQuality),
@@ -326,6 +390,7 @@ public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
         var values = encoder.container(keyedBy: CodingKeys.self)
         try values.encode(view, forKey: .view)
         try values.encode(range, forKey: .range)
+        try values.encode(filters, forKey: .filters)
         try values.encode(capabilityAvailable, forKey: .capabilityAvailable)
         try values.encode(truncated, forKey: .truncated)
         try values.encode(dataQuality, forKey: .dataQuality)

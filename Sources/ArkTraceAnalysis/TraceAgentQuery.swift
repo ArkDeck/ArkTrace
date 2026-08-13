@@ -85,6 +85,7 @@ public struct TraceAgentQueryEngine: Sendable {
                 return try TraceAgentQueryResult(
                     view: view,
                     range: range,
+                    filters: filters,
                     capabilityAvailable: page.capabilityAvailable,
                     truncated: page.truncated || sorted.count > limit,
                     dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
@@ -115,6 +116,7 @@ public struct TraceAgentQueryEngine: Sendable {
                 return try TraceAgentQueryResult(
                     view: view,
                     range: range,
+                    filters: filters,
                     capabilityAvailable: page.capabilityAvailable,
                     truncated: page.truncated || sorted.count > limit,
                     dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
@@ -145,6 +147,7 @@ public struct TraceAgentQueryEngine: Sendable {
                 return try TraceAgentQueryResult(
                     view: view,
                     range: range,
+                    filters: filters,
                     capabilityAvailable: page.capabilityAvailable,
                     truncated: page.truncated || sorted.count > limit,
                     dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
@@ -169,6 +172,7 @@ public struct TraceAgentQueryEngine: Sendable {
                 return try TraceAgentQueryResult(
                     view: view,
                     range: range,
+                    filters: filters,
                     capabilityAvailable: page.capabilityAvailable,
                     truncated: page.truncated || sorted.count > limit,
                     dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),

@@ -18,6 +18,7 @@ public enum TraceDeterministicAnalysisKind: String, Codable, Sendable {
 /// Defaults have already been materialized; no omitted field is inferred by a
 /// consumer (SPEC §10.1).
 public struct TraceDeterministicAnalysisParameters: Hashable, Codable, Sendable {
+    public let filters: TraceAgentQueryFilters
     public let maximumCPUSlices: Int
     public let maximumProcessSlices: Int
     public let maximumThreadSlices: Int
@@ -38,6 +39,7 @@ public struct TraceDeterministicAnalysisParameters: Hashable, Codable, Sendable 
 
 public struct TraceDeterministicAnalysisRequest: Sendable {
     public let range: TraceTimeRange
+    public let filters: TraceAgentQueryFilters
     public let maximumCPUSlices: Int
     public let maximumProcessSlices: Int
     public let maximumThreadSlices: Int
@@ -56,6 +58,7 @@ public struct TraceDeterministicAnalysisRequest: Sendable {
 
     public init(
         range: TraceTimeRange,
+        filters: TraceAgentQueryFilters = .none,
         maximumCPUSlices: Int = 20_000,
         maximumProcessSlices: Int = 20_000,
         maximumThreadSlices: Int = 20_000,
@@ -82,6 +85,10 @@ public struct TraceDeterministicAnalysisRequest: Sendable {
             schedulingSampleLimit, hotIntervalLimit,
         ]
         guard range.startNs < range.endNs,
+            filters.cpu == nil, filters.rawState == nil,
+            filters.normalizedState == nil, filters.name == nil,
+            filters.minimumDurationNs == nil, filters.depth == nil,
+            filters.counterFilterID == nil,
             eventBudgets.allSatisfy({ (1...100_000).contains($0) }),
             outputLimits.allSatisfy({ (1...1_000).contains($0) }),
             (1...10_000).contains(hotBucketCount),
@@ -95,6 +102,7 @@ public struct TraceDeterministicAnalysisRequest: Sendable {
             )
         }
         self.range = range
+        self.filters = filters
         self.maximumCPUSlices = maximumCPUSlices
         self.maximumProcessSlices = maximumProcessSlices
         self.maximumThreadSlices = maximumThreadSlices
@@ -299,6 +307,88 @@ public struct TraceDeterministicAnalysis: Hashable, Codable, Sendable {
     public let hotIntervals: [TraceHotInterval]
     public let sections: TraceDeterministicAnalysisSections
     public let dataQuality: TraceDataQuality
+
+    /// Applies the CLI's command-global row budget across all seven output
+    /// sections in a fixed semantic priority. Store input budgets remain
+    /// independent; this is the final bounded result projection.
+    public func retainingRows(maximumRows: Int) throws -> Self {
+        guard maximumRows >= 0 else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Analysis row budget must be non-negative"
+            )
+        }
+        var remaining = maximumRows
+        func retained<T>(_ values: [T]) -> [T] {
+            let count = min(remaining, values.count)
+            remaining -= count
+            return Array(values.prefix(count))
+        }
+        func status(
+            _ original: TraceAnalysisSectionStatus,
+            returnedCount: Int
+        ) -> TraceAnalysisSectionStatus {
+            TraceAnalysisSectionStatus(
+                returnedCount: returnedCount,
+                matchedCount: original.matchedCount,
+                truncated: original.truncated || returnedCount < original.returnedCount
+            )
+        }
+
+        let retainedCPU = retained(cpuUtilization)
+        let retainedProcesses = retained(topProcesses)
+        let retainedThreads = retained(topThreads)
+        let retainedLongSlices = retained(longSlices)
+        let retainedStates = retained(threadStateDistribution)
+        let retainedSamples = retained(schedulingLatency.topSamples)
+        let retainedHot = retained(hotIntervals)
+        let retainedScheduling = TraceSchedulingLatencyResult(
+            supported: schedulingLatency.supported,
+            unsupportedReason: schedulingLatency.unsupportedReason,
+            count: schedulingLatency.count,
+            percentiles: schedulingLatency.percentiles,
+            topSamples: retainedSamples,
+            truncated: schedulingLatency.truncated
+                || retainedSamples.count < schedulingLatency.topSamples.count
+        )
+        return TraceDeterministicAnalysis(
+            kind: kind,
+            parameters: parameters,
+            range: range,
+            cpuUtilization: retainedCPU,
+            topProcesses: retainedProcesses,
+            topThreads: retainedThreads,
+            longSlices: retainedLongSlices,
+            threadStateDistribution: retainedStates,
+            schedulingLatency: retainedScheduling,
+            hotIntervals: retainedHot,
+            sections: TraceDeterministicAnalysisSections(
+                cpuUtilization: status(
+                    sections.cpuUtilization, returnedCount: retainedCPU.count
+                ),
+                topProcesses: status(
+                    sections.topProcesses, returnedCount: retainedProcesses.count
+                ),
+                topThreads: status(
+                    sections.topThreads, returnedCount: retainedThreads.count
+                ),
+                longSlices: status(
+                    sections.longSlices, returnedCount: retainedLongSlices.count
+                ),
+                threadStateDistribution: status(
+                    sections.threadStateDistribution, returnedCount: retainedStates.count
+                ),
+                schedulingLatency: status(
+                    sections.schedulingLatency, returnedCount: retainedSamples.count
+                ),
+                hotIntervals: status(
+                    sections.hotIntervals, returnedCount: retainedHot.count
+                )
+            ),
+            dataQuality: dataQuality
+        )
+    }
 }
 
 public struct TraceDeterministicAnalysisEngine: Sendable {
@@ -391,6 +481,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let cpuPage = try await repository.cpuSlices(
                 try CpuSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     limit: request.maximumCPUSlices,
                     deadline: deadline
                 )
@@ -398,6 +492,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let processPage = try await repository.cpuSlices(
                 try CpuSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     limit: request.maximumProcessSlices,
                     deadline: deadline
                 )
@@ -405,6 +503,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let threadPage = try await repository.cpuSlices(
                 try CpuSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     limit: request.maximumThreadSlices,
                     deadline: deadline
                 )
@@ -412,6 +514,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let statePage = try await repository.threadStates(
                 try ThreadStateQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     limit: request.maximumStateIntervals,
                     deadline: deadline
                 )
@@ -419,6 +525,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let namedPage = try await repository.slices(
                 try TraceSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     minimumDurationNs: request.minimumLongSliceDurationNs,
                     limit: request.maximumNamedSlices,
                     deadline: deadline
@@ -427,6 +537,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let schedulingCPUPage = try await repository.cpuSlices(
                 try CpuSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     limit: request.maximumSchedulingEvents,
                     deadline: deadline
                 )
@@ -434,6 +548,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let schedulingStatePage = try await repository.threadStates(
                 try ThreadStateQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     state: .runnable,
                     limit: request.maximumSchedulingEvents,
                     deadline: deadline
@@ -442,6 +560,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let hotCPUPage = try await repository.cpuSlices(
                 try CpuSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     limit: request.maximumHotEvents,
                     deadline: deadline
                 )
@@ -449,6 +571,10 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             let hotNamedPage = try await repository.slices(
                 try TraceSliceQuery(
                     range: request.range,
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
                     minimumDurationNs: request.minimumLongSliceDurationNs,
                     limit: request.maximumHotEvents,
                     deadline: deadline
@@ -1068,6 +1194,7 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
     ) -> TraceDeterministicAnalysisParameters {
         let components = request.timeout.components
         return TraceDeterministicAnalysisParameters(
+            filters: request.filters,
             maximumCPUSlices: request.maximumCPUSlices,
             maximumProcessSlices: request.maximumProcessSlices,
             maximumThreadSlices: request.maximumThreadSlices,

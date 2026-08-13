@@ -1,4 +1,4 @@
-import ArkTraceAnalysis
+@testable import ArkTraceAnalysis
 @testable import ArkTraceCLI
 import ArkTraceCore
 import Foundation
@@ -407,6 +407,305 @@ final class TypedMachinePayloadTests: XCTestCase {
         }
     }
 
+    func testPhase4PayloadCannotDriftFromFiltersOrGlobalLimits() throws {
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 100)
+        let invocationFilters = try TraceAgentQueryFilters(cpu: 0)
+        let mismatchedQuery = try CLIMachineCommandPayload.query(
+            bound: CLIMachineBoundTraceResult(
+                snapshot: testSnapshot(
+                    metadata: metadata,
+                    preparation: preparation,
+                    cacheHit: false
+                ),
+                value: TraceAgentQueryResult(
+                    view: .cpuSlices,
+                    range: range,
+                    filters: try TraceAgentQueryFilters(cpu: 1),
+                    capabilityAvailable: true,
+                    truncated: false,
+                    dataQuality: TraceDataQuality(),
+                    cpuSlices: []
+                )
+            )
+        )
+        let queryInvocation = try CLIArgumentParser().parse([
+            "--json", "query", "trace", "--view", "cpu-slices",
+            "--start-ns", "0", "--end-ns", "100", "--cpu", "0", "--limit", "1",
+        ])
+        guard case .query(_, let queryOptions) = queryInvocation.command else {
+            return XCTFail("expected query invocation")
+        }
+        XCTAssertEqual(queryOptions.filters, invocationFilters)
+        assertRequestPayloadMismatch {
+            _ = try mismatchedQuery.envelope(for: queryInvocation, tool: tool)
+        }
+
+        func status(_ count: Int) -> TraceContextSectionStatus {
+            TraceContextSectionStatus(
+                returnedCount: count,
+                matchedCount: count,
+                truncated: false
+            )
+        }
+        func truncation(
+            processes: Int = 0,
+            threads: Int = 0,
+            cpuSlices: Int = 0,
+            slices: Int = 0
+        ) -> TraceContextTruncation {
+            TraceContextTruncation(
+                processes: status(processes),
+                threads: status(threads),
+                cpuSlices: status(cpuSlices),
+                threadStates: status(0),
+                slices: status(slices),
+                counters: status(0),
+                summary: status(1),
+                referenceOmittedByBudget: false
+            )
+        }
+        let summary = TraceSummary(
+            range: range,
+            durationNs: range.durationNs,
+            cpuCount: 0,
+            processCount: 0,
+            threadCount: 0,
+            cpuSliceCount: 0,
+            threadStateCount: 0,
+            namedSliceCount: 0,
+            counterSeriesCount: 0,
+            eventCountBySource: [],
+            capabilities: metadata.capabilities,
+            schemaFingerprint: metadata.schemaFingerprint,
+            dataQuality: metadata.dataQuality,
+            truncatedSections: []
+        )
+        let firstProcess = TraceProcess(
+            key: ProcessKey(ipid: 1),
+            pid: 1,
+            name: nil,
+            startNs: nil,
+            endNs: nil,
+            threadCount: nil
+        )
+        let firstThread = TraceThread(
+            key: ThreadKey(itid: 1),
+            processKey: ProcessKey(ipid: 1),
+            tid: 1,
+            pid: 1,
+            name: nil,
+            processName: nil,
+            startNs: nil,
+            endNs: nil,
+            isMainThread: nil
+        )
+        let rowOversized = TraceContext(
+            range: range,
+            processes: [firstProcess],
+            threads: [firstThread],
+            cpuSlices: [],
+            threadStates: [],
+            slices: [],
+            counters: [],
+            summary: summary,
+            dataQuality: metadata.dataQuality,
+            truncation: truncation(processes: 1, threads: 1)
+        )
+        let firstSlice = CpuSlice(
+            key: EventKey(table: .schedSlice, rowID: 1),
+            range: try TraceTimeRange.query(startNs: 1, endNs: 2),
+            cpu: 0,
+            threadKey: nil,
+            processKey: nil,
+            tid: nil,
+            pid: nil,
+            threadName: nil,
+            processName: nil,
+            endState: nil,
+            priority: nil,
+            isOpenEnded: false
+        )
+        let namedSlice = TraceSlice(
+            key: EventKey(table: .callstack, rowID: 3),
+            range: try TraceTimeRange.query(startNs: 3, endNs: 4),
+            threadKey: nil,
+            processKey: nil,
+            pid: nil,
+            tid: nil,
+            processName: nil,
+            threadName: nil,
+            name: "slice",
+            category: nil,
+            depth: nil,
+            parentEventKey: nil,
+            isAsync: false,
+            isOpenEnded: false
+        )
+        let eventOversized = TraceContext(
+            range: range,
+            processes: [],
+            threads: [],
+            cpuSlices: [firstSlice],
+            threadStates: [],
+            slices: [namedSlice],
+            counters: [],
+            summary: summary,
+            dataQuality: metadata.dataQuality,
+            truncation: truncation(cpuSlices: 1, slices: 1)
+        )
+        let mismatchedSummary = TraceSummary(
+            range: try TraceTimeRange.query(startNs: 1, endNs: 100),
+            durationNs: 99,
+            cpuCount: 0,
+            processCount: 0,
+            threadCount: 0,
+            cpuSliceCount: 0,
+            threadStateCount: 0,
+            namedSliceCount: 0,
+            counterSeriesCount: 0,
+            eventCountBySource: [],
+            capabilities: metadata.capabilities,
+            schemaFingerprint: metadata.schemaFingerprint,
+            dataQuality: metadata.dataQuality,
+            truncatedSections: []
+        )
+        XCTAssertThrowsError(try CLIMachineCommandPayload.context(
+            bound: CLIMachineBoundTraceResult(
+                snapshot: testSnapshot(
+                    metadata: metadata, preparation: preparation, cacheHit: false
+                ),
+                value: TraceContext(
+                    range: range,
+                    processes: [], threads: [], cpuSlices: [], threadStates: [],
+                    slices: [], counters: [], summary: mismatchedSummary,
+                    dataQuality: metadata.dataQuality,
+                    truncation: truncation()
+                )
+            )
+        )) { error in
+            XCTAssertEqual(
+                (error as? ArkTraceError)?.details["reason"],
+                "contextSummaryMismatch"
+            )
+        }
+        let contextInvocation = try CLIArgumentParser().parse([
+            "--json", "--max-rows", "1", "--max-events", "1",
+            "context", "trace", "--start-ns", "0", "--end-ns", "100",
+        ])
+        var rowOversizedPayload: CLIMachineCommandPayload?
+        for context in [rowOversized, eventOversized] {
+            let payload = try CLIMachineCommandPayload.context(
+                bound: CLIMachineBoundTraceResult(
+                    snapshot: testSnapshot(
+                        metadata: metadata,
+                        preparation: preparation,
+                        cacheHit: false
+                    ),
+                    value: context
+                )
+            )
+            assertRequestPayloadMismatch {
+                _ = try payload.envelope(for: contextInvocation, tool: tool)
+            }
+            if context.processes.count == 1 { rowOversizedPayload = payload }
+        }
+
+        let emptyAnalysisStatus = TraceAnalysisSectionStatus(
+            returnedCount: 0, matchedCount: 0, truncated: false
+        )
+        let oneAnalysisStatus = TraceAnalysisSectionStatus(
+            returnedCount: 1, matchedCount: 1, truncated: false
+        )
+        let analysisParameters = TraceDeterministicAnalysisParameters(
+            filters: .none,
+            maximumCPUSlices: 1,
+            maximumProcessSlices: 1,
+            maximumThreadSlices: 1,
+            maximumStateIntervals: 1,
+            maximumNamedSlices: 1,
+            maximumSchedulingEvents: 1,
+            maximumHotEvents: 1,
+            topProcessLimit: 1,
+            topThreadLimit: 1,
+            longSliceLimit: 1,
+            schedulingSampleLimit: 1,
+            hotIntervalLimit: 1,
+            hotBucketCount: 100,
+            minimumLongSliceDurationNs: 0,
+            timeoutSeconds: 30,
+            timeoutAttoseconds: 0
+        )
+        let oversizedAnalysis = TraceDeterministicAnalysis(
+            kind: .deterministicBatch,
+            parameters: analysisParameters,
+            range: range,
+            cpuUtilization: [TraceCPUUtilization(
+                cpu: 0, rawRunningNs: 1, occupiedNs: 1,
+                sliceCount: 1, utilization: 0.01
+            )],
+            topProcesses: [TraceRunningProcess(
+                processKey: ProcessKey(ipid: 1), pid: 1, name: nil,
+                runningNs: 1, shareOfOneCPU: 0.01, sliceCount: 1
+            )],
+            topThreads: [], longSlices: [], threadStateDistribution: [],
+            schedulingLatency: TraceSchedulingLatencyResult(
+                supported: false, unsupportedReason: .capabilityUnavailable,
+                count: 0, percentiles: nil, topSamples: [], truncated: false
+            ),
+            hotIntervals: [],
+            sections: TraceDeterministicAnalysisSections(
+                cpuUtilization: oneAnalysisStatus,
+                topProcesses: oneAnalysisStatus,
+                topThreads: emptyAnalysisStatus,
+                longSlices: emptyAnalysisStatus,
+                threadStateDistribution: emptyAnalysisStatus,
+                schedulingLatency: emptyAnalysisStatus,
+                hotIntervals: emptyAnalysisStatus
+            ),
+            dataQuality: metadata.dataQuality
+        )
+        let analysisInvocation = try CLIArgumentParser().parse([
+            "--json", "--max-rows", "1", "--max-events", "1",
+            "analyze", "trace", "--kind", "range",
+            "--start-ns", "0", "--end-ns", "100", "--limit", "1",
+        ])
+        let analysisPayload = try CLIMachineCommandPayload.analyze(
+            kind: .range,
+            bound: CLIMachineBoundTraceResult(
+                snapshot: testSnapshot(
+                    metadata: metadata, preparation: preparation, cacheHit: false
+                ),
+                value: oversizedAnalysis
+            )
+        )
+        assertRequestPayloadMismatch {
+            _ = try analysisPayload.envelope(for: analysisInvocation, tool: tool)
+        }
+
+        let humanQueryInvocation = try CLIArgumentParser().parse([
+            "query", "trace", "--view", "cpu-slices",
+            "--start-ns", "0", "--end-ns", "100", "--cpu", "0", "--limit", "1",
+        ])
+        let humanContextInvocation = try CLIArgumentParser().parse([
+            "--max-rows", "1", "--max-events", "1",
+            "context", "trace", "--start-ns", "0", "--end-ns", "100",
+        ])
+        let humanAnalysisInvocation = try CLIArgumentParser().parse([
+            "--max-rows", "1", "--max-events", "1",
+            "analyze", "trace", "--kind", "range",
+            "--start-ns", "0", "--end-ns", "100", "--limit", "1",
+        ])
+        for (payload, invocation) in [
+            (mismatchedQuery, humanQueryInvocation),
+            (try XCTUnwrap(rowOversizedPayload), humanContextInvocation),
+            (analysisPayload, humanAnalysisInvocation),
+        ] {
+            assertRequestPayloadMismatch {
+                try payload.validate(for: invocation)
+            }
+        }
+    }
+
     func testSummaryPayloadUsesIndependentRowAndEventLimits() throws {
         func makeSummary(cpuSlices: Int64) -> TraceSummary {
             TraceSummary(
@@ -510,6 +809,24 @@ final class TypedMachinePayloadTests: XCTestCase {
     ) throws -> [String: Any] {
         let object = try encodedObject(payload, arguments: arguments)
         return try XCTUnwrap(object["result"] as? [String: Any])
+    }
+
+    private func assertRequestPayloadMismatch(
+        _ operation: () throws -> Void,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertThrowsError(try operation(), file: file, line: line) { error in
+            let typed = error as? ArkTraceError
+            XCTAssertEqual(typed?.code, .internalError, file: file, line: line)
+            XCTAssertEqual(typed?.stage, .encoding, file: file, line: line)
+            XCTAssertEqual(
+                typed?.details["reason"],
+                "requestPayloadMismatch",
+                file: file,
+                line: line
+            )
+        }
     }
 
     private var tool: CLIMachineTool {

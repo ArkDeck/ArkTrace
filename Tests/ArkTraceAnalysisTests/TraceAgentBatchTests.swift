@@ -702,11 +702,23 @@ final class TraceAgentBatchTests: XCTestCase {
         XCTAssertEqual(result.schedulingLatency.percentiles?.p50Ns, 20)
         XCTAssertFalse(result.hotIntervals.isEmpty)
         XCTAssertEqual(result.kind, .deterministicBatch)
+
+        let globallyRetained = try result.retainingRows(maximumRows: 1)
+        XCTAssertEqual(globallyRetained.cpuUtilization.count, 1)
+        XCTAssertEqual(globallyRetained.topProcesses.count, 0)
+        XCTAssertEqual(globallyRetained.topThreads.count, 0)
+        XCTAssertEqual(globallyRetained.longSlices.count, 0)
+        XCTAssertEqual(globallyRetained.threadStateDistribution.count, 0)
+        XCTAssertEqual(globallyRetained.schedulingLatency.topSamples.count, 0)
+        XCTAssertEqual(globallyRetained.hotIntervals.count, 0)
+        XCTAssertEqual(globallyRetained.sections.cpuUtilization.returnedCount, 1)
+        XCTAssertTrue(globallyRetained.sections.topProcesses.truncated)
+        XCTAssertTrue(globallyRetained.sections.schedulingLatency.truncated)
         let parameterEncoder = JSONEncoder()
         parameterEncoder.outputFormatting = [.sortedKeys]
         XCTAssertEqual(
             String(decoding: try parameterEncoder.encode(result.parameters), as: UTF8.self),
-            #"{"hotBucketCount":4,"hotIntervalLimit":20,"longSliceLimit":20,"maximumCPUSlices":20000,"maximumHotEvents":20000,"maximumNamedSlices":20000,"maximumProcessSlices":20000,"maximumSchedulingEvents":20000,"maximumStateIntervals":20000,"maximumThreadSlices":20000,"minimumLongSliceDurationNs":0,"schedulingSampleLimit":20,"timeoutAttoseconds":0,"timeoutSeconds":30,"topProcessLimit":10,"topThreadLimit":10}"#
+            #"{"filters":{"counterFilterID":null,"cpu":null,"depth":null,"minimumDurationNs":null,"name":null,"nameMatch":"exact","normalizedState":null,"pid":null,"processKey":null,"rawState":null,"threadKey":null,"tid":null},"hotBucketCount":4,"hotIntervalLimit":20,"longSliceLimit":20,"maximumCPUSlices":20000,"maximumHotEvents":20000,"maximumNamedSlices":20000,"maximumProcessSlices":20000,"maximumSchedulingEvents":20000,"maximumStateIntervals":20000,"maximumThreadSlices":20000,"minimumLongSliceDurationNs":0,"schedulingSampleLimit":20,"timeoutAttoseconds":0,"timeoutSeconds":30,"topProcessLimit":10,"topThreadLimit":10}"#
         )
         let firstHot = try XCTUnwrap(result.hotIntervals.first)
         XCTAssertEqual(

@@ -18,6 +18,7 @@ cp "$source_scripts/benchmark_phase3.sh" \
     "$source_scripts/source_tree_identity.py" \
     "$source_scripts/verify_phase3_evidence_times.py" \
     "$source_scripts/verify_phase3_query_plans.jq" \
+    "$source_scripts/verify_phase4_workloads.jq" \
     "$source_scripts/phase3_shell_safety.sh" "$repository/scripts/"
 chmod +x "$repository/scripts/"*
 
@@ -85,6 +86,58 @@ except SystemExit:
 else:
     raise SystemExit("oversized source projection was accepted")
 PY
+
+valid_workload="$temporary_root/valid-workload.json"
+jq -n '{contextWorkload:{
+  name:"timestamp-default-v1",
+  time:{timestampNs:10200000000,windowBeforeNs:50000000,windowAfterNs:50000000},
+  normalizedRange:{startNs:10150000000,endNs:10250000000},
+  filters:{cpu:null,processKey:null,pid:null,threadKey:null,tid:null,
+    rawState:null,normalizedState:null,name:null,nameMatch:"exact",
+    minimumDurationNs:null,depth:null,counterFilterID:null},
+  maximumEvents:10000,maximumRows:10000,maximumOutputBytes:8388608,
+  timeoutSeconds:30,timeoutAttoseconds:0
+},analysisWorkload:{
+  name:"agent-range-default-v1",
+  range:{startNs:10100000000,endNs:10300000000},
+  globalMaximumRows:10000,
+  parameters:{
+    filters:{cpu:null,processKey:null,pid:null,threadKey:null,tid:null,
+      rawState:null,normalizedState:null,name:null,nameMatch:"exact",
+      minimumDurationNs:null,depth:null,counterFilterID:null},
+    maximumCPUSlices:10000,maximumProcessSlices:10000,
+    maximumThreadSlices:10000,maximumStateIntervals:10000,
+    maximumNamedSlices:10000,maximumSchedulingEvents:10000,
+    maximumHotEvents:10000,topProcessLimit:1000,topThreadLimit:1000,
+    longSliceLimit:1000,schedulingSampleLimit:1000,hotIntervalLimit:1000,
+    hotBucketCount:100,minimumLongSliceDurationNs:0,
+    timeoutSeconds:30,timeoutAttoseconds:0
+  }
+}}' >"$valid_workload"
+jq -e -f "$repository/scripts/verify_phase4_workloads.jq" \
+    "$valid_workload" >/dev/null \
+    || fail "reviewed Phase 4 workloads were rejected"
+for mutation in context-range context-events context-rows context-bytes context-timeout \
+    analysis-range analysis-budget analysis-output analysis-timeout
+do
+    candidate="$temporary_root/workload-$mutation.json"
+    case "$mutation" in
+        context-range) jq '.contextWorkload.normalizedRange.startNs += 1' "$valid_workload" >"$candidate" ;;
+        context-events) jq '.contextWorkload.maximumEvents -= 1' "$valid_workload" >"$candidate" ;;
+        context-rows) jq '.contextWorkload.maximumRows -= 1' "$valid_workload" >"$candidate" ;;
+        context-bytes) jq '.contextWorkload.maximumOutputBytes -= 1' "$valid_workload" >"$candidate" ;;
+        context-timeout) jq '.contextWorkload.timeoutSeconds = 10' "$valid_workload" >"$candidate" ;;
+        analysis-range) jq '.analysisWorkload.range.startNs += 1' "$valid_workload" >"$candidate" ;;
+        analysis-budget) jq '.analysisWorkload.parameters.maximumCPUSlices -= 1' "$valid_workload" >"$candidate" ;;
+        analysis-output) jq '.analysisWorkload.parameters.topProcessLimit -= 1' "$valid_workload" >"$candidate" ;;
+        analysis-timeout) jq '.analysisWorkload.parameters.timeoutSeconds = 10' "$valid_workload" >"$candidate" ;;
+    esac
+    if jq -e -f "$repository/scripts/verify_phase4_workloads.jq" \
+        "$candidate" >/dev/null
+    then
+        fail "drifted Phase 4 workload was accepted: $mutation"
+    fi
+done
 
 time_acquisition="$temporary_root/time-acquisition.json"
 time_grant="$temporary_root/time-grant.json"
@@ -160,16 +213,38 @@ git -C "$repository" -c user.name='ArkTrace Contract' \
 first_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")
 printf 'candidate byte A\n' >"$repository/source-identity-probe.txt"
-second_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+untracked_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")
-[ "$first_tree_sha" != "$second_tree_sha" ] \
+[ "$first_tree_sha" != "$untracked_tree_sha" ] \
     || fail "dirty source bytes did not change the audited source identity"
-printf 'candidate byte B\n' >"$repository/source-identity-probe.txt"
-third_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+git -C "$repository" add source-identity-probe.txt
+staged_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")
-[ "$second_tree_sha" != "$third_tree_sha" ] \
+[ "$untracked_tree_sha" = "$staged_tree_sha" ] \
+    || fail "staging unchanged source bytes changed the audited source identity"
+git -C "$repository" -c user.name='ArkTrace Contract' \
+    -c user.email='contract@invalid.example' commit -qm 'classify source identity probe'
+committed_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+    "$repository/scripts/source_tree_identity.py" "$repository")
+[ "$staged_tree_sha" = "$committed_tree_sha" ] \
+    || fail "committing unchanged source bytes changed the audited source identity"
+
+printf 'candidate byte B\n' >"$repository/source-identity-probe.txt"
+changed_bytes_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+    "$repository/scripts/source_tree_identity.py" "$repository")
+[ "$committed_tree_sha" != "$changed_bytes_tree_sha" ] \
     || fail "same HEAD with different untracked bytes reused a source identity"
-rm -f -- "$repository/source-identity-probe.txt"
+git -C "$repository" checkout -q -- source-identity-probe.txt
+chmod +x "$repository/source-identity-probe.txt"
+executable_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+    "$repository/scripts/source_tree_identity.py" "$repository")
+[ "$committed_tree_sha" != "$executable_tree_sha" ] \
+    || fail "source executable mode change reused a source identity"
+chmod -x "$repository/source-identity-probe.txt"
+restored_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+    "$repository/scripts/source_tree_identity.py" "$repository")
+[ "$committed_tree_sha" = "$restored_tree_sha" ] \
+    || fail "restoring source bytes and mode did not restore source identity"
 
 valid_plan="$temporary_root/valid-plan.json"
 jq -n '{diagnostics:{queryPlans:{

@@ -1217,11 +1217,17 @@ Indexed medium DB、可见 8 tracks、2,000-point viewport 的 detail/density qu
 
 ### AT-PERF-005 Context
 
-默认 100 ms window、10k event/8 MiB budget 的 context p95 目标：medium ≤ 1 s，large ≤ 2 s。
+冻结的默认 Context benchmark workload 为 timestamp `10.2 s`、before/after 各 `50 ms`
+（normalized range `[10.15 s, 10.25 s)`）、无 filter、10k event、10k row、8 MiB、
+30 s timeout；完整 time/range/effective limits 必须写入 evidence 并由 gate 逐字段锁定。
+该 workload 的 context p95 目标：medium ≤ 1 s，large ≤ 2 s。
 
 ### AT-PERF-006 Analysis
 
-排除首次 parse/index，默认 range analysis p95 目标：medium ≤ 3 s，large ≤ 5 s。
+排除首次 parse/index，冻结的默认 range-analysis benchmark workload 为 reviewed Trace 的
+`[10.1 s, 10.3 s)`、无 filter、CLI 默认 `maxRows=maxEvents=10k`、local limit 1k、
+30 s timeout；完整 normalized range 与 effective parameters 必须写入 evidence 并由 gate
+逐字段锁定。该 workload 的 p95 目标：medium ≤ 3 s，large ≤ 5 s。
 
 ### AT-PERF-007 Rendering
 

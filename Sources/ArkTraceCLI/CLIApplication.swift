@@ -146,7 +146,8 @@ public struct CLIApplication: Sendable {
                         tool: try requiredMachineTool(machineTool),
                         result: .object([
                             "commands": .array([
-                                "doctor", "inspect", "summary", "processes", "threads", "licenses",
+                                "doctor", "inspect", "summary", "processes", "threads",
+                                "query", "context", "analyze", "licenses",
                             ].map(CLIJSONValue.string)),
                             "usage": .string("arktrace [global-options] <command> [command-options]"),
                         ])
@@ -254,7 +255,14 @@ public struct CLIApplication: Sendable {
                     deadline: operationDeadline,
                     clock: deadlineClock
                 ) {
-                    let output = try await executor.execute(parsedInvocation)
+                    let output = try await CLIMachineExecutionContext.$tool.withValue(
+                        capturedMachineTool
+                    ) {
+                        try await executor.execute(parsedInvocation)
+                    }
+                    if let payload = output.machinePayload {
+                        try payload.validate(for: parsedInvocation)
+                    }
                     if let beforeEncoding { try await beforeEncoding() }
                     try Self.checkCancellation()
                     CLIOperationStage.active?.set(.encoding)

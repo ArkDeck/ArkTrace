@@ -322,6 +322,9 @@ fi
 jq -e -f "$script_directory/verify_phase3_query_plans.jq" \
     "$partial_evidence" >/dev/null \
     || fail "benchmark query plans do not use the exact reviewed index set"
+jq -e -f "$script_directory/verify_phase4_workloads.jq" \
+    "$partial_evidence" >/dev/null \
+    || fail "benchmark Context or analysis workload drifted from the reviewed default"
 jq -e \
     --arg class "$fixture_class" --arg base "$base_revision" \
     --arg sourceTreeSHA "$source_tree_sha" \
@@ -329,7 +332,7 @@ jq -e \
     --arg provenanceSource "$provenance_source" --arg licenseSHA "$license_sha" \
     --argjson dirty "$worktree_dirty" '
     .formatVersion == 3
-    and ((keys | sort) == ["arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","databaseByteCount","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","rangeAnalysisP50Ms","rangeAnalysisP95Ms","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
+    and ((keys | sort) == ["analysisWorkload","arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","contextWorkload","databaseByteCount","deterministicAnalysisP50Ms","deterministicAnalysisP95Ms","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
     and .fixtureClass == $class
     and .arkTraceBaseRevision == $base
     and .workingTreeDirty == ($dirty == 1)
@@ -366,13 +369,13 @@ jq -e \
     and .viewportP95Ms == ([.viewportLatency[].p95Ms] | max)
     and .viewportP50Ms == ([.viewportLatency[].p50Ms] | max)
     and .contextP95Ms <= (if $class == "large" then 2000 else 1000 end)
-    and .rangeAnalysisP95Ms <= (if $class == "large" then 5000 else 3000 end)
+    and .deterministicAnalysisP95Ms <= (if $class == "large" then 5000 else 3000 end)
     and .peakRSSBytes <= 1610612736
     and .capabilities.cpuScheduling == true
     and .capabilities.threadStates == true
     and .capabilities.namedSlices == true
     and ([.measuredRows[] > 0] | all)
-    and ((.measuredRows | keys | sort) == ["contextEvents","cpuDensityEvents","cpuDetail","namedSliceDensityEvents","namedSliceDetail","threadStateDensityEvents","threadStateDetail"])
+    and ((.measuredRows | keys | sort) == ["contextBytes","contextEvents","cpuDensityEvents","cpuDetail","deterministicAnalysisRows","namedSliceDensityEvents","namedSliceDetail","threadStateDensityEvents","threadStateDetail"])
     and ((.diagnostics | keys | sort) == ["applicableIndexNames","persistentIndexNames","queryPlans","relationshipProbeSteps","relationshipVMInstructionBudget","tableRowCounts","usesAutomaticIndex"])
     and .diagnostics.relationshipVMInstructionBudget == 250000
     and .diagnostics.usesAutomaticIndex == false

@@ -1,4 +1,5 @@
 @testable import ArkTraceCLI
+import ArkTraceAnalysis
 import ArkTraceCore
 import ArkTraceParser
 import Foundation
@@ -185,6 +186,103 @@ final class CLITests: XCTestCase {
             try CLIArgumentParser().parse(["processes", "trace"]).command,
             .processes(trace: "trace", pid: nil, name: nil, limit: 10_000)
         )
+    }
+
+    func testPhase4CommandsParseClosedTypedRequestsAndCanonicalEchoes() throws {
+        let query = try CLIArgumentParser().parse([
+            "--json", "--max-rows", "4", "--max-events", "3",
+            "query", "trace", "--view", "slices", "--start-ns", "10",
+            "--end-ns", "20", "--process-key", "-7", "--thread-key", "-9",
+            "--name", "work", "--name-match", "prefix",
+            "--min-duration-ns", "2", "--depth", "1", "--limit", "3",
+        ])
+        let queryFilters = try TraceAgentQueryFilters(
+            processKey: ProcessKey(ipid: -7), threadKey: ThreadKey(itid: -9),
+            name: "work", nameMatch: .prefix, minimumDurationNs: 2, depth: 1
+        )
+        XCTAssertEqual(query.command, .query(
+            trace: "trace",
+            options: CLIQueryOptions(
+                view: .slices,
+                range: try TraceTimeRange.query(startNs: 10, endNs: 20),
+                filters: queryFilters,
+                limit: 3
+            )
+        ))
+        let queryEcho = try query.machineRequest()
+        XCTAssertEqual(queryEcho.command, "query")
+        XCTAssertEqual(queryEcho.parameters["view"], .string("slices"))
+        XCTAssertEqual(queryEcho.parameters["processKey"], .int64(-7))
+        XCTAssertEqual(queryEcho.parameters["cpu"], .null)
+
+        let context = try CLIArgumentParser().parse([
+            "context", "trace", "--timestamp-ns", "5000000",
+            "--window-ms", "2", "--pid", "42",
+        ])
+        let contextFilters = try TraceAgentQueryFilters(pid: 42)
+        XCTAssertEqual(context.command, .context(
+            trace: "trace",
+            options: CLIContextOptions(
+                time: .timestamp(
+                    timestampNs: 5_000_000,
+                    windowBeforeNs: 2_000_000,
+                    windowAfterNs: 2_000_000
+                ),
+                filters: contextFilters
+            )
+        ))
+        let contextEcho = try context.machineRequest()
+        XCTAssertEqual(contextEcho.parameters["timestampNs"], .int64(5_000_000))
+        XCTAssertEqual(contextEcho.parameters["windowBeforeNs"], .int64(2_000_000))
+        XCTAssertEqual(contextEcho.parameters["windowAfterNs"], .int64(2_000_000))
+        XCTAssertEqual(contextEcho.parameters["startNs"], .null)
+        XCTAssertNil(contextEcho.parameters["windowMs"])
+
+        let analyze = try CLIArgumentParser().parse([
+            "analyze", "trace", "--kind", "hot-intervals", "--start-ns", "1",
+            "--end-ns", "100", "--thread-key", "-11", "--threshold-ns", "8",
+            "--limit", "5",
+        ])
+        let analysisFilters = try TraceAgentQueryFilters(threadKey: ThreadKey(itid: -11))
+        XCTAssertEqual(analyze.command, .analyze(
+            trace: "trace",
+            options: CLIAnalyzeOptions(
+                kind: .hotIntervals,
+                range: try TraceTimeRange.query(startNs: 1, endNs: 100),
+                filters: analysisFilters,
+                thresholdNs: 8,
+                limit: 5
+            )
+        ))
+        let analyzeEcho = try analyze.machineRequest()
+        XCTAssertEqual(analyzeEcho.parameters["kind"], .string("hot-intervals"))
+        XCTAssertEqual(analyzeEcho.parameters["threadKey"], .int64(-11))
+    }
+
+    func testPhase4CommandConflictsOverflowAndUnsupportedFiltersFailClosed() {
+        let invalid: [[String]] = [
+            ["query", "trace", "--view", "unknown", "--start-ns", "1", "--end-ns", "2"],
+            ["query", "trace", "--view", "slices", "--start-ns", "1"],
+            ["--max-events", "2", "query", "trace", "--view", "slices",
+             "--start-ns", "1", "--end-ns", "2", "--limit", "3"],
+            ["query", "trace", "--view", "slices", "--start-ns", "1",
+             "--end-ns", "2", "--process-key", "0"],
+            ["query", "trace", "--view", "slices", "--start-ns", "1",
+             "--end-ns", "2", "--cpu", "0"],
+            ["context", "trace", "--timestamp-ns", "1", "--window-ms", "1",
+             "--start-ns", "0", "--end-ns", "2"],
+            ["context", "trace", "--timestamp-ns", "1", "--window-ms",
+             String(Int64.max)],
+            ["analyze", "trace", "--kind", "cpu", "--cpu", "1"],
+            ["analyze", "trace", "--kind", "slices", "--start-ns", "1"],
+            ["analyze", "trace", "--kind", "unknown"],
+        ]
+        for arguments in invalid {
+            XCTAssertThrowsError(try CLIArgumentParser().parse(arguments), "\(arguments)") {
+                XCTAssertEqual(($0 as? ArkTraceError)?.code, .invalidArgument)
+                XCTAssertEqual(($0 as? ArkTraceError)?.stage, .request)
+            }
+        }
     }
 
     func testLicensesCommandReturnsBundledReviewedResourcesWithoutExecutingTraceWork() async throws {

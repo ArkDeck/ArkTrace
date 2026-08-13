@@ -35,6 +35,10 @@ public struct CLIHumanRenderer: Sendable {
               summary <trace> [--start-ns <n> --end-ns <n>]
               processes <trace> [--pid <pid>] [--name <text>] [--limit <n>]
               threads <trace> [filters] [--limit <n>]
+              query <trace> --view <view> --start-ns <n> --end-ns <n> [filters]
+              context <trace> (--timestamp-ns <n> --window-ms <n> |
+                               --start-ns <n> --end-ns <n>) [filters]
+              analyze <trace> --kind <kind> [--start-ns <n> --end-ns <n>]
 
             Global options:
               --json  --pretty  --timeout-ms <n>
@@ -160,6 +164,120 @@ public struct CLIHumanRenderer: Sendable {
         return Data((lines.joined(separator: "\n") + "\n").utf8)
     }
 
+    static func query(
+        _ result: TraceAgentQueryResult,
+        maximumBytes: Int
+    ) throws -> Data {
+        var output = try BoundedHumanOutput(maximumBytes: maximumBytes)
+        try output.append("View: \(result.view.rawValue)")
+        try output.append("Range ns: [\(result.range.startNs), \(result.range.endNs))")
+        try output.append("Capability available: \(result.capabilityAvailable)")
+        switch result.view {
+        case .cpuSlices:
+            for item in result.cpuSlices {
+                try output.append(
+                    "\(item.startNs)\t\(item.endNs)\tcpu=\(item.cpu)\tevent="
+                        + "\(item.key.table.rawValue):\(item.key.rowID)"
+                )
+            }
+        case .threadStates:
+            for item in result.threadStates {
+                try output.append(
+                    "\(item.startNs)\t\(item.endNs)\tstate="
+                        + "\(terminalField(item.state))\tevent="
+                        + "\(item.key.table.rawValue):\(item.key.rowID)"
+                )
+            }
+        case .slices:
+            for item in result.slices {
+                try output.append(
+                    "\(item.startNs)\t\(item.endNs)\tname="
+                        + "\(terminalField(item.name))\tevent="
+                        + "\(item.key.table.rawValue):\(item.key.rowID)"
+                )
+            }
+        case .counters:
+            for item in result.counters {
+                try output.append(
+                    "\(item.sample.timestampNs)\tvalue=\(item.sample.value)\tname="
+                        + "\(terminalField(item.name))\tevent="
+                        + "\(item.sample.key.table.rawValue):\(item.sample.key.rowID)"
+                )
+            }
+        }
+        if result.truncated { try output.append("… result truncated") }
+        return output.data
+    }
+
+    static func context(
+        _ context: TraceContext,
+        maximumBytes: Int
+    ) throws -> Data {
+        var output = try BoundedHumanOutput(maximumBytes: maximumBytes)
+        try output.append("Range ns: [\(context.range.startNs), \(context.range.endNs))")
+        try output.append("Processes: \(context.processes.count)")
+        try output.append("Threads: \(context.threads.count)")
+        try output.append("CPU slices: \(context.cpuSlices.count)")
+        try output.append("Thread states: \(context.threadStates.count)")
+        try output.append("Named slices: \(context.slices.count)")
+        try output.append(
+            "Counter samples: \(context.counters.reduce(0) { $0 + $1.samples.count })"
+        )
+        try output.append("Data quality: \(context.dataQuality.status.rawValue)")
+        try output.append("Truncated: \(context.truncation.truncated)")
+        return output.data
+    }
+
+    static func analyze(
+        _ kind: CLIAnalyzeKind,
+        _ analysis: TraceDeterministicAnalysis,
+        maximumBytes: Int
+    ) throws -> Data {
+        var output = try BoundedHumanOutput(maximumBytes: maximumBytes)
+        try output.append("Analysis: \(kind.rawValue)")
+        try output.append("Range ns: [\(analysis.range.startNs), \(analysis.range.endNs))")
+        switch kind {
+        case .cpu:
+            for item in analysis.cpuUtilization {
+                try output.append(
+                    "cpu=\(item.cpu) runningNs=\(item.occupiedNs) "
+                        + "rawRunningNs=\(item.rawRunningNs) slices=\(item.sliceCount)"
+                )
+            }
+        case .scheduling:
+            try output.append("Supported: \(analysis.schedulingLatency.supported)")
+            try output.append("Count: \(analysis.schedulingLatency.count)")
+            if let percentiles = analysis.schedulingLatency.percentiles {
+                try output.append(
+                    "p50=\(percentiles.p50Ns) p90=\(percentiles.p90Ns) "
+                        + "p95=\(percentiles.p95Ns) p99=\(percentiles.p99Ns) "
+                        + "max=\(percentiles.maxNs)"
+                )
+            }
+        case .slices:
+            for item in analysis.longSlices {
+                try output.append(
+                    "durationNs=\(item.range.durationNs) name=\(terminalField(item.name)) event=\(item.key.table.rawValue):\(item.key.rowID)"
+                )
+            }
+        case .range:
+            try output.append("CPUs: \(analysis.cpuUtilization.count)")
+            try output.append("Top processes: \(analysis.topProcesses.count)")
+            try output.append("Top threads: \(analysis.topThreads.count)")
+            try output.append("State rows: \(analysis.threadStateDistribution.count)")
+            try output.append("Long slices: \(analysis.longSlices.count)")
+        case .hotIntervals:
+            for item in analysis.hotIntervals {
+                try output.append(
+                    "[\(item.range.startNs),\(item.range.endNs)) score="
+                        + "\(item.score.total) cpuBusyNs=\(item.score.cpuBusyNs)"
+                )
+            }
+        }
+        try output.append("Data quality: \(analysis.dataQuality.status.rawValue)")
+        return output.data
+    }
+
     /// Trace strings are data, not terminal markup. Render control and format
     /// scalars visibly and cap each expanded field so a single hostile value
     /// cannot create an unbounded intermediate human-output row.
@@ -186,6 +304,37 @@ public struct CLIHumanRenderer: Sendable {
             byteCount += componentBytes
         }
         return rendered
+    }
+
+    private struct BoundedHumanOutput {
+        private(set) var data = Data()
+        let maximumBytes: Int
+
+        init(maximumBytes: Int) throws {
+            guard maximumBytes >= 0 else {
+                throw ArkTraceError(
+                    code: .outputLimitExceeded,
+                    stage: .encoding,
+                    message: "Human output exceeds its byte budget",
+                    retryable: true
+                )
+            }
+            self.maximumBytes = maximumBytes
+        }
+
+        mutating func append(_ line: String) throws {
+            let bytes = Data((line + "\n").utf8)
+            guard bytes.count <= maximumBytes - data.count else {
+                throw ArkTraceError(
+                    code: .outputLimitExceeded,
+                    stage: .encoding,
+                    message: "Human output exceeds its byte budget",
+                    retryable: true,
+                    details: ["maximumBytes": String(maximumBytes)]
+                )
+            }
+            data.append(bytes)
+        }
     }
 }
 

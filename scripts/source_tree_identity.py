@@ -122,6 +122,12 @@ def main() -> None:
         paths.pop()
     if not paths:
         fail("source projection is empty")
+    if len(paths) != len(set(paths)):
+        fail("source projection contains duplicate paths")
+    # `git ls-files --cached --others` groups paths by index classification.
+    # Sort the combined byte paths so staging or committing an unchanged file
+    # cannot change the identity of the source projection.
+    paths.sort()
 
     digest = hashlib.sha256()
     digest.update(b"arktrace-source-tree-v1\0")
@@ -140,7 +146,10 @@ def main() -> None:
             # This audited output is generated from the projection itself. Keeping
             # it outside the projection avoids a self-referential hash while all
             # source, scripts, locks and tests remain covered.
-            if relative == "Fixtures/release-evidence/phase3-medium-performance.json":
+            if relative in {
+                "Fixtures/release-evidence/phase3-medium-performance.json",
+                "Fixtures/release-evidence/phase4-medium-agent-performance.json",
+            }:
                 continue
             if relative.endswith(".pyc"):
                 continue

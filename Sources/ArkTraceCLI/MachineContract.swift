@@ -352,7 +352,69 @@ public extension CLIInvocation {
                     "limit": .int64(Int64(limit)),
                 ]
             )
+        case .query(_, let options):
+            var parameters = options.filters.machineParameters
+            parameters["view"] = .string(options.view.cliName)
+            parameters["startNs"] = .int64(options.range.startNs)
+            parameters["endNs"] = .int64(options.range.endNs)
+            parameters["limit"] = .int64(Int64(options.limit))
+            return try CLIMachineRequest(command: "query", parameters: parameters)
+        case .context(_, let options):
+            var parameters = options.filters.machineParameters
+            switch options.time {
+            case .timestamp(let timestampNs, let beforeNs, let afterNs):
+                parameters["timestampNs"] = .int64(timestampNs)
+                parameters["windowBeforeNs"] = .int64(beforeNs)
+                parameters["windowAfterNs"] = .int64(afterNs)
+                parameters["startNs"] = .null
+                parameters["endNs"] = .null
+            case .range(let range):
+                parameters["timestampNs"] = .null
+                parameters["windowBeforeNs"] = .null
+                parameters["windowAfterNs"] = .null
+                parameters["startNs"] = .int64(range.startNs)
+                parameters["endNs"] = .int64(range.endNs)
+            }
+            return try CLIMachineRequest(command: "context", parameters: parameters)
+        case .analyze(_, let options):
+            var parameters = options.filters.machineParameters
+            parameters["kind"] = .string(options.kind.rawValue)
+            parameters["startNs"] = options.range.map { .int64($0.startNs) } ?? .null
+            parameters["endNs"] = options.range.map { .int64($0.endNs) } ?? .null
+            parameters["thresholdNs"] = .int64(options.thresholdNs)
+            parameters["limit"] = .int64(Int64(options.limit))
+            return try CLIMachineRequest(command: "analyze", parameters: parameters)
         }
+    }
+}
+
+private extension TraceAgentQueryView {
+    var cliName: String {
+        switch self {
+        case .cpuSlices: "cpu-slices"
+        case .threadStates: "thread-states"
+        case .slices: "slices"
+        case .counters: "counters"
+        }
+    }
+}
+
+private extension TraceAgentQueryFilters {
+    var machineParameters: [String: CLIJSONValue] {
+        [
+            "cpu": cpu.map(CLIJSONValue.int64) ?? .null,
+            "processKey": processKey.map { .int64($0.ipid) } ?? .null,
+            "pid": pid.map(CLIJSONValue.int64) ?? .null,
+            "threadKey": threadKey.map { .int64($0.itid) } ?? .null,
+            "tid": tid.map(CLIJSONValue.int64) ?? .null,
+            "rawState": rawState.map(CLIJSONValue.string) ?? .null,
+            "normalizedState": normalizedState.map { .string($0.rawValue) } ?? .null,
+            "name": name.map(CLIJSONValue.string) ?? .null,
+            "nameMatch": .string(nameMatch.rawValue),
+            "minimumDurationNs": minimumDurationNs.map(CLIJSONValue.int64) ?? .null,
+            "depth": depth.map(CLIJSONValue.int64) ?? .null,
+            "counterFilterID": counterFilterID.map(CLIJSONValue.int64) ?? .null,
+        ]
     }
 }
 
@@ -773,12 +835,155 @@ public struct CLIMachineThreadsResult: Hashable, Codable, Sendable {
     }
 }
 
+public struct CLIMachineAgentQueryResult: Encodable, Sendable {
+    private let value: TraceAgentQueryResult
+    private let dataQuality: CLIMachineDataQuality
+
+    private enum CodingKeys: String, CodingKey {
+        case view, range, filters, capabilityAvailable, truncated, dataQuality
+        case cpuSlices, threadStates, slices, counters
+    }
+
+    fileprivate init(_ value: TraceAgentQueryResult) throws {
+        self.value = value
+        dataQuality = try CLIMachineDataQuality(value.dataQuality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value.view, forKey: .view)
+        try container.encode(value.range, forKey: .range)
+        try container.encode(value.filters, forKey: .filters)
+        try container.encode(value.capabilityAvailable, forKey: .capabilityAvailable)
+        try container.encode(value.truncated, forKey: .truncated)
+        try container.encode(dataQuality, forKey: .dataQuality)
+        switch value.view {
+        case .cpuSlices: try container.encode(value.cpuSlices, forKey: .cpuSlices)
+        case .threadStates: try container.encode(value.threadStates, forKey: .threadStates)
+        case .slices: try container.encode(value.slices, forKey: .slices)
+        case .counters: try container.encode(value.counters, forKey: .counters)
+        }
+    }
+}
+
+private struct CLIMachineContextSummary: Encodable, Sendable {
+    let value: TraceSummary
+    let dataQuality: CLIMachineDataQuality
+
+    private enum CodingKeys: String, CodingKey {
+        case range, durationNs, cpuCount, processCount, threadCount
+        case cpuSliceCount, threadStateCount, namedSliceCount, counterSeriesCount
+        case eventCountBySource, capabilities, schemaFingerprint, dataQuality
+        case truncatedSections
+    }
+
+    init(_ value: TraceSummary) throws {
+        self.value = value
+        dataQuality = try CLIMachineDataQuality(value.dataQuality)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value.range, forKey: .range)
+        try container.encode(value.durationNs, forKey: .durationNs)
+        try container.encodeNullable(value.cpuCount, forKey: .cpuCount)
+        try container.encode(value.processCount, forKey: .processCount)
+        try container.encode(value.threadCount, forKey: .threadCount)
+        try container.encodeNullable(value.cpuSliceCount, forKey: .cpuSliceCount)
+        try container.encodeNullable(value.threadStateCount, forKey: .threadStateCount)
+        try container.encodeNullable(value.namedSliceCount, forKey: .namedSliceCount)
+        try container.encodeNullable(value.counterSeriesCount, forKey: .counterSeriesCount)
+        try container.encodeNullable(value.eventCountBySource, forKey: .eventCountBySource)
+        try container.encode(value.capabilities, forKey: .capabilities)
+        try container.encode(value.schemaFingerprint, forKey: .schemaFingerprint)
+        try container.encode(dataQuality, forKey: .dataQuality)
+        try container.encode(value.truncatedSections, forKey: .truncatedSections)
+    }
+}
+
+public struct CLIMachineContextResult: Encodable, Sendable {
+    private let value: TraceContext
+    private let dataQuality: CLIMachineDataQuality
+    private let summary: CLIMachineContextSummary
+
+    private enum CodingKeys: String, CodingKey {
+        case range, filters, processes, threads, cpuSlices, threadStates
+        case slices, counters, summary, dataQuality, truncation
+    }
+
+    fileprivate init(_ value: TraceContext) throws {
+        self.value = value
+        dataQuality = try CLIMachineDataQuality(value.dataQuality)
+        summary = try CLIMachineContextSummary(value.summary)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value.range, forKey: .range)
+        try container.encode(value.filters, forKey: .filters)
+        try container.encode(value.processes, forKey: .processes)
+        try container.encode(value.threads, forKey: .threads)
+        try container.encode(value.cpuSlices, forKey: .cpuSlices)
+        try container.encode(value.threadStates, forKey: .threadStates)
+        try container.encode(value.slices, forKey: .slices)
+        try container.encode(value.counters, forKey: .counters)
+        try container.encode(summary, forKey: .summary)
+        try container.encode(dataQuality, forKey: .dataQuality)
+        try container.encode(value.truncation, forKey: .truncation)
+    }
+}
+
+public struct CLIMachineDeterministicAnalysisResult: Encodable, Sendable {
+    private let value: TraceDeterministicAnalysis
+    private let dataQuality: CLIMachineDataQuality
+
+    private enum CodingKeys: String, CodingKey {
+        case kind, parameters, range, cpuUtilization, topProcesses, topThreads
+        case longSlices, threadStateDistribution, schedulingLatency, hotIntervals
+        case sections, dataQuality
+    }
+
+    fileprivate init(_ value: TraceDeterministicAnalysis) throws {
+        self.value = value
+        dataQuality = try CLIMachineDataQuality(value.dataQuality)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value.kind, forKey: .kind)
+        try container.encode(value.parameters, forKey: .parameters)
+        try container.encode(value.range, forKey: .range)
+        try container.encode(value.cpuUtilization, forKey: .cpuUtilization)
+        try container.encode(value.topProcesses, forKey: .topProcesses)
+        try container.encode(value.topThreads, forKey: .topThreads)
+        try container.encode(value.longSlices, forKey: .longSlices)
+        try container.encode(value.threadStateDistribution, forKey: .threadStateDistribution)
+        try container.encode(value.schedulingLatency, forKey: .schedulingLatency)
+        try container.encode(value.hotIntervals, forKey: .hotIntervals)
+        try container.encode(value.sections, forKey: .sections)
+        try container.encode(dataQuality, forKey: .dataQuality)
+    }
+}
+
+public struct CLIMachineAnalyzeResult: Encodable, Sendable {
+    public let kind: CLIAnalyzeKind
+    public let analysis: CLIMachineDeterministicAnalysisResult
+
+    fileprivate init(kind: CLIAnalyzeKind, analysis: TraceDeterministicAnalysis) throws {
+        self.kind = kind
+        self.analysis = try CLIMachineDeterministicAnalysisResult(analysis)
+    }
+}
+
 public enum CLIMachineCommandResult: Encodable, Sendable {
     case doctor(CLIMachineDoctorResult)
     case inspect(CLIMachineInspectResult)
     case summary(CLIMachineSummaryResult)
     case processes(CLIMachineProcessesResult)
     case threads(CLIMachineThreadsResult)
+    case query(CLIMachineAgentQueryResult)
+    case context(CLIMachineContextResult)
+    case analyze(CLIMachineAnalyzeResult)
 
     public func encode(to encoder: Encoder) throws {
         switch self {
@@ -787,6 +992,9 @@ public enum CLIMachineCommandResult: Encodable, Sendable {
         case .summary(let result): try result.encode(to: encoder)
         case .processes(let result): try result.encode(to: encoder)
         case .threads(let result): try result.encode(to: encoder)
+        case .query(let result): try result.encode(to: encoder)
+        case .context(let result): try result.encode(to: encoder)
+        case .analyze(let result): try result.encode(to: encoder)
         }
     }
 }
@@ -852,6 +1060,54 @@ protocol CLIMachineTraceSession: Sendable {
     func cliThreads(
         _ query: ThreadQuery
     ) async throws -> CLIMachineBoundTraceResult<BoundedPage<TraceThread>>
+    func cliAgentQuery(
+        _ request: TraceAgentQueryRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceAgentQueryResult>
+    func cliContext(
+        _ request: TraceContextRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceContext>
+    func cliAnalyze(
+        _ request: TraceDeterministicAnalysisRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceDeterministicAnalysis>
+}
+
+// Existing internal session doubles that exercise only the Phase 2 commands
+// stay source-compatible. Phase 4 command tests override the exact operation
+// they support; reaching one of these defaults is a stable test-boundary
+// failure rather than a fabricated result.
+extension CLIMachineTraceSession {
+    func cliAgentQuery(
+        _ request: TraceAgentQueryRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceAgentQueryResult> {
+        throw ArkTraceError(
+            code: .internalError,
+            stage: .querying,
+            message: "Trace session does not implement Agent query",
+            details: ["reason": "missingAgentQueryBoundary"]
+        )
+    }
+
+    func cliContext(
+        _ request: TraceContextRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceContext> {
+        throw ArkTraceError(
+            code: .internalError,
+            stage: .analyzing,
+            message: "Trace session does not implement Context",
+            details: ["reason": "missingContextBoundary"]
+        )
+    }
+
+    func cliAnalyze(
+        _ request: TraceDeterministicAnalysisRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceDeterministicAnalysis> {
+        throw ArkTraceError(
+            code: .internalError,
+            stage: .analyzing,
+            message: "Trace session does not implement deterministic analysis",
+            details: ["reason": "missingAnalysisBoundary"]
+        )
+    }
 }
 
 extension TraceSession: CLIMachineTraceSession {
@@ -894,6 +1150,35 @@ extension TraceSession: CLIMachineTraceSession {
             value: value
         )
     }
+
+    func cliAgentQuery(
+        _ request: TraceAgentQueryRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceAgentQueryResult> {
+        let value = try await TraceAgentQueryEngine(repository: repository).query(request)
+        return try await CLIMachineBoundTraceResult(
+            snapshot: cliInspectSnapshot(), value: value
+        )
+    }
+
+    func cliContext(
+        _ request: TraceContextRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceContext> {
+        let value = try await TraceContextBuilder(repository: repository).build(request)
+        return try await CLIMachineBoundTraceResult(
+            snapshot: cliInspectSnapshot(), value: value
+        )
+    }
+
+    func cliAnalyze(
+        _ request: TraceDeterministicAnalysisRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceDeterministicAnalysis> {
+        let value = try await TraceDeterministicAnalysisEngine(
+            repository: repository
+        ).analyze(request)
+        return try await CLIMachineBoundTraceResult(
+            snapshot: cliInspectSnapshot(), value: value
+        )
+    }
 }
 
 /// Domain-owned evidence returned by command executors. Construction is
@@ -906,9 +1191,28 @@ public struct CLIMachineCommandPayload: Sendable {
         case summary(CLIMachineTraceSnapshot, TraceSummary)
         case processes(CLIMachineTraceSnapshot, BoundedPage<TraceProcess>)
         case threads(CLIMachineTraceSnapshot, BoundedPage<TraceThread>)
+        case query(CLIMachineTraceSnapshot, TraceAgentQueryResult)
+        case context(CLIMachineTraceSnapshot, TraceContext)
+        case analyze(CLIMachineTraceSnapshot, CLIAnalyzeKind, TraceDeterministicAnalysis)
     }
 
     private let storage: Storage
+
+    /// Runs the same request/result/provenance checks for human and Machine
+    /// presentation. The fixed internal tool is never encoded or exposed; it
+    /// only lets the single envelope implementation remain the source of truth.
+    func validate(for invocation: CLIInvocation) throws {
+        let validationTool = try CLIMachineTool(
+            name: ArkTraceCLITool.name,
+            version: ArkTraceCLITool.version,
+            buildRevision: String(repeating: "0", count: 64)
+        )
+        _ = try validatedEnvelope(
+            for: invocation,
+            tool: validationTool,
+            performMachinePreflight: false
+        )
+    }
 
     static func doctor(
         selfTest: Bool,
@@ -949,8 +1253,15 @@ public struct CLIMachineCommandPayload: Sendable {
     static func summary(
         bound: CLIMachineBoundTraceResult<TraceSummary>
     ) throws -> CLIMachineCommandPayload {
-        let metadata = bound.snapshot.metadata
-        let summary = bound.value
+        try validateSummary(bound.value, snapshot: bound.snapshot)
+        return CLIMachineCommandPayload(storage: .summary(bound.snapshot, bound.value))
+    }
+
+    private static func validateSummary(
+        _ summary: TraceSummary,
+        snapshot: CLIMachineTraceSnapshot
+    ) throws {
+        let metadata = snapshot.metadata
         guard summary.dataQuality.issues.count <= 4_096,
             (summary.eventCountBySource?.count ?? 0) <= 100_000
         else { throw CLIMachineValueValidation.limitFailure() }
@@ -978,7 +1289,6 @@ public struct CLIMachineCommandPayload: Sendable {
             }
             previousSourceBytes = sourceBytes
         }
-        return CLIMachineCommandPayload(storage: .summary(bound.snapshot, summary))
     }
 
     static func processes(
@@ -1017,11 +1327,133 @@ public struct CLIMachineCommandPayload: Sendable {
         return CLIMachineCommandPayload(storage: .threads(bound.snapshot, page))
     }
 
+    static func query(
+        bound: CLIMachineBoundTraceResult<TraceAgentQueryResult>
+    ) throws -> CLIMachineCommandPayload {
+        guard bound.value.range.endNs <= bound.snapshot.metadata.durationNs,
+            bound.value.dataQuality.issues.count <= 4_096
+        else {
+            throw CLIMachineValueValidation.contractFailure(
+                reason: "agentQueryProvenanceMismatch"
+            )
+        }
+        return CLIMachineCommandPayload(storage: .query(bound.snapshot, bound.value))
+    }
+
+    static func context(
+        bound: CLIMachineBoundTraceResult<TraceContext>
+    ) throws -> CLIMachineCommandPayload {
+        guard bound.value.range.endNs <= bound.snapshot.metadata.durationNs,
+            bound.value.dataQuality.issues.count <= 4_096
+        else {
+            throw CLIMachineValueValidation.contractFailure(
+                reason: "contextProvenanceMismatch"
+            )
+        }
+        try validateSummary(bound.value.summary, snapshot: bound.snapshot)
+        let context = bound.value
+        let summary = context.summary
+        guard summary.range == context.range,
+            Set(summary.dataQuality.issues).isSubset(of: Set(context.dataQuality.issues))
+        else {
+            throw CLIMachineValueValidation.contractFailure(
+                reason: "contextSummaryMismatch"
+            )
+        }
+        try validateContextSectionStatuses(context)
+        return CLIMachineCommandPayload(storage: .context(bound.snapshot, context))
+    }
+
+    private static func validateContextSectionStatuses(_ context: TraceContext) throws {
+        let counters = context.counters.reduce(into: 0) { total, series in
+            let (next, overflow) = total.addingReportingOverflow(series.samples.count)
+            total = overflow ? .max : next
+        }
+        let values: [(TraceContextSectionStatus, Int)] = [
+            (context.truncation.processes, context.processes.count),
+            (context.truncation.threads, context.threads.count),
+            (context.truncation.cpuSlices, context.cpuSlices.count),
+            (context.truncation.threadStates, context.threadStates.count),
+            (context.truncation.slices, context.slices.count),
+            (context.truncation.counters, counters),
+            (context.truncation.summary, 1),
+        ]
+        guard values.allSatisfy({ status, actual in
+            status.returnedCount == actual
+                && status.returnedCount >= 0
+                && (status.matchedCount == nil || status.matchedCount! >= actual)
+        }) else {
+            throw CLIMachineValueValidation.contractFailure(
+                reason: "contextSectionStatusMismatch"
+            )
+        }
+    }
+
+    static func analyze(
+        kind: CLIAnalyzeKind,
+        bound: CLIMachineBoundTraceResult<TraceDeterministicAnalysis>
+    ) throws -> CLIMachineCommandPayload {
+        guard bound.value.range.endNs <= bound.snapshot.metadata.durationNs,
+            bound.value.dataQuality.issues.count <= 4_096
+        else {
+            throw CLIMachineValueValidation.contractFailure(
+                reason: "analysisProvenanceMismatch"
+            )
+        }
+        try validateAnalysisSectionStatuses(bound.value)
+        return CLIMachineCommandPayload(
+            storage: .analyze(bound.snapshot, kind, bound.value)
+        )
+    }
+
+    private static func validateAnalysisSectionStatuses(
+        _ analysis: TraceDeterministicAnalysis
+    ) throws {
+        let values: [(TraceAnalysisSectionStatus, Int)] = [
+            (analysis.sections.cpuUtilization, analysis.cpuUtilization.count),
+            (analysis.sections.topProcesses, analysis.topProcesses.count),
+            (analysis.sections.topThreads, analysis.topThreads.count),
+            (analysis.sections.longSlices, analysis.longSlices.count),
+            (
+                analysis.sections.threadStateDistribution,
+                analysis.threadStateDistribution.count
+            ),
+            (
+                analysis.sections.schedulingLatency,
+                analysis.schedulingLatency.topSamples.count
+            ),
+            (analysis.sections.hotIntervals, analysis.hotIntervals.count),
+        ]
+        guard values.allSatisfy({ status, actual in
+            status.returnedCount == actual
+                && status.returnedCount >= 0
+                && (status.matchedCount == nil || status.matchedCount! >= actual)
+        }) else {
+            throw CLIMachineValueValidation.contractFailure(
+                reason: "analysisSectionStatusMismatch"
+            )
+        }
+    }
+
     func envelope(
         for invocation: CLIInvocation,
         tool: CLIMachineTool
     ) throws -> CLIMachineSuccessEnvelope<CLIMachineCommandResult> {
-        try preflight(maximumBytes: invocation.options.limits.maxOutputBytes)
+        try validatedEnvelope(
+            for: invocation,
+            tool: tool,
+            performMachinePreflight: true
+        )
+    }
+
+    private func validatedEnvelope(
+        for invocation: CLIInvocation,
+        tool: CLIMachineTool,
+        performMachinePreflight: Bool
+    ) throws -> CLIMachineSuccessEnvelope<CLIMachineCommandResult> {
+        if performMachinePreflight {
+            try preflight(maximumBytes: invocation.options.limits.maxOutputBytes)
+        }
         let request = try invocation.machineRequest()
         let limits = CLIMachineLimits(invocation.options.limits)
         switch (storage, invocation.command) {
@@ -1157,9 +1589,174 @@ public struct CLIMachineCommandPayload: Sendable {
                 ),
                 truncationSections: page.truncated ? ["threads"] : []
             )
+        case (.query(let snapshot, let result), .query(_, let options)):
+            guard result.view == options.view, result.range == options.range,
+                result.filters == options.filters,
+                result.eventCount <= options.limit
+            else {
+                throw CLIMachineValueValidation.contractFailure(
+                    reason: "requestPayloadMismatch"
+                )
+            }
+            return try traceEnvelope(
+                metadata: snapshot.metadata,
+                preparation: snapshot.preparation,
+                tool: tool,
+                request: request,
+                limits: limits,
+                result: .query(try CLIMachineAgentQueryResult(result)),
+                quality: result.dataQuality,
+                truncationSections: result.truncated ? [options.view.cliName] : []
+            )
+        case (.context(let snapshot, let context), .context(_, let options)):
+            let requestedRange = try expectedContextRange(
+                options.time, durationNs: snapshot.metadata.durationNs
+            )
+            let directoryCount = checkedTotal([
+                context.processes.count, context.threads.count,
+            ])
+            let eventCount = checkedTotal(
+                [
+                    context.cpuSlices.count,
+                    context.threadStates.count,
+                    context.slices.count,
+                ] + context.counters.map(\.samples.count)
+            )
+            guard context.range == requestedRange,
+                context.filters == options.filters,
+                directoryCount != nil,
+                directoryCount! <= invocation.options.limits.maxRows,
+                eventCount != nil,
+                eventCount! <= invocation.options.limits.maxEvents
+            else {
+                throw CLIMachineValueValidation.contractFailure(
+                    reason: "requestPayloadMismatch"
+                )
+            }
+            let sections = contextTruncationSections(context.truncation)
+            return try traceEnvelope(
+                metadata: snapshot.metadata,
+                preparation: snapshot.preparation,
+                tool: tool,
+                request: request,
+                limits: limits,
+                result: .context(try CLIMachineContextResult(context)),
+                quality: context.dataQuality,
+                truncationSections: sections
+            )
+        case (.analyze(let snapshot, let kind, let analysis),
+              .analyze(_, let options)):
+            let expectedRange = try options.range
+                ?? TraceTimeRange.query(
+                    startNs: 0, endNs: snapshot.metadata.durationNs
+                )
+            let expectedTimeout = Duration.milliseconds(limits.timeoutMs).components
+            let returnedRows = checkedTotal([
+                analysis.cpuUtilization.count,
+                analysis.topProcesses.count,
+                analysis.topThreads.count,
+                analysis.longSlices.count,
+                analysis.threadStateDistribution.count,
+                analysis.schedulingLatency.topSamples.count,
+                analysis.hotIntervals.count,
+            ])
+            guard kind == options.kind, analysis.range == expectedRange,
+                analysis.parameters.filters == options.filters,
+                analysis.parameters.maximumCPUSlices == limits.maxEvents,
+                analysis.parameters.maximumProcessSlices == limits.maxEvents,
+                analysis.parameters.maximumThreadSlices == limits.maxEvents,
+                analysis.parameters.maximumStateIntervals == limits.maxEvents,
+                analysis.parameters.maximumNamedSlices == limits.maxEvents,
+                analysis.parameters.maximumSchedulingEvents == limits.maxEvents,
+                analysis.parameters.maximumHotEvents == limits.maxEvents,
+                analysis.parameters.minimumLongSliceDurationNs == options.thresholdNs,
+                analysis.parameters.topProcessLimit == options.limit,
+                analysis.parameters.topThreadLimit == options.limit,
+                analysis.parameters.longSliceLimit == options.limit,
+                analysis.parameters.schedulingSampleLimit == options.limit,
+                analysis.parameters.hotIntervalLimit == options.limit,
+                analysis.parameters.hotBucketCount == 100,
+                analysis.parameters.timeoutSeconds == expectedTimeout.seconds,
+                analysis.parameters.timeoutAttoseconds == expectedTimeout.attoseconds,
+                returnedRows != nil,
+                returnedRows! <= limits.maxRows
+            else {
+                throw CLIMachineValueValidation.contractFailure(
+                    reason: "requestPayloadMismatch"
+                )
+            }
+            return try traceEnvelope(
+                metadata: snapshot.metadata,
+                preparation: snapshot.preparation,
+                tool: tool,
+                request: request,
+                limits: limits,
+                result: .analyze(
+                    try CLIMachineAnalyzeResult(kind: kind, analysis: analysis)
+                ),
+                quality: analysis.dataQuality,
+                truncationSections: analysisTruncationSections(analysis.sections)
+            )
         default:
             throw CLIMachineValueValidation.contractFailure(reason: "requestPayloadMismatch")
         }
+    }
+
+    private func checkedTotal(_ values: [Int]) -> Int? {
+        var total = 0
+        for value in values {
+            let (next, overflow) = total.addingReportingOverflow(value)
+            guard !overflow else { return nil }
+            total = next
+        }
+        return total
+    }
+
+    private func expectedContextRange(
+        _ selection: TraceContextTimeSelection,
+        durationNs: Int64
+    ) throws -> TraceTimeRange {
+        switch selection {
+        case .range(let range): return range
+        case .timestamp(let timestamp, let before, let after):
+            let start = timestamp >= before ? timestamp - before : 0
+            let (candidateEnd, overflow) = timestamp.addingReportingOverflow(after)
+            return try TraceTimeRange.query(
+                startNs: start,
+                endNs: min(durationNs, overflow ? .max : candidateEnd)
+            )
+        }
+    }
+
+    private func contextTruncationSections(
+        _ value: TraceContextTruncation
+    ) -> [String] {
+        var sections: [String] = []
+        if value.processes.truncated { sections.append("processes") }
+        if value.threads.truncated { sections.append("threads") }
+        if value.cpuSlices.truncated { sections.append("cpuSlices") }
+        if value.threadStates.truncated { sections.append("threadStates") }
+        if value.slices.truncated { sections.append("slices") }
+        if value.counters.truncated { sections.append("counters") }
+        if value.summary.truncated { sections.append("summary") }
+        if value.referenceOmittedByBudget { sections.append("references") }
+        return sections
+    }
+
+    private func analysisTruncationSections(
+        _ value: TraceDeterministicAnalysisSections
+    ) -> [String] {
+        var sections: [String] = []
+        if value.cpuUtilization.truncated { sections.append("cpuUtilization") }
+        if value.topProcesses.truncated { sections.append("topProcesses") }
+        if value.topThreads.truncated { sections.append("topThreads") }
+        if value.longSlices.truncated { sections.append("longSlices") }
+        if value.threadStateDistribution.truncated {
+            sections.append("threadStateDistribution")
+        }
+        if value.schedulingLatency.truncated { sections.append("schedulingLatency") }
+        if value.hotIntervals.truncated { sections.append("hotIntervals") }
+        return sections
     }
 
     fileprivate static func validate(
@@ -1365,6 +1962,49 @@ public struct CLIMachineCommandPayload: Sendable {
                 try addString(item.name)
                 try addString(item.processName)
             }
+        case .query(let snapshot, let result):
+            try addMetadata(snapshot.metadata)
+            try addString(snapshot.preparation.schemaAdapterVersion)
+            try add(result.eventCount * 2)
+            for item in result.cpuSlices {
+                try addString(item.threadName)
+                try addString(item.processName)
+                try addString(item.endState)
+            }
+            for item in result.threadStates {
+                try addString(item.state)
+                try addString(item.threadName)
+                try addString(item.processName)
+            }
+            for item in result.slices {
+                try addString(item.name)
+                try addString(item.category)
+                try addString(item.threadName)
+                try addString(item.processName)
+            }
+            for item in result.counters {
+                try addString(item.name)
+                try addString(item.processName)
+                try addString(item.unit)
+            }
+        case .context(let snapshot, let context):
+            try addMetadata(snapshot.metadata)
+            try addString(snapshot.preparation.schemaAdapterVersion)
+            try add(
+                (context.processes.count + context.threads.count
+                    + context.cpuSlices.count + context.threadStates.count
+                    + context.slices.count + context.counters.count) * 2
+            )
+        case .analyze(let snapshot, _, let analysis):
+            try addMetadata(snapshot.metadata)
+            try addString(snapshot.preparation.schemaAdapterVersion)
+            try add(
+                (analysis.cpuUtilization.count + analysis.topProcesses.count
+                    + analysis.topThreads.count + analysis.longSlices.count
+                    + analysis.threadStateDistribution.count
+                    + analysis.schedulingLatency.topSamples.count
+                    + analysis.hotIntervals.count) * 2
+            )
         }
     }
 

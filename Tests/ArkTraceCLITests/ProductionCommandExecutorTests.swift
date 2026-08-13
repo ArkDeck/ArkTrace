@@ -1,4 +1,4 @@
-import ArkTraceAnalysis
+@testable import ArkTraceAnalysis
 @testable import ArkTraceCLI
 import ArkTraceCore
 @testable import ArkTraceRuntime
@@ -188,7 +188,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
         XCTAssertTrue(rendered[0].contains("…"))
     }
 
-    func testRealFixtureRunsAllFiveCommandsInHumanAndMachineModes() async throws {
+    func testRealFixtureRunsAllEightCommandsInHumanAndMachineModes() async throws {
         let repositoryRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
@@ -235,6 +235,17 @@ final class ProductionCommandExecutorTests: XCTestCase {
             ["summary", fixtureURL.path],
             ["processes", fixtureURL.path, "--limit", "2"],
             ["threads", fixtureURL.path, "--limit", "2"],
+            [
+                "query", fixtureURL.path, "--view", "slices",
+                "--start-ns", "0", "--end-ns", "1", "--limit", "2",
+            ],
+            [
+                "context", fixtureURL.path, "--start-ns", "0", "--end-ns", "1",
+            ],
+            [
+                "analyze", fixtureURL.path, "--kind", "range",
+                "--start-ns", "0", "--end-ns", "1", "--limit", "2",
+            ],
         ]
 
         for command in commands {
@@ -264,7 +275,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
         }
     }
 
-    func testFiveProductionCommandsSupportHumanAndMachineOutput() async throws {
+    func testEightProductionCommandsSupportHumanAndMachineOutput() async throws {
         let environment = try CommandEnvironment()
         let executor = environment.executor()
         let commands: [([String], String)] = [
@@ -279,6 +290,18 @@ final class ProductionCommandExecutorTests: XCTestCase {
                 "threads", "/Users/private/source.htrace", "--pid", "42",
                 "--tid", "43", "--name", "worker-thread", "--limit", "1",
             ], "ITID\tIPID"),
+            ([
+                "query", "/Users/private/source.htrace", "--view", "slices",
+                "--start-ns", "0", "--end-ns", "100", "--limit", "1",
+            ], "View: slices"),
+            ([
+                "context", "/Users/private/source.htrace", "--start-ns", "0",
+                "--end-ns", "100",
+            ], "CPU slices:"),
+            ([
+                "analyze", "/Users/private/source.htrace", "--kind", "range",
+                "--start-ns", "0", "--end-ns", "100", "--limit", "1",
+            ], "Analysis: range"),
         ]
 
         for (arguments, humanNeedle) in commands {
@@ -313,7 +336,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
         }
 
         let sessions = environment.registry.sessions
-        XCTAssertEqual(sessions.count, 8)
+        XCTAssertEqual(sessions.count, 14)
         for session in sessions {
             let closeCount = await session.closeCount
             XCTAssertEqual(closeCount, 1)
@@ -391,6 +414,70 @@ final class ProductionCommandExecutorTests: XCTestCase {
         XCTAssertEqual(threadQuery.limit, 1)
         XCTAssertNotNil(threadQuery.deadline)
 
+        let queryWriter = TestOutputWriter()
+        let queryStatus = await application(executor: executor).run(
+            arguments: [
+                "--json", "--max-events", "3", "--timeout-ms", "500",
+                "query", "trace", "--view", "slices", "--start-ns", "10",
+                "--end-ns", "90", "--process-key", "-101", "--name", "work",
+                "--name-match", "prefix", "--limit", "2",
+            ],
+            writer: queryWriter
+        )
+        XCTAssertEqual(queryStatus, 0)
+        let querySession = try XCTUnwrap(environment.registry.sessions.last)
+        let capturedAgentRequest = await querySession.agentRequest
+        let agentRequest = try XCTUnwrap(capturedAgentRequest)
+        XCTAssertEqual(agentRequest.view, .slices)
+        XCTAssertEqual(agentRequest.range, try TraceTimeRange.query(startNs: 10, endNs: 90))
+        XCTAssertEqual(agentRequest.filters.processKey, ProcessKey(ipid: -101))
+        XCTAssertEqual(agentRequest.filters.name, "work")
+        XCTAssertEqual(agentRequest.filters.nameMatch, .prefix)
+        XCTAssertEqual(agentRequest.limit, 2)
+        XCTAssertEqual(agentRequest.timeout, .milliseconds(500))
+
+        let contextWriter = TestOutputWriter()
+        let contextStatus = await application(executor: executor).run(
+            arguments: [
+                "--json", "--max-rows", "7", "--max-events", "3",
+                "--max-output-bytes", "4096", "--timeout-ms", "500",
+                "context", "trace", "--timestamp-ns", "50", "--window-ms", "1",
+                "--pid", "42",
+            ],
+            writer: contextWriter
+        )
+        // The symmetric window clips to the full 0...100 test trace.
+        XCTAssertEqual(contextStatus, 0)
+        let contextSession = try XCTUnwrap(environment.registry.sessions.last)
+        let capturedContextRequest = await contextSession.contextRequest
+        let contextRequest = try XCTUnwrap(capturedContextRequest)
+        XCTAssertEqual(contextRequest.filters.pid, 42)
+        XCTAssertEqual(contextRequest.maximumEvents, 3)
+        XCTAssertEqual(contextRequest.maximumRows, 7)
+        XCTAssertEqual(contextRequest.maximumOutputBytes, 4_096)
+        XCTAssertEqual(contextRequest.timeout, .milliseconds(500))
+
+        let analysisWriter = TestOutputWriter()
+        let analysisStatus = await application(executor: executor).run(
+            arguments: [
+                "--json", "--max-events", "3", "--timeout-ms", "500",
+                "analyze", "trace", "--kind", "hot-intervals", "--start-ns", "10",
+                "--end-ns", "90", "--thread-key", "-202", "--threshold-ns", "7",
+                "--limit", "2",
+            ],
+            writer: analysisWriter
+        )
+        XCTAssertEqual(analysisStatus, 0)
+        let analysisSession = try XCTUnwrap(environment.registry.sessions.last)
+        let capturedAnalysisRequest = await analysisSession.analysisRequest
+        let analysisRequest = try XCTUnwrap(capturedAnalysisRequest)
+        XCTAssertEqual(analysisRequest.range, try TraceTimeRange.query(startNs: 10, endNs: 90))
+        XCTAssertEqual(analysisRequest.filters.threadKey, ThreadKey(itid: -202))
+        XCTAssertEqual(analysisRequest.maximumCPUSlices, 3)
+        XCTAssertEqual(analysisRequest.minimumLongSliceDurationNs, 7)
+        XCTAssertEqual(analysisRequest.hotIntervalLimit, 2)
+        XCTAssertEqual(analysisRequest.timeout, .milliseconds(500))
+
         let doctorWriter = TestOutputWriter()
         let doctorStatus = await application(executor: executor).run(
             arguments: ["--json", "doctor", "--self-test"],
@@ -424,6 +511,81 @@ final class ProductionCommandExecutorTests: XCTestCase {
             (unhealthyObject["error"] as? [String: Any])?["code"] as? String,
             "TRACE_CACHE_CORRUPT"
         )
+    }
+
+    func testContextRetentionBudgetsTheCompleteMachineEnvelope() async throws {
+        let environment = try CommandEnvironment()
+        environment.registry.setNearBudgetContext(true)
+
+        let humanWriter = TestOutputWriter()
+        let humanStatus = await application(executor: environment.executor()).run(
+            arguments: [
+                "--max-output-bytes", "4096",
+                "context", "trace", "--start-ns", "0", "--end-ns", "100",
+            ],
+            writer: humanWriter
+        )
+        XCTAssertEqual(humanStatus, 0)
+        XCTAssertLessThanOrEqual(humanWriter.stdout.count, 4_096)
+        XCTAssertTrue(humanWriter.stderr.isEmpty)
+        XCTAssertTrue(String(decoding: humanWriter.stdout, as: UTF8.self).contains("Processes: 6"))
+        let humanSession = try XCTUnwrap(environment.registry.sessions.last)
+        let humanRequests = await humanSession.contextRequests
+        XCTAssertEqual(humanRequests.count, 1)
+        XCTAssertEqual(humanRequests.first?.maximumOutputBytes, 4_096)
+
+        for pretty in [false, true] {
+            let maximumBytes = pretty ? 6_000 : 4_096
+            let writer = TestOutputWriter()
+            var arguments = ["--json"]
+            if pretty { arguments.append("--pretty") }
+            arguments += [
+                "--max-output-bytes", String(maximumBytes),
+                "context", "trace", "--start-ns", "0", "--end-ns", "100",
+            ]
+            let status = await application(executor: environment.executor()).run(
+                arguments: arguments,
+                writer: writer
+            )
+            XCTAssertEqual(status, 0, "pretty=\(pretty)")
+            XCTAssertLessThanOrEqual(writer.stdout.count, maximumBytes)
+            let object = try XCTUnwrap(
+                try JSONSerialization.jsonObject(with: writer.stdout) as? [String: Any]
+            )
+            XCTAssertNotNil(object["trace"])
+            XCTAssertNotNil(object["provenance"])
+            XCTAssertNotNil((object["result"] as? [String: Any])?["summary"])
+            let session = try XCTUnwrap(environment.registry.sessions.last)
+            let requests = await session.contextRequests
+            XCTAssertGreaterThan(requests.count, 1)
+            XCTAssertEqual(requests.first?.maximumOutputBytes, maximumBytes)
+            XCTAssertLessThan(
+                try XCTUnwrap(requests.last?.maximumOutputBytes), maximumBytes
+            )
+        }
+    }
+
+    func testThreadCommandPreservesReusedPIDTIDInternalIdentities() async throws {
+        let environment = try CommandEnvironment()
+        let writer = TestOutputWriter()
+        let status = await application(executor: environment.executor()).run(
+            arguments: [
+                "--json", "threads", "trace", "--pid", "42", "--tid", "43",
+                "--limit", "2",
+            ],
+            writer: writer
+        )
+
+        XCTAssertEqual(status, 0)
+        let object = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: writer.stdout) as? [String: Any]
+        )
+        let items = try XCTUnwrap(
+            (object["result"] as? [String: Any])?["items"] as? [[String: Any]]
+        )
+        XCTAssertEqual(items.compactMap { $0["pid"] as? Int64 }, [42, 42])
+        XCTAssertEqual(items.compactMap { $0["tid"] as? Int64 }, [43, 43])
+        XCTAssertEqual(items.compactMap { $0["key"] as? Int64 }, [202, 203])
     }
 
     func testOperationOrCleanupFailureCannotReturnSuccess() async throws {
@@ -644,6 +806,7 @@ private final class SessionRegistry: @unchecked Sendable {
     private var storage: [CommandSessionDouble] = []
     private var capturedOptions: [CLIGlobalOptions] = []
     private var closeError: ArkTraceError?
+    private var nearBudgetContext = false
 
     init(snapshot: CLIMachineTraceSnapshot) throws {
         self.snapshot = snapshot
@@ -656,9 +819,18 @@ private final class SessionRegistry: @unchecked Sendable {
         lock.withLock { closeError = error }
     }
 
+
+    func setNearBudgetContext(_ enabled: Bool) {
+        lock.withLock { nearBudgetContext = enabled }
+    }
+
     func make(source: URL, options: CLIGlobalOptions) -> CommandSessionDouble {
-        let error = lock.withLock { closeError }
-        let session = CommandSessionDouble(snapshot: snapshot, closeError: error)
+        let configuration = lock.withLock { (closeError, nearBudgetContext) }
+        let session = CommandSessionDouble(
+            snapshot: snapshot,
+            closeError: configuration.0,
+            nearBudgetContext: configuration.1
+        )
         lock.withLock {
             storage.append(session)
             capturedOptions.append(options)
@@ -674,10 +846,21 @@ private actor CommandSessionDouble: CLIManagedTraceSession {
     private(set) var summaryRequest: TraceSummaryRequest?
     private(set) var processQuery: ProcessQuery?
     private(set) var threadQuery: ThreadQuery?
+    private(set) var agentRequest: TraceAgentQueryRequest?
+    private(set) var contextRequest: TraceContextRequest?
+    private(set) var contextRequests: [TraceContextRequest] = []
+    private(set) var analysisRequest: TraceDeterministicAnalysisRequest?
 
-    init(snapshot: CLIMachineTraceSnapshot, closeError: ArkTraceError?) {
+    let nearBudgetContext: Bool
+
+    init(
+        snapshot: CLIMachineTraceSnapshot,
+        closeError: ArkTraceError?,
+        nearBudgetContext: Bool = false
+    ) {
         self.snapshot = snapshot
         self.closeError = closeError
+        self.nearBudgetContext = nearBudgetContext
     }
 
     func cliInspectSnapshot() async throws -> CLIMachineTraceSnapshot { snapshot }
@@ -731,19 +914,170 @@ private actor CommandSessionDouble: CLIManagedTraceSession {
         _ query: ThreadQuery
     ) async throws -> CLIMachineBoundTraceResult<BoundedPage<TraceThread>> {
         threadQuery = query
+        let first = TraceThread(
+            key: ThreadKey(itid: 202),
+            processKey: ProcessKey(ipid: 101),
+            tid: 43,
+            pid: 42,
+            name: "worker-thread",
+            processName: "worker",
+            startNs: 5,
+            endNs: nil,
+            isMainThread: false
+        )
+        let items = query.pid == 42 && query.tid == 43 && query.limit >= 2
+            ? [
+                first,
+                TraceThread(
+                    key: ThreadKey(itid: 203),
+                    processKey: ProcessKey(ipid: 101),
+                    tid: 43,
+                    pid: 42,
+                    name: "worker-thread-reused",
+                    processName: "worker",
+                    startNs: 50,
+                    endNs: nil,
+                    isMainThread: false
+                ),
+            ]
+            : [first]
         return CLIMachineBoundTraceResult(
             snapshot: snapshot,
-            value: BoundedPage(items: [TraceThread(
-                key: ThreadKey(itid: 202),
-                processKey: ProcessKey(ipid: 101),
-                tid: 43,
-                pid: 42,
-                name: "worker-thread",
-                processName: "worker",
-                startNs: 5,
-                endNs: nil,
-                isMainThread: false
-            )], truncated: query.limit == 1)
+            value: BoundedPage(items: items, truncated: query.limit == 1)
+        )
+    }
+
+    func cliAgentQuery(
+        _ request: TraceAgentQueryRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceAgentQueryResult> {
+        agentRequest = request
+        return CLIMachineBoundTraceResult(
+            snapshot: snapshot,
+            value: try TraceAgentQueryResult(
+                view: request.view,
+                range: request.range,
+                filters: request.filters,
+                capabilityAvailable: true,
+                truncated: false,
+                dataQuality: snapshot.metadata.dataQuality
+            )
+        )
+    }
+
+    func cliContext(
+        _ request: TraceContextRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceContext> {
+        contextRequest = request
+        contextRequests.append(request)
+        let range: TraceTimeRange
+        switch request.time {
+        case .range(let value):
+            range = value
+        case .timestamp(let timestamp, let before, let after):
+            let start = timestamp >= before ? timestamp - before : 0
+            let (candidateEnd, overflow) = timestamp.addingReportingOverflow(after)
+            range = try TraceTimeRange.query(
+                startNs: start,
+                endNs: min(snapshot.metadata.durationNs, overflow ? .max : candidateEnd)
+            )
+        }
+        let empty = TraceContextSectionStatus(
+            returnedCount: 0, matchedCount: 0, truncated: false
+        )
+        let processes: [TraceProcess] = nearBudgetContext
+            && request.maximumOutputBytes >= 4_096
+            ? (0..<6).map { index in
+                TraceProcess(
+                    key: ProcessKey(ipid: Int64(index + 1)),
+                    pid: Int64(index + 1),
+                    name: String(repeating: "x", count: 250),
+                    startNs: nil,
+                    endNs: nil,
+                    threadCount: nil
+                )
+            }
+            : []
+        let summary = TraceSummary(
+            range: range,
+            durationNs: range.durationNs,
+            cpuCount: 0, processCount: 0, threadCount: 0,
+            cpuSliceCount: 0, threadStateCount: 0,
+            namedSliceCount: 0, counterSeriesCount: 0,
+            eventCountBySource: [],
+            capabilities: snapshot.metadata.capabilities,
+            schemaFingerprint: snapshot.metadata.schemaFingerprint,
+            dataQuality: snapshot.metadata.dataQuality,
+            truncatedSections: []
+        )
+        return CLIMachineBoundTraceResult(
+            snapshot: snapshot,
+            value: TraceContext(
+                range: range,
+                filters: request.filters,
+                processes: processes, threads: [], cpuSlices: [], threadStates: [],
+                slices: [], counters: [], summary: summary,
+                dataQuality: snapshot.metadata.dataQuality,
+                truncation: TraceContextTruncation(
+                    processes: .init(
+                        returnedCount: processes.count,
+                        matchedCount: processes.count,
+                        truncated: nearBudgetContext && processes.isEmpty
+                    ), threads: empty, cpuSlices: empty,
+                    threadStates: empty, slices: empty, counters: empty,
+                    summary: .init(returnedCount: 1, matchedCount: 1, truncated: false),
+                    referenceOmittedByBudget: false
+                )
+            )
+        )
+    }
+
+    func cliAnalyze(
+        _ request: TraceDeterministicAnalysisRequest
+    ) async throws -> CLIMachineBoundTraceResult<TraceDeterministicAnalysis> {
+        analysisRequest = request
+        let timeout = request.timeout.components
+        let empty = TraceAnalysisSectionStatus(
+            returnedCount: 0, matchedCount: 0, truncated: false
+        )
+        return CLIMachineBoundTraceResult(
+            snapshot: snapshot,
+            value: TraceDeterministicAnalysis(
+                kind: .deterministicBatch,
+                parameters: TraceDeterministicAnalysisParameters(
+                    filters: request.filters,
+                    maximumCPUSlices: request.maximumCPUSlices,
+                    maximumProcessSlices: request.maximumProcessSlices,
+                    maximumThreadSlices: request.maximumThreadSlices,
+                    maximumStateIntervals: request.maximumStateIntervals,
+                    maximumNamedSlices: request.maximumNamedSlices,
+                    maximumSchedulingEvents: request.maximumSchedulingEvents,
+                    maximumHotEvents: request.maximumHotEvents,
+                    topProcessLimit: request.topProcessLimit,
+                    topThreadLimit: request.topThreadLimit,
+                    longSliceLimit: request.longSliceLimit,
+                    schedulingSampleLimit: request.schedulingSampleLimit,
+                    hotIntervalLimit: request.hotIntervalLimit,
+                    hotBucketCount: request.hotBucketCount,
+                    minimumLongSliceDurationNs: request.minimumLongSliceDurationNs,
+                    timeoutSeconds: timeout.seconds,
+                    timeoutAttoseconds: timeout.attoseconds
+                ),
+                range: request.range,
+                cpuUtilization: [], topProcesses: [], topThreads: [],
+                longSlices: [], threadStateDistribution: [],
+                schedulingLatency: TraceSchedulingLatencyResult(
+                    supported: false,
+                    unsupportedReason: .capabilityUnavailable,
+                    count: 0, percentiles: nil, topSamples: [], truncated: false
+                ),
+                hotIntervals: [],
+                sections: TraceDeterministicAnalysisSections(
+                    cpuUtilization: empty, topProcesses: empty, topThreads: empty,
+                    longSlices: empty, threadStateDistribution: empty,
+                    schedulingLatency: empty, hotIntervals: empty
+                ),
+                dataQuality: snapshot.metadata.dataQuality
+            )
         )
     }
 

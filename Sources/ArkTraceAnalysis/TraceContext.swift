@@ -462,6 +462,7 @@ private enum TraceJSONByteCounter {
 /// SQL, filesystem path, parser log, or dynamic dictionary section.
 public struct TraceContext: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
+    public let filters: TraceAgentQueryFilters
     public let processes: [TraceProcess]
     public let threads: [TraceThread]
     public let cpuSlices: [CpuSlice]
@@ -471,6 +472,32 @@ public struct TraceContext: Hashable, Codable, Sendable {
     public let summary: TraceSummary
     public let dataQuality: TraceDataQuality
     public let truncation: TraceContextTruncation
+
+    public init(
+        range: TraceTimeRange,
+        filters: TraceAgentQueryFilters = .none,
+        processes: [TraceProcess],
+        threads: [TraceThread],
+        cpuSlices: [CpuSlice],
+        threadStates: [ThreadStateInterval],
+        slices: [TraceSlice],
+        counters: [CounterSeries],
+        summary: TraceSummary,
+        dataQuality: TraceDataQuality,
+        truncation: TraceContextTruncation
+    ) {
+        self.range = range
+        self.filters = filters
+        self.processes = processes
+        self.threads = threads
+        self.cpuSlices = cpuSlices
+        self.threadStates = threadStates
+        self.slices = slices
+        self.counters = counters
+        self.summary = summary
+        self.dataQuality = dataQuality
+        self.truncation = truncation
+    }
 
     /// Exact second-stage byte enforcement (AT-CTX-005). The builder performs
     /// the same check before returning, and callers can recheck after wrapping.
@@ -558,6 +585,7 @@ public struct TraceContextBuilder: Sendable {
     private struct Loaded {
         let metadata: TraceMetadata
         let range: TraceTimeRange
+        let filters: TraceAgentQueryFilters
         let center: Int64?
         let processPage: BoundedPage<TraceProcess>
         let threadPage: BoundedPage<TraceThread>
@@ -853,6 +881,7 @@ public struct TraceContextBuilder: Sendable {
         var loaded = Loaded(
             metadata: metadata,
             range: normalized.range,
+            filters: request.filters,
             center: normalized.center,
             processPage: processPage,
             threadPage: threadPage,
@@ -868,7 +897,8 @@ public struct TraceContextBuilder: Sendable {
             candidates: []
         )
         loaded = Loaded(
-            metadata: loaded.metadata, range: loaded.range, center: loaded.center,
+            metadata: loaded.metadata, range: loaded.range, filters: loaded.filters,
+            center: loaded.center,
             processPage: loaded.processPage, threadPage: loaded.threadPage,
             cpu: loaded.cpu, states: loaded.states, slices: loaded.slices,
             counters: loaded.counters, summary: loaded.summary,
@@ -983,7 +1013,8 @@ public struct TraceContextBuilder: Sendable {
             }
         }
         loaded = Loaded(
-            metadata: loaded.metadata, range: loaded.range, center: loaded.center,
+            metadata: loaded.metadata, range: loaded.range, filters: loaded.filters,
+            center: loaded.center,
             processPage: loaded.processPage, threadPage: loaded.threadPage,
             cpu: loaded.cpu, states: loaded.states, slices: loaded.slices,
             counters: loaded.counters, summary: loaded.summary,
@@ -1223,7 +1254,8 @@ public struct TraceContextBuilder: Sendable {
         try Self.check(deadline)
         return Assembly(
             context: TraceContext(
-                range: loaded.range, processes: processes, threads: threads,
+                range: loaded.range, filters: loaded.filters,
+                processes: processes, threads: threads,
                 cpuSlices: cpu, threadStates: states, slices: slices,
                 counters: counters, summary: loaded.summary,
                 dataQuality: quality, truncation: truncation

@@ -1,3 +1,4 @@
+import ArkTraceAnalysis
 import ArkTraceCore
 import ArkTraceParser
 import Foundation
@@ -94,6 +95,68 @@ public enum CLICommand: Equatable, Sendable {
         name: String?,
         limit: Int
     )
+    case query(trace: String, options: CLIQueryOptions)
+    case context(trace: String, options: CLIContextOptions)
+    case analyze(trace: String, options: CLIAnalyzeOptions)
+}
+
+public struct CLIQueryOptions: Equatable, Sendable {
+    public let view: TraceAgentQueryView
+    public let range: TraceTimeRange
+    public let filters: TraceAgentQueryFilters
+    public let limit: Int
+
+    public init(
+        view: TraceAgentQueryView,
+        range: TraceTimeRange,
+        filters: TraceAgentQueryFilters,
+        limit: Int
+    ) {
+        self.view = view
+        self.range = range
+        self.filters = filters
+        self.limit = limit
+    }
+}
+
+public struct CLIContextOptions: Equatable, Sendable {
+    public let time: TraceContextTimeSelection
+    public let filters: TraceAgentQueryFilters
+
+    public init(time: TraceContextTimeSelection, filters: TraceAgentQueryFilters) {
+        self.time = time
+        self.filters = filters
+    }
+}
+
+public enum CLIAnalyzeKind: String, Codable, CaseIterable, Hashable, Sendable {
+    case cpu
+    case scheduling
+    case slices
+    case range
+    case hotIntervals = "hot-intervals"
+}
+
+public struct CLIAnalyzeOptions: Equatable, Sendable {
+    public let kind: CLIAnalyzeKind
+    public let range: TraceTimeRange?
+    public let filters: TraceAgentQueryFilters
+    public let thresholdNs: Int64
+    public let limit: Int
+
+    public init(
+        kind: CLIAnalyzeKind,
+        range: TraceTimeRange?,
+        filters: TraceAgentQueryFilters,
+        thresholdNs: Int64,
+        limit: Int
+    ) {
+        self.kind = kind
+        self.range = range
+        self.filters = filters
+        self.thresholdNs = thresholdNs
+        self.limit = limit
+    }
 }
 
 public struct CLIInvocation: Equatable, Sendable {

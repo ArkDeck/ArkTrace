@@ -139,6 +139,95 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                     machinePayload: payload
                 )
             }
+        case .query(let trace, let options):
+            let request = try TraceAgentQueryRequest(
+                view: options.view,
+                range: options.range,
+                filters: options.filters,
+                limit: options.limit,
+                timeout: .milliseconds(invocation.options.limits.timeoutMs)
+            )
+            return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.querying)
+                let bound = try await session.cliAgentQuery(request)
+                CLIOperationStage.active?.set(.encoding)
+                return CLICommandOutput(
+                    stdout: try CLIHumanRenderer.query(
+                        bound.value,
+                        maximumBytes: invocation.options.limits.maxOutputBytes
+                    ),
+                    machinePayload: try CLIMachineCommandPayload.query(bound: bound)
+                )
+            }
+        case .context(let trace, let options):
+            let request = try TraceContextRequest(
+                time: options.time,
+                filters: options.filters,
+                maximumEvents: invocation.options.limits.maxEvents,
+                maximumRows: invocation.options.limits.maxRows,
+                maximumOutputBytes: invocation.options.limits.maxOutputBytes,
+                timeout: .milliseconds(invocation.options.limits.timeoutMs)
+            )
+            return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.analyzing)
+                let bound = try await Self.envelopeFittedContext(
+                    request,
+                    invocation: invocation,
+                    session: session
+                )
+                CLIOperationStage.active?.set(.encoding)
+                return CLICommandOutput(
+                    stdout: try CLIHumanRenderer.context(
+                        bound.value,
+                        maximumBytes: invocation.options.limits.maxOutputBytes
+                    ),
+                    machinePayload: try CLIMachineCommandPayload.context(bound: bound)
+                )
+            }
+        case .analyze(let trace, let options):
+            return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.analyzing)
+                let snapshot = try await session.cliInspectSnapshot()
+                let range = try options.range ?? TraceTimeRange.query(
+                    startNs: 0, endNs: snapshot.metadata.durationNs
+                )
+                let eventBudget = invocation.options.limits.maxEvents
+                let request = try TraceDeterministicAnalysisRequest(
+                    range: range,
+                    filters: options.filters,
+                    maximumCPUSlices: eventBudget,
+                    maximumProcessSlices: eventBudget,
+                    maximumThreadSlices: eventBudget,
+                    maximumStateIntervals: eventBudget,
+                    maximumNamedSlices: eventBudget,
+                    maximumSchedulingEvents: eventBudget,
+                    maximumHotEvents: eventBudget,
+                    topProcessLimit: options.limit,
+                    topThreadLimit: options.limit,
+                    longSliceLimit: options.limit,
+                    schedulingSampleLimit: options.limit,
+                    hotIntervalLimit: options.limit,
+                    minimumLongSliceDurationNs: options.thresholdNs,
+                    timeout: .milliseconds(invocation.options.limits.timeoutMs)
+                )
+                let sourceBound = try await session.cliAnalyze(request)
+                let bound = CLIMachineBoundTraceResult(
+                    snapshot: sourceBound.snapshot,
+                    value: try sourceBound.value.retainingRows(
+                        maximumRows: invocation.options.limits.maxRows
+                    )
+                )
+                CLIOperationStage.active?.set(.encoding)
+                return CLICommandOutput(
+                    stdout: try CLIHumanRenderer.analyze(
+                        options.kind, bound.value,
+                        maximumBytes: invocation.options.limits.maxOutputBytes
+                    ),
+                    machinePayload: try CLIMachineCommandPayload.analyze(
+                        kind: options.kind, bound: bound
+                    )
+                )
+            }
         case .help, .version, .licenses:
             throw ArkTraceError(
                 code: .internalError,
@@ -147,6 +236,93 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 details: ["reason": "requestPayloadMismatch"]
             )
         }
+    }
+
+    private static func envelopeFittedContext(
+        _ initialRequest: TraceContextRequest,
+        invocation: CLIInvocation,
+        session: any CLIManagedTraceSession
+    ) async throws -> CLIMachineBoundTraceResult<TraceContext> {
+        guard invocation.options.json else {
+            return try await session.cliContext(initialRequest)
+        }
+        guard let tool = CLIMachineExecutionContext.tool else {
+            throw ArkTraceError(
+                code: .internalError,
+                stage: .encoding,
+                message: "Machine tool identity is unavailable during Context retention",
+                details: ["reason": "missingToolIdentity"]
+            )
+        }
+
+        let maximumBytes = invocation.options.limits.maxOutputBytes
+        let encoder = CLIMachineEncoder()
+        var request = initialRequest
+        var priorRawByteCount: Int?
+        var lastRequiredByteCount = maximumBytes + 1
+
+        // The first pass normally fits. Near the output boundary, use the
+        // measured full envelope overage to tighten the domain byte limit and
+        // let TraceContextBuilder re-run its deterministic retention policy.
+        // A small fixed attempt cap prevents a non-conforming test/session
+        // implementation from turning this into an unbounded retry loop.
+        for _ in 0..<16 {
+            try Task.checkCancellation()
+            let bound = try await session.cliContext(request)
+            let payload = try CLIMachineCommandPayload.context(bound: bound)
+            let document = try encoder.encode(
+                payload.envelope(for: invocation, tool: tool),
+                pretty: invocation.options.pretty
+            )
+            lastRequiredByteCount = document.count
+            if document.count <= maximumBytes { return bound }
+
+            let rawByteCount = try bound.value.encoded(maximumBytes: Int.max).count
+            let overage = document.count - maximumBytes
+            let (candidateLimit, underflow) = rawByteCount.subtractingReportingOverflow(
+                overage
+            )
+            let nextLimit = min(request.maximumOutputBytes - 1, candidateLimit)
+            guard !underflow,
+                nextLimit >= 1_024,
+                nextLimit < request.maximumOutputBytes,
+                priorRawByteCount != rawByteCount
+            else {
+                throw contextEnvelopeLimitFailure(
+                    maximumBytes: maximumBytes,
+                    requiredBytes: document.count
+                )
+            }
+            priorRawByteCount = rawByteCount
+            request = try TraceContextRequest(
+                time: request.time,
+                filters: request.filters,
+                maximumEvents: request.maximumEvents,
+                maximumRows: request.maximumRows,
+                maximumOutputBytes: nextLimit,
+                timeout: request.timeout
+            )
+        }
+        throw contextEnvelopeLimitFailure(
+            maximumBytes: maximumBytes,
+            requiredBytes: lastRequiredByteCount
+        )
+    }
+
+    private static func contextEnvelopeLimitFailure(
+        maximumBytes: Int,
+        requiredBytes: Int
+    ) -> ArkTraceError {
+        ArkTraceError(
+            code: .outputLimitExceeded,
+            stage: .encoding,
+            message: "The minimum Context machine envelope exceeds its byte budget",
+            retryable: true,
+            details: [
+                "maximumBytes": String(maximumBytes),
+                "requiredBytes": String(requiredBytes),
+            ]
+        )
     }
 
     private func doctor(

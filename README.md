@@ -5,10 +5,10 @@ macOS 原生 OpenHarmony Trace Workbench：同一套核心同时服务人（原�
 ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Trace 解析为本地 SQLite，在其上提供：
 
 - **ArkTrace.app** — SwiftUI + CoreGraphics 原生 Timeline Viewer（CPU / Process / Thread / Slice / Counter、Zoom / Pan / Search / Inspector）
-- **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；Phase 2 已实现 `doctor` / `inspect` / `summary` / `processes` / `threads`，Phase 3 增加 fail-closed `licenses`，`query` / `context` / `analyze` 归 Phase 4
+- **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T10 实现及流水提前实施的 P4-T01～T03 均已通过独立 review，Phase 3 外部发布门证据仍开放（2026-08-14）。** 键盘/VoiceOver contract、真实 medium 性能门、完全锁定的 TraceStreamer 构建配方和第三方许可证清单已落地；独立采集且可再分发的 >500 MiB large trace、Developer ID/notarization 与人工 VoiceOver 工作流证据仍是明确的外部发布阻塞，发布门 6/7 尚未关闭。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T10 实现及 P4-T01～T03 已通过独立 review；P4-T04～T07 为统一 review 候选，Phase 3 外部发布门证据仍开放（2026-08-14）。** 真实 medium Agent contract/性能门、键盘/VoiceOver contract、完全锁定的 TraceStreamer 构建配方和许可证清单已落地；独立采集且可再分发的 >500 MiB large trace、Developer ID/notarization 与人工 VoiceOver 工作流证据仍是明确外部阻塞，发布门 6/7 尚未关闭。
 
 ## 文档
 
@@ -47,9 +47,21 @@ scripts/test_phase3_batch1.sh
 # Phase 3 完整发布 gate：再执行 parser 双 clean-build、medium/large benchmark、
 # large cancellation 以及 Developer ID/notarization；缺少外部输入时 fail closed
 scripts/test_phase3.sh
+
+# Phase 4 本地批次：继承 Phase 3 candidate + real Agent CLI + medium benchmark
+scripts/test_phase4_batch1.sh
+
+# Phase 4 完整 gate：额外继承 Phase 3 全部外部发布门；缺输入时 fail closed
+scripts/test_phase4.sh
 ```
 
 `scripts/test_phase1.sh` 会在测试前校验 binary、manifest、arm64 architecture、fixture/license SHA/byte count/Git blob；缺失或漂移直接失败。通过后输出不超过 4 KiB 的 machine evidence。TraceStreamer binary 是本机构建产物并被 `.gitignore` 排除，不能只 clone 仓库后跳过构建。
+
+当前 Phase 4 medium candidate 由生产 `TraceContextBuilder` 与
+`TraceDeterministicAnalysisEngine` 直接采样；逐字段 20-sample 数值、机器信息、trace/parser、
+source-tree 与 test-binary identity 的事实源固定为
+`Fixtures/release-evidence/phase4-medium-agent-performance.json`。large 阈值与正式 Phase Exit
+仍等待 reviewed external fixture/signing evidence，不能用 medium 结果替代。
 
 `arktrace` Release binary 位于 `swift build -c release --show-bin-path` 输出目录。示例：
 
@@ -59,6 +71,9 @@ scripts/test_phase3.sh
 .build/release/arktrace --json summary trace.htrace
 .build/release/arktrace --json processes trace.htrace --limit 100
 .build/release/arktrace --json threads trace.htrace --pid 42 --limit 100
+.build/release/arktrace --json query trace.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
+.build/release/arktrace --json context trace.htrace --timestamp-ns 500000 --window-ms 1
+.build/release/arktrace --json analyze trace.htrace --kind range --start-ns 0 --end-ns 1000000
 .build/release/arktrace licenses
 ```
 

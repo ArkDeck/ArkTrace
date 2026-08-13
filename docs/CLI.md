@@ -1,8 +1,8 @@
 # arktrace CLI
 
-`arktrace` 是 ArkTrace 的本地、确定性命令行入口。Phase 2 提供
-`doctor`、`licenses`、`inspect`、`summary`、`processes` 和 `threads`；`query`、`context`
-与 `analyze` 属于 Phase 4，当前不会以 raw SQL 或占位实现提前暴露。
+`arktrace` 是 ArkTrace 的本地、确定性命令行入口。它提供
+`doctor`、`licenses`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`
+与 `analyze`；全部命令使用 typed 参数，不提供 raw SQL 或动态表/列入口。
 
 ## 安装与构建
 
@@ -19,14 +19,16 @@ reviewed deployment 路径；开发者可通过 `--trace-streamer <absolute-path
 必须通过 Mach-O、manifest、版本、revision、SHA-256 与 architecture identity 校验。CLI 不搜索
 `PATH`。
 
-完整 Phase 2 验收使用：
+Phase 4 Agent 批次验收使用：
 
 ```bash
-scripts/test_phase2.sh
+scripts/test_phase4_batch1.sh
 ```
 
-该 gate 先执行 Phase 1 locked parser/fixture gate，再执行 Release 全套测试、真实 CLI 负例、
-signal/cancellation 与 cached-open benchmark；缺失 parser/fixture 或任何 skip 都直接失败。
+该 gate 继承 Phase 1～3 本地候选验证，并执行真实 medium Trace 的 Agent CLI 问题、
+determinism/privacy 负例与 Context/Analysis 20-sample 性能门。完整 `scripts/test_phase4.sh`
+还继承 Phase 3 的 signed-App accessibility、large trace、Developer ID/notary 外部门；缺失时
+fail closed，不把本地候选误报为 Phase Exit。
 
 ## 通用语法与限制
 
@@ -123,6 +125,60 @@ arktrace --json threads trace.htrace --pid 42 --name worker --limit 100
 `--process-key` 与 `--pid`、`--thread-key` 与 `--tid` 分别互斥。稳定顺序为
 `pid, tid, threadKey(itid)`；TID reuse 同样保留多个 internal identity。
 
+### query
+
+```bash
+arktrace --json query trace.htrace --view cpu-slices \
+  --start-ns 10100000000 --end-ns 10300000000 --cpu 0 --limit 1000
+arktrace query trace.htrace --view slices \
+  --start-ns 1000000 --end-ns 2000000 --name render --name-match prefix \
+  --min-duration-ns 100000 --depth 1 --limit 100
+```
+
+`--view` 是闭集 `cpu-slices|thread-states|slices|counters`，range 必填。支持的 typed
+filters 为 `--cpu`、process/thread key 或 PID/TID、`--raw-state`/`--state`、
+`--name` + `--name-match exact|prefix|contains`、`--min-duration-ns`、`--depth` 和
+counter `--filter-id`；各 view 在 request boundary 拒绝不适用 filter。`--limit` 同时受
+global `maxRows` 与 `maxEvents` 约束。Machine result 回显 closed view、effective filters、
+normalized range、capability、typed quality 和恰好一个对应 event array。
+
+### context
+
+```bash
+arktrace --json context trace.htrace --timestamp-ns 10200000000 --window-ms 100 \
+  --thread-key 17
+arktrace context trace.htrace --start-ns 10100000000 --end-ns 10300000000
+```
+
+时间选择必须恰为 `timestamp-ns + window-ms` 或 `start-ns + end-ns`。对称窗口以
+overflow-safe `window-ms × 1,000,000` 规范化，request echo 只记录
+`windowBeforeNs/windowAfterNs`。结果包含有效 filters、process/thread directory、四类 event、
+summary、typed data quality 与逐 section truncation；event 引用在 row budget 允许时闭合到
+directory，预算不足显式标记 `referenceOmittedByBudget`。Context 在返回前按实际 canonical
+JSON bytes 缩减，且 Machine 模式以包含 tool/request/trace/provenance/summary 的完整 envelope
+作为最终 byte boundary，绝不输出 raw row dump 或半截 JSON。`maxRows` 是 processes+threads
+共享的全局 directory budget；`maxEvents` 是 CPU/state/slice/counter samples 共享的全局 event
+budget，不能由跨 section 各自用满来绕过。
+
+### analyze
+
+```bash
+arktrace --json analyze trace.htrace --kind range \
+  --start-ns 10100000000 --end-ns 10300000000 --thread-key 17 --limit 20
+arktrace analyze trace.htrace --kind slices --threshold-ns 1000000 --limit 20
+arktrace --json analyze trace.htrace --kind hot-intervals --limit 20
+```
+
+`--kind` 是闭集 `cpu|scheduling|slices|range|hot-intervals`；可选 range 必须成对，
+identity filters 只接受 process/thread key 或 PID/TID。结果包含 kind 以及同一确定性 analysis
+batch：CPU utilization、process/thread runningNs、state distribution、long slices、可证明的
+Runnable→Running latency 与 hot intervals。有效 effective parameters 全部显式编码；语义不足时
+scheduling 返回 `supported=false` 和 typed reason，而不是猜测 latency。重复运行同一 immutable
+Trace/request 的 `result` canonical bytes 相同。`maxEvents` 分别限制七类 Store 输入采样；返回
+的七个 analysis section 再按固定优先级共享 command-global `maxRows`，并要求每个
+`sections.*.returnedCount` 与实际数组（scheduling 使用 `topSamples`）一致。human 与 JSON 在
+presentation 分流前执行同一 handoff 校验。
+
 ## Machine JSON 1.0
 
 `--json` success envelope 固定包含 `schemaVersion`、`tool`、`request`、`limits`、`result`、
@@ -137,6 +193,21 @@ success；若最小 error envelope 也放不下，stdout 保持空。log/diagnos
 Typed data-quality category 包括 `probeTruncated`、`invalidValue`、`clampedValue`、
 `droppedValue`、`referentialIntegrity` 和 `unavailableValue`，下游不能解析 human warning
 文案判断语义。
+
+Phase 4 三个 Agent result 的 closed schema 如下；表中字段均为固定 key，不允许调用者增加
+动态 section：
+
+| Command | `result` required fields |
+|---|---|
+| `query` | `view,range,filters,capabilityAvailable,truncated,dataQuality`，以及恰好一个 `cpuSlices/threadStates/slices/counters` |
+| `context` | `range,filters,processes,threads,cpuSlices,threadStates,slices,counters,summary,dataQuality,truncation` |
+| `analyze` | `kind,analysis`；`analysis` 固定包含 `kind,parameters,range,cpuUtilization,topProcesses,topThreads,longSlices,threadStateDistribution,schedulingLatency,hotIntervals,sections,dataQuality` |
+
+Agent 可直接回答 process/thread identity、range event、running time、named/long slice、hot interval
+和 scheduling evidence；capability 不足时读取 `capabilityAvailable`、`supported` 与 typed reason，
+不要把 empty array 猜成失败。`QUERY_TIMEOUT`/`QUERY_LIMIT_EXCEEDED` 可在收紧 range/limit 后重试；
+`ANALYSIS_UNSUPPORTED` 表示当前 Trace 缺少可证明语义，不应重试同一请求；`CANCELLED` 只有在
+Runtime 完成 session/cache cleanup 后才返回。
 
 ## Exit status 与信号
 
@@ -165,5 +236,6 @@ entry 先隔离，再最多重建一次。active session 持 shared lease，muta
 
 CLI 不修改 source Trace、不执行 shell、不上传数据，也不输出 source/cache path、environment、
 raw SQL 或 parser log。human 表格中的 Trace-controlled text 使用有界 terminal escaping；Machine
-fields 经过 closed typed validation。完整第三方许可证 inventory 仍归 Phase 3 / P3-T10，发布门
-3 保持开放。
+fields 经过 closed typed validation。Agent API 只能组合上述 closed filters；形似 SQL 的未知 flag
+在读取 Trace 前返回 `INVALID_ARGUMENT`，不会在 output 中回显原字符串。完整第三方许可证
+inventory 的实现已 review，但正式分发门仍等待 Phase 3 外部签名/notary 流程。

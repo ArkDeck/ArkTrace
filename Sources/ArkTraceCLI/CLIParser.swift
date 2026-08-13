@@ -1,3 +1,4 @@
+import ArkTraceAnalysis
 import ArkTraceCore
 import Foundation
 
@@ -175,7 +176,7 @@ public struct CLIArgumentParser: Sendable {
         }
         let command = try parseCommand(
             remaining,
-            globalMaxRows: limits.maxRows,
+            limits: limits,
             optionsTerminated: optionsTerminated
         )
         return CLIInvocation(options: options, command: command)
@@ -198,7 +199,7 @@ public struct CLIArgumentParser: Sendable {
 
     private func parseCommand(
         _ arguments: [String],
-        globalMaxRows: Int,
+        limits: CLILimits,
         optionsTerminated: Bool = false
     ) throws -> CLICommand {
         guard let name = arguments.first else {
@@ -240,20 +241,310 @@ public struct CLIArgumentParser: Sendable {
         case "processes":
             return try parseProcesses(
                 tail,
-                globalMaxRows: globalMaxRows,
+                globalMaxRows: limits.maxRows,
                 optionsTerminated: optionsTerminated
             )
         case "threads":
             return try parseThreads(
                 tail,
-                globalMaxRows: globalMaxRows,
+                globalMaxRows: limits.maxRows,
                 optionsTerminated: optionsTerminated
             )
+        case "query":
+            return try parseQuery(tail, limits: limits, optionsTerminated: optionsTerminated)
+        case "context":
+            return try parseContext(tail, limits: limits, optionsTerminated: optionsTerminated)
+        case "analyze":
+            return try parseAnalyze(tail, limits: limits, optionsTerminated: optionsTerminated)
         default:
             throw CLIParsing.invalid(
                 "Unknown command",
                 details: ["command": boundedToken(name)]
             )
+        }
+    }
+
+    private func parseQuery(
+        _ arguments: [String],
+        limits: CLILimits,
+        optionsTerminated: Bool
+    ) throws -> CLICommand {
+        var view: TraceAgentQueryView?
+        var start: Int64?
+        var end: Int64?
+        var filter = ParsedAgentFilters()
+        var limit = min(limits.maxRows, limits.maxEvents)
+        var seen: Set<String> = []
+        var positionals: [String] = []
+        try parseLocal(arguments, optionsTerminated: optionsTerminated) { option, values, index in
+            switch option {
+            case "--view":
+                try markOnce(option, seen: &seen)
+                let raw = try stringValue(after: option, in: values, index: &index)
+                view = try queryView(raw)
+            case "--start-ns":
+                try markOnce(option, seen: &seen)
+                start = try int64Value(after: option, in: values, index: &index)
+            case "--end-ns":
+                try markOnce(option, seen: &seen)
+                end = try int64Value(after: option, in: values, index: &index)
+            case "--limit":
+                try markOnce(option, seen: &seen)
+                limit = try localEventLimit(
+                    after: option, in: values, index: &index,
+                    maximum: min(limits.maxRows, limits.maxEvents)
+                )
+            default:
+                return try parseAgentFilter(
+                    option, values: values, index: &index, seen: &seen, filter: &filter
+                )
+            }
+            return true
+        } positional: { positionals.append($0) }
+        guard let view, let start, let end else {
+            throw CLIParsing.invalid("query requires --view, --start-ns, and --end-ns")
+        }
+        let range = try TraceTimeRange.query(startNs: start, endNs: end)
+        let filters = try filter.value()
+        _ = try TraceAgentQueryRequest(
+            view: view, range: range, filters: filters, limit: limit
+        )
+        let options = CLIQueryOptions(
+            view: view,
+            range: range,
+            filters: filters,
+            limit: limit
+        )
+        return .query(
+            trace: try exactlyOneTrace(positionals, command: "query"),
+            options: options
+        )
+    }
+
+    private func parseContext(
+        _ arguments: [String],
+        limits: CLILimits,
+        optionsTerminated: Bool
+    ) throws -> CLICommand {
+        var timestamp: Int64?
+        var windowMs: Int64?
+        var start: Int64?
+        var end: Int64?
+        var filter = ParsedAgentFilters()
+        var seen: Set<String> = []
+        var positionals: [String] = []
+        try parseLocal(arguments, optionsTerminated: optionsTerminated) { option, values, index in
+            switch option {
+            case "--timestamp-ns":
+                try markOnce(option, seen: &seen)
+                timestamp = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--window-ms":
+                try markOnce(option, seen: &seen)
+                windowMs = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--start-ns":
+                try markOnce(option, seen: &seen)
+                start = try int64Value(after: option, in: values, index: &index)
+            case "--end-ns":
+                try markOnce(option, seen: &seen)
+                end = try int64Value(after: option, in: values, index: &index)
+            default:
+                return try parseAgentFilter(
+                    option, values: values, index: &index, seen: &seen, filter: &filter
+                )
+            }
+            return true
+        } positional: { positionals.append($0) }
+        let time: TraceContextTimeSelection
+        if let timestamp, let windowMs, start == nil, end == nil {
+            let (windowNs, overflow) = windowMs.multipliedReportingOverflow(by: 1_000_000)
+            guard !overflow, windowNs > 0 else {
+                throw CLIParsing.invalid("--window-ms is outside the supported nanosecond range")
+            }
+            time = .timestamp(
+                timestampNs: timestamp,
+                windowBeforeNs: windowNs,
+                windowAfterNs: windowNs
+            )
+        } else if let start, let end, timestamp == nil, windowMs == nil {
+            time = .range(try TraceTimeRange.query(startNs: start, endNs: end))
+        } else {
+            throw CLIParsing.invalid(
+                "context requires exactly one timestamp/window or start/end range"
+            )
+        }
+        return .context(
+            trace: try exactlyOneTrace(positionals, command: "context"),
+            options: CLIContextOptions(time: time, filters: try filter.value())
+        )
+    }
+
+    private func parseAnalyze(
+        _ arguments: [String],
+        limits: CLILimits,
+        optionsTerminated: Bool
+    ) throws -> CLICommand {
+        var kind: CLIAnalyzeKind?
+        var start: Int64?
+        var end: Int64?
+        var threshold: Int64 = 0
+        var limit = min(1_000, min(limits.maxRows, limits.maxEvents))
+        var filter = ParsedAgentFilters()
+        var seen: Set<String> = []
+        var positionals: [String] = []
+        try parseLocal(arguments, optionsTerminated: optionsTerminated) { option, values, index in
+            switch option {
+            case "--kind":
+                try markOnce(option, seen: &seen)
+                let raw = try stringValue(after: option, in: values, index: &index)
+                guard let value = CLIAnalyzeKind(rawValue: raw) else {
+                    throw CLIParsing.invalid("Unknown analysis kind")
+                }
+                kind = value
+            case "--start-ns":
+                try markOnce(option, seen: &seen)
+                start = try int64Value(after: option, in: values, index: &index)
+            case "--end-ns":
+                try markOnce(option, seen: &seen)
+                end = try int64Value(after: option, in: values, index: &index)
+            case "--threshold-ns":
+                try markOnce(option, seen: &seen)
+                threshold = try nonnegativeInt64(after: option, in: values, index: &index)
+            case "--limit":
+                try markOnce(option, seen: &seen)
+                limit = try localEventLimit(
+                    after: option, in: values, index: &index,
+                    maximum: min(1_000, min(limits.maxRows, limits.maxEvents))
+                )
+            default:
+                return try parseAgentFilter(
+                    option, values: values, index: &index, seen: &seen, filter: &filter
+                )
+            }
+            return true
+        } positional: { positionals.append($0) }
+        guard let kind, (start == nil) == (end == nil) else {
+            throw CLIParsing.invalid("analyze requires --kind and a complete optional range")
+        }
+        let range = try start.map { start in
+            try TraceTimeRange.query(startNs: start, endNs: end!)
+        }
+        let analysisFilters = try filter.value()
+        guard analysisFilters.cpu == nil, analysisFilters.rawState == nil,
+            analysisFilters.normalizedState == nil, analysisFilters.name == nil,
+            analysisFilters.minimumDurationNs == nil, analysisFilters.depth == nil,
+            analysisFilters.counterFilterID == nil
+        else {
+            throw CLIParsing.invalid("analyze only accepts process/thread identity filters")
+        }
+        return .analyze(
+            trace: try exactlyOneTrace(positionals, command: "analyze"),
+            options: CLIAnalyzeOptions(
+                kind: kind, range: range, filters: analysisFilters,
+                thresholdNs: threshold, limit: limit
+            )
+        )
+    }
+
+    private struct ParsedAgentFilters {
+        var cpu: Int64?
+        var processKey: Int64?
+        var pid: Int64?
+        var threadKey: Int64?
+        var tid: Int64?
+        var rawState: String?
+        var normalizedState: TraceThreadState?
+        var name: String?
+        var nameMatch: TraceAgentTextMatch = .exact
+        var minimumDurationNs: Int64?
+        var depth: Int64?
+        var counterFilterID: Int64?
+
+        func value() throws -> TraceAgentQueryFilters {
+            guard processKey == nil || pid == nil else {
+                throw CLIParsing.invalid("--process-key and --pid are mutually exclusive")
+            }
+            guard threadKey == nil || tid == nil else {
+                throw CLIParsing.invalid("--thread-key and --tid are mutually exclusive")
+            }
+            return try TraceAgentQueryFilters(
+                cpu: cpu,
+                processKey: processKey.map(ProcessKey.init(ipid:)), pid: pid,
+                threadKey: threadKey.map(ThreadKey.init(itid:)), tid: tid,
+                rawState: rawState, normalizedState: normalizedState,
+                name: name, nameMatch: nameMatch,
+                minimumDurationNs: minimumDurationNs, depth: depth,
+                counterFilterID: counterFilterID
+            )
+        }
+    }
+
+    private func parseAgentFilter(
+        _ option: String,
+        values: [String],
+        index: inout Int,
+        seen: inout Set<String>,
+        filter: inout ParsedAgentFilters
+    ) throws -> Bool {
+        switch option {
+        case "--cpu":
+            try markOnce(option, seen: &seen)
+            filter.cpu = try nonnegativeInt64(after: option, in: values, index: &index)
+        case "--process-key":
+            try markOnce(option, seen: &seen)
+            filter.processKey = try stableKeyValue(after: option, in: values, index: &index)
+        case "--pid":
+            try markOnce(option, seen: &seen)
+            filter.pid = try nonnegativeInt64(after: option, in: values, index: &index)
+        case "--thread-key":
+            try markOnce(option, seen: &seen)
+            filter.threadKey = try stableKeyValue(after: option, in: values, index: &index)
+        case "--tid":
+            try markOnce(option, seen: &seen)
+            filter.tid = try nonnegativeInt64(after: option, in: values, index: &index)
+        case "--raw-state":
+            try markOnce(option, seen: &seen)
+            filter.rawState = try boundedAgentText(after: option, in: values, index: &index)
+        case "--state":
+            try markOnce(option, seen: &seen)
+            let raw = try stringValue(after: option, in: values, index: &index)
+            guard let value = TraceThreadState(rawValue: raw) else {
+                throw CLIParsing.invalid("Unknown normalized thread state")
+            }
+            filter.normalizedState = value
+        case "--name":
+            try markOnce(option, seen: &seen)
+            filter.name = try boundedAgentText(after: option, in: values, index: &index)
+        case "--name-match":
+            try markOnce(option, seen: &seen)
+            let raw = try stringValue(after: option, in: values, index: &index)
+            guard let value = TraceAgentTextMatch(rawValue: raw) else {
+                throw CLIParsing.invalid("Unknown name match mode")
+            }
+            filter.nameMatch = value
+        case "--min-duration-ns":
+            try markOnce(option, seen: &seen)
+            filter.minimumDurationNs = try nonnegativeInt64(
+                after: option, in: values, index: &index
+            )
+        case "--depth":
+            try markOnce(option, seen: &seen)
+            filter.depth = try nonnegativeInt64(after: option, in: values, index: &index)
+        case "--filter-id":
+            try markOnce(option, seen: &seen)
+            filter.counterFilterID = try int64Value(after: option, in: values, index: &index)
+        default:
+            return false
+        }
+        return true
+    }
+
+    private func queryView(_ raw: String) throws -> TraceAgentQueryView {
+        switch raw {
+        case "cpu-slices": .cpuSlices
+        case "thread-states": .threadStates
+        case "slices": .slices
+        case "counters": .counters
+        default: throw CLIParsing.invalid("Unknown query view")
         }
     }
 
@@ -342,13 +633,13 @@ public struct CLIArgumentParser: Sendable {
             switch option {
             case "--process-key":
                 try markOnce(option, seen: &seen)
-                processKey = try nonnegativeInt64(after: option, in: values, index: &index)
+                processKey = try stableKeyValue(after: option, in: values, index: &index)
             case "--pid":
                 try markOnce(option, seen: &seen)
                 pid = try nonnegativeInt64(after: option, in: values, index: &index)
             case "--thread-key":
                 try markOnce(option, seen: &seen)
-                threadKey = try nonnegativeInt64(after: option, in: values, index: &index)
+                threadKey = try stableKeyValue(after: option, in: values, index: &index)
             case "--tid":
                 try markOnce(option, seen: &seen)
                 tid = try nonnegativeInt64(after: option, in: values, index: &index)
@@ -472,6 +763,26 @@ public struct CLIArgumentParser: Sendable {
         return value
     }
 
+    private func stableKeyValue(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> Int64 {
+        let value = try int64Value(after: option, in: arguments, index: &index)
+        guard value != 0 else {
+            throw CLIParsing.invalid("Stable identity 0 is the absent sentinel")
+        }
+        return value
+    }
+
+    private func boundedAgentText(
+        after option: String, in arguments: [String], index: inout Int
+    ) throws -> String {
+        let value = try stringValue(after: option, in: arguments, index: &index)
+        guard !value.isEmpty, value.utf8.count <= 256 else {
+            throw CLIParsing.invalid("Agent text filter must contain 1...256 UTF-8 bytes")
+        }
+        return value
+    }
+
     private func boundedText(
         after option: String, in arguments: [String], index: inout Int
     ) throws -> String {
@@ -491,6 +802,19 @@ public struct CLIArgumentParser: Sendable {
         let value = try intValue(after: option, in: arguments, index: &index)
         guard value >= 1, value <= maximum else {
             throw CLIParsing.invalid("--limit must be within 1...global maxRows")
+        }
+        return value
+    }
+
+    private func localEventLimit(
+        after option: String,
+        in arguments: [String],
+        index: inout Int,
+        maximum: Int
+    ) throws -> Int {
+        let value = try intValue(after: option, in: arguments, index: &index)
+        guard value >= 1, value <= maximum else {
+            throw CLIParsing.invalid("--limit exceeds the effective row/event bound")
         }
         return value
     }

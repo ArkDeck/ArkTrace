@@ -39,6 +39,13 @@ final class CLIOperationStage: @unchecked Sendable {
     @TaskLocal static var active: CLIOperationStage?
 }
 
+/// Carries the exact executable identity resolved by CLIApplication into the
+/// production executor. Context retention uses it to measure the complete
+/// Machine envelope, rather than budgeting only the nested domain payload.
+enum CLIMachineExecutionContext {
+    @TaskLocal static var tool: CLIMachineTool?
+}
+
 enum CLIOperationDeadline {
     static func run<Value: Sendable>(
         deadline: ContinuousClock.Instant,
