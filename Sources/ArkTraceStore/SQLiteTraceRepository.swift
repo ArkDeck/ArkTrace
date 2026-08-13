@@ -124,7 +124,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let threadCountIndex: Int32? =
             processHasThreadCount ? (processHasEndTs ? 5 : 4) : nil
 
-        let rows = try db.query(sql, bindings: bindings) { row in
+        let rows = try db.query(
+            sql,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row in
             guard let ipid = row.int64(0), let pid = row.int64(1) else {
                 throw Self.invalidIdentity(table: "process")
             }
@@ -181,7 +186,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let mainThreadIndex: Int32? =
             threadHasIsMainThread ? (threadHasEndTs ? 8 : 7) : nil
 
-        let rows = try db.query(sql, bindings: bindings) { row in
+        let rows = try db.query(
+            sql,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row in
             guard let itid = row.int64(0), let tid = row.int64(1) else {
                 throw Self.invalidIdentity(table: "thread")
             }
@@ -220,14 +230,15 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             )
         }
         let absoluteRange = try absoluteRange(relativeRange)
-        let limit = query.maximumRowsPerSection
+        let rowLimit = query.maximumRowsPerSection
+        let eventLimit = query.maximumEventsPerSection
 
         // CPU count is trace topology, not a range-scoped event count in
         // AT-AN-001. Every table is sampled by rowid before filtering or
         // reduction, so the caller's budget bounds actual SQLite work.
         let cpuCount = validation.capabilities.cpuScheduling
             ? try boundedDistinctCPUCount(
-                limit: limit,
+                limit: eventLimit,
                 deadline: query.deadline
             ) : nil
         let process = try boundedDirectoryCount(
@@ -235,7 +246,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             identityColumn: "ipid",
             hasEndTimestamp: processHasEndTs,
             range: absoluteRange,
-            limit: limit,
+            limit: rowLimit,
             deadline: query.deadline
         )
         let thread = try boundedDirectoryCount(
@@ -243,7 +254,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             identityColumn: "itid",
             hasEndTimestamp: threadHasEndTs,
             range: absoluteRange,
-            limit: limit,
+            limit: rowLimit,
             deadline: query.deadline
         )
         var qualityIssues: [TraceDataQualityIssue] = []
@@ -290,32 +301,32 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             ? try boundedEventCount(
                 table: "sched_slice",
                 range: absoluteRange,
-                limit: limit,
+                limit: eventLimit,
                 deadline: query.deadline
             ) : nil
         let threadStateCount = validation.capabilities.threadStates
             ? try boundedEventCount(
                 table: "thread_state",
                 range: absoluteRange,
-                limit: limit,
+                limit: eventLimit,
                 deadline: query.deadline
             ) : nil
         let namedSliceCount = validation.capabilities.namedSlices
             ? try boundedEventCount(
                 table: "callstack",
                 range: absoluteRange,
-                limit: limit,
+                limit: eventLimit,
                 deadline: query.deadline
             ) : nil
         let counterSeriesCount = try boundedCounterSeriesCount(
             range: absoluteRange,
-            limit: limit,
+            limit: eventLimit,
             deadline: query.deadline
         )
         let eventCountBySource: TraceEventSourceCounts?
         if query.range == nil, validation.eventSourceCountsAvailable {
             let eventSourceSummary = try boundedEventSourceCounts(
-                limit: limit,
+                limit: eventLimit,
                 deadline: query.deadline
             )
             eventCountBySource = eventSourceSummary.counts

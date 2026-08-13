@@ -1720,19 +1720,7 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func isCleanupFailure(_ error: Error) -> Bool {
-        guard let error = error as? ArkTraceError,
-            error.code == .traceParseFailed,
-            let reason = error.details["reason"]
-        else {
-            return false
-        }
-        return reason == "identityCleanupFailed"
-            || reason == "stagingCleanupFailed"
-            || reason == "readyRollbackFailed"
-            || reason == "readyQuarantineFailed"
-            || reason == "readyIdentityProbeFailed"
-            || reason == "replacementRestoreFailed"
-            || reason == "readyRemovalFailed"
+        (error as? ArkTraceError)?.isOwnershipCleanupFailure == true
     }
 
     private static func removeStagingItems(

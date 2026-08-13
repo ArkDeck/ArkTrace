@@ -10,6 +10,7 @@ final class TraceSummaryTests: XCTestCase {
         let metadataBusyWait: Duration?
         let timeoutAfterCancellation: Bool
         private(set) var requests: [TraceSummaryQuery] = []
+        private(set) var metadataFinished = false
 
         init(
             metadata: TraceMetadata,
@@ -31,6 +32,7 @@ final class TraceSummaryTests: XCTestCase {
                 while ContinuousClock.now < end {}
             }
             if let metadataDelay { try await Task.sleep(for: metadataDelay) }
+            metadataFinished = true
             return traceMetadata
         }
 
@@ -317,6 +319,23 @@ final class TraceSummaryTests: XCTestCase {
         }
     }
 
+    func testSummaryRequestKeepsRowAndEventBudgetsIndependent() throws {
+        let request = try TraceSummaryRequest(
+            maximumRowsPerSection: 7,
+            maximumEventsPerSection: 3
+        )
+        XCTAssertEqual(request.maximumRowsPerSection, 7)
+        XCTAssertEqual(request.maximumEventsPerSection, 3)
+        XCTAssertThrowsError(
+            try TraceSummaryRequest(
+                maximumRowsPerSection: 7,
+                maximumEventsPerSection: 1_000_001
+            )
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .invalidArgument)
+        }
+    }
+
     func testMetadataDelayHonorsAnalysisDeadline() async throws {
         let repository = RepositoryStub(
             metadata: metadata(),
@@ -337,7 +356,7 @@ final class TraceSummaryTests: XCTestCase {
         XCTAssertLessThan(started.duration(to: ContinuousClock.now), .seconds(1))
     }
 
-    func testDeadlineReturnsWithoutWaitingForUncooperativeRepository() async throws {
+    func testDeadlineDrainsUncooperativeRepositoryBeforeReturning() async throws {
         let repository = RepositoryStub(
             metadata: metadata(),
             facts: facts(),
@@ -353,7 +372,12 @@ final class TraceSummaryTests: XCTestCase {
             XCTAssertEqual(error.code, .queryTimeout)
             XCTAssertEqual(error.stage, .analyzing)
         }
-        XCTAssertLessThan(started.duration(to: ContinuousClock.now), .milliseconds(100))
+        XCTAssertGreaterThanOrEqual(
+            started.duration(to: ContinuousClock.now),
+            .milliseconds(200)
+        )
+        let metadataFinished = await repository.metadataFinished
+        XCTAssertTrue(metadataFinished)
     }
 
     func testCancellationIsMappedToTypedAnalysisError() async throws {

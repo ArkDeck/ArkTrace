@@ -14,8 +14,14 @@ public struct ProcessQuery: Sendable {
     public let pid: Int64?
     public let name: String?
     public let limit: Int
+    public let deadline: ContinuousClock.Instant?
 
-    public init(pid: Int64? = nil, name: String? = nil, limit: Int = 10_000) throws {
+    public init(
+        pid: Int64? = nil,
+        name: String? = nil,
+        limit: Int = 10_000,
+        deadline: ContinuousClock.Instant? = nil
+    ) throws {
         guard limit >= 1, limit <= 100_000 else {
             throw ArkTraceError(
                 code: .invalidArgument,
@@ -26,6 +32,7 @@ public struct ProcessQuery: Sendable {
         self.pid = pid
         self.name = name
         self.limit = limit
+        self.deadline = deadline
     }
 }
 
@@ -36,6 +43,7 @@ public struct ThreadQuery: Sendable {
     public let tid: Int64?
     public let name: String?
     public let limit: Int
+    public let deadline: ContinuousClock.Instant?
 
     public init(
         processKey: ProcessKey? = nil,
@@ -43,7 +51,8 @@ public struct ThreadQuery: Sendable {
         threadKey: ThreadKey? = nil,
         tid: Int64? = nil,
         name: String? = nil,
-        limit: Int = 10_000
+        limit: Int = 10_000,
+        deadline: ContinuousClock.Instant? = nil
     ) throws {
         guard limit >= 1, limit <= 100_000 else {
             throw ArkTraceError(
@@ -58,6 +67,7 @@ public struct ThreadQuery: Sendable {
         self.tid = tid
         self.name = name
         self.limit = limit
+        self.deadline = deadline
     }
 }
 
@@ -67,11 +77,13 @@ public struct ThreadQuery: Sendable {
 public struct TraceSummaryQuery: Sendable {
     public let range: TraceTimeRange?
     public let maximumRowsPerSection: Int
+    public let maximumEventsPerSection: Int
     public let deadline: ContinuousClock.Instant
 
     public init(
         range: TraceTimeRange? = nil,
         maximumRowsPerSection: Int = 100_000,
+        maximumEventsPerSection: Int? = nil,
         deadline: ContinuousClock.Instant
     ) throws {
         guard maximumRowsPerSection >= 1, maximumRowsPerSection <= 1_000_000 else {
@@ -79,6 +91,14 @@ public struct TraceSummaryQuery: Sendable {
                 code: .invalidArgument,
                 stage: .request,
                 message: "maximumRowsPerSection must be within 1...1000000"
+            )
+        }
+        let maximumEventsPerSection = maximumEventsPerSection ?? maximumRowsPerSection
+        guard maximumEventsPerSection >= 1, maximumEventsPerSection <= 1_000_000 else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "maximumEventsPerSection must be within 1...1000000"
             )
         }
         if let range, range.startNs >= range.endNs {
@@ -90,6 +110,7 @@ public struct TraceSummaryQuery: Sendable {
         }
         self.range = range
         self.maximumRowsPerSection = maximumRowsPerSection
+        self.maximumEventsPerSection = maximumEventsPerSection
         self.deadline = deadline
     }
 }

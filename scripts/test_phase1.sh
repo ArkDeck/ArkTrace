@@ -21,12 +21,23 @@ license="$repository_root/Fixtures/traces/LICENSE.Apache-2.0.txt"
 
 gate_temporary_directory=$(mktemp -d "${TMPDIR:-/tmp}/arktrace-phase1.XXXXXX")
 test_log="$gate_temporary_directory/swift-test.log"
+sanitized_test_log="$gate_temporary_directory/swift-test.sanitized.log"
 machine_evidence="$gate_temporary_directory/phase1-evidence.json"
 machine_evidence_with_results="$gate_temporary_directory/phase1-evidence-with-results.json"
 cleanup() {
     rm -rf -- "$gate_temporary_directory"
 }
 trap cleanup EXIT HUP INT TERM
+
+print_test_failure() {
+    sed \
+        -e "s|$repository_root|<repo>|g" \
+        -e "s|$gate_temporary_directory|<temp>|g" \
+        "$test_log" >"$sanitized_test_log"
+    grep -nE 'error: -\[|Test Case .* failed|fatal error|unexpected failure' \
+        "$sanitized_test_log" >&2 || true
+    tail -n 120 "$sanitized_test_log" >&2
+}
 
 [ -r "$manifest" ] || fail "pinned manifest is missing"
 [ -x "$binary" ] || fail "pinned trace_streamer is missing or not executable"
@@ -106,20 +117,14 @@ if ! env \
     CLANG_MODULE_CACHE_PATH="$gate_temporary_directory/module-cache" \
     swift test >"$test_log" 2>&1
 then
-    sed \
-        -e "s|$repository_root|<repo>|g" \
-        -e "s|$gate_temporary_directory|<temp>|g" \
-        "$test_log" | tail -n 120 >&2
+    print_test_failure
     fail "Swift test suite failed"
 fi
 
 # Match XCTest's actual skip output (per-case line and run summary), not the
 # XCTSkip identifier, so test names containing "XCTSkip" cannot false-positive.
 if grep -Eq "' skipped \(|[0-9] tests? skipped" "$test_log"; then
-    sed \
-        -e "s|$repository_root|<repo>|g" \
-        -e "s|$gate_temporary_directory|<temp>|g" \
-        "$test_log" | tail -n 120 >&2
+    print_test_failure
     fail "Phase 1 gate must contain zero skipped tests"
 fi
 

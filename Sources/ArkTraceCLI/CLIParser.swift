@@ -2,8 +2,8 @@ import ArkTraceCore
 import Foundation
 
 public struct CLIArgumentParser: Sendable {
-    private static let maximumArgumentCount = 256
-    private static let maximumArgumentBytes = 16 * 1_024
+    static let maximumArgumentCount = 256
+    static let maximumArgumentBytes = 16 * 1_024
 
     public init() {}
 
@@ -15,32 +15,54 @@ public struct CLIArgumentParser: Sendable {
 
     static func machinePresentationHint(
         _ arguments: [String]
-    ) -> (json: Bool, pretty: Bool, maximumOutputBytes: Int) {
+    ) -> (json: Bool, pretty: Bool, maximumOutputBytes: Int, timeoutMs: Int64) {
         var json = false
         var pretty = false
         var maximumOutputBytes = CLILimits.defaultMaxOutputBytes
+        var timeoutMs = CLILimits.defaultTimeoutMs
         var index = 0
-        let bounded = Array(arguments.prefix(maximumArgumentCount + 1))
+        let bounded = boundedPresentationArguments(arguments)
         while index < bounded.count {
             let token = bounded[index]
+            guard isWithinArgumentByteBudget(token) else {
+                index += 1
+                continue
+            }
             if token == "--" { break }
             if token == "--json" { json = true }
             if token == "--pretty" { pretty = true }
             if token == "--max-output-bytes", index + 1 < bounded.count,
+                isWithinArgumentByteBudget(bounded[index + 1]),
                 let value = Int(bounded[index + 1]),
                 (1_024...(64 * 1_024 * 1_024)).contains(value)
             {
                 maximumOutputBytes = value
                 index += 1
             }
+            if token == "--timeout-ms", index + 1 < bounded.count,
+                isWithinArgumentByteBudget(bounded[index + 1]),
+                let value = Int64(bounded[index + 1]),
+                (100...120_000).contains(value)
+            {
+                timeoutMs = value
+                index += 1
+            }
             index += 1
         }
-        return (json, pretty && json, maximumOutputBytes)
+        return (json, pretty && json, maximumOutputBytes, timeoutMs)
+    }
+
+    static func boundedPresentationArguments(_ arguments: [String]) -> ArraySlice<String> {
+        arguments.prefix(maximumArgumentCount + 1)
+    }
+
+    static func isWithinArgumentByteBudget(_ argument: String) -> Bool {
+        argument.utf8.prefix(maximumArgumentBytes + 1).count <= maximumArgumentBytes
     }
 
     public func parse(_ arguments: [String]) throws -> CLIInvocation {
         guard arguments.count <= Self.maximumArgumentCount,
-            arguments.allSatisfy({ $0.utf8.count <= Self.maximumArgumentBytes })
+            arguments.allSatisfy(Self.isWithinArgumentByteBudget)
         else {
             throw CLIParsing.invalid("CLI argument budget was exceeded")
         }

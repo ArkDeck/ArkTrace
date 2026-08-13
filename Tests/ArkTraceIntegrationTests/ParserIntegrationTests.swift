@@ -440,6 +440,42 @@ final class ParserIntegrationTests: XCTestCase {
         return (hash, Int64(data.count))
     }
 
+    private static func milliseconds(_ duration: Duration) -> Double {
+        let components = duration.components
+        return Double(components.seconds) * 1_000
+            + Double(components.attoseconds) / 1_000_000_000_000_000
+    }
+
+    private static func percentile(_ values: [Double], fraction: Double) -> Double {
+        precondition(!values.isEmpty)
+        let sorted = values.sorted()
+        let rank = max(0, min(sorted.count - 1, Int(ceil(Double(sorted.count) * fraction)) - 1))
+        return sorted[rank]
+    }
+
+    private static func sysctlString(_ name: String) -> String? {
+        var byteCount = 0
+        guard sysctlbyname(name, nil, &byteCount, nil, 0) == 0, byteCount > 1,
+            byteCount <= 4_096
+        else { return nil }
+        var bytes = [CChar](repeating: 0, count: byteCount)
+        guard sysctlbyname(name, &bytes, &byteCount, nil, 0) == 0 else { return nil }
+        return String(
+            decoding: bytes.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) },
+            as: UTF8.self
+        )
+    }
+
+    private static func machineArchitecture() -> String {
+        #if arch(arm64)
+        return "arm64"
+        #elseif arch(x86_64)
+        return "x86_64"
+        #else
+        return "unknown"
+        #endif
+    }
+
     private func gitBlobOID(at url: URL) throws -> String {
         let data = try Data(contentsOf: url)
         var hasher = Insecure.SHA1()
@@ -1078,6 +1114,119 @@ final class ParserIntegrationTests: XCTestCase {
             metaTablePresent: tables.contains("meta"),
             pathsAbsent: pathsAbsent,
             stages: recorder.snapshot().map(\.rawValue)
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let data = try encoder.encode(evidence)
+        XCTAssertLessThanOrEqual(data.count, 4_096)
+        try data.write(to: outputURL, options: .atomic)
+    }
+
+    func testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["ARKTRACE_PHASE2_GATE"] == "1" else { return }
+        let outputPath = try XCTUnwrap(environment["ARKTRACE_PHASE2_EVIDENCE_OUTPUT"])
+        let outputURL = URL(fileURLWithPath: outputPath)
+        let (binary, fixture) = try requireCacheEnvironment()
+        let parser = try TraceStreamerProcessParser(executableURL: binary)
+        let parserIdentity = try await parser.identity()
+        let traceIdentity = try sha256AndSize(at: fixture)
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-phase2-benchmark-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let initial = try await TraceSession.open(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            storagePolicy: .contentAddressed(cacheDirectory: cache)
+        )
+        let initialCacheHit = await initial.cacheHit
+        let initialCacheMetadataValue = await initial.cacheMetadata
+        XCTAssertFalse(initialCacheHit)
+        let initialCacheMetadata = try XCTUnwrap(initialCacheMetadataValue)
+        try await initial.close()
+
+        let iterations = 20
+        var openMilliseconds: [Double] = []
+        var metadataMilliseconds: [Double] = []
+        openMilliseconds.reserveCapacity(iterations)
+        metadataMilliseconds.reserveCapacity(iterations)
+        for _ in 0..<iterations {
+            let openStart = ContinuousClock.now
+            let session = try await TraceSession.open(
+                source: fixture,
+                parser: parser,
+                stagingDirectory: staging,
+                storagePolicy: .contentAddressed(cacheDirectory: cache)
+            )
+            openMilliseconds.append(
+                Self.milliseconds(openStart.duration(to: ContinuousClock.now))
+            )
+            let cacheHit = await session.cacheHit
+            XCTAssertTrue(cacheHit)
+
+            let metadataStart = ContinuousClock.now
+            let metadata = try await session.repository.metadata()
+            metadataMilliseconds.append(
+                Self.milliseconds(metadataStart.duration(to: ContinuousClock.now))
+            )
+            XCTAssertEqual(metadata.traceSHA256, traceIdentity.sha256)
+            try await session.close()
+        }
+
+        struct Phase2Evidence: Encodable {
+            struct Machine: Encodable {
+                let model: String
+                let architecture: String
+                let operatingSystem: String
+                let physicalMemoryBytes: UInt64
+            }
+
+            let formatVersion: Int
+            let arkTraceVersion: String
+            let arkTraceBaseRevision: String
+            let workingTreeDirty: Bool
+            let machine: Machine
+            let traceSHA256: String
+            let traceByteCount: Int64
+            let parserBinarySHA256: String
+            let parserVersion: String
+            let parserUpstreamRevision: String
+            let databaseByteCount: Int64
+            let iterations: Int
+            let cacheOpenP50Ms: Double
+            let cacheOpenP95Ms: Double
+            let metadataP50Ms: Double
+            let metadataP95Ms: Double
+            let cacheHitCount: Int
+        }
+
+        let evidence = Phase2Evidence(
+            formatVersion: 1,
+            arkTraceVersion: "0.1.0",
+            arkTraceBaseRevision: environment["ARKTRACE_BASE_REVISION"] ?? "unknown",
+            workingTreeDirty: environment["ARKTRACE_WORKTREE_DIRTY"] == "1",
+            machine: .init(
+                model: Self.sysctlString("hw.model") ?? "unknown",
+                architecture: Self.machineArchitecture(),
+                operatingSystem: ProcessInfo.processInfo.operatingSystemVersionString,
+                physicalMemoryBytes: ProcessInfo.processInfo.physicalMemory
+            ),
+            traceSHA256: traceIdentity.sha256,
+            traceByteCount: traceIdentity.byteCount,
+            parserBinarySHA256: parserIdentity.binarySHA256,
+            parserVersion: parserIdentity.reportedVersion,
+            parserUpstreamRevision: parserIdentity.upstreamRevision,
+            databaseByteCount: initialCacheMetadata.databaseByteCount,
+            iterations: iterations,
+            cacheOpenP50Ms: Self.percentile(openMilliseconds, fraction: 0.50),
+            cacheOpenP95Ms: Self.percentile(openMilliseconds, fraction: 0.95),
+            metadataP50Ms: Self.percentile(metadataMilliseconds, fraction: 0.50),
+            metadataP95Ms: Self.percentile(metadataMilliseconds, fraction: 0.95),
+            cacheHitCount: iterations
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]

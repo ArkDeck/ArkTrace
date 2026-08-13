@@ -1,53 +1,6 @@
 import ArkTraceCore
 import Foundation
 
-private final class TraceSummaryDeadlineRace<Value: Sendable>: @unchecked Sendable {
-    private let lock = NSLock()
-    private var continuation: CheckedContinuation<Value, any Error>?
-    private var result: Result<Value, any Error>?
-    private var tasks: [Task<Void, Never>] = []
-
-    func install(_ continuation: CheckedContinuation<Value, any Error>) {
-        lock.lock()
-        if let result {
-            lock.unlock()
-            continuation.resume(with: result)
-        } else {
-            self.continuation = continuation
-            lock.unlock()
-        }
-    }
-
-    func add(_ task: Task<Void, Never>) {
-        lock.lock()
-        if result != nil {
-            lock.unlock()
-            task.cancel()
-        } else {
-            tasks.append(task)
-            lock.unlock()
-        }
-    }
-
-    func finish(_ result: Result<Value, any Error>) {
-        let continuation: CheckedContinuation<Value, any Error>?
-        let tasks: [Task<Void, Never>]
-        lock.lock()
-        guard self.result == nil else {
-            lock.unlock()
-            return
-        }
-        self.result = result
-        continuation = self.continuation
-        self.continuation = nil
-        tasks = self.tasks
-        self.tasks.removeAll(keepingCapacity: false)
-        lock.unlock()
-        tasks.forEach { $0.cancel() }
-        continuation?.resume(with: result)
-    }
-}
-
 public enum TraceSummarySection: String, Codable, Sendable, CaseIterable {
     case cpuCount
     case processCount
@@ -62,11 +15,13 @@ public enum TraceSummarySection: String, Codable, Sendable, CaseIterable {
 public struct TraceSummaryRequest: Sendable {
     public let range: TraceTimeRange?
     public let maximumRowsPerSection: Int
+    public let maximumEventsPerSection: Int
     public let timeout: Duration
 
     public init(
         range: TraceTimeRange? = nil,
         maximumRowsPerSection: Int = 100_000,
+        maximumEventsPerSection: Int? = nil,
         timeout: Duration = .seconds(30)
     ) throws {
         guard maximumRowsPerSection >= 1, maximumRowsPerSection <= 1_000_000 else {
@@ -74,6 +29,14 @@ public struct TraceSummaryRequest: Sendable {
                 code: .invalidArgument,
                 stage: .request,
                 message: "maximumRowsPerSection must be within 1...1000000"
+            )
+        }
+        let maximumEventsPerSection = maximumEventsPerSection ?? maximumRowsPerSection
+        guard maximumEventsPerSection >= 1, maximumEventsPerSection <= 1_000_000 else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "maximumEventsPerSection must be within 1...1000000"
             )
         }
         guard timeout > .zero, timeout <= .seconds(300) else {
@@ -92,6 +55,7 @@ public struct TraceSummaryRequest: Sendable {
         }
         self.range = range
         self.maximumRowsPerSection = maximumRowsPerSection
+        self.maximumEventsPerSection = maximumEventsPerSection
         self.timeout = timeout
     }
 }
@@ -204,36 +168,62 @@ public struct TraceSummaryEngine: Sendable {
     public func summarize(_ request: TraceSummaryRequest) async throws -> TraceSummary {
         let clock = ContinuousClock()
         let deadline = clock.now.advanced(by: request.timeout)
+        let channel = AsyncThrowingStream<TraceSummary, any Error>.makeStream()
+        let operationTask = Task<Result<TraceSummary, any Error>, Never> {
+            do {
+                let value = try await summarize(request, deadline: deadline)
+                channel.continuation.yield(value)
+                channel.continuation.finish()
+                return .success(value)
+            } catch {
+                channel.continuation.finish(throwing: error)
+                return .failure(error)
+            }
+        }
+        let timerTask = Task {
+            do {
+                try await clock.sleep(until: deadline)
+                channel.continuation.finish(throwing: Self.timeoutError())
+            } catch {
+                // The operation or parent cancellation won.
+            }
+        }
         do {
-            let race = TraceSummaryDeadlineRace<TraceSummary>()
             return try await withTaskCancellationHandler {
-                try await withCheckedThrowingContinuation { continuation in
-                    race.install(continuation)
-                    let operation = Task {
-                        do {
-                            race.finish(.success(
-                                try await summarize(request, deadline: deadline)
-                            ))
-                        } catch {
-                            race.finish(.failure(error))
-                        }
+                var iterator = channel.stream.makeAsyncIterator()
+                do {
+                    guard let value = try await iterator.next() else {
+                        throw ArkTraceError(
+                            code: .internalError,
+                            stage: .analyzing,
+                            message: "Summary deadline channel ended without a result"
+                        )
                     }
-                    race.add(operation)
-                    let timer = Task {
-                        do {
-                            try await clock.sleep(until: deadline)
-                            race.finish(.failure(Self.timeoutError()))
-                        } catch {
-                            // The winning operation/cancellation cancels this
-                            // timer; its result has already been published.
-                        }
+                    timerTask.cancel()
+                    try Self.checkBoundary(deadline)
+                    return value
+                } catch {
+                    operationTask.cancel()
+                    timerTask.cancel()
+                    let operationResult = await operationTask.value
+                    if case .failure(let operationError) = operationResult,
+                       (operationError as? ArkTraceError)?.isOwnershipCleanupFailure == true {
+                        throw operationError
                     }
-                    race.add(timer)
+                    try Self.checkBoundary(deadline)
+                    throw error
                 }
             } onCancel: {
-                race.finish(.failure(CancellationError()))
+                operationTask.cancel()
+                timerTask.cancel()
+                channel.continuation.finish(throwing: CancellationError())
             }
         } catch {
+            operationTask.cancel()
+            timerTask.cancel()
+            if (error as? ArkTraceError)?.isOwnershipCleanupFailure == true {
+                throw error
+            }
             if Task.isCancelled || error is CancellationError {
                 throw ArkTraceError(
                     code: .cancelled,
@@ -273,6 +263,7 @@ public struct TraceSummaryEngine: Sendable {
             try TraceSummaryQuery(
                 range: request.range,
                 maximumRowsPerSection: request.maximumRowsPerSection,
+                maximumEventsPerSection: request.maximumEventsPerSection,
                 deadline: deadline
             )
         )

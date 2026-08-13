@@ -220,4 +220,37 @@ final class ArkTraceErrorContractTests: XCTestCase {
             retryable: true
         ).publicContractViolation, .retryability)
     }
+
+    func testOwnershipCleanupFailureRequiresExactValidCodeAndReasonPair() {
+        let parserCleanup = ArkTraceError(
+            code: .traceParseFailed,
+            stage: .openingDatabase,
+            message: "cleanup failed",
+            retryable: true,
+            details: ["reason": "sessionCleanupFailed"]
+        )
+        let cacheCleanup = ArkTraceError(
+            code: .traceCacheCorrupt,
+            stage: .cacheLookup,
+            message: "cleanup failed",
+            retryable: true,
+            details: ["reason": "cacheCleanupFailed"]
+        )
+        XCTAssertTrue(parserCleanup.isOwnershipCleanupFailure)
+        XCTAssertTrue(cacheCleanup.isOwnershipCleanupFailure)
+
+        XCTAssertFalse(ArkTraceError(
+            code: .queryFailed,
+            stage: .querying,
+            message: "not a cleanup failure",
+            details: ["reason": "sessionCleanupFailed"]
+        ).isOwnershipCleanupFailure)
+        XCTAssertFalse(ArkTraceError(
+            code: .traceParseFailed,
+            stage: .analyzing,
+            message: "invalid public tuple",
+            retryable: true,
+            details: ["reason": "sessionCleanupFailed"]
+        ).isOwnershipCleanupFailure)
+    }
 }

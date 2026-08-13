@@ -407,6 +407,51 @@ final class TypedMachinePayloadTests: XCTestCase {
         }
     }
 
+    func testSummaryPayloadUsesIndependentRowAndEventLimits() throws {
+        func makeSummary(cpuSlices: Int64) -> TraceSummary {
+            TraceSummary(
+                range: try! TraceTimeRange.query(startNs: 0, endNs: 100),
+                durationNs: 100,
+                cpuCount: 3,
+                processCount: 7,
+                threadCount: 7,
+                cpuSliceCount: cpuSlices,
+                threadStateCount: 3,
+                namedSliceCount: 3,
+                counterSeriesCount: 3,
+                eventCountBySource: [
+                    TraceEventSourceCount(source: "a", count: 1),
+                    TraceEventSourceCount(source: "b", count: 1),
+                    TraceEventSourceCount(source: "c", count: 1),
+                ],
+                capabilities: metadata.capabilities,
+                schemaFingerprint: metadata.schemaFingerprint,
+                dataQuality: metadata.dataQuality,
+                truncatedSections: []
+            )
+        }
+        let invocation = try CLIArgumentParser().parse([
+            "--json", "--max-rows", "7", "--max-events", "3",
+            "summary", "trace",
+        ])
+        let valid = try CLIMachineCommandPayload.summary(
+            metadata: metadata,
+            preparation: preparation,
+            summary: makeSummary(cpuSlices: 3)
+        )
+        XCTAssertNoThrow(try valid.envelope(for: invocation, tool: tool))
+
+        let oversized = try CLIMachineCommandPayload.summary(
+            metadata: metadata,
+            preparation: preparation,
+            summary: makeSummary(cpuSlices: 4)
+        )
+        XCTAssertThrowsError(try oversized.envelope(for: invocation, tool: tool)) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .outputLimitExceeded)
+            XCTAssertEqual((error as? ArkTraceError)?.stage, .encoding)
+        }
+    }
+
     func testMachineErrorDirectConstructionNormalizesInvalidRetryability() {
         let error = CLIMachineError(ArkTraceError(
             code: .traceSchemaUnsupported,

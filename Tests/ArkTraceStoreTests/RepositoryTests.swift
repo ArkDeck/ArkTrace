@@ -425,6 +425,52 @@ final class RepositoryTests: XCTestCase {
         }
     }
 
+    func testSummaryUsesIndependentRowAndEventBudgets() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let facts = try await repository.summaryFacts(
+            try TraceSummaryQuery(
+                maximumRowsPerSection: 100,
+                maximumEventsPerSection: 1,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+
+        XCTAssertEqual(facts.processCount, TraceBoundedCount(value: 3, truncated: true))
+        XCTAssertEqual(facts.threadCount, TraceBoundedCount(value: 3, truncated: true))
+        XCTAssertEqual(facts.cpuCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.cpuSliceCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.threadStateCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.namedSliceCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.counterSeriesCount, TraceBoundedCount(value: 1, truncated: true))
+        XCTAssertEqual(facts.eventCountBySource?.truncated, true)
+    }
+
+    func testProcessAndThreadDeadlinesInterruptAtRepositoryBoundary() async throws {
+        let repository = try makeRepository()
+        do {
+            _ = try await repository.processes(
+                try ProcessQuery(deadline: ContinuousClock.now)
+            )
+            XCTFail("expired process query must fail")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .queryTimeout)
+            XCTAssertEqual(error.stage, .querying)
+            XCTAssertTrue(error.retryable)
+        }
+
+        do {
+            _ = try await repository.threads(
+                try ThreadQuery(deadline: ContinuousClock.now)
+            )
+            XCTFail("expired thread query must fail")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .queryTimeout)
+            XCTAssertEqual(error.stage, .querying)
+            XCTAssertTrue(error.retryable)
+        }
+    }
+
     func testSummaryDeadlineInterruptsBeforeQueryStarts() async throws {
         let (repository, url) = try makeSummaryRepository()
         defer { try? FileManager.default.removeItem(at: url) }

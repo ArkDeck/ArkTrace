@@ -22,10 +22,14 @@ let package = Package(
         .target(name: "ArkTraceRuntime", dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"]),
         .target(name: "ArkTraceAnalysis", dependencies: ["ArkTraceCore"]),
         .target(
+            name: "ArkTraceSignalShim",
+            publicHeadersPath: "include"
+        ),
+        .target(
             name: "ArkTraceCLI",
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
-                "ArkTraceAnalysis",
+                "ArkTraceAnalysis", "ArkTraceSignalShim",
             ],
             resources: [
                 .copy("../../Fixtures/traces/zlib.htrace"),

@@ -289,7 +289,9 @@ public struct CLIMachineRequest: Hashable, Codable, Sendable {
             "doctor", "inspect", "summary", "processes", "threads",
             "query", "context", "analyze",
         ]
-        let command = arguments.first(where: { names.contains($0) }) ?? "unknown"
+        let command = CLIArgumentParser.boundedPresentationArguments(arguments).first(where: {
+            CLIArgumentParser.isWithinArgumentByteBudget($0) && names.contains($0)
+        }) ?? "unknown"
         return CLIMachineRequest(validatedCommand: command)
     }
 
@@ -1083,9 +1085,14 @@ public struct CLIMachineCommandPayload: Sendable {
             guard summary.range == expectedRange else {
                 throw CLIMachineValueValidation.contractFailure(reason: "requestPayloadMismatch")
             }
-            guard (summary.eventCountBySource?.count ?? 0) <= invocation.options.limits.maxRows
+            guard (summary.eventCountBySource?.count ?? 0)
+                <= invocation.options.limits.maxEvents
             else { throw CLIMachineValueValidation.limitFailure() }
-            try validateSummaryCounts(summary, limit: invocation.options.limits.maxRows)
+            try validateSummaryCounts(
+                summary,
+                rowLimit: invocation.options.limits.maxRows,
+                eventLimit: invocation.options.limits.maxEvents
+            )
             return try traceEnvelope(
                 metadata: metadata,
                 preparation: snapshot.preparation,
@@ -1272,17 +1279,21 @@ public struct CLIMachineCommandPayload: Sendable {
         return start <= end
     }
 
-    private func validateSummaryCounts(_ summary: TraceSummary, limit: Int) throws {
-        let maximum = Int64(limit)
-        let counts = [
-            summary.cpuCount, summary.processCount, summary.threadCount,
-            summary.cpuSliceCount, summary.threadStateCount, summary.namedSliceCount,
-            summary.counterSeriesCount,
+    private func validateSummaryCounts(
+        _ summary: TraceSummary,
+        rowLimit: Int,
+        eventLimit: Int
+    ) throws {
+        let directoryCounts = [summary.processCount, summary.threadCount].compactMap { $0 }
+        let eventCounts = [
+            summary.cpuCount, summary.cpuSliceCount, summary.threadStateCount,
+            summary.namedSliceCount, summary.counterSeriesCount,
         ].compactMap { $0 }
         // Section row budgets cap sampled identities/rows. A stat row's
         // aggregate `count`, however, is domain data and may legitimately be
         // greater than the number of sampled rows.
-        guard counts.allSatisfy({ $0 <= maximum })
+        guard directoryCounts.allSatisfy({ $0 <= Int64(rowLimit) }),
+            eventCounts.allSatisfy({ $0 <= Int64(eventLimit) })
         else { throw CLIMachineValueValidation.limitFailure() }
     }
 

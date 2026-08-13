@@ -1,12 +1,80 @@
 import ArkTraceAnalysis
 @testable import ArkTraceCLI
 import ArkTraceCore
-import ArkTraceRuntime
+@testable import ArkTraceRuntime
 import ArkTraceStore
 import Foundation
 import XCTest
 
 final class ProductionCommandExecutorTests: XCTestCase {
+    func testCLITimeoutDrainsCacheRollbackBeforeReturning() async throws {
+        let repositoryRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let parserURL = repositoryRoot
+            .appendingPathComponent("ThirdParty/TraceStreamer/macx/trace_streamer")
+        let fixtureURL = repositoryRoot
+            .appendingPathComponent("Fixtures/traces/zlib.htrace")
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cli-timeout-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let paths = CLIStoragePaths(
+            stagingDirectory: root.appendingPathComponent("staging", isDirectory: true),
+            cacheDirectory: root.appendingPathComponent("cache", isDirectory: true)
+        )
+        let barrier = BlockingCachePromotionBarrier()
+        let deadlineClock = ManualCLIDeadlineClock()
+        let executor = CLIProductionCommandExecutor(
+            sessionOpener: { source, options, storage in
+                try await TraceSession.openCached(
+                    source: source,
+                    parser: options.resolveParser(),
+                    stagingDirectory: storage.stagingDirectory,
+                    cacheDirectory: storage.cacheDirectory,
+                    hooks: TraceCacheTestHooks(afterPromotion: { barrier.pause(at: $0) })
+                )
+            },
+            parserIdentityProvider: { options in
+                try await options.resolveParser().identity()
+            },
+            toolRevisionProvider: { String(repeating: "a", count: 64) },
+            storagePathsProvider: { paths },
+            selfTestFixtureProvider: { fixtureURL }
+        )
+        let writer = TestOutputWriter()
+        let testedApplication = application(
+            executor: executor,
+            deadlineClock: deadlineClock.clock
+        )
+        let operation = Task {
+            await testedApplication.run(
+                arguments: [
+                    "--json", "--timeout-ms", "5000", "--trace-streamer", parserURL.path,
+                    "inspect", fixtureURL.path,
+                ],
+                writer: writer
+            )
+        }
+        guard let promotedURL = await barrier.waitUntilReached(timeout: 30) else {
+            operation.cancel()
+            barrier.resume()
+            _ = await operation.value
+            XCTFail("cache promotion was not reached before the test deadline")
+            return
+        }
+        deadlineClock.expire()
+
+        let status = await operation.value
+        XCTAssertEqual(status, 7)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: promotedURL.path))
+        let object = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: writer.stdout) as? [String: Any]
+        )
+        XCTAssertNil(object["result"])
+        XCTAssertEqual((object["error"] as? [String: Any])?["code"] as? String, "QUERY_TIMEOUT")
+    }
+
     func testHumanTraceFieldsAreBoundedAndTerminalEscaped() throws {
         let injected = "worker\n\t\u{1B}]0;owned\u{7}\u{202E}"
         let process = TraceProcess(
@@ -224,7 +292,8 @@ final class ProductionCommandExecutorTests: XCTestCase {
         let summaryWriter = TestOutputWriter()
         let summaryStatus = await application(executor: executor).run(
             arguments: [
-                "--json", "--max-rows", "7", "--timeout-ms", "500",
+                "--json", "--max-rows", "7", "--max-events", "3",
+                "--timeout-ms", "500",
                 "summary", "trace", "--start-ns", "10", "--end-ns", "90",
             ],
             writer: summaryWriter
@@ -235,6 +304,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
         let summaryRequest = try XCTUnwrap(capturedSummaryRequest)
         XCTAssertEqual(summaryRequest.range, try TraceTimeRange.query(startNs: 10, endNs: 90))
         XCTAssertEqual(summaryRequest.maximumRowsPerSection, 7)
+        XCTAssertEqual(summaryRequest.maximumEventsPerSection, 3)
         XCTAssertEqual(summaryRequest.timeout, .milliseconds(500))
 
         let processWriter = TestOutputWriter()
@@ -252,6 +322,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
         XCTAssertEqual(processQuery.pid, 42)
         XCTAssertEqual(processQuery.name, "worker")
         XCTAssertEqual(processQuery.limit, 1)
+        XCTAssertNotNil(processQuery.deadline)
 
         let emptyWriter = TestOutputWriter()
         let emptyStatus = await application(executor: executor).run(
@@ -283,6 +354,7 @@ final class ProductionCommandExecutorTests: XCTestCase {
         XCTAssertEqual(threadQuery.threadKey, ThreadKey(itid: 202))
         XCTAssertEqual(threadQuery.name, "worker-thread")
         XCTAssertEqual(threadQuery.limit, 1)
+        XCTAssertNotNil(threadQuery.deadline)
 
         let doctorWriter = TestOutputWriter()
         let doctorStatus = await application(executor: executor).run(
@@ -367,7 +439,8 @@ final class ProductionCommandExecutorTests: XCTestCase {
     }
 
     private func application(
-        executor: CLIProductionCommandExecutor
+        executor: CLIProductionCommandExecutor,
+        deadlineClock: CLIDeadlineClock = .continuous
     ) -> CLIApplication {
         CLIApplication(
             executor: executor,
@@ -377,8 +450,86 @@ final class ProductionCommandExecutorTests: XCTestCase {
                     version: ArkTraceCLITool.version,
                     buildRevision: String(repeating: "a", count: 64)
                 )
-            }
+            },
+            deadlineClock: deadlineClock
         )
+    }
+}
+
+private final class ManualCLIDeadlineClock: @unchecked Sendable {
+    private let lock = NSLock()
+    private let base = ContinuousClock.now
+    private var expired = false
+    private var sleepers: [UUID: CheckedContinuation<Void, any Error>] = [:]
+
+    var clock: CLIDeadlineClock {
+        CLIDeadlineClock(
+            now: { [self] in
+                lock.withLock { expired ? base.advanced(by: .seconds(10)) : base }
+            },
+            sleepUntil: { [self] _ in try await sleepUntilExpiration() }
+        )
+    }
+
+    func expire() {
+        let continuations = lock.withLock {
+            expired = true
+            let continuations = Array(sleepers.values)
+            sleepers.removeAll(keepingCapacity: false)
+            return continuations
+        }
+        continuations.forEach { $0.resume() }
+    }
+
+    private func sleepUntilExpiration() async throws {
+        let id = UUID()
+        try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                let immediate: Result<Void, any Error>? = lock.withLock {
+                    if Task.isCancelled { return .failure(CancellationError()) }
+                    if expired { return .success(()) }
+                    sleepers[id] = continuation
+                    return nil
+                }
+                if let immediate { continuation.resume(with: immediate) }
+            }
+        } onCancel: {
+            let continuation = lock.withLock { sleepers.removeValue(forKey: id) }
+            continuation?.resume(throwing: CancellationError())
+        }
+    }
+}
+
+private final class BlockingCachePromotionBarrier: @unchecked Sendable {
+    private let lock = NSLock()
+    private let reached = DispatchSemaphore(value: 0)
+    private let release = DispatchSemaphore(value: 0)
+    private var promotedURL: URL?
+
+    func pause(at url: URL) {
+        lock.withLock { promotedURL = url }
+        reached.signal()
+        // Do not let the operation race the deadline timer. The production
+        // operation itself leaves this hook only after CLIOperationDeadline
+        // has actually cancelled its child, proving the subsequent Runtime
+        // rollback/drain path rather than a normal successful close.
+        while !Task.isCancelled {
+            if release.wait(timeout: .now() + 0.01) == .success { return }
+        }
+    }
+
+    func waitUntilReached(timeout: TimeInterval) async -> URL? {
+        let result = await Task.detached { self.waitBlocking(timeout: timeout) }.value
+        guard result == .success else { return nil }
+        return lock.withLock { promotedURL }
+    }
+
+    private func waitBlocking(timeout: TimeInterval) -> DispatchTimeoutResult {
+        reached.wait(timeout: .now() + timeout)
+    }
+
+    func resume() {
+        release.signal()
     }
 }
 

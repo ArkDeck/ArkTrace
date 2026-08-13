@@ -110,6 +110,12 @@ P2-T05 production command executor 与真实五命令端到端接入及 review h
 doctor failure 与 terminal escaping/session cleanup evidence 均为 Phase 2 additive coverage，
 Phase 1 冻结表仍不改写。
 
+P2-T06/T07 deadline/signal/resource-bound 与 Phase 2 gate implementation candidate 完成后重跑：
+237 tests、0 failed、0 skipped；新增 independent row/event budgets、process/thread SQLite deadline、
+encoding/tool-provenance deadline、post-promotion cache rollback、SIGINT/second-signal 与 cached-open
+benchmark evidence。locked parser/source/upstream/Ready SHA 与 schema fingerprint 继续保持不变；
+该批统一独立 review 已 clean，此处仍不改写 Phase 1 冻结主表。
+
 ## 6. 已知限制与仍开放发布门
 
 - 发布门 3（完整第三方许可证清单）仍开放，归 P3-T10；当前只锁定 TraceStreamer/source fixtures 的 Apache-2.0 证据。

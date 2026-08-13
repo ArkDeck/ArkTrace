@@ -65,6 +65,9 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
     }
 
     public func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
+        let operationDeadline = ContinuousClock.now.advanced(
+            by: .milliseconds(invocation.options.limits.timeoutMs)
+        )
         switch invocation.command {
         case .doctor(let selfTest):
             return try await doctor(invocation: invocation, selfTest: selfTest)
@@ -82,6 +85,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
             let request = try TraceSummaryRequest(
                 range: range,
                 maximumRowsPerSection: invocation.options.limits.maxRows,
+                maximumEventsPerSection: invocation.options.limits.maxEvents,
                 timeout: .milliseconds(invocation.options.limits.timeoutMs)
             )
             return try await withSession(trace: trace, options: invocation.options) { session in
@@ -93,7 +97,12 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 )
             }
         case .processes(let trace, let pid, let name, let limit):
-            let query = try ProcessQuery(pid: pid, name: name, limit: limit)
+            let query = try ProcessQuery(
+                pid: pid,
+                name: name,
+                limit: limit,
+                deadline: operationDeadline
+            )
             return try await withSession(trace: trace, options: invocation.options) { session in
                 let bound = try await session.cliProcesses(query)
                 let payload = try CLIMachineCommandPayload.processes(bound: bound)
@@ -111,7 +120,8 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 threadKey: threadKey.map(ThreadKey.init(itid:)),
                 tid: tid,
                 name: name,
-                limit: limit
+                limit: limit,
+                deadline: operationDeadline
             )
             return try await withSession(trace: trace, options: invocation.options) { session in
                 let bound = try await session.cliThreads(query)
@@ -262,6 +272,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 ) { session in
                     let request = try TraceSummaryRequest(
                         maximumRowsPerSection: invocation.options.limits.maxRows,
+                        maximumEventsPerSection: invocation.options.limits.maxEvents,
                         timeout: .milliseconds(invocation.options.limits.timeoutMs)
                     )
                     let bound = try await session.cliSummary(request)

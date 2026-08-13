@@ -253,4 +253,34 @@ public struct ArkTraceError: Error, Sendable {
             details: ["reason": violation.rawValue]
         )
     }
+
+    /// Whether this reviewed, public-contract-valid error means an owned
+    /// filesystem cleanup/rollback transaction did not complete. Callers use
+    /// this at cancellation/deadline boundaries so residual ownership failure
+    /// is not hidden by the event that triggered cleanup.
+    public var isOwnershipCleanupFailure: Bool {
+        guard publicContractViolation == nil,
+              let reason = details["reason"] else {
+            return false
+        }
+        switch code {
+        case .traceParseFailed:
+            return Self.traceParseCleanupFailureReasons.contains(reason)
+        case .traceCacheCorrupt:
+            return reason == "cacheCleanupFailed"
+        default:
+            return false
+        }
+    }
+
+    private static let traceParseCleanupFailureReasons: Set<String> = [
+        "identityCleanupFailed",
+        "readyIdentityProbeFailed",
+        "readyQuarantineFailed",
+        "readyRemovalFailed",
+        "readyRollbackFailed",
+        "replacementRestoreFailed",
+        "sessionCleanupFailed",
+        "stagingCleanupFailed",
+    ]
 }

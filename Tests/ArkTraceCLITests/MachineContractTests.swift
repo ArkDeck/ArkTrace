@@ -6,6 +6,373 @@ import Foundation
 import XCTest
 
 final class MachineContractTests: XCTestCase {
+    func testGlobalDeadlineCancelsExecutionWithoutPartialJSON() async throws {
+        let executor = CancellableSuspendedExecutor(
+            payload: try commandPayload(command: "inspect", scenario: "success")
+        )
+        let writer = ContractWriter()
+        let application = CLIApplication(
+            executor: executor,
+            machineToolProvider: { fixtureMachineTool }
+        )
+        let clock = ContinuousClock()
+        let started = clock.now
+        let operation = Task {
+            await application.run(
+                arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+                writer: writer
+            )
+        }
+        XCTAssertEqual(executor.entered.wait(timeout: .now() + 5), .success)
+
+        let status = await operation.value
+        let elapsed = started.duration(to: clock.now)
+
+        XCTAssertEqual(status, 7)
+        XCTAssertLessThan(elapsed, .seconds(2))
+        XCTAssertEqual(executor.finished.wait(timeout: .now()), .success)
+        XCTAssertEqual(writer.stdoutWrites, 1)
+        XCTAssertEqual(writer.stderrWrites, 0)
+        let object = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: writer.stdout) as? [String: Any]
+        )
+        XCTAssertNil(object["result"])
+        XCTAssertEqual((object["error"] as? [String: Any])?["code"] as? String, "QUERY_TIMEOUT")
+    }
+
+    func testCancellationDrainsExecutionAndEmitsOneTypedDocument() async throws {
+        let executor = CancellableSuspendedExecutor(
+            payload: try commandPayload(command: "inspect", scenario: "success")
+        )
+        let writer = ContractWriter()
+        let application = CLIApplication(
+            executor: executor,
+            machineToolProvider: { fixtureMachineTool }
+        )
+        let operation = Task {
+            await application.run(arguments: ["--json", "inspect", "trace"], writer: writer)
+        }
+        XCTAssertEqual(executor.entered.wait(timeout: .now() + 5), .success)
+
+        operation.cancel()
+        let status = await operation.value
+
+        XCTAssertEqual(status, 8)
+        XCTAssertEqual(executor.finished.wait(timeout: .now()), .success)
+        XCTAssertEqual(writer.stdoutWrites, 1)
+        XCTAssertEqual(writer.stderrWrites, 0)
+        let object = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: writer.stdout) as? [String: Any]
+        )
+        XCTAssertNil(object["result"])
+        XCTAssertEqual((object["error"] as? [String: Any])?["code"] as? String, "CANCELLED")
+
+        for arguments in [["--unknown"], ["--json", "--unknown"]] {
+            let malformedWriter = ContractWriter()
+            let malformedOperation = Task {
+                while !Task.isCancelled { await Task.yield() }
+                return await application.run(arguments: arguments, writer: malformedWriter)
+            }
+            malformedOperation.cancel()
+            let malformedStatus = await malformedOperation.value
+            XCTAssertEqual(
+                malformedStatus,
+                8,
+                "parent cancellation must outrank malformed argv"
+            )
+        }
+    }
+
+    func testCleanupFailureOverridesDeadlineAndParentCancellation() async throws {
+        let cleanupError = ArkTraceError(
+            code: .traceParseFailed,
+            stage: .openingDatabase,
+            message: "Injected session cleanup failure",
+            retryable: true,
+            details: ["reason": "sessionCleanupFailed"]
+        )
+
+        let timeoutExecutor = CleanupFailureOnCancellationExecutor(error: cleanupError)
+        let timeoutWriter = ContractWriter()
+        let timeoutStatus = await CLIApplication(
+            executor: timeoutExecutor,
+            machineToolProvider: { fixtureMachineTool }
+        ).run(
+            arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+            writer: timeoutWriter
+        )
+
+        XCTAssertEqual(timeoutStatus, 4)
+        XCTAssertEqual(timeoutExecutor.finished.wait(timeout: .now()), .success)
+        let timeoutObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: timeoutWriter.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (timeoutObject["error"] as? [String: Any])?["code"] as? String,
+            "TRACE_PARSE_FAILED"
+        )
+        XCTAssertEqual(
+            ((timeoutObject["error"] as? [String: Any])?["details"] as? [String: String])?["reason"],
+            "sessionCleanupFailed"
+        )
+
+        let cancellationExecutor = CleanupFailureOnCancellationExecutor(error: cleanupError)
+        let cancellationWriter = ContractWriter()
+        let operation = Task {
+            await CLIApplication(
+                executor: cancellationExecutor,
+                machineToolProvider: { fixtureMachineTool }
+            ).run(arguments: ["--json", "inspect", "trace"], writer: cancellationWriter)
+        }
+        XCTAssertEqual(cancellationExecutor.entered.wait(timeout: .now() + 5), .success)
+        operation.cancel()
+
+        let cancellationStatus = await operation.value
+        XCTAssertEqual(cancellationStatus, 4)
+        XCTAssertEqual(cancellationExecutor.finished.wait(timeout: .now()), .success)
+        let cancellationObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: cancellationWriter.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (cancellationObject["error"] as? [String: Any])?["code"] as? String,
+            "TRACE_PARSE_FAILED"
+        )
+        XCTAssertEqual(
+            ((cancellationObject["error"] as? [String: Any])?["details"] as? [String: String])?["reason"],
+            "sessionCleanupFailed"
+        )
+
+        let impostor = ArkTraceError(
+            code: .queryFailed,
+            stage: .querying,
+            message: "Not an ownership cleanup failure",
+            details: ["reason": "sessionCleanupFailed"]
+        )
+        let impostorExecutor = CleanupFailureOnCancellationExecutor(error: impostor)
+        let impostorWriter = ContractWriter()
+        let impostorStatus = await CLIApplication(
+            executor: impostorExecutor,
+            machineToolProvider: { fixtureMachineTool }
+        ).run(
+            arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+            writer: impostorWriter
+        )
+        XCTAssertEqual(impostorStatus, 7, "a reason token cannot spoof cleanup priority")
+        let impostorObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: impostorWriter.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (impostorObject["error"] as? [String: Any])?["code"] as? String,
+            "QUERY_TIMEOUT"
+        )
+    }
+
+    func testDeadlineIncludesEncodingAndHumanOutputBudget() async throws {
+        let usageWriter = ContractWriter()
+        let usageStatus = await CLIApplication(
+            executor: FixedExecutor(),
+            machineToolProvider: {
+                Thread.sleep(forTimeInterval: 0.15)
+                return fixtureMachineTool
+            }
+        ).run(
+            arguments: [
+                "--json", "--timeout-ms", "100", "--timeout-ms", "100",
+                "inspect", "trace",
+            ],
+            writer: usageWriter
+        )
+        XCTAssertEqual(usageStatus, 2, "invalid syntax has priority over execution deadline")
+        let usageObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: usageWriter.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (usageObject["error"] as? [String: Any])?["code"] as? String,
+            "INVALID_ARGUMENT"
+        )
+
+        let identityWriter = ContractWriter()
+        let identityStatus = await CLIApplication(
+            executor: FixedExecutor(
+                machinePayload: try commandPayload(command: "inspect", scenario: "success")
+            ),
+            machineToolProvider: {
+                Thread.sleep(forTimeInterval: 0.15)
+                return fixtureMachineTool
+            }
+        ).run(
+            arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+            writer: identityWriter
+        )
+        XCTAssertEqual(identityStatus, 7, "tool provenance work is inside the command deadline")
+        XCTAssertTrue(identityWriter.stdout.isEmpty)
+        XCTAssertTrue(String(decoding: identityWriter.stderr, as: UTF8.self).contains(
+            "QUERY_TIMEOUT"
+        ))
+
+        let failingIdentityWriter = ContractWriter()
+        let failingIdentityStatus = await CLIApplication(
+            executor: FixedExecutor(
+                machinePayload: try commandPayload(command: "inspect", scenario: "success")
+            ),
+            machineToolProvider: {
+                Thread.sleep(forTimeInterval: 0.15)
+                throw ArkTraceError(
+                    code: .internalError,
+                    stage: .hashing,
+                    message: "Injected executable identity failure"
+                )
+            }
+        ).run(
+            arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+            writer: failingIdentityWriter
+        )
+        XCTAssertEqual(
+            failingIdentityStatus,
+            7,
+            "an expired invocation overrides a delayed provenance failure"
+        )
+        XCTAssertTrue(failingIdentityWriter.stdout.isEmpty)
+        XCTAssertTrue(String(decoding: failingIdentityWriter.stderr, as: UTF8.self).contains(
+            "QUERY_TIMEOUT"
+        ))
+
+        let cooperativeProvider = CooperativeMachineToolProvider()
+        let cooperativeWriter = ContractWriter()
+        let cooperativeStatus = await CLIApplication(
+            executor: FixedExecutor(
+                machinePayload: try commandPayload(command: "inspect", scenario: "success")
+            ),
+            machineToolProvider: { try cooperativeProvider.resolve() }
+        ).run(
+            arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+            writer: cooperativeWriter
+        )
+        XCTAssertEqual(cooperativeStatus, 7)
+        XCTAssertEqual(cooperativeProvider.cancelled.wait(timeout: .now()), .success)
+        XCTAssertEqual(cooperativeProvider.finished.wait(timeout: .now()), .success)
+        XCTAssertTrue(cooperativeWriter.stdout.isEmpty)
+
+        let delayedFailureWriter = ContractWriter()
+        let delayedFailureStatus = await CLIApplication(
+            executor: DelayedFailureExecutor(),
+            machineToolProvider: { fixtureMachineTool }
+        ).run(
+            arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+            writer: delayedFailureWriter
+        )
+        XCTAssertEqual(delayedFailureStatus, 7)
+        let delayedFailureObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: delayedFailureWriter.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (delayedFailureObject["error"] as? [String: Any])?["code"] as? String,
+            "QUERY_TIMEOUT"
+        )
+
+        let hugeNumericArgument = String(repeating: "9", count: 16 * 1_024 + 1)
+        let boundedHint = CLIArgumentParser.machinePresentationHint([
+            "--json", "--timeout-ms", hugeNumericArgument,
+        ])
+        XCTAssertEqual(boundedHint.timeoutMs, CLILimits.defaultTimeoutMs)
+        let excessivePrefix = Array(repeating: "padding", count: 257) + ["summary"]
+        XCTAssertEqual(CLIMachineRequest.hint(for: excessivePrefix).command, "unknown")
+
+        let encodingEntered = DispatchSemaphore(value: 0)
+        let payload = try commandPayload(command: "inspect", scenario: "success")
+        let machineWriter = ContractWriter()
+        let application = CLIApplication(
+            executor: FixedExecutor(machinePayload: payload),
+            machineToolProvider: { fixtureMachineTool },
+            beforeEncoding: {
+                encodingEntered.signal()
+                try await Task.sleep(for: .seconds(5))
+            }
+        )
+        let operation = Task {
+            await application.run(
+                arguments: ["--json", "--timeout-ms", "100", "inspect", "trace"],
+                writer: machineWriter
+            )
+        }
+        XCTAssertEqual(encodingEntered.wait(timeout: .now() + 5), .success)
+        let timeoutStatus = await operation.value
+        XCTAssertEqual(timeoutStatus, 7)
+        XCTAssertEqual(machineWriter.stdoutWrites, 1)
+        let timeoutObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: machineWriter.stdout) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (timeoutObject["error"] as? [String: Any])?["code"] as? String,
+            "QUERY_TIMEOUT"
+        )
+
+        let humanWriter = ContractWriter()
+        let oversized = CLIApplication(
+            executor: FixedExecutor(
+                stdout: Data(repeating: UInt8(ascii: "x"), count: 800),
+                stderr: Data(repeating: UInt8(ascii: "y"), count: 300)
+            ),
+            machineToolProvider: { fixtureMachineTool }
+        )
+        let outputStatus = await oversized.run(
+            arguments: ["--max-output-bytes", "1024", "inspect", "trace"],
+            writer: humanWriter
+        )
+        XCTAssertEqual(outputStatus, 7)
+        XCTAssertEqual(humanWriter.stdoutWrites, 0)
+        XCTAssertTrue(String(decoding: humanWriter.stderr, as: UTF8.self).contains(
+            "OUTPUT_LIMIT_EXCEEDED"
+        ))
+    }
+
+    func testSignalMonitorCancelsOnceThenAllowsForcedExit() throws {
+        let state = SignalTestState()
+        let monitor = CLISignalMonitor(
+            onFirstSignal: { state.recordCancellation() },
+            onSecondSignal: { signal in state.recordForced(signal) }
+        )
+
+        monitor.receiveForTesting(SIGINT)
+        XCTAssertEqual(state.cancellations, 1)
+        XCTAssertTrue(state.forced.isEmpty)
+        monitor.receiveForTesting(SIGTERM)
+        XCTAssertEqual(state.cancellations, 1)
+        XCTAssertEqual(state.forced, [SIGTERM])
+        monitor.receiveForTesting(SIGINT)
+        XCTAssertEqual(state.forced, [SIGTERM])
+
+        let lifecycleMonitors = (0..<2).map { _ in
+            CLISignalMonitor(onFirstSignal: {}, onSecondSignal: { _ in })
+        }
+        DispatchQueue.concurrentPerform(iterations: 64) { index in
+            let lifecycleMonitor = lifecycleMonitors[index % lifecycleMonitors.count]
+            if (index / lifecycleMonitors.count).isMultiple(of: 2) {
+                try? lifecycleMonitor.start()
+            } else {
+                lifecycleMonitor.stop()
+            }
+        }
+        lifecycleMonitors.forEach { $0.stop() }
+
+        let installedSignal = DispatchSemaphore(value: 0)
+        let installWindowMonitor = CLISignalMonitor(
+            onFirstSignal: { installedSignal.signal() },
+            onSecondSignal: { _ in }
+        )
+        try installWindowMonitor.start(beforeSourceActivation: {
+            _ = Darwin.kill(Darwin.getpid(), SIGINT)
+            waitForPendingProcessSignal()
+        })
+        XCTAssertTrue(CLISignalMonitor.hasPendingSignal)
+        XCTAssertEqual(
+            installedSignal.wait(timeout: .now() + 5),
+            .success,
+            "a signal captured before Dispatch activation must not be lost"
+        )
+        installWindowMonitor.stop()
+    }
+
     func testCancellationAtFinalSuccessBoundaryCannotCommitSuccess() async throws {
         let entered = DispatchSemaphore(value: 0)
         let release = DispatchSemaphore(value: 0)
@@ -36,6 +403,47 @@ final class MachineContractTests: XCTestCase {
         )
         XCTAssertNil(object["result"])
         XCTAssertEqual((object["error"] as? [String: Any])?["code"] as? String, "CANCELLED")
+
+        let deliveryEntered = DispatchSemaphore(value: 0)
+        let releaseDelivery = DispatchSemaphore(value: 0)
+        let pendingObserved = LockedFlag()
+        let signalWriter = ContractWriter()
+        let signalMonitor = CLISignalMonitor(
+            onFirstSignal: {},
+            onSecondSignal: { _ in },
+            beforeDelivery: {
+                deliveryEntered.signal()
+                _ = releaseDelivery.wait(timeout: .now() + 5)
+            }
+        )
+        try signalMonitor.start()
+        let signalApplication = CLIApplication(
+            executor: FixedExecutor(machinePayload: payload),
+            machineToolProvider: { fixtureMachineTool },
+            beforeSuccessCommit: {
+                _ = Darwin.kill(Darwin.getpid(), SIGINT)
+                waitForPendingProcessSignal()
+                pendingObserved.set(CLISignalMonitor.hasPendingSignal)
+            }
+        )
+        let signalStatus = await signalApplication.run(
+            arguments: ["--json", "summary", "trace"],
+            writer: signalWriter
+        )
+
+        XCTAssertEqual(deliveryEntered.wait(timeout: .now() + 5), .success)
+        XCTAssertTrue(pendingObserved.value)
+        XCTAssertEqual(signalStatus, 8, "captured signal must linearize before success commit")
+        let signalObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: signalWriter.stdout) as? [String: Any]
+        )
+        XCTAssertNil(signalObject["result"])
+        XCTAssertEqual(
+            (signalObject["error"] as? [String: Any])?["code"] as? String,
+            "CANCELLED"
+        )
+        releaseDelivery.signal()
+        signalMonitor.stop()
     }
 
     func testCancellationWhileDiagnosticWriterBlocksCannotCommitSuccess() async throws {
@@ -43,13 +451,16 @@ final class MachineContractTests: XCTestCase {
         let application = CLIApplication(
             executor: FixedExecutor(
                 stdout: Data("stale success\n".utf8),
-                stderr: Data("prepared diagnostic\n".utf8)
+                stderr: Data(repeating: UInt8(ascii: "d"), count: 1_000)
             ),
             machineToolProvider: { fixtureMachineTool }
         )
 
         let operation = Task {
-            await application.run(arguments: ["summary", "trace"], writer: writer)
+            await application.run(
+                arguments: ["--max-output-bytes", "1024", "summary", "trace"],
+                writer: writer
+            )
         }
         XCTAssertEqual(writer.entered.wait(timeout: .now() + 5), .success)
         operation.cancel()
@@ -59,6 +470,8 @@ final class MachineContractTests: XCTestCase {
         XCTAssertEqual(status, 8)
         XCTAssertEqual(writer.stdoutWrites, 0)
         XCTAssertFalse(String(decoding: writer.stderr, as: UTF8.self).contains("stale success"))
+        XCTAssertLessThanOrEqual(writer.stderr.count, 1_024)
+        XCTAssertEqual(writer.stderr.count, 1_000)
     }
 
     func testSchemaVersionUsesMajorMinorAndMajorCompatibility() throws {
@@ -821,6 +1234,104 @@ private struct FixedExecutor: CLICommandExecuting {
         } else {
             CLICommandOutput(stdout: stdout, stderr: stderr)
         }
+    }
+}
+
+private final class CancellableSuspendedExecutor: CLICommandExecuting, @unchecked Sendable {
+    let entered = DispatchSemaphore(value: 0)
+    let finished = DispatchSemaphore(value: 0)
+    private let payload: CLIMachineCommandPayload
+
+    init(payload: CLIMachineCommandPayload) {
+        self.payload = payload
+    }
+
+    func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
+        defer { finished.signal() }
+        entered.signal()
+        try await Task.sleep(for: .seconds(30))
+        return CLICommandOutput(machinePayload: payload)
+    }
+}
+
+private final class CleanupFailureOnCancellationExecutor: CLICommandExecuting, @unchecked Sendable {
+    let entered = DispatchSemaphore(value: 0)
+    let finished = DispatchSemaphore(value: 0)
+    private let error: ArkTraceError
+
+    init(error: ArkTraceError) {
+        self.error = error
+    }
+
+    func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
+        defer { finished.signal() }
+        entered.signal()
+        do {
+            try await Task.sleep(for: .seconds(30))
+            throw ArkTraceError(
+                code: .internalError,
+                stage: .request,
+                message: "Cancellation test did not suspend"
+            )
+        } catch is CancellationError {
+            throw error
+        }
+    }
+}
+
+private final class CooperativeMachineToolProvider: @unchecked Sendable {
+    let cancelled = DispatchSemaphore(value: 0)
+    let finished = DispatchSemaphore(value: 0)
+
+    func resolve() throws -> CLIMachineTool {
+        defer { finished.signal() }
+        while !Task.isCancelled { Thread.sleep(forTimeInterval: 0.001) }
+        cancelled.signal()
+        throw CancellationError()
+    }
+}
+
+private struct DelayedFailureExecutor: CLICommandExecuting {
+    func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
+        let end = ContinuousClock.now.advanced(by: .milliseconds(150))
+        while ContinuousClock.now < end {}
+        throw ArkTraceError(
+            code: .queryFailed,
+            stage: .querying,
+            message: "Injected failure after the command deadline"
+        )
+    }
+}
+
+private final class SignalTestState: @unchecked Sendable {
+    private let lock = NSLock()
+    private var cancellationCount = 0
+    private var forcedSignals: [Int32] = []
+
+    var cancellations: Int { lock.withLock { cancellationCount } }
+    var forced: [Int32] { lock.withLock { forcedSignals } }
+
+    func recordCancellation() {
+        lock.withLock { cancellationCount += 1 }
+    }
+
+    func recordForced(_ signal: Int32) {
+        lock.withLock { forcedSignals.append(signal) }
+    }
+}
+
+private final class LockedFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var storage = false
+
+    var value: Bool { lock.withLock { storage } }
+    func set(_ value: Bool) { lock.withLock { storage = value } }
+}
+
+private func waitForPendingProcessSignal() {
+    let deadline = ContinuousClock.now.advanced(by: .seconds(1))
+    while !CLISignalMonitor.hasPendingSignal, ContinuousClock.now < deadline {
+        _ = Darwin.sched_yield()
     }
 }
 

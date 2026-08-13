@@ -1,6 +1,6 @@
 # ArkTrace Phase 2 任务清单
 
-> 状态：Active — P2-T01～T05 已完成，下一项 P2-T06
+> 状态：Completed — 7/7，P2-T06/T07 统一独立 review clean
 > 阶段：CLI Vertical Slice
 > 验收目标：Agent 不依赖 UI 即可 inspect、summary、读取 process/thread
 
@@ -149,8 +149,8 @@ AT-TIME-005 保留为合法 open-ended sentinel，不再误报“ignored”。�
 10 万行 regression 在 1,000 VM-step budget 内完成且 query plan 无 temp B-tree；WITHOUT ROWID
 或 rowid alias 被遮蔽时以 `NOT INDEXED` 固定物理 B-tree/record 前缀。generated columns 通过
 `table_xinfo` 参与 alias 判断、hidden-kind fingerprint 与兼容性回归。one-shot timeout race 覆盖 metadata、Store 与 Analysis
-reduction，即使 protocol implementation 不合作也不阻塞公开 deadline，且 parent cancellation
-优先于并发 timeout，
+reduction；deadline/cancellation 会取消并 join repository operation，确保 session/lease 不在子任务
+仍工作时释放，且 parent cancellation优先于并发 timeout，
 SQLite progress handler 在 deadline 时实际 interrupt；`stat` 无 timestamp，因此仅 full summary
 返回 bounded `eventCountBySource`，且只汇总 `stat_type=received`，其他类型进入 data-quality，
 过长/空字段以 warning+truncation 暴露；source 以原始 UTF-8 bytes 作为 BINARY identity，Unicode
@@ -293,7 +293,7 @@ upstream/Ready SHA 与 schema fingerprint 未漂移。
 使用同一 `TraceSession`/repository 打开、查询、构造 human 与 typed machine 输出，并在 stdout
 提交前完成 session close；close/cleanup 失败优先，不能返回 success。默认使用 content-addressed
 cache，`--no-cache` 使用 Runtime 的 ephemeral owned directory；doctor self-test 始终强制
-ephemeral/no-cache，确保每次都真实执行 parser。summary 将 range、maxRows 与 timeout 传入
+ephemeral/no-cache，确保每次都真实执行 parser。summary 将 range、maxRows、maxEvents 与 timeout 传入
 `TraceSummaryRequest`；process/thread 将所有 identity/PID/TID/name/limit 传入 Store prepared
 query，复用既有稳定排序和 limit+1。
 
@@ -326,11 +326,27 @@ parser/source/upstream/Ready SHA 与 schema fingerprint 未漂移。
 
 **验收**
 
-- [ ] timeout/cancel/second signal；
-- [ ] query interrupt 生效；
-- [ ] cache 无 partial promotion；
-- [ ] 每个 error family 的 exit mapping；
-- [ ] human 与 JSON 使用同一 Core error。
+- [x] timeout/cancel/second signal；
+- [x] query interrupt 生效；
+- [x] cache 无 partial promotion；
+- [x] 每个 error family 的 exit mapping；
+- [x] human 与 JSON 使用同一 Core error。
+
+**实现证据（2026-08-13，统一独立 review clean）**
+
+CLI 从 invocation 开始建立绝对 deadline；tool provenance、Runtime open/parser、Store/Analysis query、
+Machine/human encoding、combined stdout/stderr byte check 与最终 commit boundary 均在同一 deadline
+下。timeout/parent cancel 会取消 operation，并等待 Runtime 的 cache/session cleanup transaction
+完成后才输出 typed terminal error；真实 post-promotion barrier regression 证明返回
+`QUERY_TIMEOUT` 前 public Ready entry 已完成 exact-identity rollback。process/thread query 将 deadline
+传入 task-aware SQLite progress handler，既有 summary VM interrupt regression 保持有效。
+
+`CLISignalMonitor` 用 async-signal-safe C pipe shim 捕获 SIGINT/SIGTERM，再由 Dispatch read source
+处理：handler 安装到 source activation 的信号也会缓存在 pipe；第一次取消顶层 Task，第二次才
+`_exit(128 + signal)`；gate 的实际 Release executable 得到 SIGINT status 8 / typed `CANCELLED`，
+连续 SIGTERM 得到 143。`CLIExitStatus` 穷举全部 stable error code 的 2～9 family。summary 的
+directory budget 与 event budget 已拆为 `maxRows`/`maxEvents`，Store sampling、Analysis request 与
+Machine payload validation 全链路独立；output budget 同时约束 stdout + stderr，JSON 仍单次提交。
 
 ### P2-T07 — CLI contract tests、性能基线与文档
 
@@ -347,13 +363,26 @@ parser/source/upstream/Ready SHA 与 schema fingerprint 未漂移。
 6. README 更新可执行命令；
 7. scripts/test_phase2.sh 一条命令执行 Phase 1 + Phase 2 gate。
 
+**实现证据（2026-08-13，统一独立 review clean）**
+
+已有 20 份 static canonical golden 覆盖五命令 success/empty/truncated/error；新增
+`scripts/test_phase2.sh` 先执行 Phase 1 locked gate，再执行完整 Release zero-skip suite，随后用
+实际 `arktrace` 验证 malformed argument、wrong parser、timeout、output overflow、SIGINT cancel 与
+second-signal force。Phase 2 machine evidence 记录 bounded host/trace/parser identity、20 次 warm
+cache hit 的 open/metadata p50/p95、test/skip count 与 CLI status checks。最终 clean gate：
+237 tests、0 failure、0 skip；Mac15,12/arm64/16 GiB、locked zlib fixture 上 cached open p95
+170.608375 ms、metadata p95 0.003709 ms。该 small baseline 不替代 P3-T09 medium/large/viewport gate，
+发布门 3、6、7 均保持开放。安装、flags、commands、Machine JSON、exit/signal/privacy 已写入
+[CLI.md](./CLI.md)，README 已更新 executable/gate 用法，完整候选证据见
+[PHASE_2_VERIFICATION.md](./PHASE_2_VERIFICATION.md)。
+
 ## 5. Exit Checklist
 
-- [ ] doctor、inspect、summary、processes、threads 均支持 human/JSON；
-- [ ] JSON 1.0 golden 稳定，stdout/stderr 隔离；
-- [ ] cache hit、identity invalidation、single-flight、atomic promotion 正确；
-- [ ] timeout/limits/signals/exit status 正确；
-- [ ] real Trace gate 零 skip；
-- [ ] cached open/metadata benchmark 有真实数值或明确 not measured；
-- [ ] Agent 无需 UI 即可读取 Trace 基础事实；
-- [ ] 未提前实现 raw SQL、GUI automation 或深度 Agent query。
+- [x] doctor、inspect、summary、processes、threads 均支持 human/JSON；
+- [x] JSON 1.0 golden 稳定，stdout/stderr 隔离；
+- [x] cache hit、identity invalidation、single-flight、atomic promotion 正确；
+- [x] timeout/limits/signals/exit status 正确；
+- [x] real Trace gate 零 skip；
+- [x] cached open/metadata benchmark 有真实数值或明确 not measured；
+- [x] Agent 无需 UI 即可读取 Trace 基础事实；
+- [x] 未提前实现 raw SQL、GUI automation 或深度 Agent query。
