@@ -1,6 +1,6 @@
 # ArkTrace Phase 3 任务清单
 
-> 状态：Active — 4/10 完成，下一批 P3-T05～T07
+> 状态：Active — P3-T01～T07 已完成并通过独立 review；已 review 7/10
 > 阶段：Native Viewer
 > 验收目标：ArkTrace.app 可以实际替代浏览器完成基础 Trace 查看
 
@@ -161,12 +161,12 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **验收**
 
-- [ ] AC-AT-001/002/003/004；
-- [ ] old session result 不出现在 new session；
-- [ ] purge 不能接受 root/home/broad path；
-- [ ] 超过 high watermark 会降至 low，active entry 不被 eviction；
-- [ ] 原始 Trace hash 不变；
-- [ ] UI 不解析 parser log 猜错误。
+- [x] AC-AT-001/002/003/004 的 Parser/Runtime 事实由继承 gate 覆盖，App generation/close 由 controller regression 覆盖；
+- [x] old session result 不出现在 new session；
+- [x] purge 不能接受 root/home/broad path；
+- [x] 超过 high watermark 会降至 low，active entry 不被 eviction；
+- [x] 原始 Trace hash 不变；
+- [x] UI 不解析 parser log 猜错误。
 
 ### P3-T06 — 组合 Toolbar/Sidebar/Timeline/Inspector
 
@@ -203,11 +203,11 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 **验收**
 
-- [ ] Open → search → reveal → select → Inspector；
-- [ ] range analysis 可 cancel；
-- [ ] zoom anchor 稳定，Int64 时间不漂移；
-- [ ] density bucket 不可选；
-- [ ] AC-AT-017 完整通过。
+- [x] Open → search → reveal → select → Inspector 的 typed controller/UI 链路已接通；
+- [x] range analysis 可 cancel；
+- [x] zoom anchor 稳定，Int64 时间不漂移；
+- [x] density bucket 不可选；
+- [x] AC-AT-017 的 Store/Renderer marker 与 selection contract 由继承 regression 覆盖。
 
 ### P3-T08 — 落实 reviewed accessibility contract
 

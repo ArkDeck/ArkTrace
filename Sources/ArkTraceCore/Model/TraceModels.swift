@@ -95,7 +95,9 @@ public struct TraceDataQualityIssue: Hashable, Codable, Sendable {
 public enum TraceDataQualityScope {
     public static let machineAllowed: Set<String> = [
         "process.start_ts", "process.end_ts", "process.lifecycle",
+        "process.name",
         "thread.start_ts", "thread.end_ts", "thread.ipid", "thread.lifecycle",
+        "thread.name", "thread.processName",
         "sched_slice.ts", "sched_slice.dur", "sched_slice.cpu",
         "sched_slice.value", "sched_slice.identity", "sched_slice.overlap",
         "thread_state.ts", "thread_state.dur", "thread_state.cpu",

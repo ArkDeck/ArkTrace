@@ -61,12 +61,16 @@ public actor TraceSession {
         do {
             try await resourceOwner.close()
         } catch {
+            var details = ["reason": "sessionCleanupFailed"]
+            if let typed = error as? ArkTraceError {
+                details["underlyingCode"] = typed.code.rawValue
+            }
             throw ArkTraceError(
                 code: .traceParseFailed,
                 stage: .openingDatabase,
                 message: "Trace session storage could not be released",
                 retryable: true,
-                details: ["reason": "sessionCleanupFailed"]
+                details: details
             )
         }
     }
@@ -286,12 +290,22 @@ public actor TraceSession {
             }
             if cleanupFailed {
                 report(.failed)
+                // Cleanup failure deliberately outranks the trigger, but the
+                // trigger's stable code is preserved so a deterministic
+                // diagnosis (e.g. TRACE_FORMAT_UNSUPPORTED) is not erased by
+                // a transient removal failure and retried forever.
+                var details = ["reason": "sessionCleanupFailed"]
+                if let typed = error as? ArkTraceError {
+                    details["underlyingCode"] = typed.code.rawValue
+                } else if error is CancellationError || Task.isCancelled {
+                    details["underlyingCode"] = ArkTraceError.Code.cancelled.rawValue
+                }
                 throw ArkTraceError(
                     code: .traceParseFailed,
                     stage: .openingDatabase,
                     message: "Trace session storage could not be released",
                     retryable: true,
-                    details: ["reason": "sessionCleanupFailed"]
+                    details: details
                 )
             }
             if let error = error as? ArkTraceError, error.code == .cancelled {

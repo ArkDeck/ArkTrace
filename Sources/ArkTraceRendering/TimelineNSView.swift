@@ -6,7 +6,9 @@ import SwiftUI
 public final class TimelineNSView: NSView {
     public var snapshot: TimelineSnapshot? {
         didSet {
-            if let oldValue, snapshot?.generation != oldValue.generation,
+            if snapshot == nil {
+                previousSnapshot = nil
+            } else if let oldValue, snapshot?.generation != oldValue.generation,
                 snapshot?.isLoading == true
             {
                 previousSnapshot = oldValue
@@ -18,8 +20,13 @@ public final class TimelineNSView: NSView {
     }
     public var selection: TraceTimeRange? { didSet { needsDisplay = true } }
     public var onSelectEvent: (@MainActor (EventKey?) -> Void)?
+    public var onHoverEvent: (@MainActor (EventKey?) -> Void)?
+    public var onSelectRange: (@MainActor (TraceTimeRange?) -> Void)?
+    public var onViewportIntent: (@MainActor (TimelineViewportIntent) -> Void)?
 
     private var previousSnapshot: TimelineSnapshot?
+    private var dragStartX: CGFloat?
+    private var trackingAreaReference: NSTrackingArea?
 
     public override var isFlipped: Bool { true }
     public override var acceptsFirstResponder: Bool { true }
@@ -58,7 +65,78 @@ public final class TimelineNSView: NSView {
 
     public override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        onSelectEvent?(self.event(at: point))
+        if let selected = self.event(at: point) {
+            dragStartX = nil
+            onSelectRange?(nil)
+            onSelectEvent?(selected)
+        } else {
+            onSelectEvent?(nil)
+            dragStartX = point.x
+        }
+    }
+
+    public override func mouseDragged(with event: NSEvent) {
+        guard let startX = dragStartX, let source = displayedSnapshot else { return }
+        let endX = convert(event.locationInWindow, from: nil).x
+        let first = TimelineGeometry.time(forX: startX, viewport: source.viewport)
+        let second = TimelineGeometry.time(forX: endX, viewport: source.viewport)
+        guard first != second else {
+            selection = nil
+            onSelectRange?(nil)
+            return
+        }
+        let range = try? TraceTimeRange.query(
+            startNs: min(first, second),
+            endNs: max(first, second)
+        )
+        selection = range
+        onSelectRange?(range)
+    }
+
+    public override func mouseUp(with event: NSEvent) {
+        if dragStartX != nil { mouseDragged(with: event) }
+        dragStartX = nil
+    }
+
+    public override func mouseMoved(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        onHoverEvent?(self.event(at: point))
+    }
+
+    public override func magnify(with event: NSEvent) {
+        guard let source = displayedSnapshot else { return }
+        let point = convert(event.locationInWindow, from: nil)
+        let anchor = TimelineGeometry.time(forX: point.x, viewport: source.viewport)
+        onViewportIntent?(
+            .zoom(
+                anchorNs: anchor,
+                scale: exp(-Double(event.magnification)),
+                sourceViewport: source.viewport
+            )
+        )
+    }
+
+    public override func scrollWheel(with event: NSEvent) {
+        let horizontal = Double(event.scrollingDeltaX)
+        guard abs(horizontal) > 0.01 else {
+            super.scrollWheel(with: event)
+            return
+        }
+        guard let source = displayedSnapshot else { return }
+        onViewportIntent?(.panPoints(horizontal, sourceViewport: source.viewport))
+    }
+
+    public override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let trackingAreaReference { removeTrackingArea(trackingAreaReference) }
+        let area = NSTrackingArea(
+            rect: bounds,
+            options: [.activeInKeyWindow, .mouseMoved, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(area)
+        trackingAreaReference = area
     }
 
     private var displayedSnapshot: TimelineSnapshot? {
@@ -198,15 +276,24 @@ public struct TimelineView: NSViewRepresentable {
     public let snapshot: TimelineSnapshot?
     public let selection: TraceTimeRange?
     public let onSelectEvent: @MainActor (EventKey?) -> Void
+    public let onHoverEvent: @MainActor (EventKey?) -> Void
+    public let onSelectRange: @MainActor (TraceTimeRange?) -> Void
+    public let onViewportIntent: @MainActor (TimelineViewportIntent) -> Void
 
     public init(
         snapshot: TimelineSnapshot?,
         selection: TraceTimeRange? = nil,
-        onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in }
+        onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
+        onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
+        onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
+        onViewportIntent: @escaping @MainActor (TimelineViewportIntent) -> Void = { _ in }
     ) {
         self.snapshot = snapshot
         self.selection = selection
         self.onSelectEvent = onSelectEvent
+        self.onHoverEvent = onHoverEvent
+        self.onSelectRange = onSelectRange
+        self.onViewportIntent = onViewportIntent
     }
 
     public func makeNSView(context: Context) -> TimelineNSView {
@@ -214,6 +301,9 @@ public struct TimelineView: NSViewRepresentable {
         view.snapshot = snapshot
         view.selection = selection
         view.onSelectEvent = onSelectEvent
+        view.onHoverEvent = onHoverEvent
+        view.onSelectRange = onSelectRange
+        view.onViewportIntent = onViewportIntent
         return view
     }
 
@@ -221,5 +311,8 @@ public struct TimelineView: NSViewRepresentable {
         view.snapshot = snapshot
         view.selection = selection
         view.onSelectEvent = onSelectEvent
+        view.onHoverEvent = onHoverEvent
+        view.onSelectRange = onSelectRange
+        view.onViewportIntent = onViewportIntent
     }
 }

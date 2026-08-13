@@ -1032,7 +1032,7 @@ Cache hit 必须校验 metadata、regular file、size、SQLite quick check 和 s
 | `TRACE_DATABASE_INVALID` | validating/opening | false | SQLite/integrity/range 无效 |
 | `TRACE_CACHE_CORRUPT` | cacheLookup | true | cache 可重建 |
 | `QUERY_FAILED` | querying | false | SQL/decoding failure |
-| `QUERY_TIMEOUT` | querying/analyzing | true | deadline 到达 |
+| `QUERY_TIMEOUT` | request/parsing/querying/analyzing/encoding | true | deadline 到达；stage 为到期时实际所处的生命周期阶段 |
 | `QUERY_LIMIT_EXCEEDED` | querying | true | 需要缩小范围/limit |
 | `OUTPUT_LIMIT_EXCEEDED` | encoding | true | byte budget 太小 |
 | `ANALYSIS_UNSUPPORTED` | analyzing | false | trace 无所需数据语义 |

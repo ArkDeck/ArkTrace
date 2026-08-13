@@ -10,6 +10,7 @@
 		010000000000000000000004 /* ArkTraceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000001 /* ArkTraceCore */; };
 		010000000000000000000005 /* ArkTraceRendering in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000002 /* ArkTraceRendering */; };
 		010000000000000000000006 /* ArkTraceAppSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000003 /* ArkTraceAppSupport */; };
+		010000000000000000000007 /* ArkTraceAnalysis in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000004 /* ArkTraceAnalysis */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 				010000000000000000000004 /* ArkTraceCore in Frameworks */,
 				010000000000000000000005 /* ArkTraceRendering in Frameworks */,
 				010000000000000000000006 /* ArkTraceAppSupport in Frameworks */,
+				010000000000000000000007 /* ArkTraceAnalysis in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +97,7 @@
 				090000000000000000000001 /* ArkTraceCore */,
 				090000000000000000000002 /* ArkTraceRendering */,
 				090000000000000000000003 /* ArkTraceAppSupport */,
+				090000000000000000000004 /* ArkTraceAnalysis */,
 			);
 			productName = ArkTrace;
 			productReference = 020000000000000000000006 /* ArkTrace.app */;
@@ -221,6 +224,7 @@
 		090000000000000000000001 /* ArkTraceCore */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceCore;};
 		090000000000000000000002 /* ArkTraceRendering */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceRendering;};
 		090000000000000000000003 /* ArkTraceAppSupport */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceAppSupport;};
+		090000000000000000000004 /* ArkTraceAnalysis */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceAnalysis;};
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 070000000000000000000001 /* Project object */;

@@ -3,22 +3,41 @@
 public struct BoundedPage<Element: Sendable>: Sendable {
     public let items: [Element]
     public let truncated: Bool
+    /// Row-level anomalies (invalid names, inverted lifecycles) surfaced as
+    /// typed evidence instead of aborting the page or dropping data silently
+    /// (AT-QUERY-008).
+    public let dataQualityIssues: [TraceDataQualityIssue]
 
-    public init(items: [Element], truncated: Bool) {
+    public init(
+        items: [Element],
+        truncated: Bool,
+        dataQualityIssues: [TraceDataQualityIssue] = []
+    ) {
         self.items = items
         self.truncated = truncated
+        self.dataQualityIssues = dataQualityIssues
     }
 }
 
+public enum TraceDirectoryNameMatch: String, Codable, Sendable {
+    case exact
+    case prefix
+    case contains
+}
+
 public struct ProcessQuery: Sendable {
+    public let processKey: ProcessKey?
     public let pid: Int64?
     public let name: String?
+    public let nameMatch: TraceDirectoryNameMatch
     public let limit: Int
     public let deadline: ContinuousClock.Instant?
 
     public init(
+        processKey: ProcessKey? = nil,
         pid: Int64? = nil,
         name: String? = nil,
+        nameMatch: TraceDirectoryNameMatch = .exact,
         limit: Int = 10_000,
         deadline: ContinuousClock.Instant? = nil
     ) throws {
@@ -29,8 +48,17 @@ public struct ProcessQuery: Sendable {
                 message: "limit must be within 1...100000, got \(limit)"
             )
         }
+        if let name, name.isEmpty || name.utf8.count > 4_096 {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "process name filter must be 1...4096 UTF-8 bytes"
+            )
+        }
+        self.processKey = processKey
         self.pid = pid
         self.name = name
+        self.nameMatch = nameMatch
         self.limit = limit
         self.deadline = deadline
     }
@@ -42,6 +70,7 @@ public struct ThreadQuery: Sendable {
     public let threadKey: ThreadKey?
     public let tid: Int64?
     public let name: String?
+    public let nameMatch: TraceDirectoryNameMatch
     public let limit: Int
     public let deadline: ContinuousClock.Instant?
 
@@ -51,6 +80,7 @@ public struct ThreadQuery: Sendable {
         threadKey: ThreadKey? = nil,
         tid: Int64? = nil,
         name: String? = nil,
+        nameMatch: TraceDirectoryNameMatch = .exact,
         limit: Int = 10_000,
         deadline: ContinuousClock.Instant? = nil
     ) throws {
@@ -61,11 +91,19 @@ public struct ThreadQuery: Sendable {
                 message: "limit must be within 1...100000, got \(limit)"
             )
         }
+        if let name, name.isEmpty || name.utf8.count > 4_096 {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "thread name filter must be 1...4096 UTF-8 bytes"
+            )
+        }
         self.processKey = processKey
         self.pid = pid
         self.threadKey = threadKey
         self.tid = tid
         self.name = name
+        self.nameMatch = nameMatch
         self.limit = limit
         self.deadline = deadline
     }

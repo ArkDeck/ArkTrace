@@ -104,6 +104,7 @@ public enum TraceSliceNameFilter: Hashable, Sendable {
 
 public struct TraceSliceQuery: Sendable {
     public let range: TraceTimeRange
+    public let eventKey: EventKey?
     public let processKey: ProcessKey?
     public let pid: Int64?
     public let threadKey: ThreadKey?
@@ -116,6 +117,7 @@ public struct TraceSliceQuery: Sendable {
 
     public init(
         range: TraceTimeRange,
+        eventKey: EventKey? = nil,
         processKey: ProcessKey? = nil,
         pid: Int64? = nil,
         threadKey: ThreadKey? = nil,
@@ -128,6 +130,13 @@ public struct TraceSliceQuery: Sendable {
     ) throws {
         try TraceEventQueryValidation.range(range)
         try TraceEventQueryValidation.limit(limit)
+        if let eventKey, eventKey.table != .callstack {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Named-slice event key uses the wrong table"
+            )
+        }
         if let minimumDurationNs, minimumDurationNs < 0 {
             throw ArkTraceError(
                 code: .invalidArgument,
@@ -156,6 +165,7 @@ public struct TraceSliceQuery: Sendable {
             }
         }
         self.range = range
+        self.eventKey = eventKey
         self.processKey = processKey
         self.pid = pid
         self.threadKey = threadKey

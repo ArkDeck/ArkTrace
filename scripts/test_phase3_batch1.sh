@@ -80,6 +80,22 @@ verify_candidate_app() {
     test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' \
         "$candidate_app/Contents/Info.plist")" = "1" \
         || fail "$candidate_name product build drifted"
+    test "$(/usr/libexec/PlistBuddy -c \
+        'Print :CFBundleDocumentTypes:0:CFBundleTypeRole' \
+        "$candidate_app/Contents/Info.plist")" = "Viewer" \
+        || fail "$candidate_name document role drifted"
+    test "$(/usr/libexec/PlistBuddy -c \
+        'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:0' \
+        "$candidate_app/Contents/Info.plist")" = "htrace" \
+        || fail "$candidate_name htrace document registration drifted"
+    test "$(/usr/libexec/PlistBuddy -c \
+        'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:1' \
+        "$candidate_app/Contents/Info.plist")" = "systrace" \
+        || fail "$candidate_name systrace document registration drifted"
+    test "$(/usr/libexec/PlistBuddy -c \
+        'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:2' \
+        "$candidate_app/Contents/Info.plist")" = "trace" \
+        || fail "$candidate_name trace document registration drifted"
     test "$(lipo -archs "$executable")" = "arm64" \
         || fail "$candidate_name is not arm64-only"
     codesign -d --entitlements :- "$candidate_app" >"$entitlements_file" 2>/dev/null \

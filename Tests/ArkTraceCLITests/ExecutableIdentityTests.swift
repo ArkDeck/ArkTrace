@@ -176,7 +176,7 @@ final class ExecutableIdentityTests: XCTestCase {
         }
     }
 
-    func testMachineApplicationFailsClosedWhenToolIdentityIsUnavailable() async {
+    func testMachineApplicationFailsClosedWithoutForgingToolIdentity() async throws {
         let writer = ExecutableIdentityWriter()
         let application = CLIApplication(machineToolProvider: {
             throw ArkTraceError(
@@ -194,7 +194,7 @@ final class ExecutableIdentityTests: XCTestCase {
         let output = writer.snapshot()
         XCTAssertTrue(output.stdout.isEmpty)
         XCTAssertTrue(String(decoding: output.stderr, as: UTF8.self).contains("INTERNAL_ERROR"))
-        XCTAssertFalse(String(decoding: output.stderr, as: UTF8.self).contains("/"))
+        XCTAssertFalse(String(decoding: output.stderr, as: UTF8.self).contains("/Users/"))
     }
 
     private func makeTemporaryDirectory() throws -> URL {

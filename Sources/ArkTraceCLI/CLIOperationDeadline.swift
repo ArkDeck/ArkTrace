@@ -13,6 +13,32 @@ struct CLIDeadlineClock: Sendable {
     )
 }
 
+/// Coarse lifecycle position of the operation the CLI deadline wraps, updated
+/// by the executor/application at phase boundaries so a deadline expiry can
+/// name the stage it actually interrupted instead of a hardcoded one.
+final class CLIOperationStage: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value: ArkTraceError.Stage
+
+    init(_ initial: ArkTraceError.Stage) {
+        value = initial
+    }
+
+    func set(_ stage: ArkTraceError.Stage) {
+        lock.lock()
+        value = stage
+        lock.unlock()
+    }
+
+    var current: ArkTraceError.Stage {
+        lock.lock()
+        defer { lock.unlock() }
+        return value
+    }
+
+    @TaskLocal static var active: CLIOperationStage?
+}
+
 enum CLIOperationDeadline {
     static func run<Value: Sendable>(
         deadline: ContinuousClock.Instant,
@@ -67,6 +93,12 @@ enum CLIOperationDeadline {
                     // clean terminal state while an owned residual remains.
                     operationTask.cancel()
                     timerTask.cancel()
+                    // Terminal output is a transaction boundary: do not
+                    // publish timeout/cancellation while Runtime may still
+                    // promote or roll back an owned Ready/session directory.
+                    // Parser reap and filesystem cleanup own their bounded
+                    // termination policies below this layer; the CLI always
+                    // joins that work and gives a cleanup failure priority.
                     let operationResult = await operationTask.value
                     if case .failure(let operationError) = operationResult,
                        isCleanupFailure(operationError) {
@@ -107,7 +139,7 @@ enum CLIOperationDeadline {
     private static func timeoutError() -> ArkTraceError {
         ArkTraceError(
             code: .queryTimeout,
-            stage: .analyzing,
+            stage: CLIOperationStage.active?.current ?? .analyzing,
             message: "CLI operation reached its deadline",
             retryable: true
         )
@@ -116,4 +148,5 @@ enum CLIOperationDeadline {
     private static func isCleanupFailure(_ error: any Error) -> Bool {
         (error as? ArkTraceError)?.isOwnershipCleanupFailure == true
     }
+
 }

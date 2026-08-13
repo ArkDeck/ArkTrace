@@ -43,7 +43,7 @@ public struct CpuSlice: Hashable, Codable, Sendable {
         range: TraceTimeRange,
         cpu: Int64,
         threadKey: ThreadKey?,
-        processKey: ProcessKey?,
+        processKey: ProcessKey? = nil,
         tid: Int64?,
         pid: Int64?,
         threadName: String?,
@@ -104,6 +104,7 @@ public struct ThreadStateInterval: Hashable, Codable, Sendable {
     public let key: EventKey
     public let range: TraceTimeRange
     public let threadKey: ThreadKey
+    public let processKey: ProcessKey?
     /// The exact upstream state string. Unknown values are never discarded.
     public let state: String
     /// Versioned ArkTrace mapping; nil means the upstream state is unknown.
@@ -111,27 +112,35 @@ public struct ThreadStateInterval: Hashable, Codable, Sendable {
     public let cpu: Int64?
     public let tid: Int64?
     public let pid: Int64?
+    public let processName: String?
+    public let threadName: String?
     public let isOpenEnded: Bool
 
     public init(
         key: EventKey,
         range: TraceTimeRange,
         threadKey: ThreadKey,
+        processKey: ProcessKey? = nil,
         state: String,
         normalizedState: TraceThreadState?,
         cpu: Int64?,
         tid: Int64?,
         pid: Int64?,
+        processName: String? = nil,
+        threadName: String? = nil,
         isOpenEnded: Bool
     ) {
         self.key = key
         self.range = range
         self.threadKey = threadKey
+        self.processKey = processKey
         self.state = state
         self.normalizedState = normalizedState
         self.cpu = cpu
         self.tid = tid
         self.pid = pid
+        self.processName = processName
+        self.threadName = threadName
         self.isOpenEnded = isOpenEnded
     }
 
@@ -145,16 +154,20 @@ public struct ThreadStateInterval: Hashable, Codable, Sendable {
         try container.encode(key, forKey: .key)
         try container.encode(range, forKey: .range)
         try container.encode(threadKey, forKey: .threadKey)
+        try container.encodeOptional(processKey, forKey: .processKey)
         try container.encode(state, forKey: .state)
         try container.encodeOptional(normalizedState, forKey: .normalizedState)
         try container.encodeOptional(cpu, forKey: .cpu)
         try container.encodeOptional(tid, forKey: .tid)
         try container.encodeOptional(pid, forKey: .pid)
+        try container.encodeOptional(processName, forKey: .processName)
+        try container.encodeOptional(threadName, forKey: .threadName)
         try container.encode(isOpenEnded, forKey: .isOpenEnded)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case key, range, threadKey, state, normalizedState, cpu, tid, pid, isOpenEnded
+        case key, range, threadKey, processKey, state, normalizedState, cpu, tid, pid
+        case processName, threadName, isOpenEnded
     }
 }
 
@@ -163,6 +176,10 @@ public struct TraceSlice: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
     public let threadKey: ThreadKey?
     public let processKey: ProcessKey?
+    public let pid: Int64?
+    public let tid: Int64?
+    public let processName: String?
+    public let threadName: String?
     public let name: String
     public let category: String?
     public let depth: Int64?
@@ -175,6 +192,10 @@ public struct TraceSlice: Hashable, Codable, Sendable {
         range: TraceTimeRange,
         threadKey: ThreadKey?,
         processKey: ProcessKey?,
+        pid: Int64? = nil,
+        tid: Int64? = nil,
+        processName: String? = nil,
+        threadName: String? = nil,
         name: String,
         category: String?,
         depth: Int64?,
@@ -186,6 +207,10 @@ public struct TraceSlice: Hashable, Codable, Sendable {
         self.range = range
         self.threadKey = threadKey
         self.processKey = processKey
+        self.pid = pid
+        self.tid = tid
+        self.processName = processName
+        self.threadName = threadName
         self.name = name
         self.category = category
         self.depth = depth
@@ -204,6 +229,10 @@ public struct TraceSlice: Hashable, Codable, Sendable {
         try container.encode(range, forKey: .range)
         try container.encodeOptional(threadKey, forKey: .threadKey)
         try container.encodeOptional(processKey, forKey: .processKey)
+        try container.encodeOptional(pid, forKey: .pid)
+        try container.encodeOptional(tid, forKey: .tid)
+        try container.encodeOptional(processName, forKey: .processName)
+        try container.encodeOptional(threadName, forKey: .threadName)
         try container.encode(name, forKey: .name)
         try container.encodeOptional(category, forKey: .category)
         try container.encodeOptional(depth, forKey: .depth)
@@ -213,7 +242,8 @@ public struct TraceSlice: Hashable, Codable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case key, range, threadKey, processKey, name, category, depth
+        case key, range, threadKey, processKey, pid, tid, processName, threadName
+        case name, category, depth
         case parentEventKey, isAsync, isOpenEnded
     }
 }
@@ -258,6 +288,8 @@ public struct CounterSeries: Hashable, Codable, Sendable {
     public let scope: CounterScope
     public let cpu: Int64?
     public let processKey: ProcessKey?
+    public let pid: Int64?
+    public let processName: String?
     public let unit: String?
     public let samples: [CounterSample]
 
@@ -267,6 +299,8 @@ public struct CounterSeries: Hashable, Codable, Sendable {
         scope: CounterScope,
         cpu: Int64?,
         processKey: ProcessKey?,
+        pid: Int64? = nil,
+        processName: String? = nil,
         unit: String?,
         samples: [CounterSample]
     ) {
@@ -275,6 +309,8 @@ public struct CounterSeries: Hashable, Codable, Sendable {
         self.scope = scope
         self.cpu = cpu
         self.processKey = processKey
+        self.pid = pid
+        self.processName = processName
         self.unit = unit
         self.samples = samples
     }
@@ -286,12 +322,14 @@ public struct CounterSeries: Hashable, Codable, Sendable {
         try container.encode(scope, forKey: .scope)
         try container.encodeOptional(cpu, forKey: .cpu)
         try container.encodeOptional(processKey, forKey: .processKey)
+        try container.encodeOptional(pid, forKey: .pid)
+        try container.encodeOptional(processName, forKey: .processName)
         try container.encodeOptional(unit, forKey: .unit)
         try container.encode(samples, forKey: .samples)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case filterID, name, scope, cpu, processKey, unit, samples
+        case filterID, name, scope, cpu, processKey, pid, processName, unit, samples
     }
 }
 

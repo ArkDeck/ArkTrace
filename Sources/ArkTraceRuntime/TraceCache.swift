@@ -7,13 +7,6 @@ import Foundation
 @_silgen_name("flock")
 private func arkTraceFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 
-@_silgen_name("fcntl")
-private func arkTraceFcntl(
-    _ descriptor: Int32,
-    _ command: Int32,
-    _ argument: UnsafeMutableRawPointer
-) -> Int32
-
 /// Storage policy shared by App and CLI. Phase 2 deliberately exposes no
 /// cache mutation API; eviction and purge arrive with the Phase 3 App flow.
 public enum TraceSessionStoragePolicy: Sendable {
@@ -330,7 +323,10 @@ private final class TraceCacheFileLock: @unchecked Sendable {
                     reportedContention = true
                     contentionHook?()
                 }
-                Darwin.usleep(10_000)
+                // Suspend between polls: a blocking usleep would pin one
+                // cooperative-pool thread per waiter and can livelock the
+                // pool once same-key waiters reach the core count.
+                try await Task.sleep(nanoseconds: 10_000_000)
             }
         }
         return try await withTaskCancellationHandler {
@@ -338,6 +334,31 @@ private final class TraceCacheFileLock: @unchecked Sendable {
         } onCancel: {
             task.cancel()
         }
+    }
+
+    /// Non-blocking acquisition used only by cache maintenance. A live owner
+    /// or key holder is skipped rather than delayed or inferred stale.
+    static func tryAcquireExisting(at url: URL) throws -> TraceCacheFileLock? {
+        let descriptor = url.path.withCString {
+            Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
+            if errno == ENOENT { return nil }
+            throw CacheIO.lockOpen
+        }
+        var shouldClose = true
+        defer { if shouldClose { _ = Darwin.close(descriptor) } }
+        var info = stat()
+        guard Darwin.fstat(descriptor, &info) == 0,
+            (info.st_mode & S_IFMT) == S_IFREG,
+            info.st_size <= 4_096
+        else { throw CacheIO.lockOpen }
+        guard arkTraceFlock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
+            if errno == EWOULDBLOCK { return nil }
+            throw CacheIO.lockAcquire
+        }
+        shouldClose = false
+        return TraceCacheFileLock(descriptor: descriptor)
     }
 }
 
@@ -383,7 +404,7 @@ final class TraceCacheEntryLease: @unchecked Sendable {
             else {
                 throw CacheIO.leaseOpen
             }
-            try waitForLock(
+            try await waitForLock(
                 descriptor: descriptor,
                 mode: mode,
                 contentionHook: contentionHook
@@ -398,14 +419,46 @@ final class TraceCacheEntryLease: @unchecked Sendable {
         }
     }
 
-    func upgradeToExclusive() async throws {
+    static func tryAcquireExclusiveExisting(
+        at url: URL
+    ) throws -> TraceCacheEntryLease? {
+        let descriptor = url.path.withCString {
+            Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
+            if errno == ENOENT { return nil }
+            throw CacheIO.leaseOpen
+        }
+        var shouldClose = true
+        defer { if shouldClose { _ = Darwin.close(descriptor) } }
+        var info = stat()
+        guard Darwin.fstat(descriptor, &info) == 0,
+            (info.st_mode & S_IFMT) == S_IFREG
+        else { throw CacheIO.leaseOpen }
+        guard arkTraceFlock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
+            if errno == EWOULDBLOCK { return nil }
+            throw CacheIO.leaseOpen
+        }
+        shouldClose = false
+        return TraceCacheEntryLease(descriptor: descriptor, mode: .exclusive)
+    }
+
+    /// Upgrades to an exclusive lease. When `deadline` is supplied and live
+    /// shared holders keep the lease busy past it, throws `CacheIO.leaseBusy`
+    /// instead of waiting forever: the per-key lease file is shared by every
+    /// generation of the entry, so an unbounded wait here wedges the key for
+    /// all later openers behind one long-lived reader.
+    func upgradeToExclusive(
+        deadline: ContinuousClock.Instant? = nil
+    ) async throws {
         guard mode != .exclusive else { return }
         let descriptor = descriptor
         let task = Task.detached {
-            try Self.waitForLock(
+            try await Self.waitForLock(
                 descriptor: descriptor,
                 mode: .exclusive,
-                contentionHook: nil
+                contentionHook: nil,
+                deadline: deadline
             )
         }
         try await withTaskCancellationHandler {
@@ -425,8 +478,9 @@ final class TraceCacheEntryLease: @unchecked Sendable {
     private static func waitForLock(
         descriptor: Int32,
         mode: Mode,
-        contentionHook: (@Sendable () -> Void)?
-    ) throws {
+        contentionHook: (@Sendable () -> Void)?,
+        deadline: ContinuousClock.Instant? = nil
+    ) async throws {
         let operation = mode == .shared ? LOCK_SH : LOCK_EX
         var reportedContention = false
         while true {
@@ -434,11 +488,15 @@ final class TraceCacheEntryLease: @unchecked Sendable {
             if arkTraceFlock(descriptor, operation | LOCK_NB) == 0 { return }
             if errno == EINTR { continue }
             guard errno == EWOULDBLOCK else { throw CacheIO.leaseOpen }
+            if let deadline, ContinuousClock.now >= deadline {
+                throw CacheIO.leaseBusy
+            }
             if !reportedContention {
                 reportedContention = true
                 contentionHook?()
             }
-            Darwin.usleep(10_000)
+            // Suspend between polls (see TraceCacheFileLock.acquire).
+            try await Task.sleep(nanoseconds: 10_000_000)
         }
     }
 }
@@ -451,6 +509,10 @@ private enum CacheIO: Error {
     case lockOpen
     case lockAcquire
     case leaseOpen
+    /// An exclusive-lease upgrade hit its deadline because live shared
+    /// holders (healthy readers of another generation) keep the per-key
+    /// lease busy. Not an entry-corruption signal.
+    case leaseBusy
     case promotion
     case quarantine
     case cleanup
@@ -594,6 +656,20 @@ enum TraceContentAddressedCache {
     private static let databaseName = "database.sqlite"
     private static let metadataName = "metadata.json"
     private static let maximumMetadataByteCount = 16_384
+    /// Bound on exclusive-lease upgrades. Contention past this means live
+    /// shared holders (healthy sessions on another generation of the same
+    /// key), which no amount of waiting under the key lock resolves.
+    private static let exclusiveLeaseGrace: Duration = .seconds(2)
+
+    /// Errors from releasing the session staging directory. They report a
+    /// cleanup transaction that did not complete and never indict the cache
+    /// entry, so the hit path must not translate them into quarantine.
+    private static func isSessionCleanupFailure(_ error: any Error) -> Bool {
+        if error is OwnedDirectoryCleanupFailure { return true }
+        if error is TraceStorageTransactionError { return true }
+        if case CacheIO.cleanup = error { return true }
+        return false
+    }
 
     static func open(
         source: URL,
@@ -635,12 +711,16 @@ enum TraceContentAddressedCache {
 
             cancellationStage = .hashing
             report(.hashing)
-            let sourceSnapshot = try await detached {
-                try makeSourceSnapshot(source: source, in: session.url)
+            // Hash-only keying pass. The byte-for-byte snapshot is deferred
+            // to the rebuild path: a cache hit never reads snapshot bytes,
+            // so copying and fsyncing the whole trace on every warm open was
+            // pure waste (validateEntry consumes only hash + byte count).
+            let sourceFacts = try await detached {
+                try hashSourceFacts(source: source)
             }
             try Task.checkCancellation()
             let key = try TraceCacheKey(
-                traceSHA256: sourceSnapshot.sha256,
+                traceSHA256: sourceFacts.sha256,
                 parserBinarySHA256: parserIdentity.binarySHA256,
                 upstreamRevision: parserIdentity.upstreamRevision,
                 schemaAdapterVersion: TraceDatabaseStagingPreparer.schemaAdapterVersion,
@@ -671,15 +751,31 @@ enum TraceContentAddressedCache {
                     layout: layout,
                     key: key,
                     parser: parserIdentity,
-                    sourceByteCount: sourceSnapshot.byteCount,
+                    sourceByteCount: sourceFacts.byteCount,
                     sourceFormat: source.pathExtension.isEmpty ? nil : source.pathExtension,
                     repositoryValidationHook: repositoryValidationHook
                 ) {
                     let updated = hit.metadata.accessed(at: now())
-                    let updatedMetadataIdentity = try await detached {
-                        let identity = try writeMetadata(updated, to: layout.metadataURL)
-                        try synchronizeDirectory(at: layout.entryURL)
-                        return identity
+                    var effectiveMetadata = updated
+                    var expectedMetadataIdentity: TraceDatabaseFileIdentity
+                    do {
+                        expectedMetadataIdentity = try await detached {
+                            let identity = try writeMetadata(updated, to: layout.metadataURL)
+                            try synchronizeDirectory(at: layout.entryURL)
+                            return identity
+                        }
+                    } catch is CancellationError {
+                        throw CancellationError()
+                    } catch {
+                        // lastAccessedAt is best-effort LRU bookkeeping. A
+                        // failed rewrite (ENOSPC, EIO) says nothing about the
+                        // just-validated entry, so serve the hit instead of
+                        // quarantining it; the handoff guard pins whichever
+                        // metadata file is actually current under the key lock.
+                        effectiveMetadata = hit.metadata
+                        expectedMetadataIdentity =
+                            regularFileIdentity(at: layout.metadataURL)
+                            ?? hit.metadataFileIdentity
                     }
                     try Task.checkCancellation()
                     hooks.beforeReadyHandoff?(layout.entryURL, layout.leaseURL)
@@ -687,7 +783,7 @@ enum TraceContentAddressedCache {
                     guard regularFileIdentity(at: layout.databaseURL)
                         == hit.databaseFileIdentity,
                         regularFileIdentity(at: layout.metadataURL)
-                            == updatedMetadataIdentity
+                            == expectedMetadataIdentity
                     else { throw CacheIO.promotion }
                     try await removeOwnedDirectory(session, removalHook: nil)
                     sessionDirectory = nil
@@ -695,7 +791,7 @@ enum TraceContentAddressedCache {
                     guard regularFileIdentity(at: layout.databaseURL)
                         == hit.databaseFileIdentity,
                         regularFileIdentity(at: layout.metadataURL)
-                            == updatedMetadataIdentity
+                            == expectedMetadataIdentity
                     else { throw CacheIO.promotion }
                     _fixLifetime(keyLockForCleanup)
                     keyLockForCleanup = nil
@@ -703,7 +799,7 @@ enum TraceContentAddressedCache {
                     return TraceCacheOpenResult(
                         repository: hit.repository,
                         parsed: hit.parsed,
-                        metadata: updated,
+                        metadata: effectiveMetadata,
                         lease: lease,
                         cacheHit: true
                     )
@@ -713,17 +809,52 @@ enum TraceContentAddressedCache {
             } catch let error as ArkTraceError where error.code == .cancelled {
                 throw error
             } catch {
-                // Once the immutable source snapshot has been released, a
-                // late handoff failure cannot safely fall through into a
-                // rebuild from the caller's mutable source path.
-                guard sessionDirectory != nil else { throw error }
-                try await lease.upgradeToExclusive()
+                // Only fall through into quarantine + rebuild for errors that
+                // indict the entry itself. A session-cleanup failure says
+                // nothing about entry health, and once the session directory
+                // is gone the rebuild has no staging area for a verified
+                // snapshot of the caller's mutable source path.
+                guard sessionDirectory != nil, !isSessionCleanupFailure(error)
+                else { throw error }
+                do {
+                    try await lease.upgradeToExclusive(
+                        deadline: ContinuousClock.now.advanced(by: exclusiveLeaseGrace)
+                    )
+                } catch CacheIO.leaseBusy {
+                    // Live readers still hold the shared per-key lease; the
+                    // damaged entry cannot be isolated now. Surface the
+                    // validation failure instead of wedging every later
+                    // opener behind this key's lock.
+                    throw error
+                }
                 try await detached { try quarantineEntry(layout: layout) }
             }
 
-            try await lease.upgradeToExclusive()
+            do {
+                try await lease.upgradeToExclusive(
+                    deadline: ContinuousClock.now.advanced(by: exclusiveLeaseGrace)
+                )
+            } catch CacheIO.leaseBusy {
+                throw cacheCorrupt(reason: "inUse")
+            }
             try Task.checkCancellation()
             cancellationStage = .parsing
+            // Rebuild path: materialize the immutable snapshot now, pinned to
+            // the keying hash so a source mutated since the hash-only pass
+            // cannot be parsed under the old identity.
+            let sourceSnapshot = try await detached {
+                try makeSourceSnapshot(source: source, in: session.url)
+            }
+            try Task.checkCancellation()
+            guard sourceSnapshot.sha256 == key.traceSHA256,
+                sourceSnapshot.byteCount == sourceFacts.byteCount
+            else {
+                throw ArkTraceError(
+                    code: .traceFileUnreadable,
+                    stage: .hashing,
+                    message: "Trace input changed while opening"
+                )
+            }
             let build = try await createOwnedDirectory(
                 root: layout.stagingRoot,
                 prefix: "entry-",
@@ -932,7 +1063,11 @@ enum TraceContentAddressedCache {
             if let promotedThisCall, let cacheRootForRollback {
                 do {
                     if let leaseForCleanup {
-                        try await leaseForCleanup.upgradeToExclusive()
+                        try await leaseForCleanup.upgradeToExclusive(
+                            deadline: ContinuousClock.now.advanced(
+                                by: exclusiveLeaseGrace
+                            )
+                        )
                     }
                     let outcome = try await detached {
                         try quarantineOwnedEntry(
@@ -973,7 +1108,9 @@ enum TraceContentAddressedCache {
             leaseForCleanup = nil
             keyLockForCleanup = nil
             if cleanupFailed {
-                throw cacheCorrupt(reason: "cacheCleanupFailed")
+                // Cleanup outranks the trigger, but the trigger's stable code
+                // travels along so the root diagnosis stays recoverable.
+                throw cacheCorrupt(reason: "cacheCleanupFailed", underlying: error)
             }
             if let typed = error as? ArkTraceError {
                 throw typed
@@ -1284,6 +1421,22 @@ enum TraceContentAddressedCache {
     private static func makeSourceSnapshot(source: URL, in directory: URL) throws
         -> TraceSourceSnapshot
     {
+        try scanSource(source: source, snapshotDirectory: directory)
+    }
+
+    /// Streaming keying pass: SHA-256 and byte count through the same
+    /// O_NOFOLLOW descriptor discipline as the snapshot, without writing a
+    /// copy. The returned `url` is the canonical source path and must never
+    /// be handed to the parser; only `makeSourceSnapshot` produces an
+    /// immutable input.
+    private static func hashSourceFacts(source: URL) throws -> TraceSourceSnapshot {
+        try scanSource(source: source, snapshotDirectory: nil)
+    }
+
+    private static func scanSource(
+        source: URL,
+        snapshotDirectory: URL?
+    ) throws -> TraceSourceSnapshot {
         try Task.checkCancellation()
         let canonicalSource = source.resolvingSymlinksInPath().standardizedFileURL
         let input = canonicalSource.path.withCString {
@@ -1311,19 +1464,26 @@ enum TraceContentAddressedCache {
             )
         }
 
-        let destination = directory.appendingPathComponent("source.snapshot")
-        let output = destination.path.withCString {
-            Darwin.open(
-                $0,
-                O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
-                0o600
-            )
+        var destination: URL?
+        var output: Int32 = -1
+        if let snapshotDirectory {
+            let snapshotURL = snapshotDirectory.appendingPathComponent("source.snapshot")
+            output = snapshotURL.path.withCString {
+                Darwin.open(
+                    $0,
+                    O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
+                    0o600
+                )
+            }
+            guard output >= 0 else { throw CacheIO.destination }
+            destination = snapshotURL
         }
-        guard output >= 0 else { throw CacheIO.destination }
         var keepDestination = false
         defer {
-            _ = Darwin.close(output)
-            if !keepDestination { _ = Darwin.unlink(destination.path) }
+            if let destination {
+                _ = Darwin.close(output)
+                if !keepDestination { _ = Darwin.unlink(destination.path) }
+            }
         }
         var hasher = SHA256()
         var total: Int64 = 0
@@ -1341,7 +1501,9 @@ enum TraceContentAddressedCache {
             if count == 0 { break }
             let chunk = Data(buffer.prefix(count))
             hasher.update(data: chunk)
-            try writeAll(chunk, descriptor: output)
+            if destination != nil {
+                try writeAll(chunk, descriptor: output)
+            }
             let (next, overflow) = total.addingReportingOverflow(Int64(count))
             guard !overflow else {
                 throw ArkTraceError(
@@ -1353,12 +1515,14 @@ enum TraceContentAddressedCache {
             total = next
         }
         try Task.checkCancellation()
-        guard Darwin.fchmod(output, 0o400) == 0, Darwin.fsync(output) == 0 else {
-            throw CacheIO.destination
+        if destination != nil {
+            guard Darwin.fchmod(output, 0o400) == 0, Darwin.fsync(output) == 0 else {
+                throw CacheIO.destination
+            }
+            keepDestination = true
         }
-        keepDestination = true
         return TraceSourceSnapshot(
-            url: destination,
+            url: destination ?? canonicalSource,
             sha256: hasher.finalize().map { String(format: "%02x", $0) }.joined(),
             byteCount: total
         )
@@ -2161,7 +2325,11 @@ enum TraceContentAddressedCache {
             path.deinitialize(count: capacity)
             path.deallocate()
         }
-        let result = arkTraceFcntl(
+        // Call through Darwin's variadic-safe overlay: binding the variadic
+        // fcntl(2) to a fixed three-argument signature is an ABI mismatch on
+        // arm64 (variadic arguments are stack-passed), which made this
+        // F_GETPATH call fail with EFAULT unconditionally.
+        let result = Darwin.fcntl(
             descriptor,
             F_GETPATH,
             UnsafeMutableRawPointer(path)
@@ -2345,13 +2513,22 @@ enum TraceContentAddressedCache {
         }
     }
 
-    private static func cacheCorrupt(reason: String) -> ArkTraceError {
-        ArkTraceError(
+    private static func cacheCorrupt(
+        reason: String,
+        underlying: (any Error)? = nil
+    ) -> ArkTraceError {
+        var details = ["reason": String(reason.prefix(64))]
+        if let typed = underlying as? ArkTraceError {
+            details["underlyingCode"] = typed.code.rawValue
+        } else if underlying is CancellationError {
+            details["underlyingCode"] = ArkTraceError.Code.cancelled.rawValue
+        }
+        return ArkTraceError(
             code: .traceCacheCorrupt,
             stage: .cacheLookup,
             message: "Content-addressed cache entry is invalid",
             retryable: true,
-            details: ["reason": String(reason.prefix(64))]
+            details: details
         )
     }
 
@@ -2380,5 +2557,798 @@ enum TraceContentAddressedCache {
         try Task.checkCancellation()
         try operation(layout.entryURL)
         try Task.checkCancellation()
+    }
+}
+
+public struct TraceCacheWatermarks: Hashable, Sendable {
+    public static let standard = try! TraceCacheWatermarks(
+        highBytes: 20 * 1_024 * 1_024 * 1_024,
+        lowBytes: 16 * 1_024 * 1_024 * 1_024
+    )
+
+    public let highBytes: Int64
+    public let lowBytes: Int64
+
+    public init(
+        highBytes: Int64 = 20 * 1_024 * 1_024 * 1_024,
+        lowBytes: Int64 = 16 * 1_024 * 1_024 * 1_024
+    ) throws {
+        guard highBytes > 0, lowBytes >= 0, lowBytes < highBytes else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .cacheLookup,
+                message: "Cache watermarks must satisfy 0 <= low < high"
+            )
+        }
+        self.highBytes = highBytes
+        self.lowBytes = lowBytes
+    }
+}
+
+public struct TraceCacheInventory: Hashable, Sendable {
+    public let entryCount: Int
+    public let totalByteCount: Int64
+    public let activeEntryCount: Int
+
+    public init(entryCount: Int, totalByteCount: Int64, activeEntryCount: Int) {
+        self.entryCount = entryCount
+        self.totalByteCount = totalByteCount
+        self.activeEntryCount = activeEntryCount
+    }
+}
+
+public struct TraceCacheMaintenanceReport: Hashable, Sendable {
+    public let before: TraceCacheInventory
+    public let after: TraceCacheInventory
+    public let recoveredPrivateDirectoryCount: Int
+    public let removedOrphanOwnerMarkerCount: Int
+    public let removedEntryCount: Int
+    public let skippedActiveEntryCount: Int
+
+    public init(
+        before: TraceCacheInventory,
+        after: TraceCacheInventory,
+        recoveredPrivateDirectoryCount: Int,
+        removedOrphanOwnerMarkerCount: Int,
+        removedEntryCount: Int,
+        skippedActiveEntryCount: Int
+    ) {
+        self.before = before
+        self.after = after
+        self.recoveredPrivateDirectoryCount = recoveredPrivateDirectoryCount
+        self.removedOrphanOwnerMarkerCount = removedOrphanOwnerMarkerCount
+        self.removedEntryCount = removedEntryCount
+        self.skippedActiveEntryCount = skippedActiveEntryCount
+    }
+}
+
+/// App-facing cache maintenance. Targets are fixed at initialization and must
+/// be dedicated traces/staging leaves; callers cannot pass a deletion path to
+/// purge. Every Ready mutation holds key lock -> exclusive entry lease ->
+/// exact owner lock, while private crash recovery consumes only bound owner
+/// evidence and never infers ownership from PID, age, or a UUID-shaped name.
+public actor TraceCacheMaintenance {
+    private let cacheDirectory: URL
+    private let stagingDirectory: URL
+    private let maximumEntries: Int
+
+    public init(
+        cacheDirectory: URL,
+        stagingDirectory: URL,
+        maximumEntries: Int = 4_096
+    ) throws {
+        guard maximumEntries >= 1, maximumEntries <= 65_536 else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .cacheLookup,
+                message: "Cache enumeration bound is invalid"
+            )
+        }
+        let cacheDirectory = try Self.dedicatedRoot(
+            cacheDirectory, requiredLeaf: "traces"
+        )
+        let stagingDirectory = try Self.dedicatedRoot(
+            stagingDirectory, requiredLeaf: "staging"
+        )
+        let parent = cacheDirectory.deletingLastPathComponent().standardizedFileURL
+        let home = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
+        guard stagingDirectory.deletingLastPathComponent().standardizedFileURL == parent,
+            parent.path != "/",
+            parent.path != home.path
+        else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .cacheLookup,
+                message: "Cache and staging must be dedicated sibling directories"
+            )
+        }
+        self.cacheDirectory = cacheDirectory
+        self.stagingDirectory = stagingDirectory
+        self.maximumEntries = maximumEntries
+    }
+
+    public func inventory() async throws -> TraceCacheInventory {
+        try await mapFailure {
+            try await TraceContentAddressedCache.maintenanceInventory(
+                cacheDirectory: cacheDirectory,
+                maximumEntries: maximumEntries
+            )
+        }
+    }
+
+    public func maintain(
+        watermarks: TraceCacheWatermarks = .standard
+    ) async throws -> TraceCacheMaintenanceReport {
+        try await mapFailure {
+            let recovered = try await TraceContentAddressedCache.recoverStaleOwners(
+                cacheDirectory: cacheDirectory,
+                stagingDirectory: stagingDirectory,
+                maximumEntries: maximumEntries
+            )
+            return try await TraceContentAddressedCache.evict(
+                cacheDirectory: cacheDirectory,
+                maximumEntries: maximumEntries,
+                targetByteCount: watermarks.lowBytes,
+                onlyIfAbove: watermarks.highBytes,
+                recovery: recovered
+            )
+        }
+    }
+
+    public func purgeUnused() async throws -> TraceCacheMaintenanceReport {
+        try await mapFailure {
+            let recovered = try await TraceContentAddressedCache.recoverStaleOwners(
+                cacheDirectory: cacheDirectory,
+                stagingDirectory: stagingDirectory,
+                maximumEntries: maximumEntries
+            )
+            return try await TraceContentAddressedCache.evict(
+                cacheDirectory: cacheDirectory,
+                maximumEntries: maximumEntries,
+                targetByteCount: 0,
+                onlyIfAbove: 0,
+                recovery: recovered
+            )
+        }
+    }
+
+    private func mapFailure<T: Sendable>(
+        _ operation: () async throws -> T
+    ) async throws -> T {
+        do {
+            return try await operation()
+        } catch is CancellationError {
+            throw ArkTraceError(
+                code: .cancelled,
+                stage: .cacheLookup,
+                message: "Cache maintenance was cancelled",
+                retryable: true
+            )
+        } catch let error as ArkTraceError {
+            throw error
+        } catch {
+            throw ArkTraceError(
+                code: .traceCacheCorrupt,
+                stage: .cacheLookup,
+                message: "Cache maintenance could not complete safely",
+                retryable: true,
+                details: ["reason": "cacheMaintenanceFailed"]
+            )
+        }
+    }
+
+    private static func dedicatedRoot(
+        _ url: URL,
+        requiredLeaf: String
+    ) throws -> URL {
+        let standardized = url.standardizedFileURL
+        let home = FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL
+        guard url.isFileURL,
+            url.path == standardized.path,
+            standardized.lastPathComponent == requiredLeaf,
+            standardized.path != "/",
+            standardized.path != home.path,
+            standardized.pathComponents.count >= 4
+        else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .cacheLookup,
+                message: "Cache maintenance requires a dedicated resolved directory"
+            )
+        }
+        return standardized
+    }
+}
+
+private extension TraceContentAddressedCache {
+    struct MaintenanceEntry: Sendable {
+        let traceName: String
+        let parserName: String
+        let url: URL
+        let identity: (device: UInt64, inode: UInt64)
+        let byteCount: Int64
+        let metadata: TraceCacheMetadata?
+
+        var key: TraceCacheKey? { metadata?.cacheKey }
+        var lastAccessedAt: Date { metadata?.lastAccessedAt ?? .distantFuture }
+        var relativePath: String { "\(traceName)/\(parserName)" }
+    }
+
+    struct MaintenanceOwnerRecord: Sendable {
+        let markerURL: URL
+        let evidenceURL: URL
+        let ownerRootURL: URL
+        let recoveryRootURL: URL
+        let evidence: TraceOwnerEvidence
+        let targetURL: URL
+    }
+
+    static func maintenanceInventory(
+        cacheDirectory: URL,
+        maximumEntries: Int
+    ) async throws -> TraceCacheInventory {
+        try await detached {
+            try Task.checkCancellation()
+            let root = try secureDirectory(at: cacheDirectory)
+            let entries = try maintenanceEntries(
+                root: root,
+                maximumEntries: maximumEntries
+            )
+            var total: Int64 = 0
+            var active = 0
+            for (index, entry) in entries.enumerated() {
+                if index & 63 == 0 { try Task.checkCancellation() }
+                let (next, overflow) = total.addingReportingOverflow(entry.byteCount)
+                guard !overflow else { throw CacheIO.metadata }
+                total = next
+                guard let key = entry.key else {
+                    active += 1
+                    continue
+                }
+                let layout = try CacheLayout(root: root, key: key)
+                guard let keyLock = try TraceCacheFileLock.tryAcquireExisting(
+                    at: layout.lockURL
+                ) else {
+                    active += 1
+                    continue
+                }
+                guard let lease = try TraceCacheEntryLease.tryAcquireExclusiveExisting(
+                    at: layout.leaseURL
+                ) else {
+                    _fixLifetime(keyLock)
+                    active += 1
+                    continue
+                }
+                _fixLifetime(lease)
+                _fixLifetime(keyLock)
+            }
+            try Task.checkCancellation()
+            return TraceCacheInventory(
+                entryCount: entries.count,
+                totalByteCount: total,
+                activeEntryCount: active
+            )
+        }
+    }
+
+    struct MaintenanceRecovery: Sendable {
+        var privateDirectoryCount = 0
+        var orphanOwnerMarkerCount = 0
+    }
+
+    static func recoverStaleOwners(
+        cacheDirectory: URL,
+        stagingDirectory: URL,
+        maximumEntries: Int
+    ) async throws -> MaintenanceRecovery {
+        let cacheRoot = try await detached { try secureDirectory(at: cacheDirectory) }
+        let sessionRoot = try await detached { try secureDirectory(at: stagingDirectory) }
+        let cachedBuildRoot = try await detached {
+            try secureDirectory(
+                at: cacheRoot.appendingPathComponent(".staging", isDirectory: true)
+            )
+        }
+        var recovered = MaintenanceRecovery()
+        for (ownerRoot, recoveryRoot) in [
+            (sessionRoot, sessionRoot),
+            (cachedBuildRoot, cacheRoot),
+        ] {
+            try Task.checkCancellation()
+            let records = try await detached {
+                try ownerRecords(
+                    ownerRoot: ownerRoot,
+                    recoveryRoot: recoveryRoot,
+                    maximumEntries: maximumEntries
+                )
+            }
+            for record in records {
+                try Task.checkCancellation()
+                guard record.evidence.state == .session
+                    || record.evidence.state == .building
+                else { continue }
+                guard let ownerLock = try await detached({
+                    try TraceCacheFileLock.tryAcquireExisting(at: record.markerURL)
+                }) else { continue }
+                let current = try await detached {
+                    try rereadOwnerRecord(record)
+                }
+                guard current.evidence.state == .session
+                    || current.evidence.state == .building,
+                    let directory = try await detached({
+                        try boundOwnedDirectory(from: current, ownerLock: ownerLock)
+                    })
+                else {
+                    _fixLifetime(ownerLock)
+                    continue
+                }
+                // Promotion is rename-before-evidence-commit. A crash can
+                // therefore leave `.building` evidence bound to an inode that
+                // already occupies the canonical Ready namespace. Never treat
+                // that inode as a private residual: a live cache hit may hold
+                // a shared entry lease. Ready eviction below acquires the full
+                // key lock -> exclusive lease -> owner lock transaction.
+                if current.evidence.state == .building,
+                    canonicalReadyRelativePath(
+                        directory.url,
+                        cacheRoot: cacheRoot
+                    ) != nil
+                {
+                    _fixLifetime(ownerLock)
+                    continue
+                }
+                try await removeOwnedDirectory(
+                    directory,
+                    removalHook: nil,
+                    initialProbeHook: nil
+                )
+                recovered.privateDirectoryCount += 1
+                _fixLifetime(ownerLock)
+            }
+            recovered.orphanOwnerMarkerCount += try await detached {
+                try removeOrphanOwnerMarkers(
+                    ownerRoot: ownerRoot,
+                    maximumEntries: maximumEntries
+                )
+            }
+        }
+        return recovered
+    }
+
+    static func evict(
+        cacheDirectory: URL,
+        maximumEntries: Int,
+        targetByteCount: Int64,
+        onlyIfAbove thresholdByteCount: Int64,
+        recovery: MaintenanceRecovery
+    ) async throws -> TraceCacheMaintenanceReport {
+        let before = try await maintenanceInventory(
+            cacheDirectory: cacheDirectory,
+            maximumEntries: maximumEntries
+        )
+        guard before.totalByteCount > thresholdByteCount else {
+            return TraceCacheMaintenanceReport(
+                before: before,
+                after: before,
+                recoveredPrivateDirectoryCount: recovery.privateDirectoryCount,
+                removedOrphanOwnerMarkerCount: recovery.orphanOwnerMarkerCount,
+                removedEntryCount: 0,
+                skippedActiveEntryCount: 0
+            )
+        }
+        let root = try await detached { try secureDirectory(at: cacheDirectory) }
+        let entries = try await detached {
+            try maintenanceEntries(root: root, maximumEntries: maximumEntries)
+        }.sorted {
+            if $0.lastAccessedAt != $1.lastAccessedAt {
+                return $0.lastAccessedAt < $1.lastAccessedAt
+            }
+            if $0.traceName != $1.traceName { return $0.traceName < $1.traceName }
+            return $0.parserName < $1.parserName
+        }
+        let buildRoot = try await detached {
+            try secureDirectory(
+                at: root.appendingPathComponent(".staging", isDirectory: true)
+            )
+        }
+        let readyRecords = try await detached {
+            try ownerRecords(
+                ownerRoot: buildRoot,
+                recoveryRoot: root,
+                maximumEntries: maximumEntries
+            ).filter {
+                $0.evidence.state == .ready || $0.evidence.state == .building
+            }
+        }
+        var remaining = before.totalByteCount
+        var removed = 0
+        var skipped = 0
+        for entry in entries where remaining > targetByteCount {
+            try Task.checkCancellation()
+            guard let key = entry.key else {
+                skipped += 1
+                continue
+            }
+            let layout = try await detached { try CacheLayout(root: root, key: key) }
+            guard layout.entryURL.standardizedFileURL == entry.url.standardizedFileURL,
+                let keyLock = try await detached({
+                    try TraceCacheFileLock.tryAcquireExisting(at: layout.lockURL)
+                })
+            else {
+                skipped += 1
+                continue
+            }
+            guard let lease = try await detached({
+                try TraceCacheEntryLease.tryAcquireExclusiveExisting(at: layout.leaseURL)
+            }) else {
+                _fixLifetime(keyLock)
+                skipped += 1
+                continue
+            }
+            let currentIdentity = await detachedDirectoryIdentity(at: entry.url)
+            guard currentIdentity?.device == entry.identity.device,
+                currentIdentity?.inode == entry.identity.inode,
+                let ownerRecord = readyRecords.first(where: {
+                    guard $0.evidence.device == entry.identity.device,
+                        $0.evidence.inode == entry.identity.inode
+                    else { return false }
+                    return $0.evidence.state == .building
+                        || $0.evidence.relativePath == entry.relativePath
+                }),
+                let ownerLock = try await detached({
+                    try TraceCacheFileLock.tryAcquireExisting(at: ownerRecord.markerURL)
+                })
+            else {
+                _fixLifetime(lease)
+                _fixLifetime(keyLock)
+                skipped += 1
+                continue
+            }
+            let currentRecord = try await detached { try rereadOwnerRecord(ownerRecord) }
+            guard currentRecord.evidence.state == .ready
+                    || currentRecord.evidence.state == .building,
+                currentRecord.evidence.device == entry.identity.device,
+                currentRecord.evidence.inode == entry.identity.inode,
+                let owned = try await detached({
+                    try boundOwnedDirectory(from: currentRecord, ownerLock: ownerLock)
+                }),
+                owned.url.standardizedFileURL == entry.url.standardizedFileURL,
+                canonicalReadyRelativePath(owned.url, cacheRoot: root) == entry.relativePath
+            else {
+                _fixLifetime(ownerLock)
+                _fixLifetime(lease)
+                _fixLifetime(keyLock)
+                skipped += 1
+                continue
+            }
+            try await removeOwnedDirectory(
+                owned,
+                removalHook: nil,
+                initialProbeHook: nil
+            )
+            let (next, underflow) = remaining.subtractingReportingOverflow(entry.byteCount)
+            remaining = underflow ? 0 : max(0, next)
+            removed += 1
+            try await detached {
+                let traceRoot = entry.url.deletingLastPathComponent()
+                _ = traceRoot.path.withCString { Darwin.rmdir($0) }
+                try synchronizeDirectory(at: root)
+            }
+            _fixLifetime(ownerLock)
+            _fixLifetime(lease)
+            _fixLifetime(keyLock)
+        }
+        let after = try await maintenanceInventory(
+            cacheDirectory: cacheDirectory,
+            maximumEntries: maximumEntries
+        )
+        return TraceCacheMaintenanceReport(
+            before: before,
+            after: after,
+            recoveredPrivateDirectoryCount: recovery.privateDirectoryCount,
+            removedOrphanOwnerMarkerCount: recovery.orphanOwnerMarkerCount,
+            removedEntryCount: removed,
+            skippedActiveEntryCount: skipped
+        )
+    }
+
+    static func detachedDirectoryIdentity(
+        at url: URL
+    ) async -> (device: UInt64, inode: UInt64)? {
+        await Task.detached {
+            if case .directory(let device, let inode) = directoryProbe(at: url) {
+                return (device, inode)
+            }
+            return nil
+        }.value
+    }
+
+    static func canonicalReadyRelativePath(
+        _ url: URL,
+        cacheRoot: URL
+    ) -> String? {
+        guard let relative = try? relativePath(from: cacheRoot, to: url) else {
+            return nil
+        }
+        let components = relative.split(separator: "/", omittingEmptySubsequences: false)
+        guard components.count == 2,
+            isLowercaseHex(String(components[0]), count: 64),
+            isLowercaseHex(String(components[1]), count: 64)
+        else { return nil }
+        return relative
+    }
+
+    static func maintenanceEntries(
+        root: URL,
+        maximumEntries: Int
+    ) throws -> [MaintenanceEntry] {
+        var result: [MaintenanceEntry] = []
+        for traceName in try boundedDirectoryNames(at: root, maximumCount: maximumEntries) {
+            if traceName.hasPrefix(".") { continue }
+            guard isLowercaseHex(traceName, count: 64) else { continue }
+            let traceRoot = root.appendingPathComponent(traceName, isDirectory: true)
+            guard case .directory = directoryProbe(at: traceRoot),
+                traceRoot.resolvingSymlinksInPath().standardizedFileURL == traceRoot.standardizedFileURL
+            else { continue }
+            let remaining = maximumEntries - result.count
+            guard remaining > 0 else { throw CacheIO.metadata }
+            for parserName in try boundedDirectoryNames(
+                at: traceRoot,
+                maximumCount: remaining
+            ) {
+                guard isLowercaseHex(parserName, count: 64) else { continue }
+                let entryURL = traceRoot.appendingPathComponent(parserName, isDirectory: true)
+                guard case .directory(let device, let inode) = directoryProbe(at: entryURL),
+                    entryURL.resolvingSymlinksInPath().standardizedFileURL
+                        == entryURL.standardizedFileURL
+                else { continue }
+                let byteCount = try immediateRegularFileBytes(
+                    at: entryURL,
+                    maximumFiles: 16
+                )
+                let metadataURL = entryURL.appendingPathComponent(metadataName)
+                let databaseURL = entryURL.appendingPathComponent(databaseName)
+                let metadata: TraceCacheMetadata?
+                if let loaded = try? loadMetadata(at: metadataURL),
+                    loaded.metadata.cacheKey.traceSHA256 == traceName,
+                    loaded.metadata.cacheKey.parserKey == parserName,
+                    loaded.metadata.databaseByteCount
+                        == (try? regularFileByteCount(at: databaseURL))
+                {
+                    metadata = loaded.metadata
+                } else {
+                    metadata = nil
+                }
+                result.append(
+                    MaintenanceEntry(
+                        traceName: traceName,
+                        parserName: parserName,
+                        url: entryURL,
+                        identity: (device, inode),
+                        byteCount: byteCount,
+                        metadata: metadata
+                    )
+                )
+                guard result.count <= maximumEntries else { throw CacheIO.metadata }
+            }
+        }
+        return result
+    }
+
+    static func ownerRecords(
+        ownerRoot: URL,
+        recoveryRoot: URL,
+        maximumEntries: Int
+    ) throws -> [MaintenanceOwnerRecord] {
+        let owners = try secureDirectory(
+            at: ownerRoot.appendingPathComponent(".owners", isDirectory: true)
+        )
+        var result: [MaintenanceOwnerRecord] = []
+        for name in try boundedDirectoryNames(at: owners, maximumCount: maximumEntries * 3) {
+            guard name.hasSuffix(".json") else { continue }
+            let base = String(name.dropLast(5))
+            guard isOwnerName(base) else { throw CacheIO.metadata }
+            let evidenceURL = owners.appendingPathComponent(name)
+            let markerURL = owners.appendingPathComponent("\(base).lock")
+            let evidence = try readOwnerEvidence(at: evidenceURL)
+            let targetURL = try ownerTarget(
+                evidence: evidence,
+                recoveryRoot: recoveryRoot
+            )
+            result.append(
+                MaintenanceOwnerRecord(
+                    markerURL: markerURL,
+                    evidenceURL: evidenceURL,
+                    ownerRootURL: ownerRoot,
+                    recoveryRootURL: recoveryRoot,
+                    evidence: evidence,
+                    targetURL: targetURL
+                )
+            )
+            guard result.count <= maximumEntries else { throw CacheIO.metadata }
+        }
+        return result
+    }
+
+    static func rereadOwnerRecord(
+        _ record: MaintenanceOwnerRecord
+    ) throws -> MaintenanceOwnerRecord {
+        let evidence = try readOwnerEvidence(at: record.evidenceURL)
+        return MaintenanceOwnerRecord(
+            markerURL: record.markerURL,
+            evidenceURL: record.evidenceURL,
+            ownerRootURL: record.ownerRootURL,
+            recoveryRootURL: record.recoveryRootURL,
+            evidence: evidence,
+            targetURL: try ownerTarget(
+                evidence: evidence,
+                recoveryRoot: record.recoveryRootURL
+            )
+        )
+    }
+
+    static func readOwnerEvidence(at url: URL) throws -> TraceOwnerEvidence {
+        guard let data = readBoundedRegularFile(at: url, maximumByteCount: 4_096),
+            let evidence = try? JSONDecoder().decode(TraceOwnerEvidence.self, from: data),
+            evidence.formatVersion == 1,
+            evidence.relativePath.utf8.count <= 1_024,
+            (evidence.device == nil) == (evidence.inode == nil)
+        else { throw CacheIO.metadata }
+        return evidence
+    }
+
+    static func ownerTarget(
+        evidence: TraceOwnerEvidence,
+        recoveryRoot: URL
+    ) throws -> URL {
+        let components = evidence.relativePath.split(
+            separator: "/",
+            omittingEmptySubsequences: false
+        )
+        guard !components.isEmpty,
+            components.count <= 8,
+            components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." })
+        else { throw CacheIO.metadata }
+        var target = recoveryRoot.standardizedFileURL
+        for component in components {
+            target.appendPathComponent(String(component))
+        }
+        target = target.standardizedFileURL
+        guard try relativePath(from: recoveryRoot, to: target) == evidence.relativePath else {
+            throw CacheIO.metadata
+        }
+        return target
+    }
+
+    static func boundOwnedDirectory(
+        from record: MaintenanceOwnerRecord,
+        ownerLock: TraceCacheFileLock
+    ) throws -> TraceOwnedDirectory? {
+        guard record.evidence.state != .creating,
+            let device = record.evidence.device,
+            let inode = record.evidence.inode
+        else { return nil }
+        let located = exactDirectoryURL(
+            preferred: record.targetURL,
+            recoveryRoot: record.recoveryRootURL,
+            device: device,
+            inode: inode
+        )
+        guard let located,
+            located.resolvingSymlinksInPath().standardizedFileURL
+                == located.standardizedFileURL,
+            case .directory(let observedDevice, let observedInode) = directoryProbe(at: located),
+            observedDevice == device,
+            observedInode == inode
+        else { return nil }
+        let handle = try TraceOwnedDirectoryHandle(
+            url: located,
+            device: device,
+            inode: inode
+        )
+        return TraceOwnedDirectory(
+            url: located,
+            rootURL: record.ownerRootURL,
+            recoveryRootURL: record.recoveryRootURL,
+            device: device,
+            inode: inode,
+            ownerState: record.evidence.state,
+            ownerMarkerURL: record.markerURL,
+            ownerEvidenceURL: record.evidenceURL,
+            ownerLease: ownerLock,
+            directoryHandle: handle
+        )
+    }
+
+    static func removeOrphanOwnerMarkers(
+        ownerRoot: URL,
+        maximumEntries: Int
+    ) throws -> Int {
+        let owners = try secureDirectory(
+            at: ownerRoot.appendingPathComponent(".owners", isDirectory: true)
+        )
+        let names = try boundedDirectoryNames(at: owners, maximumCount: maximumEntries * 3)
+        let evidenceBases = Set(
+            names.filter { $0.hasSuffix(".json") }.map { String($0.dropLast(5)) }
+        )
+        var removed = 0
+        for name in names where name.hasSuffix(".lock") {
+            let base = String(name.dropLast(5))
+            guard isOwnerName(base), !evidenceBases.contains(base) else { continue }
+            let marker = owners.appendingPathComponent(name)
+            guard let lock = try TraceCacheFileLock.tryAcquireExisting(at: marker) else {
+                continue
+            }
+            guard marker.path.withCString({ Darwin.unlink($0) }) == 0 || errno == ENOENT
+            else {
+                _fixLifetime(lock)
+                throw CacheIO.cleanup
+            }
+            removed += 1
+            _fixLifetime(lock)
+        }
+        if removed > 0 { try synchronizeDirectory(at: owners) }
+        return removed
+    }
+
+    static func boundedDirectoryNames(
+        at url: URL,
+        maximumCount: Int
+    ) throws -> [String] {
+        guard maximumCount >= 0 else { throw CacheIO.metadata }
+        guard let directory = url.path.withCString({ Darwin.opendir($0) }) else {
+            throw CacheIO.directory
+        }
+        defer { Darwin.closedir(directory) }
+        var result: [String] = []
+        while let entry = Darwin.readdir(directory) {
+            let name = withUnsafePointer(to: &entry.pointee.d_name) { pointer in
+                pointer.withMemoryRebound(
+                    to: CChar.self,
+                    capacity: Int(MAXNAMLEN) + 1
+                ) { String(cString: $0) }
+            }
+            if name == "." || name == ".." { continue }
+            guard result.count < maximumCount else { throw CacheIO.metadata }
+            result.append(name)
+        }
+        return result.sorted()
+    }
+
+    static func immediateRegularFileBytes(
+        at url: URL,
+        maximumFiles: Int
+    ) throws -> Int64 {
+        let names = try boundedDirectoryNames(at: url, maximumCount: maximumFiles)
+        var total: Int64 = 0
+        for name in names {
+            let child = url.appendingPathComponent(name)
+            var info = stat()
+            guard child.path.withCString({ Darwin.lstat($0, &info) }) == 0 else {
+                throw CacheIO.metadata
+            }
+            guard (info.st_mode & S_IFMT) == S_IFREG, info.st_size >= 0 else {
+                throw CacheIO.metadata
+            }
+            let (next, overflow) = total.addingReportingOverflow(Int64(info.st_size))
+            guard !overflow else { throw CacheIO.metadata }
+            total = next
+        }
+        return total
+    }
+
+    static func isLowercaseHex(_ value: String, count: Int) -> Bool {
+        value.utf8.count == count && value.utf8.allSatisfy {
+            ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
+                || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
+        }
+    }
+
+    static func isOwnerName(_ value: String) -> Bool {
+        !value.isEmpty && value.utf8.count <= 96 && value.utf8.allSatisfy {
+            ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "z"))
+                || ($0 >= UInt8(ascii: "A") && $0 <= UInt8(ascii: "Z"))
+                || ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
+                || $0 == UInt8(ascii: "-")
+        }
     }
 }

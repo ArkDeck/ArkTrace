@@ -52,6 +52,17 @@ public struct CLIApplication: Sendable {
         arguments: [String],
         writer: any CLIOutputWriting
     ) async -> Int32 {
+        // Deadline expiries report the lifecycle stage they actually
+        // interrupted; the executor advances this marker at phase boundaries.
+        await CLIOperationStage.$active.withValue(CLIOperationStage(.request)) {
+            await runCore(arguments: arguments, writer: writer)
+        }
+    }
+
+    private func runCore(
+        arguments: [String],
+        writer: any CLIOutputWriting
+    ) async -> Int32 {
         let invocationStart = deadlineClock.now()
         var invocation: CLIInvocation?
         let machineHint = CLIArgumentParser.machinePresentationHint(arguments)
@@ -169,6 +180,7 @@ public struct CLIApplication: Sendable {
                     let output = try await executor.execute(parsedInvocation)
                     if let beforeEncoding { try await beforeEncoding() }
                     try Self.checkCancellation()
+                    CLIOperationStage.active?.set(.encoding)
                     let stdout: Data
                     if parsedInvocation.options.json {
                         guard let payload = output.machinePayload else {
@@ -393,8 +405,23 @@ public struct CLIApplication: Sendable {
         maximumBytes: Int,
         writer: any CLIOutputWriting
     ) {
-        guard data.count <= maximumBytes else { return }
-        try? writer.writeStderr(data)
+        guard maximumBytes > 0, !data.isEmpty else { return }
+        if data.count <= maximumBytes {
+            try? writer.writeStderr(data)
+            return
+        }
+        // Never exit non-zero with no diagnostic anywhere: clip the error
+        // line to the remaining budget (on a UTF-8 boundary) instead of
+        // silently discarding it.
+        var clipped = data.prefix(maximumBytes)
+        while let last = clipped.last, (last & 0xC0) == 0x80 {
+            clipped = clipped.dropLast()
+        }
+        if let last = clipped.last, last >= 0xC0 {
+            clipped = clipped.dropLast()
+        }
+        guard !clipped.isEmpty else { return }
+        try? writer.writeStderr(Data(clipped))
     }
 
     private static func checkCancellation() throws {

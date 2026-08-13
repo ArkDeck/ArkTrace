@@ -7,16 +7,19 @@ final class TimelineRenderingTests: XCTestCase {
         let eventCount: Int64
         let delay: Duration?
         let counterPage: TraceEventPage<CounterSeries>?
+        let slicePage: TraceEventPage<TraceSlice>?
         private var requestedDensitySources: [TraceDensitySource] = []
 
         init(
             eventCount: Int64,
             delay: Duration? = nil,
-            counterPage: TraceEventPage<CounterSeries>? = nil
+            counterPage: TraceEventPage<CounterSeries>? = nil,
+            slicePage: TraceEventPage<TraceSlice>? = nil
         ) {
             self.eventCount = eventCount
             self.delay = delay
             self.counterPage = counterPage
+            self.slicePage = slicePage
         }
 
         func metadata() async throws -> TraceMetadata { throw CancellationError() }
@@ -62,6 +65,18 @@ final class TimelineRenderingTests: XCTestCase {
         }
         func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries> {
             counterPage ?? .unavailable
+        }
+        func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice> {
+            guard let slicePage else { return .unavailable }
+            let filtered = slicePage.items.filter {
+                (query.eventKey == nil || $0.key == query.eventKey)
+                    && (query.threadKey == nil || $0.threadKey == query.threadKey)
+            }
+            return TraceEventPage(
+                items: Array(filtered.prefix(query.limit)),
+                truncated: filtered.count > query.limit,
+                dataQuality: slicePage.dataQuality
+            )
         }
     }
     func testDetailBudgetContract() {
@@ -199,6 +214,41 @@ final class TimelineRenderingTests: XCTestCase {
         }
     }
 
+    func testPanAndCursorAnchoredZoomAreOverflowSafe() throws {
+        let bounds = try TraceTimeRange.query(startNs: 0, endNs: .max)
+        let range = try TraceTimeRange.query(
+            startNs: 1_000_000_000,
+            endNs: 5_000_000_000
+        )
+        XCTAssertEqual(
+            try TimelineInteraction.pan(range: range, deltaNs: .min, within: bounds)
+                .startNs,
+            0
+        )
+        let right = try TimelineInteraction.pan(
+            range: range, deltaNs: .max, within: bounds
+        )
+        XCTAssertEqual(right.endNs, .max)
+
+        let anchor: Int64 = 2_000_000_000
+        let zoomed = try TimelineInteraction.zoom(
+            range: range,
+            anchorNs: anchor,
+            scale: 0.25,
+            within: bounds
+        )
+        XCTAssertEqual(zoomed.durationNs, 1_000_000_000)
+        let oldFraction = Double(anchor - range.startNs) / Double(range.durationNs)
+        let newFraction = Double(anchor - zoomed.startNs) / Double(zoomed.durationNs)
+        XCTAssertEqual(oldFraction, newFraction, accuracy: 0.000_001)
+        XCTAssertEqual(
+            try TimelineInteraction.zoom(
+                range: bounds, anchorNs: .max, scale: 20, within: bounds
+            ),
+            bounds
+        )
+    }
+
     func testCounterDetailUsesPositiveAndOpenEndedDurations() async throws {
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 100, endNs: 500),
@@ -249,6 +299,70 @@ final class TimelineRenderingTests: XCTestCase {
         }
         XCTAssertEqual(ranges?.map(\.startNs), [150, 300])
         XCTAssertEqual(ranges?.map(\.endNs), [250, 500])
+        let inspectors = snapshot?.tracks.first?.primitives.compactMap { primitive in
+            if case .detail(let detail) = primitive { return detail.inspector }
+            return nil
+        }
+        XCTAssertEqual(inspectors?.map(\.semanticDurationNs), [100, nil])
+        XCTAssertEqual(inspectors?.map(\.isOpenEnded), [false, true])
+    }
+
+    func testFocusedNamedSliceIsReservedBeyondOrdinaryDetailPrefix() async throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 7
+        )
+        let thread = ThreadKey(itid: 9)
+        var rows: [TraceSlice] = []
+        for row in 1...3 {
+            let rowID = Int64(row)
+            let startNs = rowID * 10
+            rows.append(try TraceSlice(
+                key: EventKey(table: .callstack, rowID: Int64(row)),
+                range: TraceTimeRange(startNs: startNs, endNs: startNs + 5),
+                threadKey: thread,
+                processKey: ProcessKey(ipid: 4),
+                pid: 40,
+                tid: 90,
+                processName: "app",
+                threadName: "worker",
+                name: "slice \(rowID)",
+                category: "work",
+                depth: 0,
+                parentEventKey: nil,
+                isAsync: false,
+                isOpenEnded: false
+            ))
+        }
+        let focused = rows[2].key
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: [TrackDescriptor(title: "worker", source: .namedSlice(thread))],
+            pixelWidth: 100,
+            generation: viewport.generation,
+            preference: .detail,
+            maximumPrimitives: 2,
+            focusedEventKey: focused,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let snapshot = try await TimelineSnapshotLoader().load(
+            request,
+            repository: DensityRepository(
+                eventCount: 3,
+                slicePage: TraceEventPage(items: rows, truncated: false)
+            )
+        )
+        let keys = snapshot?.tracks.first?.primitives.compactMap { primitive in
+            primitive.selectableEventKey
+        }
+        XCTAssertEqual(keys?.first, focused)
+        XCTAssertTrue(keys?.contains(focused) == true)
+        XCTAssertEqual(snapshot?.tracks.first?.primitives.first.flatMap {
+            if case .detail(let detail) = $0 { return detail.inspector?.processName }
+            return nil
+        }, "app")
     }
 
     func testAutomaticCounterLODUsesCounterDensityEstimate() async throws {

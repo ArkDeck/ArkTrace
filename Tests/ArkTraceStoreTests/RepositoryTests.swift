@@ -1165,6 +1165,26 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(page.truncated)
     }
 
+    func testDirectoryNameMatchModesSupportBoundedViewerSearch() async throws {
+        let repository = try makeRepository()
+        let processPrefix = try await repository.processes(
+            ProcessQuery(name: "app", nameMatch: .prefix)
+        )
+        XCTAssertEqual(processPrefix.items.map(\.name), ["app", "app_reused"])
+        let processContains = try await repository.processes(
+            ProcessQuery(name: "reused", nameMatch: .contains)
+        )
+        XCTAssertEqual(processContains.items.map(\.key.ipid), [2])
+        let byStableProcessKey = try await repository.processes(
+            ProcessQuery(processKey: ProcessKey(ipid: 2))
+        )
+        XCTAssertEqual(byStableProcessKey.items.map(\.pid), [100])
+        let threadContains = try await repository.threads(
+            ThreadQuery(name: "ork", nameMatch: .contains)
+        )
+        XCTAssertEqual(threadContains.items.map(\.tid), [101])
+    }
+
     func testThreadDirectory() async throws {
         let page = try await makeRepository().threads(ThreadQuery())
         XCTAssertEqual(page.items.count, 3)

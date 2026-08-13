@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；Phase 2 已实现 `doctor` / `inspect` / `summary` / `processes` / `threads`，`query` / `context` / `analyze` 归 Phase 4
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成并通过独立 review（2026-08-13）；Phase 3 Native Viewer 已进入，P3-T01～T04 为待统一 review 的实现候选。** 当前仓库可构建真实 Trace → pinned TraceStreamer → content-addressed cache → Store/Analysis → human/Machine JSON CLI 链路，并已加入 native App shell、typed event query、bounded Timeline LOD 和 NSView/CoreGraphics renderer；完整 Viewer 工作流仍需 P3-T05～T10。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T07 已通过独立 review（2026-08-13）。** 当前仓库可构建真实 Trace → pinned TraceStreamer → content-addressed cache → Store/Analysis → human/Machine JSON CLI 链路，并已加入 native App shell、typed event query、bounded Timeline LOD、session/file/cache UI、Viewer composition、Search 与 Inspector；P3-T08～T10 仍开放。
 
 ## 文档
 
@@ -20,7 +20,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 | [docs/CLI.md](docs/CLI.md) | arktrace 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
 | [docs/PHASE_1_VERIFICATION.md](docs/PHASE_1_VERIFICATION.md) | Phase 1 requirement、fixture、hash、测试与已知限制证据 |
 | [docs/PHASE_2_VERIFICATION.md](docs/PHASE_2_VERIFICATION.md) | Phase 2 CLI contract、gate 与 cached-open benchmark 证据 |
-| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T04 App/event/LOD/renderer 候选证据 |
+| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T07 的已 review 验证证据 |
 | [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision、构建配方、identity 与调用约束 |
 
 ## 构建与测试
@@ -41,7 +41,7 @@ scripts/test_phase1.sh
 # Phase 2 正式验收候选：Phase 1 + Release CLI contract/signal/benchmark gate
 scripts/test_phase2.sh
 
-# Phase 3 首批候选：Phase 2 gate + signed App/parser bundle/smoke
+# Phase 3 当前 gate：Phase 2 + signed App/parser bundle/document types/smoke
 scripts/test_phase3_batch1.sh
 ```
 

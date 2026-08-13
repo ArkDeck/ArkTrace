@@ -29,7 +29,10 @@ let package = Package(
         ),
         .target(
             name: "ArkTraceAppSupport",
-            dependencies: ["ArkTraceCore", "ArkTraceParser"]
+            dependencies: [
+                "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
+                "ArkTraceAnalysis", "ArkTraceRendering",
+            ]
         ),
         .target(
             name: "ArkTraceSignalShim",
@@ -61,7 +64,10 @@ let package = Package(
         ),
         .testTarget(
             name: "ArkTraceAppSupportTests",
-            dependencies: ["ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser"]
+            dependencies: [
+                "ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser",
+                "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering",
+            ]
         ),
         .testTarget(
             name: "ArkTraceCLITests",

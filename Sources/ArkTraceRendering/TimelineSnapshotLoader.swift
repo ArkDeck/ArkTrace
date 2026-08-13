@@ -103,6 +103,7 @@ public actor TimelineSnapshotLoader {
             range: request.viewport.range,
             limit: budget,
             deadline: request.deadline,
+            focusedEventKey: request.focusedEventKey,
             repository: repository,
             qualityIssues: &qualityIssues
         )
@@ -113,6 +114,7 @@ public actor TimelineSnapshotLoader {
         range: TraceTimeRange,
         limit: Int,
         deadline: ContinuousClock.Instant,
+        focusedEventKey: EventKey?,
         repository: any TraceRepositoryProtocol,
         qualityIssues: inout [TraceDataQualityIssue]
     ) async throws -> [TimelinePrimitive] {
@@ -130,7 +132,26 @@ public actor TimelineSnapshotLoader {
                         eventKey: $0.key,
                         range: try eventRange(start: $0.startNs, end: $0.endNs),
                         label: $0.tid.map { "TID \($0)" },
-                        category: "cpu"
+                        category: "cpu",
+                        inspector: TraceEventInspector(
+                            key: $0.key,
+                            type: .cpuSlice,
+                            name: $0.threadName,
+                            range: $0.range,
+                            semanticDurationNs: $0.isOpenEnded ? nil : $0.range.durationNs,
+                            isOpenEnded: $0.isOpenEnded,
+                            processKey: $0.processKey,
+                            threadKey: $0.threadKey,
+                            pid: $0.pid,
+                            tid: $0.tid,
+                            cpu: $0.cpu,
+                            processName: $0.processName,
+                            threadName: $0.threadName,
+                            category: "cpu",
+                            state: $0.endState,
+                            value: nil,
+                            unit: nil
+                        )
                     )
                 )
             }
@@ -150,7 +171,26 @@ public actor TimelineSnapshotLoader {
                         trackID: track.id, eventKey: $0.key,
                         range: try eventRange(start: $0.startNs, end: $0.endNs),
                         label: $0.state,
-                        category: $0.normalizedState?.rawValue ?? "unknown"
+                        category: $0.normalizedState?.rawValue ?? "unknown",
+                        inspector: TraceEventInspector(
+                            key: $0.key,
+                            type: .threadState,
+                            name: nil,
+                            range: $0.range,
+                            semanticDurationNs: $0.isOpenEnded ? nil : $0.range.durationNs,
+                            isOpenEnded: $0.isOpenEnded,
+                            processKey: $0.processKey,
+                            threadKey: $0.threadKey,
+                            pid: $0.pid,
+                            tid: $0.tid,
+                            cpu: $0.cpu,
+                            processName: $0.processName,
+                            threadName: $0.threadName,
+                            category: $0.normalizedState?.rawValue,
+                            state: $0.state,
+                            value: nil,
+                            unit: nil
+                        )
                     )
                 )
             }
@@ -160,16 +200,53 @@ public actor TimelineSnapshotLoader {
                     range: range, threadKey: threadKey, limit: limit, deadline: deadline
                 )
             )
+            let focused: [TraceSlice]
+            if let focusedEventKey, focusedEventKey.table == .callstack {
+                focused = try await repository.slices(
+                    TraceSliceQuery(
+                        range: range,
+                        eventKey: focusedEventKey,
+                        threadKey: threadKey,
+                        limit: 1,
+                        deadline: deadline
+                    )
+                ).items
+            } else {
+                focused = []
+            }
             qualityIssues.append(contentsOf: page.dataQuality.issues)
             appendTruncation(
                 page.truncated, scope: "timeline.namedSlice", to: &qualityIssues
             )
-            return try page.items.map {
+            var seen: Set<EventKey> = []
+            let items = (focused + page.items).filter {
+                seen.insert($0.key).inserted
+            }.prefix(limit)
+            return try items.map {
                 .detail(
                     TimelineDetailPrimitive(
                         trackID: track.id, eventKey: $0.key,
                         range: try eventRange(start: $0.startNs, end: $0.endNs),
-                        label: $0.name, category: $0.category
+                        label: $0.name, category: $0.category,
+                        inspector: TraceEventInspector(
+                            key: $0.key,
+                            type: .namedSlice,
+                            name: $0.name,
+                            range: $0.range,
+                            semanticDurationNs: $0.isOpenEnded ? nil : $0.range.durationNs,
+                            isOpenEnded: $0.isOpenEnded,
+                            processKey: $0.processKey,
+                            threadKey: $0.threadKey,
+                            pid: $0.pid,
+                            tid: $0.tid,
+                            cpu: nil,
+                            processName: $0.processName,
+                            threadName: $0.threadName,
+                            category: $0.category,
+                            state: nil,
+                            value: nil,
+                            unit: nil
+                        )
                     )
                 )
             }
@@ -239,7 +316,29 @@ public actor TimelineSnapshotLoader {
                                 end: max(sample.timestampNs, end)
                             ),
                             label: series.name,
-                            category: "counter"
+                            category: "counter",
+                            inspector: TraceEventInspector(
+                                key: sample.key,
+                                type: .counter,
+                                name: series.name,
+                                range: try eventRange(
+                                    start: sample.timestampNs,
+                                    end: max(sample.timestampNs, end)
+                                ),
+                                semanticDurationNs: sample.durationNs,
+                                isOpenEnded: sample.durationNs == nil,
+                                processKey: series.processKey,
+                                threadKey: nil,
+                                pid: series.pid,
+                                tid: nil,
+                                cpu: series.cpu,
+                                processName: series.processName,
+                                threadName: nil,
+                                category: series.scope.rawValue,
+                                state: nil,
+                                value: sample.value,
+                                unit: series.unit
+                            )
                         )
                     )
                 )

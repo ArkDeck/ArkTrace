@@ -206,9 +206,7 @@ final class MachineContractTests: XCTestCase {
         )
         XCTAssertEqual(identityStatus, 7, "tool provenance work is inside the command deadline")
         XCTAssertTrue(identityWriter.stdout.isEmpty)
-        XCTAssertTrue(String(decoding: identityWriter.stderr, as: UTF8.self).contains(
-            "QUERY_TIMEOUT"
-        ))
+        XCTAssertTrue(String(decoding: identityWriter.stderr, as: UTF8.self).contains("QUERY_TIMEOUT"))
 
         let failingIdentityWriter = ContractWriter()
         let failingIdentityStatus = await CLIApplication(
@@ -233,9 +231,10 @@ final class MachineContractTests: XCTestCase {
             "an expired invocation overrides a delayed provenance failure"
         )
         XCTAssertTrue(failingIdentityWriter.stdout.isEmpty)
-        XCTAssertTrue(String(decoding: failingIdentityWriter.stderr, as: UTF8.self).contains(
-            "QUERY_TIMEOUT"
-        ))
+        XCTAssertTrue(
+            String(decoding: failingIdentityWriter.stderr, as: UTF8.self)
+                .contains("QUERY_TIMEOUT")
+        )
 
         let cooperativeProvider = CooperativeMachineToolProvider()
         let cooperativeWriter = ContractWriter()
@@ -252,6 +251,10 @@ final class MachineContractTests: XCTestCase {
         XCTAssertEqual(cooperativeProvider.cancelled.wait(timeout: .now()), .success)
         XCTAssertEqual(cooperativeProvider.finished.wait(timeout: .now()), .success)
         XCTAssertTrue(cooperativeWriter.stdout.isEmpty)
+        XCTAssertTrue(
+            String(decoding: cooperativeWriter.stderr, as: UTF8.self)
+                .contains("QUERY_TIMEOUT")
+        )
 
         let delayedFailureWriter = ContractWriter()
         let delayedFailureStatus = await CLIApplication(
@@ -470,8 +473,14 @@ final class MachineContractTests: XCTestCase {
         XCTAssertEqual(status, 8)
         XCTAssertEqual(writer.stdoutWrites, 0)
         XCTAssertFalse(String(decoding: writer.stderr, as: UTF8.self).contains("stale success"))
-        XCTAssertLessThanOrEqual(writer.stderr.count, 1_024)
-        XCTAssertEqual(writer.stderr.count, 1_000)
+        // The cancelled diagnostic is clipped into the remaining budget
+        // instead of being silently discarded: total output stays within
+        // --max-output-bytes, and the tail carries the error-line prefix.
+        XCTAssertEqual(writer.stderr.count, 1_024)
+        XCTAssertTrue(
+            String(decoding: writer.stderr.suffix(24), as: UTF8.self)
+                .hasPrefix("error: CANCELLED")
+        )
     }
 
     func testSchemaVersionUsesMajorMinorAndMajorCompatibility() throws {

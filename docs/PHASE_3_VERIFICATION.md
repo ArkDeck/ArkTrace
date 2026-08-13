@@ -1,13 +1,14 @@
 # ArkTrace Phase 3 verification
 
-> 状态：Verified — P3-T01～T04 已通过统一独立 review
+> 状态：P3-T01～T07 已通过统一独立 review；P3-T08～T10 仍开放
 > 日期：2026-08-13
 
 ## 范围
 
-本证据只覆盖 Phase 3 首批垂直切片：ArkTrace.app shell 与分发边界、typed
-event repository、viewport/detail-density LOD 和 NSView/CoreGraphics renderer。P3-T05～T10、
-Phase 3 Exit 及发布门 3/6/7 仍为开放，不得由本批测试证据关闭。
+已 review 的首批证据覆盖 ArkTrace.app shell 与分发边界、typed event repository、
+viewport/detail-density LOD 和 NSView/CoreGraphics renderer。本轮 review 增加 P3-T05～T07：
+session/file/recent/cache maintenance、完整 Viewer composition、交互、Search、Event/Range
+Inspector。P3-T08～T10、Phase 3 Exit 及发布门 3/6/7 仍为开放，不得由本批测试证据关闭。
 
 ## App 与分发候选
 
@@ -38,6 +39,26 @@ Phase 3 Exit 及发布门 3/6/7 仍为开放，不得由本批测试证据关闭
     scripts/test_phase3_batch1.sh
     git diff --check
 
+## P3-T05～T07 已 review 证据
+
+- App 支持 Open panel、Open With、Drag & Drop、Recent bookmark 和 Reload；打开替换以
+  generation 隔离旧 parse/query/analysis，cleanup failure 保持 typed、可重试且不会被取消覆盖；
+- cache maintenance 只接受 canonical `traces`/`staging` sibling roots；stale owner recovery
+  消费有界 owner evidence 与 exclusive owner lock，Ready eviction 使用 key lock → exclusive
+  entry lease → exact owner lock/identity；20/16 GiB watermark、LRU、active lease、原 Trace
+  hash 与 broad-path 负例均有回归；
+- Toolbar/Sidebar/Timeline/Inspector 使用 immutable snapshot；CPU/thread-state/named-slice/
+  counter track capability-aware，窄布局先折 Inspector，Timeline 是唯一二维滚动区域；
+- mouse/trackpad pan、cursor-anchored zoom、zoom selection、hover/click/drag range、bounded
+  PID/TID/process/thread/slice Search、detail reveal、Event Inspector 和 cancellable Range
+  Analysis 已接入共享 Store/Analysis/Rendering contract；
+- 本轮冻结 Release、继承的 Phase 1/2 gate 均为 **293 tests、0 failure、0 skip**；
+  Phase 2 warm cache-open p50/p95 为 34.768334/39.221125 ms，metadata p50/p95 为
+  0.000333/0.0005 ms，actual CLI status 保持 2/4/7/7/8/143；
+- `scripts/test_phase3_batch1.sh` 已通过，并同时完成签名 Debug/Release App、pinned
+  parser/manifest、empty entitlement、Release-only API boundary、built Info.plist 的
+  htrace/systrace/trace document registration/Open With contract 与无交互启动 smoke。
+
 2026-08-13 的冻结候选证据为：Release/继承的 Phase 1/Phase 2 gate 均为
 276 tests、0 failure、0 skip；Phase 2 warm cache-open p50/p95 为
 160.776167/353.283042 ms，metadata p50/p95 为 0.001791/0.003208 ms；actual CLI
@@ -49,12 +70,12 @@ API 不存在。
 
 `scripts/test_phase3_batch1.sh` 先运行完整 Phase 2 gate，再构建/签名 App、校验
 bundle parser/manifest 字节、扫描禁止 entitlement，并完成无交互启动 smoke。
-这些数据是提交前的冻结实测；独立 reviewer 已完成多轮只读复审并确认 P0～P3
-均无 finding，本批可提交。该结论不关闭 Phase 3 Exit 或任何仍开放的发布门。
+这些数据是 P3-T01～T04 提交前的冻结实测；该批独立 reviewer 已确认 P0～P3
+均无 finding。上方 P3-T05～T07 也已通过统一独立 review，不改写前一批证据，也不关闭
+Phase 3 Exit 或任何仍开放的发布门。
 
 ## 仍开放的风险
 
-- complete session/file/cache UI、track composition、interaction/search/Inspector 尚未交付；
 - VoiceOver/keyboard/focus/Reduce Motion 保留为 0.1 硬门，由 P3-T08 完整验收；
 - 20,000 primitives 的真实 frame p95、large trace cancellation 与 viewport query plan 由
   P3-T09 给出；

@@ -73,7 +73,9 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
             return try await doctor(invocation: invocation, selfTest: selfTest)
         case .inspect(let trace):
             return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.querying)
                 let snapshot = try await session.cliInspectSnapshot()
+                CLIOperationStage.active?.set(.encoding)
                 let payload = try CLIMachineCommandPayload.inspect(snapshot: snapshot)
                 return CLICommandOutput(
                     stdout: CLIHumanRenderer.inspect(snapshot),
@@ -89,7 +91,9 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 timeout: .milliseconds(invocation.options.limits.timeoutMs)
             )
             return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.analyzing)
                 let bound = try await session.cliSummary(request)
+                CLIOperationStage.active?.set(.encoding)
                 let payload = try CLIMachineCommandPayload.summary(bound: bound)
                 return CLICommandOutput(
                     stdout: CLIHumanRenderer.summary(bound.value),
@@ -104,7 +108,9 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 deadline: operationDeadline
             )
             return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.querying)
                 let bound = try await session.cliProcesses(query)
+                CLIOperationStage.active?.set(.encoding)
                 let payload = try CLIMachineCommandPayload.processes(bound: bound)
                 return CLICommandOutput(
                     stdout: CLIHumanRenderer.processes(bound.value),
@@ -124,7 +130,9 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 deadline: operationDeadline
             )
             return try await withSession(trace: trace, options: invocation.options) { session in
+                CLIOperationStage.active?.set(.querying)
                 let bound = try await session.cliThreads(query)
+                CLIOperationStage.active?.set(.encoding)
                 let payload = try CLIMachineCommandPayload.threads(bound: bound)
                 return CLICommandOutput(
                     stdout: CLIHumanRenderer.threads(bound.value),
@@ -278,9 +286,13 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                     let bound = try await session.cliSummary(request)
                     guard bound.value.schemaFingerprint == bound.snapshot.metadata.schemaFingerprint
                     else {
+                        // Stage must stay within the public contract's
+                        // allowed set for TRACE_DATABASE_INVALID; .analyzing
+                        // would be rewritten to INTERNAL_ERROR at the
+                        // boundary, masking this diagnostic (exit 9, not 5).
                         throw ArkTraceError(
                             code: .traceDatabaseInvalid,
-                            stage: .analyzing,
+                            stage: .querying,
                             message: "Self-test summary provenance is inconsistent"
                         )
                     }
@@ -344,6 +356,9 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
     ) async throws -> Value {
         let paths = try storagePathsProvider()
         let source = URL(fileURLWithPath: trace).standardizedFileURL
+        // Session opening spans hashing, cache lookup, and the exporter
+        // parse; a deadline expiry anywhere in it is attributed to parsing.
+        CLIOperationStage.active?.set(.parsing)
         let session = try await sessionOpener(source, options, paths)
         let value: Value
         do {

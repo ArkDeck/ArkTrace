@@ -3178,6 +3178,207 @@ final class ParserIntegrationTests: XCTestCase {
             (try FileManager.default.contentsOfDirectory(atPath: victim.path)).isEmpty
         )
     }
+
+    func testCacheMaintenanceSkipsActiveLeaseThenEvictsToLowWatermark() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let original = try sha256AndSize(at: fixture)
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-maintenance-\(UUID().uuidString)")
+        let cache = root.appendingPathComponent("traces", isDirectory: true)
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let session = try await TraceSession.open(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging,
+            storagePolicy: .contentAddressed(cacheDirectory: cache)
+        )
+        let maintenance = try TraceCacheMaintenance(
+            cacheDirectory: cache,
+            stagingDirectory: staging
+        )
+        let active = try await maintenance.inventory()
+        XCTAssertEqual(active.entryCount, 1)
+        XCTAssertEqual(active.activeEntryCount, 1)
+        XCTAssertGreaterThan(active.totalByteCount, 0)
+
+        let protected = try await maintenance.purgeUnused()
+        XCTAssertEqual(protected.removedEntryCount, 0)
+        XCTAssertEqual(protected.skippedActiveEntryCount, 1)
+        XCTAssertEqual(protected.after.entryCount, 1)
+
+        try await session.close()
+        let report = try await maintenance.maintain(
+            watermarks: TraceCacheWatermarks(highBytes: 1, lowBytes: 0)
+        )
+        XCTAssertEqual(report.removedEntryCount, 1)
+        XCTAssertEqual(report.after.entryCount, 0)
+        XCTAssertEqual(try sha256AndSize(at: fixture).sha256, original.sha256)
+        XCTAssertEqual(try sha256AndSize(at: fixture).byteCount, original.byteCount)
+    }
+
+    func testBuildingEvidenceBoundToReadyEntryUsesReadyLeaseTransaction() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-building-ready-\(UUID().uuidString)")
+        let cache = root.appendingPathComponent("traces", isDirectory: true)
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let session = try await TraceSession.openCached(
+            source: fixture,
+            parser: try TraceStreamerProcessParser(executableURL: binary),
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let entry = await session.parsed.databaseURL.deletingLastPathComponent()
+        let ownerRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let evidenceURLs = try FileManager.default.contentsOfDirectory(
+            at: ownerRoot,
+            includingPropertiesForKeys: nil
+        ).filter { $0.pathExtension == "json" }
+        let evidenceURL = try XCTUnwrap(evidenceURLs.first)
+        var evidence = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: Data(contentsOf: evidenceURL))
+                as? [String: Any]
+        )
+        evidence["state"] = "building"
+        evidence["relativePath"] = ".staging/entry-crash-window"
+        try JSONSerialization.data(withJSONObject: evidence, options: [.sortedKeys])
+            .write(to: evidenceURL, options: .atomic)
+
+        let maintenance = try TraceCacheMaintenance(
+            cacheDirectory: cache,
+            stagingDirectory: staging
+        )
+        let protected = try await maintenance.purgeUnused()
+        XCTAssertEqual(protected.removedEntryCount, 0)
+        XCTAssertEqual(protected.skippedActiveEntryCount, 1)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: entry.path))
+
+        try await session.close()
+        let removed = try await maintenance.purgeUnused()
+        XCTAssertEqual(removed.removedEntryCount, 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: entry.path))
+    }
+
+    func testCacheMaintenanceEvictsLeastRecentlyAccessedReadyEntryFirst() async throws {
+        let (binary, oldFixture) = try requireCacheEnvironment()
+        let newFixture = Self.repoRoot.appendingPathComponent(
+            "Fixtures/traces/hiprofiler_data_ability.htrace"
+        )
+        guard FileManager.default.isReadableFile(atPath: newFixture.path) else {
+            throw XCTSkip("second LRU fixture is unavailable")
+        }
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-lru-\(UUID().uuidString)")
+        let cache = root.appendingPathComponent("traces", isDirectory: true)
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = try TraceStreamerProcessParser(executableURL: binary)
+        let older = try await TraceSession.openCached(
+            source: oldFixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+        try await older.close()
+        let newer = try await TraceSession.openCached(
+            source: newFixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            now: { Date(timeIntervalSince1970: 200) }
+        )
+        try await newer.close()
+
+        let maintenance = try TraceCacheMaintenance(
+            cacheDirectory: cache,
+            stagingDirectory: staging
+        )
+        let inventory = try await maintenance.inventory()
+        XCTAssertEqual(inventory.entryCount, 2)
+        let report = try await maintenance.maintain(
+            watermarks: TraceCacheWatermarks(
+                highBytes: inventory.totalByteCount - 1,
+                lowBytes: inventory.totalByteCount - 2
+            )
+        )
+        XCTAssertEqual(report.removedEntryCount, 1)
+        XCTAssertEqual(report.after.entryCount, 1)
+
+        let retained = try await TraceSession.openCached(
+            source: newFixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let wasHit = await retained.cacheHit
+        XCTAssertTrue(wasHit)
+        try await retained.close()
+    }
+
+    func testCacheMaintenanceRecoversOnlyBoundStaleOwnersAndOrphanMarkers() async throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-owner-recovery-\(UUID().uuidString)")
+        let cache = root.appendingPathComponent("traces", isDirectory: true)
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        var stale: TraceOwnedDirectory? = try await TraceContentAddressedCache
+            .createOwnedDirectory(root: staging, prefix: "session-")
+        let staleURL = try XCTUnwrap(stale).url
+        stale = nil
+
+        let owners = staging.appendingPathComponent(".owners", isDirectory: true)
+        try FileManager.default.createDirectory(at: owners, withIntermediateDirectories: true)
+        let creatingBase = "session-unbound"
+        let creatingMarker = owners.appendingPathComponent("\(creatingBase).lock")
+        let creatingEvidence = owners.appendingPathComponent("\(creatingBase).json")
+        FileManager.default.createFile(atPath: creatingMarker.path, contents: Data())
+        let evidenceObject: [String: Any] = [
+            "formatVersion": 1,
+            "state": "creating",
+            "relativePath": "session-unbound",
+        ]
+        try JSONSerialization.data(
+            withJSONObject: evidenceObject,
+            options: [.sortedKeys]
+        ).write(to: creatingEvidence)
+        let orphanMarker = owners.appendingPathComponent("session-orphan.lock")
+        FileManager.default.createFile(atPath: orphanMarker.path, contents: Data())
+
+        let maintenance = try TraceCacheMaintenance(
+            cacheDirectory: cache,
+            stagingDirectory: staging
+        )
+        let report = try await maintenance.maintain()
+        XCTAssertEqual(report.recoveredPrivateDirectoryCount, 1)
+        XCTAssertEqual(report.removedOrphanOwnerMarkerCount, 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: staleURL.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: orphanMarker.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: creatingMarker.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: creatingEvidence.path))
+    }
+
+    func testCacheMaintenanceRejectsBroadOrUnresolvedTargets() throws {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        XCTAssertThrowsError(
+            try TraceCacheMaintenance(
+                cacheDirectory: home.appendingPathComponent("traces"),
+                stagingDirectory: home.appendingPathComponent("staging")
+            )
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .invalidArgument)
+        }
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-maintenance-root-\(UUID().uuidString)")
+        XCTAssertThrowsError(
+            try TraceCacheMaintenance(
+                cacheDirectory: root.appendingPathComponent("child/../traces"),
+                stagingDirectory: root.appendingPathComponent("staging")
+            )
+        )
+    }
 }
 
 private extension Array {

@@ -112,6 +112,7 @@ public struct ArkTraceError: Error, Sendable {
         "fileSync",
         "fileSyncOpen",
         "identityCleanupFailed",
+        "metadataTooLarge",
         "metadataWrite",
         "prepareStaging",
         "readyIdentityProbeFailed",
@@ -193,8 +194,12 @@ public struct ArkTraceError: Error, Sendable {
                 retryability: .fixed(false)
             )
         case .queryTimeout:
+            // The invocation-wide deadline covers argv-to-output, so a
+            // timeout may legitimately interrupt tool-identity resolution
+            // (.request), session open incl. exporter parse (.parsing),
+            // repository queries, analysis, and machine encoding.
             return PublicContractPolicy(
-                allowedStages: [.querying, .analyzing],
+                allowedStages: [.request, .parsing, .querying, .analyzing, .encoding],
                 retryability: .fixed(true)
             )
         case .queryLimitExceeded:

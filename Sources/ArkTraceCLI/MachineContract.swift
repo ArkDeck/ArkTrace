@@ -1115,7 +1115,10 @@ public struct CLIMachineCommandPayload: Sendable {
                 request: request,
                 limits: limits,
                 result: .processes(try CLIMachineProcessesResult(page)),
-                quality: metadata.dataQuality,
+                quality: TraceDataQuality(
+                    warnings: metadata.dataQuality.warnings,
+                    issues: metadata.dataQuality.issues + page.dataQualityIssues
+                ),
                 truncationSections: page.truncated ? ["processes"] : []
             )
         case (.threads(let snapshot, let page),
@@ -1146,7 +1149,10 @@ public struct CLIMachineCommandPayload: Sendable {
                 request: request,
                 limits: limits,
                 result: .threads(try CLIMachineThreadsResult(page)),
-                quality: metadata.dataQuality,
+                quality: TraceDataQuality(
+                    warnings: metadata.dataQuality.warnings,
+                    issues: metadata.dataQuality.issues + page.dataQualityIssues
+                ),
                 truncationSections: page.truncated ? ["threads"] : []
             )
         default:
@@ -1570,8 +1576,16 @@ public struct CLIMachineError: Hashable, Codable, Sendable {
             ["reason"]
         case .traceStreamerIdentityMismatch:
             ["field", "reason"]
-        case .traceParseFailed, .traceCacheCorrupt, .traceDatabaseInvalid,
-             .internalError:
+        case .traceParseFailed, .traceCacheCorrupt:
+            // underlyingCode preserves the stable code of a failure whose
+            // cleanup-outranks policy replaced it at the throw site.
+            ["reason", "underlyingCode"]
+        case .traceDatabaseInvalid:
+            // Producers attach sqliteCode (TraceDatabase open/step failures)
+            // and rowCount (trace_range shape evidence); stripping them left
+            // details always empty for this code.
+            ["reason", "rowCount", "sqliteCode"]
+        case .internalError:
             ["reason"]
         case .traceSchemaUnsupported:
             ["missingCapability", "reason", "rowCount"]
@@ -1598,6 +1612,9 @@ public struct CLIMachineError: Hashable, Codable, Sendable {
         }
         if key == "reason" {
             return stableReasonTokens.contains(value)
+        }
+        if key == "underlyingCode" {
+            return ArkTraceError.Code(rawValue: value) != nil
         }
         if key == "field" {
             return [
@@ -1635,7 +1652,8 @@ public struct CLIMachineError: Hashable, Codable, Sendable {
         "readyIdentityProbeFailed", "readyQuarantineFailed", "readyRemovalFailed",
         "readyRollbackFailed", "replacementRestoreFailed", "requestPayloadMismatch",
         "sameAsSource", "sessionCleanupFailed", "sessionIO",
-        "sessionProvenanceMismatch", "snapshotIO", "sourceSnapshotChanged",
+        "sessionProvenanceMismatch", "signalMonitorSetup", "snapshotIO",
+        "sourceSnapshotChanged",
         "stagingCleanupFailed", "stagingIO", "summaryProvenanceMismatch",
         "unavailable", "unavailableSectionTruncated", "unboundedText",
         "unknownDoctorCheck", "unreadable", "unreported", "unsafeDiagnostic",

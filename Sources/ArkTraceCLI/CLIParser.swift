@@ -165,10 +165,19 @@ public struct CLIArgumentParser: Sendable {
             try validateActionTail(remaining)
             return CLIInvocation(options: options, command: hasHelp ? .help : .version)
         }
+        // A leading `--` terminated option parsing for the entire invocation;
+        // the command name still dispatches, but every later token is an
+        // operand — never re-parsed as an option (docs/CLI.md).
+        var optionsTerminated = false
         if remaining.first == "--" {
             remaining.removeFirst()
+            optionsTerminated = true
         }
-        let command = try parseCommand(remaining, globalMaxRows: limits.maxRows)
+        let command = try parseCommand(
+            remaining,
+            globalMaxRows: limits.maxRows,
+            optionsTerminated: optionsTerminated
+        )
         return CLIInvocation(options: options, command: command)
     }
 
@@ -187,7 +196,11 @@ public struct CLIArgumentParser: Sendable {
         }
     }
 
-    private func parseCommand(_ arguments: [String], globalMaxRows: Int) throws -> CLICommand {
+    private func parseCommand(
+        _ arguments: [String],
+        globalMaxRows: Int,
+        optionsTerminated: Bool = false
+    ) throws -> CLICommand {
         guard let name = arguments.first else {
             throw CLIParsing.invalid("A command is required")
         }
@@ -197,7 +210,7 @@ public struct CLIArgumentParser: Sendable {
             var selfTest = false
             var seen: Set<String> = []
             var positionals: [String] = []
-            try parseLocal(tail) { option, _, _ in
+            try parseLocal(tail, optionsTerminated: optionsTerminated) { option, _, _ in
                 guard option == "--self-test" else { return false }
                 try markOnce(option, seen: &seen)
                 selfTest = true
@@ -209,14 +222,24 @@ public struct CLIArgumentParser: Sendable {
             return .doctor(selfTest: selfTest)
         case "inspect":
             var positionals: [String] = []
-            try parseLocal(tail) { _, _, _ in false } positional: { positionals.append($0) }
+            try parseLocal(tail, optionsTerminated: optionsTerminated) { _, _, _ in
+                false
+            } positional: { positionals.append($0) }
             return .inspect(trace: try exactlyOneTrace(positionals, command: name))
         case "summary":
-            return try parseSummary(tail)
+            return try parseSummary(tail, optionsTerminated: optionsTerminated)
         case "processes":
-            return try parseProcesses(tail, globalMaxRows: globalMaxRows)
+            return try parseProcesses(
+                tail,
+                globalMaxRows: globalMaxRows,
+                optionsTerminated: optionsTerminated
+            )
         case "threads":
-            return try parseThreads(tail, globalMaxRows: globalMaxRows)
+            return try parseThreads(
+                tail,
+                globalMaxRows: globalMaxRows,
+                optionsTerminated: optionsTerminated
+            )
         default:
             throw CLIParsing.invalid(
                 "Unknown command",
@@ -225,12 +248,15 @@ public struct CLIArgumentParser: Sendable {
         }
     }
 
-    private func parseSummary(_ arguments: [String]) throws -> CLICommand {
+    private func parseSummary(
+        _ arguments: [String],
+        optionsTerminated: Bool = false
+    ) throws -> CLICommand {
         var start: Int64?
         var end: Int64?
         var seen: Set<String> = []
         var positionals: [String] = []
-        try parseLocal(arguments) { option, values, index in
+        try parseLocal(arguments, optionsTerminated: optionsTerminated) { option, values, index in
             switch option {
             case "--start-ns":
                 try markOnce(option, seen: &seen)
@@ -256,13 +282,17 @@ public struct CLIArgumentParser: Sendable {
         return .summary(trace: trace, range: range)
     }
 
-    private func parseProcesses(_ arguments: [String], globalMaxRows: Int) throws -> CLICommand {
+    private func parseProcesses(
+        _ arguments: [String],
+        globalMaxRows: Int,
+        optionsTerminated: Bool = false
+    ) throws -> CLICommand {
         var pid: Int64?
         var name: String?
         var limit = globalMaxRows
         var seen: Set<String> = []
         var positionals: [String] = []
-        try parseLocal(arguments) { option, values, index in
+        try parseLocal(arguments, optionsTerminated: optionsTerminated) { option, values, index in
             switch option {
             case "--pid":
                 try markOnce(option, seen: &seen)
@@ -286,7 +316,11 @@ public struct CLIArgumentParser: Sendable {
         )
     }
 
-    private func parseThreads(_ arguments: [String], globalMaxRows: Int) throws -> CLICommand {
+    private func parseThreads(
+        _ arguments: [String],
+        globalMaxRows: Int,
+        optionsTerminated: Bool = false
+    ) throws -> CLICommand {
         var processKey: Int64?
         var pid: Int64?
         var threadKey: Int64?
@@ -295,7 +329,7 @@ public struct CLIArgumentParser: Sendable {
         var limit = globalMaxRows
         var seen: Set<String> = []
         var positionals: [String] = []
-        try parseLocal(arguments) { option, values, index in
+        try parseLocal(arguments, optionsTerminated: optionsTerminated) { option, values, index in
             switch option {
             case "--process-key":
                 try markOnce(option, seen: &seen)
@@ -339,11 +373,12 @@ public struct CLIArgumentParser: Sendable {
 
     private func parseLocal(
         _ arguments: [String],
+        optionsTerminated: Bool = false,
         option: (String, [String], inout Int) throws -> Bool,
         positional: (String) -> Void
     ) throws {
         var index = 0
-        var terminatorReached = false
+        var terminatorReached = optionsTerminated
         while index < arguments.count {
             let token = arguments[index]
             if token == "--", !terminatorReached {

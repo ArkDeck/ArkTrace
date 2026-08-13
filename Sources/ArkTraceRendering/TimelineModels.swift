@@ -15,17 +15,19 @@ public struct TimelineTrackID: Hashable, Codable, Sendable, Comparable {
 public enum TimelineTrackSource: Hashable, Codable, Sendable {
     case cpu(Int64)
     case threadState(ThreadKey)
-    case namedSlice(ThreadKey)
+    case namedSlice(ThreadKey?)
     case cpuCounter(filterID: Int64, cpu: Int64?)
     case processCounter(filterID: Int64, processKey: ProcessKey?)
 
-    var stableID: TimelineTrackID {
+    public var stableID: TimelineTrackID {
         switch self {
         case .cpu(let cpu): return TimelineTrackID(rawValue: "cpu:\(cpu)")
         case .threadState(let key):
             return TimelineTrackID(rawValue: "thread-state:\(key.itid)")
         case .namedSlice(let key):
-            return TimelineTrackID(rawValue: "named-slice:\(key.itid)")
+            return TimelineTrackID(
+                rawValue: "named-slice:\(key.map { String($0.itid) } ?? "unattributed")"
+            )
         case .cpuCounter(let filterID, let cpu):
             return TimelineTrackID(rawValue: "cpu-counter:\(filterID):\(cpu.map(String.init) ?? "all")")
         case .processCounter(let filterID, let processKey):
@@ -111,6 +113,79 @@ public enum TimelineDetailPreference: String, Codable, Sendable {
     case density
 }
 
+public enum TimelineViewportIntent: Sendable {
+    case panPoints(Double, sourceViewport: TimelineViewport)
+    case zoom(anchorNs: Int64, scale: Double, sourceViewport: TimelineViewport)
+}
+
+public enum TimelineInteraction {
+    public static func pan(
+        range: TraceTimeRange,
+        deltaNs: Int64,
+        within bounds: TraceTimeRange
+    ) throws -> TraceTimeRange {
+        guard range.startNs >= bounds.startNs, range.endNs <= bounds.endNs else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Viewport range exceeds trace bounds"
+            )
+        }
+        let maximumStart = bounds.endNs - range.durationNs
+        let candidate: Int64
+        let (value, overflow) = range.startNs.addingReportingOverflow(deltaNs)
+        if overflow {
+            candidate = deltaNs < 0 ? bounds.startNs : maximumStart
+        } else {
+            candidate = value
+        }
+        let start = min(max(bounds.startNs, candidate), maximumStart)
+        return try TraceTimeRange.query(
+            startNs: start,
+            endNs: start + range.durationNs
+        )
+    }
+
+    public static func zoom(
+        range: TraceTimeRange,
+        anchorNs: Int64,
+        scale: Double,
+        within bounds: TraceTimeRange
+    ) throws -> TraceTimeRange {
+        guard scale.isFinite, scale > 0,
+            range.startNs >= bounds.startNs,
+            range.endNs <= bounds.endNs
+        else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Zoom request is invalid"
+            )
+        }
+        let boundedScale = min(20, max(0.05, scale))
+        let proposed = Double(range.durationNs) * boundedScale
+        let newDuration: Int64
+        if !proposed.isFinite || proposed >= Double(bounds.durationNs) {
+            newDuration = bounds.durationNs
+        } else {
+            newDuration = max(1, Int64(proposed.rounded()))
+        }
+        if newDuration >= bounds.durationNs { return bounds }
+        let anchor = min(max(range.startNs, anchorNs), range.endNs)
+        let fraction = Double(anchor - range.startNs) / Double(range.durationNs)
+        let offsetDouble = fraction * Double(newDuration)
+        let offset = offsetDouble >= Double(Int64.max)
+            ? Int64.max
+            : max(0, Int64(offsetDouble.rounded(.down)))
+        let rawStart: Int64
+        let (candidate, underflow) = anchor.subtractingReportingOverflow(offset)
+        rawStart = underflow ? bounds.startNs : candidate
+        let maximumStart = bounds.endNs - newDuration
+        let start = min(max(bounds.startNs, rawStart), maximumStart)
+        return try TraceTimeRange.query(startNs: start, endNs: start + newDuration)
+    }
+}
+
 public struct ViewportRequest: Sendable {
     public let viewport: TimelineViewport
     public let tracks: [TrackDescriptor]
@@ -118,6 +193,7 @@ public struct ViewportRequest: Sendable {
     public let generation: UInt64
     public let preference: TimelineDetailPreference
     public let maximumPrimitives: Int
+    public let focusedEventKey: EventKey?
     public let deadline: ContinuousClock.Instant
 
     public init(
@@ -127,6 +203,7 @@ public struct ViewportRequest: Sendable {
         generation: UInt64,
         preference: TimelineDetailPreference = .automatic,
         maximumPrimitives: Int? = nil,
+        focusedEventKey: EventKey? = nil,
         deadline: ContinuousClock.Instant
     ) throws {
         guard pixelWidth >= 1, pixelWidth <= 100_000,
@@ -154,6 +231,7 @@ public struct ViewportRequest: Sendable {
         self.generation = generation
         self.preference = preference
         self.maximumPrimitives = min(requested, defaultBudget)
+        self.focusedEventKey = focusedEventKey
         self.deadline = deadline
     }
 
@@ -169,19 +247,22 @@ public struct TimelineDetailPrimitive: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
     public let label: String?
     public let category: String?
+    public let inspector: TraceEventInspector?
 
     public init(
         trackID: TimelineTrackID,
         eventKey: EventKey,
         range: TraceTimeRange,
         label: String? = nil,
-        category: String? = nil
+        category: String? = nil,
+        inspector: TraceEventInspector? = nil
     ) {
         self.trackID = trackID
         self.eventKey = eventKey
         self.range = range
         self.label = label
         self.category = category
+        self.inspector = inspector
     }
 }
 

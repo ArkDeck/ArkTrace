@@ -38,7 +38,7 @@ arktrace [global-options] <command> [command-options]
 |---|---:|---|
 | `--json` | off | stdout 为一个完整 Machine JSON 1.0 document |
 | `--pretty` | off | 仅可与 `--json` 同时使用 |
-| `--timeout-ms <n>` | 30,000 | 100–120,000；覆盖 open/parser/query/analysis/encoding/cleanup transaction |
+| `--timeout-ms <n>` | 30,000 | 100–120,000；覆盖 open/parser/query/analysis/encoding；deadline 触发后会取消 operation，但 terminal error 必须等待 parser/session ownership cleanup 完成，cleanup failure 优先 |
 | `--max-rows <n>` | 10,000 | 1–100,000；目录行与命令 `--limit` 上界 |
 | `--max-events <n>` | 10,000 | 1–100,000；summary 的 event/counter sampling 上界 |
 | `--max-output-bytes <n>` | 8 MiB | 1 KiB–64 MiB；stdout 与 stderr 合并预算 |
