@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 的 P3-T01～T10 实现及 P4-T01～T03 已通过独立 review；P4-T04～T07 为统一 review 候选，Phase 3 外部发布门证据仍开放（2026-08-14）。** 真实 medium Agent contract/性能门、键盘/VoiceOver contract、完全锁定的 TraceStreamer 构建配方和许可证清单已落地；独立采集且可再分发的 >500 MiB large trace、Developer ID/notarization 与人工 VoiceOver 工作流证据仍是明确外部阻塞，发布门 6/7 尚未关闭。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 为 9/10，P3-T08 accessibility 与 P3-T10 distribution 已完成；P4-T01～T03 已通过独立 review，P4-T04～T07 为统一 review 候选（2026-08-14）。** 真实 medium Agent contract/性能门、签名 App keyboard/VoiceOver/Reduce Motion、Developer ID notarization、完全锁定的 TraceStreamer 构建配方和许可证清单已落地；唯一 Phase 3 外部阻塞是独立采集且可再分发的 >500 MiB large trace，发布门 6/7 尚未关闭。
 
 ## 文档
 
@@ -61,7 +61,7 @@ scripts/test_phase4.sh
 `TraceDeterministicAnalysisEngine` 直接采样；逐字段 20-sample 数值、机器信息、trace/parser、
 source-tree 与 test-binary identity 的事实源固定为
 `Fixtures/release-evidence/phase4-medium-agent-performance.json`。large 阈值与正式 Phase Exit
-仍等待 reviewed external fixture/signing evidence，不能用 medium 结果替代。
+仍等待 reviewed external large fixture，不能用 medium 结果替代。
 
 `arktrace` Release binary 位于 `swift build -c release --show-bin-path` 输出目录。示例：
 
@@ -92,12 +92,13 @@ Inspector 显示 event 或 range analysis。键盘基线包括方向键切换 ev
 
 Settings → Licenses 展示 ArkTrace MIT license 与随 App 打包的 third-party notice；CLI 的
 `arktrace licenses` 输出同一组经锁定的资源。当前已知限制是首发仅支持 Apple silicon/macOS 14+，不含 capture/device/network
-能力；large-trace 和 notarized distribution 仍须提供上述外部发布证据。实际 App 截图和
-人工 VoiceOver walkthrough 将与签名候选一并记录，自动 UI 控制不可用时不会用合成图替代。
+能力；large-trace 仍须提供上述外部发布证据。Developer ID 签名候选已获 Apple notarization
+`Accepted`，最终 stapled ZIP、实际 App 截图与人工 VoiceOver walkthrough 已由 exact
+candidate tree/CDHash 和 tracked artifact SHA 绑定；自动 UI 控制不可用时没有用合成图替代。
 
 ## TraceStreamer 怎么获得
 
-ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；`source-lock.json` 锁定 upstream、13 个 source dependency 和 GN/Ninja artifact，独立 patch 与构建脚本共同生成 content-derived recipe identity。`scripts/test_trace_streamer_reproducibility.sh` 要求两个 fresh worktree 产出 byte-identical binary。完整 source-closure inventory、exact license bytes 与 notice 已落地，但发布门 3 只会在本批独立 review 通过后关闭。
+ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；`source-lock.json` 锁定 upstream、13 个 source dependency 和 GN/Ninja artifact，独立 patch 与构建脚本共同生成 content-derived recipe identity。`scripts/test_trace_streamer_reproducibility.sh` 要求两个 fresh worktree 产出 byte-identical binary。完整 source-closure inventory、exact license bytes 与 notice 已落地；发布门 3 已由签名 App 与最终 notarized ZIP 的逐字节复验关闭。
 
 ## ArkDeck 怎么接入
 

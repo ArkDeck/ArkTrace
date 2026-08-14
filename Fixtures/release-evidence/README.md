@@ -26,3 +26,28 @@ is intentionally not required because it would not add meaningful independence
 when the reviewer and build run in the same workspace. Generated screenshots or
 synthetic accessibility claims are not accepted as substitutes for the real
 signed-App walkthrough.
+
+The notarization audit record is
+`Fixtures/release-evidence/phase3-notarization.json`. It binds the exact
+accessibility manifest, signed candidate tree and Code Directory hash,
+certificate and Team identity, final ZIP byte count and SHA-256, Apple
+submission ID, and the post-staple signature, ticket, and Gatekeeper checks.
+`Fixtures/release-evidence/phase3-notarization-receipt.json` is the bounded,
+canonical semantic projection of the live `notarytool log` response. It is
+produced with:
+
+```sh
+xcrun notarytool log <submission-id> --keychain-profile <profile> --output-format json | jq -S .
+```
+
+Every field is compared with a fresh Apple response, while the projection's
+stable bytes and SHA-256 are pinned by the audit record. It is not described as
+Apple's raw byte stream because JSON key order can change between otherwise
+equivalent queries.
+
+The final ZIP is retained outside the repository `.build` tree in an
+owner-bound physical system temporary directory so later build gates cannot
+silently clean it. A reviewer must independently rehash and extract that
+physical ZIP and reverify the nested and outer signatures, stapled ticket, and
+Gatekeeper result. The JSON metadata is not a substitute for the retained
+artifact.

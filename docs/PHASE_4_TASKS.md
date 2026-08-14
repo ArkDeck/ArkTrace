@@ -246,7 +246,7 @@ P4-T01 和 P4-T02 可以并行。
 - 统一 review 的 findings 已全部关闭：counter 改为全局事件序、Analysis 补齐 kind/effective parameters 与完整稳定总序、Runnable→Running 精确相邻证据、整数 hot buckets、open-ended duration、动态 SQLite storage、引用/预算区分、重复 identity typed failure 与公开 Codable fail-closed 均有 regression；
 - 新增 15 个 Analysis batch regressions、1 个 Store 动态 storage regression，并扩展现有 Store 时间语义回归；冻结完整 `CI=true swift test -c release` 为 **333 tests、0 failure**；
 - 继承的 `scripts/test_phase3_batch1.sh` 同样以 **333 tests、0 skip** 通过，真实 fixture 的 parser SHA、quick_check、schema fingerprint 与 locked evidence 均未漂移；
-- 独立 reviewer 结论为 P0/P1/P2/P3 全 clean。本节只关闭 P4-T01～T03，不关闭 Phase 4 Exit，也不改写 Phase 3 Gate 3/6/7 的 Open 状态。
+- 独立 reviewer 结论为 P0/P1/P2/P3 全 clean。本节当时只关闭 P4-T01～T03，不关闭 Phase 4 Exit，也不改写当时 Phase 3 Gate 3/6/7 的 Open 状态；随后 Gate 3 已由 Developer ID/notarization 的 tracked evidence 关闭，Gate 6/7 仍保持 Open。
 
 ## 7. P4-T04～T07 统一 review 候选证据（2026-08-14）
 
@@ -269,4 +269,4 @@ P4-T01 和 P4-T02 可以并行。
   `Fixtures/release-evidence/phase4-medium-agent-performance.json`，并被 source-tree identity
   明确排除以避免 evidence 自哈希循环。gate 会直接验证 Context ≤1s、deterministic analysis
   ≤3s、RSS ≤1.5 GiB，以及 Context events/bytes 与 analysis rows 均非空；
-- 本节仍是 unified review candidate。review clean 后才更新 T04～T07 完成数；independently captured/reviewed large fixture、人工 signed-App accessibility、Developer ID/notary 与 Phase 3 Gate 3/6/7 继续 Open，因此 `scripts/test_phase4.sh` 必须 fail closed，Phase 4 Exit 不在本批关闭。
+- 本节仍是 unified review candidate。review clean 后才更新 T04～T07 完成数；人工 signed-App accessibility、Developer ID/notary 与 Phase 3 Gate 3 已由 tracked evidence 关闭，independently captured/reviewed large fixture 与 Phase 3 Gate 6/7 继续 Open，因此 `scripts/test_phase4.sh` 必须 fail closed，Phase 4 Exit 不在本批关闭。

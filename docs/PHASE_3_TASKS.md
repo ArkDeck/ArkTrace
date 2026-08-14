@@ -1,6 +1,6 @@
 # ArkTrace Phase 3 任务清单
 
-> 状态：Active — P3-T01～T07 已完成并通过独立 review；P3-T08～T10 已实现候选并等待统一 review，其中 large/notarization/manual a11y 证据仍开放
+> 状态：Active，9/10 — P3-T01～T08 与 P3-T10 已完成并通过独立 review；P3-T09 的独立 large fixture、large cancellation 与 viewport 发布门 6/7 仍开放
 > 阶段：Native Viewer
 > 验收目标：ArkTrace.app 可以实际替代浏览器完成基础 Trace 查看
 
@@ -236,10 +236,10 @@ P3-T01、P3-T02、P3-T05 可以并行。
 
 - [x] 键盘 command/focus policy、真实 event navigation 与 target size 有无窗口 regression；
 - [x] bounded accessibility group 可读 focused/selected event 与 range，仅在动作确实可改变当前语义时暴露 event/track、pan、zoom、selection/reset actions，不为全量 event 建 node；
-- [ ] 在签名 App 上人工完成 keyboard-only 与 VoiceOver walkthrough；
-- [ ] 最小窗口和长本地化字符串的人工检查；
+- [x] 在 exact Developer ID 签名 App 上完成 keyboard-only 与 VoiceOver walkthrough，含 Search → Timeline real event → selection/range → Inspector、loading/result/completion/error announcements 与恢复路径；
+- [x] 最小窗口、14 pt 德语长本地化字符串和 Inspector disclosure focus restoration 的人工检查；
 - [x] 真实 hosted AppKit/SwiftUI control 的 target hard floor 24×24、Tab/focus restoration，以及 focus ring、非纯颜色 selection 与 Reduce Motion 分支由代码/测试锁定；
-- [ ] AC-AT-016 的人工 App 证据完成。
+- [x] AC-AT-016 的六项 exact candidate-bound artifact 与 SHA 已提交并通过独立 Agent review，事实源为 `Fixtures/release-evidence/accessibility-c00e79ed.json`。
 
 ### P3-T09 — 真实性能、large cancellation 与 viewport 发布门
 
@@ -291,18 +291,19 @@ P3-T01、P3-T02、P3-T05 可以并行。
 - [x] 14 个 source component、2 个 build tool 的 exact license bytes、notice、App/CLI licenses 已校验；
 - [x] Debug/Release App bundle、empty entitlement、parser/manifest/license exact-copy gate 已落地；
 - [x] distribution contract regression 锁定 nested helper inner-first signing、exact certificate/Team/Authority、unsigned→signed manifest provenance、人工 artifact/hash 绑定、private-partial 复验后 atomic publish 与 staple-before-final-ZIP；
-- [ ] Developer ID identity/team/notary profile 与 notarized/stapled artifact（本机当前无 identity）；
-- [ ] 签名候选的实际 App screenshot 与人工 VoiceOver walkthrough；
+- [x] Developer ID identity/team/certificate 与 notary profile 完成真实 smoke：Apple status `Accepted`，ticket staple、Gatekeeper、解包后的 nested/outer signature 与 ticket 均通过；最终 ZIP SHA/bytes/submission ID 见 `Fixtures/release-evidence/phase3-notarization.json`；
+- [x] exact signed candidate 的真实 App screenshots、keyboard/VoiceOver/Reduce Motion/target audit 与 focus restoration walkthrough 已提交并通过独立 review；
 - [x] 完整 gate 对 large trace/notarization 缺失 fail closed，不以 skip 关闭发布门。
 
 ## 5. Exit Checklist
 
-- [ ] ArkTrace.app 可打开真实 Trace；
-- [ ] CPU/Process/Thread State/Named Slice 可见，Counter capability-aware；
-- [ ] pan/zoom/select/range/Inspector/Search 可用；
-- [ ] detail/density LOD bounded，无全量 preload；
-- [ ] DESIGN §25.11 的 reviewed a11y 分层决策已执行；若 SPEC 保持不变，则 keyboard/VoiceOver/Reduce Motion 完整 contract 通过；
-- [ ] MainActor 无 parse/hash/index/query 阻塞；
+- [x] ArkTrace.app 可打开真实 Trace；
+- [x] CPU/Process/Thread State/Named Slice 可见，Counter capability-aware；
+- [x] pan/zoom/select/range/Inspector/Search 可用；
+- [x] detail/density LOD bounded，无全量 preload；
+- [x] DESIGN §25.11 的 reviewed a11y 决策已执行，keyboard/VoiceOver/Reduce Motion 完整 contract 通过；
+- [x] MainActor 无 parse/hash/index/query 阻塞；
 - [ ] medium/large benchmark 有证据；
-- [ ] 发布门 3、6、7 按真实证据关闭；
-- [ ] App 可完成基础查看，且不依赖浏览器或 GUI automation。
+- [x] 发布门 3 由完整许可证清单与最终分发包逐字节复验关闭；
+- [ ] 发布门 6/7 仍等待合格 large fixture；
+- [x] App 可完成基础查看，且不依赖浏览器或 GUI automation。

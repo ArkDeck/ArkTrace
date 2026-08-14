@@ -1,0 +1,36 @@
+{
+  "accessibilityEvidence": {
+    "path": "Fixtures/release-evidence/accessibility-c00e79ed.json",
+    "sha256": "cbc47f1f9bbc60af06f04c470132a5ab0f92536531030735daac5a0584bdcd7d"
+  },
+  "app": {
+    "build": "1",
+    "bundleIdentifier": "com.arktrace.ArkTrace",
+    "candidateCodeDirectoryHash": "c3acd968f032c8256b16197b89155fd544dcde78",
+    "candidateTreeSHA256": "c00e79ed569e6198a269e56607ab41e38c1d6b948dc895f0385c58ff229bed54",
+    "signingCertificateSHA1": "38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C",
+    "signingIdentity": "Developer ID Application: Hanfeng Fu (8AQTYW5FKR)",
+    "teamIdentifier": "8AQTYW5FKR",
+    "version": "0.1.0"
+  },
+  "artifact": {
+    "byteCount": 5041314,
+    "fileName": "ArkTrace-20260814T061210Z.zip",
+    "sha256": "1ae5b0a6b2d68b2b19ad5265ef593aa73b1a67f79418a2ddc11fc686ddd161bd"
+  },
+  "evidenceRevision": "8d92603913fc9ade7dc0c2e993a013106a433da9",
+  "formatVersion": 1,
+  "notarization": {
+    "finalArchiveReverified": true,
+    "gatekeeperAssessment": "accepted",
+    "nestedAndOuterSignaturesValid": true,
+    "stapledTicketValidated": true,
+    "receiptPath": "Fixtures/release-evidence/phase3-notarization-receipt.json",
+    "receiptSHA256": "f7b5cc84e69563d93c0aa51ff203ee9a55f9c1079ef4120c568a99c6fc33e558",
+    "status": "Accepted",
+    "submissionID": "45e9a553-4c3a-492a-be06-cff85ab13b11"
+  },
+  "packagedAt": "2026-08-14T06:12:10Z",
+  "reviewedAt": "2026-08-14T06:14:07Z",
+  "sourceRevision": "f629b3c9a6557660db5dc7bfa704c2ad2d2a1fe3"
+}

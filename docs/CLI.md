@@ -27,8 +27,8 @@ scripts/test_phase4_batch1.sh
 
 该 gate 继承 Phase 1～3 本地候选验证，并执行真实 medium Trace 的 Agent CLI 问题、
 determinism/privacy 负例与 Context/Analysis 20-sample 性能门。完整 `scripts/test_phase4.sh`
-还继承 Phase 3 的 signed-App accessibility、large trace、Developer ID/notary 外部门；缺失时
-fail closed，不把本地候选误报为 Phase Exit。
+还复验 Phase 3 已提交的 signed-App accessibility 与 Developer ID/notary evidence，并要求
+独立 large trace；任一缺失时 fail closed，不把本地候选误报为 Phase Exit。
 
 ## 通用语法与限制
 
@@ -238,4 +238,4 @@ CLI 不修改 source Trace、不执行 shell、不上传数据，也不输出 so
 raw SQL 或 parser log。human 表格中的 Trace-controlled text 使用有界 terminal escaping；Machine
 fields 经过 closed typed validation。Agent API 只能组合上述 closed filters；形似 SQL 的未知 flag
 在读取 Trace 前返回 `INVALID_ARGUMENT`，不会在 output 中回显原字符串。完整第三方许可证
-inventory 的实现已 review，但正式分发门仍等待 Phase 3 外部签名/notary 流程。
+inventory、签名 App 与 notarized/stapled 最终 ZIP 已逐字节消费同一资源，发布门 3 已关闭。

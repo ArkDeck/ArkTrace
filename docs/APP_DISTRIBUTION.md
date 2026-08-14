@@ -1,8 +1,9 @@
 # ArkTrace.app 0.1 distribution decision
 
-Status: reviewed App-shell decision plus P3-T08～T10 distribution candidate
-(2026-08-13). Developer ID/notarization and manual accessibility evidence remain
-external release gates until their exact artifacts are checked in.
+Status: P3-T08 accessibility and P3-T10 Developer ID distribution evidence
+completed (2026-08-14). The exact manual artifacts and notarization record are
+tracked under `Fixtures/release-evidence/`; only the independent large-trace
+Phase 3 gates remain open.
 
 ## Target and signing
 
@@ -10,9 +11,11 @@ external release gates until their exact artifacts are checked in.
 - direct Developer ID distribution and notarization; App Store/TestFlight and
   Intel are explicitly deferred until the child-process and performance
   evidence is repeated for those channels;
-- Debug uses ad-hoc signing for local launch tests. Developer ID Application +
-  hardened-runtime distribution is the reviewed Release candidate; archive,
-  notarization and quarantine evidence remain P3-T10 and are not claimed here.
+- Debug uses ad-hoc signing for local launch tests. The reviewed Release candidate
+  uses Developer ID Application + hardened runtime; Apple notarization returned
+  `Accepted`, and the stapled final ZIP passed Gatekeeper and extracted signature/
+  ticket verification. Exact identity, artifact SHA and submission ID are in
+  `Fixtures/release-evidence/phase3-notarization.json`.
 
 ## Sandbox and file grants
 
@@ -90,7 +93,9 @@ The large-trace reviewer and redistribution-grant issuer remain independently
 key-bound in `Config/ArkTraceReleaseReviewers.json`. A caller cannot mutate the
 accessibility evidence or large-trace trust configuration during packaging. A missing Developer ID identity/team/profile,
 large-trace record, manual evidence artifact, notarization acceptance, staple,
-or Gatekeeper assessment causes the complete Phase 3 gate to fail closed.
+or Gatekeeper assessment causes the complete Phase 3 gate to fail closed. The
+2026-08-14 accessibility/package run satisfies the signed-App/manual/notary
+inputs; the complete Phase 3 gate remains blocked only by the independent large record.
 All distribution output roots must be physical owner-marked descendants of the
 repository `.build` directory or the physical system temporary root. External
 tool logs remain private; public failure diagnostics are bounded and path-redacted.

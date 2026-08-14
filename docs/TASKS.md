@@ -1,8 +1,8 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-14 / Phase 3 活跃；P3-T08～T10 实现已通过统一 review、外部门证据仍开放；P4-T01～T03 已完成，P4-T04～T07 为统一 review 候选
+> 状态基线：2026-08-14 / Phase 3 活跃；P3-T08、P3-T10 已完成，P3-T09 的独立 large fixture 与发布门 6/7 仍开放；P4-T01～T03 已完成，P4-T04～T07 为统一 review 候选
 > 任务总数：57
-> 已完成：32（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 七项 + Phase 4 三项）
+> 已完成：34（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 三项）
 > 下一阶段：Phase 3 — Native Viewer
 
 ## 1. 阶段总览
@@ -12,7 +12,7 @@
 | 0 | Evidence | 6 | Completed | 关键架构问题有真实证据，发布门 1 关闭 | [PHASE_0_TASKS.md](./PHASE_0_TASKS.md) |
 | 1 | Parser Vertical Slice | 9 | Completed，9/9 | real Trace → TraceStreamer → SQLite → Store → metadata | [PHASE_1_TASKS.md](./PHASE_1_TASKS.md) |
 | 2 | CLI Vertical Slice | 7 | Completed，7/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
-| 3 | Native Viewer | 10 | Active，7/10；T08～T10 implementation review clean，外部门开放 | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
+| 3 | Native Viewer | 10 | Active，9/10；T08/T10 complete，T09 large gates open | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
 | 4 | Agent Query | 7 | Planned；T01～T03 review clean，T04～T07 batch candidate | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
 | 5 | ArkDeck Integration | 9 | Planned | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Planned | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
@@ -121,7 +121,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 |---:|---|---|---|
 | 1 | canonical upstream 重锚定 | Closed | Phase 0 / P0-T06 |
 | 2 | Apple silicon 原生构建 | Closed | Phase 1 / P1-T01 |
-| 3 | 完整第三方许可证清单 | Open | Phase 3 / P3-T10 |
+| 3 | 完整第三方许可证清单 | Closed | Phase 3 / P3-T10 |
 | 4 | 可再分发真实 Trace fixture | Closed | Phase 1 / P1-T01～T03 |
 | 5 | required schema fingerprint + real DB fixture | Closed | Phase 1 / P1-T05 |
 | 6 | large Trace cancellation，无 orphan/cache promotion | Open | Phase 3 / P3-T09 |
@@ -130,7 +130,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 | 9 | ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact | Open | Phase 5 / P5-T09 |
 | 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Open | Phase 6 / P6-T09 |
 
-注意：e710e78 的 commit subject 写有“close gates 2, 3”，但当前 reviewed DESIGN 中 gate 3 是许可证 inventory，仍未关闭；本索引以 DESIGN 为准。
+发布门 3 已于 2026-08-14 由 exact source/license inventory、App/CLI 同源资源、签名 App 与最终 notarized ZIP 的逐字节复验关闭；事实证据见 DESIGN §24 与 `Fixtures/release-evidence/phase3-notarization.json`。
 
 ## 5. 跨阶段不变量
 
