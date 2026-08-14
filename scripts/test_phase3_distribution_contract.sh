@@ -116,13 +116,18 @@ for argument in "$@"; do
     printf ' %s' "$label" >>"$ARKTRACE_FAKE_OPERATION_LOG"
 done
 printf '\n' >>"$ARKTRACE_FAKE_OPERATION_LOG"
-previous=
 for argument in "$@"; do
-    if [ "$previous" = --extract-certificates ]; then
-        printf 'fake-certificate\n' >"${argument}0"
-        exit 0
-    fi
-    previous=$argument
+    case "$argument" in
+        --extract-certificates=*)
+            prefix=${argument#--extract-certificates=}
+            printf 'fake-certificate\n' >"${prefix}0"
+            exit 0
+            ;;
+        --extract-certificates)
+            printf 'certificate prefix must use the audited equals form\n' >&2
+            exit 64
+            ;;
+    esac
 done
 case " $* " in
     *' --entitlements :- '*)
@@ -137,7 +142,7 @@ esac
 case " $* " in
     *' -dv '*|*' -d '*)
         printf 'Authority=Developer ID Application: ArkTrace Test (TEAMTEST)\n' >&2
-        printf 'TeamIdentifier=TEAMTEST\nflags=0x10000(runtime)\nTimestamp=Aug 13, 2026\nCDHash=0123456789abcdef\n' >&2 ;;
+        printf 'TeamIdentifier=TEAMTEST\nCodeDirectory v=20500 size=123 flags=0x10000(runtime) hashes=1+1 location=embedded\nTimestamp=Aug 13, 2026\nCDHash=0123456789abcdef\n' >&2 ;;
 esac
 if [ "${ARKTRACE_FAKE_FAIL_PARTIAL_VERIFY:-0}" = 1 ]; then
     for argument in "$@"; do

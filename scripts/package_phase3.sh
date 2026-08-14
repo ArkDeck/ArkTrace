@@ -41,7 +41,7 @@ signature_certificate_sha1() {
     label=$2
     prefix="$temporary_root/$label-certificate-"
     run_external "$label certificate extraction failed" \
-        codesign -d --extract-certificates "$prefix" "$candidate"
+        codesign -d "--extract-certificates=$prefix" "$candidate"
     leaf="${prefix}0"
     [ -f "$leaf" ] && [ ! -L "$leaf" ] \
         || fail "$label signing certificate is unavailable"
@@ -58,7 +58,7 @@ signature_detail() {
         || fail "$label signature details are unreadable"
     grep -Fx "TeamIdentifier=$team" "$detail" >/dev/null \
         || fail "$label TeamIdentifier drifted"
-    grep -E '^flags=.*runtime' "$detail" >/dev/null \
+    grep -E '^CodeDirectory .* flags=.*\(runtime\)' "$detail" >/dev/null \
         || fail "$label hardened runtime is missing"
     grep -E '^Timestamp=' "$detail" >/dev/null \
         || fail "$label trusted timestamp is missing"
