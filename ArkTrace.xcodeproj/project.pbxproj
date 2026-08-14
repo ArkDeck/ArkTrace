@@ -11,6 +11,7 @@
 		010000000000000000000005 /* ArkTraceRendering in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000002 /* ArkTraceRendering */; };
 		010000000000000000000006 /* ArkTraceAppSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000003 /* ArkTraceAppSupport */; };
 		010000000000000000000007 /* ArkTraceAnalysis in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000004 /* ArkTraceAnalysis */; };
+		010000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000008 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		020000000000000000000005 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ThirdParty/TraceStreamer/macx/manifest.json; sourceTree = SOURCE_ROOT; };
 		020000000000000000000006 /* ArkTrace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArkTrace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		020000000000000000000007 /* ArkTraceProduct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ArkTraceProduct.xcconfig; sourceTree = "<group>"; };
+		020000000000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +54,7 @@
 			isa = PBXGroup;
 			children = (
 				020000000000000000000001 /* ArkTraceApp.swift */,
+				020000000000000000000008 /* Assets.xcassets */,
 				020000000000000000000002 /* Info.plist */,
 				020000000000000000000003 /* ArkTraceApp.entitlements */,
 			);
@@ -88,6 +91,7 @@
 			buildPhases = (
 				0B0000000000000000000001 /* Sources */,
 				040000000000000000000001 /* Frameworks */,
+				0D0000000000000000000001 /* Resources */,
 				030000000000000000000001 /* Copy Pinned TraceStreamer Bytes */,
 			);
 			buildRules = ();
@@ -159,6 +163,17 @@
 		};
 /* End PBXShellScriptBuildPhase section */
 
+/* Begin PBXResourcesBuildPhase section */
+		0D0000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				010000000000000000000008 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		0B0000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -176,6 +191,7 @@
 			baseConfigurationReference = 020000000000000000000007 /* ArkTraceProduct.xcconfig */;
 			buildSettings = {
 				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Apps/ArkTraceApp/ArkTraceApp.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
@@ -199,6 +215,7 @@
 			baseConfigurationReference = 020000000000000000000007 /* ArkTraceProduct.xcconfig */;
 			buildSettings = {
 				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Apps/ArkTraceApp/ArkTraceApp.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
