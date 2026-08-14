@@ -1,6 +1,6 @@
 # ArkTrace Phase 4 任务清单
 
-> 状态：Planned — P4-T01～T03 已完成统一独立 review；P4-T04～T07 implementation candidate 已成批实现、待统一 review；Phase 3 Exit 与外部门仍是正式 Exit 前置条件
+> 状态：Active，6/7 — P4-T01～T05 与 P4-T07 implementation review clean；P4-T06 medium 验收通过、large evidence 外部开放；Phase 3 Exit 与外部门仍是正式 Exit 前置条件
 > 阶段：Agent Query
 > 验收目标：Agent 无需解析 UI 或 human log，即可获得 bounded、deterministic Trace evidence
 
@@ -133,7 +133,7 @@ P4-T01 和 P4-T02 可以并行。
 **优先级：P0。**
 **依赖：P4-T01～T03。**
 **关联：AT-CLI-006～008。**
-**状态：Implemented candidate — pending unified batch review.**
+**状态：Completed — implementation review clean.**
 
 **query**
 
@@ -164,7 +164,7 @@ P4-T01 和 P4-T02 可以并行。
 **优先级：P0。**
 **依赖：P4-T04。**
 **关联：AT-JSON-002/006/007、AT-SEC-003～006、AT-DB-008。**
-**状态：Implemented candidate — pending unified batch review.**
+**状态：Completed — implementation review clean.**
 
 **交付**
 
@@ -191,7 +191,7 @@ P4-T01 和 P4-T02 可以并行。
 **优先级：P0。**
 **依赖：P4-T05。**
 **关联：AT-PERF-005/006、AC-AT-008～010/013。**
-**状态：Medium candidate measured；large evidence remains externally open.**
+**状态：Medium implementation/acceptance review clean；large evidence remains externally open.**
 
 **使用真实 Trace 逐条验证**
 
@@ -217,7 +217,7 @@ P4-T01 和 P4-T02 可以并行。
 
 **优先级：P1。**
 **依赖：P4-T06。**
-**状态：Implemented candidate — full gate remains fail-closed on Phase 3 external inputs.**
+**状态：Completed — implementation/gate review clean；full gate remains fail-closed on Phase 3 external inputs.**
 
 **交付**
 
@@ -229,14 +229,15 @@ P4-T01 和 P4-T02 可以并行。
 
 ## 5. Exit Checklist
 
-- [ ] query/context/analyze human/JSON 完成；
-- [ ] Agent 可回答六类真实 Trace 问题；
-- [ ] bounded context 有 referential closure 和 deterministic truncation；
-- [ ] Analysis 结果确定性、可复算、无 LLM；
-- [ ] no raw SQL/no GUI/no path leak；
-- [ ] real trace gate 零 skip；
-- [ ] context/analysis benchmark 有真实结果；
-- [ ] AC-AT-008/009/010/013 通过；AC-AT-015 的完整真实闭环由 Phase 6 验收。
+- [x] query/context/analyze human/JSON 完成；
+- [x] Agent 可回答六类真实 Trace 问题；
+- [x] bounded context 有 referential closure 和 deterministic truncation；
+- [x] Analysis 结果确定性、可复算、无 LLM；
+- [x] no raw SQL/no GUI/no path leak；
+- [x] reviewed medium real trace gate 零 skip；
+- [x] medium context/analysis benchmark 有真实结果；
+- [ ] large context/analysis benchmark 等待 reviewed external large fixture；
+- [x] AC-AT-008/009/010/013 的 medium/contract 验收通过；AC-AT-015 的完整真实闭环由 Phase 6 验收。
 
 ## 6. P4-T01～T03 已 review 的流水证据（2026-08-14）
 
@@ -248,7 +249,7 @@ P4-T01 和 P4-T02 可以并行。
 - 继承的 `scripts/test_phase3_batch1.sh` 同样以 **333 tests、0 skip** 通过，真实 fixture 的 parser SHA、quick_check、schema fingerprint 与 locked evidence 均未漂移；
 - 独立 reviewer 结论为 P0/P1/P2/P3 全 clean。本节当时只关闭 P4-T01～T03，不关闭 Phase 4 Exit，也不改写当时 Phase 3 Gate 3/6/7 的 Open 状态；随后 Gate 3 已由 Developer ID/notarization 的 tracked evidence 关闭，Gate 6/7 仍保持 Open。
 
-## 7. P4-T04～T07 统一 review 候选证据（2026-08-14）
+## 7. P4-T04～T07 统一 review 证据（2026-08-14）
 
 - `query/context/analyze` 已接入同一 `TraceSession`、Machine 1.0 envelope、deadline/signal/cleanup 与 output budget；Machine final handoff 会重新绑定 effective filter、normalized range、command kind 和 global row/event limits，executor 无法混入另一请求的合法 result；
 - 三命令各有 success/empty/truncated/typed-error 静态 canonical golden，共新增 12 份，仓库 Machine JSON golden 总数为 **34**；另有真实 bundled fixture human/JSON、filter/range/limit propagation 与 provenance regressions；
@@ -269,4 +270,5 @@ P4-T01 和 P4-T02 可以并行。
   `Fixtures/release-evidence/phase4-medium-agent-performance.json`，并被 source-tree identity
   明确排除以避免 evidence 自哈希循环。gate 会直接验证 Context ≤1s、deterministic analysis
   ≤3s、RSS ≤1.5 GiB，以及 Context events/bytes 与 analysis rows 均非空；
-- 本节仍是 unified review candidate。review clean 后才更新 T04～T07 完成数；人工 signed-App accessibility、Developer ID/notary 与 Phase 3 Gate 3 已由 tracked evidence 关闭，independently captured/reviewed large fixture 与 Phase 3 Gate 6/7 继续 Open，因此 `scripts/test_phase4.sh` 必须 fail closed，Phase 4 Exit 不在本批关闭。
+- 跨进程 single-flight cancellation regression 不再用固定 100ms 猜测 waiter 生命周期，而在真实 key-lock contention 后才取消；定向 Release 连续 12 次、完整 Release **338/338** 与完整 batch gate 均通过；
+- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。T04/T05/T07 implementation 完成；T06 的 medium 验收完成，但 independently captured/reviewed large fixture 与 Phase 3 Gate 6/7 继续 Open，因此 `scripts/test_phase4.sh` 必须 fail closed，Phase 4 Exit 不在本批关闭。

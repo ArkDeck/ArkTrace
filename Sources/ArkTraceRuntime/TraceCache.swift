@@ -156,6 +156,7 @@ public struct TraceCacheMetadata: Hashable, Codable, Sendable {
 struct TraceCacheTestHooks: Sendable {
     var beforePromotion: (@Sendable (URL) -> Void)?
     var afterPromotion: (@Sendable (URL) -> Void)?
+    var keyLockContended: (@Sendable () -> Void)?
     var afterKeyLock: (@Sendable (URL) -> Void)?
     var beforeReadyHandoff: (@Sendable (URL, URL) -> Void)?
     var rollbackInitialProbe: (@Sendable (URL) throws -> Void)?
@@ -168,6 +169,7 @@ struct TraceCacheTestHooks: Sendable {
     init(
         beforePromotion: (@Sendable (URL) -> Void)? = nil,
         afterPromotion: (@Sendable (URL) -> Void)? = nil,
+        keyLockContended: (@Sendable () -> Void)? = nil,
         afterKeyLock: (@Sendable (URL) -> Void)? = nil,
         beforeReadyHandoff: (@Sendable (URL, URL) -> Void)? = nil,
         rollbackInitialProbe: (@Sendable (URL) throws -> Void)? = nil,
@@ -179,6 +181,7 @@ struct TraceCacheTestHooks: Sendable {
     ) {
         self.beforePromotion = beforePromotion
         self.afterPromotion = afterPromotion
+        self.keyLockContended = keyLockContended
         self.afterKeyLock = afterKeyLock
         self.beforeReadyHandoff = beforeReadyHandoff
         self.rollbackInitialProbe = rollbackInitialProbe
@@ -730,7 +733,10 @@ enum TraceContentAddressedCache {
             report(.cacheLookup)
 
             let layout = try await detached { try CacheLayout(root: roots, key: key) }
-            let keyLock = try await TraceCacheFileLock.acquire(at: layout.lockURL)
+            let keyLock = try await TraceCacheFileLock.acquire(
+                at: layout.lockURL,
+                contentionHook: hooks.keyLockContended
+            )
             keyLockForCleanup = keyLock
             try Task.checkCancellation()
             hooks.afterKeyLock?(layout.entryURL)

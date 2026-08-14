@@ -1,9 +1,9 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-14 / Phase 3 活跃；P3-T08、P3-T10 已完成，P3-T09 的独立 large fixture 与发布门 6/7 仍开放；P4-T01～T03 已完成，P4-T04～T07 为统一 review 候选
+> 状态基线：2026-08-14 / Phase 3 活跃；P3-T08、P3-T10 已完成，P3-T09 的独立 large fixture 与发布门 6/7 仍开放；Phase 4 实现为 6/7，P4-T06 仅剩同一 large fixture 验收
 > 任务总数：57
-> 已完成：34（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 三项）
-> 下一阶段：Phase 3 — Native Viewer
+> 已完成：37（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项）
+> 下一阶段：关闭 Phase 3 发布门 6/7 与 Phase 4 P4-T06 large 验收
 
 ## 1. 阶段总览
 
@@ -13,7 +13,7 @@
 | 1 | Parser Vertical Slice | 9 | Completed，9/9 | real Trace → TraceStreamer → SQLite → Store → metadata | [PHASE_1_TASKS.md](./PHASE_1_TASKS.md) |
 | 2 | CLI Vertical Slice | 7 | Completed，7/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
 | 3 | Native Viewer | 10 | Active，9/10；T08/T10 complete，T09 large gates open | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
-| 4 | Agent Query | 7 | Planned；T01～T03 review clean，T04～T07 batch candidate | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
+| 4 | Agent Query | 7 | Active，6/7；T01～T05/T07 review clean，T06 large open | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
 | 5 | ArkDeck Integration | 9 | Planned | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Planned | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
 

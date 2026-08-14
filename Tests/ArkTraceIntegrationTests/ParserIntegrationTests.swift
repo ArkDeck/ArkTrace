@@ -2851,15 +2851,19 @@ final class ParserIntegrationTests: XCTestCase {
             release: keyRelease
         )
         try await waitForFile(keyReady)
+        let keyContention = OneShotSignal()
         let waiter = Task {
             try await TraceSession.openCached(
                 source: fixture,
                 parser: try TraceStreamerProcessParser(executableURL: binary),
                 stagingDirectory: waitRoot.appendingPathComponent("local-staging"),
-                cacheDirectory: waitRoot.appendingPathComponent("cache")
+                cacheDirectory: waitRoot.appendingPathComponent("cache"),
+                hooks: TraceCacheTestHooks(
+                    keyLockContended: { keyContention.signal() }
+                )
             )
         }
-        try await Task.sleep(for: .milliseconds(100))
+        await keyContention.wait()
         let cancelStart = ContinuousClock.now
         waiter.cancel()
         do {

@@ -7,8 +7,20 @@ fail() {
 }
 
 bounded_failure_summary() {
-    : "$1"
-    printf 'benchmark subprocess diagnostics withheld\n' >&2
+    benchmark_failure_log=$1
+    benchmark_sanitized_log="$temporary_root/benchmark.sanitized.log"
+    sed \
+        -e "s|$repository_root|<repo>|g" \
+        -e "s|$temporary_root|<temp>|g" \
+        -e "s|$ARKTRACE_REVIEWED_BUILD_ROOT|<build>|g" \
+        -e "s|$ARKTRACE_REVIEWED_TEMP_ROOT|<system-temp>|g" \
+        "$benchmark_failure_log" \
+        | sed -E 's#(/[A-Za-z0-9._ -]+)+#<path>#g' \
+        | cut -c1-512 >"$benchmark_sanitized_log"
+    grep -nE 'error: -\[|Test Case .* failed|fatal error|unexpected failure' \
+        "$benchmark_sanitized_log" | tail -40 >&2 || true
+    printf 'benchmark subprocess diagnostics withheld; bounded failure locations shown above\n' \
+        >&2
 }
 
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
