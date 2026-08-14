@@ -306,7 +306,40 @@ final class TraceDocumentControllerTests: XCTestCase {
         await controller.close()
     }
 
-    func testInspectorCollapseRestoresFocusToDisclosure() {
+    func testInspectorLayoutAndCollapseFocusPolicy() {
+        XCTAssertEqual(
+            TraceViewerLayoutPolicy.inspectorAction(
+                detailWidth: 0,
+                inspectorVisible: true,
+                inspectorWasAutoCollapsed: false
+            ),
+            .none
+        )
+        XCTAssertEqual(
+            TraceViewerLayoutPolicy.inspectorAction(
+                detailWidth: 759.999,
+                inspectorVisible: true,
+                inspectorWasAutoCollapsed: false
+            ),
+            .collapseAutomatically
+        )
+        XCTAssertEqual(
+            TraceViewerLayoutPolicy.inspectorAction(
+                detailWidth: 760,
+                inspectorVisible: false,
+                inspectorWasAutoCollapsed: true
+            ),
+            .expandAutomatically
+        )
+        XCTAssertEqual(
+            TraceViewerLayoutPolicy.inspectorAction(
+                detailWidth: 1_200,
+                inspectorVisible: false,
+                inspectorWasAutoCollapsed: false
+            ),
+            .none
+        )
+
         XCTAssertEqual(
             TraceViewerFocusPolicy.afterInspectorVisibilityChange(
                 current: .inspector, inspectorVisible: false

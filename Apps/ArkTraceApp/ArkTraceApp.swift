@@ -56,6 +56,9 @@ private struct TraceViewerRootView: View {
     @State private var searchText = ""
     @State private var showInspector = true
     @State private var showDiagnostics = false
+    @State private var inspectorVisibilityGeneration: UInt64 = 0
+    @State private var inspectorDisclosureFocusRequestID: UInt64?
+    @State private var inspectorWasAutoCollapsed = false
 
     var body: some View {
         NavigationSplitView {
@@ -63,21 +66,60 @@ private struct TraceViewerRootView: View {
                 .navigationSplitViewColumnWidth(min: 210, ideal: 270, max: 360)
         } detail: {
             GeometryReader { geometry in
-                HSplitView {
-                    timelinePane
-                        .frame(minWidth: 420)
-                    if showInspector {
-                        inspector
-                            .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
+                ZStack(alignment: .topTrailing) {
+                    HSplitView {
+                        timelinePane
+                            .frame(minWidth: 420)
+                        if showInspector {
+                            inspector
+                                .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
+                        }
+                    }
+                    if !showInspector {
+                        InspectorDisclosureButton(
+                            focusRequestID: inspectorDisclosureFocusRequestID,
+                            onFocusRequestConsumed: { requestID in
+                                guard inspectorDisclosureFocusRequestID == requestID else { return }
+                                inspectorDisclosureFocusRequestID = nil
+                            },
+                            action: { expandInspector(restoringInspectorFocus: true) }
+                        )
+                        .focused($focusRegion, equals: .inspectorDisclosure)
+                        .frame(width: 32, height: 32)
+                        .padding(8)
                     }
                 }
-                .onChange(of: geometry.size.width, initial: true) { _, width in
-                    if width < 760 {
-                        focusRegion = TraceViewerFocusPolicy.afterInspectorVisibilityChange(
-                            current: focusRegion,
-                            inspectorVisible: false
+                .task(id: geometry.size.width) {
+                    let initialVisibilityGeneration = inspectorVisibilityGeneration
+                    do {
+                        // Persisted window frames and live resize publish transient widths.
+                        // Only the last stable geometry may change pane visibility.
+                        try await Task.sleep(for: .milliseconds(150))
+                        try Task.checkCancellation()
+                    } catch {
+                        return
+                    }
+                    guard inspectorVisibilityGeneration == initialVisibilityGeneration else {
+                        return
+                    }
+                    switch TraceViewerLayoutPolicy.inspectorAction(
+                        detailWidth: Double(geometry.size.width),
+                        inspectorVisible: showInspector,
+                        inspectorWasAutoCollapsed: inspectorWasAutoCollapsed
+                    ) {
+                    case .none:
+                        return
+                    case .collapseAutomatically:
+                        inspectorWasAutoCollapsed = true
+                        collapseInspector(
+                            restoringDisclosureFocus: focusRegion == .inspector,
+                            initiatedByLayout: true
                         )
-                        showInspector = false
+                    case .expandAutomatically:
+                        inspectorWasAutoCollapsed = false
+                        expandInspector(
+                            restoringInspectorFocus: focusRegion == .inspectorDisclosure
+                        )
                     }
                 }
             }
@@ -265,8 +307,10 @@ private struct TraceViewerRootView: View {
                     Text("Inspector").font(.headline)
                     Spacer()
                     Button {
-                        focusRegion = .inspectorDisclosure
-                        showInspector = false
+                        collapseInspector(
+                            restoringDisclosureFocus: true,
+                            initiatedByLayout: false
+                        )
                     } label: {
                         Image(systemName: "sidebar.trailing")
                     }
@@ -345,16 +389,6 @@ private struct TraceViewerRootView: View {
                 Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass")
             }
             .primaryToolbarTarget()
-            if !showInspector {
-                Button {
-                    showInspector = true
-                    focusRegion = .inspector
-                } label: {
-                    Label("Show Inspector", systemImage: "sidebar.trailing")
-                }
-                .focused($focusRegion, equals: .inspectorDisclosure)
-                .primaryToolbarTarget()
-            }
         }
     }
 
@@ -392,6 +426,43 @@ private struct TraceViewerRootView: View {
         .focused($focusRegion, equals: .errorRecovery)
     }
 
+    private func collapseInspector(
+        restoringDisclosureFocus: Bool,
+        initiatedByLayout: Bool
+    ) {
+        inspectorVisibilityGeneration &+= 1
+        let generation = inspectorVisibilityGeneration
+        if !initiatedByLayout { inspectorWasAutoCollapsed = false }
+        showInspector = false
+        guard restoringDisclosureFocus else { return }
+        Task { @MainActor in
+            await Task.yield()
+            guard inspectorVisibilityGeneration == generation,
+                  !showInspector,
+                  focusRegion == .inspector || focusRegion == nil
+            else { return }
+            focusRegion = TraceViewerFocusPolicy.afterInspectorVisibilityChange(
+                current: .inspector,
+                inspectorVisible: false
+            )
+            inspectorDisclosureFocusRequestID = generation
+        }
+    }
+
+    private func expandInspector(restoringInspectorFocus: Bool) {
+        inspectorVisibilityGeneration &+= 1
+        let generation = inspectorVisibilityGeneration
+        inspectorDisclosureFocusRequestID = nil
+        inspectorWasAutoCollapsed = false
+        showInspector = true
+        guard restoringInspectorFocus else { return }
+        Task { @MainActor in
+            await Task.yield()
+            guard inspectorVisibilityGeneration == generation, showInspector else { return }
+            focusRegion = .inspector
+        }
+    }
+
     @MainActor
     private func presentOpenPanel() {
         let panel = NSOpenPanel()
@@ -416,6 +487,80 @@ private struct TraceViewerRootView: View {
                 ),
             ]
         )
+    }
+}
+
+private struct InspectorDisclosureButton: NSViewRepresentable {
+    let focusRequestID: UInt64?
+    let onFocusRequestConsumed: @MainActor (UInt64) -> Void
+    let action: @MainActor () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(
+            onFocusRequestConsumed: onFocusRequestConsumed,
+            action: action
+        )
+    }
+
+    func makeNSView(context: Context) -> NSButton {
+        let button = NSButton()
+        button.bezelStyle = .rounded
+        button.image = NSImage(
+            systemSymbolName: "sidebar.trailing",
+            accessibilityDescription: "Show Inspector"
+        )
+        button.imagePosition = .imageOnly
+        button.title = ""
+        button.toolTip = "Show Inspector"
+        button.setAccessibilityLabel("Show Inspector")
+        button.target = context.coordinator
+        button.action = #selector(Coordinator.activate)
+        configureFocus(on: button, coordinator: context.coordinator)
+        return button
+    }
+
+    func updateNSView(_ button: NSButton, context: Context) {
+        context.coordinator.onFocusRequestConsumed = onFocusRequestConsumed
+        context.coordinator.action = action
+        configureFocus(on: button, coordinator: context.coordinator)
+    }
+
+    private func configureFocus(on button: NSButton, coordinator: Coordinator) {
+        guard let focusRequestID,
+              coordinator.lastFocusRequestID != focusRequestID
+        else {
+            return
+        }
+        coordinator.lastFocusRequestID = focusRequestID
+        let expectedRequestID = focusRequestID
+        DispatchQueue.main.async { [weak button, weak coordinator] in
+            guard let button,
+                  let coordinator,
+                  button.window != nil,
+                  coordinator.lastFocusRequestID == expectedRequestID
+            else { return }
+            guard button.window?.makeFirstResponder(button) == true else { return }
+            coordinator.onFocusRequestConsumed(expectedRequestID)
+        }
+    }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var onFocusRequestConsumed: @MainActor (UInt64) -> Void
+        var action: @MainActor () -> Void
+        var lastFocusRequestID: UInt64?
+
+        init(
+            onFocusRequestConsumed: @escaping @MainActor (UInt64) -> Void,
+            action: @escaping @MainActor () -> Void
+        ) {
+            self.onFocusRequestConsumed = onFocusRequestConsumed
+            self.action = action
+        }
+
+        @objc func activate() {
+            action()
+        }
     }
 }
 

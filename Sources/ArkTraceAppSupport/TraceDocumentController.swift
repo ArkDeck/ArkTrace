@@ -56,6 +56,26 @@ public enum TraceViewerFocusPolicy {
     }
 }
 
+public enum TraceViewerInspectorLayoutAction: Hashable, Sendable {
+    case none
+    case collapseAutomatically
+    case expandAutomatically
+}
+
+public enum TraceViewerLayoutPolicy {
+    public static func inspectorAction(
+        detailWidth: Double,
+        inspectorVisible: Bool,
+        inspectorWasAutoCollapsed: Bool
+    ) -> TraceViewerInspectorLayoutAction {
+        guard detailWidth.isFinite, detailWidth > 0 else { return .none }
+        if detailWidth < 760 {
+            return inspectorVisible ? .collapseAutomatically : .none
+        }
+        return !inspectorVisible && inspectorWasAutoCollapsed ? .expandAutomatically : .none
+    }
+}
+
 public struct TraceAppErrorPresentation: Hashable, Sendable {
     public let title: String
     public let reason: String
