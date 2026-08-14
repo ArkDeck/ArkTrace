@@ -1,0 +1,23 @@
+ArkTrace accessibility walkthrough v1
+check: voiceOver
+candidateTreeSHA256: 35588b227cb1a929a97a0da186ab621910b2b0e67059b9a614f21aae7a0a6b01
+reviewedAt: 2026-08-14T04:12:56Z
+dynamicAnnouncementsReplayedAt: 2026-08-14T04:29:58Z
+reviewMethod: independent-agent-review
+steps:
+1. Enabled VoiceOver in macOS Accessibility settings, raised the exact signed candidate, activated Reload for zlib.htrace, and recorded the production AX announcement inputs "Opening trace" followed by "Trace loaded, 24 visible tracks".
+2. Focused Search, entered 2956, pressed Return, recorded the production AX announcement input "Search found 1 results", and observed the real search result "TID 2956 · itid 49".
+3. Pressed Tab from Search to Timeline, pressed Right to focus a real named-slice event, and pressed Return to select it.
+4. With VoiceOver still enabled, selected a real Timeline range, recorded the production AX announcement input "Range analysis complete", and observed both the Timeline semantic value and Inspector range analysis.
+5. Opened a temporary malformed trace to exercise the real error announcement and semantic error state, then reopened zlib.htrace and verified recovery.
+6. Restored VoiceOver and full keyboard navigation to their original off state.
+observations:
+- With VoiceOver enabled, Reload submitted "Opening trace" before completion submitted "Trace loaded, 24 visible tracks"; the signed candidate then resolved to a Timeline reporting viewport 0 ns–32.211 s and 24 visible tracks.
+- Search submitted "Search found 1 results" and exposed the single matching result "TID 2956 · itid 49" before focus moved to Timeline.
+- Timeline announced focused track TID 891 and callstack 863, with the full BundleMgrProxy::GetBundleInfo event name, start 12.045 s, duration 2.701 ms; Return added "selected event callstack 863".
+- Inspector exposed the same selected event name and identity plus PID 198, TID 891, process key 39, and thread key 78.
+- The selected range was 5.959 s–12.110 s (6.151 s); Timeline exposed "selected range 5.959 s to 12.110 s" and Inspector exposed Selected Range, CPU Utilization, Top Threads, Long Slices, and the bounded-lower-estimate status.
+- The dynamic-announcement replay selected 5.120 s–10.712 s under VoiceOver, submitted "Range analysis complete", and exposed the completed analysis in the Inspector.
+- The malformed trace exposed "ArkTrace could not finish" with "trace_streamer exited with a failure status" and a separate "Trace unavailable" semantic state; Open, Reload, Search, Sidebar, and Inspector remained reachable.
+- Reopening zlib.htrace restored the 24-track Timeline and Duration 32.211 s / 68 KB / schema cb34d8b668c2 / Cache Hit Inspector summary.
+- The Computer Use bridge cannot capture VoiceOver speech audio or transient Caption Panel pixels. This record therefore reports the exact submitted AX announcement input together with the independently observed VoiceOver-enabled focus, value, selection, Inspector, error, and recovery states; it does not claim an audio transcription.

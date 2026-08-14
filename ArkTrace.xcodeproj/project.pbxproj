@@ -12,6 +12,7 @@
 		010000000000000000000006 /* ArkTraceAppSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000003 /* ArkTraceAppSupport */; };
 		010000000000000000000007 /* ArkTraceAnalysis in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000004 /* ArkTraceAnalysis */; };
 		010000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000008 /* Assets.xcassets */; };
+		010000000000000000000009 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000009 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		020000000000000000000006 /* ArkTrace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArkTrace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		020000000000000000000007 /* ArkTraceProduct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ArkTraceProduct.xcconfig; sourceTree = "<group>"; };
 		020000000000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		020000000000000000000009 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +57,7 @@
 			children = (
 				020000000000000000000001 /* ArkTraceApp.swift */,
 				020000000000000000000008 /* Assets.xcassets */,
+				020000000000000000000009 /* Localizable.xcstrings */,
 				020000000000000000000002 /* Info.plist */,
 				020000000000000000000003 /* ArkTraceApp.entitlements */,
 			);
@@ -122,7 +125,7 @@
 			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, Base);
+			knownRegions = (en, de, Base);
 			mainGroup = 050000000000000000000001;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (080000000000000000000001 /* XCLocalSwiftPackageReference "." */);
@@ -169,6 +172,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				010000000000000000000008 /* Assets.xcassets in Resources */,
+				010000000000000000000009 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

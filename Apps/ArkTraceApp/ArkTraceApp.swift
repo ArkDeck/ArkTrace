@@ -58,6 +58,7 @@ private struct TraceViewerRootView: View {
     @State private var showDiagnostics = false
     @State private var inspectorVisibilityGeneration: UInt64 = 0
     @State private var inspectorDisclosureFocusRequestID: UInt64?
+    @State private var inspectorHideFocusRequestID: UInt64?
     @State private var inspectorWasAutoCollapsed = false
 
     var body: some View {
@@ -70,23 +71,36 @@ private struct TraceViewerRootView: View {
                     HSplitView {
                         timelinePane
                             .frame(minWidth: 420)
+                            .overlay(alignment: .topLeading) {
+                                if !showInspector {
+                                    InspectorFocusButton(
+                                        title: String(
+                                            localized: "Show Inspector",
+                                            comment: "Button that restores the Inspector pane."
+                                        ),
+                                        showsTitle: true,
+                                        focusRequestID: inspectorDisclosureFocusRequestID,
+                                        onFocusRequestConsumed: { requestID in
+                                            guard inspectorDisclosureFocusRequestID == requestID else { return }
+                                            inspectorDisclosureFocusRequestID = nil
+                                        },
+                                        action: { expandInspector(restoringInspectorFocus: true) }
+                                    )
+                                    .focused($focusRegion, equals: .inspectorDisclosure)
+                                    .frame(
+                                        minWidth: 124,
+                                        minHeight: 32,
+                                        idealHeight: 32,
+                                        maxHeight: 32
+                                    )
+                                    .fixedSize(horizontal: true, vertical: false)
+                                    .padding(8)
+                                }
+                            }
                         if showInspector {
                             inspector
                                 .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
                         }
-                    }
-                    if !showInspector {
-                        InspectorDisclosureButton(
-                            focusRequestID: inspectorDisclosureFocusRequestID,
-                            onFocusRequestConsumed: { requestID in
-                                guard inspectorDisclosureFocusRequestID == requestID else { return }
-                                inspectorDisclosureFocusRequestID = nil
-                            },
-                            action: { expandInspector(restoringInspectorFocus: true) }
-                        )
-                        .focused($focusRegion, equals: .inspectorDisclosure)
-                        .frame(width: 32, height: 32)
-                        .padding(8)
                     }
                 }
                 .task(id: geometry.size.width) {
@@ -306,18 +320,26 @@ private struct TraceViewerRootView: View {
                 HStack {
                     Text("Inspector").font(.headline)
                     Spacer()
-                    Button {
-                        collapseInspector(
-                            restoringDisclosureFocus: true,
-                            initiatedByLayout: false
-                        )
-                    } label: {
-                        Image(systemName: "sidebar.trailing")
-                    }
-                    .buttonStyle(.plain)
-                    .help("Hide Inspector")
-                    .accessibilityLabel("Hide Inspector")
-                    .arktraceAccessibleTarget()
+                    InspectorFocusButton(
+                        title: String(
+                            localized: "Hide Inspector",
+                            comment: "Button that collapses the Inspector pane."
+                        ),
+                        showsTitle: false,
+                        focusRequestID: inspectorHideFocusRequestID,
+                        onFocusRequestConsumed: { requestID in
+                            guard inspectorHideFocusRequestID == requestID else { return }
+                            inspectorHideFocusRequestID = nil
+                        },
+                        action: {
+                            collapseInspector(
+                                restoringDisclosureFocus: true,
+                                initiatedByLayout: false
+                            )
+                        }
+                    )
+                    .frame(width: 32, height: 32)
+                    .focused($focusRegion, equals: .inspector)
                 }
                 Divider()
                 if let event = controller.selectedEvent {
@@ -346,7 +368,6 @@ private struct TraceViewerRootView: View {
             .padding(14)
         }
         .focusSection()
-        .focused($focusRegion, equals: .inspector)
     }
 
     @ToolbarContentBuilder
@@ -433,6 +454,7 @@ private struct TraceViewerRootView: View {
         inspectorVisibilityGeneration &+= 1
         let generation = inspectorVisibilityGeneration
         if !initiatedByLayout { inspectorWasAutoCollapsed = false }
+        inspectorHideFocusRequestID = nil
         showInspector = false
         guard restoringDisclosureFocus else { return }
         Task { @MainActor in
@@ -453,6 +475,7 @@ private struct TraceViewerRootView: View {
         inspectorVisibilityGeneration &+= 1
         let generation = inspectorVisibilityGeneration
         inspectorDisclosureFocusRequestID = nil
+        inspectorHideFocusRequestID = nil
         inspectorWasAutoCollapsed = false
         showInspector = true
         guard restoringInspectorFocus else { return }
@@ -460,6 +483,7 @@ private struct TraceViewerRootView: View {
             await Task.yield()
             guard inspectorVisibilityGeneration == generation, showInspector else { return }
             focusRegion = .inspector
+            inspectorHideFocusRequestID = generation
         }
     }
 
@@ -490,7 +514,9 @@ private struct TraceViewerRootView: View {
     }
 }
 
-private struct InspectorDisclosureButton: NSViewRepresentable {
+private struct InspectorFocusButton: NSViewRepresentable {
+    let title: String
+    let showsTitle: Bool
     let focusRequestID: UInt64?
     let onFocusRequestConsumed: @MainActor (UInt64) -> Void
     let action: @MainActor () -> Void
@@ -507,12 +533,12 @@ private struct InspectorDisclosureButton: NSViewRepresentable {
         button.bezelStyle = .rounded
         button.image = NSImage(
             systemSymbolName: "sidebar.trailing",
-            accessibilityDescription: "Show Inspector"
+            accessibilityDescription: title
         )
-        button.imagePosition = .imageOnly
-        button.title = ""
-        button.toolTip = "Show Inspector"
-        button.setAccessibilityLabel("Show Inspector")
+        button.imagePosition = showsTitle ? .imageLeading : .imageOnly
+        button.title = showsTitle ? title : ""
+        button.toolTip = title
+        button.setAccessibilityLabel(title)
         button.target = context.coordinator
         button.action = #selector(Coordinator.activate)
         configureFocus(on: button, coordinator: context.coordinator)

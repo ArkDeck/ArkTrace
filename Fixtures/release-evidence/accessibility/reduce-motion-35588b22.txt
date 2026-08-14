@@ -1,0 +1,15 @@
+ArkTrace accessibility walkthrough v1
+check: reduceMotion
+candidateTreeSHA256: 35588b227cb1a929a97a0da186ab621910b2b0e67059b9a614f21aae7a0a6b01
+reviewedAt: 2026-08-14T04:12:56Z
+reviewMethod: independent-agent-review
+steps:
+1. Enabled Reduce Motion in macOS Accessibility settings while the exact signed candidate displayed zlib.htrace.
+2. Invoked Zoom In and observed the viewport change from 0 ns–32.211 s to 8.053 s–24.158 s.
+3. Verified the Timeline retained 24 visible tracks and exposed the updated pan, zoom, event, and track actions.
+4. Restored Reduce Motion to its original off state after completing the interaction.
+observations:
+- Zoom completed directly at the requested viewport without a prolonged or repeated transition.
+- Timeline semantics remained present before and after the viewport change.
+- No flashing, autoplay, motion-only status, or animation-dependent affordance was observed.
+- The UI remained responsive throughout the reduced-motion walkthrough.
