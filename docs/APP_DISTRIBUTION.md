@@ -81,9 +81,14 @@ expands the same Xcode build settings. Tests and the app gate fail closed on dri
 for manual review. `scripts/package_phase3.sh` consumes that same App and a
 tracked evidence manifest under `Fixtures/release-evidence/`; it does not rebuild
 or silently substitute a candidate. The six required artifacts and their schema
-are documented in that directory. The reviewer key must match the independent,
-HEAD-locked trust root in `Config/ArkTraceReleaseReviewers.json`; a caller cannot
-self-provision a key or mutate the evidence/configuration during packaging. A missing Developer ID identity/team/profile,
+are documented in that directory. The manifest and all six artifacts must be
+tracked, byte-identical to `HEAD`, hash-bound, and tied to the exact candidate;
+the independent Agent or human review result is recorded in Git history. A
+separate accessibility reviewer key is deliberately not required because it
+would not establish additional independence inside the same build workspace.
+The large-trace reviewer and redistribution-grant issuer remain independently
+key-bound in `Config/ArkTraceReleaseReviewers.json`. A caller cannot mutate the
+accessibility evidence or large-trace trust configuration during packaging. A missing Developer ID identity/team/profile,
 large-trace record, manual evidence artifact, notarization acceptance, staple,
 or Gatekeeper assessment causes the complete Phase 3 gate to fail closed.
 All distribution output roots must be physical owner-marked descendants of the

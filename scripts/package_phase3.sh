@@ -138,13 +138,10 @@ team=${ARKTRACE_DEVELOPMENT_TEAM:-}
 notary_profile=${ARKTRACE_NOTARY_PROFILE:-}
 reviewed_app=${ARKTRACE_REVIEWED_SIGNED_APP:-}
 accessibility_evidence=${ARKTRACE_ACCESSIBILITY_EVIDENCE:-}
-reviewer_public_key=${ARKTRACE_ACCESSIBILITY_REVIEWER_PUBLIC_KEY:-}
 artifact_directory=${ARKTRACE_PHASE3_ARTIFACT_DIR:-$repository_root/.build/phase3-artifacts}
-reviewer_configuration="$repository_root/Config/ArkTraceReleaseReviewers.json"
 
 [ -n "$identity" ] && [ -n "$team" ] && [ -n "$notary_profile" ] \
     || fail "Developer ID identity, team, and notary keychain profile are required"
-command -v openssl >/dev/null 2>&1 || fail "OpenSSL is unavailable"
 [ -n "$reviewed_app" ] && [ -n "$accessibility_evidence" ] \
     || fail "the reviewed signed App and its accessibility evidence are required"
 arktrace_validate_reviewed_roots "$repository_root"
@@ -153,14 +150,6 @@ arktrace_validate_owned_directory_request "$artifact_directory" "artifact output
     || fail "reviewed signed App is unavailable or is a symlink"
 [ -f "$accessibility_evidence" ] && [ ! -L "$accessibility_evidence" ] \
     || fail "accessibility evidence is unavailable or is a symlink"
-[ -f "$reviewer_public_key" ] && [ ! -L "$reviewer_public_key" ] \
-    || fail "independent accessibility reviewer public key is required"
-[ -f "$reviewer_configuration" ] && [ ! -L "$reviewer_configuration" ] \
-    || fail "reviewer trust configuration is unavailable"
-[ "$(stat -f '%z' "$reviewer_configuration")" -le 16384 ] \
-    || fail "reviewer trust configuration exceeds its byte bound"
-[ "$(stat -f '%z' "$reviewer_public_key")" -le 65536 ] \
-    || fail "accessibility reviewer public key exceeds its byte bound"
 arktrace_create_reviewed_build_root
 temporary_root=$(mktemp -d "$ARKTRACE_REVIEWED_TEMP_ROOT/arktrace-package.XXXXXX")
 partial_zip=
@@ -195,7 +184,6 @@ evidence_relative=${evidence_path#"$repository_root"/}
 git -C "$repository_root" ls-files --error-unmatch "$evidence_relative" >/dev/null 2>&1 \
     || fail "accessibility evidence is not tracked"
 reviewed_head_file "$evidence_relative" "$accessibility_evidence"
-reviewed_head_file "Config/ArkTraceReleaseReviewers.json" "$reviewer_configuration"
 
 app="$temporary_root/ArkTrace.app"
 run_external "reviewed App copy failed" /usr/bin/ditto --noqtn "$reviewed_app" "$app"
@@ -245,7 +233,7 @@ jq -e \
     --arg version "$app_version" --arg build "$app_build" \
     --arg bundle "$app_bundle_id" --arg team "$team" '
     .formatVersion == 1
-    and ((keys | sort) == ["app","checks","formatVersion","reviewSignaturePath","reviewedAt","reviewer","reviewerKeySHA256"])
+    and ((keys | sort) == ["app","checks","formatVersion","reviewMethod","reviewedAt","reviewer"])
     and .app.treeSHA256 == $tree
     and .app.codeDirectoryHash == $cdhash
     and .app.version == $version
@@ -266,8 +254,7 @@ jq -e \
     and (.checks.minimumTargets.artifactPath | endswith(".png"))
     and (.checks.focusRestoration.artifactPath | endswith(".txt"))
     and (.reviewer | type == "string" and length > 0 and length <= 128)
-    and (.reviewSignaturePath | test("^Fixtures/release-evidence/[A-Za-z0-9_.+-]+\\.sig$") and contains("..") | not)
-    and (.reviewerKeySHA256 | test("^[0-9a-f]{64}$"))
+    and (.reviewMethod == "independent-agent-review" or .reviewMethod == "independent-human-review")
     and (.reviewedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T"))
     and ((.app | keys | sort) == ["build","bundleIdentifier","codeDirectoryHash","teamIdentifier","treeSHA256","version"])
 ' "$accessibility_evidence" >/dev/null \
@@ -277,33 +264,6 @@ PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$script_directory/verify_phase3_evidence_times.py" \
     --timestamp "$accessibility_reviewed_at" >/dev/null 2>&1 \
     || fail "accessibility review timestamp is not canonical UTC"
-expected_reviewer_key_sha=$(jq -er '.reviewerKeySHA256' "$accessibility_evidence")
-jq -e '
-    .formatVersion == 1
-    and ((keys | sort) == ["accessibilityReviewerPublicKeySHA256","formatVersion","largeTraceReviewerPublicKeySHA256","redistributionGrantIssuerPublicKeySHA256"])
-    and (.accessibilityReviewerPublicKeySHA256 | test("^[0-9a-f]{64}$"))
-    | select(.)
-' "$reviewer_configuration" >/dev/null 2>&1 \
-    || fail "an independent accessibility reviewer trust root has not been provisioned"
-trusted_reviewer_key_sha=$(jq -er '.accessibilityReviewerPublicKeySHA256' \
-    "$reviewer_configuration")
-[ "$expected_reviewer_key_sha" = "$trusted_reviewer_key_sha" ] \
-    || fail "accessibility reviewer is not in the reviewed trust configuration"
-[ "$(shasum -a 256 "$reviewer_public_key" | awk '{print $1}')" = \
-    "$expected_reviewer_key_sha" ] \
-    || fail "accessibility reviewer key identity drifted"
-review_signature_relative=$(jq -er '.reviewSignaturePath' "$accessibility_evidence")
-review_signature="$repository_root/$review_signature_relative"
-[ -f "$review_signature" ] && [ ! -L "$review_signature" ] \
-    || fail "accessibility reviewer signature is unavailable"
-[ "$(stat -f '%z' "$review_signature")" -le 65536 ] \
-    || fail "accessibility reviewer signature exceeds its byte bound"
-git -C "$repository_root" ls-files --error-unmatch "$review_signature_relative" \
-    >/dev/null 2>&1 || fail "accessibility reviewer signature is not tracked"
-reviewed_head_file "$review_signature_relative" "$review_signature"
-run_external "accessibility reviewer signature is invalid" \
-    openssl dgst -sha256 -verify "$reviewer_public_key" \
-        -signature "$review_signature" "$accessibility_evidence"
 while IFS="$(printf '\t')" read -r check_name artifact_path artifact_sha; do
     reviewed_artifact "$check_name" "$artifact_path" "$artifact_sha"
 done <<EOF

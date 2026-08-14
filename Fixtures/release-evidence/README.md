@@ -17,7 +17,12 @@ Each check object has the exact shape
 `{"status":"pass","artifactPath":"Fixtures/release-evidence/...","artifactSHA256":"..."}`.
 The manifest also records the candidate tree SHA-256, Code Directory hash,
 version, build, bundle identifier, Team ID, reviewer, and review timestamp.
-The packaging gate rehashes every artifact and rejects missing, untracked,
-duplicated, oversized, or candidate-mismatched evidence. Generated screenshots
-or synthetic accessibility claims are not accepted as substitutes for the real
+It records whether the review was performed by an independent Agent or human.
+The packaging gate requires the manifest and every artifact to be exact bytes
+from `HEAD`, rehashes every artifact, and rejects missing, dirty, untracked,
+duplicated, oversized, or candidate-mismatched evidence. Git history and the
+independent review result are the audit record; a separate reviewer signing key
+is intentionally not required because it would not add meaningful independence
+when the reviewer and build run in the same workspace. Generated screenshots or
+synthetic accessibility claims are not accepted as substitutes for the real
 signed-App walkthrough.

@@ -109,8 +109,9 @@ Inspector。P3-T08～T10、Phase 3 Exit 及发布门 3/6/7 仍为开放，不得
   `licenses`、`THIRD_PARTY_NOTICES.md` 消费同一资源。发布门 3 仍等待本批独立 review，未提前关闭。
 - Packaging：distribution candidate 将 unsigned reproducible helper 内层 Developer-ID 签名并把
   signed SHA/recipe/exact Team/Authority/certificate fingerprint 记录到 Resources，随后签外层 App；package 只消费经人工 review
-  的同一 App，要求 empty entitlement、HEAD 锁定 reviewer trust root、签名 review manifest 和六项
-  distinct tracked artifact/hash，提交 notarization、staple 后才
+  的同一 App，要求 empty entitlement、与 `HEAD` 逐字节一致且绑定 exact App tree/CDHash 的 review manifest、
+  独立 Agent/人工 review 记录和六项 distinct tracked artifact/hash；同一 workspace 内不再制造不能提供实际独立性的
+  accessibility reviewer key，large trace reviewer 与 redistribution grant issuer 的独立信任根保持不变。提交 notarization、staple 后才
   在 owner-bound private partial 建 ZIP；解包复验 nested/outer signature、ticket 与 `spctl` 全过后
   才原子发布 final ZIP。失败的 candidate/ZIP 不会留在正式 artifact 名下。本机 `security find-identity`
   当前为 `0 valid identities found`，

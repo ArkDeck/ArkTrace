@@ -192,7 +192,7 @@ jq -n --arg sha "$(printf fake | shasum -a 256 | awk '{print $1}')" '
 ' >"$provenance"
 mkdir -p "$repository/Config"
 jq -n --arg trusted "$(printf trusted | shasum -a 256 | awk '{print $1}')" '
- {formatVersion:1,accessibilityReviewerPublicKeySHA256:null,
+ {formatVersion:1,
   largeTraceReviewerPublicKeySHA256:$trusted,
   redistributionGrantIssuerPublicKeySHA256:$trusted}
 ' >"$repository/Config/ArkTraceReleaseReviewers.json"

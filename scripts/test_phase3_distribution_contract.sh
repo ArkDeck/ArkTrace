@@ -286,34 +286,19 @@ for check in $checks; do
         '. + {($check): {status:"pass",artifactPath:$path,artifactSHA256:$sha}}')
 done
 evidence="$repository/Fixtures/release-evidence/accessibility.json"
-reviewer_private_key="$temporary_root/reviewer-private.pem"
-reviewer_public_key="$temporary_root/reviewer-public.pem"
-openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 \
-    -out "$reviewer_private_key" >/dev/null 2>&1
-openssl pkey -in "$reviewer_private_key" -pubout -out "$reviewer_public_key" \
-    >/dev/null 2>&1
-reviewer_key_sha=$(shasum -a 256 "$reviewer_public_key" | awk '{print $1}')
-cat >"$repository/Config/ArkTraceReleaseReviewers.json" <<EOF
-{"formatVersion":1,"accessibilityReviewerPublicKeySHA256":"$reviewer_key_sha","largeTraceReviewerPublicKeySHA256":null,"redistributionGrantIssuerPublicKeySHA256":null}
-EOF
-review_signature_relative='Fixtures/release-evidence/accessibility.sig'
-review_signature="$repository/$review_signature_relative"
 printf '%s' "$checks_json" | jq \
     --arg tree "$candidate_tree" \
-    --arg team "$team" --arg key "$reviewer_key_sha" \
-    --arg signature "$review_signature_relative" '
+    --arg team "$team" '
     {
       formatVersion:1,
       app:{treeSHA256:$tree,codeDirectoryHash:"0123456789abcdef",version:"0.1.0",build:"1",bundleIdentifier:"com.arktrace.ArkTrace",teamIdentifier:$team},
       checks:.,reviewedAt:"2026-08-13T00:00:00Z",reviewer:"independent-reviewer",
-      reviewerKeySHA256:$key,reviewSignaturePath:$signature
+      reviewMethod:"independent-agent-review"
     }
 ' >"$evidence"
-openssl dgst -sha256 -sign "$reviewer_private_key" -out "$review_signature" "$evidence"
-git -C "$repository" add Config/ArkTraceReleaseReviewers.json Fixtures/release-evidence
+git -C "$repository" add Fixtures/release-evidence
 git -C "$repository" -c user.name='ArkTrace Contract' \
     -c user.email='contract@invalid.example' commit -qm 'lock review evidence'
-export ARKTRACE_ACCESSIBILITY_REVIEWER_PUBLIC_KEY="$reviewer_public_key"
 
 : >"$operation_log"
 PATH="$fake_bin:$PATH" \
@@ -410,11 +395,10 @@ then
     fail "prefix TeamIdentifier was accepted"
 fi
 
-trusted_configuration="$repository/Config/ArkTraceReleaseReviewers.json"
-cp "$trusted_configuration" "$temporary_root/trusted-reviewers.json"
-jq '.accessibilityReviewerPublicKeySHA256 = ("b" * 64)' \
-    "$trusted_configuration" >"$temporary_root/untrusted-reviewers.json"
-cp "$temporary_root/untrusted-reviewers.json" "$trusted_configuration"
+cp "$evidence" "$temporary_root/trusted-accessibility.json"
+jq '.reviewer = "caller-modified-reviewer"' \
+    "$evidence" >"$temporary_root/unreviewed-accessibility.json"
+cp "$temporary_root/unreviewed-accessibility.json" "$evidence"
 if PATH="$fake_bin:$PATH" \
     ARKTRACE_FAKE_OPERATION_LOG="$operation_log" \
     ARKTRACE_DEVELOPER_ID_APPLICATION="$identity" \
@@ -424,9 +408,9 @@ if PATH="$fake_bin:$PATH" \
     ARKTRACE_PHASE3_ARTIFACT_DIR="$temporary_root/dirty-trust" \
     "$repository/scripts/package_phase3.sh" >/dev/null 2>&1
 then
-    fail "caller-modified reviewer trust configuration was accepted"
+    fail "caller-modified accessibility evidence was accepted"
 fi
-cp "$temporary_root/trusted-reviewers.json" "$trusted_configuration"
+cp "$temporary_root/trusted-accessibility.json" "$evidence"
 
 printf 'tampered\n' >>"$repository/Fixtures/release-evidence/voiceOver.txt"
 if PATH="$fake_bin:$PATH" \

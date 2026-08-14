@@ -161,7 +161,7 @@ else
     trusted_review_key=$(jq -er '
       if (
         .formatVersion == 1
-        and ((keys | sort) == ["accessibilityReviewerPublicKeySHA256","formatVersion","largeTraceReviewerPublicKeySHA256","redistributionGrantIssuerPublicKeySHA256"])
+        and ((keys | sort) == ["formatVersion","largeTraceReviewerPublicKeySHA256","redistributionGrantIssuerPublicKeySHA256"])
         and (.largeTraceReviewerPublicKeySHA256 | test("^[0-9a-f]{64}$"))
         and (.redistributionGrantIssuerPublicKeySHA256 | test("^[0-9a-f]{64}$"))
       ) then .largeTraceReviewerPublicKeySHA256 else empty end
