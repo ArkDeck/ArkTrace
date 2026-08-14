@@ -1,0 +1,17 @@
+ArkTrace accessibility walkthrough v1
+check: keyboardNavigation
+candidateTreeSHA256: c00e79ed569e6198a269e56607ab41e38c1d6b948dc895f0385c58ff229bed54
+reviewedAt: 2026-08-14T05:12:26Z
+reviewMethod: independent-agent-review
+steps:
+1. Enabled macOS full keyboard navigation, raised the exact signed candidate, and loaded zlib.htrace.
+2. Focused Search, typed 2956, pressed Return, and verified the real result "TID 2956 · itid 49".
+3. Pressed Tab once from Search to Trace Timeline, then pressed Right to focus a real event and Return to select it.
+4. Keyboard-collapsed and expanded Inspector with Space and observed the exact first responder after each transition.
+5. Restored full keyboard navigation to its original off state after the walkthrough.
+observations:
+- Search, Timeline, Inspector disclosure, and Sidebar remained reachable in a stable traversal without a pointer.
+- The focused Timeline value identified track TID 891 and callstack 863, named "H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::GetBundleInfo(const std::string &, const OHOS::AppExecFwk::BundleFlag, OHOS::AppExecFwk::BundleInfo &, int32_t)", starting at 12.045 s for 2.701 ms.
+- Return added "selected event callstack 863" to the Timeline semantic value and Inspector exposed the same name, identity, start, duration, PID 198, TID 891, process key 39, and thread key 78.
+- Timeline exposed its keyboard instructions and only actions that could change the current semantic state.
+- Pane collapse focused Show Inspector; pane expansion focused Hide Inspector without dropping focus to the window.

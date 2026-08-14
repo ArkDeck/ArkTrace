@@ -1,0 +1,17 @@
+ArkTrace accessibility walkthrough v1
+check: focusRestoration
+candidateTreeSHA256: c00e79ed569e6198a269e56607ab41e38c1d6b948dc895f0385c58ff229bed54
+reviewedAt: 2026-08-14T05:12:26Z
+reviewMethod: independent-agent-review
+steps:
+1. Launched the exact Developer ID signed candidate with its real German localization selected.
+2. In macOS Accessibility > Display > Text Size, changed the preferred reading size from Default (value 4) to 14 pt (value 6).
+3. Resized the real ArkTrace window to its supported minimum and verified the Inspector auto-collapsed.
+4. Keyboard-focused the localized Show Inspector disclosure, activated it, then activated the localized Hide Inspector control with Space.
+5. Restored the preferred reading size, Reduce Motion, VoiceOver, and full keyboard navigation settings after the walkthrough.
+observations:
+- The complete German title "Informationsbereich wieder einblenden" remained visible and keyboard focused at the supported minimum; it was not truncated, overlapped, or moved into toolbar overflow.
+- The minimum-window artifact is a 957 by 768 pixel capture made while the 14 pt macOS preferred reading size was active.
+- Manual collapse moved focus directly to the only control that could restore the hidden pane; no extra Tab was required.
+- Manual expansion moved focus to "Informationsbereich ausblenden" in the rematerialized Inspector pane.
+- A later stable narrow geometry again exposed the disclosure without stealing focus from unrelated controls.

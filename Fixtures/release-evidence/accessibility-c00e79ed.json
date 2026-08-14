@@ -1,0 +1,46 @@
+{
+  "app": {
+    "build": "1",
+    "bundleIdentifier": "com.arktrace.ArkTrace",
+    "codeDirectoryHash": "c3acd968f032c8256b16197b89155fd544dcde78",
+    "teamIdentifier": "8AQTYW5FKR",
+    "treeSHA256": "c00e79ed569e6198a269e56607ab41e38c1d6b948dc895f0385c58ff229bed54",
+    "version": "0.1.0"
+  },
+  "checks": {
+    "focusRestoration": {
+      "artifactPath": "Fixtures/release-evidence/accessibility/focus-restoration-c00e79ed.txt",
+      "artifactSHA256": "6d2edcfd5f2b11e16d035d36d90f6da1bb7da255dec3f9721d37db6a85768a4f",
+      "status": "pass"
+    },
+    "keyboardNavigation": {
+      "artifactPath": "Fixtures/release-evidence/accessibility/keyboard-navigation-c00e79ed.txt",
+      "artifactSHA256": "a82d3788309860f3de2c2d9f8ce7034b103eb3b39d14b2f27ca5106a70a719de",
+      "status": "pass"
+    },
+    "minimumTargets": {
+      "artifactPath": "Fixtures/release-evidence/accessibility/minimum-targets-c00e79ed.png",
+      "artifactSHA256": "35f8375b92f85d53f44efdef7f7e8649262ce6e32ac2cb5a7b742b09df552cea",
+      "status": "pass"
+    },
+    "minimumWindow": {
+      "artifactPath": "Fixtures/release-evidence/accessibility/minimum-window-c00e79ed.png",
+      "artifactSHA256": "d3478ee0741ada625570e5f1f1a9bf0411bfdfee80c54ce743d66de55d48113e",
+      "status": "pass"
+    },
+    "reduceMotion": {
+      "artifactPath": "Fixtures/release-evidence/accessibility/reduce-motion-c00e79ed.txt",
+      "artifactSHA256": "a2c63cce03942377c124658ec12826326fc8f8e7ed00c0079ca665ca12de04cc",
+      "status": "pass"
+    },
+    "voiceOver": {
+      "artifactPath": "Fixtures/release-evidence/accessibility/voiceover-c00e79ed.txt",
+      "artifactSHA256": "d6eef32ae2be25cafe8fa2b8109ede55a1e27d4233744722be5b340f972c5fa7",
+      "status": "pass"
+    }
+  },
+  "formatVersion": 1,
+  "reviewMethod": "independent-agent-review",
+  "reviewedAt": "2026-08-14T05:12:26Z",
+  "reviewer": "Codex Agent accessibility walkthrough"
+}
