@@ -115,11 +115,11 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   仍在 digest 处 fail closed，不作为 release fixture；只有重新采集的 exact hash 能进入门禁。
   `scripts/benchmark_phase3.sh large` 和 `scripts/test_phase3.sh` 在缺少或漂移
   `ARKTRACE_LARGE_TRACE`/provenance evidence 时继续 fail closed。
-  正式 benchmark 的 cache/viewport/context/analysis p95 为 321.754/283.091/1165.668/1088.449 ms，
-  frame p95 4.068 ms、peak RSS 811,909,120 bytes；24 个 applicable/persistent indexes 精确闭合且
+  正式 benchmark 的 cache/viewport/context/analysis/frame/RSS 均满足冻结阈值；24 个
+  applicable/persistent indexes 精确闭合且
   `usesAutomaticIndex=false`。真实 child cancellation 后 child 不存在，禁止的 cache/private/owner/
   quarantine residue 为 0；空的安全 `.owners` 目录不被伪报为 active owner。原子事实源为
-  `Fixtures/release-evidence/phase3-large-performance.json`。
+  `Fixtures/release-evidence/phase3-large-performance.json`，文档不复制会随每次真实测量波动的精确值。
 - Build hardening：`source-lock.json` 固定 upstream、13 个 source dependency 与 GN/Ninja
   URL/SHA/bytes；standalone patch、HTTPS rewrite 和构建脚本共同导出 recipe
   `e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06`。

@@ -294,6 +294,6 @@ Gate 6/7 的关闭条件现已由 exact、可机器重验的证据满足：
   完整性放行仍来自严格 verifier。
 - release-provenance 正式 recapture：PASS，674,044,067 bytes、120,672 个唯一 packet、单 segment，
   header/payload digest 一致；pinned SQLite `quick_check=ok` 且 required rows 与 provenance 精确相等；
-- 正式 large benchmark 与真实 child cancellation：PASS；cache/viewport/context/analysis p95
-  321.754/283.091/1165.668/1088.449 ms，frame p95 4.068 ms，peak RSS 811,909,120 bytes，
-  cancellation 禁止 residue 为 0。最终逐字段值以 tracked performance JSON 为准。
+- 正式 large benchmark 与真实 child cancellation：PASS；cache/viewport/context/analysis、frame
+  和 peak RSS 均满足冻结阈值，cancellation 禁止 residue 为 0。每次测量会有正常波动，最终逐字段
+  数值只以 tracked performance JSON 为准。

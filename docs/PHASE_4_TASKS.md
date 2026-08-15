@@ -209,9 +209,9 @@ P4-T01 和 P4-T02 可以并行。
 - medium 发布门在正式 20-sample measurement 前完整执行一次相同 production workload 作为
   warm-filesystem/runtime warm-up；该轮不得发布 evidence，也不得参与 percentile 或放宽下列阈值；
 - [x] medium context p95 ≤1s；
-- [ ] large context p95 ≤2s（实测 1.166s；本文件暂不据此自动改变 Phase 4 总状态）；
+- [ ] large context p95 ≤2s（signed evidence 已满足；本文件暂不据此自动改变 Phase 4 总状态）；
 - [x] medium deterministic range analysis p95 ≤3s；
-- [ ] large deterministic range analysis p95 ≤5s（实测 1.089s；本文件暂不据此自动改变 Phase 4 总状态）；
+- [ ] large deterministic range analysis p95 ≤5s（signed evidence 已满足；本文件暂不据此自动改变 Phase 4 总状态）；
 - [x] medium peak RSS、event/output counts 有记录；
 - [x] 未达到目标时保留真实 measured result，不伪报完成。
 
@@ -273,4 +273,4 @@ P4-T01 和 P4-T02 可以并行。
   明确排除以避免 evidence 自哈希循环。gate 会直接验证 Context ≤1s、deterministic analysis
   ≤3s、RSS ≤1.5 GiB，以及 Context events/bytes 与 analysis rows 均非空；
 - 跨进程 single-flight cancellation regression 不再用固定 100ms 猜测 waiter 生命周期，而在真实 key-lock contention 后才取消；定向 Release 连续 12 次、完整 Release **338/338** 与完整 batch gate 均通过；
-- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。该批当时只完成 T06 medium；2026-08-15 后续 signed DAYU 200 fixture 在相同 production workload 上取得 context/analysis p95 1.166s/1.089s，低于 2s/5s 限值并关闭 Gate 6/7。该事实不在本次文档更新中自动改写 Phase 4 Exit。
+- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。该批当时只完成 T06 medium；2026-08-15 后续 signed DAYU 200 fixture 在相同 production workload 上满足 context ≤2s、analysis ≤5s 并关闭 Gate 6/7，精确值由 tracked performance JSON 唯一记录。该事实不在本次文档更新中自动改写 Phase 4 Exit。
