@@ -57,6 +57,35 @@ candidate_directory=${ARKTRACE_PHASE3_CANDIDATE_DIR:-$repository_root/.build/pha
     || fail "Developer ID identity and team are required"
 arktrace_validate_reviewed_roots "$repository_root"
 arktrace_validate_owned_directory_request "$candidate_directory" "candidate output"
+
+# Validate every repository input needed before creating the reviewed build
+# root.  The final release gate exports signing credentials to its inherited
+# safety tests; an invalid or partial checkout must still fail without leaving
+# any output directory behind merely because those credentials are present.
+[ -d "$repository_root/ArkTrace.xcodeproj" ] \
+    && [ ! -L "$repository_root/ArkTrace.xcodeproj" ] \
+    && arktrace_assert_physical_directory_chain \
+        "$repository_root" "$repository_root/ArkTrace.xcodeproj" \
+    || fail "Xcode project is unavailable or non-physical"
+for candidate_input in \
+    "$repository_root/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
+    "$repository_root/ThirdParty/TraceStreamer/macx/trace_streamer" \
+    "$repository_root/ThirdParty/TraceStreamer/macx/manifest.json" \
+    "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
+    "$repository_root/LICENSE" \
+    "$repository_root/THIRD_PARTY_NOTICES.md"
+do
+    arktrace_assert_physical_file_within \
+        "$repository_root" "$candidate_input" "candidate build input"
+done
+[ -d "$repository_root/ThirdParty/TraceStreamer/LICENSES" ] \
+    && [ ! -L "$repository_root/ThirdParty/TraceStreamer/LICENSES" ] \
+    && arktrace_assert_physical_directory_chain \
+        "$repository_root" "$repository_root/ThirdParty/TraceStreamer/LICENSES" \
+    || fail "candidate license directory is unavailable or non-physical"
+[ -z "$(find "$repository_root/ThirdParty/TraceStreamer/LICENSES" \
+    -type l -print -quit)" ] \
+    || fail "candidate license directory contains a symlink"
 arktrace_create_reviewed_build_root
 
 temporary_root=$(mktemp -d "$ARKTRACE_REVIEWED_TEMP_ROOT/arktrace-candidate.XXXXXX")
