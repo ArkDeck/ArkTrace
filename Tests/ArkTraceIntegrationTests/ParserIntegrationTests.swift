@@ -1598,15 +1598,18 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertTrue(metadata.capabilities.threadStates)
         XCTAssertTrue(metadata.capabilities.namedSlices)
         let fullRange = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
-        let probeDeadline = ContinuousClock.now.advanced(by: .seconds(30))
+        // These are independent capability probes, not one aggregate request.
+        // Give each the reviewed per-query bound so an earlier full-range probe
+        // cannot consume a later probe's complete deadline on a real large DB.
+        let probeDeadline = { ContinuousClock.now.advanced(by: .seconds(30)) }
         let cpuProbe = try await cold.repository.cpuSlices(
-            try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+            try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline())
         )
         let stateProbe = try await cold.repository.threadStates(
-            try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+            try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline())
         )
         let sliceProbe = try await cold.repository.slices(
-            try TraceSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+            try TraceSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline())
         )
         let firstCPU = try XCTUnwrap(cpuProbe.items.first)
         let firstState = try XCTUnwrap(stateProbe.items.first)
@@ -1615,19 +1618,19 @@ final class ParserIntegrationTests: XCTestCase {
             try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 64,
-                    deadline: probeDeadline
+                    deadline: probeDeadline()
                 )
             ),
             try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .threadState(firstState.threadKey),
-                    bucketCount: 64, deadline: probeDeadline
+                    bucketCount: 64, deadline: probeDeadline()
                 )
             ),
             try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .namedSlice(firstSlice.threadKey),
-                    bucketCount: 64, deadline: probeDeadline
+                    bucketCount: 64, deadline: probeDeadline()
                 )
             ),
         ]
