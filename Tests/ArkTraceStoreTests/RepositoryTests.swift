@@ -60,6 +60,15 @@ final class RepositoryTests: XCTestCase {
         );
         """
 
+    private static let requiredDensityIndexesSQL = """
+        CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur
+            ON sched_slice(cpu, ts, dur);
+        CREATE INDEX arktrace_v3_thread_state_itid_ts_dur
+            ON thread_state(itid, ts, dur);
+        CREATE INDEX arktrace_v3_callstack_callid_ts_dur
+            ON callstack(callid, ts, dur);
+        """
+
     private static func eventSchemaSQL(
         omitting missing: String? = nil,
         overridingTypes: [String: String] = [:]
@@ -168,6 +177,7 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO thread VALUES (2, 2, 101, 'worker', 1200, NULL, 1, 0);
             INSERT INTO thread VALUES (3, 3, 200, 'rs.main', 1000, 2000, 3, 1);
             \(Self.requiredEventTablesSQL)
+            \(Self.requiredDensityIndexesSQL)
             """
         )
     }
@@ -235,6 +245,7 @@ final class RepositoryTests: XCTestCase {
                 INSERT INTO callstack VALUES (1, 1100, 100, 1, 'old');
                 INSERT INTO callstack VALUES (2, 1200, 200, 2, 'inside');
                 INSERT INTO callstack VALUES (3, 1400, 0, 3, 'right-boundary');
+                \(Self.requiredDensityIndexesSQL)
                 CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
                 CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
                 CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
@@ -3033,6 +3044,7 @@ final class RepositoryTests: XCTestCase {
                 itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
             );
             \(Self.requiredEventTablesSQL)
+            \(Self.requiredDensityIndexesSQL)
             INSERT INTO sched_slice
                 VALUES (1, \(Int64.min), -1, 7, 0, 0);
             """

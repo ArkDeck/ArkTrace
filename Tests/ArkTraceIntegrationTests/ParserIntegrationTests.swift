@@ -816,11 +816,11 @@ final class ParserIntegrationTests: XCTestCase {
             ),
             (
                 "SELECT ts FROM thread_state WHERE itid = 1 AND ts >= 0",
-                "arktrace_v1_thread_state_itid_ts"
+                "arktrace_v3_thread_state_itid_ts_dur"
             ),
             (
                 "SELECT ts FROM callstack WHERE callid = 1 AND ts >= 0",
-                "arktrace_v2_callstack_callid_ts_id_dur"
+                "arktrace_v3_callstack_callid_ts_dur"
             ),
         ]
         for (sql, indexName) in plans {
