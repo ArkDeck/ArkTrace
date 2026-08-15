@@ -2293,25 +2293,30 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(Darwin.kill(launchedPID, 0), -1)
         XCTAssertEqual(errno, ESRCH)
 
+        let enumeratedRoot = root.resolvingSymlinksInPath().standardizedFileURL
         let residuals = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey],
+            at: enumeratedRoot,
+            includingPropertiesForKeys: [
+                .isRegularFileKey, .isDirectoryKey, .isSymbolicLinkKey,
+            ],
             options: []
-        )?.compactMap { element -> String? in
+        )?.compactMap { element -> LargeCancellationResidual? in
             guard let url = element as? URL else { return nil }
-            return String(url.path.dropFirst(root.path.count + 1))
+            let values = try? url.resourceValues(forKeys: [
+                .isDirectoryKey, .isSymbolicLinkKey,
+            ])
+            return LargeCancellationResidual(
+                path: String(url.path.dropFirst(enumeratedRoot.path.count + 1)),
+                isSafeDirectory: values?.isDirectory == true
+                    && values?.isSymbolicLink != true
+            )
         } ?? []
-        XCTAssertFalse(residuals.contains { $0.split(separator: "/").contains("database.sqlite") })
-        XCTAssertFalse(residuals.contains { $0.split(separator: "/").contains("metadata.json") })
-        XCTAssertFalse(residuals.contains { path in
-            path.split(separator: "/").contains { component in
-                component.hasPrefix("session-")
-                    || component.hasPrefix("entry-")
-                    || component.hasPrefix("cancelled-")
-                    || component.hasPrefix("displaced-")
-            }
-        })
-        XCTAssertFalse(residuals.contains { $0.hasPrefix(".owners/") })
+        let prohibitedResiduals = Self.prohibitedLargeCancellationResiduals(residuals)
+        XCTAssertTrue(
+            prohibitedResiduals.isEmpty,
+            "cancelled large parse left prohibited Ready/private artifacts: "
+                + prohibitedResiduals.prefix(16).joined(separator: ",")
+        )
         XCTAssertTrue(observedCancellation)
         let traceIdentity = try sha256AndSize(
             at: fixture, maximumByteCount: 2_147_483_648
@@ -2332,11 +2337,65 @@ final class ParserIntegrationTests: XCTestCase {
             traceByteCount: traceIdentity.byteCount,
             testExecuted: true,
             cancellationObserved: observedCancellation,
-            residualCount: residuals.count
+            residualCount: prohibitedResiduals.count
         )
         let data = try JSONEncoder().encode(evidence)
         XCTAssertLessThanOrEqual(data.count, 4_096)
         try data.write(to: evidenceURL, options: .atomic)
+    }
+
+    func testLargeCancellationResidualClassifierRejectsPrivateArtifacts() {
+        XCTAssertEqual(
+            Self.prohibitedLargeCancellationResiduals([
+                .init(path: "staging", isSafeDirectory: true),
+                .init(path: "staging/.owners", isSafeDirectory: true),
+                .init(path: "cache/.staging/.owners", isSafeDirectory: true),
+            ]),
+            []
+        )
+        let attackPaths = [
+            "staging/.owners/session-dead.lock",
+            "cache/.staging/.owners/entry-dead.json",
+            "session-dead/database.sqlite",
+            "session-dead/database.sqlite-wal",
+            "entry-dead/metadata.json",
+            "cancelled-dead",
+            "displaced-dead/private-output",
+        ]
+        let attacks = attackPaths.map {
+            LargeCancellationResidual(path: $0, isSafeDirectory: false)
+        } + [
+            LargeCancellationResidual(path: "staging/.owners", isSafeDirectory: false)
+        ]
+        XCTAssertEqual(
+            Self.prohibitedLargeCancellationResiduals(attacks),
+            attackPaths + ["staging/.owners"]
+        )
+    }
+
+    private struct LargeCancellationResidual {
+        let path: String
+        let isSafeDirectory: Bool
+    }
+
+    private static func prohibitedLargeCancellationResiduals(
+        _ residuals: [LargeCancellationResidual]
+    ) -> [String] {
+        residuals.compactMap { residual in
+            let components = residual.path.split(separator: "/")
+            let prohibited = components.enumerated().contains { index, component in
+                let emptyOwnerDirectory = component == ".owners"
+                    && index == components.count - 1 && residual.isSafeDirectory
+                return component.hasPrefix("database.sqlite")
+                    || component == "metadata.json"
+                    || (component == ".owners" && !emptyOwnerDirectory)
+                    || component.hasPrefix("session-")
+                    || component.hasPrefix("entry-")
+                    || component.hasPrefix("cancelled-")
+                    || component.hasPrefix("displaced-")
+            }
+            return prohibited ? residual.path : nil
+        }
     }
 
     @MainActor
