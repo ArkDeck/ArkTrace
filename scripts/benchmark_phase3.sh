@@ -198,8 +198,7 @@ else
         || fail "large trace SHA differs from reviewed provenance"
     [ "$(stat -f '%z' "$trace")" = "$(jq -er '.byteCount' "$generated_integrity")" ] \
         || fail "large trace path changed after verification"
-    allocated_bytes=$(( $(stat -f '%b' "$trace") * 512 ))
-    [ "$allocated_bytes" -ge "$(stat -f '%z' "$trace")" ] \
+    arktrace_is_fully_allocated_regular_file "$trace" \
         || fail "large trace is sparse or incompletely allocated"
     acquisition_record=$(reviewed_file \
         "$(jq -er '.acquisition.recordPath' "$provenance")" \

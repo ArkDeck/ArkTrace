@@ -81,7 +81,7 @@ piece 数；writer 对每个 packet 的 4-byte L 和 packet V 分别加一。因
 | 超过 500 MiB | 50,875,435 bytes |
 | `length` 原始 bytes | `2b 4c 48 22 00 00 00 00` |
 | 设备分配 bytes（`st_blocks * 512`） | 575,733,760 |
-| 主机分配 bytes（`st_blocks * 512`） | 578,633,728 |
+| 主机首次拉取后分配 bytes（`st_blocks * 512`） | 578,633,728 |
 | link count（设备 / 主机） | 1 / 1 |
 | 文件 SHA-256（设备与主机一致） | `2d061b51b68f01830331458f09d0a29d127573bbd82d9372f2aed97cacf9060d` |
 | `version` / `dataType` | 65,536 / 0 |
@@ -93,6 +93,11 @@ piece 数；writer 对每个 packet 的 4-byte L 和 packet V 分别加一。因
 Framing 从 offset 1024 精确结束于 575,163,435；verifier 的 duplicate index 证明所有
 104,235 个 packet 唯一。文件是单 type-0 segment，无零长/越界 packet、尾随 bytes、第二
 header、padding、拼接或 sparse allocation。
+
+独立 review 时同一路径的主机分配量为 575,164,416 bytes，仍大于逻辑长度。APFS/Dropbox
+可能在不改变文件 bytes、SHA 或逻辑长度的情况下重新分配物理 blocks，因此上表只保留首次
+拉取后的时点观测，不能充当不变身份字段；每次 gate 执行仍必须从当前文件重新读取 blocks
+并 fail closed 拒绝 sparse allocation。
 
 ## 3. 上游 writer 的 digest 覆盖范围与失效原因
 
@@ -178,11 +183,17 @@ repeated `Finish`、stop/flush 多路径，以及 reader 对完整 payload 的�
 ### 5.1 本次设备部署的安全边界
 
 为完成真实采集，设备临时使用了仅作用于上述原始 binary 中
-`TraceFileHelper::Finish -> SHA256_Final` 调用点的选择性 shim。它同时锁定：原始 executable
-SHA/BuildID、Thumb return offset `0x1f48c`、调用前 12-byte 指令签名
+`TraceFileHelper::Finish -> SHA256_Final` 调用点的选择性 shim。部署前独立记录并核对了原始
+executable SHA/BuildID；shim 运行时自身只锁定 basename、Thumb return offset `0x1f48c`、
+调用前 12-byte 指令签名
 `05 f1 18 00 d5 f8 00 14 34 f0 ba ed` 和 OpenHarmony OpenSSL 3.0.9 的 112-byte public
 `SHA256_CTX` ABI。binary 内另一处 `SHA256_Final` 调用（return offset `0x1861a`）及所有非目标
 调用仍直接委托给原实现；加载前后标准 `SHA256("abc")` 设备正测均通过。
+
+因此不能声称 shim 在运行时校验了整份 executable SHA 或 BuildID。该限制不改变已采 trace
+的 byte-level 完整性结果，但阻止当前采集方法在没有更强 provenance 的情况下成为 release
+acquisition。后续应优先使用正式产品构建应用源码补丁；若仍使用临时部署，启动边界必须
+在 exec 前 fail closed 校验整份原始 binary 身份并把校验结果写入同时代采集日志。
 
 部署期间 init 仍以 PPID 1、UID 3063、原 groups 和 `u:r:hiprofilerd:s0` 运行原始
 384,468-byte executable；shim 只把目标 context 复制后 Final，不修改 packet、header 或磁盘
@@ -200,6 +211,12 @@ Gate 6/7 没有关闭条件：
 
 - 两份原有采集均未通过 header digest 完整性门；修复后的本地采集虽通过，但尚不是 reviewed
   release fixture；
+- 独立新会话 review 判定修复后采集 **必须 recapture**：没有同时代 host UTC start/end log，
+  设备 realtime/mtime 错误地停在 2017，host copy time 不能冒充 capture time；
+- 保存的配置仍写原输出名，而实际使用命令行 override 生成 `fixed` 输出名；没有同时代日志
+  绑定这次 override、session 与最终 trace SHA；
+- 临时 shim 没有在运行时校验整份 executable SHA/BuildID，且待审包中的手工摘录 patch 不是
+  可直接应用的完整 unified diff；
 - 480 秒采集本身未达到严格 `> 500 MiB` 的 size 条件；
 - `Fixtures/phase3-performance-fixtures.json` 的 large reviewed evidence path/SHA 仍为空；
 - `Config/ArkTraceReleaseReviewers.json` 的 large reviewer 与 redistribution-grant issuer trust
