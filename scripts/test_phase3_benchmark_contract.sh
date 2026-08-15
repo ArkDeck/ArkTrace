@@ -7,6 +7,7 @@ fail() {
 }
 
 source_scripts=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+source_root=$(CDPATH= cd -- "$source_scripts/.." && pwd)
 temporary_root=$(mktemp -d "${TMPDIR:-/tmp}/arktrace-benchmark-contract.XXXXXX")
 cleanup() { rm -rf -- "$temporary_root"; }
 trap cleanup EXIT HUP INT TERM
@@ -21,6 +22,33 @@ cp "$source_scripts/benchmark_phase3.sh" \
     "$source_scripts/verify_phase4_workloads.jq" \
     "$source_scripts/phase3_shell_safety.sh" "$repository/scripts/"
 chmod +x "$repository/scripts/"*
+
+issuer_key_relative=Fixtures/release-evidence/phase3-large/grant-issuer-public.pem
+issuer_key="$source_root/$issuer_key_relative"
+trust_configuration="$source_root/Config/ArkTraceReleaseReviewers.json"
+[ -f "$issuer_key" ] && [ ! -L "$issuer_key" ] \
+    || fail "grant issuer public key is not a regular non-symlink"
+git -C "$source_root" ls-files --error-unmatch "$issuer_key_relative" \
+    >/dev/null 2>&1 || fail "grant issuer public key is not tracked"
+git -C "$source_root" cat-file -e "HEAD:$issuer_key_relative" 2>/dev/null \
+    || fail "grant issuer public key is absent from HEAD"
+issuer_key_sha=$(shasum -a 256 "$issuer_key" | awk '{print $1}')
+issuer_head_sha=$(git -C "$source_root" show "HEAD:$issuer_key_relative" \
+    | shasum -a 256 | awk '{print $1}')
+[ "$issuer_key_sha" = "$issuer_head_sha" ] \
+    || fail "grant issuer public key differs from HEAD"
+[ "$issuer_key_sha" = "$(jq -er \
+    '.redistributionGrantIssuerPublicKeySHA256' "$trust_configuration")" ] \
+    || fail "grant issuer public key differs from the trusted SHA"
+issuer_key_bits=$(openssl pkey -pubin -in "$issuer_key" -text_pub -noout 2>/dev/null \
+    | sed -n 's/^Public-Key: (\([0-9][0-9]*\) bit)$/\1/p')
+[ "$issuer_key_bits" -ge 3072 ] 2>/dev/null \
+    || fail "grant issuer public key is weaker than RSA-3072"
+mutated_issuer_key="$temporary_root/mutated-grant-issuer-public.pem"
+cp "$issuer_key" "$mutated_issuer_key"
+printf '\n' >>"$mutated_issuer_key"
+[ "$(shasum -a 256 "$mutated_issuer_key" | awk '{print $1}')" != \
+    "$issuer_key_sha" ] || fail "mutated grant issuer public key reused the trusted SHA"
 
 (
     . "$repository/scripts/phase3_shell_safety.sh"

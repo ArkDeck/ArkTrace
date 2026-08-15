@@ -84,3 +84,17 @@ does not claim that the already executed daemon was built from a later commit.
 `scripts/test_phase5.sh`; the gate also cross-checks the notarized distribution evidence and rejects
 host paths. This is a real small Trace and closes Gate 9 only. It does not satisfy or waive the
 independently captured >500 MiB evidence required by Gates 6/7 and P4-T06 large.
+
+## Phase 3 large fixture trust-root onboarding
+
+`phase3-large/grant-issuer-public.pem` is the tracked RSA-3072 public key for
+`Hanfeng Fu (GitHub: lvye, account ID 4340161)`, the declared issuer of the
+trace-bound `CC-BY-4.0` redistribution grant. Its exact file SHA-256 is
+`06566ab2804b7a213236c45aa9a799157fcd00a190d542039df29cd08bc804dd`
+and is pinned by `Config/ArkTraceReleaseReviewers.json`.
+
+This key onboarding is not itself a redistribution grant, review signature,
+large provenance record, or Gate 6/7 closure. The independent reviewer trust
+root remains unprovisioned, the signed evidence remains absent, and the large
+gate must continue to fail closed until those later, separately reviewed
+artifacts are present.
