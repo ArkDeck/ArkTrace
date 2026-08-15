@@ -1,15 +1,17 @@
 # ArkTrace Phase 5 任务清单
 
-> 状态：Planned — Phase 4 Exit 后进入
+> 状态：Active — 2026-08-14 用户明确授权先跳过独立 Large Trace 进入本阶段；Phase 3 Gate 6/7、P4-T06 large 与 Phase 4 Exit 继续 Open
 > 阶段：ArkDeck Integration
 > 验收目标：真实 ArkDeck Job 可把 Trace Artifact 交给 ArkTrace，并持久化结构化 Analysis Artifact
 
 ## 1. 进入条件
 
-- [ ] Phase 4 的 arktrace CLI、JSON 1.0、summary/query/context/analyze 稳定；
-- [ ] CLI 有可安装/可固定 identity 的 production artifact；
-- [ ] ArkTrace 与 ArkDeck 工作树均可测试；
-- [ ] 开始实现前重新核对 ArkDeck HEAD、AGENTS、PRODUCT-LOOP、constitution、living specs 和 Catalog，不能沿用过期快照。
+- [x] Phase 4 的 arktrace CLI、JSON 1.0、summary/query/context/analyze 实现及 reviewed medium gate 稳定；独立 large 仍开放；
+- [x] CLI 有可安装/可固定 identity 的 production artifact；
+- [x] ArkTrace 与 ArkDeck 工作树均可测试；
+- [x] 开始实现前已重新核对 ArkDeck 当前 HEAD `60bfa76d6fba3ff1ea9abad031aefa077f5fbbfe`、AGENTS、PRODUCT-LOOP、constitution、living specs、Catalog、AnalyzerProvider/resolver/availability/Artifact 实现；此前审计过的 `2849c5c188717ac351f9228a9cd60c054035fbcf` 已被后续 protected-main 变更取代，不再作为实现 pin。
+
+本次是排程上的显式 deferral，不是验收豁免：任何 Phase 5 结果都不能把缺失的 >500 MiB cancellation/viewport/Agent performance evidence 标记为通过，完整 `scripts/test_phase4.sh` 仍应 fail closed。
 
 ## 2. 责任边界
 
@@ -55,9 +57,22 @@ P5-T01 和 P5-T02 可以并行。
 
 **验收**
 
-- [ ] 没有基于旧快照直接改生产代码；
-- [ ] 每个 ArkDeck mutation 都有对应 spec/contract test；
-- [ ] operation 名称与 ownership 无重复。
+- [x] 没有基于旧快照直接改生产代码；
+- [x] 每个 ArkDeck mutation 都有对应 spec/contract test；
+- [x] operation 名称与 ownership 无重复。
+
+**完成证据（独立 review clean；与 T03～T07 同车提交）：**
+
+- baseline 与 contract hashes 已记录在 ArkDeck
+  `openspec/changes/chg-2026-058-arktrace-summary-analyzer/`；
+- change 保持 `status: proposed`，未把 Agent 自审当成维护者 approval；
+- change、生产实现、tests 与 evidence 必须作为同一 GJ-5 垂直 PR review，不单独提交
+  proposal/readiness 载体；
+- 当前差距精确锁定为 production profile、action-specific resolver、availability、完整 machine output verification 和 exact derived bytes；
+- summary 继续复用 `analyzer.summarize-trace@1`，deep analysis 明确留给以后独立 typed operation review。
+- change 与 P5-T03～T07 的垂直实现最终由 ArkDeck PR #1309 合入为
+  `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f`；PR 作者为 `github-actions[bot]`，
+  allowed-paths、SDD、Swift full tests 与 App build 全绿。
 
 ### P5-T02 — 产出 ArkDeck 可固定的 arktrace distribution artifact
 
@@ -76,9 +91,28 @@ P5-T01 和 P5-T02 可以并行。
 
 **验收**
 
-- [ ] clean host 能用固定 absolute descriptor 执行 doctor --self-test --json；
-- [ ] binary/manifests 任一漂移可检测；
-- [ ] artifact 不包含用户路径或构建临时目录 dependency。
+- [x] clean host 能用固定 absolute descriptor 执行 doctor --self-test --json；
+- [x] binary/manifests 任一漂移可检测；
+- [x] artifact 不包含用户路径或构建临时目录 dependency。
+
+**完成证据（独立 review clean）：**
+
+- `scripts/build_phase5_cli_distribution_candidate.sh` 构建 `LSBackgroundOnly` 的
+  `ArkTraceCLI.app`，固定 `Contents/MacOS/arktrace`、bundled TraceStreamer、资源和许可证；
+- `scripts/package_phase5_cli_distribution.sh` 复核 candidate、notarize/staple、Gatekeeper、quarantine self-test 后才原子发布 ZIP；
+- `scripts/verify_phase5_cli_distribution.py` 对 manifest/layout/hash/provenance/attribution/upgrade policy fail closed；
+- Developer ID 候选已用证书 `38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C`
+  内到外签名，独立复核 App/tool/parser hardened runtime、timestamp、Team
+  `8AQTYW5FKR`、无 entitlement blob、installed doctor self-test、human/Machine
+  `licenses` 的 18-file exact closure 及二进制无仓库绝对路径；
+- 详细安装/回滚 contract 见 `CLI_DISTRIBUTION.md`；被 source-tree projection 排除的
+  `Fixtures/release-evidence/phase5-cli-distribution.json` 锁定最终
+  `ArkTraceCLI-0.1.0-20260814T105423Z.zip`（5,076,367 bytes，SHA-256
+  `ad5cd371bf52ad632ac58aa78594cdfb4501259398a3c54df4b9ec8a36955d7a`）、
+  Apple submission `bf933f7e-9f67-443e-9f1c-34669837d7ac`、staple/Gatekeeper、
+  source/tool/parser/certificate 及 final App/resource tree；
+- evidence 中的 source revision/tree 是被打包源码的不可变历史快照；公证后的本节状态收口
+  是 doc-only delta，不改变也不冒充已公证 artifact bytes。
 
 ### P5-T03 — 按 analyzerRef 支持多个 pinned analyzer executable
 
@@ -97,10 +131,15 @@ P5-T01 和 P5-T02 可以并行。
 
 **验收**
 
-- [ ] 多 analyzer mapping unit tests；
-- [ ] wrong ref/hash/path/profile 拒绝；
-- [ ] no shell/no PATH selection；
-- [ ] crash/hilog tests 不回归。
+- [x] 多 analyzer mapping unit tests；
+- [x] wrong ref/hash/path/profile 拒绝；
+- [x] no shell/no PATH selection；
+- [x] crash/hilog tests 不回归。
+
+**完成证据：** ArkDeck PR #1309 的 action-specific resolver 把既有 crash analyzer 与
+`analyzer.summarize-trace@1` 分别绑定到 closed profile；caller 无 executable/path/argv
+选择面，unknown/wrong identity fail closed。merge commit 为
+`528b521c7a6ace44e225ffbc3d1e1797b9c1a54f`。
 
 ### P5-T04 — 实现 Availability-first trace analyzer 检查
 
@@ -120,9 +159,12 @@ P5-T01 和 P5-T02 可以并行。
 
 **测试**
 
-- [ ] not found/version/hash/doctor/contract/profile failures；
-- [ ] machine-readable reason 稳定；
-- [ ] recovery 后 availability 可重新变为 available。
+- [x] not found/version/hash/doctor/contract/profile failures；
+- [x] machine-readable reason 稳定；
+- [x] recovery 后 availability 可重新变为 available。
+
+**完成证据：** PR #1309 固定签名/notarized distribution、doctor、manifest、tree 与
+runtime pin；identity 变化使 availability cache 失效，unavailable 在 Job admission 前拒绝。
 
 ### P5-T05 — Lower 现有 analyzer.summarize-trace@1
 
@@ -142,11 +184,15 @@ P5-T01 和 P5-T02 可以并行。
 
 **验收**
 
-- [ ] argv exact golden；
-- [ ] path 含空格/特殊字符仍作为单独 argv；
-- [ ] wrong lease bytes/hash 拒绝；
-- [ ] 不启动 ArkTrace.app；
-- [ ] 不出现 HDC/device route。
+- [x] argv exact golden；
+- [x] path 含空格/特殊字符仍作为单独 argv；
+- [x] wrong lease bytes/hash 拒绝；
+- [x] 不启动 ArkTrace.app；
+- [x] 不出现 HDC/device route。
+
+**完成证据：** PR #1309 使用 descriptor-bound immutable source lease 与固定
+`summary --json --no-cache` argv；真实输入只作为一个 path token，host-only、无 shell、
+无 GUI、无 HDC/capability route。
 
 ### P5-T06 — 验证输出并持久化 trace-summary.json
 
@@ -167,11 +213,16 @@ P5-T01 和 P5-T02 可以并行。
 
 **测试**
 
-- [ ] valid summary success；
-- [ ] wrong trace/tool/command/schema/provenance；
-- [ ] malformed/truncated/oversized；
-- [ ] timeout/cancel；
-- [ ] persistence/provenance/receipt。
+- [x] valid summary success；
+- [x] wrong trace/tool/command/schema/provenance；
+- [x] malformed/truncated/oversized；
+- [x] timeout/cancel；
+- [x] persistence/provenance/receipt。
+
+**完成证据：** PR #1309 对 ArkTrace JSON 1.0 进行 closed schema、integer、identity、
+privacy 与 output-bound 验证；validated stdout 逐字节发布为 `trace-summary.json`，并把
+source/tool/parser/request/limits/hash/bytes lineage 持久化。取消和 crash recovery 均锁定
+zero redispatch 与 no partial publication。
 
 ### P5-T07 — 完成 ArkDeck contract/regression tests
 
@@ -196,8 +247,13 @@ P5-T01 和 P5-T02 可以并行。
 
 **完成判据**
 
-- [ ] P5-T03 的 action-specific resolver 与本任务全部 identity/regression tests 通过；
-- [ ] DESIGN 发布门 8 以 resolver implementation + contract evidence 关闭，不等待 P5-T09 的 Artifact 链路。
+- [x] P5-T03 的 action-specific resolver 与本任务全部 identity/regression tests 通过；
+- [x] DESIGN 发布门 8 以 resolver implementation + contract evidence 关闭，不等待 P5-T09 的 Artifact 链路。
+
+**完成证据：** PR #1309 合入 1,794 行 ArkTrace 专项 contract tests，并覆盖现有
+AnalyzerProvider、ProcessExecutor、RuntimeJobEngine、daemon 与 Artifact regression；GitHub
+Swift full tests、App build、SDD、allowed-paths 全绿。Gate 9 仍等待 P5-T09 的真实 capture
+Artifact 链路，未由本项提前关闭。
 
 ### P5-T08 — 发布 Phase 6 所需的 deep typed analysis operation
 
@@ -249,14 +305,14 @@ P5-T01 和 P5-T02 可以并行。
 
 ## 5. Exit Checklist
 
-- [ ] 现有 analyzer.summarize-trace@1 被复用；
-- [ ] multi-analyzer resolver 不弱化 pinned identity；
-- [ ] Availability-first 完整；
-- [ ] Artifact lease execution 前重验；
-- [ ] JSON/hash/provenance 严格验证；
-- [ ] derived summary Artifact 持久化；
-- [ ] no shell/no GUI/no HDC/no capability；
+- [x] 现有 analyzer.summarize-trace@1 被复用；
+- [x] multi-analyzer resolver 不弱化 pinned identity；
+- [x] Availability-first 完整；
+- [x] Artifact lease execution 前重验；
+- [x] JSON/hash/provenance 严格验证；
+- [x] derived summary Artifact 持久化；
+- [x] no shell/no GUI/no HDC/no capability；
 - [ ] real ArkDeck Artifact 链路通过；
 - [ ] Phase 6 所需 deep typed operation 已 review/published，或明确记录真实阻塞；
-- [ ] 发布门 8 关闭；
+- [x] 发布门 8 关闭；
 - [ ] 发布门 9 关闭。

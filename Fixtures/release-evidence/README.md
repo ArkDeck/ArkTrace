@@ -51,3 +51,20 @@ silently clean it. A reviewer must independently rehash and extract that
 physical ZIP and reverify the nested and outer signatures, stapled ticket, and
 Gatekeeper result. The JSON metadata is not a substitute for the retained
 artifact.
+
+## Phase 5 CLI distribution evidence
+
+`phase5-cli-distribution.json` binds the ArkDeck-installable CLI distribution
+to its immutable build-time source snapshot, Developer ID certificate, signed
+tool and TraceStreamer identities, final App/resource trees, Apple submission,
+staple/Gatekeeper checks and final ZIP bytes. Its embedded live notary log is a
+`jq -S -c` semantic projection rather than a claim about Apple's JSON key order.
+The retained artifact is
+`ArkTraceCLI-0.1.0-20260814T105423Z.zip` (5,076,367 bytes, SHA-256
+`ad5cd371bf52ad632ac58aa78594cdfb4501259398a3c54df4b9ec8a36955d7a`).
+
+The evidence source-tree SHA identifies the exact tree packaged before the
+post-notarization status documentation was updated. Those documentation-only
+edits do not change the already signed/notarized artifact and are not presented
+as part of its build-time source snapshot. The evidence JSON remains metadata,
+not a substitute for retaining and independently rehashing the ZIP.

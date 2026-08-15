@@ -43,11 +43,15 @@ let package = Package(
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceSignalShim",
-            ],
+            ]
+        ),
+        // Test-only resource target. Keeping it outside the production CLI
+        // dependency graph prevents SwiftPM's generated Bundle.module accessor
+        // from embedding the build-machine path in the distributable binary.
+        .target(
+            name: "ArkTraceCLIResourceFixtures",
             resources: [
                 .copy("../../Fixtures/traces/zlib.htrace"),
-                .copy("../../Fixtures/traces/LICENSE.Apache-2.0.txt"),
-                .copy("../../Fixtures/traces/NOTICE.md"),
                 .copy("../../LICENSE"),
                 .copy("../../THIRD_PARTY_NOTICES.md"),
                 .copy("../../ThirdParty/TraceStreamer/license-inventory.json"),
@@ -77,7 +81,7 @@ let package = Package(
             name: "ArkTraceCLITests",
             dependencies: [
                 "ArkTraceCLI", "ArkTraceCore", "ArkTraceParser", "ArkTraceStore",
-                "ArkTraceRuntime",
+                "ArkTraceRuntime", "ArkTraceCLIResourceFixtures",
             ],
             resources: [.copy("Fixtures")]
         ),

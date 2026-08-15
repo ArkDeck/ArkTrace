@@ -1,5 +1,6 @@
 @testable import ArkTraceAnalysis
 @testable import ArkTraceCLI
+import ArkTraceCLIResourceFixtures
 import ArkTraceCore
 import Foundation
 import XCTest
@@ -12,7 +13,11 @@ final class GoldenFixtureTests: XCTestCase {
                 executor: fixture.executor,
                 machineToolProvider: { dynamicGoldenTool }
             )
-            let status = await application.run(arguments: fixture.arguments, writer: writer)
+            let status = await CLIResourceLocator.$testingRootPath.withValue(
+                ArkTraceCLIResourceFixtures.root.path
+            ) {
+                await application.run(arguments: fixture.arguments, writer: writer)
+            }
 
             XCTAssertEqual(status, fixture.expectedStatus, fixture.name)
             XCTAssertEqual(writer.stdoutWrites, 1, fixture.name)

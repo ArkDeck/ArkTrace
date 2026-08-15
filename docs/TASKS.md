@@ -1,9 +1,9 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-14 / Phase 3 活跃；P3-T08、P3-T10 已完成，P3-T09 的独立 large fixture 与发布门 6/7 仍开放；Phase 4 实现为 6/7，P4-T06 仅剩同一 large fixture 验收
+> 状态基线：2026-08-15 / Phase 3、4 的独立 large fixture 与发布门 6/7 仍开放；Phase 5 T01～T07 已完成独立 review，ArkDeck PR #1309 已合入并关闭 Gate 8，但不关闭或豁免 Phase 3/4 Exit
 > 任务总数：57
-> 已完成：37（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项）
-> 下一阶段：关闭 Phase 3 发布门 6/7 与 Phase 4 P4-T06 large 验收
+> 已完成：44（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项 + Phase 5 七项）
+> 当前批次：P5-T08 deep typed analysis operation；P5-T09 real Artifact gate 与 large Trace 作为显式 deferred 外部项继续保留
 
 ## 1. 阶段总览
 
@@ -14,7 +14,7 @@
 | 2 | CLI Vertical Slice | 7 | Completed，7/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
 | 3 | Native Viewer | 10 | Active，9/10；T08/T10 complete，T09 large gates open | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
 | 4 | Agent Query | 7 | Active，6/7；T01～T05/T07 review clean，T06 large open | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
-| 5 | ArkDeck Integration | 9 | Planned | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
+| 5 | ArkDeck Integration | 9 | Active under explicit large-trace deferral；T01～T07 review clean，7/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Planned | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
 
 ## 2. 总体依赖
@@ -29,7 +29,7 @@ flowchart LR
     P5 --> P6["Phase 6\nReal Loop"]
 ~~~
 
-阶段必须按 Exit Checklist 依次进入。阶段内部可按各文档依赖图并行，不能因某项“看起来可用”跳过真实 gate。
+阶段默认必须按 Exit Checklist 依次进入。2026-08-14 用户明确要求暂时跳过独立 large Trace、进入 Phase 5；该产品排程授权只允许推进不依赖 large fixture 的 ArkDeck integration，不改变 Gate 6/7、P4-T06 large 或 Phase 3/4 Exit 的 Open 状态，也不得被引用为发布豁免。
 
 实施允许流水并行：P4-T01/P4-T02 可在 P3-T02/P3-T03 contract 稳定后提前开工，避免 a11y、性能或打包等正交工作阻塞 Agent Core；但 Phase 4 Exit 仍必须以 Phase 3 Exit 已完成为前提，且提前工作不得复制或绕过尚未稳定的 Store/LOD contract。
 
@@ -126,7 +126,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 | 5 | required schema fingerprint + real DB fixture | Closed | Phase 1 / P1-T05 |
 | 6 | large Trace cancellation，无 orphan/cache promotion | Open | Phase 3 / P3-T09 |
 | 7 | indexed large viewport query 性能 | Open | Phase 3 / P3-T09 |
-| 8 | ArkDeck multi-analyzer resolver 不弱化 pinned identity | Open | Phase 5 / P5-T03/P5-T07 |
+| 8 | ArkDeck multi-analyzer resolver 不弱化 pinned identity | Closed；ArkDeck PR #1309 / merge `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f` | Phase 5 / P5-T03/P5-T07 |
 | 9 | ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact | Open | Phase 5 / P5-T09 |
 | 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Open | Phase 6 / P6-T09 |
 
