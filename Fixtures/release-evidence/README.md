@@ -93,8 +93,14 @@ trace-bound `CC-BY-4.0` redistribution grant. Its exact file SHA-256 is
 `06566ab2804b7a213236c45aa9a799157fcd00a190d542039df29cd08bc804dd`
 and is pinned by `Config/ArkTraceReleaseReviewers.json`.
 
-This key onboarding is not itself a redistribution grant, review signature,
-large provenance record, or Gate 6/7 closure. The independent reviewer trust
-root remains unprovisioned, the signed evidence remains absent, and the large
-gate must continue to fail closed until those later, separately reviewed
-artifacts are present.
+`phase3-large/reviewer-public.pem` is a separate RSA-3072 role key controlled by
+the same named human for the post-capture technical review. The reviewer did
+not execute the device capture; the acquisition record must identify the actual
+capture task separately. The review key SHA-256 is
+`ba49d54e355c88082877c0e3dcaf4b616d818ff5ec7f85cfc1723c2bf28eb2db`.
+The two role keys are required to remain byte-distinct.
+
+Trust-root onboarding is not itself a redistribution grant, review signature,
+large provenance record, or Gate 6/7 closure. Signed evidence remains absent,
+and the large gate must continue to fail closed until those later, separately
+reviewed artifacts are present.

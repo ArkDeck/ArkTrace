@@ -50,6 +50,34 @@ printf '\n' >>"$mutated_issuer_key"
 [ "$(shasum -a 256 "$mutated_issuer_key" | awk '{print $1}')" != \
     "$issuer_key_sha" ] || fail "mutated grant issuer public key reused the trusted SHA"
 
+reviewer_key_relative=Fixtures/release-evidence/phase3-large/reviewer-public.pem
+reviewer_key="$source_root/$reviewer_key_relative"
+[ -f "$reviewer_key" ] && [ ! -L "$reviewer_key" ] \
+    || fail "large reviewer public key is not a regular non-symlink"
+git -C "$source_root" ls-files --error-unmatch "$reviewer_key_relative" \
+    >/dev/null 2>&1 || fail "large reviewer public key is not tracked"
+git -C "$source_root" cat-file -e "HEAD:$reviewer_key_relative" 2>/dev/null \
+    || fail "large reviewer public key is absent from HEAD"
+reviewer_key_sha=$(shasum -a 256 "$reviewer_key" | awk '{print $1}')
+reviewer_head_sha=$(git -C "$source_root" show "HEAD:$reviewer_key_relative" \
+    | shasum -a 256 | awk '{print $1}')
+[ "$reviewer_key_sha" = "$reviewer_head_sha" ] \
+    || fail "large reviewer public key differs from HEAD"
+[ "$reviewer_key_sha" = "$(jq -er \
+    '.largeTraceReviewerPublicKeySHA256' "$trust_configuration")" ] \
+    || fail "large reviewer public key differs from the trusted SHA"
+reviewer_key_bits=$(openssl pkey -pubin -in "$reviewer_key" -text_pub -noout 2>/dev/null \
+    | sed -n 's/^Public-Key: (\([0-9][0-9]*\) bit)$/\1/p')
+[ "$reviewer_key_bits" -ge 3072 ] 2>/dev/null \
+    || fail "large reviewer public key is weaker than RSA-3072"
+[ "$reviewer_key_sha" != "$issuer_key_sha" ] \
+    || fail "large reviewer and grant issuer reused one trust key"
+mutated_reviewer_key="$temporary_root/mutated-large-reviewer-public.pem"
+cp "$reviewer_key" "$mutated_reviewer_key"
+printf '\n' >>"$mutated_reviewer_key"
+[ "$(shasum -a 256 "$mutated_reviewer_key" | awk '{print $1}')" != \
+    "$reviewer_key_sha" ] || fail "mutated large reviewer key reused the trusted SHA"
+
 (
     . "$repository/scripts/phase3_shell_safety.sh"
     arktrace_is_fully_allocated_regular_file \
