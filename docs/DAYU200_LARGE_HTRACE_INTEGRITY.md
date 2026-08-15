@@ -1,8 +1,9 @@
 # DAYU 200 large `.htrace` 完整性调查
 
 > 调查日期：2026-08-15
-> 结论：修正 ArkTrace 的 packet-count 协议解释，但不接受两份现有采集；HiProfiler
-> writer 必须修复 repeated-final digest bug 后重新采集。Gate 6/7 保持 Open。
+> 结论：修正 ArkTrace 的 packet-count 协议解释，但不接受两份原有采集；修复 HiProfiler
+> repeated-final digest bug 后取得了一份通过完整性门的本地 600 秒采集。该文件尚无独立审核
+> 和再分发授权，Gate 6/7 保持 Open。
 
 ## 1. 调查范围与信任边界
 
@@ -66,6 +67,33 @@ large gate 的严格 `> 500 MiB` 条件；600 秒文件满足 size 条件。
 piece 数；writer 对每个 packet 的 4-byte L 和 packet V 分别加一。因此该文件
 `220760 / 2 = 110380` 与完整 framing 精确一致，100,000 不是 wire-format 上限。
 
+### 2.1 修复后正式采集
+
+修复后的正式文件位于
+`/private/tmp/arktrace-dayu200-20260815-fixed-600s.htrace`，设备端原件保留在同名
+`/data/local/tmp/` 路径。它没有覆盖前三次采集，使用原有
+`arktrace-dayu200-600s.pbtxt`、`arktrace-dayu200-swipe-workload-600s.sh` 和约第 7 分钟启动的
+`arktrace-dayu200-final-swipe-burst.sh`，没有通过 padding 或 post-hoc header rewrite 补量。
+
+| 项目 | 修复后 600 秒采集 |
+|---|---:|
+| 文件 bytes / header `length` | 575,163,435 |
+| 超过 500 MiB | 50,875,435 bytes |
+| `length` 原始 bytes | `2b 4c 48 22 00 00 00 00` |
+| 设备分配 bytes（`st_blocks * 512`） | 575,733,760 |
+| 主机分配 bytes（`st_blocks * 512`） | 578,633,728 |
+| link count（设备 / 主机） | 1 / 1 |
+| 文件 SHA-256（设备与主机一致） | `2d061b51b68f01830331458f09d0a29d127573bbd82d9372f2aed97cacf9060d` |
+| `version` / `dataType` | 65,536 / 0 |
+| `segments` / packet 数 | 208,470 / 104,235 |
+| packet 长度范围 | 38…86,193 |
+| payload bytes | 575,162,411 |
+| header digest / 实算 payload SHA-256 | `0151f93d58b17437d83a97c08e4e6c7de7987c136989e0315a0bb8be8b22c9e4` |
+
+Framing 从 offset 1024 精确结束于 575,163,435；verifier 的 duplicate index 证明所有
+104,235 个 packet 唯一。文件是单 type-0 segment，无零长/越界 packet、尾随 bytes、第二
+header、padding、拼接或 sparse allocation。
+
 ## 3. 上游 writer 的 digest 覆盖范围与失效原因
 
 HiProfiler 的正常 `TraceFileWriter::Write` 顺序是：
@@ -95,10 +123,13 @@ length prefix 和 packet body 的完整 payload SHA-256；`segments` 对 type-0 
 每次 drain 结束和 stop 路径上的 repeated `Finish`；仅调整采集周期或阈值不能可靠生成符合
 header 定义的长 trace。
 
-上述是与 bytes 完全一致的锁定上游实现层根因，但现有采集没有记录 DAYU 200 上实际
-HiProfiler executable 的 SHA/build revision，不能把 source-lock revision 冒充为设备 binary
-provenance。重新采集时必须补记该身份；缺失身份进一步阻止现有文件成为 gate evidence，
-而不是允许 verifier 猜测另一种 digest 算法。
+上述是与 bytes 完全一致的锁定上游实现层根因。两份原有采集没有记录 DAYU 200 上实际
+HiProfiler executable 的 SHA/build revision，不能把 source-lock revision 冒充为其设备
+binary provenance。修复后采集补记了设备身份：OpenHarmony `7.0.0.37`、ARM32 musl
+`/system/bin/hiprofilerd` 384,468 bytes、SHA-256
+`878a8837e0b7eb9f6c26735271096e80bf296f7e57765ae21752432225ad8607`、BuildID
+`166974de2a7ac2e0c93793a2417bc397`；设备 OpenSSL 报告 `3.0.9`。这不把 source-lock revision
+冒充为设备 binary revision，也不补救原有文件缺失的 provenance。
 
 ## 4. 为什么 TraceStreamer 可以导入
 
@@ -139,11 +170,36 @@ context。设备侧回归至少应覆盖 `Write(A) -> Finish -> Write(B) -> Fini
 repeated `Finish`、stop/flush 多路径，以及 reader 对完整 payload 的独立重算。随后必须用
 修复后的、身份可记录的 HiProfiler 重新采集；配置调整本身不是充分修复。
 
+本次已在 source-lock checkout 上实现最小上游补丁：`SHA256_CTX shaCtx = *shaCtx_`，只在
+快照上执行 `SHA256_Final`；新增 writer/reader 回归执行
+`Write(A) -> Finish -> Write(B) -> Finish -> ValidateHeader`。本机没有完整 OHOS 产品构建树，
+因此不能把该源码测试声称为已由产品构建执行。
+
+### 5.1 本次设备部署的安全边界
+
+为完成真实采集，设备临时使用了仅作用于上述原始 binary 中
+`TraceFileHelper::Finish -> SHA256_Final` 调用点的选择性 shim。它同时锁定：原始 executable
+SHA/BuildID、Thumb return offset `0x1f48c`、调用前 12-byte 指令签名
+`05 f1 18 00 d5 f8 00 14 34 f0 ba ed` 和 OpenHarmony OpenSSL 3.0.9 的 112-byte public
+`SHA256_CTX` ABI。binary 内另一处 `SHA256_Final` 调用（return offset `0x1861a`）及所有非目标
+调用仍直接委托给原实现；加载前后标准 `SHA256("abc")` 设备正测均通过。
+
+部署期间 init 仍以 PPID 1、UID 3063、原 groups 和 `u:r:hiprofilerd:s0` 运行原始
+384,468-byte executable；shim 只把目标 context 复制后 Final，不修改 packet、header 或磁盘
+文件。15 秒真实预检先得到 2,010,209-byte、682-packet 单 segment 文件并通过同一 verifier，
+之后才开始正式采集。
+
+这是已披露的采集端临时修复，不是官方固件或独立审核结论。正式采集完成后，wrapper/shim
+已移出 system，原始 binary SHA 与 SELinux label 已恢复；设备重启后根分区为只读，原版
+服务重新以 UID 3063、`u:r:hiprofilerd:s0` 运行，进程映射中无 shim。长期方案仍应由产品
+构建应用上述源码补丁并执行其回归测试。
+
 ## 6. Gate 6/7
 
 Gate 6/7 没有关闭条件：
 
-- 两份现有采集均未通过 header digest 完整性门；
+- 两份原有采集均未通过 header digest 完整性门；修复后的本地采集虽通过，但尚不是 reviewed
+  release fixture；
 - 480 秒采集本身未达到严格 `> 500 MiB` 的 size 条件；
 - `Fixtures/phase3-performance-fixtures.json` 的 large reviewed evidence path/SHA 仍为空；
 - `Config/ArkTraceReleaseReviewers.json` 的 large reviewer 与 redistribution-grant issuer trust
@@ -158,9 +214,18 @@ Gate 6/7 没有关闭条件：
 
 - `sh scripts/test_htrace_integrity_verifier.sh`：PASS；
 - `sh scripts/test_phase3_benchmark_contract.sh`：PASS，caller self-attestation 继续被拒绝；
+- `sh scripts/test_phase3_batch1.sh`：PASS，继承 Phase 2 的 338 tests / 0 skip，并通过
+  TraceStreamer build safety、license、distribution、Debug/Release app 与签名合同；
 - 无 `ARKTRACE_LARGE_TRACE`/`ARKTRACE_LARGE_TRACE_EVIDENCE` 执行
   `scripts/benchmark_phase3.sh large`：预期 FAIL，要求 reviewed provenance；
 - 修正 count 语义后分别校验两份真实 trace：均预期 FAIL，稳定错误为
   `segment payload SHA-256 drifted`；
 - 两份 pinned TraceStreamer SQLite：`PRAGMA quick_check` 均为 `ok`，仅作为 parser 行为
-  对照，不作为完整性放行依据。
+  对照，不作为完整性放行依据；
+- 15 秒修复后预检：PASS，2,010,209 bytes、682 packet、单 segment；
+- 600 秒修复后正式文件：PASS，575,163,435 bytes、104,235 个唯一 packet、单 segment，
+  header digest 与完整 payload SHA-256 相等；
+- 正式文件由 pinned TraceStreamer 成功导出为 554,758,144-byte SQLite，
+  `PRAGMA quick_check=ok`；`process=3605`、`thread=4432`、`sched_slice=2224374`、
+  `thread_state=4089301`、`callstack=1523093`、`trace_range=1`。该导入结果证明可消费性，
+  完整性放行仍来自严格 verifier。
