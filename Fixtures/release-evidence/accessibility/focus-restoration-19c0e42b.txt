@@ -1,0 +1,18 @@
+ArkTrace accessibility walkthrough v1
+check: focusRestoration
+candidateTreeSHA256: 19c0e42b3635688366368dea0a1874694b9bf419ccc78789c7c6dc54c42de3f9
+reviewedAt: 2026-08-15T13:29:13Z
+reviewMethod: independent-agent-review
+reviewer: Codex independent Agent /root/phase4_a11y_review
+steps:
+1. Temporarily enabled Full Keyboard Access in its real macOS setting.
+2. Reached Show Inspector using Tab and activated it with Space.
+3. Activated Hide Inspector with Space, then activated Show Inspector again.
+4. Resized to the supported narrow window and observed the automatic Inspector collapse.
+5. Restored Full Keyboard Access to its original off state.
+observations:
+- Expansion moved focus to the exact Hide Inspector accessibility button.
+- Collapse moved focus directly to the exact Show Inspector accessibility button with no extra Tab.
+- Re-expansion restored focus to Hide Inspector.
+- At the supported narrow window, Show Inspector remained visible and keyboard focused after automatic Inspector collapse.
+- This record transcribes the independent Agent's raw Computer Use observations; it does not claim a reviewer cryptographic signature.

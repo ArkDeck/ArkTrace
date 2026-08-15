@@ -1,0 +1,17 @@
+ArkTrace accessibility walkthrough v1
+check: voiceOver
+candidateTreeSHA256: 19c0e42b3635688366368dea0a1874694b9bf419ccc78789c7c6dc54c42de3f9
+reviewedAt: 2026-08-15T13:29:13Z
+reviewMethod: independent-agent-review
+reviewer: Codex independent Agent /root/phase4_a11y_review
+steps:
+1. Enabled VoiceOver from its original off state.
+2. Used Finder's Choose Application flow to open the locked zlib.htrace fixture in the exact signed candidate.
+3. Observed loaded Timeline and Inspector semantics, searched 2956, and focused and selected a real event.
+4. Restored VoiceOver to its original off state.
+observations:
+- Timeline exposed viewport 0 ns to 32.211 s, 24 visible tracks, keyboard help, and explicit event, track, pan, zoom, reset, and selection actions.
+- Inspector exposed Duration 32.211 s, 68 KB, schema cb34d8b668c2, and cache status.
+- Search, focused event, selected event, and Inspector identifiers remained semantically consistent under VoiceOver.
+- The selected callstack 863 Inspector identity included PID 198, TID 891, process key 39, and thread key 78.
+- No speech audio or transient announcement pixels were captured; this record does not claim an audio transcription or a reviewer cryptographic signature.
