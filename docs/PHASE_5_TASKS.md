@@ -1,6 +1,6 @@
 # ArkTrace Phase 5 任务清单
 
-> 状态：Active — 2026-08-14 用户明确授权先跳过独立 Large Trace 进入本阶段；Phase 3 Gate 6/7、P4-T06 large 与 Phase 4 Exit 继续 Open
+> 状态：Completed under explicit large-trace deferral — 9/9；Phase 3 Gate 6/7、P4-T06 large 与 Phase 4 Exit 继续 Open
 > 阶段：ArkDeck Integration
 > 验收目标：真实 ArkDeck Job 可把 Trace Artifact 交给 ArkTrace，并持久化结构化 Analysis Artifact
 
@@ -252,8 +252,8 @@ zero redispatch 与 no partial publication。
 
 **完成证据：** PR #1309 合入 1,794 行 ArkTrace 专项 contract tests，并覆盖现有
 AnalyzerProvider、ProcessExecutor、RuntimeJobEngine、daemon 与 Artifact regression；GitHub
-Swift full tests、App build、SDD、allowed-paths 全绿。Gate 9 仍等待 P5-T09 的真实 capture
-Artifact 链路，未由本项提前关闭。
+Swift full tests、App build、SDD、allowed-paths 全绿。PR #1309 合入时 Gate 9 仍等待
+P5-T09 的真实 capture Artifact 链路，未由本项提前关闭。
 
 ### P5-T08 — 发布 Phase 6 所需的 deep typed analysis operation
 
@@ -301,13 +301,26 @@ context/analyze lowering、严格 envelope validation、exact Artifact persisten
 
 **验收**
 
-- [ ] 使用真实 ArkDeck capture Artifact，不使用 synthetic lease；
-- [ ] availability 在 submit 前 available；
-- [ ] job 成功且 restart 后 derived Artifact 可读；
-- [ ] source/derived hashes 和 provenance 一致；
-- [ ] 无手工打开 ArkTrace、无 GUI automation；
-- [ ] 发布门 9 按真实 Trace Artifact → ArkTrace → derived analysis Artifact evidence 关闭；
-- [ ] docs/ARKDECK_INTEGRATION.md 和 scripts/test_phase5.sh 完成。
+- [x] 使用真实 ArkDeck capture Artifact，不使用 synthetic lease；
+- [x] availability 在 submit 前 available；
+- [x] job 成功且 restart 后 derived Artifact 可读；
+- [x] source/derived hashes 和 provenance 一致；
+- [x] 无手工打开 ArkTrace、无 GUI automation；
+- [x] 发布门 9 按真实 Trace Artifact → ArkTrace → derived analysis Artifact evidence 关闭；
+- [x] docs/ARKDECK_INTEGRATION.md 和 scripts/test_phase5.sh 完成。
+
+**完成证据：** ArkDeck production daemon 在 submit 前确认 `capture.diagnostics@1` 与
+`analyzer.summarize-trace@1` available。真实 capture Job
+`job-876a0741ebd945358b598a37b584c11a` 产出 source Artifact
+`ART-fd0a93c85a005703f6edf1cfb47a3daa`（1,240 bytes，SHA-256
+`a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35`）；host-only
+analyzer Job `job-9e47472de912cbe7e040757019421d57` 持久化 derived Artifact
+`ART-13f8ddd3192811c11efc40c048a078eb`（1,781 bytes，SHA-256
+`009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe`）。daemon
+restart 后 operation 仍 available 且 exact Artifact bytes 可读。LaunchAgent descriptor 安装集成由
+ArkDeck PR #1311 合入为 `4e478b46f202a139dbeb2c91d79e36d6d7774fac`；运行基线、descriptor、
+tool/parser 与完整 lineage 见 `ARKDECK_INTEGRATION.md` 及 retained evidence。该真实小 Trace
+关闭 Gate 9，但不构成 large evidence。
 
 ## 5. Exit Checklist
 
@@ -318,7 +331,7 @@ context/analyze lowering、严格 envelope validation、exact Artifact persisten
 - [x] JSON/hash/provenance 严格验证；
 - [x] derived summary Artifact 持久化；
 - [x] no shell/no GUI/no HDC/no capability；
-- [ ] real ArkDeck Artifact 链路通过；
+- [x] real ArkDeck Artifact 链路通过；
 - [x] Phase 6 所需 deep typed operation 已 review/published；
 - [x] 发布门 8 关闭；
-- [ ] 发布门 9 关闭。
+- [x] 发布门 9 关闭。

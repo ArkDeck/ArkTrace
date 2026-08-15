@@ -68,3 +68,19 @@ post-notarization status documentation was updated. Those documentation-only
 edits do not change the already signed/notarized artifact and are not presented
 as part of its build-time source snapshot. The evidence JSON remains metadata,
 not a substitute for retaining and independently rehashing the ZIP.
+
+## Phase 5 real ArkDeck Artifact evidence
+
+`phase5-arkdeck-real-artifact.json` records the path-free production chain from a real
+`capture.diagnostics@1` Artifact through `analyzer.summarize-trace@1` to a persisted derived
+`trace-summary.json` Artifact. It binds the ArkDeck daemon/catalog/descriptor identity,
+pre-submit availability, source and derived Job/Artifact IDs, source/tool/parser/request lineage,
+execution effect, output limits, and the post-restart readback SHA-256. The ArkDeck protected-main
+runtime baseline and the later LaunchAgent integration merge are separate fields so the evidence
+does not claim that the already executed daemon was built from a later commit.
+
+`phase5-arkdeck-real-artifact-summary.json` contains the exact 1,781 derived bytes. Its SHA-256 is
+`009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe` and is rehashed by
+`scripts/test_phase5.sh`; the gate also cross-checks the notarized distribution evidence and rejects
+host paths. This is a real small Trace and closes Gate 9 only. It does not satisfy or waive the
+independently captured >500 MiB evidence required by Gates 6/7 and P4-T06 large.

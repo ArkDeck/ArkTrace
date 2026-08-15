@@ -83,6 +83,7 @@ small_trace=$small_snapshot
 medium_trace=$medium_snapshot
 
 cd "$repository_root"
+swift build -c release --product arktrace >/dev/null
 release_bin_path=$(swift build -c release --show-bin-path)
 arktrace="$release_bin_path/arktrace"
 [ -x "$arktrace" ] || fail "Release arktrace executable is unavailable"

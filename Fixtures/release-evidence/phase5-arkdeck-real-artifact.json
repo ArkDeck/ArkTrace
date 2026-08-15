@@ -1,0 +1,91 @@
+{
+  "arkDeck": {
+    "catalogDigest": "328cade24b399a20b0c467195ea724f832854bbae7c65ab3dcbb8160318b1d2d",
+    "daemonBinarySHA256": "150d4f0645eb17639063481403c722152b92ea50c667ba9e7e197addf129203a",
+    "descriptor": {
+      "byteCount": 220,
+      "manifestSHA256": "443a04a711b6dfc6866e97d4177301e6d5901d8abe2e324d525f156b5bfbf25b",
+      "sha256": "89a7ae5a012a9b577c7b761419e6a3557b6745402540eef3ecf1fbdaf23ff9db"
+    },
+    "launchAgentIntegrationMerge": "4e478b46f202a139dbeb2c91d79e36d6d7774fac",
+    "protectedMainBaseline": "0d8f01964b058d954112604900db19dea28ef39f",
+    "runtimeProtocolVersion": "1.0.0"
+  },
+  "availability": {
+    "analyzer.summarize-trace@1": "available",
+    "capture.diagnostics@1": "available",
+    "checkedBeforeSubmit": true
+  },
+  "derivedArtifact": {
+    "artifactID": "ART-13f8ddd3192811c11efc40c048a078eb",
+    "byteCount": 1781,
+    "createdAtUTC": "2026-08-15T05:26:36Z",
+    "jobID": "job-9e47472de912cbe7e040757019421d57",
+    "mediaType": "application/json",
+    "name": "trace-summary.json",
+    "privacy": "standard",
+    "redactionApplied": false,
+    "sha256": "009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe",
+    "status": "published",
+    "targetID": "TGT-958780b2ffb7"
+  },
+  "derivation": {
+    "analyzerRef": "trace-summary@1",
+    "analyzerVersion": "0.1.0+1",
+    "indexSchemaVersion": 2,
+    "maxEvents": 10000,
+    "maxOutputBytes": 8388608,
+    "maxRows": 1000,
+    "parserAdapterVersion": "1",
+    "parserBuildRecipeVersion": "600d94fae578f523ca2fd526f334b2a7c6febbaad03fea1135057357020fd18c",
+    "parserSHA256": "2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5",
+    "parserUpstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "parserVersion": "4.3.7",
+    "schemaAdapterVersion": "2",
+    "sourceArtifactID": "ART-fd0a93c85a005703f6edf1cfb47a3daa",
+    "sourceByteCount": 1240,
+    "sourceSHA256": "a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35",
+    "timeoutMs": 30000,
+    "toolSHA256": "0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65"
+  },
+  "execution": {
+    "actualEffect": "hostOnly",
+    "executionMode": "execute",
+    "finishedAtUTC": "2026-08-15T05:26:43Z",
+    "guiAutomationUsed": false,
+    "jobID": "job-9e47472de912cbe7e040757019421d57",
+    "manualArkTraceLaunchUsed": false,
+    "operation": "analyzer.summarize-trace@1",
+    "outcomeUnknown": false,
+    "runtimeCapabilityConsumed": false,
+    "startedAtUTC": "2026-08-15T05:26:35Z",
+    "state": "succeeded",
+    "targetID": "TGT-958780b2ffb7"
+  },
+  "formatVersion": 1,
+  "largeTraceGateApplied": false,
+  "recordedAtUTC": "2026-08-15T05:36:20Z",
+  "restartProof": {
+    "artifactReadable": true,
+    "daemonReady": true,
+    "derivedSHA256AfterRestart": "009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe",
+    "operationAvailable": true,
+    "restartedAtUTC": "2026-08-15T05:36:20Z"
+  },
+  "sourceArtifact": {
+    "artifactID": "ART-fd0a93c85a005703f6edf1cfb47a3daa",
+    "bindingRevision": 3,
+    "byteCount": 1240,
+    "captureFinishedAtUTC": "2026-08-14T07:46:24Z",
+    "captureJobID": "job-876a0741ebd945358b598a37b584c11a",
+    "captureState": "succeeded",
+    "mediaType": "application/octet-stream",
+    "name": "trace.htrace",
+    "sha256": "a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35",
+    "sourceOperation": "capture.diagnostics@1",
+    "stableIdentitySHA256": "2406ead546f19ad2c434ea521d226a149824633cf68af083460fd01e29ef824c",
+    "status": "published",
+    "targetID": "TGT-958780b2ffb7"
+  },
+  "summaryBytes": "phase5-arkdeck-real-artifact-summary.json"
+}

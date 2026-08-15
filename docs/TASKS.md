@@ -1,9 +1,9 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-15 / Phase 3、4 的独立 large fixture 与发布门 6/7 仍开放；Phase 5 T01～T08 已完成独立 review，ArkDeck PR #1309/#1310 已合入并关闭 Gate 8，但不关闭或豁免 Phase 3/4 Exit
+> 状态基线：2026-08-15 / Phase 3、4 的独立 large fixture 与发布门 6/7 仍开放；Phase 5 以真实 ArkDeck Artifact 链路完成 9/9 并关闭 Gate 8/9，但不关闭或豁免 Phase 3/4 Exit
 > 任务总数：57
-> 已完成：45（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项 + Phase 5 八项）
-> 当前批次：P5-T09 real Artifact gate；large Trace 作为显式 deferred 外部项继续保留
+> 已完成：46（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项 + Phase 5 九项）
+> 当前批次：P6-T01 real scenario；large Trace 作为显式 deferred 外部项继续保留
 
 ## 1. 阶段总览
 
@@ -14,8 +14,8 @@
 | 2 | CLI Vertical Slice | 7 | Completed，7/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
 | 3 | Native Viewer | 10 | Active，9/10；T08/T10 complete，T09 large gates open | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
 | 4 | Agent Query | 7 | Active，6/7；T01～T05/T07 review clean，T06 large open | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
-| 5 | ArkDeck Integration | 9 | Active under explicit large-trace deferral；T01～T08 review clean，8/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
-| 6 | Real Debug Loop | 9 | Planned | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
+| 5 | ArkDeck Integration | 9 | Completed under explicit large-trace deferral，9/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
+| 6 | Real Debug Loop | 9 | Active；P6-T01 | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
 
 ## 2. 总体依赖
 
@@ -127,7 +127,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 | 6 | large Trace cancellation，无 orphan/cache promotion | Open | Phase 3 / P3-T09 |
 | 7 | indexed large viewport query 性能 | Open | Phase 3 / P3-T09 |
 | 8 | ArkDeck multi-analyzer resolver 不弱化 pinned identity | Closed；ArkDeck PR #1309 / merge `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f` | Phase 5 / P5-T03/P5-T07 |
-| 9 | ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact | Open | Phase 5 / P5-T09 |
+| 9 | ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact | Closed；real capture/derived Artifact evidence + ArkDeck PR #1311 / merge `4e478b46f202a139dbeb2c91d79e36d6d7774fac` | Phase 5 / P5-T09 |
 | 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Open | Phase 6 / P6-T09 |
 
 发布门 3 已于 2026-08-14 由 exact source/license inventory、App/CLI 同源资源、签名 App 与最终 notarized ZIP 的逐字节复验关闭；事实证据见 DESIGN §24 与 `Fixtures/release-evidence/phase3-notarization.json`。
