@@ -1,9 +1,10 @@
 # DAYU 200 large `.htrace` 完整性调查
 
 > 调查日期：2026-08-15
-> 结论：修正 ArkTrace 的 packet-count 协议解释，但不接受两份原有采集；修复 HiProfiler
-> repeated-final digest bug 后取得了一份通过完整性门的本地 600 秒采集。该文件尚无独立审核
-> 和再分发授权，Gate 6/7 保持 Open。
+> 结论：以格式证据修正 ArkTrace 的 packet-count 协议解释，但继续拒绝两份原有采集；修复
+> HiProfiler repeated-final digest bug 后重新采集。最终 674,044,067-byte recapture 具有同时代
+> capture log、完整 binary/runtime 身份检查、恢复记录、CC-BY-4.0 grant、签名人工 review、
+> 外部 content-addressed artifact、真实 cancellation/performance evidence，Gate 6/7 已关闭。
 
 ## 1. 调查范围与信任边界
 
@@ -17,8 +18,9 @@
   `73d26bb5acfcafb2b1f4f94ead5640241d1e5f73` 的 `TraceFileHeader`、
   `TraceFileHelper`、`TraceFileWriter` 和 `PluginService`。
 
-本地采集不是 tracked fixture，也没有独立 reviewer、redistribution grant 或已配置 trust
-root。本报告只记录协议调查事实，不能充当 Gate 6/7 的 provenance、审核或授权证据。
+前两份失败采集和第一份 575 MiB 修复后本地采集不是 release fixture；它们只提供协议调查
+事实，不能充当 Gate 6/7 的 provenance、审核或授权证据。§2.2 记录随后单独执行并由 tracked
+签名证据绑定的正式 recapture。
 
 可复核的上游源码位置：
 
@@ -98,6 +100,28 @@ header、padding、拼接或 sparse allocation。
 可能在不改变文件 bytes、SHA 或逻辑长度的情况下重新分配物理 blocks，因此上表只保留首次
 拉取后的时点观测，不能充当不变身份字段；每次 gate 执行仍必须从当前文件重新读取 blocks
 并 fail closed 拒绝 sparse allocation。
+
+### 2.2 具备 release provenance 的正式 recapture
+
+因 §2.1 缺少同时代 host 时间、命令绑定和完整 runtime identity，正式 recapture 使用新的
+session `20260815T081830Z`，没有沿用或改写旧文件：
+
+| 项目 | 正式 reviewed 600 秒采集 |
+|---|---:|
+| 文件 bytes / header `length` | 674,044,067 |
+| 文件 SHA-256 | `087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3` |
+| capture UTC | `2026-08-15T08:42:18Z`～`2026-08-15T08:52:38Z` |
+| segment / dataType | 1 / 0 |
+| protobuf packet 数 / 唯一数 | 120,672 / 120,672 |
+| payload SHA-256 | `cdd98842be21ef9a8d2e5968f6d3369543f1a6413185caae35960ac333a701c5` |
+| Trace duration | 598,338,869,077 ns |
+| pinned SQLite rows | process 4,437；thread 5,285；sched_slice 2,599,251；thread_state 4,965,866；callstack 1,867,490 |
+
+设备与主机 SHA 一致；主机观测分配 682,614,784 bytes，文件为 regular、link count 1、非 sparse。
+framing 从 offset 1024 精确消费到 header length，单 segment payload digest 与 header 相等；
+没有 padding、拼接、重复 packet、trailing byte 或第二 segment。pinned TraceStreamer
+`e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf`
+成功导入，SQLite `quick_check=ok`，但该可消费性仍不替代 ArkTrace 的 cryptographic integrity gate。
 
 ## 3. 上游 writer 的 digest 覆盖范围与失效原因
 
@@ -205,36 +229,58 @@ acquisition。后续应优先使用正式产品构建应用源码补丁；若仍
 服务重新以 UID 3063、`u:r:hiprofilerd:s0` 运行，进程映射中无 shim。长期方案仍应由产品
 构建应用上述源码补丁并执行其回归测试。
 
+### 5.2 正式 recapture 的加固与恢复证明
+
+§2.2 的正式 recapture 不依赖 §2.1 那次不充分的运行边界。新的 wrapper 在 exec 前校验完整
+原始 `hiprofilerd` SHA-256、shim SHA-256、只读 root mount 与目标 runtime identity；错误的
+embedded digest 负例先以 exit 125 fail closed，修正版本的正/负 contract 随后通过。capture
+期间原始 daemon 以 PPID 1、UID 3063、`u:r:hiprofilerd:s0` 运行，原始 executable SHA-256
+保持 `878a8837e0b7eb9f6c26735271096e80bf296f7e57765ae21752432225ad8607`，shim 只对已披露的
+checkpoint Final 做 context snapshot。所有部署、预检、600 秒命令、workload、milestone、
+设备/主机 hash、parser import 和恢复事件按 host UTC 写入
+`Fixtures/release-evidence/phase3-large/acquisition-events.tsv`。
+
+完成后恢复原始 binary、owner/mode/SELinux label，移除 wrapper/shim 并重启；最终 root mount
+为只读，原始 daemon SHA 再次匹配、临时 system 文件不存在、进程映射无 shim。该操作记录
+由 `acquisition-record.json` 绑定到 exact trace SHA，不能泛化为对其他设备或文件的授权。
+
 ## 6. Gate 6/7
 
-Gate 6/7 没有关闭条件：
+Gate 6/7 的关闭条件现已由 exact、可机器重验的证据满足：
 
-- 两份原有采集均未通过 header digest 完整性门；修复后的本地采集虽通过，但尚不是 reviewed
-  release fixture；
-- 独立新会话 review 判定修复后采集 **必须 recapture**：没有同时代 host UTC start/end log，
-  设备 realtime/mtime 错误地停在 2017，host copy time 不能冒充 capture time；
-- 保存的配置仍写原输出名，而实际使用命令行 override 生成 `fixed` 输出名；没有同时代日志
-  绑定这次 override、session 与最终 trace SHA；
-- 临时 shim 没有在运行时校验整份 executable SHA/BuildID，且待审包中的手工摘录 patch 不是
-  可直接应用的完整 unified diff；
-- 480 秒采集本身未达到严格 `> 500 MiB` 的 size 条件；
-- `Fixtures/phase3-performance-fixtures.json` 的 large reviewed evidence path/SHA 仍为空；
-- `Config/ArkTraceReleaseReviewers.json` 的 large reviewer 与 redistribution-grant issuer trust
-  root 仍为 `null`；
-- 没有独立 review signature 或 trace-bound redistribution grant；
-- 尚未基于合格 large fixture 完成 cancellation/no-orphan/no-cache-promotion 与 indexed
-  viewport benchmark。
+- `Fixtures/phase3-performance-fixtures.json` 锁定 provenance SHA-256
+  `bffd3b91df0509da3c5d74603e934f4ebbc3647e44f6ea2666435c1c42f50184` 与 exact trace hash/size；
+- trace 保存在普通 Git 外的 content-addressed Release asset
+  `arktrace-dayu200-20260815T081830Z-600s.htrace`，release tag
+  `phase3-large-fixture-087105c0-review`；下载 bytes 必须再次匹配 exact SHA/size；
+- Hanfeng Fu（GitHub `lvye`，account ID `4340161`）以 CC-BY-4.0 对 exact trace/session 出具
+  redistribution grant；grant JSON、license bytes、RSA-3072 signature 和 issuer public key 均 tracked；
+- `capturedBy` 是 OpenAI Codex capture task `01a00388-5e86-7cf1-9689-e8679ba60dc4`，人工
+  `reviewedBy` 是 Hanfeng Fu。独立性按采集执行职责与技术审核职责分离判断，不要求第二位人类；
+  reviewer 也可担任 grant issuer，但两种角色使用 byte-distinct RSA-3072 key。配置锁定的
+  reviewer/issuer public-key SHA-256 分别为
+  `ba49d54e355c88082877c0e3dcaf4b616d818ff5ec7f85cfc1723c2bf28eb2db` 与
+  `06566ab2804b7a213236c45aa9a799157fcd00a190d542039df29cd08bc804dd`；
+- review manifest 逐项绑定 trace、acquisition、integrity 与 redistribution grant，并由 reviewer
+  signature 验证；caller 自生成 key、自签、修改 trust config、替换任一被绑定文件都继续拒绝；
+- 真实 large parser child cancellation 后 child 已退出，禁止的 Ready/private DB、metadata、owner
+  子项和 quarantine artifact 数为 0；攻击负例证明空安全目录不能掩盖 `database.sqlite*`、owner
+  子项或 session/entry/cancelled/displaced residue；
+- 同一 fixture 的 20-sample benchmark 满足 cache p95 ≤1s、viewport p95 ≤500ms、context p95
+  ≤2s、analysis p95 ≤5s、frame p95 ≤16.67ms 与 RSS ≤1.5GiB；24 个 applicable/persistent
+  indices 精确闭合且 `usesAutomaticIndex=false`。exact 事实源为
+  `Fixtures/release-evidence/phase3-large-performance.json`。
 
-因此 Gate 6、Gate 7、P4-T06 large 和相关 Phase Exit 必须继续保持 **Open**。
+因此 Gate 6、Gate 7 已 **Closed**。该结论不关闭 Gate 10，也不使原 480/600 秒失败文件有效；
+缺失外部 artifact、签名、许可、provenance 或任一 exact identity 时门禁仍 fail closed。
 
 ## 7. 本次验证结果
 
 - `sh scripts/test_htrace_integrity_verifier.sh`：PASS；
 - `sh scripts/test_phase3_benchmark_contract.sh`：PASS，caller self-attestation 继续被拒绝；
-- `sh scripts/test_phase3_batch1.sh`：PASS，继承 Phase 2 的 338 tests / 0 skip，并通过
-  TraceStreamer build safety、license、distribution、Debug/Release app 与签名合同；
-- 无 `ARKTRACE_LARGE_TRACE`/`ARKTRACE_LARGE_TRACE_EVIDENCE` 执行
-  `scripts/benchmark_phase3.sh large`：预期 FAIL，要求 reviewed provenance；
+- `sh scripts/test_phase3_distribution_contract.sh` 与 `sh scripts/verify_trace_streamer_lock.sh`：PASS；
+- 无 `ARKTRACE_LARGE_TRACE`/provenance、外部 bytes 漂移、caller self-attestation、替换 trust root
+  或签名漂移时：预期 FAIL；
 - 修正 count 语义后分别校验两份真实 trace：均预期 FAIL，稳定错误为
   `segment payload SHA-256 drifted`；
 - 两份 pinned TraceStreamer SQLite：`PRAGMA quick_check` 均为 `ok`，仅作为 parser 行为
@@ -246,3 +292,8 @@ Gate 6/7 没有关闭条件：
   `PRAGMA quick_check=ok`；`process=3605`、`thread=4432`、`sched_slice=2224374`、
   `thread_state=4089301`、`callstack=1523093`、`trace_range=1`。该导入结果证明可消费性，
   完整性放行仍来自严格 verifier。
+- release-provenance 正式 recapture：PASS，674,044,067 bytes、120,672 个唯一 packet、单 segment，
+  header/payload digest 一致；pinned SQLite `quick_check=ok` 且 required rows 与 provenance 精确相等；
+- 正式 large benchmark 与真实 child cancellation：PASS；cache/viewport/context/analysis、frame
+  和 peak RSS 均满足冻结阈值，cancellation 禁止 residue 为 0。每次测量会有正常波动，最终逐字段
+  数值只以 tracked performance JSON 为准。

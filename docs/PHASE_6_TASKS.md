@@ -1,6 +1,6 @@
 # ArkTrace Phase 6 任务清单
 
-> 状态：Active — P6-T01；Phase 5 real Artifact Gate 9 已关闭，large Trace 外部门继续 deferred/Open
+> 状态：Active — P6-T01；Phase 5 real Artifact Gate 9 与 large Trace Gate 6/7 已关闭，真实闭环 Gate 10 仍开放
 > 阶段：Real Debug Loop
 > 验收目标：至少闭合一次真实 OpenHarmony App → ArkDeck → ArkTrace → Agent → typed request → ArkDeck 复验链路
 

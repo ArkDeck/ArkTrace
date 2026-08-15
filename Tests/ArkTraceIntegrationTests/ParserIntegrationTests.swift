@@ -816,11 +816,11 @@ final class ParserIntegrationTests: XCTestCase {
             ),
             (
                 "SELECT ts FROM thread_state WHERE itid = 1 AND ts >= 0",
-                "arktrace_v1_thread_state_itid_ts"
+                "arktrace_v3_thread_state_itid_ts_dur"
             ),
             (
                 "SELECT ts FROM callstack WHERE callid = 1 AND ts >= 0",
-                "arktrace_v2_callstack_callid_ts_id_dur"
+                "arktrace_v3_callstack_callid_ts_dur"
             ),
         ]
         for (sql, indexName) in plans {
@@ -1598,36 +1598,39 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertTrue(metadata.capabilities.threadStates)
         XCTAssertTrue(metadata.capabilities.namedSlices)
         let fullRange = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
-        let probeDeadline = ContinuousClock.now.advanced(by: .seconds(30))
+        // These are independent capability probes, not one aggregate request.
+        // Give each the reviewed per-query bound so an earlier full-range probe
+        // cannot consume a later probe's complete deadline on a real large DB.
+        let probeDeadline = { ContinuousClock.now.advanced(by: .seconds(30)) }
         let cpuProbe = try await cold.repository.cpuSlices(
-            try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+            try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline())
         )
         let stateProbe = try await cold.repository.threadStates(
-            try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+            try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline())
         )
         let sliceProbe = try await cold.repository.slices(
-            try TraceSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline)
+            try TraceSliceQuery(range: fullRange, limit: 1_024, deadline: probeDeadline())
         )
         let firstCPU = try XCTUnwrap(cpuProbe.items.first)
         let firstState = try XCTUnwrap(stateProbe.items.first)
-        let firstSlice = try XCTUnwrap(sliceProbe.items.first)
+        let firstSlice = try XCTUnwrap(sliceProbe.items.first { $0.threadKey != nil })
         let densityProbes = [
             try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 64,
-                    deadline: probeDeadline
+                    deadline: probeDeadline()
                 )
             ),
             try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .threadState(firstState.threadKey),
-                    bucketCount: 64, deadline: probeDeadline
+                    bucketCount: 64, deadline: probeDeadline()
                 )
             ),
             try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .namedSlice(firstSlice.threadKey),
-                    bucketCount: 64, deadline: probeDeadline
+                    bucketCount: 64, deadline: probeDeadline()
                 )
             ),
         ]
@@ -2290,25 +2293,30 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(Darwin.kill(launchedPID, 0), -1)
         XCTAssertEqual(errno, ESRCH)
 
+        let enumeratedRoot = root.resolvingSymlinksInPath().standardizedFileURL
         let residuals = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey],
+            at: enumeratedRoot,
+            includingPropertiesForKeys: [
+                .isRegularFileKey, .isDirectoryKey, .isSymbolicLinkKey,
+            ],
             options: []
-        )?.compactMap { element -> String? in
+        )?.compactMap { element -> LargeCancellationResidual? in
             guard let url = element as? URL else { return nil }
-            return String(url.path.dropFirst(root.path.count + 1))
+            let values = try? url.resourceValues(forKeys: [
+                .isDirectoryKey, .isSymbolicLinkKey,
+            ])
+            return LargeCancellationResidual(
+                path: String(url.path.dropFirst(enumeratedRoot.path.count + 1)),
+                isSafeDirectory: values?.isDirectory == true
+                    && values?.isSymbolicLink != true
+            )
         } ?? []
-        XCTAssertFalse(residuals.contains { $0.split(separator: "/").contains("database.sqlite") })
-        XCTAssertFalse(residuals.contains { $0.split(separator: "/").contains("metadata.json") })
-        XCTAssertFalse(residuals.contains { path in
-            path.split(separator: "/").contains { component in
-                component.hasPrefix("session-")
-                    || component.hasPrefix("entry-")
-                    || component.hasPrefix("cancelled-")
-                    || component.hasPrefix("displaced-")
-            }
-        })
-        XCTAssertFalse(residuals.contains { $0.hasPrefix(".owners/") })
+        let prohibitedResiduals = Self.prohibitedLargeCancellationResiduals(residuals)
+        XCTAssertTrue(
+            prohibitedResiduals.isEmpty,
+            "cancelled large parse left prohibited Ready/private artifacts: "
+                + prohibitedResiduals.prefix(16).joined(separator: ",")
+        )
         XCTAssertTrue(observedCancellation)
         let traceIdentity = try sha256AndSize(
             at: fixture, maximumByteCount: 2_147_483_648
@@ -2329,11 +2337,65 @@ final class ParserIntegrationTests: XCTestCase {
             traceByteCount: traceIdentity.byteCount,
             testExecuted: true,
             cancellationObserved: observedCancellation,
-            residualCount: residuals.count
+            residualCount: prohibitedResiduals.count
         )
         let data = try JSONEncoder().encode(evidence)
         XCTAssertLessThanOrEqual(data.count, 4_096)
         try data.write(to: evidenceURL, options: .atomic)
+    }
+
+    func testLargeCancellationResidualClassifierRejectsPrivateArtifacts() {
+        XCTAssertEqual(
+            Self.prohibitedLargeCancellationResiduals([
+                .init(path: "staging", isSafeDirectory: true),
+                .init(path: "staging/.owners", isSafeDirectory: true),
+                .init(path: "cache/.staging/.owners", isSafeDirectory: true),
+            ]),
+            []
+        )
+        let attackPaths = [
+            "staging/.owners/session-dead.lock",
+            "cache/.staging/.owners/entry-dead.json",
+            "session-dead/database.sqlite",
+            "session-dead/database.sqlite-wal",
+            "entry-dead/metadata.json",
+            "cancelled-dead",
+            "displaced-dead/private-output",
+        ]
+        let attacks = attackPaths.map {
+            LargeCancellationResidual(path: $0, isSafeDirectory: false)
+        } + [
+            LargeCancellationResidual(path: "staging/.owners", isSafeDirectory: false)
+        ]
+        XCTAssertEqual(
+            Self.prohibitedLargeCancellationResiduals(attacks),
+            attackPaths + ["staging/.owners"]
+        )
+    }
+
+    private struct LargeCancellationResidual {
+        let path: String
+        let isSafeDirectory: Bool
+    }
+
+    private static func prohibitedLargeCancellationResiduals(
+        _ residuals: [LargeCancellationResidual]
+    ) -> [String] {
+        residuals.compactMap { residual in
+            let components = residual.path.split(separator: "/")
+            let prohibited = components.enumerated().contains { index, component in
+                let emptyOwnerDirectory = component == ".owners"
+                    && index == components.count - 1 && residual.isSafeDirectory
+                return component.hasPrefix("database.sqlite")
+                    || component == "metadata.json"
+                    || (component == ".owners" && !emptyOwnerDirectory)
+                    || component.hasPrefix("session-")
+                    || component.hasPrefix("entry-")
+                    || component.hasPrefix("cancelled-")
+                    || component.hasPrefix("displaced-")
+            }
+            return prohibited ? residual.path : nil
+        }
     }
 
     @MainActor
@@ -2986,6 +3048,53 @@ final class ParserIntegrationTests: XCTestCase {
             try FileManager.default.contentsOfDirectory(atPath: corruptRoot.path).count,
             1
         )
+        try await rebuilt.close()
+    }
+
+    func testInPlaceCacheMutationCannotReuseProcessValidationMemo() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-in-place-corrupt-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+
+        let seeded = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let databaseURL = await seeded.parsed.databaseURL
+        try await seeded.close()
+        var before = stat()
+        XCTAssertEqual(Darwin.lstat(databaseURL.path, &before), 0)
+        XCTAssertEqual(Darwin.chmod(databaseURL.path, 0o600), 0)
+        let handle = try FileHandle(forWritingTo: databaseURL)
+        try handle.seek(toOffset: 0)
+        try handle.write(contentsOf: Data("not-a-sqlite-database".utf8))
+        try handle.synchronize()
+        try handle.close()
+        XCTAssertEqual(Darwin.chmod(databaseURL.path, 0o400), 0)
+        var after = stat()
+        XCTAssertEqual(Darwin.lstat(databaseURL.path, &after), 0)
+        XCTAssertEqual(before.st_dev, after.st_dev)
+        XCTAssertEqual(before.st_ino, after.st_ino, "mutation must retain the cached inode")
+        XCTAssertEqual(before.st_size, after.st_size, "mutation must retain the cached byte count")
+
+        let rebuilt = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let wasHit = await rebuilt.cacheHit
+        XCTAssertFalse(wasHit)
+        XCTAssertEqual(parser.count(), 2)
+        XCTAssertTrue(try TraceDatabase(url: databaseURL, readOnly: true).quickCheckIsOK())
         try await rebuilt.close()
     }
 

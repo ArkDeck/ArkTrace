@@ -6,6 +6,19 @@ import Foundation
 /// The engine only translates reviewed typed filters into repository query
 /// values. It never accepts a table, column, SQL fragment, or expression.
 public struct TraceAgentQueryEngine: Sendable {
+    struct BatchEntry: Sendable {
+        let view: TraceAgentQueryView
+        let filters: TraceAgentQueryFilters
+        let limit: Int
+    }
+
+    private enum BatchMapping: Sendable {
+        case cpu(Int, BatchEntry)
+        case state(Int, BatchEntry)
+        case slice(Int, BatchEntry)
+        case counter(Int, BatchEntry)
+    }
+
     private let repository: any TraceRepositoryProtocol
 
     public init(repository: any TraceRepositoryProtocol) {
@@ -76,20 +89,9 @@ public struct TraceAgentQueryEngine: Sendable {
                         deadline: deadline
                     )
                 )
-                let sorted = try Self.stableEvents(
-                    page.items,
-                    start: \CpuSlice.startNs,
-                    key: \CpuSlice.key,
-                    deadline: deadline
-                )
-                return try TraceAgentQueryResult(
-                    view: view,
-                    range: range,
-                    filters: filters,
-                    capabilityAvailable: page.capabilityAvailable,
-                    truncated: page.truncated || sorted.count > limit,
-                    dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
-                    cpuSlices: Array(sorted.prefix(limit))
+                return try Self.cpuResult(
+                    page, range: range, filters: filters, limit: limit,
+                    metadata: metadata, deadline: deadline
                 )
 
             case .threadStates:
@@ -107,20 +109,9 @@ public struct TraceAgentQueryEngine: Sendable {
                         deadline: deadline
                     )
                 )
-                let sorted = try Self.stableEvents(
-                    page.items,
-                    start: \ThreadStateInterval.startNs,
-                    key: \ThreadStateInterval.key,
-                    deadline: deadline
-                )
-                return try TraceAgentQueryResult(
-                    view: view,
-                    range: range,
-                    filters: filters,
-                    capabilityAvailable: page.capabilityAvailable,
-                    truncated: page.truncated || sorted.count > limit,
-                    dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
-                    threadStates: Array(sorted.prefix(limit))
+                return try Self.stateResult(
+                    page, range: range, filters: filters, limit: limit,
+                    metadata: metadata, deadline: deadline
                 )
 
             case .slices:
@@ -138,20 +129,9 @@ public struct TraceAgentQueryEngine: Sendable {
                         deadline: deadline
                     )
                 )
-                let sorted = try Self.stableEvents(
-                    page.items,
-                    start: \TraceSlice.startNs,
-                    key: \TraceSlice.key,
-                    deadline: deadline
-                )
-                return try TraceAgentQueryResult(
-                    view: view,
-                    range: range,
-                    filters: filters,
-                    capabilityAvailable: page.capabilityAvailable,
-                    truncated: page.truncated || sorted.count > limit,
-                    dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
-                    slices: Array(sorted.prefix(limit))
+                return try Self.sliceResult(
+                    page, range: range, filters: filters, limit: limit,
+                    metadata: metadata, deadline: deadline
                 )
 
             case .counters:
@@ -167,18 +147,173 @@ public struct TraceAgentQueryEngine: Sendable {
                         deadline: deadline
                     )
                 )
-                let sorted = try Self.stableCounters(page.items, deadline: deadline)
-                try Self.check(deadline)
-                return try TraceAgentQueryResult(
-                    view: view,
-                    range: range,
-                    filters: filters,
-                    capabilityAvailable: page.capabilityAvailable,
-                    truncated: page.truncated || sorted.count > limit,
-                    dataQuality: Self.quality(metadata.dataQuality, page.dataQuality),
-                    counters: Array(sorted.prefix(limit))
+                return try Self.counterResult(
+                    page, range: range, filters: filters, limit: limit,
+                    metadata: metadata, deadline: deadline
                 )
         }
+    }
+
+    func queryBatch(
+        range: TraceTimeRange,
+        entries: [BatchEntry],
+        deadline: ContinuousClock.Instant
+    ) async throws -> [TraceAgentQueryResult] {
+        try Self.check(deadline)
+        let metadata = try await repository.metadata()
+        guard range.endNs <= metadata.durationNs else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Agent query range exceeds trace duration"
+            )
+        }
+        var cpuQueries: [CpuSliceQuery] = []
+        var stateQueries: [ThreadStateQuery] = []
+        var sliceQueries: [TraceSliceQuery] = []
+        var counterQueries: [CounterQuery] = []
+        var mappings: [BatchMapping] = []
+        for entry in entries {
+            try Self.validateFilters(entry.filters, for: entry.view)
+            switch entry.view {
+            case .cpuSlices:
+                mappings.append(.cpu(cpuQueries.count, entry))
+                cpuQueries.append(try CpuSliceQuery(
+                    range: range, cpu: entry.filters.cpu,
+                    processKey: entry.filters.processKey, pid: entry.filters.pid,
+                    threadKey: entry.filters.threadKey, tid: entry.filters.tid,
+                    limit: entry.limit, deadline: deadline
+                ))
+            case .threadStates:
+                mappings.append(.state(stateQueries.count, entry))
+                stateQueries.append(try ThreadStateQuery(
+                    range: range, cpu: entry.filters.cpu,
+                    processKey: entry.filters.processKey, pid: entry.filters.pid,
+                    threadKey: entry.filters.threadKey, tid: entry.filters.tid,
+                    rawState: entry.filters.rawState,
+                    state: entry.filters.normalizedState,
+                    limit: entry.limit, deadline: deadline
+                ))
+            case .slices:
+                mappings.append(.slice(sliceQueries.count, entry))
+                sliceQueries.append(try TraceSliceQuery(
+                    range: range, processKey: entry.filters.processKey,
+                    pid: entry.filters.pid, threadKey: entry.filters.threadKey,
+                    tid: entry.filters.tid, name: Self.sliceName(entry.filters),
+                    minimumDurationNs: entry.filters.minimumDurationNs,
+                    depth: entry.filters.depth, limit: entry.limit,
+                    deadline: deadline
+                ))
+            case .counters:
+                mappings.append(.counter(counterQueries.count, entry))
+                counterQueries.append(try CounterQuery(
+                    range: range, filterID: entry.filters.counterFilterID,
+                    cpu: entry.filters.cpu, processKey: entry.filters.processKey,
+                    pid: entry.filters.pid, name: Self.counterName(entry.filters),
+                    limit: entry.limit, deadline: deadline
+                ))
+            }
+        }
+        let pages = try await repository.eventBatch(
+            TraceRepositoryEventBatch(
+                cpuSlices: cpuQueries, threadStates: stateQueries,
+                slices: sliceQueries, counters: counterQueries
+            )
+        )
+        return try mappings.map { mapping in
+            switch mapping {
+            case .cpu(let index, let entry):
+                try Self.cpuResult(
+                    pages.cpuSlices[index], range: range, filters: entry.filters,
+                    limit: entry.limit, metadata: metadata, deadline: deadline
+                )
+            case .state(let index, let entry):
+                try Self.stateResult(
+                    pages.threadStates[index], range: range, filters: entry.filters,
+                    limit: entry.limit, metadata: metadata, deadline: deadline
+                )
+            case .slice(let index, let entry):
+                try Self.sliceResult(
+                    pages.slices[index], range: range, filters: entry.filters,
+                    limit: entry.limit, metadata: metadata, deadline: deadline
+                )
+            case .counter(let index, let entry):
+                try Self.counterResult(
+                    pages.counters[index], range: range, filters: entry.filters,
+                    limit: entry.limit, metadata: metadata, deadline: deadline
+                )
+            }
+        }
+    }
+
+    private static func cpuResult(
+        _ page: TraceEventPage<CpuSlice>, range: TraceTimeRange,
+        filters: TraceAgentQueryFilters, limit: Int, metadata: TraceMetadata,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceAgentQueryResult {
+        let sorted = try stableEvents(
+            page.items, start: \CpuSlice.startNs, key: \CpuSlice.key,
+            deadline: deadline
+        )
+        return try TraceAgentQueryResult(
+            view: .cpuSlices, range: range, filters: filters,
+            capabilityAvailable: page.capabilityAvailable,
+            truncated: page.truncated || sorted.count > limit,
+            dataQuality: quality(metadata.dataQuality, page.dataQuality),
+            cpuSlices: Array(sorted.prefix(limit))
+        )
+    }
+
+    private static func stateResult(
+        _ page: TraceEventPage<ThreadStateInterval>, range: TraceTimeRange,
+        filters: TraceAgentQueryFilters, limit: Int, metadata: TraceMetadata,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceAgentQueryResult {
+        let sorted = try stableEvents(
+            page.items, start: \ThreadStateInterval.startNs,
+            key: \ThreadStateInterval.key, deadline: deadline
+        )
+        return try TraceAgentQueryResult(
+            view: .threadStates, range: range, filters: filters,
+            capabilityAvailable: page.capabilityAvailable,
+            truncated: page.truncated || sorted.count > limit,
+            dataQuality: quality(metadata.dataQuality, page.dataQuality),
+            threadStates: Array(sorted.prefix(limit))
+        )
+    }
+
+    private static func sliceResult(
+        _ page: TraceEventPage<TraceSlice>, range: TraceTimeRange,
+        filters: TraceAgentQueryFilters, limit: Int, metadata: TraceMetadata,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceAgentQueryResult {
+        let sorted = try stableEvents(
+            page.items, start: \TraceSlice.startNs, key: \TraceSlice.key,
+            deadline: deadline
+        )
+        return try TraceAgentQueryResult(
+            view: .slices, range: range, filters: filters,
+            capabilityAvailable: page.capabilityAvailable,
+            truncated: page.truncated || sorted.count > limit,
+            dataQuality: quality(metadata.dataQuality, page.dataQuality),
+            slices: Array(sorted.prefix(limit))
+        )
+    }
+
+    private static func counterResult(
+        _ page: TraceEventPage<CounterSeries>, range: TraceTimeRange,
+        filters: TraceAgentQueryFilters, limit: Int, metadata: TraceMetadata,
+        deadline: ContinuousClock.Instant
+    ) throws -> TraceAgentQueryResult {
+        let sorted = try stableCounters(page.items, deadline: deadline)
+        try check(deadline)
+        return try TraceAgentQueryResult(
+            view: .counters, range: range, filters: filters,
+            capabilityAvailable: page.capabilityAvailable,
+            truncated: page.truncated || sorted.count > limit,
+            dataQuality: quality(metadata.dataQuality, page.dataQuality),
+            counters: Array(sorted.prefix(limit))
+        )
     }
 
     private static func validateFilters(

@@ -20,6 +20,26 @@ public actor TimelineSnapshotLoader {
         var y = -request.viewport.verticalOffsetPoints
         var snapshots: [TimelineTrackSnapshot] = []
         var issues: [TraceDataQualityIssue] = []
+        let fairBudget = visible.isEmpty ? 0 : remaining / visible.count
+        let prefetchedDensities: [TraceDensityResult]?
+        if fairBudget >= 1 {
+            let bucketCount = max(
+                1, min(max(1, request.pixelWidth / 16), fairBudget)
+            )
+            let batch = try TraceRepositoryEventBatch(
+                densities: try visible.map {
+                    try TraceDensityQuery(
+                        range: request.viewport.range,
+                        source: $0.source.densitySource,
+                        bucketCount: bucketCount,
+                        deadline: request.deadline
+                    )
+                }
+            )
+            prefetchedDensities = try await repository.eventBatch(batch).densities
+        } else {
+            prefetchedDensities = nil
+        }
 
         for (index, track) in visible.enumerated() {
             try Task.checkCancellation()
@@ -35,6 +55,7 @@ public actor TimelineSnapshotLoader {
                     request: request,
                     budget: budget,
                     repository: repository,
+                    prefetchedDensity: prefetchedDensities?[index],
                     qualityIssues: &issues
                 )
             }
@@ -65,6 +86,7 @@ public actor TimelineSnapshotLoader {
         request: ViewportRequest,
         budget: Int,
         repository: any TraceRepositoryProtocol,
+        prefetchedDensity: TraceDensityResult?,
         qualityIssues: inout [TraceDataQualityIssue]
     ) async throws -> [TimelinePrimitive] {
         // Fetch the bounded density candidate once. Automatic LOD previously
@@ -76,14 +98,18 @@ public actor TimelineSnapshotLoader {
         // are deliberately non-selectable and rendering may expand one across
         // several pixels; exact domain ranges and event counts stay intact.
         let bucketLimit = max(1, min(max(1, request.pixelWidth / 16), budget))
-        let density = try await repository.density(
-            TraceDensityQuery(
-                range: request.viewport.range,
-                source: track.source.densitySource,
-                bucketCount: bucketLimit,
-                deadline: request.deadline
+        let density = if let prefetchedDensity {
+            prefetchedDensity
+        } else {
+            try await repository.density(
+                TraceDensityQuery(
+                    range: request.viewport.range,
+                    source: track.source.densitySource,
+                    bucketCount: bucketLimit,
+                    deadline: request.deadline
+                )
             )
-        )
+        }
         qualityIssues.append(contentsOf: density.dataQuality.issues)
         guard density.capabilityAvailable else { return [] }
         let estimatedCount = density.buckets.reduce(Int64(0)) { $0 + $1.eventCount }

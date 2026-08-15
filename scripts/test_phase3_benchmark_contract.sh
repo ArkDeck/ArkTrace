@@ -18,6 +18,7 @@ cp "$source_scripts/benchmark_phase3.sh" \
     "$source_scripts/verify_htrace_integrity.py" \
     "$source_scripts/source_tree_identity.py" \
     "$source_scripts/verify_phase3_evidence_times.py" \
+    "$source_scripts/verify_phase3_review_manifest.jq" \
     "$source_scripts/verify_phase3_query_plans.jq" \
     "$source_scripts/verify_phase4_workloads.jq" \
     "$source_scripts/phase3_shell_safety.sh" "$repository/scripts/"
@@ -236,6 +237,46 @@ for mutation in reversed invalid-date reviewer-mismatch time-mismatch; do
         fail "inconsistent evidence timestamp was accepted: $mutation"
     fi
 done
+
+review_trace_sha=$(printf reviewed-trace | shasum -a 256 | awk '{print $1}')
+review_acquisition_sha=$(printf reviewed-acquisition | shasum -a 256 | awk '{print $1}')
+review_integrity_sha=$(printf reviewed-integrity | shasum -a 256 | awk '{print $1}')
+review_grant_sha=$(printf reviewed-grant | shasum -a 256 | awk '{print $1}')
+valid_review_manifest="$temporary_root/valid-review-manifest.json"
+jq -n \
+    --arg traceSHA256 "$review_trace_sha" \
+    --arg acquisitionRecordSHA256 "$review_acquisition_sha" \
+    --arg integrityReportSHA256 "$review_integrity_sha" \
+    --arg redistributionGrantSHA256 "$review_grant_sha" '
+  {acquisitionRecordSHA256:$acquisitionRecordSHA256,formatVersion:1,
+   integrityReportSHA256:$integrityReportSHA256,
+   redistributionGrantSHA256:$redistributionGrantSHA256,
+   reviewedAt:"2026-08-14T01:00:00Z",reviewer:"independent-reviewer",
+   traceByteCount:524288001,traceSHA256:$traceSHA256}
+' >"$valid_review_manifest"
+verify_review_manifest() {
+    jq -e \
+        --arg traceSHA "$review_trace_sha" \
+        --arg traceBytes 524288001 \
+        --arg acquisitionSHA "$review_acquisition_sha" \
+        --arg integritySHA "$review_integrity_sha" \
+        --arg grantSHA "$review_grant_sha" \
+        -f "$repository/scripts/verify_phase3_review_manifest.jq" "$1" \
+        >/dev/null
+}
+verify_review_manifest "$valid_review_manifest" \
+    || fail "complete signed review manifest was rejected"
+for mutation in missing-format extra-self-attestation trace-drift; do
+    candidate="$temporary_root/review-manifest-$mutation.json"
+    case "$mutation" in
+        missing-format) jq 'del(.formatVersion)' "$valid_review_manifest" >"$candidate" ;;
+        extra-self-attestation) jq '.selfAttested=true' "$valid_review_manifest" >"$candidate" ;;
+        trace-drift) jq '.traceSHA256="0000000000000000000000000000000000000000000000000000000000000000"' "$valid_review_manifest" >"$candidate" ;;
+    esac
+    if verify_review_manifest "$candidate"; then
+        fail "invalid signed review manifest was accepted: $mutation"
+    fi
+done
 printf '#!/bin/sh\nexit 0\n' \
     >"$repository/ThirdParty/TraceStreamer/macx/trace_streamer"
 chmod +x "$repository/ThirdParty/TraceStreamer/macx/trace_streamer"
@@ -282,6 +323,12 @@ git -C "$repository" -c user.name='ArkTrace Contract' \
 
 first_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")
+printf '{"audited":"output"}\n' \
+    >"$repository/Fixtures/release-evidence/phase3-large-performance.json"
+excluded_output_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+    "$repository/scripts/source_tree_identity.py" "$repository")
+[ "$first_tree_sha" = "$excluded_output_tree_sha" ] \
+    || fail "large performance output created a self-referential source identity"
 printf 'candidate byte A\n' >"$repository/source-identity-probe.txt"
 untracked_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")
@@ -321,9 +368,9 @@ jq -n '{diagnostics:{queryPlans:{
   "viewport.cpu.detail":["SEARCH s USING COVERING INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid (cpu=?)","SEARCH t USING COVERING INDEX arktrace_v2_thread_itid_tid_name_ipid (itid=?)","SEARCH p USING COVERING INDEX arktrace_v2_process_ipid_pid_name (ipid=?)"],
   "viewport.threadState.detail":["SEARCH s USING COVERING INDEX arktrace_v2_thread_state_itid_ts_id_dur (itid=?)","SEARCH t USING COVERING INDEX arktrace_v2_thread_itid_tid_name_ipid (itid=?)","SEARCH p USING COVERING INDEX arktrace_v2_process_ipid_pid_name (ipid=?)"],
   "viewport.namedSlice.detail":["SEARCH s USING COVERING INDEX arktrace_v2_callstack_callid_ts_id_dur (callid=?)","SEARCH t USING COVERING INDEX arktrace_v2_thread_itid_tid_name_ipid (itid=?)","SEARCH p USING COVERING INDEX arktrace_v2_process_ipid_pid_name (ipid=?)"],
-  "viewport.cpu.density":["SEARCH s USING COVERING INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid (cpu=?)","USE TEMP B-TREE FOR GROUP BY"],
-  "viewport.threadState.density":["SEARCH s USING COVERING INDEX arktrace_v2_thread_state_itid_ts_id_dur (itid=?)","USE TEMP B-TREE FOR GROUP BY"],
-  "viewport.namedSlice.density":["SEARCH s USING COVERING INDEX arktrace_v2_callstack_callid_ts_id_dur (callid=?)","USE TEMP B-TREE FOR GROUP BY"]
+  "viewport.cpu.density":["SEARCH s USING COVERING INDEX arktrace_v3_sched_slice_cpu_ts_dur (cpu=?)","USE TEMP B-TREE FOR GROUP BY"],
+  "viewport.threadState.density":["SEARCH s USING COVERING INDEX arktrace_v3_thread_state_itid_ts_dur (itid=?)","USE TEMP B-TREE FOR GROUP BY"],
+  "viewport.namedSlice.density":["SEARCH s USING COVERING INDEX arktrace_v3_callstack_callid_ts_dur (callid=?)","USE TEMP B-TREE FOR GROUP BY"]
 }}}' >"$valid_plan"
 jq -e -f "$repository/scripts/verify_phase3_query_plans.jq" "$valid_plan" >/dev/null \
     || fail "exact reviewed query plan was rejected"
@@ -433,4 +480,4 @@ if grep -F "$temporary_root" "$temporary_root/error.log" >/dev/null; then
     fail "rejection diagnostic disclosed an absolute path"
 fi
 
-printf 'Phase 3 benchmark contract test passed: self-attested large provenance rejected\n'
+printf 'Phase 3 benchmark contract test passed: signed review schema enforced; self-attested large provenance rejected\n'

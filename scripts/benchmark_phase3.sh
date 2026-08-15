@@ -266,16 +266,9 @@ else
         --arg traceBytes "$(jq -er '.trace.byteCount|tostring' "$provenance")" \
         --arg acquisitionSHA "$(jq -er '.acquisition.recordSHA256' "$provenance")" \
         --arg integritySHA "$(jq -er '.integrity.reportSHA256' "$provenance")" \
-        --arg grantSHA "$(jq -er '.license.redistributionGrantSHA256' "$provenance")" '
-        .formatVersion == 1
-        and ((keys | sort) == ["acquisitionRecordSHA256","integrityReportSHA256","redistributionGrantSHA256","reviewedAt","reviewer","traceByteCount","traceSHA256"])
-        and .traceSHA256 == $traceSHA and (.traceByteCount|tostring) == $traceBytes
-        and .acquisitionRecordSHA256 == $acquisitionSHA
-        and .integrityReportSHA256 == $integritySHA
-        and .redistributionGrantSHA256 == $grantSHA
-        and (.reviewer | type == "string" and length > 0 and length <= 256)
-        and (.reviewedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T"))
-    ' "$review_manifest" >/dev/null \
+        --arg grantSHA "$(jq -er '.license.redistributionGrantSHA256' "$provenance")" \
+        -f "$script_directory/verify_phase3_review_manifest.jq" \
+        "$review_manifest" >/dev/null \
         || fail "large review manifest is not bound to the complete evidence set"
     PYTHONDONTWRITEBYTECODE=1 python3 -B \
         "$script_directory/verify_phase3_evidence_times.py" \
@@ -413,20 +406,26 @@ jq -e \
       "arktrace_v1_thread_itid","arktrace_v1_thread_state_itid_ts",
       "arktrace_v1_thread_state_ts_cpu","arktrace_v1_thread_tid_ipid",
       "arktrace_v2_callstack_callid_ts_cover_optional",
-      "arktrace_v2_callstack_callid_ts_id_dur","arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_callstack_callid_ts_id_dur","arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v2_cpu_measure_filter_id",
       "arktrace_v2_process_ipid_pid_name","arktrace_v2_process_measure_filter_id",
       "arktrace_v2_sched_slice_cpu_ts_cover_optional",
       "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
       "arktrace_v2_thread_itid_tid_name_ipid",
       "arktrace_v2_thread_state_itid_ts_cover_cpu",
-      "arktrace_v2_thread_state_itid_ts_id_dur"
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_thread_state_itid_ts_dur",
+      "arktrace_v3_callstack_callid_ts_dur"
     ]) == [])
     and ([
       "arktrace_v1_process_ipid","arktrace_v2_process_ipid_pid_name",
       "arktrace_v1_thread_itid","arktrace_v2_thread_itid_tid_name_ipid",
       "arktrace_v1_sched_slice_ts_cpu","arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
       "arktrace_v1_thread_state_itid_ts","arktrace_v2_thread_state_itid_ts_id_dur",
-      "arktrace_v1_callstack_callid_ts","arktrace_v2_callstack_callid_ts_id_dur"
+      "arktrace_v1_callstack_callid_ts","arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid","arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_sched_slice_cpu_ts_dur","arktrace_v3_thread_state_itid_ts_dur"
     ] - .diagnostics.applicableIndexNames == [])
     and (.diagnostics.persistentIndexNames == .diagnostics.applicableIndexNames)
 ' "$partial_evidence" >/dev/null || fail "benchmark evidence does not satisfy Phase 3 budgets"

@@ -1,0 +1,40 @@
+{
+  "acquisition": {
+    "recordPath": "Fixtures/release-evidence/phase3-large/acquisition-record.json",
+    "recordSHA256": "6987a00d5f64a6e433f546d78946f315d38ec08309e95a00cf5dbf2a0ae62e7c"
+  },
+  "fixtureClass": "large",
+  "formatVersion": 3,
+  "integrity": {
+    "reportPath": "Fixtures/release-evidence/phase3-large/integrity.json",
+    "reportSHA256": "78a36ef017e281db4ae56ff711aa1d3fc95fff3f2217efe502ce9af7aa5e488f"
+  },
+  "license": {
+    "grantIssuerPublicKeyPath": "Fixtures/release-evidence/phase3-large/grant-issuer-public.pem",
+    "grantIssuerPublicKeySHA256": "06566ab2804b7a213236c45aa9a799157fcd00a190d542039df29cd08bc804dd",
+    "grantSignaturePath": "Fixtures/release-evidence/phase3-large/redistribution-grant.sig",
+    "path": "Fixtures/release-evidence/phase3-large/CC-BY-4.0.txt",
+    "redistributionGrantPath": "Fixtures/release-evidence/phase3-large/redistribution-grant.json",
+    "redistributionGrantSHA256": "b39517ad28dcbaae2fc16d37f36d212a8c978c1e9a3bdd78088451a8679b31e6",
+    "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+  },
+  "review": {
+    "manifestPath": "Fixtures/release-evidence/phase3-large/review-manifest.json",
+    "manifestSHA256": "29920e82da11c192eec25cda68accb3007e790dc0df73dcab7906926333b1ce2",
+    "reviewerPublicKeyPath": "Fixtures/release-evidence/phase3-large/reviewer-public.pem",
+    "reviewerPublicKeySHA256": "ba49d54e355c88082877c0e3dcaf4b616d818ff5ec7f85cfc1723c2bf28eb2db",
+    "signaturePath": "Fixtures/release-evidence/phase3-large/review-manifest.sig"
+  },
+  "trace": {
+    "byteCount": 674044067,
+    "durationNs": 598338869077,
+    "requiredRows": {
+      "callstack": 1867490,
+      "process": 4437,
+      "sched_slice": 2599251,
+      "thread": 5285,
+      "thread_state": 4965866
+    },
+    "sha256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3"
+  }
+}

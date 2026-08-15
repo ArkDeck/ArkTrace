@@ -45,14 +45,11 @@ and exact_detail("viewport.namedSlice.detail"; [
   "arktrace_v2_callstack_callid_ts_cover_optional"
 ])
 and exact_density("viewport.cpu.density"; [
-  "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
-  "arktrace_v2_sched_slice_cpu_ts_cover_optional"
+  "arktrace_v3_sched_slice_cpu_ts_dur"
 ])
 and exact_density("viewport.threadState.density"; [
-  "arktrace_v2_thread_state_itid_ts_id_dur",
-  "arktrace_v2_thread_state_itid_ts_cover_cpu"
+  "arktrace_v3_thread_state_itid_ts_dur"
 ])
 and exact_density("viewport.namedSlice.density"; [
-  "arktrace_v2_callstack_callid_ts_id_dur",
-  "arktrace_v2_callstack_callid_ts_cover_optional"
+  "arktrace_v3_callstack_callid_ts_dur"
 ])

@@ -49,7 +49,7 @@ scripts/build_trace_streamer.sh
 3. **插件裁剪**：`./build.sh -e hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower`——禁用 hiperf/ebpf/native_hook（ArkTrace 不消费 perf/malloc 栈数据，它们是脆弱 native unwinder 的唯一使用方）；
 4. `gsed` 实际未被 CLI 构建路径使用（脚本只赋值未引用），无需安装；
 5. GN/Ninja 的锁定 darwin-x86 archive 经 Rosetta 2 运行；下载后先校验 exact size/SHA，再解包；产出的 trace_streamer 本体仍为原生 arm64；
-6. 构建脚本、共享 shell safety helper、source lock 与 local patch 各自 SHA-256 经稳定 recipe 编码生成 `buildRecipeVersion`。当前 recipe 为 `600d94fae578f523ca2fd526f334b2a7c6febbaad03fea1135057357020fd18c`；当前 unsigned reproducible binary SHA-256 为 `e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf`；Developer ID 分发会在内层签名后记录新的 helper SHA，详见 `APP_DISTRIBUTION.md`；
+6. 构建脚本、共享 shell safety helper、source lock 与 local patch 各自 SHA-256 经稳定 recipe 编码生成 `buildRecipeVersion`。当前 recipe 为 `e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06`；当前 unsigned reproducible binary SHA-256 为 `e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf`；Developer ID 分发会在内层签名后记录新的 helper SHA，详见 `APP_DISTRIBUTION.md`；
 7. `mac_depend.sh` **不得执行**：现代 macOS 的 `/usr/lib/*.dylib` 已并入 dyld shared cache，该脚本 `find /usr` 找不到 libc++ 文件，却仍会把二进制的 libc++ 依赖改写为相对路径 `./lib/libc++.1.dylib`，直接损坏二进制。上游仓库中它恰好缺执行位而失败——`build.sh` 因此以非零退出，但二进制此时已完整链接。构建脚本以"新鲜二进制存在 + `--version` 可运行 + 未被改写依赖"为真实成功判据，并显式校验。
 
 Phase 1 的 production adapter 还会在每次 identity/parse 前把 binary 与 source 复制到 session-owned `0700` staging，分别设为只读/可执行快照，并对真正执行/解析的快照计算 SHA。子进程取消采用 TERM → 500 ms grace → 同一已知 PID 的 KILL，并显式 wait/reap；stdout、stderr 与 `.ohos.ts` diagnostics 都有 64 KiB 上限。输入 symlink 只允许解析一次到 regular/readable target，Ready DB 与 sidecar 不允许 symlink。

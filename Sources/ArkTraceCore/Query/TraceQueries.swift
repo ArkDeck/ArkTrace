@@ -242,6 +242,66 @@ public protocol TraceRepositoryProtocol: Sendable {
     func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice>
     func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries>
     func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult
+    func eventBatch(_ batch: TraceRepositoryEventBatch) async throws
+        -> TraceRepositoryEventBatchResult
+}
+
+/// A bounded group of independent, immutable Ready-database reads. The Store
+/// may execute these reads concurrently, but every result retains the exact
+/// semantics, limit and deadline of its corresponding typed query.
+public struct TraceRepositoryEventBatch: Sendable {
+    public static let maximumQueryCount = 32
+
+    public let cpuSlices: [CpuSliceQuery]
+    public let threadStates: [ThreadStateQuery]
+    public let slices: [TraceSliceQuery]
+    public let counters: [CounterQuery]
+    public let densities: [TraceDensityQuery]
+
+    public init(
+        cpuSlices: [CpuSliceQuery] = [],
+        threadStates: [ThreadStateQuery] = [],
+        slices: [TraceSliceQuery] = [],
+        counters: [CounterQuery] = [],
+        densities: [TraceDensityQuery] = []
+    ) throws {
+        let count = cpuSlices.count + threadStates.count + slices.count
+            + counters.count + densities.count
+        guard (1...Self.maximumQueryCount).contains(count) else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Repository event batch must contain 1...32 queries"
+            )
+        }
+        self.cpuSlices = cpuSlices
+        self.threadStates = threadStates
+        self.slices = slices
+        self.counters = counters
+        self.densities = densities
+    }
+}
+
+public struct TraceRepositoryEventBatchResult: Sendable {
+    public let cpuSlices: [TraceEventPage<CpuSlice>]
+    public let threadStates: [TraceEventPage<ThreadStateInterval>]
+    public let slices: [TraceEventPage<TraceSlice>]
+    public let counters: [TraceEventPage<CounterSeries>]
+    public let densities: [TraceDensityResult]
+
+    public init(
+        cpuSlices: [TraceEventPage<CpuSlice>],
+        threadStates: [TraceEventPage<ThreadStateInterval>],
+        slices: [TraceEventPage<TraceSlice>],
+        counters: [TraceEventPage<CounterSeries>],
+        densities: [TraceDensityResult]
+    ) {
+        self.cpuSlices = cpuSlices
+        self.threadStates = threadStates
+        self.slices = slices
+        self.counters = counters
+        self.densities = densities
+    }
 }
 
 /// Additive event APIs do not force summary-only adapters to manufacture
@@ -267,5 +327,27 @@ public extension TraceRepositoryProtocol {
 
     func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
         .unavailable
+    }
+
+    func eventBatch(
+        _ batch: TraceRepositoryEventBatch
+    ) async throws -> TraceRepositoryEventBatchResult {
+        var cpu: [TraceEventPage<CpuSlice>] = []
+        var states: [TraceEventPage<ThreadStateInterval>] = []
+        var slices: [TraceEventPage<TraceSlice>] = []
+        var counters: [TraceEventPage<CounterSeries>] = []
+        var densities: [TraceDensityResult] = []
+        for query in batch.cpuSlices { cpu.append(try await cpuSlices(query)) }
+        for query in batch.threadStates { states.append(try await threadStates(query)) }
+        for query in batch.slices { slices.append(try await self.slices(query)) }
+        for query in batch.counters { counters.append(try await self.counters(query)) }
+        for query in batch.densities { densities.append(try await density(query)) }
+        return TraceRepositoryEventBatchResult(
+            cpuSlices: cpu,
+            threadStates: states,
+            slices: slices,
+            counters: counters,
+            densities: densities
+        )
     }
 }

@@ -476,42 +476,45 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
             }
             try Self.check(deadline)
 
-            // Each section has an independent Store query and budget. One
-            // truncated section cannot silently lower another section's data.
-            let cpuPage = try await repository.cpuSlices(
-                try CpuSliceQuery(
+            // Every distinct typed query retains its own Store limit. Sections
+            // whose reviewed query is byte-for-byte identical share that one
+            // immutable page; distinct limits or filters remain independent.
+            let cpuLimits = [
+                request.maximumCPUSlices, request.maximumProcessSlices,
+                request.maximumThreadSlices, request.maximumSchedulingEvents,
+                request.maximumHotEvents,
+            ]
+            var cpuQueryIndexes: [Int: Int] = [:]
+            var cpuQueries: [CpuSliceQuery] = []
+            for limit in cpuLimits where cpuQueryIndexes[limit] == nil {
+                cpuQueryIndexes[limit] = cpuQueries.count
+                cpuQueries.append(try CpuSliceQuery(
                     range: request.range,
                     processKey: request.filters.processKey,
                     pid: request.filters.pid,
                     threadKey: request.filters.threadKey,
                     tid: request.filters.tid,
-                    limit: request.maximumCPUSlices,
+                    limit: limit,
                     deadline: deadline
-                )
-            )
-            let processPage = try await repository.cpuSlices(
-                try CpuSliceQuery(
+                ))
+            }
+            let sliceLimits = [request.maximumNamedSlices, request.maximumHotEvents]
+            var sliceQueryIndexes: [Int: Int] = [:]
+            var sliceQueries: [TraceSliceQuery] = []
+            for limit in sliceLimits where sliceQueryIndexes[limit] == nil {
+                sliceQueryIndexes[limit] = sliceQueries.count
+                sliceQueries.append(try TraceSliceQuery(
                     range: request.range,
                     processKey: request.filters.processKey,
                     pid: request.filters.pid,
                     threadKey: request.filters.threadKey,
                     tid: request.filters.tid,
-                    limit: request.maximumProcessSlices,
+                    minimumDurationNs: request.minimumLongSliceDurationNs,
+                    limit: limit,
                     deadline: deadline
-                )
-            )
-            let threadPage = try await repository.cpuSlices(
-                try CpuSliceQuery(
-                    range: request.range,
-                    processKey: request.filters.processKey,
-                    pid: request.filters.pid,
-                    threadKey: request.filters.threadKey,
-                    tid: request.filters.tid,
-                    limit: request.maximumThreadSlices,
-                    deadline: deadline
-                )
-            )
-            let statePage = try await repository.threadStates(
+                ))
+            }
+            let stateQueries = [
                 try ThreadStateQuery(
                     range: request.range,
                     processKey: request.filters.processKey,
@@ -520,32 +523,7 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
                     tid: request.filters.tid,
                     limit: request.maximumStateIntervals,
                     deadline: deadline
-                )
-            )
-            let namedPage = try await repository.slices(
-                try TraceSliceQuery(
-                    range: request.range,
-                    processKey: request.filters.processKey,
-                    pid: request.filters.pid,
-                    threadKey: request.filters.threadKey,
-                    tid: request.filters.tid,
-                    minimumDurationNs: request.minimumLongSliceDurationNs,
-                    limit: request.maximumNamedSlices,
-                    deadline: deadline
-                )
-            )
-            let schedulingCPUPage = try await repository.cpuSlices(
-                try CpuSliceQuery(
-                    range: request.range,
-                    processKey: request.filters.processKey,
-                    pid: request.filters.pid,
-                    threadKey: request.filters.threadKey,
-                    tid: request.filters.tid,
-                    limit: request.maximumSchedulingEvents,
-                    deadline: deadline
-                )
-            )
-            let schedulingStatePage = try await repository.threadStates(
+                ),
                 try ThreadStateQuery(
                     range: request.range,
                     processKey: request.filters.processKey,
@@ -555,31 +533,30 @@ public struct TraceDeterministicAnalysisEngine: Sendable {
                     state: .runnable,
                     limit: request.maximumSchedulingEvents,
                     deadline: deadline
+                ),
+            ]
+            let pages = try await repository.eventBatch(
+                TraceRepositoryEventBatch(
+                    cpuSlices: cpuQueries,
+                    threadStates: stateQueries,
+                    slices: sliceQueries
                 )
             )
-            let hotCPUPage = try await repository.cpuSlices(
-                try CpuSliceQuery(
-                    range: request.range,
-                    processKey: request.filters.processKey,
-                    pid: request.filters.pid,
-                    threadKey: request.filters.threadKey,
-                    tid: request.filters.tid,
-                    limit: request.maximumHotEvents,
-                    deadline: deadline
-                )
-            )
-            let hotNamedPage = try await repository.slices(
-                try TraceSliceQuery(
-                    range: request.range,
-                    processKey: request.filters.processKey,
-                    pid: request.filters.pid,
-                    threadKey: request.filters.threadKey,
-                    tid: request.filters.tid,
-                    minimumDurationNs: request.minimumLongSliceDurationNs,
-                    limit: request.maximumHotEvents,
-                    deadline: deadline
-                )
-            )
+            let cpuPage = pages.cpuSlices[cpuQueryIndexes[request.maximumCPUSlices]!]
+            let processPage = pages.cpuSlices[
+                cpuQueryIndexes[request.maximumProcessSlices]!
+            ]
+            let threadPage = pages.cpuSlices[
+                cpuQueryIndexes[request.maximumThreadSlices]!
+            ]
+            let schedulingCPUPage = pages.cpuSlices[
+                cpuQueryIndexes[request.maximumSchedulingEvents]!
+            ]
+            let hotCPUPage = pages.cpuSlices[cpuQueryIndexes[request.maximumHotEvents]!]
+            let statePage = pages.threadStates[0]
+            let schedulingStatePage = pages.threadStates[1]
+            let namedPage = pages.slices[sliceQueryIndexes[request.maximumNamedSlices]!]
+            let hotNamedPage = pages.slices[sliceQueryIndexes[request.maximumHotEvents]!]
             try Self.check(deadline)
 
             let cpu = try Self.cpuUtilization(cpuPage.items, request.range, deadline)

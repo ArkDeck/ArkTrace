@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 为 9/10；Phase 4 实现为 6/7；Phase 5 为 9/9；Phase 6 已进入 P6-T01。** ArkDeck summary/deep operations 分别由 PR #1309/#1310 合入，LaunchAgent descriptor 安装由 PR #1311 合入；真实 capture Artifact 已经 pinned ArkTrace 产出 restart 后仍可读的 derived summary Artifact，发布门 8/9 均已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。独立采集且可再分发的 >500 MiB large trace 仍明确保持开放；发布门 6/7、P4-T06 large 性能项与 Phase 4 Exit 没有因本次阶段推进而被关闭或豁免。
+> **状态：Phase 1～5 已完成；Phase 3/4 的 large 发布门 6/7 已由真实 DAYU 200 证据关闭；Phase 6 已进入 P6-T01。** ArkDeck summary/deep operations 分别由 PR #1309/#1310 合入，LaunchAgent descriptor 安装由 PR #1311 合入；真实 capture Artifact 已经 pinned ArkTrace 产出 restart 后仍可读的 derived summary Artifact，发布门 8/9 均已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。674,044,067-byte DAYU 200 trace 保存在 Git 外的 content-addressed Release artifact，tracked CC-BY-4.0 grant、签名 review/provenance、完整性报告以及真实 cancellation/performance evidence 共同关闭 Gate 6/7。
 
 ## 文档
 

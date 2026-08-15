@@ -1,6 +1,6 @@
 # ArkTrace Phase 4 任务清单
 
-> 状态：Active，6/7 — P4-T01～T05 与 P4-T07 implementation review clean；P4-T06 medium 验收通过、large evidence 外部开放；Phase 3 Exit 与外部门仍是正式 Exit 前置条件
+> 状态：Active，6/7 — P4-T01～T05 与 P4-T07 implementation review clean；P4-T06 的 signed large metrics 已取得并关闭 Gate 6/7，Phase 4 总阶段状态仍单独跟踪
 > 阶段：Agent Query
 > 验收目标：Agent 无需解析 UI 或 human log，即可获得 bounded、deterministic Trace evidence
 
@@ -191,7 +191,7 @@ P4-T01 和 P4-T02 可以并行。
 **优先级：P0。**
 **依赖：P4-T05。**
 **关联：AT-PERF-005/006、AC-AT-008～010/013。**
-**状态：Medium implementation/acceptance review clean；large evidence remains externally open.**
+**状态：Medium implementation/acceptance review clean；signed large evidence 已取得，阶段完成声明仍单独跟踪。**
 
 **使用真实 Trace 逐条验证**
 
@@ -209,9 +209,9 @@ P4-T01 和 P4-T02 可以并行。
 - medium 发布门在正式 20-sample measurement 前完整执行一次相同 production workload 作为
   warm-filesystem/runtime warm-up；该轮不得发布 evidence，也不得参与 percentile 或放宽下列阈值；
 - [x] medium context p95 ≤1s；
-- [ ] large context p95 ≤2s（等待 reviewed large fixture）；
+- [ ] large context p95 ≤2s（signed evidence 已满足；本文件暂不据此自动改变 Phase 4 总状态）；
 - [x] medium deterministic range analysis p95 ≤3s；
-- [ ] large deterministic range analysis p95 ≤5s（等待 reviewed large fixture）；
+- [ ] large deterministic range analysis p95 ≤5s（signed evidence 已满足；本文件暂不据此自动改变 Phase 4 总状态）；
 - [x] medium peak RSS、event/output counts 有记录；
 - [x] 未达到目标时保留真实 measured result，不伪报完成。
 
@@ -219,7 +219,7 @@ P4-T01 和 P4-T02 可以并行。
 
 **优先级：P1。**
 **依赖：P4-T06。**
-**状态：Completed — implementation/gate review clean；full gate remains fail-closed on Phase 3 external inputs.**
+**状态：Completed — implementation/gate review clean；Gate 6/7 后续已由 signed DAYU 200 external input 关闭。**
 
 **交付**
 
@@ -238,7 +238,7 @@ P4-T01 和 P4-T02 可以并行。
 - [x] no raw SQL/no GUI/no path leak；
 - [x] reviewed medium real trace gate 零 skip；
 - [x] medium context/analysis benchmark 有真实结果；
-- [ ] large context/analysis benchmark 等待 reviewed external large fixture；
+- [ ] large context/analysis benchmark 已有 reviewed external evidence；Phase 4 Exit 状态仍待单独确认；
 - [x] AC-AT-008/009/010/013 的 medium/contract 验收通过；AC-AT-015 的完整真实闭环由 Phase 6 验收。
 
 ## 6. P4-T01～T03 已 review 的流水证据（2026-08-14）
@@ -249,7 +249,7 @@ P4-T01 和 P4-T02 可以并行。
 - 统一 review 的 findings 已全部关闭：counter 改为全局事件序、Analysis 补齐 kind/effective parameters 与完整稳定总序、Runnable→Running 精确相邻证据、整数 hot buckets、open-ended duration、动态 SQLite storage、引用/预算区分、重复 identity typed failure 与公开 Codable fail-closed 均有 regression；
 - 新增 15 个 Analysis batch regressions、1 个 Store 动态 storage regression，并扩展现有 Store 时间语义回归；冻结完整 `CI=true swift test -c release` 为 **333 tests、0 failure**；
 - 继承的 `scripts/test_phase3_batch1.sh` 同样以 **333 tests、0 skip** 通过，真实 fixture 的 parser SHA、quick_check、schema fingerprint 与 locked evidence 均未漂移；
-- 独立 reviewer 结论为 P0/P1/P2/P3 全 clean。本节当时只关闭 P4-T01～T03，不关闭 Phase 4 Exit，也不改写当时 Phase 3 Gate 3/6/7 的 Open 状态；随后 Gate 3 已由 Developer ID/notarization 的 tracked evidence 关闭，Gate 6/7 仍保持 Open。
+- 独立 reviewer 结论为 P0/P1/P2/P3 全 clean。本节当时只关闭 P4-T01～T03，不关闭 Phase 4 Exit，也不改写当时 Phase 3 Gate 3/6/7 的 Open 状态；随后 Gate 3 已由 Developer ID/notarization 关闭，Gate 6/7 于 2026-08-15 由单独的 signed large evidence 关闭。
 
 ## 7. P4-T04～T07 统一 review 证据（2026-08-14）
 
@@ -273,4 +273,4 @@ P4-T01 和 P4-T02 可以并行。
   明确排除以避免 evidence 自哈希循环。gate 会直接验证 Context ≤1s、deterministic analysis
   ≤3s、RSS ≤1.5 GiB，以及 Context events/bytes 与 analysis rows 均非空；
 - 跨进程 single-flight cancellation regression 不再用固定 100ms 猜测 waiter 生命周期，而在真实 key-lock contention 后才取消；定向 Release 连续 12 次、完整 Release **338/338** 与完整 batch gate 均通过；
-- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。T04/T05/T07 implementation 完成；T06 的 medium 验收完成，但 independently captured/reviewed large fixture 与 Phase 3 Gate 6/7 继续 Open，因此 `scripts/test_phase4.sh` 必须 fail closed，Phase 4 Exit 不在本批关闭。
+- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。该批当时只完成 T06 medium；2026-08-15 后续 signed DAYU 200 fixture 在相同 production workload 上满足 context ≤2s、analysis ≤5s 并关闭 Gate 6/7，精确值由 tracked performance JSON 唯一记录。该事实不在本次文档更新中自动改写 Phase 4 Exit。

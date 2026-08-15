@@ -97,7 +97,7 @@ public enum TraceDatabaseStagingPreparer {
     /// Public cache identity for the currently accepted TraceStreamer schema
     /// contract. Runtime includes this value in every content-addressed key.
     public static let schemaAdapterVersion = TraceSchemaAdapter.version
-    public static let indexVersion = 2
+    public static let indexVersion = 3
     public static let relationshipVMInstructionBudget = 250_000
 
     private struct IndexDefinition {
@@ -195,6 +195,13 @@ public enum TraceDatabaseStagingPreparer {
             requiredForReady: false
         ),
         IndexDefinition(
+            name: "arktrace_v3_sched_slice_cpu_ts_dur",
+            table: "sched_slice",
+            columns: ["cpu", "ts", "dur"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
             name: "arktrace_v1_sched_slice_itid_ts",
             table: "sched_slice",
             columns: ["itid", "ts"],
@@ -230,6 +237,13 @@ public enum TraceDatabaseStagingPreparer {
             requiredForReady: false
         ),
         IndexDefinition(
+            name: "arktrace_v3_thread_state_itid_ts_dur",
+            table: "thread_state",
+            columns: ["itid", "ts", "dur"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
             name: "arktrace_v1_callstack_callid_ts",
             table: "callstack",
             columns: ["callid", "ts"],
@@ -252,6 +266,20 @@ public enum TraceDatabaseStagingPreparer {
             ],
             bootstrapForValidation: false,
             requiredForReady: false
+        ),
+        IndexDefinition(
+            name: "arktrace_v3_callstack_ts_id_dur_callid",
+            table: "callstack",
+            columns: ["ts", "id", "dur", "callid", "name"],
+            bootstrapForValidation: false,
+            requiredForReady: true
+        ),
+        IndexDefinition(
+            name: "arktrace_v3_callstack_callid_ts_dur",
+            table: "callstack",
+            columns: ["callid", "ts", "dur"],
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_measure_filter_id_ts",

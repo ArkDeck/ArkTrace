@@ -1,6 +1,6 @@
 # ArkTrace Phase 3 任务清单
 
-> 状态：Active，9/10 — P3-T01～T08 与 P3-T10 已完成并通过独立 review；P3-T09 的独立 large fixture、large cancellation 与 viewport 发布门 6/7 仍开放
+> 状态：Completed，10/10 — P3-T09 已由签名 DAYU 200 large fixture、真实 cancellation 与 performance evidence 关闭 Gate 6/7
 > 阶段：Native Viewer
 > 验收目标：ArkTrace.app 可以实际替代浏览器完成基础 Trace 查看
 
@@ -264,8 +264,8 @@ P3-T01、P3-T02、P3-T05 可以并行。
 - [x] 许可锁定的 265,032,803-byte medium fixture 跑通 parse/index/cache-open/directory/viewport/frame/RSS；
 - [x] index schema v2 的 CPU/thread-state/named-slice viewport 均命中 persistent covering index，relationship probe 11k～25k steps，未触发 automatic index；
 - [x] medium gate 消费精确 row counts、非空 CPU/state/slice detail+density、context、analysis、RSS，并分别记录真实 detail selection、pan、steady 与 rebuild frame；对 Store 实际执行的六类 production SQL 锁 exact applicable v2 covering plan；最新冻结数值记入 verification 文档；
-- [ ] 独立采集、可再分发、恰好一个 type-0 protobuf segment，且非 padding/拼接/重复 packet 的 >500 MiB large trace；多 segment 在缺少可验证 session chain 时 fail closed；
-- [ ] 在上述 large trace 上关闭 cancellation orphan/cache promotion 与 gate 6/7。
+- [x] 独立采集、可再分发、恰好一个 type-0 protobuf segment，且非 padding/拼接/重复 packet 的 674,044,067-byte DAYU 200 large trace；多 segment 在缺少可验证 session chain 时继续 fail closed；
+- [x] 在上述 large trace 上以真实 child cancellation、24-index exact closure 与 20-sample benchmark 关闭 gate 6/7；事实源为 `Fixtures/release-evidence/phase3-large-performance.json`。
 
 ### P3-T10 — Build hardening、App tests、许可证、打包和文档
 
@@ -303,7 +303,7 @@ P3-T01、P3-T02、P3-T05 可以并行。
 - [x] detail/density LOD bounded，无全量 preload；
 - [x] DESIGN §25.11 的 reviewed a11y 决策已执行，keyboard/VoiceOver/Reduce Motion 完整 contract 通过；
 - [x] MainActor 无 parse/hash/index/query 阻塞；
-- [ ] medium/large benchmark 有证据；
+- [x] medium/large benchmark 有证据；
 - [x] 发布门 3 由完整许可证清单与最终分发包逐字节复验关闭；
-- [ ] 发布门 6/7 仍等待合格 large fixture；
+- [x] 发布门 6/7 由 signed DAYU 200 large fixture、真实 cancellation 与 performance evidence 关闭；
 - [x] App 可完成基础查看，且不依赖浏览器或 GUI automation。

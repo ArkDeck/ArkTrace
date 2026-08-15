@@ -1,15 +1,15 @@
 # ArkTrace Phase 3 verification
 
-> 状态：P3-T01～T08 与 P3-T10 已完成并通过独立 review；签名 App accessibility、Developer ID/notarization 与发布门 3 已关闭，P3-T09 的独立 large fixture及发布门 6/7 仍开放
-> 日期：2026-08-14
+> 状态：Phase 3 Completed，10/10；signed DAYU 200 large fixture、真实 cancellation/performance evidence 已关闭发布门 6/7
+> 日期：2026-08-15
 
 ## 范围
 
 已 review 的首批证据覆盖 ArkTrace.app shell 与分发边界、typed event repository、
 viewport/detail-density LOD 和 NSView/CoreGraphics renderer。本轮 review 增加 P3-T05～T07：
 session/file/recent/cache maintenance、完整 Viewer composition、交互、Search、Event/Range
-Inspector。P3-T08 与 P3-T10 的真实外部证据已完成；Phase 3 Exit 仍只受 P3-T09 的
-independent large fixture、large cancellation/viewport 与发布门 6/7 阻塞。
+Inspector。P3-T08 与 P3-T10 的真实外部证据已完成；P3-T09 后续以独立采集和人工签名审核的
+DAYU 200 large fixture、真实 parser cancellation 与 20-sample production benchmark 完成。
 
 ## App 与分发候选
 
@@ -61,7 +61,7 @@ independent large fixture、large cancellation/viewport 与发布门 6/7 阻塞�
   parser/manifest、empty entitlement、Release-only API boundary、built Info.plist 的
   htrace/systrace/trace document registration/Open With contract 与无交互启动 smoke。
 
-## P3-T08～T10 已 review 证据（仅 large 门开放）
+## P3-T08～T10 已 review 证据
 
 - Accessibility：Timeline 是单个 bounded accessibility group，暴露 focused track、真实
   selected/focused event、viewport/range 与当前状态下确实可执行的 custom actions（含 pan/zoom），不为 event array 建 accessibility
@@ -97,20 +97,32 @@ independent large fixture、large cancellation/viewport 与发布门 6/7 阻塞�
   segment 的真实 trace；OHOSPROF 没有可验证的跨 segment session chain，因此 0.1 对所有
   multi-segment container fail closed，而不是猜测 type-0/type-1/type-1000 是否同源。padding、sparse、
   拼接和重复 packet 均拒绝。gate 从真实 bytes 重走 segment length/payload SHA、protobuf framing
-  与 packet uniqueness，并绑定独立 capture record、reviewer、license 与
+  与 packet uniqueness，并绑定 capture record、reviewer、license 与
   redistribution grant；capture log、typed redistribution grant 与完整 review manifest 分别绑定
-  trace/session/hash，并由 HEAD 锁定的独立 reviewer/issuer trust root 验签；caller 自生成 key、签名或修改
-  trust config 的负例不能通过。当前未找到满足该条件的公开 fixture，故 gate 6/7 保持 Open；
+  trace/session/hash，并由 HEAD 锁定的 reviewer/issuer trust root 验签；caller 自生成 key、签名或修改
+  trust config 的负例不能通过。2026-08-15 的正式 recapture 为 674,044,067 bytes、SHA-256
+  `087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3`、单 type-0 segment、
+  120,672 个唯一 packet，保存在普通 Git 外的 content-addressed Release artifact。`capturedBy`
+  是 Codex capture task，人工 reviewer 是 Hanfeng Fu；review 独立性按采集执行职责判断。
+  reviewer 同时可以是 redistribution grant issuer，但 RSA-3072 角色 key 必须分离且字节不同；
+  reviewer/issuer public-key SHA-256 分别为 `ba49d54e355c88082877c0e3dcaf4b616d818ff5ec7f85cfc1723c2bf28eb2db`
+  与 `06566ab2804b7a213236c45aa9a799157fcd00a190d542039df29cd08bc804dd`。
+  CC-BY-4.0 grant、两份签名、acquisition/integrity/provenance 均 tracked；调用者自签负例仍拒绝。
   2026-08-15 的 DAYU 200 真实 large 采集调查发现 verifier 的 100,000 packet 上限不是
   OHOSPROF wire-format 上限，同时确认 HiProfiler 离线 writer repeated `SHA256_Final` 会令
   header digest 偏离完整 payload；协议证据、字节结果与安全处置见
-  [DAYU200_LARGE_HTRACE_INTEGRITY.md](./DAYU200_LARGE_HTRACE_INTEGRITY.md)。两份现有采集
-  仍在 digest 处 fail closed，不作为 large fixture 或 Gate 6/7 关闭证据；
-  `scripts/benchmark_phase3.sh large` 和 `scripts/test_phase3.sh` 在缺少
-  `ARKTRACE_LARGE_TRACE`/provenance evidence 时 fail closed。
+  [DAYU200_LARGE_HTRACE_INTEGRITY.md](./DAYU200_LARGE_HTRACE_INTEGRITY.md)。原 480/600 秒文件
+  仍在 digest 处 fail closed，不作为 release fixture；只有重新采集的 exact hash 能进入门禁。
+  `scripts/benchmark_phase3.sh large` 和 `scripts/test_phase3.sh` 在缺少或漂移
+  `ARKTRACE_LARGE_TRACE`/provenance evidence 时继续 fail closed。
+  正式 benchmark 的 cache/viewport/context/analysis/frame/RSS 均满足冻结阈值；24 个
+  applicable/persistent indexes 精确闭合且
+  `usesAutomaticIndex=false`。真实 child cancellation 后 child 不存在，禁止的 cache/private/owner/
+  quarantine residue 为 0；空的安全 `.owners` 目录不被伪报为 active owner。原子事实源为
+  `Fixtures/release-evidence/phase3-large-performance.json`，文档不复制会随每次真实测量波动的精确值。
 - Build hardening：`source-lock.json` 固定 upstream、13 个 source dependency 与 GN/Ninja
   URL/SHA/bytes；standalone patch、HTTPS rewrite 和构建脚本共同导出 recipe
-  `600d94fae578f523ca2fd526f334b2a7c6febbaad03fea1135057357020fd18c`。
+  `e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06`。
   两个独立 fresh worktree 的实建产物彼此且与仓库 binary byte-identical，binary SHA 保持
   `e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf`；完整 two-clean-build
   gate 已由 `scripts/test_trace_streamer_reproducibility.sh` 实际通过并固化。
@@ -122,7 +134,7 @@ independent large fixture、large cancellation/viewport 与发布门 6/7 阻塞�
   signed SHA/recipe/exact Team/Authority/certificate fingerprint 记录到 Resources，随后签外层 App；package 只消费经人工 review
   的同一 App，要求 empty entitlement、与 `HEAD` 逐字节一致且绑定 exact App tree/CDHash 的 review manifest、
   独立 Agent/人工 review 记录和六项 distinct tracked artifact/hash；同一 workspace 内不再制造不能提供实际独立性的
-  accessibility reviewer key，large trace reviewer 与 redistribution grant issuer 的独立信任根保持不变。提交 notarization、staple 后才
+  accessibility reviewer key；large trace reviewer 与 redistribution grant issuer 使用各自独立、byte-distinct 的角色信任根。提交 notarization、staple 后才
   在 owner-bound private partial 建 ZIP；解包复验 nested/outer signature、ticket 与 `spctl` 全过后
   才原子发布 final ZIP。失败的 candidate/ZIP 不会留在正式 artifact 名下。2026-08-14 使用
   `Developer ID Application: Hanfeng Fu (8AQTYW5FKR)` 与 certificate SHA-1
@@ -155,13 +167,13 @@ API 不存在。
 `scripts/test_phase3_batch1.sh` 先运行完整 Phase 2 gate，再构建/签名 App、校验
 bundle parser/manifest 字节、扫描禁止 entitlement，并完成无交互启动 smoke。
 这些数据是 P3-T01～T04 提交前的冻结实测；该批独立 reviewer 已确认 P0～P3
-均无 finding。上方 P3-T05～T07 也已通过统一独立 review，不改写前一批证据，也不关闭
-Phase 3 Exit 或任何仍开放的发布门。
+均无 finding。上方 P3-T05～T07 也已通过统一独立 review，不改写前一批证据。该段是历史冻结
+结果；Phase 3 Exit 后于 2026-08-15 由 P3-T09 的独立 large evidence 关闭。
 
-## 仍开放的风险
+## 剩余风险与非目标
 
 - 人工 VoiceOver/keyboard/最小窗口/长本地化 walkthrough 已由 exact signed candidate 证据关闭；
-- medium 的真实 frame/viewport/index 证据已给出；large cancellation、large viewport 与
-  250,000-step 再评估仍等待合格 large fixture；
-- third-party inventory/build lock、Developer ID/notarization/package 与实际 App screenshot
-  已完成；剩余外部阻塞仅为满足许可、结构和独立审核要求的 large fixture。
+- medium 与 large 的真实 frame/viewport/index/cancellation 证据均已给出；large fixture 仍只在
+  content-addressed 外部 artifact 存储中保留，不进入普通 Git，release asset 的可用性属于分发运维风险；
+- third-party inventory/build lock、Developer ID/notarization/package 与实际 App screenshot 已完成；
+  Gate 10 的真实两轮调试闭环属于 Phase 6，不能由本次 large trace evidence 替代。
