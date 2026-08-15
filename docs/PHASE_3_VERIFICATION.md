@@ -101,6 +101,11 @@ independent large fixture、large cancellation/viewport 与发布门 6/7 阻塞�
   redistribution grant；capture log、typed redistribution grant 与完整 review manifest 分别绑定
   trace/session/hash，并由 HEAD 锁定的独立 reviewer/issuer trust root 验签；caller 自生成 key、签名或修改
   trust config 的负例不能通过。当前未找到满足该条件的公开 fixture，故 gate 6/7 保持 Open；
+  2026-08-15 的 DAYU 200 真实 large 采集调查发现 verifier 的 100,000 packet 上限不是
+  OHOSPROF wire-format 上限，同时确认 HiProfiler 离线 writer repeated `SHA256_Final` 会令
+  header digest 偏离完整 payload；协议证据、字节结果与安全处置见
+  [DAYU200_LARGE_HTRACE_INTEGRITY.md](./DAYU200_LARGE_HTRACE_INTEGRITY.md)。两份现有采集
+  仍在 digest 处 fail closed，不作为 large fixture 或 Gate 6/7 关闭证据；
   `scripts/benchmark_phase3.sh large` 和 `scripts/test_phase3.sh` 在缺少
   `ARKTRACE_LARGE_TRACE`/provenance evidence 时 fail closed。
 - Build hardening：`source-lock.json` 固定 upstream、13 个 source dependency 与 GN/Ninja

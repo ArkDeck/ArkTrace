@@ -28,8 +28,13 @@ def segment(packets, data_type=0):
     return bytes(header) + payload
 
 valid = segment([b"one", b"two", b"three"])
+(root / "dayu-count-shape.htrace").write_bytes(
+    segment([struct.pack("<I", index) for index in range(110_380)])
+)
 (root / "valid.htrace").write_bytes(valid)
+(root / "truncated.htrace").write_bytes(valid[:-1])
 (root / "padding.htrace").write_bytes(valid + b"padding")
+(root / "zero-packet.htrace").write_bytes(segment([b""]))
 (root / "duplicates.htrace").write_bytes(segment([b"same", b"same"]))
 (root / "repeated-segment.htrace").write_bytes(valid + valid)
 (root / "distinct-concat.htrace").write_bytes(
@@ -39,8 +44,20 @@ valid = segment([b"one", b"two", b"three"])
     segment([b"first-capture"], data_type=0)
     + segment([b"independent-symbols"], data_type=1)
 )
-(root / "too-many-packets.htrace").write_bytes(
-    segment([struct.pack("<I", index) for index in range(100_001)])
+(root / "digest-drift.htrace").write_bytes(
+    valid[:24] + bytes([valid[24] ^ 1]) + valid[25:]
+)
+odd_count = bytearray(valid)
+struct.pack_into("<I", odd_count, 20, 5)
+(root / "odd-count.htrace").write_bytes(odd_count)
+underreported_count = bytearray(valid)
+struct.pack_into("<I", underreported_count, 20, 2)
+(root / "underreported-count.htrace").write_bytes(underreported_count)
+overreported_count = bytearray(valid)
+struct.pack_into("<I", overreported_count, 20, 8)
+(root / "overreported-count.htrace").write_bytes(overreported_count)
+(root / "digest-index-overflow.htrace").write_bytes(
+    segment([struct.pack("<I", index) for index in range(262_145)])
 )
 PY
 
@@ -76,6 +93,15 @@ jq -e '
     and (.traceSHA256 | test("^[0-9a-f]{64}$"))
 ' "$temporary_root/report.json" >/dev/null || fail "valid report shape drifted"
 
+"$script_directory/verify_htrace_integrity.py" \
+    "$temporary_root/dayu-count-shape.htrace" "$temporary_root/dayu-count-report.json"
+jq -e '
+    .formatVersion == 1 and .segmentCount == 1
+    and .protobufPacketCount == 110380
+    and .segments[0].protobufPacketCount == 110380
+' "$temporary_root/dayu-count-report.json" >/dev/null \
+    || fail "DAYU packet-count shape was not accepted"
+
 printf 'foreign output sentinel\n' >"$temporary_root/foreign-output"
 foreign_output_sha=$(shasum -a 256 "$temporary_root/foreign-output" | awk '{print $1}')
 ln -s "$temporary_root/foreign-output" "$temporary_root/symlink-report.json"
@@ -89,7 +115,10 @@ ln -s "$temporary_root/foreign-output" "$temporary_root/symlink-report.json"
 [ -z "$(find "$temporary_root" -maxdepth 1 -name '.*.partial' -print -quit)" ] \
     || fail "integrity verifier left a private partial output"
 
-for invalid in padding duplicates repeated-segment distinct-concat cross-type-concat too-many-packets; do
+for invalid in truncated padding zero-packet duplicates repeated-segment \
+    distinct-concat cross-type-concat digest-drift odd-count \
+    underreported-count overreported-count digest-index-overflow
+do
     if "$script_directory/verify_htrace_integrity.py" \
         "$temporary_root/$invalid.htrace" "$temporary_root/$invalid.json" \
         >/dev/null 2>"$temporary_root/$invalid.log"
@@ -103,4 +132,4 @@ for invalid in padding duplicates repeated-segment distinct-concat cross-type-co
     fi
 done
 
-printf 'htrace integrity verifier test passed: padding, concat, duplicates, and packet overflow rejected\n'
+printf 'htrace integrity verifier test passed: DAYU count accepted; truncation, digest, framing, concat, duplicates, and index overflow rejected\n'
