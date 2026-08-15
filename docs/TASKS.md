@@ -1,9 +1,9 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-15 / Phase 3、4 的独立 large fixture 与发布门 6/7 仍开放；Phase 5 T01～T07 已完成独立 review，ArkDeck PR #1309 已合入并关闭 Gate 8，但不关闭或豁免 Phase 3/4 Exit
+> 状态基线：2026-08-15 / Phase 3、4 的独立 large fixture 与发布门 6/7 仍开放；Phase 5 T01～T08 已完成独立 review，ArkDeck PR #1309/#1310 已合入并关闭 Gate 8，但不关闭或豁免 Phase 3/4 Exit
 > 任务总数：57
-> 已完成：44（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项 + Phase 5 七项）
-> 当前批次：P5-T08 deep typed analysis operation；P5-T09 real Artifact gate 与 large Trace 作为显式 deferred 外部项继续保留
+> 已完成：45（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 九项 + Phase 4 六项 + Phase 5 八项）
+> 当前批次：P5-T09 real Artifact gate；large Trace 作为显式 deferred 外部项继续保留
 
 ## 1. 阶段总览
 
@@ -14,7 +14,7 @@
 | 2 | CLI Vertical Slice | 7 | Completed，7/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
 | 3 | Native Viewer | 10 | Active，9/10；T08/T10 complete，T09 large gates open | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
 | 4 | Agent Query | 7 | Active，6/7；T01～T05/T07 review clean，T06 large open | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
-| 5 | ArkDeck Integration | 9 | Active under explicit large-trace deferral；T01～T07 review clean，7/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
+| 5 | ArkDeck Integration | 9 | Active under explicit large-trace deferral；T01～T08 review clean，8/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Planned | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
 
 ## 2. 总体依赖

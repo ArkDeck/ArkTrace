@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 为 9/10；Phase 4 实现为 6/7；Phase 5 为 7/9。** P5-T01～T07 已通过独立 review；ArkDeck summary integration 由 `github-actions[bot]` 通过 PR #1309 合入，发布门 8 已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。P5-T08 deep typed operation、P5-T09 real Artifact gate，以及独立采集且可再分发的 >500 MiB large trace 仍明确保持开放；发布门 6/7、P4-T06 large 性能项与 Phase 4 Exit 没有因本次阶段推进而被关闭或豁免。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 为 9/10；Phase 4 实现为 6/7；Phase 5 为 8/9。** P5-T01～T08 已通过独立 review；ArkDeck summary integration 由 `github-actions[bot]` 通过 PR #1309 合入，deep typed analysis operation 由 PR #1310 合入，发布门 8 已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。P5-T09 real Artifact gate，以及独立采集且可再分发的 >500 MiB large trace 仍明确保持开放；发布门 6/7、P4-T06 large 性能项与 Phase 4 Exit 没有因本次阶段推进而被关闭或豁免。
 
 ## 文档
 
@@ -108,7 +108,7 @@ ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer。Canonical
 
 通过 ArkDeck 现有 `analyzer.summarize-trace@1` typed operation 调用 pinned `arktrace` CLI（immutable Artifact lease 输入、derived `trace-summary.json` 输出）；ArkTrace 永不获得设备控制能力（DESIGN §16、SPECIFICATION §18）。
 
-Phase 5 最初以 ArkDeck `60bfa76d6fba3ff1ea9abad031aefa077f5fbbfe` 重新审计，summary integration 在治理修复后的 `26de01e100d3fcbde4dfefeb20cf47e2a7b6ae9b` 上冻结，并由 PR #1309 合入为 `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f`。集成使用 [CLI distribution contract](docs/CLI_DISTRIBUTION.md) 固定签名 tool/parser/JSON identity；参数化 deep analysis 不修改现有 summary operation，后续只可走独立 typed Catalog review。
+Phase 5 最初以 ArkDeck `60bfa76d6fba3ff1ea9abad031aefa077f5fbbfe` 重新审计，summary integration 在治理修复后的 `26de01e100d3fcbde4dfefeb20cf47e2a7b6ae9b` 上冻结，并由 PR #1309 合入为 `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f`。独立的 `analyzer.analyze-trace@1` deep typed operation 随后由 PR #1310 合入为 `0d8f01964b058d954112604900db19dea28ef39f`；既有 summary descriptor 与输出保持不变。两条 operation 均使用 [CLI distribution contract](docs/CLI_DISTRIBUTION.md) 固定签名 tool/parser/JSON identity。
 
 ## License
 

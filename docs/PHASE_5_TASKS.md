@@ -274,11 +274,17 @@ Artifact 链路，未由本项提前关闭。
 
 **验收**
 
-- [ ] Catalog/schema/Provider/Artifact tests；
-- [ ] invalid kind/range/limits 在 submit 前拒绝；
-- [ ] context output bounded；
-- [ ] source hash/provenance 验证；
-- [ ] summary contract 零变化。
+- [x] Catalog/schema/Provider/Artifact tests；
+- [x] invalid kind/range/limits 在 submit 前拒绝；
+- [x] context output bounded；
+- [x] source hash/provenance 验证；
+- [x] summary contract 零变化。
+
+**完成证据：** ArkDeck PR #1310 由 `github-actions[bot]` 创建、维护者 review 后合入为
+`0d8f01964b058d954112604900db19dea28ef39f`。`analyzer.analyze-trace@1` 的 closed input、
+context/analyze lowering、严格 envelope validation、exact Artifact persistence、取消/重启恢复与
+真实签名 profile replay 同车通过；既有 summary descriptor SHA-256
+`b41b4c43d8d44a88d43dd5da1d87e5297d00dfa4fc22cbb8187fcd64fcdc5e31` 保持不变。
 
 ### P5-T09 — 跑通真实 ArkDeck Artifact 链路并关闭发布门 9
 
@@ -313,6 +319,6 @@ Artifact 链路，未由本项提前关闭。
 - [x] derived summary Artifact 持久化；
 - [x] no shell/no GUI/no HDC/no capability；
 - [ ] real ArkDeck Artifact 链路通过；
-- [ ] Phase 6 所需 deep typed operation 已 review/published，或明确记录真实阻塞；
+- [x] Phase 6 所需 deep typed operation 已 review/published；
 - [x] 发布门 8 关闭；
 - [ ] 发布门 9 关闭。
