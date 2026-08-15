@@ -5,12 +5,25 @@ import Foundation
 public enum ArkTraceCLIResourceFixtures {
     public static let root: URL = {
         let bundled = Bundle.module.resourceURL!
-        guard let resolved = bundled.path.withCString({ Darwin.realpath($0, nil) }) else {
+        let descriptor = bundled.path.withCString {
+            Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
             return bundled.standardizedFileURL
         }
-        defer { Darwin.free(resolved) }
+        defer { _ = Darwin.close(descriptor) }
+        var path = [CChar](repeating: 0, count: Int(MAXPATHLEN))
+        guard Darwin.fcntl(descriptor, F_GETPATH, &path) == 0,
+            let terminator = path.firstIndex(of: 0)
+        else {
+            return bundled.standardizedFileURL
+        }
+        let physicalPath = String(
+            decoding: path[..<terminator].map { UInt8(bitPattern: $0) },
+            as: UTF8.self
+        )
         return URL(
-            fileURLWithPath: String(cString: resolved), isDirectory: true
+            fileURLWithPath: physicalPath, isDirectory: true
         ).standardizedFileURL
     }()
 }
