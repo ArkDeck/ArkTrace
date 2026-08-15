@@ -8,11 +8,34 @@ fail() {
 
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd)
+. "$script_directory/phase3_shell_safety.sh"
 
 [ -n "${ARKTRACE_REVIEWED_SIGNED_APP:-}" ] \
     || fail "ARKTRACE_REVIEWED_SIGNED_APP is required for the final distribution gate"
 [ -n "${ARKTRACE_ACCESSIBILITY_EVIDENCE:-}" ] \
     || fail "ARKTRACE_ACCESSIBILITY_EVIDENCE is required for AC-AT-016"
+
+# Freeze the exact reviewed App before inherited clean-build gates run.  The
+# candidate builder may publish under repository .build, which SwiftPM/Xcode
+# cleanup is allowed to replace; packaging must consume the pre-clean bytes,
+# never a rebuilt or caller-substituted App.
+reviewed_app_input=$ARKTRACE_REVIEWED_SIGNED_APP
+[ -d "$reviewed_app_input" ] && [ ! -L "$reviewed_app_input" ] \
+    || fail "ARKTRACE_REVIEWED_SIGNED_APP is unavailable or is a symlink"
+arktrace_validate_reviewed_roots "$repository_root"
+umask 077
+gate_snapshot_root=$(mktemp -d \
+    "$ARKTRACE_REVIEWED_TEMP_ROOT/arktrace-phase3-reviewed-app.XXXXXX") \
+    || fail "reviewed App snapshot root could not be created"
+cleanup() { rm -rf -- "$gate_snapshot_root"; }
+trap cleanup EXIT HUP INT TERM
+reviewed_app_snapshot="$gate_snapshot_root/ArkTrace.app"
+/usr/bin/ditto --noqtn "$reviewed_app_input" "$reviewed_app_snapshot" \
+    || fail "reviewed App snapshot failed"
+[ -d "$reviewed_app_snapshot" ] && [ ! -L "$reviewed_app_snapshot" ] \
+    || fail "reviewed App snapshot is unavailable or symbolic"
+ARKTRACE_REVIEWED_SIGNED_APP=$reviewed_app_snapshot
+export ARKTRACE_REVIEWED_SIGNED_APP
 
 cd "$repository_root"
 scripts/test_phase3_batch1.sh
