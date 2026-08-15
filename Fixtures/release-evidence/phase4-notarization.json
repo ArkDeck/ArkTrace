@@ -1,0 +1,42 @@
+{
+  "accessibilityEvidence": {
+    "path": "Fixtures/release-evidence/accessibility-19c0e42b.json",
+    "sha256": "37c1849ddcd99e056ce8e62db384e47df93cd1c9df4b8109119d4681f3f40312"
+  },
+  "app": {
+    "build": "1",
+    "bundleIdentifier": "com.arktrace.ArkTrace",
+    "candidateCodeDirectoryHash": "9b94d646548dbb6a20f63b588ef614daab172f61",
+    "candidateTreeSHA256": "19c0e42b3635688366368dea0a1874694b9bf419ccc78789c7c6dc54c42de3f9",
+    "signingCertificateSHA1": "38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C",
+    "signingIdentity": "Developer ID Application: Hanfeng Fu (8AQTYW5FKR)",
+    "teamIdentifier": "8AQTYW5FKR",
+    "version": "0.1.0"
+  },
+  "artifact": {
+    "byteCount": 5078476,
+    "fileName": "ArkTrace-20260815T135456Z.zip",
+    "sha256": "170fb0d37fe79a775806ddd4ed57ce8796dfea80034ea30ca9c3da3dec212616"
+  },
+  "artifactReview": {
+    "method": "independent-agent-review",
+    "reviewEndedAt": "2026-08-15T13:58:39Z",
+    "reviewStartedAt": "2026-08-15T13:56:00Z",
+    "reviewer": "Codex independent Agent /root/phase4_a11y_review"
+  },
+  "evidenceRevision": "07af796b827f72fa6b7e2242564676f34cc46689",
+  "formatVersion": 1,
+  "notarization": {
+    "finalArchiveReverified": true,
+    "gatekeeperAssessment": "accepted",
+    "nestedAndOuterSignaturesValid": true,
+    "receiptPath": "Fixtures/release-evidence/phase4-notarization-receipt.json",
+    "receiptSHA256": "5e86817b8042299a305a8ea782c571195480956c45abfd0057d9b8d512bc7563",
+    "stapledTicketValidated": true,
+    "status": "Accepted",
+    "submissionID": "0b37f807-a37b-4f8f-bd1c-fcb6dc39cd72"
+  },
+  "packagedAt": "2026-08-15T13:54:56Z",
+  "reviewedAt": "2026-08-15T13:58:39Z",
+  "sourceRevision": "b22c185cfd44e0862aa644b6064ab4a55ae08df5"
+}

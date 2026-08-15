@@ -1,0 +1,37 @@
+{
+  "archiveFilename": "ArkTrace-notary-submission.zip",
+  "issues": null,
+  "jobId": "0b37f807-a37b-4f8f-bd1c-fcb6dc39cd72",
+  "logFormatVersion": 1,
+  "sha256": "9df57527755a2ff597b6893b5c44f51c84ef0ccb73337c04283b927185e3a8c6",
+  "status": "Accepted",
+  "statusCode": 0,
+  "statusSummary": "Ready for distribution",
+  "ticketContents": [
+    {
+      "arch": "arm64",
+      "cdhash": "9b4685ac5e54a930f434f4c5eb0b5536d844dae3",
+      "digestAlgorithm": "SHA-256",
+      "path": "ArkTrace-notary-submission.zip/ArkTrace.app/Contents/Helpers/trace_streamer"
+    },
+    {
+      "arch": "arm64",
+      "cdhash": "9b94d646548dbb6a20f63b588ef614daab172f61",
+      "digestAlgorithm": "SHA-256",
+      "path": "ArkTrace-notary-submission.zip/ArkTrace.app"
+    },
+    {
+      "arch": "arm64",
+      "cdhash": "9b94d646548dbb6a20f63b588ef614daab172f61",
+      "digestAlgorithm": "SHA-256",
+      "path": "ArkTrace-notary-submission.zip/ArkTrace.app/Contents/MacOS/ArkTrace"
+    },
+    {
+      "arch": "arm64",
+      "cdhash": "9b4685ac5e54a930f434f4c5eb0b5536d844dae3",
+      "digestAlgorithm": "SHA-256",
+      "path": "ArkTrace-notary-submission.zip/ArkTrace.app/Contents/Helpers/trace_streamer"
+    }
+  ],
+  "uploadDate": "2026-08-15T13:54:38.564Z"
+}
