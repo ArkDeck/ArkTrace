@@ -1,6 +1,45 @@
 import ArkTraceCore
 import Foundation
 
+private struct RepositoryValidationCacheKey: Hashable {
+    let file: TraceDatabaseFileSnapshot
+    let preparation: TraceDatabasePreparationResult
+}
+
+/// Avoids rescanning a multi-gigabyte Ready database for every cache hit in
+/// one process. Keys include inode, size, mtime and ctime from the descriptor
+/// SQLite actually opened. Replacement or in-place mutation therefore misses
+/// and must pass quick_check plus full schema validation again. The bounded
+/// memo is never persisted across launches.
+private final class RepositoryValidationCache: @unchecked Sendable {
+    private let lock = NSLock()
+    private var values: [RepositoryValidationCacheKey: TraceSchemaAdapter.Validation] = [:]
+    private var order: [RepositoryValidationCacheKey] = []
+    private let maximumEntries = 64
+
+    func value(for key: RepositoryValidationCacheKey) -> TraceSchemaAdapter.Validation? {
+        lock.lock()
+        defer { lock.unlock() }
+        return values[key]
+    }
+
+    func insert(
+        _ validation: TraceSchemaAdapter.Validation,
+        for key: RepositoryValidationCacheKey
+    ) {
+        lock.lock()
+        defer { lock.unlock() }
+        if values.updateValue(validation, forKey: key) == nil {
+            order.append(key)
+        }
+        while order.count > maximumEntries {
+            values.removeValue(forKey: order.removeFirst())
+        }
+    }
+}
+
+private let repositoryValidationCache = RepositoryValidationCache()
+
 enum TracePerformanceQuery: Sendable {
     case cpuDetail(TraceTimeRange, ContinuousClock.Instant)
     case threadStateDetail(TraceTimeRange, ContinuousClock.Instant)
@@ -87,14 +126,26 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 message: "Ready database identity is unavailable"
             )
         }
-        guard try db.quickCheckIsOK() else {
-            throw ArkTraceError(
-                code: .traceDatabaseInvalid,
-                stage: .validating,
-                message: "SQLite quick_check failed"
-            )
+        let validationCacheKey = expectedPreparation.flatMap { preparation in
+            db.fileSnapshot.map {
+                RepositoryValidationCacheKey(file: $0, preparation: preparation)
+            }
         }
-        let validation = try TraceSchemaAdapter.validate(db)
+        let validation: TraceSchemaAdapter.Validation
+        if let validationCacheKey,
+            let cached = repositoryValidationCache.value(for: validationCacheKey)
+        {
+            validation = cached
+        } else {
+            guard try db.quickCheckIsOK() else {
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .validating,
+                    message: "SQLite quick_check failed"
+                )
+            }
+            validation = try TraceSchemaAdapter.validate(db)
+        }
         if let expectedPreparation {
             guard expectedPreparation.schemaAdapterVersion
                 == TraceDatabaseStagingPreparer.schemaAdapterVersion,
@@ -108,6 +159,9 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 )
             }
             try TraceDatabaseStagingPreparer.validateReadyIndexes(in: db)
+        }
+        if let validationCacheKey {
+            repositoryValidationCache.insert(validation, for: validationCacheKey)
         }
 
         self.db = db

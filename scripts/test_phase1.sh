@@ -155,7 +155,7 @@ jq -e '
     and (.readyDatabaseSHA256 | test("^[0-9a-f]{64}$"))
     and (.schemaFingerprint | test("^[0-9a-f]{64}$"))
     and .schemaAdapterVersion == "2"
-    and .indexVersion == 2
+    and .indexVersion == 3
     and .testCount > 0
     and .skippedTestCount == 0
     and .durationNs > 0

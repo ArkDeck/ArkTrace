@@ -1609,11 +1609,11 @@ final class ParserIntegrationTests: XCTestCase {
             try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline())
         )
         let sliceProbe = try await cold.repository.slices(
-            try TraceSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline())
+            try TraceSliceQuery(range: fullRange, limit: 1_024, deadline: probeDeadline())
         )
         let firstCPU = try XCTUnwrap(cpuProbe.items.first)
         let firstState = try XCTUnwrap(stateProbe.items.first)
-        let firstSlice = try XCTUnwrap(sliceProbe.items.first)
+        let firstSlice = try XCTUnwrap(sliceProbe.items.first { $0.threadKey != nil })
         let densityProbes = [
             try await cold.repository.density(
                 try TraceDensityQuery(
@@ -2989,6 +2989,53 @@ final class ParserIntegrationTests: XCTestCase {
             try FileManager.default.contentsOfDirectory(atPath: corruptRoot.path).count,
             1
         )
+        try await rebuilt.close()
+    }
+
+    func testInPlaceCacheMutationCannotReuseProcessValidationMemo() async throws {
+        let (binary, fixture) = try requireCacheEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-cache-in-place-corrupt-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let parser = CountingParser(
+            base: try TraceStreamerProcessParser(executableURL: binary)
+        )
+
+        let seeded = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let databaseURL = await seeded.parsed.databaseURL
+        try await seeded.close()
+        var before = stat()
+        XCTAssertEqual(Darwin.lstat(databaseURL.path, &before), 0)
+        XCTAssertEqual(Darwin.chmod(databaseURL.path, 0o600), 0)
+        let handle = try FileHandle(forWritingTo: databaseURL)
+        try handle.seek(toOffset: 0)
+        try handle.write(contentsOf: Data("not-a-sqlite-database".utf8))
+        try handle.synchronize()
+        try handle.close()
+        XCTAssertEqual(Darwin.chmod(databaseURL.path, 0o400), 0)
+        var after = stat()
+        XCTAssertEqual(Darwin.lstat(databaseURL.path, &after), 0)
+        XCTAssertEqual(before.st_dev, after.st_dev)
+        XCTAssertEqual(before.st_ino, after.st_ino, "mutation must retain the cached inode")
+        XCTAssertEqual(before.st_size, after.st_size, "mutation must retain the cached byte count")
+
+        let rebuilt = try await TraceSession.openCached(
+            source: fixture,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache
+        )
+        let wasHit = await rebuilt.cacheHit
+        XCTAssertFalse(wasHit)
+        XCTAssertEqual(parser.count(), 2)
+        XCTAssertTrue(try TraceDatabase(url: databaseURL, readOnly: true).quickCheckIsOK())
         try await rebuilt.close()
     }
 

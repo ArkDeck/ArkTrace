@@ -97,7 +97,7 @@ public enum TraceDatabaseStagingPreparer {
     /// Public cache identity for the currently accepted TraceStreamer schema
     /// contract. Runtime includes this value in every content-addressed key.
     public static let schemaAdapterVersion = TraceSchemaAdapter.version
-    public static let indexVersion = 2
+    public static let indexVersion = 3
     public static let relationshipVMInstructionBudget = 250_000
 
     private struct IndexDefinition {
@@ -252,6 +252,13 @@ public enum TraceDatabaseStagingPreparer {
             ],
             bootstrapForValidation: false,
             requiredForReady: false
+        ),
+        IndexDefinition(
+            name: "arktrace_v3_callstack_ts_id_dur_callid",
+            table: "callstack",
+            columns: ["ts", "id", "dur", "callid", "name"],
+            bootstrapForValidation: false,
+            requiredForReady: true
         ),
         IndexDefinition(
             name: "arktrace_v1_measure_filter_id_ts",

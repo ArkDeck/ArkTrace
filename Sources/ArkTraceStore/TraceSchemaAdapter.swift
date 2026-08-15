@@ -12,7 +12,7 @@ enum TraceSchemaAdapter {
     private static let relationshipVMInstructionBudget =
         TraceDatabaseStagingPreparer.relationshipVMInstructionBudget
 
-    struct Validation {
+    struct Validation: Sendable {
         let capabilities: TraceCapabilities
         let schemaFingerprint: String
         /// Absolute trace start/end as stored by TraceStreamer; the Store

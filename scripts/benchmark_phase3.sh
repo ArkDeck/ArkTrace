@@ -406,7 +406,8 @@ jq -e \
       "arktrace_v1_thread_itid","arktrace_v1_thread_state_itid_ts",
       "arktrace_v1_thread_state_ts_cpu","arktrace_v1_thread_tid_ipid",
       "arktrace_v2_callstack_callid_ts_cover_optional",
-      "arktrace_v2_callstack_callid_ts_id_dur","arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_callstack_callid_ts_id_dur","arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v2_cpu_measure_filter_id",
       "arktrace_v2_process_ipid_pid_name","arktrace_v2_process_measure_filter_id",
       "arktrace_v2_sched_slice_cpu_ts_cover_optional",
       "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
@@ -419,7 +420,8 @@ jq -e \
       "arktrace_v1_thread_itid","arktrace_v2_thread_itid_tid_name_ipid",
       "arktrace_v1_sched_slice_ts_cpu","arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
       "arktrace_v1_thread_state_itid_ts","arktrace_v2_thread_state_itid_ts_id_dur",
-      "arktrace_v1_callstack_callid_ts","arktrace_v2_callstack_callid_ts_id_dur"
+      "arktrace_v1_callstack_callid_ts","arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid"
     ] - .diagnostics.applicableIndexNames == [])
     and (.diagnostics.persistentIndexNames == .diagnostics.applicableIndexNames)
 ' "$partial_evidence" >/dev/null || fail "benchmark evidence does not satisfy Phase 3 budgets"

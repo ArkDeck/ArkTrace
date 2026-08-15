@@ -15,6 +15,20 @@ public struct TraceDatabaseFileIdentity: Equatable, Sendable {
     }
 }
 
+/// Process-local validation memoization is keyed by every stable `fstat` fact
+/// that changes when the opened database inode is replaced or written. This is
+/// deliberately not serialized: the first open in every process still runs
+/// SQLite quick_check and full semantic validation.
+struct TraceDatabaseFileSnapshot: Hashable, Sendable {
+    let device: UInt64
+    let inode: UInt64
+    let byteCount: Int64
+    let modificationSeconds: Int64
+    let modificationNanoseconds: Int64
+    let statusChangeSeconds: Int64
+    let statusChangeNanoseconds: Int64
+}
+
 private final class SQLiteQueryProgressController {
     private var callbacksRemaining: Int?
     private let observesTaskCancellation: Bool
@@ -122,6 +136,7 @@ final class TraceDatabase {
     private let bindingDescriptor: Int32?
     private let queryObserver: (@Sendable (String, Int) -> Void)?
     let fileIdentity: TraceDatabaseFileIdentity?
+    let fileSnapshot: TraceDatabaseFileSnapshot?
 
     init(
         url: URL,
@@ -145,6 +160,7 @@ final class TraceDatabase {
         let bindingDescriptor: Int32?
         let sqliteOpenPath: String
         let fileIdentity: TraceDatabaseFileIdentity?
+        let fileSnapshot: TraceDatabaseFileSnapshot?
         if readOnly {
             let descriptor = openURL.path.withCString {
                 Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
@@ -173,10 +189,20 @@ final class TraceDatabase {
                 device: UInt64(info.st_dev),
                 inode: UInt64(info.st_ino)
             )
+            fileSnapshot = TraceDatabaseFileSnapshot(
+                device: UInt64(info.st_dev),
+                inode: UInt64(info.st_ino),
+                byteCount: Int64(info.st_size),
+                modificationSeconds: Int64(info.st_mtimespec.tv_sec),
+                modificationNanoseconds: Int64(info.st_mtimespec.tv_nsec),
+                statusChangeSeconds: Int64(info.st_ctimespec.tv_sec),
+                statusChangeNanoseconds: Int64(info.st_ctimespec.tv_nsec)
+            )
         } else {
             bindingDescriptor = nil
             sqliteOpenPath = openURL.path
             fileIdentity = nil
+            fileSnapshot = nil
         }
         var flags = readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE
         if !readOnly, createIfMissing {
@@ -201,6 +227,7 @@ final class TraceDatabase {
         self.handle = db
         self.bindingDescriptor = bindingDescriptor
         self.fileIdentity = fileIdentity
+        self.fileSnapshot = fileSnapshot
         self.queryObserver = queryObserver
     }
 
