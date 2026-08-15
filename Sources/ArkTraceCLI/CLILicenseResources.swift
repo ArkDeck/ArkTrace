@@ -20,9 +20,7 @@ public enum CLILicenseResources {
         "9e03235bfb104fdeb7a91dfc8321294be0603ecd514729edcf2eace41f5a1a72"
 
     public static func noticeData() throws -> Data {
-        guard let url = Bundle.module.url(
-            forResource: "THIRD_PARTY_NOTICES", withExtension: "md"
-        ) else { throw unavailable() }
+        let url = try resourceURL(named: "THIRD_PARTY_NOTICES", extension: "md")
         return try noticeData(resourceURL: url)
     }
 
@@ -61,7 +59,8 @@ public enum CLILicenseResources {
 
     /// Reads and hashes every license file named by the bundled inventory. The
     /// command never treats the inventory as a caller-authored list of paths:
-    /// entries are flat LICENSES names and must remain inside Bundle.module.
+    /// entries are flat LICENSES names and must remain inside the reviewed
+    /// executable-relative resource root.
     public static func verifiedLicenseFiles(
         inventoryData suppliedInventory: Data? = nil,
         licenseDirectoryURL suppliedDirectory: URL? = nil
@@ -70,7 +69,9 @@ public enum CLILicenseResources {
         guard inventory.count == 6_939,
             sha256(inventory) == "b16397dbbe593a067a0906a496627c8f300b2a4a860eab489181549b35c81e1e",
             let root = suppliedDirectory
-                ?? Bundle.module.resourceURL?.appendingPathComponent("LICENSES", isDirectory: true)
+                ?? (try? CLIResourceLocator.productionRoot().appendingPathComponent(
+                    "LICENSES", isDirectory: true
+                ))
         else { throw unavailable() }
         return try validateInventory(inventory, licenseDirectoryURL: root)
     }
@@ -87,8 +88,9 @@ public enum CLILicenseResources {
             buildTools.count == buildToolCount
         else { throw unavailable() }
 
-        let root = licenseDirectoryURL.standardizedFileURL
-        guard root.path == root.resolvingSymlinksInPath().standardizedFileURL.path
+        let suppliedRoot = licenseDirectoryURL.standardizedFileURL
+        let root = suppliedRoot.resolvingSymlinksInPath().standardizedFileURL
+        guard suppliedRoot.path == root.path
         else { throw unavailable() }
         let rootValues = try? root.resourceValues(forKeys: [
             .isDirectoryKey, .isSymbolicLinkKey,
@@ -158,7 +160,8 @@ public enum CLILicenseResources {
         ), directoryEntries.count == expectedNames.count,
             Set(directoryEntries.map(\.lastPathComponent)) == expectedNames,
             directoryEntries.allSatisfy({ entry in
-                guard entry.deletingLastPathComponent() == root,
+                guard entry.deletingLastPathComponent().resolvingSymlinksInPath()
+                    .standardizedFileURL.path == root.path,
                     let values = try? entry.resourceValues(forKeys: [
                         .isRegularFileKey, .isSymbolicLinkKey,
                     ])
@@ -171,7 +174,8 @@ public enum CLILicenseResources {
             let fileName = String(record.path.dropFirst("LICENSES/".count))
             let candidate = root.appendingPathComponent(fileName, isDirectory: false)
                 .standardizedFileURL
-            guard candidate.deletingLastPathComponent() == root,
+            guard candidate.deletingLastPathComponent().resolvingSymlinksInPath()
+                    .standardizedFileURL.path == root.path,
                 record.bytes <= 128 * 1_024
             else { throw unavailable() }
             let contents = try boundedResource(at: candidate, maximumBytes: 128 * 1_024)
@@ -229,9 +233,20 @@ public enum CLILicenseResources {
         extension fileExtension: String?,
         maximumBytes: Int
     ) throws -> Data {
-        guard let url = Bundle.module.url(forResource: name, withExtension: fileExtension)
-        else { throw unavailable() }
+        let url = try resourceURL(named: name, extension: fileExtension)
         return try boundedResource(at: url, maximumBytes: maximumBytes)
+    }
+
+    private static func resourceURL(
+        named name: String,
+        extension fileExtension: String?
+    ) throws -> URL {
+        let fileName = fileExtension.map { "\(name).\($0)" } ?? name
+        guard !name.isEmpty, !name.contains("/"), fileExtension?.contains("/") != true else {
+            throw unavailable()
+        }
+        return try CLIResourceLocator.productionRoot()
+            .appendingPathComponent(fileName, isDirectory: false)
     }
 
     private static func boundedResource(at url: URL, maximumBytes: Int) throws -> Data {

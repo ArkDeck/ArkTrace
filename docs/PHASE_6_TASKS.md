@@ -1,15 +1,15 @@
 # ArkTrace Phase 6 任务清单
 
-> 状态：Planned — Phase 5 Exit 后进入
+> 状态：Active — P6-T01；Phase 5 real Artifact Gate 9 已关闭，large Trace 外部门继续 deferred/Open
 > 阶段：Real Debug Loop
 > 验收目标：至少闭合一次真实 OpenHarmony App → ArkDeck → ArkTrace → Agent → typed request → ArkDeck 复验链路
 
 ## 1. 进入条件
 
-- [ ] Phase 5 的真实 summary Artifact 链路通过；
-- [ ] deep typed trace analysis operation 已发布并可用；若未发布，Phase 6 必须标记真实阻塞，不能降级为人工复制；
+- [x] Phase 5 的真实 summary Artifact 链路通过；
+- [x] deep typed trace analysis operation 已发布并可用；
 - [ ] 有授权可运行、可采集、可重复的真实 OpenHarmony App/设备；
-- [ ] ArkDeck capture.diagnostics@1 能产生 immutable trace Artifact；
+- [x] ArkDeck capture.diagnostics@1 能产生 immutable trace Artifact；
 - [ ] 成功/失败标准在采集前写定。
 
 ## 2. 禁止替代

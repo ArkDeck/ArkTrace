@@ -28,7 +28,13 @@ MAGIC = b"OHOSPROF"
 # optional symbol/native-hook segments rather than accepting synthetic size.
 MAX_SEGMENTS = 1
 MAX_PACKET_BYTES = 256 * 1024 * 1024
-MAX_PROTOBUF_PACKETS = 100_000
+# OHOSPROF's uint32 `segments` field counts the length and value pieces, so it
+# does not define a 100,000-packet protocol limit. Keep duplicate detection
+# bounded by an explicit raw-digest index budget instead. The resulting
+# fail-closed implementation limit admits the observed DAYU 200 count (110,380)
+# without pretending that the resource policy is part of the wire format.
+MAX_PACKET_DIGEST_INDEX_BYTES = 8 * 1024 * 1024
+MAX_PROTOBUF_PACKETS = MAX_PACKET_DIGEST_INDEX_BYTES // hashlib.sha256().digest_size
 MAX_TRACE_BYTES = 2 * 1024 * 1024 * 1024
 
 
@@ -110,10 +116,22 @@ def inspect(trace: Path, after_open=None) -> dict:
 
             payload_size = declared_size - HEADER_SIZE
             if data_type == 0:
+                if declared_units == 0 or declared_units % 2 != 0:
+                    raise IntegrityError("declared protobuf segment count is invalid")
+                declared_packet_count = declared_units // 2
+                if declared_packet_count > MAX_PROTOBUF_PACKETS:
+                    raise IntegrityError("protobuf packet digest index exceeds bound")
+                # Every accepted packet has a four-byte prefix and at least one
+                # payload byte. Reject impossible header counts before growing
+                # the duplicate-detection index.
+                if declared_packet_count > payload_size // 5:
+                    raise IntegrityError("declared protobuf segment count is impossible")
                 payload_digest = hashlib.sha256()
                 consumed = 0
                 packet_count = 0
                 while consumed < payload_size:
+                    if packet_count >= declared_packet_count:
+                        raise IntegrityError("protobuf framing exceeds declared count")
                     length_bytes = read_exact(handle, 4)
                     consumed += 4
                     packet_size = struct.unpack("<I", length_bytes)[0]
@@ -123,8 +141,6 @@ def inspect(trace: Path, after_open=None) -> dict:
                         raise IntegrityError("protobuf packet exceeds its segment")
                     packet = read_exact(handle, packet_size)
                     consumed += packet_size
-                    if protobuf_packet_count + packet_count >= MAX_PROTOBUF_PACKETS:
-                        raise IntegrityError("protobuf packet count exceeds bound")
                     payload_digest.update(length_bytes)
                     payload_digest.update(packet)
                     packet_digest = hashlib.sha256(packet).digest()
@@ -132,7 +148,7 @@ def inspect(trace: Path, after_open=None) -> dict:
                         raise IntegrityError("duplicate protobuf packet detected")
                     packet_digests.add(packet_digest)
                     packet_count += 1
-                if declared_units != packet_count * 2:
+                if packet_count != declared_packet_count:
                     raise IntegrityError("declared protobuf segment count drifted")
                 actual_payload_digest = payload_digest.hexdigest()
                 protobuf_packet_count += packet_count

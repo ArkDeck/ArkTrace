@@ -149,6 +149,7 @@ def main() -> None:
             if relative in {
                 "Fixtures/release-evidence/phase3-medium-performance.json",
                 "Fixtures/release-evidence/phase4-medium-agent-performance.json",
+                "Fixtures/release-evidence/phase5-cli-distribution.json",
             }:
                 continue
             if relative.endswith(".pyc"):

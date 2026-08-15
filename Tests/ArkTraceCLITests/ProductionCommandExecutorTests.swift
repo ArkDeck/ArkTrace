@@ -1,5 +1,6 @@
 @testable import ArkTraceAnalysis
 @testable import ArkTraceCLI
+import ArkTraceCLIResourceFixtures
 import ArkTraceCore
 @testable import ArkTraceRuntime
 import ArkTraceStore
@@ -199,7 +200,11 @@ final class ProductionCommandExecutorTests: XCTestCase {
             .appendingPathComponent("Fixtures/traces/zlib.htrace")
         XCTAssertTrue(FileManager.default.isExecutableFile(atPath: parserURL.path))
         XCTAssertTrue(FileManager.default.isReadableFile(atPath: fixtureURL.path))
-        let bundledFixtureURL = try CLIProductionCommandExecutor.bundledSelfTestFixture()
+        let bundledFixtureURL = try CLIResourceLocator.$testingRootPath.withValue(
+            ArkTraceCLIResourceFixtures.root.path
+        ) {
+            try CLIProductionCommandExecutor.bundledSelfTestFixture()
+        }
         XCTAssertEqual(try Data(contentsOf: bundledFixtureURL), try Data(contentsOf: fixtureURL))
 
         let root = FileManager.default.temporaryDirectory

@@ -22,6 +22,20 @@ cp "$source_scripts/benchmark_phase3.sh" \
     "$source_scripts/phase3_shell_safety.sh" "$repository/scripts/"
 chmod +x "$repository/scripts/"*
 
+(
+    . "$repository/scripts/phase3_shell_safety.sh"
+    arktrace_is_fully_allocated_regular_file \
+        "$repository/scripts/benchmark_phase3.sh"
+) || fail "ordinary physical benchmark script was classified as sparse"
+sparse_probe="$temporary_root/sparse-large-probe"
+/usr/bin/truncate -s 1048576 "$sparse_probe"
+if (
+    . "$repository/scripts/phase3_shell_safety.sh"
+    arktrace_is_fully_allocated_regular_file "$sparse_probe"
+); then
+    fail "sparse file passed the shared large-trace allocation contract"
+fi
+
 PYTHONDONTWRITEBYTECODE=1 python3 -B - \
     "$repository/scripts/source_tree_identity.py" "$temporary_root" <<'PY'
 import importlib.util, pathlib, sys

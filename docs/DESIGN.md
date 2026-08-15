@@ -926,8 +926,8 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 5. ~~required schema fingerprint 与真实 DB fixture~~——已关闭（2026-08-12，P1-T05）：pinned TraceStreamer 从两个真实 fixture 重复导出 byte-identical `-nm` DB；schema adapter v2 的 91-table length-prefixed schema fingerprint 为 `cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3`，source/DB SHA、range、per-fixture capabilities 与六张 required table row counts 锁定在 `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`；real integration gate 同时把 actual executable SHA、manifest、evidence parser identity 与每次解析返回的 `metadata.parser` 绑定，并从 fixture/license 实际字节重算 Git blob OID 与 SHA 后重建验证；
 6. parser cancellation 在大 Trace 上无 orphan process/cache promotion；
 7. indexed viewport query 在 large trace 上满足规格目标；
-8. ArkDeck action-specific multi-analyzer resolver 不弱化 pinned identity；
-9. 一次真实链路：ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact；
+8. ~~ArkDeck action-specific multi-analyzer resolver 不弱化 pinned identity~~——已关闭（2026-08-15，P5-T03/P5-T07）：ArkDeck PR #1309 / merge `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f` 把 crash 与 ArkTrace analyzerRef 分别绑定到 closed signed profile，caller 无 executable/path/argv 选择面，identity/doctor/cache invalidation 与现有 analyzer regression 全部由同车 contract tests 锁定；
+9. ~~一次真实链路：ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact~~——已关闭（2026-08-15，P5-T09）：真实 `capture.diagnostics@1` source Artifact `ART-fd0a93c85a005703f6edf1cfb47a3daa`（SHA-256 `a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35`）经 host-only pinned ArkTrace 产出 persisted derived Artifact `ART-13f8ddd3192811c11efc40c048a078eb`（SHA-256 `009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe`），daemon restart 后 exact bytes 仍可读；LaunchAgent profile 安装由 ArkDeck PR #1311 / merge `4e478b46f202a139dbeb2c91d79e36d6d7774fac` 闭合，证据见 [ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md)；
 10. 一次真实调试闭环：baseline capture → structured analysis → Agent evidence-backed decision → 下一轮 ArkDeck typed request → follow-up capture → deterministic comparison。
 
 这些门的关闭结果应进入后续实现与验证报告；本轮不把它们拆成任务。

@@ -186,6 +186,20 @@ arktrace_assert_physical_file_within() {
         || fail "$arktrace_file_kind is not a physical regular file"
 }
 
+arktrace_is_fully_allocated_regular_file() {
+    arktrace_allocation_path=$1
+    [ -f "$arktrace_allocation_path" ] && [ ! -L "$arktrace_allocation_path" ] \
+        || return 1
+    arktrace_logical_bytes=$(stat -f '%z' "$arktrace_allocation_path") \
+        || return 1
+    arktrace_allocated_blocks=$(stat -f '%b' "$arktrace_allocation_path") \
+        || return 1
+    case "$arktrace_logical_bytes:$arktrace_allocated_blocks" in
+        *[!0-9:]*|:*|*:) return 1 ;;
+    esac
+    [ $((arktrace_allocated_blocks * 512)) -ge "$arktrace_logical_bytes" ]
+}
+
 arktrace_bounded_failure_summary() {
     # External tools can print arbitrary Unicode paths, credentials, SQL, or
     # unbounded diagnostics. Keep their private log for the transaction only;

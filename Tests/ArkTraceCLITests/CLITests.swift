@@ -1,5 +1,6 @@
 @testable import ArkTraceCLI
 import ArkTraceAnalysis
+import ArkTraceCLIResourceFixtures
 import ArkTraceCore
 import ArkTraceParser
 import Foundation
@@ -286,13 +287,21 @@ final class CLITests: XCTestCase {
     }
 
     func testLicensesCommandReturnsBundledReviewedResourcesWithoutExecutingTraceWork() async throws {
-        let inventory = try CLILicenseResources.inventoryData()
-        let notice = try CLILicenseResources.noticeData()
+        let resourceRoot = ArkTraceCLIResourceFixtures.root
+        let inventory = try CLIResourceLocator.$testingRootPath.withValue(resourceRoot.path) {
+            try CLILicenseResources.inventoryData()
+        }
+        let notice = try CLIResourceLocator.$testingRootPath.withValue(resourceRoot.path) {
+            try CLILicenseResources.noticeData()
+        }
         XCTAssertEqual(notice.count, CLILicenseResources.noticeByteCount)
         let licenseFiles = try CLILicenseResources.verifiedLicenseFiles(
-            inventoryData: inventory
+            inventoryData: inventory,
+            licenseDirectoryURL: resourceRoot.appendingPathComponent("LICENSES")
         )
-        let productLicense = try CLILicenseResources.productLicenseData()
+        let productLicense = try CLIResourceLocator.$testingRootPath.withValue(resourceRoot.path) {
+            try CLILicenseResources.productLicenseData()
+        }
         XCTAssertEqual(productLicense.count, 1_078)
         XCTAssertTrue(String(decoding: productLicense, as: UTF8.self).hasPrefix("MIT License\n"))
         let inventoryObject = try XCTUnwrap(
@@ -383,12 +392,38 @@ final class CLITests: XCTestCase {
             inventoryData: inventory, licenseDirectoryURL: temporary
         ))
 
+        let installPrefix = ancestorRoot.appendingPathComponent("install", isDirectory: true)
+        let installBin = installPrefix.appendingPathComponent("bin", isDirectory: true)
+        let installShare = installPrefix
+            .appendingPathComponent("share", isDirectory: true)
+            .appendingPathComponent("arktrace", isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: installBin, withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: installShare, withIntermediateDirectories: true
+        )
+        let unavailableBundle = ancestorRoot.appendingPathComponent(
+            "NoApp.app", isDirectory: true
+        )
+        let installedRoot = try CLIResourceLocator.productionRoot(
+            bundleURL: unavailableBundle,
+            executableURL: installBin.appendingPathComponent("arktrace")
+        )
+        XCTAssertEqual(installedRoot, installShare.resolvingSymlinksInPath().standardizedFileURL)
+        let rawRelease = installPrefix.appendingPathComponent("release", isDirectory: true)
+        try FileManager.default.createDirectory(at: rawRelease, withIntermediateDirectories: true)
+        XCTAssertThrowsError(try CLIResourceLocator.productionRoot(
+            bundleURL: unavailableBundle,
+            executableURL: rawRelease.appendingPathComponent("arktrace")
+        ))
+
         let executor = RecordingExecutor()
         let application = CLIApplication(executor: executor)
         let humanWriter = MemoryWriter()
-        let humanStatus = await application.run(
-            arguments: ["licenses"], writer: humanWriter
-        )
+        let humanStatus = await CLIResourceLocator.$testingRootPath.withValue(resourceRoot.path) {
+            await application.run(arguments: ["licenses"], writer: humanWriter)
+        }
         XCTAssertEqual(humanStatus, 0)
         XCTAssertTrue(humanWriter.stdoutString.contains("# ArkTrace Product License"))
         XCTAssertTrue(humanWriter.stdoutString.contains("MIT License"))
@@ -398,9 +433,9 @@ final class CLITests: XCTestCase {
         XCTAssertEqual(humanWriter.stderrString, "")
 
         let machineWriter = MemoryWriter()
-        let machineStatus = await application.run(
-            arguments: ["--json", "licenses"], writer: machineWriter
-        )
+        let machineStatus = await CLIResourceLocator.$testingRootPath.withValue(resourceRoot.path) {
+            await application.run(arguments: ["--json", "licenses"], writer: machineWriter)
+        }
         XCTAssertEqual(machineStatus, 0)
         let document = try XCTUnwrap(
             try JSONSerialization.jsonObject(with: machineWriter.stdoutData) as? [String: Any]

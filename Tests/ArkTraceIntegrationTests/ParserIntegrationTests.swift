@@ -1982,44 +1982,47 @@ final class ParserIntegrationTests: XCTestCase {
         let rebuildFrameP95 = Self.percentile(rebuildFrameMs, fraction: 0.95)
         let contextP95 = Self.percentile(contextMs, fraction: 0.95)
         let analysisP95 = Self.percentile(analysisMs, fraction: 0.95)
+        let warmupOnly = environment["ARKTRACE_PHASE3_WARMUP_ONLY"] == "1"
         var usage = rusage()
         _ = getrusage(RUSAGE_SELF, &usage)
         let peakRSSBytes = Int64(usage.ru_maxrss)
-        XCTAssertLessThanOrEqual(
-            cacheP95, 1_000,
-            "cacheOpen p50/p95/max=\(Self.percentile(cacheOpenMs, fraction: 0.50))/"
-                + "\(cacheP95)/\(cacheOpenMs.max() ?? -1), hash p50/p95="
-                + "\(Self.percentile(cacheHashMs, fraction: 0.50))/"
-                + "\(Self.percentile(cacheHashMs, fraction: 0.95)), validation p50/p95="
-                + "\(Self.percentile(cacheValidationMs, fraction: 0.50))/"
-                + "\(Self.percentile(cacheValidationMs, fraction: 0.95))"
-        )
-        XCTAssertLessThanOrEqual(directoryP95, 150)
-        XCTAssertLessThanOrEqual(
-            viewportP95, fixtureClass == "large" ? 500 : 250,
-            "viewportP95ByFamily=" + viewportMeasurementNames.map {
-                "\($0)=\(viewportLatency[$0]?.p95Ms ?? -1)"
-            }.joined(separator: ",")
-        )
-        XCTAssertLessThanOrEqual(contextP95, fixtureClass == "large" ? 2_000 : 1_000)
-        XCTAssertLessThanOrEqual(analysisP95, fixtureClass == "large" ? 5_000 : 3_000)
-        XCTAssertLessThanOrEqual(
-            frameP95, 16.7,
-            "steady frame p50/p95/max=\(Self.percentile(steadyFrameMs, fraction: 0.50))/"
-                + "\(frameP95)/\(steadyFrameMs.max() ?? -1), shape="
-                + finalSnapshot.tracks.map { track in
-                    let detail = track.primitives.reduce(0) {
-                        if case .detail = $1 { return $0 + 1 }
-                        return $0
-                    }
-                    let density = track.primitives.count - detail
-                    return "\(track.descriptor.id.rawValue):d\(detail)/b\(density)"
+        if !warmupOnly {
+            XCTAssertLessThanOrEqual(
+                cacheP95, 1_000,
+                "cacheOpen p50/p95/max=\(Self.percentile(cacheOpenMs, fraction: 0.50))/"
+                    + "\(cacheP95)/\(cacheOpenMs.max() ?? -1), hash p50/p95="
+                    + "\(Self.percentile(cacheHashMs, fraction: 0.50))/"
+                    + "\(Self.percentile(cacheHashMs, fraction: 0.95)), validation p50/p95="
+                    + "\(Self.percentile(cacheValidationMs, fraction: 0.50))/"
+                    + "\(Self.percentile(cacheValidationMs, fraction: 0.95))"
+            )
+            XCTAssertLessThanOrEqual(directoryP95, 150)
+            XCTAssertLessThanOrEqual(
+                viewportP95, fixtureClass == "large" ? 500 : 250,
+                "viewportP95ByFamily=" + viewportMeasurementNames.map {
+                    "\($0)=\(viewportLatency[$0]?.p95Ms ?? -1)"
                 }.joined(separator: ",")
-        )
-        XCTAssertLessThanOrEqual(selectionFrameP95, 16.7)
-        XCTAssertLessThanOrEqual(panFrameP95, 16.7)
-        XCTAssertLessThanOrEqual(rebuildFrameP95, 250)
-        XCTAssertLessThanOrEqual(peakRSSBytes, 1_610_612_736)
+            )
+            XCTAssertLessThanOrEqual(contextP95, fixtureClass == "large" ? 2_000 : 1_000)
+            XCTAssertLessThanOrEqual(analysisP95, fixtureClass == "large" ? 5_000 : 3_000)
+            XCTAssertLessThanOrEqual(
+                frameP95, 16.7,
+                "steady frame p50/p95/max=\(Self.percentile(steadyFrameMs, fraction: 0.50))/"
+                    + "\(frameP95)/\(steadyFrameMs.max() ?? -1), shape="
+                    + finalSnapshot.tracks.map { track in
+                        let detail = track.primitives.reduce(0) {
+                            if case .detail = $1 { return $0 + 1 }
+                            return $0
+                        }
+                        let density = track.primitives.count - detail
+                        return "\(track.descriptor.id.rawValue):d\(detail)/b\(density)"
+                    }.joined(separator: ",")
+            )
+            XCTAssertLessThanOrEqual(selectionFrameP95, 16.7)
+            XCTAssertLessThanOrEqual(panFrameP95, 16.7)
+            XCTAssertLessThanOrEqual(rebuildFrameP95, 250)
+            XCTAssertLessThanOrEqual(peakRSSBytes, 1_610_612_736)
+        }
         XCTAssertTrue(measuredRows.values.allSatisfy { $0 > 0 })
         let parseMs = try XCTUnwrap(stages.milliseconds(from: .parsing, to: .validating))
         let validationMs = try XCTUnwrap(stages.milliseconds(from: .validating, to: .indexing))

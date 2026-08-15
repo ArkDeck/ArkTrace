@@ -51,3 +51,36 @@ silently clean it. A reviewer must independently rehash and extract that
 physical ZIP and reverify the nested and outer signatures, stapled ticket, and
 Gatekeeper result. The JSON metadata is not a substitute for the retained
 artifact.
+
+## Phase 5 CLI distribution evidence
+
+`phase5-cli-distribution.json` binds the ArkDeck-installable CLI distribution
+to its immutable build-time source snapshot, Developer ID certificate, signed
+tool and TraceStreamer identities, final App/resource trees, Apple submission,
+staple/Gatekeeper checks and final ZIP bytes. Its embedded live notary log is a
+`jq -S -c` semantic projection rather than a claim about Apple's JSON key order.
+The retained artifact is
+`ArkTraceCLI-0.1.0-20260814T105423Z.zip` (5,076,367 bytes, SHA-256
+`ad5cd371bf52ad632ac58aa78594cdfb4501259398a3c54df4b9ec8a36955d7a`).
+
+The evidence source-tree SHA identifies the exact tree packaged before the
+post-notarization status documentation was updated. Those documentation-only
+edits do not change the already signed/notarized artifact and are not presented
+as part of its build-time source snapshot. The evidence JSON remains metadata,
+not a substitute for retaining and independently rehashing the ZIP.
+
+## Phase 5 real ArkDeck Artifact evidence
+
+`phase5-arkdeck-real-artifact.json` records the path-free production chain from a real
+`capture.diagnostics@1` Artifact through `analyzer.summarize-trace@1` to a persisted derived
+`trace-summary.json` Artifact. It binds the ArkDeck daemon/catalog/descriptor identity,
+pre-submit availability, source and derived Job/Artifact IDs, source/tool/parser/request lineage,
+execution effect, output limits, and the post-restart readback SHA-256. The ArkDeck protected-main
+runtime baseline and the later LaunchAgent integration merge are separate fields so the evidence
+does not claim that the already executed daemon was built from a later commit.
+
+`phase5-arkdeck-real-artifact-summary.json` contains the exact 1,781 derived bytes. Its SHA-256 is
+`009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe` and is rehashed by
+`scripts/test_phase5.sh`; the gate also cross-checks the notarized distribution evidence and rejects
+host paths. This is a real small Trace and closes Gate 9 only. It does not satisfy or waive the
+independently captured >500 MiB evidence required by Gates 6/7 and P4-T06 large.

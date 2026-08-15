@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1、Phase 2 已完成；Phase 3 为 9/10；Phase 4 实现为 6/7，P4-T01～T05 与 P4-T07 已通过独立 review，P4-T06 的 medium 验收已通过。** 真实 medium Agent contract/性能门、签名 App keyboard/VoiceOver/Reduce Motion、Developer ID notarization、完全锁定的 TraceStreamer 构建配方和许可证清单已落地；唯一跨 Phase 3/4 的外部阻塞是独立采集且可再分发的 >500 MiB large trace，发布门 6/7、P4-T06 large 性能项与 Phase 4 Exit 尚未关闭。
+> **状态：Phase 1、Phase 2 已完成；Phase 3 为 9/10；Phase 4 实现为 6/7；Phase 5 为 9/9；Phase 6 已进入 P6-T01。** ArkDeck summary/deep operations 分别由 PR #1309/#1310 合入，LaunchAgent descriptor 安装由 PR #1311 合入；真实 capture Artifact 已经 pinned ArkTrace 产出 restart 后仍可读的 derived summary Artifact，发布门 8/9 均已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。独立采集且可再分发的 >500 MiB large trace 仍明确保持开放；发布门 6/7、P4-T06 large 性能项与 Phase 4 Exit 没有因本次阶段推进而被关闭或豁免。
 
 ## 文档
 
@@ -18,6 +18,8 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
 | [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 总任务索引与发布门状态 |
 | [docs/CLI.md](docs/CLI.md) | arktrace 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
+| [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | ArkDeck 可固定的 CLI App layout、manifest、签名/notarization、升级与回滚 |
+| [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile、真实 Artifact 链路、restart 与 Gate 9 证据 |
 | [docs/PHASE_1_VERIFICATION.md](docs/PHASE_1_VERIFICATION.md) | Phase 1 requirement、fixture、hash、测试与已知限制证据 |
 | [docs/PHASE_2_VERIFICATION.md](docs/PHASE_2_VERIFICATION.md) | Phase 2 CLI contract、gate 与 cached-open benchmark 证据 |
 | [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T10 的已 review 实现证据与仍开放外部门 |
@@ -53,6 +55,10 @@ scripts/test_phase4_batch1.sh
 
 # Phase 4 完整 gate：额外继承 Phase 3 全部外部发布门；缺输入时 fail closed
 scripts/test_phase4.sh
+
+# Phase 5 gate：继承 reviewed medium gate，复核 CLI distribution 与真实 ArkDeck
+# capture Artifact → persisted summary Artifact；不会冒充尚缺的 large gate
+scripts/test_phase5.sh
 ```
 
 `scripts/test_phase1.sh` 会在测试前校验 binary、manifest、arm64 architecture、fixture/license SHA/byte count/Git blob；缺失或漂移直接失败。通过后输出不超过 4 KiB 的 machine evidence。TraceStreamer binary 是本机构建产物并被 `.gitignore` 排除，不能只 clone 仓库后跳过构建。
@@ -63,18 +69,21 @@ source-tree 与 test-binary identity 的事实源固定为
 `Fixtures/release-evidence/phase4-medium-agent-performance.json`。large 阈值与正式 Phase Exit
 仍等待 reviewed external large fixture，不能用 medium 结果替代。
 
-`arktrace` Release binary 位于 `swift build -c release --show-bin-path` 输出目录。示例：
+裸 `swift build -c release --product arktrace` 产物仅用于开发编译，不带 reviewed
+parser/resource installation，不能作为以下命令的可执行发行版。P5-T02 完整安装单位是最终
+ZIP 中的 `ArkTraceCLI-0.1.0` 目录；解包并验证后统一从 App 内的 production CLI 运行：
 
 ```bash
-.build/release/arktrace doctor --self-test
-.build/release/arktrace inspect trace.htrace
-.build/release/arktrace --json summary trace.htrace
-.build/release/arktrace --json processes trace.htrace --limit 100
-.build/release/arktrace --json threads trace.htrace --pid 42 --limit 100
-.build/release/arktrace --json query trace.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
-.build/release/arktrace --json context trace.htrace --timestamp-ns 500000 --window-ms 1
-.build/release/arktrace --json analyze trace.htrace --kind range --start-ns 0 --end-ns 1000000
-.build/release/arktrace licenses
+tool='<install-root>/ArkTraceCLI-0.1.0/ArkTraceCLI.app/Contents/MacOS/arktrace'
+"$tool" doctor --self-test
+"$tool" inspect trace.htrace
+"$tool" --json summary trace.htrace
+"$tool" --json processes trace.htrace --limit 100
+"$tool" --json threads trace.htrace --pid 42 --limit 100
+"$tool" --json query trace.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
+"$tool" --json context trace.htrace --timestamp-ns 500000 --window-ms 1
+"$tool" --json analyze trace.htrace --kind range --start-ns 0 --end-ns 1000000
+"$tool" licenses
 ```
 
 默认使用 content-addressed cache；`--no-cache` 使用 session-owned ephemeral DB。Machine JSON
@@ -103,6 +112,8 @@ ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer。Canonical
 ## ArkDeck 怎么接入
 
 通过 ArkDeck 现有 `analyzer.summarize-trace@1` typed operation 调用 pinned `arktrace` CLI（immutable Artifact lease 输入、derived `trace-summary.json` 输出）；ArkTrace 永不获得设备控制能力（DESIGN §16、SPECIFICATION §18）。
+
+Phase 5 最初以 ArkDeck `60bfa76d6fba3ff1ea9abad031aefa077f5fbbfe` 重新审计，summary integration 在治理修复后的 `26de01e100d3fcbde4dfefeb20cf47e2a7b6ae9b` 上冻结，并由 PR #1309 合入为 `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f`。独立的 `analyzer.analyze-trace@1` deep typed operation 随后由 PR #1310 合入为 `0d8f01964b058d954112604900db19dea28ef39f`；既有 summary descriptor 与输出保持不变。LaunchAgent descriptor 的显式 pin/preserve/drift contract 由 PR #1311 合入为 `4e478b46f202a139dbeb2c91d79e36d6d7774fac`。真实 ArkDeck capture Artifact 已通过该 production profile 生成并持久化 exact summary Artifact，restart 后复核通过；完整 identity 见 [ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md)。两条 operation 均使用 [CLI distribution contract](docs/CLI_DISTRIBUTION.md) 固定签名 tool/parser/JSON identity。
 
 ## License
 

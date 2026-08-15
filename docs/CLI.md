@@ -9,15 +9,22 @@
 需要 Apple silicon Mac、Swift 6、`jq`，以及按
 [TRACE_STREAMER.md](./TRACE_STREAMER.md) 构建的 pinned arm64 TraceStreamer：
 
+完整安装单位是 [CLI_DISTRIBUTION.md](./CLI_DISTRIBUTION.md) 定义的签名、notarized
+`ArkTraceCLI.app`；生产和 ArkDeck 均直接执行其 `Contents/MacOS/arktrace`。构建候选使用：
+
 ```bash
 scripts/build_trace_streamer.sh
-swift build -c release --product arktrace
+ARKTRACE_DEVELOPER_ID_APPLICATION='Developer ID Application: …' \
+ARKTRACE_DEVELOPMENT_TEAM='…' \
+scripts/build_phase5_cli_distribution_candidate.sh
 ```
 
-可执行文件位于 `swift build -c release --show-bin-path` 输出的目录。生产解析器只使用仓库
-reviewed deployment 路径；开发者可通过 `--trace-streamer <absolute-path>` 显式覆盖，但该文件仍
-必须通过 Mach-O、manifest、版本、revision、SHA-256 与 architecture identity 校验。CLI 不搜索
-`PATH`。
+`swift build -c release --product arktrace` 仍可用于编译和测试核心 executable，但其裸产物不是
+完整安装：它不携带 reviewed license、自测 Trace 或 parser 资源，因而 `licenses` 与
+`doctor --self-test` 会 typed fail closed。不得把 build 目录旁的陈旧 bundle 当作安装资源。
+生产解析器只使用 reviewed deployment 路径；开发者可通过 `--trace-streamer <absolute-path>`
+显式覆盖，但该文件仍必须通过 Mach-O、manifest、版本、revision、SHA-256 与 architecture
+identity 校验。CLI 不搜索 `PATH`。
 
 Phase 4 Agent 批次验收使用：
 

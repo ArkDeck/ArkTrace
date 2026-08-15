@@ -32,6 +32,13 @@ trap - EXIT HUP INT TERM
 
 "$script_directory/test_phase4_agent_contract.sh"
 
+warmup_evidence="$evidence_directory/arktrace-phase3-medium-phase4-warmup-$(date -u +%Y%m%dT%H%M%SZ)-$$.json"
+ARKTRACE_PHASE3_WARMUP_ONLY=1 \
+ARKTRACE_PHASE3_EVIDENCE_OUTPUT="$warmup_evidence" \
+    "$script_directory/benchmark.sh" phase4 medium
+[ ! -e "$warmup_evidence" ] && [ ! -L "$warmup_evidence" ] \
+    || fail "benchmark warm-up published release evidence"
+
 evidence="$evidence_directory/arktrace-phase3-medium-phase4-$(date -u +%Y%m%dT%H%M%SZ)-$$.json"
 ARKTRACE_PHASE3_EVIDENCE_OUTPUT="$evidence" \
     "$script_directory/benchmark.sh" phase4 medium

@@ -589,7 +589,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
     }
 
     static func bundledSelfTestFixture() throws -> URL {
-        guard let url = Bundle.module.url(forResource: "zlib", withExtension: "htrace") else {
+        guard let root = try? CLIResourceLocator.productionRoot() else {
             throw ArkTraceError(
                 code: .internalError,
                 stage: .preparing,
@@ -597,7 +597,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 details: ["reason": "unavailable"]
             )
         }
-        return url
+        return root.appendingPathComponent("zlib.htrace", isDirectory: false)
     }
 
     private static func doctorCheck(
