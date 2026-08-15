@@ -1,17 +1,17 @@
 # ArkTrace Phase 5 任务清单
 
-> 状态：Completed under explicit large-trace deferral — 9/9；Phase 3 Gate 6/7、P4-T06 large 与 Phase 4 Exit 继续 Open
+> 状态：Completed under explicit large-trace deferral — 9/9；Phase 3 Gate 6/7 已由后续独立 DAYU 200 evidence 关闭，Phase 4 总阶段状态仍单独跟踪
 > 阶段：ArkDeck Integration
 > 验收目标：真实 ArkDeck Job 可把 Trace Artifact 交给 ArkTrace，并持久化结构化 Analysis Artifact
 
 ## 1. 进入条件
 
-- [x] Phase 4 的 arktrace CLI、JSON 1.0、summary/query/context/analyze 实现及 reviewed medium gate 稳定；独立 large 仍开放；
+- [x] Phase 4 的 arktrace CLI、JSON 1.0、summary/query/context/analyze 实现及 reviewed medium gate 稳定；进入 Phase 5 时独立 large 尚开放，后于 2026-08-15 单独关闭 Gate 6/7；
 - [x] CLI 有可安装/可固定 identity 的 production artifact；
 - [x] ArkTrace 与 ArkDeck 工作树均可测试；
 - [x] 开始实现前已重新核对 ArkDeck 当前 HEAD `60bfa76d6fba3ff1ea9abad031aefa077f5fbbfe`、AGENTS、PRODUCT-LOOP、constitution、living specs、Catalog、AnalyzerProvider/resolver/availability/Artifact 实现；此前审计过的 `2849c5c188717ac351f9228a9cd60c054035fbcf` 已被后续 protected-main 变更取代，不再作为实现 pin。
 
-本次是排程上的显式 deferral，不是验收豁免：任何 Phase 5 结果都不能把缺失的 >500 MiB cancellation/viewport/Agent performance evidence 标记为通过，完整 `scripts/test_phase4.sh` 仍应 fail closed。
+本次在实施时是排程上的显式 deferral，不是验收豁免：Phase 5 结果从未被用于冒充 >500 MiB cancellation/viewport/Agent performance evidence。后续 Gate 6/7 的关闭只依据单独取得的 signed DAYU 200 provenance、真实 cancellation 与 benchmark。
 
 ## 2. 责任边界
 

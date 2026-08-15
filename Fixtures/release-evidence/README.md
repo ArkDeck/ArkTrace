@@ -111,6 +111,8 @@ content address is SHA-256
 `087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3`,
 and the retained GitHub Release asset is named
 `arktrace-dayu200-20260815T081830Z-600s.htrace` under release tag
-`phase3-large-fixture-087105c0-review`. The large benchmark still has to verify
-those external bytes against the tracked record and satisfy its performance and
-cancellation contracts before Gate 6/7 can be reported closed.
+`phase3-large-fixture-087105c0-review`. The large benchmark verified those
+external bytes against the tracked record, executed the real cancellation
+contract, and published the 20-sample performance facts in
+`phase3-large-performance.json`; Gate 6/7 are closed without committing the
+Trace to ordinary Git.

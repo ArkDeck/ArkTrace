@@ -76,8 +76,9 @@ timeout/output limit 7、SIGINT cancel 8、second-signal force 130/143（按实�
 
 - 发布门 3（完整第三方许可证 inventory）仍归 P3-T10；当前仅锁定 TraceStreamer/fixtures 的
   Apache-2.0 evidence。
-- 发布门 6/7 仍归 P3-T09 的 large cancellation/cache promotion 与 indexed viewport benchmark；
-  Phase 2 small benchmark 不提前关闭。
+- 本节冻结时发布门 6/7 仍归 P3-T09 的 large cancellation/cache promotion 与 indexed viewport
+  benchmark，Phase 2 small benchmark 没有提前关闭；两门后于 2026-08-15 由独立 signed large
+  evidence 单独关闭。
 - Phase 2 不提供自动 LRU/purge；owner/liveness evidence 的 recovery 与 cache UI 由 P3-T05 消费。
 - medium/large benchmark、peak RSS、viewport/frame SLO 仍标为 not measured，不能从 small trace
   外推。

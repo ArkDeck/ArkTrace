@@ -323,6 +323,12 @@ git -C "$repository" -c user.name='ArkTrace Contract' \
 
 first_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")
+printf '{"audited":"output"}\n' \
+    >"$repository/Fixtures/release-evidence/phase3-large-performance.json"
+excluded_output_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
+    "$repository/scripts/source_tree_identity.py" "$repository")
+[ "$first_tree_sha" = "$excluded_output_tree_sha" ] \
+    || fail "large performance output created a self-referential source identity"
 printf 'candidate byte A\n' >"$repository/source-identity-probe.txt"
 untracked_tree_sha=$(PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/source_tree_identity.py" "$repository")

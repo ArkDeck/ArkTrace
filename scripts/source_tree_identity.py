@@ -148,6 +148,7 @@ def main() -> None:
             # source, scripts, locks and tests remain covered.
             if relative in {
                 "Fixtures/release-evidence/phase3-medium-performance.json",
+                "Fixtures/release-evidence/phase3-large-performance.json",
                 "Fixtures/release-evidence/phase4-medium-agent-performance.json",
                 "Fixtures/release-evidence/phase5-cli-distribution.json",
             }:
