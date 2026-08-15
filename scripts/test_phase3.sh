@@ -50,5 +50,13 @@ scripts/benchmark_phase3.sh medium
     || fail "ARKTRACE_LARGE_TRACE_EVIDENCE is required to close release gates 6 and 7"
 scripts/benchmark_phase3.sh large
 
-scripts/package_phase3.sh
-printf 'Phase 3 gate passed: inherited gates + signed-App accessibility evidence + real performance + licenses + notarization\n'
+retained_notarized_zip=${ARKTRACE_REVIEWED_NOTARIZED_ZIP:-}
+retained_notarization_evidence=${ARKTRACE_REVIEWED_NOTARIZATION_EVIDENCE:-}
+if [ -z "$retained_notarized_zip" ] && [ -z "$retained_notarization_evidence" ]; then
+    scripts/package_phase3.sh
+elif [ -n "$retained_notarized_zip" ] && [ -n "$retained_notarization_evidence" ]; then
+    scripts/verify_phase3_notarized_artifact.sh
+else
+    fail "retained notarized ZIP and its reviewed evidence must be supplied together"
+fi
+printf 'Phase 3 gate passed: inherited gates + signed-App accessibility evidence + real performance + licenses + verified notarization\n'

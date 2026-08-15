@@ -13,8 +13,8 @@ trap cleanup EXIT HUP INT TERM
 repository="$temporary_root/repository"
 fake_bin="$temporary_root/bin"
 operation_log="$temporary_root/operations.log"
-identity='Developer ID Application: ArkTrace Test (TEAMTEST)'
-team=TEAMTEST
+identity='Developer ID Application: ArkTrace Test (TEAMTEST01)'
+team=TEAMTEST01
 
 mkdir -p "$repository/scripts" "$repository/ArkTrace.xcodeproj" \
     "$repository/Apps/ArkTraceApp" \
@@ -24,6 +24,7 @@ mkdir -p "$repository/scripts" "$repository/ArkTrace.xcodeproj" \
     "$repository/Fixtures/release-evidence" "$fake_bin"
 cp "$source_scripts/build_phase3_distribution_candidate.sh" \
     "$source_scripts/package_phase3.sh" \
+    "$source_scripts/verify_phase3_notarized_artifact.sh" \
     "$source_scripts/verify_phase3_evidence_times.py" \
     "$source_scripts/phase3_shell_safety.sh" "$repository/scripts/"
 chmod +x "$repository/scripts/"*.sh
@@ -85,7 +86,7 @@ PLIST
 
 cat >"$fake_bin/security" <<'SH'
 #!/bin/sh
-printf '  1) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "Developer ID Application: ArkTrace Test (TEAMTEST)"\n'
+printf '  1) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "Developer ID Application: ArkTrace Test (TEAMTEST01)"\n'
 SH
 cat >"$fake_bin/xcodebuild" <<'SH'
 #!/bin/sh
@@ -141,8 +142,8 @@ case " $* " in
 esac
 case " $* " in
     *' -dv '*|*' -d '*)
-        printf 'Authority=Developer ID Application: ArkTrace Test (TEAMTEST)\n' >&2
-        printf 'TeamIdentifier=TEAMTEST\nCodeDirectory v=20500 size=123 flags=0x10000(runtime) hashes=1+1 location=embedded\nTimestamp=Aug 13, 2026\nCDHash=0123456789abcdef\n' >&2 ;;
+        printf 'Authority=Developer ID Application: ArkTrace Test (TEAMTEST01)\n' >&2
+        printf 'TeamIdentifier=TEAMTEST01\nCodeDirectory v=20500 size=123 flags=0x10000(runtime) hashes=1+1 location=embedded\nTimestamp=Aug 13, 2026\nCDHash=0123456789abcdef0123456789abcdef01234567\n' >&2 ;;
 esac
 if [ "${ARKTRACE_FAKE_FAIL_PARTIAL_VERIFY:-0}" = 1 ]; then
     for argument in "$@"; do
@@ -173,8 +174,8 @@ if [ "$1" = notarytool ] && [ "$2" = submit ]; then
         printf '{"id":"11111111-1111-1111-1111-111111111111","status":"Accepted"}\n'
     fi
 elif [ "$1" = stapler ] && [ "$2" = staple ]; then
-    mkdir -p "$3/Contents/_CodeSignature"
-    printf 'stapled\n' >"$3/Contents/_CodeSignature/arktrace-test-ticket"
+    printf 'stapled\n' >"$3/Contents/CodeResources"
+    chmod 600 "$3/Contents/CodeResources"
 elif [ "$1" = stapler ] && [ "$2" = validate ]; then
     if [ "${ARKTRACE_FAKE_FAIL_FINAL_VALIDATE:-0}" = 1 ]; then
         case "$3" in */final/*)
@@ -182,14 +183,14 @@ elif [ "$1" = stapler ] && [ "$2" = validate ]; then
             exit 1 ;;
         esac
     fi
-    [ -f "$3/Contents/_CodeSignature/arktrace-test-ticket" ] || exit 1
+    [ -f "$3/Contents/CodeResources" ] || exit 1
 fi
 exit 0
 SH
 cat >"$fake_bin/spctl" <<'SH'
 #!/bin/sh
 for last; do :; done
-[ -f "$last/Contents/_CodeSignature/arktrace-test-ticket" ]
+[ -f "$last/Contents/CodeResources" ]
 SH
 chmod +x "$fake_bin/"*
 
@@ -291,7 +292,7 @@ printf '%s' "$checks_json" | jq \
     --arg team "$team" '
     {
       formatVersion:1,
-      app:{treeSHA256:$tree,codeDirectoryHash:"0123456789abcdef",version:"0.1.0",build:"1",bundleIdentifier:"com.arktrace.ArkTrace",teamIdentifier:$team},
+      app:{treeSHA256:$tree,codeDirectoryHash:"0123456789abcdef0123456789abcdef01234567",version:"0.1.0",build:"1",bundleIdentifier:"com.arktrace.ArkTrace",teamIdentifier:$team},
       checks:.,reviewedAt:"2026-08-13T00:00:00Z",reviewer:"independent-reviewer",
       reviewMethod:"independent-agent-review"
     }
@@ -314,12 +315,225 @@ final_zip=$(find "$temporary_root/artifacts" -maxdepth 1 -name '*.zip' -print -q
 [ -f "$final_zip" ] || fail "final distribution ZIP was not produced"
 mkdir "$temporary_root/extracted"
 /usr/bin/ditto -x -k "$final_zip" "$temporary_root/extracted"
-[ -f "$temporary_root/extracted/ArkTrace.app/Contents/_CodeSignature/arktrace-test-ticket" ] \
+[ -f "$temporary_root/extracted/ArkTrace.app/Contents/CodeResources" ] \
     || fail "final ZIP was created before stapling"
 grep 'xcrun notarytool submit' "$operation_log" >/dev/null \
     || fail "notarization was not attempted"
 grep 'xcrun stapler staple' "$operation_log" >/dev/null \
     || fail "stapling was not attempted"
+
+evidence_revision=$(git -C "$repository" rev-parse HEAD)
+receipt="$repository/Fixtures/release-evidence/phase4-notarization-receipt.json"
+submission_id=11111111-1111-1111-1111-111111111111
+app_cdhash=0123456789abcdef0123456789abcdef01234567
+jq -n -S \
+    --arg id "$submission_id" --arg cdhash "$app_cdhash" '
+    {
+      archiveFilename:"ArkTrace-notary-submission.zip",
+      issues:null,
+      jobId:$id,
+      logFormatVersion:1,
+      sha256:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      status:"Accepted",
+      statusCode:0,
+      statusSummary:"Ready for distribution",
+      ticketContents:[
+        {arch:"arm64",cdhash:$cdhash,digestAlgorithm:"SHA-256",path:"ArkTrace-notary-submission.zip/ArkTrace.app/Contents/Helpers/trace_streamer"},
+        {arch:"arm64",cdhash:$cdhash,digestAlgorithm:"SHA-256",path:"ArkTrace-notary-submission.zip/ArkTrace.app"},
+        {arch:"arm64",cdhash:$cdhash,digestAlgorithm:"SHA-256",path:"ArkTrace-notary-submission.zip/ArkTrace.app/Contents/MacOS/ArkTrace"},
+        {arch:"arm64",cdhash:$cdhash,digestAlgorithm:"SHA-256",path:"ArkTrace-notary-submission.zip/ArkTrace.app/Contents/Helpers/trace_streamer"}
+      ],
+      uploadDate:"2026-08-13T00:00:30.000Z"
+    }
+' >"$receipt"
+receipt_sha=$(shasum -a 256 "$receipt" | awk '{print $1}')
+artifact_name=$(basename -- "$final_zip")
+artifact_bytes=$(stat -f '%z' "$final_zip")
+artifact_sha=$(shasum -a 256 "$final_zip" | awk '{print $1}')
+accessibility_sha=$(shasum -a 256 "$evidence" | awk '{print $1}')
+notarization_evidence="$repository/Fixtures/release-evidence/phase4-notarization.json"
+jq -n -S \
+    --arg accessibility "Fixtures/release-evidence/accessibility.json" \
+    --arg accessibilitySHA "$accessibility_sha" \
+    --arg tree "$candidate_tree" --arg cdhash "$app_cdhash" \
+    --arg identity "$identity" --arg team "$team" \
+    --arg artifact "$artifact_name" --arg artifactSHA "$artifact_sha" \
+    --argjson artifactBytes "$artifact_bytes" \
+    --arg receiptSHA "$receipt_sha" --arg id "$submission_id" \
+    --arg revision "$evidence_revision" '
+    {
+      accessibilityEvidence:{path:$accessibility,sha256:$accessibilitySHA},
+      app:{
+        build:"1",bundleIdentifier:"com.arktrace.ArkTrace",
+        candidateCodeDirectoryHash:$cdhash,candidateTreeSHA256:$tree,
+        signingCertificateSHA1:"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        signingIdentity:$identity,teamIdentifier:$team,version:"0.1.0"
+      },
+      artifact:{byteCount:$artifactBytes,fileName:$artifact,sha256:$artifactSHA},
+      artifactReview:{
+        method:"independent-agent-review",
+        reviewEndedAt:"2026-08-13T00:03:00Z",
+        reviewStartedAt:"2026-08-13T00:02:00Z",
+        reviewer:"independent-contract-reviewer"
+      },
+      evidenceRevision:$revision,
+      formatVersion:1,
+      notarization:{
+        finalArchiveReverified:true,gatekeeperAssessment:"accepted",
+        nestedAndOuterSignaturesValid:true,
+        receiptPath:"Fixtures/release-evidence/phase4-notarization-receipt.json",
+        receiptSHA256:$receiptSHA,stapledTicketValidated:true,
+        status:"Accepted",submissionID:$id
+      },
+      packagedAt:"2026-08-13T00:01:00Z",
+      reviewedAt:"2026-08-13T00:03:00Z",
+      sourceRevision:$revision
+    }
+' >"$notarization_evidence"
+git -C "$repository" add Fixtures/release-evidence/phase4-notarization.json \
+    Fixtures/release-evidence/phase4-notarization-receipt.json
+git -C "$repository" -c user.name='ArkTrace Contract' \
+    -c user.email='contract@invalid.example' commit -qm 'lock retained notarization evidence'
+
+verify_retained() {
+    verify_repository=$1
+    verify_zip=$2
+    PATH="$fake_bin:$PATH" \
+    ARKTRACE_FAKE_OPERATION_LOG="$operation_log" \
+    ARKTRACE_DEVELOPER_ID_APPLICATION="$identity" \
+    ARKTRACE_DEVELOPMENT_TEAM="$team" \
+    ARKTRACE_REVIEWED_SIGNED_APP="$candidate" \
+    ARKTRACE_ACCESSIBILITY_EVIDENCE="$verify_repository/Fixtures/release-evidence/accessibility.json" \
+    ARKTRACE_REVIEWED_NOTARIZED_ZIP="$verify_zip" \
+    ARKTRACE_REVIEWED_NOTARIZATION_EVIDENCE="$verify_repository/Fixtures/release-evidence/phase4-notarization.json" \
+        "$verify_repository/scripts/verify_phase3_notarized_artifact.sh"
+}
+
+: >"$operation_log"
+verify_retained "$repository" "$final_zip" >"$temporary_root/retained-output"
+if grep 'notarytool' "$operation_log" >/dev/null; then
+    fail "retained artifact verification resubmitted to Apple"
+fi
+if PATH="$fake_bin:$PATH" \
+    ARKTRACE_FAKE_OPERATION_LOG="$operation_log" \
+    ARKTRACE_DEVELOPER_ID_APPLICATION="$identity" \
+    ARKTRACE_DEVELOPMENT_TEAM="$team" \
+    ARKTRACE_REVIEWED_SIGNED_APP="$candidate" \
+    ARKTRACE_ACCESSIBILITY_EVIDENCE="$evidence" \
+    ARKTRACE_REVIEWED_NOTARIZED_ZIP="$final_zip" \
+    "$repository/scripts/verify_phase3_notarized_artifact.sh" >/dev/null 2>&1
+then
+    fail "retained ZIP without reviewed notarization evidence was accepted"
+fi
+if PATH="$fake_bin:$PATH" \
+    ARKTRACE_FAKE_OPERATION_LOG="$operation_log" \
+    ARKTRACE_DEVELOPER_ID_APPLICATION="$identity" \
+    ARKTRACE_DEVELOPMENT_TEAM="$team" \
+    ARKTRACE_REVIEWED_SIGNED_APP="$candidate" \
+    ARKTRACE_ACCESSIBILITY_EVIDENCE="$evidence" \
+    ARKTRACE_REVIEWED_NOTARIZATION_EVIDENCE="$notarization_evidence" \
+    "$repository/scripts/verify_phase3_notarized_artifact.sh" >/dev/null 2>&1
+then
+    fail "notarization evidence without retained ZIP was accepted"
+fi
+
+record_backup="$temporary_root/notarization-evidence.backup"
+cp "$notarization_evidence" "$record_backup"
+jq '.artifactReview.reviewer = "caller-modified-reviewer"' \
+    "$record_backup" >"$notarization_evidence"
+if verify_retained "$repository" "$final_zip" >/dev/null 2>&1; then
+    fail "caller-modified retained notarization evidence was accepted"
+fi
+cp "$record_backup" "$notarization_evidence"
+
+mkdir "$temporary_root/tampered-artifact"
+tampered_zip="$temporary_root/tampered-artifact/$artifact_name"
+cp "$final_zip" "$tampered_zip"
+printf 'tamper\n' >>"$tampered_zip"
+if verify_retained "$repository" "$tampered_zip" >/dev/null 2>&1; then
+    fail "retained ZIP byte drift was accepted"
+fi
+
+mkdir "$temporary_root/symlink-artifact"
+symlink_zip="$temporary_root/symlink-artifact/$artifact_name"
+ln -s "$final_zip" "$symlink_zip"
+if verify_retained "$repository" "$symlink_zip" >/dev/null 2>&1; then
+    fail "symbolic retained ZIP was accepted"
+fi
+
+semantic_repository="$temporary_root/self-attestation-repository"
+/usr/bin/ditto --noqtn "$repository" "$semantic_repository"
+jq '.artifactReview.method = "self-attestation"' \
+    "$semantic_repository/Fixtures/release-evidence/phase4-notarization.json" \
+    >"$temporary_root/self-attestation.json"
+mv "$temporary_root/self-attestation.json" \
+    "$semantic_repository/Fixtures/release-evidence/phase4-notarization.json"
+git -C "$semantic_repository" add Fixtures/release-evidence/phase4-notarization.json
+git -C "$semantic_repository" -c user.name='ArkTrace Contract' \
+    -c user.email='contract@invalid.example' commit -qm 'attack self-attestation'
+if verify_retained "$semantic_repository" "$final_zip" >/dev/null 2>&1; then
+    fail "self-attested artifact review was accepted"
+fi
+
+status_repository="$temporary_root/invalid-status-repository"
+/usr/bin/ditto --noqtn "$repository" "$status_repository"
+status_receipt="$status_repository/Fixtures/release-evidence/phase4-notarization-receipt.json"
+jq '.status = "Invalid" | .statusCode = 4000' "$status_receipt" \
+    >"$temporary_root/invalid-status.json"
+mv "$temporary_root/invalid-status.json" "$status_receipt"
+status_receipt_sha=$(shasum -a 256 "$status_receipt" | awk '{print $1}')
+jq --arg sha "$status_receipt_sha" '.notarization.receiptSHA256 = $sha' \
+    "$status_repository/Fixtures/release-evidence/phase4-notarization.json" \
+    >"$temporary_root/invalid-status-evidence.json"
+mv "$temporary_root/invalid-status-evidence.json" \
+    "$status_repository/Fixtures/release-evidence/phase4-notarization.json"
+git -C "$status_repository" add Fixtures/release-evidence/phase4-notarization.json \
+    Fixtures/release-evidence/phase4-notarization-receipt.json
+git -C "$status_repository" -c user.name='ArkTrace Contract' \
+    -c user.email='contract@invalid.example' commit -qm 'attack receipt status'
+if verify_retained "$status_repository" "$final_zip" >/dev/null 2>&1; then
+    fail "non-Accepted notarization receipt was accepted"
+fi
+
+cdhash_repository="$temporary_root/cdhash-drift-repository"
+/usr/bin/ditto --noqtn "$repository" "$cdhash_repository"
+cdhash_receipt="$cdhash_repository/Fixtures/release-evidence/phase4-notarization-receipt.json"
+jq '.ticketContents[1].cdhash = "ffffffffffffffffffffffffffffffffffffffff"' \
+    "$cdhash_receipt" >"$temporary_root/cdhash-drift.json"
+mv "$temporary_root/cdhash-drift.json" "$cdhash_receipt"
+cdhash_receipt_sha=$(shasum -a 256 "$cdhash_receipt" | awk '{print $1}')
+jq --arg sha "$cdhash_receipt_sha" '.notarization.receiptSHA256 = $sha' \
+    "$cdhash_repository/Fixtures/release-evidence/phase4-notarization.json" \
+    >"$temporary_root/cdhash-drift-evidence.json"
+mv "$temporary_root/cdhash-drift-evidence.json" \
+    "$cdhash_repository/Fixtures/release-evidence/phase4-notarization.json"
+git -C "$cdhash_repository" add Fixtures/release-evidence/phase4-notarization.json \
+    Fixtures/release-evidence/phase4-notarization-receipt.json
+git -C "$cdhash_repository" -c user.name='ArkTrace Contract' \
+    -c user.email='contract@invalid.example' commit -qm 'attack receipt CDHash'
+if verify_retained "$cdhash_repository" "$final_zip" >/dev/null 2>&1; then
+    fail "notarization ticket CDHash drift was accepted"
+fi
+
+unstapled_zip="$temporary_root/ArkTrace-20260813T000400Z-retained.zip"
+/usr/bin/ditto -c -k --sequesterRsrc --keepParent "$candidate" "$unstapled_zip"
+unstapled_repository="$temporary_root/unstapled-repository"
+/usr/bin/ditto --noqtn "$repository" "$unstapled_repository"
+unstapled_bytes=$(stat -f '%z' "$unstapled_zip")
+unstapled_sha=$(shasum -a 256 "$unstapled_zip" | awk '{print $1}')
+jq --arg name "$(basename -- "$unstapled_zip")" \
+    --arg sha "$unstapled_sha" --argjson bytes "$unstapled_bytes" \
+    '.artifact.fileName = $name | .artifact.sha256 = $sha | .artifact.byteCount = $bytes' \
+    "$unstapled_repository/Fixtures/release-evidence/phase4-notarization.json" \
+    >"$temporary_root/unstapled-evidence.json"
+mv "$temporary_root/unstapled-evidence.json" \
+    "$unstapled_repository/Fixtures/release-evidence/phase4-notarization.json"
+git -C "$unstapled_repository" add Fixtures/release-evidence/phase4-notarization.json
+git -C "$unstapled_repository" -c user.name='ArkTrace Contract' \
+    -c user.email='contract@invalid.example' commit -qm 'attack unstapled artifact'
+if verify_retained "$unstapled_repository" "$unstapled_zip" >/dev/null 2>&1; then
+    fail "unstapled retained artifact was accepted"
+fi
 
 if PATH="$fake_bin:$PATH" \
     ARKTRACE_FAKE_OPERATION_LOG="$operation_log" \
