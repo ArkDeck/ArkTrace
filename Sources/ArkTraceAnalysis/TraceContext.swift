@@ -817,18 +817,59 @@ public struct TraceContextBuilder: Sendable {
             try Self.check(deadline)
             return ContinuousClock.now.duration(to: deadline)
         }
-        let cpu = try await queryEngine.query(
-            view: .cpuSlices, range: normalized.range, filters: cpuFilters,
-            limit: eventLimit, deadline: deadline
+        var batchEntries = [
+            TraceAgentQueryEngine.BatchEntry(
+                view: .cpuSlices, filters: cpuFilters, limit: eventLimit
+            ),
+            TraceAgentQueryEngine.BatchEntry(
+                view: .threadStates, filters: stateFilters, limit: eventLimit
+            ),
+            TraceAgentQueryEngine.BatchEntry(
+                view: .slices, filters: sliceFilters, limit: eventLimit
+            ),
+        ]
+        if !counterScopeConflict {
+            batchEntries.append(
+                TraceAgentQueryEngine.BatchEntry(
+                    view: .counters, filters: counterFilters, limit: eventLimit
+                )
+            )
+        }
+        async let eventResults = queryEngine.queryBatch(
+            range: normalized.range, entries: batchEntries, deadline: deadline
         )
-        let states = try await queryEngine.query(
-            view: .threadStates, range: normalized.range, filters: stateFilters,
-            limit: eventLimit, deadline: deadline
+        async let processResult = repository.processes(
+            ProcessQuery(
+                processKey: request.filters.processKey,
+                pid: request.filters.pid,
+                limit: request.maximumRows,
+                deadline: deadline
+            )
         )
-        let slices = try await queryEngine.query(
-            view: .slices, range: normalized.range, filters: sliceFilters,
-            limit: eventLimit, deadline: deadline
+        async let threadResult = repository.threads(
+            ThreadQuery(
+                processKey: request.filters.processKey,
+                pid: request.filters.pid,
+                threadKey: request.filters.threadKey,
+                tid: request.filters.tid,
+                limit: request.maximumRows,
+                deadline: deadline
+            )
         )
+        async let summaryResult = TraceSummaryEngine(repository: repository).summarize(
+            try TraceSummaryRequest(
+                range: normalized.range,
+                maximumRowsPerSection: request.maximumRows,
+                maximumEventsPerSection: request.maximumEvents,
+                timeout: remaining()
+            )
+        )
+        let (events, processPage, threadPage, summary) = try await (
+            eventResults, processResult, threadResult, summaryResult
+        )
+        let cpu = events[0]
+        let states = events[1]
+        let slices = events[2]
         let counters: TraceAgentQueryResult
         if counterScopeConflict {
             counters = try TraceAgentQueryResult(
@@ -841,37 +882,8 @@ public struct TraceContextBuilder: Sendable {
                 counters: []
             )
         } else {
-            counters = try await queryEngine.query(
-                view: .counters, range: normalized.range, filters: counterFilters,
-                limit: eventLimit, deadline: deadline
-            )
+            counters = events[3]
         }
-        let processPage = try await repository.processes(
-            ProcessQuery(
-                processKey: request.filters.processKey,
-                pid: request.filters.pid,
-                limit: request.maximumRows,
-                deadline: deadline
-            )
-        )
-        let threadPage = try await repository.threads(
-            ThreadQuery(
-                processKey: request.filters.processKey,
-                pid: request.filters.pid,
-                threadKey: request.filters.threadKey,
-                tid: request.filters.tid,
-                limit: request.maximumRows,
-                deadline: deadline
-            )
-        )
-        let summary = try await TraceSummaryEngine(repository: repository).summarize(
-            try TraceSummaryRequest(
-                range: normalized.range,
-                maximumRowsPerSection: request.maximumRows,
-                maximumEventsPerSection: request.maximumEvents,
-                timeout: remaining()
-            )
-        )
         let processByKey = try Self.uniqueDirectoryMap(
             processPage.items, key: \.key, entityName: "process", deadline: deadline
         )

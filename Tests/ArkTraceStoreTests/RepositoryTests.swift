@@ -959,24 +959,27 @@ final class RepositoryTests: XCTestCase {
             "arktrace_v2_thread_itid_tid_name_ipid",
             "arktrace_v1_sched_slice_ts_cpu",
             "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+            "arktrace_v3_sched_slice_cpu_ts_dur",
             "arktrace_v1_thread_state_itid_ts",
             "arktrace_v2_thread_state_itid_ts_id_dur",
+            "arktrace_v3_thread_state_itid_ts_dur",
             "arktrace_v1_callstack_callid_ts",
             "arktrace_v2_callstack_callid_ts_id_dur",
+            "arktrace_v3_callstack_callid_ts_dur",
         ]))
         let planText = diagnostics.queryPlans.values.flatMap { $0 }.joined(separator: " ")
         XCTAssertTrue(planText.contains("arktrace_v1_process_ipid"), planText)
         XCTAssertTrue(planText.contains("arktrace_v1_thread_itid"), planText)
         XCTAssertTrue(planText.contains("arktrace_v2_sched_slice_cpu_ts_id_dur_itid"), planText)
-        XCTAssertTrue(planText.contains("arktrace_v2_thread_state_itid_ts_id_dur"), planText)
+        XCTAssertTrue(planText.contains("arktrace_v2_thread_state_itid_ts_cover_cpu"), planText)
         XCTAssertTrue(planText.contains("arktrace_v2_callstack_callid_ts_id_dur"), planText)
         let expectedEventIndexes = [
             "viewport.cpu.detail": "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
-            "viewport.cpu.density": "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+            "viewport.cpu.density": "arktrace_v3_sched_slice_cpu_ts_dur",
             "viewport.threadState.detail": "arktrace_v2_thread_state_itid_ts_cover_cpu",
-            "viewport.threadState.density": "arktrace_v2_thread_state_itid_ts_id_dur",
+            "viewport.threadState.density": "arktrace_v3_thread_state_itid_ts_dur",
             "viewport.namedSlice.detail": "arktrace_v2_callstack_callid_ts_id_dur",
-            "viewport.namedSlice.density": "arktrace_v2_callstack_callid_ts_id_dur",
+            "viewport.namedSlice.density": "arktrace_v3_callstack_callid_ts_dur",
         ]
         for (name, expectedIndex) in expectedEventIndexes {
             let plan = try XCTUnwrap(diagnostics.queryPlans[name])
@@ -993,6 +996,109 @@ final class RepositoryTests: XCTestCase {
             XCTAssertTrue(text.contains("arktrace_v2_process_ipid_pid_name"), text)
             XCTAssertTrue(text.contains("arktrace_v2_thread_itid_tid_name_ipid"), text)
         }
+    }
+
+    func testRepositoryEventBatchRejectsUnboundedQueryCount() throws {
+        let query = try TraceDensityQuery(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1),
+            source: .cpu(0),
+            bucketCount: 1,
+            deadline: ContinuousClock.now.advanced(by: .seconds(1))
+        )
+        XCTAssertThrowsError(
+            try TraceRepositoryEventBatch(
+                densities: Array(
+                    repeating: query,
+                    count: TraceRepositoryEventBatch.maximumQueryCount + 1
+                )
+            )
+        ) { error in
+            XCTAssertEqual((error as? ArkTraceError)?.code, .invalidArgument)
+            XCTAssertEqual((error as? ArkTraceError)?.stage, .request)
+        }
+    }
+
+    func testConcurrentEventBatchRejectsReadyPathReplacement() async throws {
+        let seed = try TraceDatabase(url: databaseURL, readOnly: false)
+        try seed.execute(
+            "INSERT INTO sched_slice VALUES (1, 1100, 20, 0, 1, 1)"
+        )
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let repository = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation
+        )
+        let replacement = databaseURL.deletingLastPathComponent()
+            .appendingPathComponent("arktrace-replacement-\(UUID().uuidString).sqlite")
+        defer { try? FileManager.default.removeItem(at: replacement) }
+        try FileManager.default.copyItem(at: databaseURL, to: replacement)
+        _ = try FileManager.default.replaceItemAt(databaseURL, withItemAt: replacement)
+
+        let batch = try TraceRepositoryEventBatch(
+            densities: [
+                try TraceDensityQuery(
+                    range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                    source: .cpu(0), bucketCount: 8,
+                    deadline: ContinuousClock.now.advanced(by: .seconds(2))
+                )
+            ]
+        )
+        do {
+            _ = try await repository.eventBatch(batch)
+            XCTFail("Ready path replacement must not be queried through a clone")
+        } catch {
+            XCTAssertEqual((error as? ArkTraceError)?.code, .traceDatabaseInvalid)
+            XCTAssertEqual((error as? ArkTraceError)?.stage, .openingDatabase)
+        }
+    }
+
+    func testConcurrentEventBatchPreservesTypedOrderAndResults() async throws {
+        let seed = try TraceDatabase(url: databaseURL, readOnly: false)
+        try seed.execute(
+            """
+            INSERT INTO sched_slice VALUES (1, 1100, 20, 0, 1, 1);
+            INSERT INTO sched_slice VALUES (2, 1200, 20, 1, 1, 1);
+            """
+        )
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        let repository = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation
+        )
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        let result = try await repository.eventBatch(
+            TraceRepositoryEventBatch(
+                cpuSlices: [
+                    try CpuSliceQuery(
+                        range: range, cpu: 1, limit: 8, deadline: deadline
+                    )
+                ],
+                densities: [
+                    try TraceDensityQuery(
+                        range: range, source: .cpu(1), bucketCount: 8,
+                        deadline: deadline
+                    ),
+                    try TraceDensityQuery(
+                        range: range, source: .cpu(99), bucketCount: 8,
+                        deadline: deadline
+                    ),
+                ]
+            )
+        )
+        XCTAssertEqual(result.cpuSlices.count, 1)
+        XCTAssertEqual(result.cpuSlices[0].items.map(\.key.rowID), [2])
+        XCTAssertEqual(result.densities.count, 2)
+        XCTAssertEqual(
+            result.densities.map { density in
+                density.buckets.reduce(Int64(0)) { $0 + $1.eventCount }
+            },
+            [1, 0]
+        )
     }
 
     func testReadyDatabaseValidationRejectsMismappedProductionCoveringIndex() throws {

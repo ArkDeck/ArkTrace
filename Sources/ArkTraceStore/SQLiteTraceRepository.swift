@@ -40,6 +40,14 @@ private final class RepositoryValidationCache: @unchecked Sendable {
 
 private let repositoryValidationCache = RepositoryValidationCache()
 
+private enum RepositoryEventBatchItem: Sendable {
+    case cpu(Int, TraceEventPage<CpuSlice>)
+    case state(Int, TraceEventPage<ThreadStateInterval>)
+    case slice(Int, TraceEventPage<TraceSlice>)
+    case counter(Int, TraceEventPage<CounterSeries>)
+    case density(Int, TraceDensityResult)
+}
+
 enum TracePerformanceQuery: Sendable {
     case cpuDetail(TraceTimeRange, ContinuousClock.Instant)
     case threadStateDetail(TraceTimeRange, ContinuousClock.Instant)
@@ -71,6 +79,8 @@ public struct TraceSourceDescriptor: Sendable {
 /// trace-relative Int64 nanoseconds (AT-TIME-001/002).
 public actor SQLiteTraceRepository: TraceRepositoryProtocol {
     public nonisolated let databaseFileIdentity: TraceDatabaseFileIdentity
+    private let databaseURL: URL
+    private let expectedPreparation: TraceDatabasePreparationResult?
     private let db: TraceDatabase
     private let parserIdentity: TraceParserIdentity
     private let source: TraceSourceDescriptor
@@ -165,6 +175,8 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
 
         self.db = db
+        self.databaseURL = databaseURL
+        self.expectedPreparation = expectedPreparation
         self.databaseFileIdentity = databaseFileIdentity
         self.parserIdentity = parser
         self.source = source
@@ -208,6 +220,125 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             schemaFingerprint: validation.schemaFingerprint,
             capabilities: validation.capabilities,
             dataQuality: validation.dataQuality
+        )
+    }
+
+    public func eventBatch(
+        _ batch: TraceRepositoryEventBatch
+    ) async throws -> TraceRepositoryEventBatchResult {
+        guard let expectedPreparation else {
+            return try await sequentialEventBatch(batch)
+        }
+        let databaseURL = self.databaseURL
+        let parserIdentity = self.parserIdentity
+        let source = self.source
+        let expectedIdentity = databaseFileIdentity
+        var cpu = Array<TraceEventPage<CpuSlice>?>(
+            repeating: nil, count: batch.cpuSlices.count
+        )
+        var states = Array<TraceEventPage<ThreadStateInterval>?>(
+            repeating: nil, count: batch.threadStates.count
+        )
+        var slices = Array<TraceEventPage<TraceSlice>?>(
+            repeating: nil, count: batch.slices.count
+        )
+        var counters = Array<TraceEventPage<CounterSeries>?>(
+            repeating: nil, count: batch.counters.count
+        )
+        var densities = Array<TraceDensityResult?>(
+            repeating: nil, count: batch.densities.count
+        )
+
+        try await withThrowingTaskGroup(of: RepositoryEventBatchItem.self) { group in
+            func clone() throws -> SQLiteTraceRepository {
+                let repository = try SQLiteTraceRepository(
+                    databaseURL: databaseURL,
+                    parser: parserIdentity,
+                    source: source,
+                    expectedPreparation: expectedPreparation
+                )
+                guard repository.databaseFileIdentity == expectedIdentity else {
+                    throw ArkTraceError(
+                        code: .traceDatabaseInvalid,
+                        stage: .openingDatabase,
+                        message: "Ready database changed before concurrent query open"
+                    )
+                }
+                return repository
+            }
+            for (index, query) in batch.cpuSlices.enumerated() {
+                group.addTask {
+                    .cpu(index, try await clone().cpuSlices(query))
+                }
+            }
+            for (index, query) in batch.threadStates.enumerated() {
+                group.addTask {
+                    .state(index, try await clone().threadStates(query))
+                }
+            }
+            for (index, query) in batch.slices.enumerated() {
+                group.addTask {
+                    .slice(index, try await clone().slices(query))
+                }
+            }
+            for (index, query) in batch.counters.enumerated() {
+                group.addTask {
+                    .counter(index, try await clone().counters(query))
+                }
+            }
+            for (index, query) in batch.densities.enumerated() {
+                group.addTask {
+                    .density(index, try await clone().density(query))
+                }
+            }
+            for try await item in group {
+                switch item {
+                case .cpu(let index, let page): cpu[index] = page
+                case .state(let index, let page): states[index] = page
+                case .slice(let index, let page): slices[index] = page
+                case .counter(let index, let page): counters[index] = page
+                case .density(let index, let result): densities[index] = result
+                }
+            }
+        }
+        guard cpu.allSatisfy({ $0 != nil }), states.allSatisfy({ $0 != nil }),
+            slices.allSatisfy({ $0 != nil }), counters.allSatisfy({ $0 != nil }),
+            densities.allSatisfy({ $0 != nil })
+        else {
+            throw ArkTraceError(
+                code: .internalError,
+                stage: .querying,
+                message: "Repository event batch returned an incomplete result"
+            )
+        }
+        return TraceRepositoryEventBatchResult(
+            cpuSlices: cpu.map { $0! },
+            threadStates: states.map { $0! },
+            slices: slices.map { $0! },
+            counters: counters.map { $0! },
+            densities: densities.map { $0! }
+        )
+    }
+
+    private func sequentialEventBatch(
+        _ batch: TraceRepositoryEventBatch
+    ) async throws -> TraceRepositoryEventBatchResult {
+        var cpu: [TraceEventPage<CpuSlice>] = []
+        var states: [TraceEventPage<ThreadStateInterval>] = []
+        var slices: [TraceEventPage<TraceSlice>] = []
+        var counters: [TraceEventPage<CounterSeries>] = []
+        var densities: [TraceDensityResult] = []
+        for query in batch.cpuSlices { cpu.append(try await cpuSlices(query)) }
+        for query in batch.threadStates { states.append(try await threadStates(query)) }
+        for query in batch.slices { slices.append(try await self.slices(query)) }
+        for query in batch.counters { counters.append(try await self.counters(query)) }
+        for query in batch.densities { densities.append(try await density(query)) }
+        return TraceRepositoryEventBatchResult(
+            cpuSlices: cpu,
+            threadStates: states,
+            slices: slices,
+            counters: counters,
+            densities: densities
         )
     }
 
@@ -1257,10 +1388,10 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 SELECT MIN(\(query.bucketCount - 1), MAX(0,
                         CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
                     )) AS bucket,
-                    s.itid AS thread_id,
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
                     0 AS invalid_duration, 0 AS clamped_duration
                 FROM sched_slice AS s
+                    INDEXED BY arktrace_v3_sched_slice_cpu_ts_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
                     AND typeof(s.cpu) = 'integer' AND s.cpu = ?
                 """
@@ -1278,11 +1409,10 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 SELECT MIN(\(query.bucketCount - 1), MAX(0,
                         CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
                     )) AS bucket,
-                    s.itid AS thread_id,
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
                     0 AS invalid_duration, 0 AS clamped_duration
                 FROM thread_state AS s
-                    INDEXED BY arktrace_v2_thread_state_itid_ts_id_dur
+                    INDEXED BY arktrace_v3_thread_state_itid_ts_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
                     AND typeof(s.itid) = 'integer' AND s.itid = ?
                 """
@@ -1306,10 +1436,10 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 SELECT MIN(\(query.bucketCount - 1), MAX(0,
                         CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
                     )) AS bucket,
-                    s.callid AS thread_id,
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
                     0 AS invalid_duration, 0 AS clamped_duration
                 FROM callstack AS s
+                    INDEXED BY arktrace_v3_callstack_callid_ts_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
                     \(threadCondition)
                 """
@@ -1330,7 +1460,6 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 SELECT MIN(\(query.bucketCount - 1), MAX(0,
                         CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
                     )) AS bucket,
-                    NULL AS thread_id,
                     CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
                     \(counterInvalidDurationSelection) AS invalid_duration,
                     \(counterClampedDurationSelection) AS clamped_duration
@@ -1359,7 +1488,6 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 SELECT MIN(\(query.bucketCount - 1), MAX(0,
                         CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
                     )) AS bucket,
-                    NULL AS thread_id,
                     CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
                     \(counterInvalidDurationSelection) AS invalid_duration,
                     \(counterClampedDurationSelection) AS clamped_duration

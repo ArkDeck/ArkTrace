@@ -362,9 +362,9 @@ jq -n '{diagnostics:{queryPlans:{
   "viewport.cpu.detail":["SEARCH s USING COVERING INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid (cpu=?)","SEARCH t USING COVERING INDEX arktrace_v2_thread_itid_tid_name_ipid (itid=?)","SEARCH p USING COVERING INDEX arktrace_v2_process_ipid_pid_name (ipid=?)"],
   "viewport.threadState.detail":["SEARCH s USING COVERING INDEX arktrace_v2_thread_state_itid_ts_id_dur (itid=?)","SEARCH t USING COVERING INDEX arktrace_v2_thread_itid_tid_name_ipid (itid=?)","SEARCH p USING COVERING INDEX arktrace_v2_process_ipid_pid_name (ipid=?)"],
   "viewport.namedSlice.detail":["SEARCH s USING COVERING INDEX arktrace_v2_callstack_callid_ts_id_dur (callid=?)","SEARCH t USING COVERING INDEX arktrace_v2_thread_itid_tid_name_ipid (itid=?)","SEARCH p USING COVERING INDEX arktrace_v2_process_ipid_pid_name (ipid=?)"],
-  "viewport.cpu.density":["SEARCH s USING COVERING INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid (cpu=?)","USE TEMP B-TREE FOR GROUP BY"],
-  "viewport.threadState.density":["SEARCH s USING COVERING INDEX arktrace_v2_thread_state_itid_ts_id_dur (itid=?)","USE TEMP B-TREE FOR GROUP BY"],
-  "viewport.namedSlice.density":["SEARCH s USING COVERING INDEX arktrace_v2_callstack_callid_ts_id_dur (callid=?)","USE TEMP B-TREE FOR GROUP BY"]
+  "viewport.cpu.density":["SEARCH s USING COVERING INDEX arktrace_v3_sched_slice_cpu_ts_dur (cpu=?)","USE TEMP B-TREE FOR GROUP BY"],
+  "viewport.threadState.density":["SEARCH s USING COVERING INDEX arktrace_v3_thread_state_itid_ts_dur (itid=?)","USE TEMP B-TREE FOR GROUP BY"],
+  "viewport.namedSlice.density":["SEARCH s USING COVERING INDEX arktrace_v3_callstack_callid_ts_dur (callid=?)","USE TEMP B-TREE FOR GROUP BY"]
 }}}' >"$valid_plan"
 jq -e -f "$repository/scripts/verify_phase3_query_plans.jq" "$valid_plan" >/dev/null \
     || fail "exact reviewed query plan was rejected"
