@@ -110,7 +110,7 @@ independent large fixture、large cancellation/viewport 与发布门 6/7 阻塞�
   `ARKTRACE_LARGE_TRACE`/provenance evidence 时 fail closed。
 - Build hardening：`source-lock.json` 固定 upstream、13 个 source dependency 与 GN/Ninja
   URL/SHA/bytes；standalone patch、HTTPS rewrite 和构建脚本共同导出 recipe
-  `600d94fae578f523ca2fd526f334b2a7c6febbaad03fea1135057357020fd18c`。
+  `e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06`。
   两个独立 fresh worktree 的实建产物彼此且与仓库 binary byte-identical，binary SHA 保持
   `e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf`；完整 two-clean-build
   gate 已由 `scripts/test_trace_streamer_reproducibility.sh` 实际通过并固化。
