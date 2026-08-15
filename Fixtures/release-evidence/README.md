@@ -100,7 +100,17 @@ capture task separately. The review key SHA-256 is
 `ba49d54e355c88082877c0e3dcaf4b616d818ff5ec7f85cfc1723c2bf28eb2db`.
 The two role keys are required to remain byte-distinct.
 
-Trust-root onboarding is not itself a redistribution grant, review signature,
-large provenance record, or Gate 6/7 closure. Signed evidence remains absent,
-and the large gate must continue to fail closed until those later, separately
-reviewed artifacts are present.
+Trust-root onboarding alone is not a redistribution grant, review signature,
+large provenance record, or Gate 6/7 closure. The later evidence is now tracked
+under `phase3-large/`: a trace-bound `CC-BY-4.0` grant, contemporaneous capture
+log, verifier report, signed human review manifest, and the exact provenance
+record locked by `Fixtures/phase3-performance-fixtures.json`.
+
+The 674,044,067-byte Trace is deliberately not committed to ordinary Git. Its
+content address is SHA-256
+`087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3`,
+and the retained GitHub Release asset is named
+`arktrace-dayu200-20260815T081830Z-600s.htrace` under release tag
+`phase3-large-fixture-087105c0-review`. The large benchmark still has to verify
+those external bytes against the tracked record and satisfy its performance and
+cancellation contracts before Gate 6/7 can be reported closed.

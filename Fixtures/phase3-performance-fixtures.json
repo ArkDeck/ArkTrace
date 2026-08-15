@@ -25,8 +25,8 @@
   "large": {
     "minimumByteCount": 524288001,
     "maximumByteCount": 2147483648,
-    "reviewedEvidencePath": "",
-    "reviewedEvidenceSHA256": "",
+    "reviewedEvidencePath": "Fixtures/release-evidence/phase3-large/provenance.json",
+    "reviewedEvidenceSHA256": "bffd3b91df0509da3c5d74603e934f4ebbc3647e44f6ea2666435c1c42f50184",
     "requiredEnvironmentVariable": "ARKTRACE_LARGE_TRACE",
     "policy": "An independently captured, redistributable, single type-0 protobuf-segment trace is required; multi-segment containers, padding, sparse files, concatenation, and duplicated packets are rejected."
   }

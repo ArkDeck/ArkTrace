@@ -1,0 +1,10 @@
+{
+  "acquisitionRecordSHA256": "6987a00d5f64a6e433f546d78946f315d38ec08309e95a00cf5dbf2a0ae62e7c",
+  "formatVersion": 1,
+  "integrityReportSHA256": "78a36ef017e281db4ae56ff711aa1d3fc95fff3f2217efe502ce9af7aa5e488f",
+  "redistributionGrantSHA256": "b39517ad28dcbaae2fc16d37f36d212a8c978c1e9a3bdd78088451a8679b31e6",
+  "reviewedAt": "2026-08-15T10:33:45Z",
+  "reviewer": "Hanfeng Fu (GitHub: lvye, account ID 4340161)",
+  "traceByteCount": 674044067,
+  "traceSHA256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3"
+}

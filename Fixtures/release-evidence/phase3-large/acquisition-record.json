@@ -1,0 +1,19 @@
+{
+  "captureEndedAt": "2026-08-15T08:52:38Z",
+  "captureLogPath": "Fixtures/release-evidence/phase3-large/acquisition-events.tsv",
+  "captureLogSHA256": "269459fa7db9e249c72006aae4ba941f2e2f3ca5c9122e5b58b6a7d0944b95d2",
+  "captureSessionID": "20260815T081830Z",
+  "captureStartedAt": "2026-08-15T08:42:18Z",
+  "captureTool": "OpenHarmony HiProfiler hiprofiler_cmd with disclosed SHA-256 checkpoint fix",
+  "capturedBy": "OpenAI Codex task 01a00388-5e86-7cf1-9689-e8679ba60dc4 (authorized DAYU 200 capture operator)",
+  "formatVersion": 1,
+  "reviewMethods": [
+    "capture-log",
+    "packet-integrity",
+    "redistribution-license"
+  ],
+  "reviewedAt": "2026-08-15T10:33:45Z",
+  "reviewedBy": "Hanfeng Fu (GitHub: lvye, account ID 4340161)",
+  "sourceDescription": "Real DAYU 200 600-second system trace; external content-addressed release fixture",
+  "traceSHA256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3"
+}
