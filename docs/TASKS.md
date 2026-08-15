@@ -1,8 +1,8 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-15 / reviewed DAYU 200 large fixture 已关闭发布门 6/7；Phase 5 以真实 ArkDeck Artifact 链路完成 9/9 并关闭 Gate 8/9；Phase 4 总阶段状态仍单独跟踪
+> 状态基线：2026-08-15 / reviewed DAYU 200 large fixture 已关闭发布门 6/7；Phase 4 完整 final gate 已通过并完成 7/7；Phase 5 以真实 ArkDeck Artifact 链路完成 9/9 并关闭 Gate 8/9
 > 任务总数：57
-> 已完成：47（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 六项 + Phase 5 九项）
+> 已完成：48（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 七项 + Phase 5 九项）
 > 当前批次：P6-T01 real scenario；large Trace 外部门已关闭，不构成 Gate 10 的替代证据
 
 ## 1. 阶段总览
@@ -13,7 +13,7 @@
 | 1 | Parser Vertical Slice | 9 | Completed，9/9 | real Trace → TraceStreamer → SQLite → Store → metadata | [PHASE_1_TASKS.md](./PHASE_1_TASKS.md) |
 | 2 | CLI Vertical Slice | 7 | Completed，7/7 | Agent 无 UI 读取 inspect/summary/process/thread | [PHASE_2_TASKS.md](./PHASE_2_TASKS.md) |
 | 3 | Native Viewer | 10 | Completed，10/10；Gate 6/7 closed | ArkTrace.app 替代浏览器完成基础查看 | [PHASE_3_TASKS.md](./PHASE_3_TASKS.md) |
-| 4 | Agent Query | 7 | Active，6/7；T01～T05/T07 review clean，T06 large metrics recorded | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
+| 4 | Agent Query | 7 | Completed，7/7；完整继承发布门与 final medium/large gate 通过 | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
 | 5 | ArkDeck Integration | 9 | Completed under explicit large-trace deferral，9/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Active；P6-T01 | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
 

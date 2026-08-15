@@ -12,9 +12,9 @@ evidence="$repository_root/Fixtures/release-evidence/phase5-arkdeck-real-artifac
 summary="$repository_root/Fixtures/release-evidence/phase5-arkdeck-real-artifact-summary.json"
 distribution="$repository_root/Fixtures/release-evidence/phase5-cli-distribution.json"
 
-# Phase 5 inherits the reviewed medium Phase 4 batch, but deliberately does
-# not invoke the final Phase 4 large gate while that external fixture remains
-# explicitly deferred and fail-closed.
+# Phase 5 preserves its historical reviewed-medium inheritance boundary.  The
+# later Phase 4 final large gate is independently closed by test_phase4.sh and
+# its retained signed evidence; rerunning Phase 5 does not duplicate that cost.
 "$script_directory/test_phase4_batch1.sh"
 "$script_directory/test_phase5_cli_distribution_contract.sh"
 
@@ -167,4 +167,4 @@ jq -e '
     || fail "real Artifact evidence contains a host path"
 
 printf 'Phase 5 gate passed: inherited medium gate + CLI distribution + real ArkDeck capture Artifact to persisted summary Artifact\n'
-printf 'Large Trace gates 6/7 and the Phase 4 large exit remain open by explicit deferral.\n'
+printf 'Large Trace gates 6/7 and the Phase 4 large exit are closed by retained signed evidence.\n'

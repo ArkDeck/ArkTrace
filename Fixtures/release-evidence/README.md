@@ -52,6 +52,20 @@ physical ZIP and reverify the nested and outer signatures, stapled ticket, and
 Gatekeeper result. The JSON metadata is not a substitute for the retained
 artifact.
 
+The later Phase 4 closure uses `phase4-notarization.json` and
+`phase4-notarization-receipt.json` for the exact signed candidate reviewed under
+`accessibility-19c0e42b.json`. The retained ZIP is
+`ArkTrace-20260815T135456Z-retained.zip` (5,078,476 bytes, SHA-256
+`6e31fd5af26f8df4ec509f607f97440a4f0ffef2add5046292ef0e7b7666e5f6`),
+bound to Accepted submission `0b37f807-a37b-4f8f-bd1c-fcb6dc39cd72`.
+`scripts/verify_phase3_notarized_artifact.sh` does not accept these JSON files as
+a substitute for the ZIP or Apple ticket: it requires both retained inputs,
+requires every evidence byte from `HEAD`, revalidates receipt ticketContents,
+Developer ID/nested signatures, stapler and Gatekeeper in the system trust
+context, and proves the post-staple App differs from the reviewed candidate only
+by the physical mode-0600 Apple ticket. The live `package_phase3.sh` path remains
+available and still requires a usable notary keychain profile.
+
 ## Phase 5 CLI distribution evidence
 
 `phase5-cli-distribution.json` binds the ArkDeck-installable CLI distribution
