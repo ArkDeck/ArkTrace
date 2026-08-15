@@ -206,6 +206,8 @@ P4-T01 和 P4-T02 可以并行。
 
 **性能**
 
+- medium 发布门在正式 20-sample measurement 前完整执行一次相同 production workload 作为
+  warm-filesystem/runtime warm-up；该轮不得发布 evidence，也不得参与 percentile 或放宽下列阈值；
 - [x] medium context p95 ≤1s；
 - [ ] large context p95 ≤2s（等待 reviewed large fixture）；
 - [x] medium deterministic range analysis p95 ≤3s；

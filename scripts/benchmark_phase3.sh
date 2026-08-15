@@ -28,6 +28,7 @@ repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd -P)
 . "$script_directory/phase3_shell_safety.sh"
 fixture_lock="$repository_root/Fixtures/phase3-performance-fixtures.json"
 fixture_class=${1:-medium}
+warmup_only=${ARKTRACE_PHASE3_WARMUP_ONLY:-0}
 parser=${ARKTRACE_TRACE_STREAMER:-$repository_root/ThirdParty/TraceStreamer/macx/trace_streamer}
 locked_parser="$repository_root/ThirdParty/TraceStreamer/macx/trace_streamer"
 locked_manifest="$repository_root/ThirdParty/TraceStreamer/macx/manifest.json"
@@ -36,6 +37,8 @@ requested_evidence=${ARKTRACE_PHASE3_EVIDENCE_OUTPUT:-$default_evidence_director
 arktrace_validate_reviewed_roots "$repository_root"
 [ "$fixture_class" = medium ] || [ "$fixture_class" = large ] \
     || fail "fixture class must be medium or large"
+[ "$warmup_only" = 0 ] || [ "$warmup_only" = 1 ] \
+    || fail "warm-up mode must be 0 or 1"
 command -v openssl >/dev/null 2>&1 || fail "OpenSSL is unavailable"
 [ -x "$parser" ] && [ -f "$parser" ] && [ ! -L "$parser" ] \
     || fail "pinned TraceStreamer is unavailable"
@@ -311,6 +314,7 @@ esac
 
 benchmark_log="$temporary_root/benchmark.log"
 if ! ARKTRACE_PHASE3_GATE=1 \
+    ARKTRACE_PHASE3_WARMUP_ONLY="$warmup_only" \
     ARKTRACE_PHASE3_FIXTURE_CLASS="$fixture_class" \
     ARKTRACE_PHASE3_TRACE="$trace" \
     ARKTRACE_PHASE3_EVIDENCE_OUTPUT="$partial_evidence" \
@@ -327,6 +331,14 @@ if ! ARKTRACE_PHASE3_GATE=1 \
 then
     bounded_failure_summary "$benchmark_log"
     fail "performance XCTest failed"
+fi
+
+if [ "$warmup_only" = 1 ]; then
+    [ -s "$partial_evidence" ] && [ ! -L "$partial_evidence" ] \
+        || fail "warm-up did not complete the production evidence workload"
+    printf 'Phase 3 %s benchmark warm-up passed: production workload completed without publishing evidence\n' \
+        "$fixture_class"
+    exit 0
 fi
 
 [ -s "$partial_evidence" ] && [ ! -L "$partial_evidence" ] \
