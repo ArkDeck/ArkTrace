@@ -7,11 +7,27 @@ import Foundation
 /// never trusts path metadata followed by a second path-based open, and it
 /// checks task cancellation between bounded chunks.
 public enum ArkTraceBoundedRegularFile {
+    /// Bytes plus the identity of the descriptor they were read through, so a
+    /// caller can pin the exact inode it validated without a second
+    /// path-based `stat`.
+    public struct Contents: Sendable {
+        public let data: Data
+        public let device: UInt64
+        public let inode: UInt64
+    }
+
     public static func read(
         at url: URL,
         maximumByteCount: Int
     ) throws -> Data {
-        try read(at: url, maximumByteCount: maximumByteCount, afterOpen: nil)
+        try readContents(at: url, maximumByteCount: maximumByteCount).data
+    }
+
+    public static func readContents(
+        at url: URL,
+        maximumByteCount: Int
+    ) throws -> Contents {
+        try readContents(at: url, maximumByteCount: maximumByteCount, afterOpen: nil)
     }
 
     static func read(
@@ -19,6 +35,16 @@ public enum ArkTraceBoundedRegularFile {
         maximumByteCount: Int,
         afterOpen: (() throws -> Void)?
     ) throws -> Data {
+        try readContents(
+            at: url, maximumByteCount: maximumByteCount, afterOpen: afterOpen
+        ).data
+    }
+
+    static func readContents(
+        at url: URL,
+        maximumByteCount: Int,
+        afterOpen: (() throws -> Void)?
+    ) throws -> Contents {
         guard maximumByteCount > 0 else { throw BoundedFileError.invalidLimit }
         let descriptor = url.path.withCString {
             Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
@@ -53,7 +79,11 @@ public enum ArkTraceBoundedRegularFile {
         let final = try snapshot(descriptor)
         guard final == initial, result.count == Int(initial.byteCount)
         else { throw BoundedFileError.changedDuringRead }
-        return result
+        return Contents(
+            data: result,
+            device: initial.device,
+            inode: initial.inode
+        )
     }
 
     private struct Snapshot: Equatable {

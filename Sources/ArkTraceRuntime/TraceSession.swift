@@ -337,7 +337,7 @@ public actor TraceSession {
         sidecar: TraceDatabaseMetadataSidecar,
         fileIdentity: TraceDatabaseFileIdentity
     ) {
-        guard let snapshot = readBoundedRegularFileSnapshot(
+        guard let snapshot = try readBoundedRegularFileSnapshot(
             at: parsed.metadataSidecarURL,
             maximumByteCount: 4_096
         ),
@@ -360,34 +360,29 @@ public actor TraceSession {
         return (sidecar, snapshot.fileIdentity)
     }
 
+    /// Delegates to the one reviewed bounded reader in Core. Cancellation is
+    /// rethrown so a cancelled read is not reported as an invalid sidecar.
     private static func readBoundedRegularFileSnapshot(
         at url: URL,
         maximumByteCount: Int
-    ) -> (data: Data, fileIdentity: TraceDatabaseFileIdentity)? {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
-        }
-        guard descriptor >= 0 else { return nil }
-        let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
-        var info = stat()
-        guard Darwin.fstat(descriptor, &info) == 0,
-            (info.st_mode & S_IFMT) == S_IFREG,
-            info.st_size > 0,
-            info.st_size <= maximumByteCount
-        else {
-            try? handle.close()
+    ) throws -> (data: Data, fileIdentity: TraceDatabaseFileIdentity)? {
+        do {
+            let contents = try ArkTraceBoundedRegularFile.readContents(
+                at: url,
+                maximumByteCount: maximumByteCount
+            )
+            return (
+                contents.data,
+                TraceDatabaseFileIdentity(
+                    device: contents.device,
+                    inode: contents.inode
+                )
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
             return nil
         }
-        let data = try? handle.read(upToCount: maximumByteCount + 1)
-        try? handle.close()
-        guard let data, !data.isEmpty, data.count <= maximumByteCount else { return nil }
-        return (
-            data,
-            TraceDatabaseFileIdentity(
-                device: UInt64(info.st_dev),
-                inode: UInt64(info.st_ino)
-            )
-        )
     }
 
     private static func cancelled(stage: ArkTraceError.Stage) -> ArkTraceError {

@@ -1289,7 +1289,7 @@ enum TraceContentAddressedCache {
     private static func loadParserSidecar(
         for parsed: ParsedTrace
     ) throws -> TraceDatabaseMetadataSidecar {
-        guard let data = readBoundedRegularFile(
+        guard let data = try readBoundedRegularFile(
             at: parsed.metadataSidecarURL,
             maximumByteCount: 4_096
         ) else { throw CacheIO.metadata }
@@ -1308,7 +1308,7 @@ enum TraceContentAddressedCache {
         metadata: TraceCacheMetadata,
         fileIdentity: TraceDatabaseFileIdentity
     ) {
-        guard let snapshot = readBoundedRegularFileSnapshot(
+        guard let snapshot = try readBoundedRegularFileSnapshot(
             at: url,
             maximumByteCount: maximumMetadataByteCount
         ) else { throw CacheIO.metadata }
@@ -1327,45 +1327,39 @@ enum TraceContentAddressedCache {
     private static func readBoundedRegularFile(
         at url: URL,
         maximumByteCount: Int
-    ) -> Data? {
-        readBoundedRegularFileSnapshot(
+    ) throws -> Data? {
+        try readBoundedRegularFileSnapshot(
             at: url,
             maximumByteCount: maximumByteCount
         )?.data
     }
 
+    /// Delegates to the one reviewed bounded reader in Core, which retries
+    /// EINTR and proves the file did not change between its two `fstat` calls.
+    /// Cancellation is rethrown rather than folded into `nil`: a cancelled
+    /// read says nothing about entry health, and the callers below turn `nil`
+    /// into `CacheIO.metadata`, which quarantines the entry.
     private static func readBoundedRegularFileSnapshot(
         at url: URL,
         maximumByteCount: Int
-    ) -> (data: Data, fileIdentity: TraceDatabaseFileIdentity)? {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
-        }
-        guard descriptor >= 0 else { return nil }
-        defer { _ = Darwin.close(descriptor) }
-        var info = stat()
-        guard Darwin.fstat(descriptor, &info) == 0,
-            (info.st_mode & S_IFMT) == S_IFREG,
-            info.st_size > 0,
-            info.st_size <= maximumByteCount
-        else { return nil }
-        var result = Data()
-        result.reserveCapacity(Int(info.st_size))
-        var buffer = [UInt8](repeating: 0, count: min(4_096, maximumByteCount + 1))
-        while result.count <= maximumByteCount {
-            let count = Darwin.read(descriptor, &buffer, buffer.count)
-            if count == 0 { break }
-            guard count > 0 else { return nil }
-            result.append(contentsOf: buffer.prefix(count))
-        }
-        guard !result.isEmpty, result.count <= maximumByteCount else { return nil }
-        return (
-            result,
-            TraceDatabaseFileIdentity(
-                device: UInt64(info.st_dev),
-                inode: UInt64(info.st_ino)
+    ) throws -> (data: Data, fileIdentity: TraceDatabaseFileIdentity)? {
+        do {
+            let contents = try ArkTraceBoundedRegularFile.readContents(
+                at: url,
+                maximumByteCount: maximumByteCount
             )
-        )
+            return (
+                contents.data,
+                TraceDatabaseFileIdentity(
+                    device: contents.device,
+                    inode: contents.inode
+                )
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            return nil
+        }
     }
 
     private static func writeMetadata(
@@ -3208,7 +3202,7 @@ private extension TraceContentAddressedCache {
     }
 
     static func readOwnerEvidence(at url: URL) throws -> TraceOwnerEvidence {
-        guard let data = readBoundedRegularFile(at: url, maximumByteCount: 4_096),
+        guard let data = try readBoundedRegularFile(at: url, maximumByteCount: 4_096),
             let evidence = try? JSONDecoder().decode(TraceOwnerEvidence.self, from: data),
             evidence.formatVersion == 1,
             evidence.relativePath.utf8.count <= 1_024,
