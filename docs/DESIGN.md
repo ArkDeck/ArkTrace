@@ -8,6 +8,7 @@
 > 0.1a 修订（2026-08-12）：§2.1 证据基线改锚 GitCode canonical upstream 并记录基线偏差；§11.1 新增 instant 事件语义；§24 新增发布门 1（上游重锚定）；§25 新增关注点 9–11  
 > 0.1b 修订（2026-08-12，Phase 0）：§2.1 完成 GitCode 重锚定（pin `447a0a49`），发布门 1 关闭；新增 [TRACE_STREAMER.md](./TRACE_STREAMER.md)
 > Phase 1 实现注记（2026-08-12）：Parser/Store vertical slice、真实 schema evidence、staging validation/index/fsync、原子 Ready 与 mandatory zero-skip gate 已完成；验证见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)
+> 审查回写（2026-08-16）：§5.1/§6 补齐 `ArkTraceAppSupport`、`ArkTraceSignalShim` 与真实依赖边；§8.5 改为说明 continuation 的单次 resume 由何保证（此前的"不使用 checked continuation"与实现不符）；§9.4 更新为 index schema version 3 与多前缀命名；§8.2 第 4 条标注为未决（§25 第 12 项）
 
 ## 1. 文档目的
 
@@ -187,15 +188,23 @@ flowchart TB
 ### 5.1 依赖方向
 
 ```text
-ArkTraceCore                  ← 无 UI、SQLite、Process、ArkDeck 依赖
-ArkTraceParser    → Core
-ArkTraceStore     → Core
-ArkTraceAnalysis  → Core
-ArkTraceRuntime   → Core + Parser + Store
-ArkTraceRendering → Core
-ArkTraceCLI       → Core + Runtime + Analysis
-ArkTraceApp       → Core + Runtime + Analysis + Rendering
+ArkTraceCore       ← 无 UI、SQLite、Process、ArkDeck 依赖
+ArkTraceSignalShim ← 独立 C target，只把 POSIX signal 写入非阻塞 pipe
+ArkTraceParser     → Core
+ArkTraceStore      → Core
+ArkTraceAnalysis   → Core
+ArkTraceRendering  → Core
+ArkTraceRuntime    → Core + Parser + Store
+ArkTraceAppSupport → Core + Parser + Runtime + Analysis + Rendering
+ArkTraceCLI        → Core + Parser + Store + Runtime + Analysis + SignalShim
+ArkTraceApp        → Core + Analysis + Rendering + AppSupport
 ```
+
+`Package.swift` 是这张图的事实源。`ArkTraceAppSupport` 承载 App 的 document/session
+生命周期与 viewer 状态机，使 `Apps/ArkTraceApp` 只剩 SwiftUI shell，并让这部分逻辑
+可以在无窗口测试中覆盖。`ArkTraceCLI` 直接依赖 `Parser`/`Store` 是因为 `doctor`
+需要报告 parser identity 与 SQLite runtime 事实，`--no-cache` 需要选择 storage
+policy；这些都不经过 `Runtime` 的 session 编排。
 
 `ArkTraceRuntime` 是必要的两用编排层：App 与 CLI 都要共享 session、cache、parse、schema validation 和 cancellation。如果把这些职责放入 App 或 CLI，会产生两套生命周期；如果放入 Core，会反向引入 Process/SQLite 依赖。
 
@@ -216,24 +225,30 @@ ArkTrace/
 │   ├── ArkTraceAnalysis/
 │   ├── ArkTraceRuntime/
 │   ├── ArkTraceRendering/
-│   └── ArkTraceCLI/
+│   ├── ArkTraceAppSupport/
+│   ├── ArkTraceSignalShim/
+│   ├── ArkTraceCLI/
+│   └── arktrace/
 ├── Tests/
 │   ├── ArkTraceCoreTests/
 │   ├── ArkTraceStoreTests/
+│   ├── ArkTraceParserTests/
 │   ├── ArkTraceAnalysisTests/
-│   ├── ArkTraceRuntimeTests/
 │   ├── ArkTraceRenderingTests/
+│   ├── ArkTraceAppSupportTests/
+│   ├── ArkTraceCLITests/
 │   └── ArkTraceIntegrationTests/
 ├── Fixtures/
 │   ├── traces/
-│   └── databases/
+│   ├── databases/
+│   └── release-evidence/
 ├── ThirdParty/
 │   └── TraceStreamer/
 ├── scripts/
 │   ├── build_trace_streamer.sh
-│   ├── fetch_test_fixtures.sh
+│   ├── fetch_phase3_fixtures.sh
 │   ├── benchmark.sh
-│   └── test.sh
+│   └── test_phase<N>.sh
 └── docs/
     ├── DESIGN.md
     ├── SPECIFICATION.md
@@ -332,6 +347,14 @@ protocol TraceParser: Sendable {
 3. CLI 安装布局中的固定 `libexec` 路径；
 4. 仅 Debug 构建允许开发者 override。
 
+> **未决（2026-08-16 审查提出，见 §25 第 12 项）**：第 4 条在实现中尚未成立。
+> `TraceStreamerResolver.resolve(explicitExecutableURL:)` 没有 `#if DEBUG` 门，
+> 因此 Release CLI 的 `--trace-streamer` 在生产构建中同样可用。App 走
+> bundle-only 的 `ArkTraceBundledParserResolver`，ArkDeck 走固定 argv 的 closed
+> profile，两者都不暴露该 flag，所以当前生产链路不受影响；但本条与 SPEC §12.1
+> 对该 flag 的描述（"developer/explicit deployment only"）需要一次显式决策后再
+> 统一，不应由实现单方面确定。
+
 每次运行记录：
 
 - upstream repository；
@@ -369,7 +392,7 @@ Process.arguments = [sourceSnapshotPath, "-e", privatePartialDatabasePath, "-nm"
 
 ### 8.5 取消
 
-取消解析时先向子进程发送 TERM，等待 500 ms grace period，必要时只向同一已知且仍由该 `Process` 表示的 PID 发送 KILL，并显式 `waitUntilExit`/reap。实现不使用 checked continuation，因此自然退出与取消不存在 double-resume。取消与 atomic promotion 通过同一 gate 串行化；若移动先赢得竞态但调用任务在返回前已取消，只在 device/inode 仍匹配本次产物时撤销 destination 与 metadata sidecar。Repository detached validation 返回后也再次检查调用任务的取消状态。未完成或已取消的 staging entry 永不保持 Ready，后续清理只触碰 session-owned temp directory。
+取消解析时先向子进程发送 TERM，等待 500 ms grace period，必要时只向同一已知且仍由该 `Process` 表示的 PID 发送 KILL，并显式 `waitUntilExit`/reap。实现用一个 checked continuation 等待 `Process.terminationHandler`；单次 resume 由两条不变量保证，而不是靠避免 continuation：启动失败时先把 `terminationHandler` 置 `nil` 再 resume，且此时子进程从未启动、handler 不可能触发；启动成功后 handler 是唯一的 resume 点。取消与 atomic promotion 通过同一 gate 串行化；若移动先赢得竞态但调用任务在返回前已取消，只在 device/inode 仍匹配本次产物时撤销 destination 与 metadata sidecar。Repository detached validation 返回后也再次检查调用任务的取消状态。未完成或已取消的 staging entry 永不保持 Ready，后续清理只触碰 session-owned temp directory。
 
 ## 9. Schema Adapter 与数据库
 
@@ -436,7 +459,7 @@ protocol TraceRepository: Sendable {
 - `thread(itid)`；
 - counter 的 `(filter_id, ts)`。
 
-Phase 1 index version 为 `1`，名称统一使用 `arktrace_v1_*`。`process(ipid)`/`thread(itid)` bootstrap indexes 在 required relationship probe 前创建，使真实无索引 export 的 target lookup 保持在 VM-step budget 内；其余索引在 semantic validation 后迁移。不存在相应 optional table/column 时不创建该索引。索引 schema version 进入无路径 metadata sidecar，并在 Phase 2 参与 cache key；索引失败不会降级成无界扫描，而是使 session 加载失败。Ready 连接使用 read-only + 平台 `SQLITE_OPEN_NOFOLLOW`；macOS `/var` symlink 先以 POSIX `realpath` 规范化 parent，但 final database component 保持不解析，仍由 SQLite fail closed。
+当前 index schema version 为 `3`。索引名带引入它的版本前缀（`arktrace_v1_*` / `arktrace_v2_*` / `arktrace_v3_*`），版本号只在整体契约变化时递增，因此同一个 version 3 的数据库里三种前缀并存是正常的；`TraceDatabaseStagingPreparer.indexes` 是完整清单的事实源，上面列出的只是最小覆盖。v2 增加了 detail viewport 的 covering index，v3 增加了 density 聚合直接 `INDEXED BY` 的 `(scope, ts, dur)` 三元组。每条定义标注 `requiredForReady`：required 索引缺失即 `TRACE_SCHEMA_UNSUPPORTED`，optional 索引在其表/列不存在时跳过。`validateReadyIndexes` 在打开 Ready 数据库时逐列复核 seqno/collation/desc，不接受同名但结构不同的索引。`process(ipid)`/`thread(itid)` bootstrap indexes 在 required relationship probe 前创建，使真实无索引 export 的 target lookup 保持在 VM-step budget 内；其余索引在 semantic validation 后迁移。不存在相应 optional table/column 时不创建该索引。索引 schema version 进入无路径 metadata sidecar，并在 Phase 2 参与 cache key；索引失败不会降级成无界扫描，而是使 session 加载失败。Ready 连接使用 read-only + 平台 `SQLITE_OPEN_NOFOLLOW`；macOS `/var` symlink 先以 POSIX `realpath` 规范化 parent，但 final database component 保持不解析，仍由 SQLite fail closed。
 
 ## 10. Trace Session 与 Cache
 
@@ -947,3 +970,4 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 9. App 分发形态：是否启用 App Sandbox、Developer ID 直发还是 App Store、是否支持 Intel（universal binary）——影响 AT-APP-001 的 security-scoped bookmark、TraceStreamer 子进程调用、cache 路径与构建目标；
 10. ~~ArkTrace 自身 LICENSE 的选择~~——已决：MIT（2026-08-12 建仓时随初始提交确定，见 §22）；
 11. ~~无障碍契约（AT-APP-009～012、AC-AT-016）保留为 0.1 DoD 硬门，还是分层交付（0.1 保留键盘可达与 focus 基线，完整 VoiceOver/Reduce Motion 契约移至 0.2）。~~——已决定（2026-08-13，Phase 3 进入决策候选）：保留当前 SPEC 与 DoD，AT-APP-009～012 及 AC-AT-016 仍是 0.1 硬门。P3-T08 不得将 VoiceOver canvas semantics、focus restoration 或 Reduce Motion 降级为后续版本任务。
+12. Release CLI 的 `--trace-streamer` override（§8.2 第 4 条）：落实"仅 Debug"，还是保留 Release override 并为 pinned 身份链补一个编译期 binary SHA-256 锚点 + machine envelope 中的 `parser.pinned` 标记？当前 `TraceStreamerProcessParser` 只用编译期常量约束 upstream revision / adapter / build recipe / architecture，binary hash 仅与随可执行文件同目录的 `manifest.json` 自述值比对，因此一套自洽的 sidecar manifest 可以通过校验。App 与 ArkDeck 路径不暴露该 flag，生产链路不受影响。
