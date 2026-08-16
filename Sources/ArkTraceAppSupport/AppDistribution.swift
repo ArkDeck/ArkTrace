@@ -42,6 +42,15 @@ public struct ArkTraceBundledParserResolver: Sendable {
         self.bundleURL = bundleURL
     }
 
+    /// Every location this resolver will ever consider.
+    ///
+    /// The bundled resolver has exactly one: the helper inside the app bundle.
+    /// Exposing it lets a test assert that a planted binary elsewhere is never
+    /// a candidate, without mutating the process-global `PATH` to say so.
+    public func candidateExecutableURLs() -> [URL] {
+        [TraceStreamerResolver.appBundleExecutableURL(bundleURL: bundleURL)]
+    }
+
     public func resolve() throws -> TraceStreamerProcessParser {
         let executableURL = TraceStreamerResolver.appBundleExecutableURL(
             bundleURL: bundleURL

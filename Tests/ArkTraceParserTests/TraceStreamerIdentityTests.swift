@@ -1371,20 +1371,18 @@ final class TraceStreamerIdentityTests: XCTestCase {
         try FileManager.default.setAttributes(
             [.posixPermissions: 0o755], ofItemAtPath: fake.path)
 
-        let previousPath = ProcessInfo.processInfo.environment["PATH"]
-        setenv("PATH", directory.path, 1)
-        defer {
-            if let previousPath {
-                setenv("PATH", previousPath, 1)
-            } else {
-                unsetenv("PATH")
-            }
-        }
-
+        // The planted binary sits in a directory a caller could easily put on
+        // PATH. Asserting against the resolver's own candidate list says the
+        // same thing as mutating PATH would, without the process-global write:
+        // the environment is shared, so setenv here races every other test that
+        // spawns a subprocess.
         let resolver = TraceStreamerResolver(
             appBundleURL: directory.appendingPathComponent("Missing.app"),
             cliExecutableURL: directory.appendingPathComponent("install/bin/arktrace")
         )
+        let candidates = resolver.candidateExecutableURLs().map(\.standardizedFileURL.path)
+        XCTAssertFalse(candidates.contains(fake.standardizedFileURL.path))
+        XCTAssertFalse(candidates.contains { $0 == directory.standardizedFileURL.path })
         XCTAssertThrowsError(try resolver.resolve()) { error in
             XCTAssertEqual((error as? ArkTraceError)?.code, .traceStreamerUnavailable)
         }

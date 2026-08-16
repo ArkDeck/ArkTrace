@@ -13,13 +13,19 @@ final class AppDistributionTests: XCTestCase {
         )
         defer { try? FileManager.default.removeItem(at: root) }
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
-        let oldPath = getenv("PATH").map { String(cString: $0) }
-        setenv("PATH", "/tmp/fake-parser", 1)
-        defer {
-            if let oldPath { setenv("PATH", oldPath, 1) } else { unsetenv("PATH") }
-        }
+        // Asserted against the resolver's candidate list rather than by pointing
+        // the process-global PATH at a fake parser: PATH is shared by the whole
+        // test process, so writing it races anything that spawns a subprocess.
+        let resolver = ArkTraceBundledParserResolver(bundleURL: root)
+        let candidates = resolver.candidateExecutableURLs().map(\.standardizedFileURL.path)
+        XCTAssertEqual(
+            candidates,
+            [root.appendingPathComponent("Contents/Helpers/trace_streamer")
+                .standardizedFileURL.path]
+        )
+        XCTAssertFalse(candidates.contains { $0.hasPrefix("/tmp/fake-parser") })
 
-        XCTAssertThrowsError(try ArkTraceBundledParserResolver(bundleURL: root).resolve()) {
+        XCTAssertThrowsError(try resolver.resolve()) {
             XCTAssertEqual(($0 as? ArkTraceError)?.code, .traceStreamerUnavailable)
         }
     }

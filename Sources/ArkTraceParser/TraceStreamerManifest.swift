@@ -262,4 +262,21 @@ public struct TraceStreamerResolver: Sendable {
             .appendingPathComponent("arktrace", isDirectory: true)
             .appendingPathComponent("trace_streamer", isDirectory: false)
     }
+
+    /// Every location this resolver will ever consider, in resolution order.
+    ///
+    /// Production selection never searches `PATH`, and this makes that
+    /// checkable rather than merely absent: a test can assert a planted binary
+    /// is not in this list without mutating the process environment. Mutating
+    /// the real `PATH` to prove the same thing races every other test that
+    /// spawns a subprocess, because the environment is process-global.
+    public func candidateExecutableURLs() -> [URL] {
+        var candidates = [Self.appBundleExecutableURL(bundleURL: appBundleURL)]
+        if let cliExecutableURL,
+            let libexec = Self.cliLibexecURL(cliExecutableURL: cliExecutableURL)
+        {
+            candidates.append(libexec)
+        }
+        return candidates
+    }
 }
