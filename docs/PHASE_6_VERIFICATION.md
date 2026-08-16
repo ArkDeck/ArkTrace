@@ -278,6 +278,32 @@ Agent 判断复现了首轮结论：baseline `topProcesses` 首位 `e.waterflowd
 未被伪装成通过；其既有关闭证据（发布门 6/7、Phase 4 large exit）由 retained signed evidence 承载，
 未被本轮任何改动触及。
 
+### 8.1 分发前 hardening 之后的复跑（2026-08-16）
+
+上表描述的是 `356abef` 那棵树。之后 [PHASE_1_TASKS.md](./PHASE_1_TASKS.md) §6 的最后两条 hardening 落地，
+其中 benchmark evidence schema 由 `formatVersion: 3` 升到 `4`（新增 `storage` 块），属于会影响 gate
+断言的改动，因此重跑了受影响的链路。缺少外部输入的三项仍按设计 fail closed，未被伪装成通过。
+
+| 项 | 结果 |
+|---|---|
+| `swift test` | 通过；352 tests，0 failures |
+| `scripts/test_phase1.sh` | 通过 |
+| `scripts/test_phase2.sh` | 通过 |
+| `scripts/test_phase3_batch1.sh` | 通过 |
+| Phase 3 medium benchmark | 通过；发布 `formatVersion: 4` 证据，`storage.sameFilesystem=true`（source 与 staging 同为 device 16777231），`stagedByteCount` 265,032,803 与 `traceByteCount` 相等 |
+| Phase 3 benchmark contract | 通过 |
+| Phase 3 distribution contract | 通过 |
+| `scripts/test_phase4_batch1.sh` | 通过；其自带的 medium benchmark 同样发布 v4 证据并带 `storage` |
+| Phase 4 Agent contract | 通过 |
+| Phase 5 CLI distribution contract | 通过 |
+| `scripts/test_phase6.sh` | 通过；含新增的 confirmatory evidence 检查 |
+| license verifier / htrace integrity / build safety | 通过 |
+| `scripts/test_phase3.sh`（完整分发 gate） | **按设计失败**：`ARKTRACE_REVIEWED_SIGNED_APP is required for the final distribution gate`——外部输入缺失时 fail closed，与上文「未能执行的部分」一致 |
+
+`storage` 断言的失败方向也被逐个探测过：`sameFilesystem` 与两个 device ID 矛盾、跨卷却记成同卷、
+device ID 为 0（路径无法解析）、`stagedByteCount` 与 `traceByteCount` 不等、整个块被删除——五种都被拒。
+跨卷运行本身仍然合法，只是不能再被记成同卷。
+
 **一次首跑失败的定性**：`test_phase5.sh` 首次执行在末尾报
 `Phase 4 Agent contract failed: inspect-medium command failed`。排查确认这**不是回归**：
 `fetch_phase3_fixtures.sh` 需要从上游克隆 265 MB 的 `pbreader.htrace`，冷启动时尚未就绪。
