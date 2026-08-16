@@ -611,44 +611,16 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             deadline: query.deadline
         )
         var qualityIssues: [TraceDataQualityIssue] = []
-        if process.tailUnchecked {
-            qualityIssues.append(
-                TraceDataQualityIssue(
-                    category: .probeTruncated,
-                    scope: "process.lifecycle",
-                    message: "process lifecycle: probe tail was not inspected; processCount is a lower bound"
-                )
+        qualityIssues.append(
+            contentsOf: Self.directoryLifecycleIssues(
+                table: "process", countField: "processCount", summary: process
             )
-        }
-        if process.invalidSampled > 0 {
-            qualityIssues.append(
-                TraceDataQualityIssue(
-                    category: .invalidValue,
-                    scope: "process.lifecycle",
-                    count: process.invalidSampled,
-                    message: "process lifecycle: invalid or unknown sampled value(s) excluded; processCount is a lower bound"
-                )
+        )
+        qualityIssues.append(
+            contentsOf: Self.directoryLifecycleIssues(
+                table: "thread", countField: "threadCount", summary: thread
             )
-        }
-        if thread.tailUnchecked {
-            qualityIssues.append(
-                TraceDataQualityIssue(
-                    category: .probeTruncated,
-                    scope: "thread.lifecycle",
-                    message: "thread lifecycle: probe tail was not inspected; threadCount is a lower bound"
-                )
-            )
-        }
-        if thread.invalidSampled > 0 {
-            qualityIssues.append(
-                TraceDataQualityIssue(
-                    category: .invalidValue,
-                    scope: "thread.lifecycle",
-                    count: thread.invalidSampled,
-                    message: "thread lifecycle: invalid or unknown sampled value(s) excluded; threadCount is a lower bound"
-                )
-            )
-        }
+        )
 
         let cpuSliceCount = validation.capabilities.cpuScheduling
             ? try boundedEventCount(
@@ -2106,45 +2078,57 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         limit: Int,
         deadline: ContinuousClock.Instant
     ) throws -> TraceBoundedCount {
-        let order = try db.boundedSamplingOrderClause(of: table, deadline: deadline)
+        guard TraceDatabase.isSafeIdentifier(table) else {
+            throw ArkTraceError(
+                code: .traceSchemaUnsupported,
+                stage: .querying,
+                message: "Summary event table is unsupported"
+            )
+        }
+        // SQLite evaluates the shared intersection predicate, so `limit` bounds
+        // the number of matches instead of the length of the scanned rowid
+        // prefix. The previous prefix sampling reported zero events for every
+        // range that lies past the first `limit` rows of the table, which is
+        // indistinguishable from a genuinely empty range (AT-AN-001,
+        // AT-JSON-005).
+        var predicate = TraceEventIntersection.sqlPredicate()
+        var bindings = TraceEventIntersection.bindings(
+            queryStart: range.start,
+            queryEnd: range.end,
+            traceEnd: validation.traceEndTs
+        )
+        if includesFinalTimestamp {
+            // Saturated trace end: the exclusive bound could not be bumped past
+            // Int64.max, so admit that final timestamp explicitly.
+            predicate = "(\(predicate)) OR (typeof(ts) = 'integer' AND ts = ?)"
+            bindings.append(.int64(range.end))
+        }
+        bindings.append(.int64(Int64(limit) + 1))
         let rows = try db.query(
             """
-            SELECT ts, dur FROM \(table)
-            \(order) LIMIT ?
+            SELECT COUNT(*) FROM (
+                SELECT 1 FROM \(table)
+                WHERE \(predicate)
+                LIMIT ?
+            )
             """,
-            bindings: [.int64(Int64(limit) + 1)],
+            bindings: bindings,
             stage: .querying,
             observesTaskCancellation: true,
             deadline: deadline
-        ) { row in
-            EventSample(
-                start: row.int64(0),
-                duration: row.int64(1),
-                durationIsNull: row.isNull(1)
+        ) { $0.int64(0) }
+        try checkQueryBoundary(deadline)
+        guard let matched = rows.first ?? nil, matched >= 0 else {
+            throw ArkTraceError(
+                code: .queryFailed,
+                stage: .querying,
+                message: "Trace count query returned an invalid value"
             )
         }
-        var count: Int64 = 0
-        var incomplete = rows.count > limit
-        for (index, row) in rows.prefix(limit).enumerated() {
-            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
-            guard let start = row.start,
-                row.duration != nil || row.durationIsNull
-            else {
-                incomplete = true
-                continue
-            }
-            if TraceEventIntersection.intersects(
-                eventStartNs: start,
-                durationNs: row.duration,
-                queryStartNs: range.start,
-                queryEndNs: range.end,
-                traceEndNs: validation.traceEndTs
-            ) || (includesFinalTimestamp && start == range.end) {
-                count += 1
-            }
-        }
-        try checkQueryBoundary(deadline)
-        return TraceBoundedCount(value: count, truncated: incomplete)
+        return TraceBoundedCount(
+            value: min(matched, Int64(limit)),
+            truncated: matched > Int64(limit)
+        )
     }
 
     /// Whole-trace exclusive end bound: `trace_range.end_ts + 1`, saturating
@@ -2160,54 +2144,42 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         limit: Int,
         deadline: ContinuousClock.Instant
     ) throws -> TraceBoundedCount {
-        let order = try db.boundedSamplingOrderClause(of: "sched_slice", deadline: deadline)
+        // CPU discovery covers the whole trace, including the slice that
+        // defines trace_range.end_ts, so the window end is inclusive
+        // (see absoluteRange(_:inclusiveEnd:)). SQLite performs the DISTINCT
+        // reduction against `arktrace_v3_sched_slice_cpu_ts_dur`, so `limit`
+        // bounds distinct CPUs rather than the scanned rowid prefix.
+        var bindings = TraceEventIntersection.bindings(
+            queryStart: validation.traceStartTs,
+            queryEnd: wholeTraceInclusiveEnd,
+            traceEnd: validation.traceEndTs
+        )
+        bindings.append(.int64(Int64(limit) + 1))
         let rows = try db.query(
             """
-            SELECT ts, dur, cpu FROM sched_slice
-            \(order) LIMIT ?
+            SELECT COUNT(*) FROM (
+                SELECT DISTINCT cpu FROM sched_slice
+                WHERE typeof(cpu) = 'integer'
+                    AND \(TraceEventIntersection.sqlPredicate())
+                LIMIT ?
+            )
             """,
-            bindings: [.int64(Int64(limit) + 1)],
+            bindings: bindings,
             stage: .querying,
             observesTaskCancellation: true,
             deadline: deadline
-        ) { row in
-            (
-                EventSample(
-                    start: row.int64(0), duration: row.int64(1),
-                    durationIsNull: row.isNull(1)
-                ),
-                row.int64(2)
+        ) { $0.int64(0) }
+        try checkQueryBoundary(deadline)
+        guard let distinct = rows.first ?? nil, distinct >= 0 else {
+            throw ArkTraceError(
+                code: .queryFailed,
+                stage: .querying,
+                message: "Trace count query returned an invalid value"
             )
         }
-        var sampled: Set<Int64> = []
-        var incomplete = rows.count > limit
-        for (index, row) in rows.prefix(limit).enumerated() {
-            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
-            let event = row.0
-            guard let start = event.start,
-                event.duration != nil || event.durationIsNull,
-                let cpu = row.1
-            else {
-                incomplete = true
-                continue
-            }
-            // CPU discovery covers the whole trace, including the slice that
-            // defines trace_range.end_ts, so the window end is inclusive
-            // (see absoluteRange(_:inclusiveEnd:)).
-            if TraceEventIntersection.intersects(
-                eventStartNs: start,
-                durationNs: event.duration,
-                queryStartNs: validation.traceStartTs,
-                queryEndNs: wholeTraceInclusiveEnd,
-                traceEndNs: validation.traceEndTs
-            ) {
-                sampled.insert(cpu)
-            }
-        }
-        try checkQueryBoundary(deadline)
         return TraceBoundedCount(
-            value: Int64(sampled.count),
-            truncated: incomplete
+            value: min(distinct, Int64(limit)),
+            truncated: distinct > Int64(limit)
         )
     }
 
@@ -2235,6 +2207,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             DirectorySample(
                 identity: row.int64(0),
                 start: row.int64(1),
+                startIsNull: row.isNull(1),
                 end: row.int64(2),
                 endIsNull: row.isNull(2)
             )
@@ -2242,36 +2215,56 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var count: Int64 = 0
         let tailUnchecked = rows.count > limit
         var invalidSampled: Int64 = 0
+        var unknownStartSampled: Int64 = 0
         for (index, row) in rows.prefix(limit).enumerated() {
             if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
             guard let identity = row.identity else {
                 throw Self.invalidIdentity(table: table)
             }
             if identity == 0 { continue }
-            guard let start = row.start else {
+            // A SQL NULL start_ts is the upstream representation of "this
+            // process/thread already existed when capture began" (DESIGN
+            // section 7.1), not corrupt data. The pinned exporter writes NULL
+            // for every kernel-discovered row, so treating it as invalid used
+            // to report processCount/threadCount as 0 for real traces.
+            // Only an incompatible storage class is a genuine anomaly.
+            let startNs: Int64?
+            if let value = row.start {
+                startNs = value
+            } else if row.startIsNull {
+                startNs = nil
+                unknownStartSampled += 1
+            } else {
                 invalidSampled += 1
                 continue
             }
-            let endsAfterStart: Bool
+            let endsAfterRangeStart: Bool
             if hasEndTimestamp {
                 if let end = row.end {
-                    guard end > start else {
+                    if let startNs, end <= startNs {
                         invalidSampled += 1
                         continue
                     }
-                    endsAfterStart = end > range.start
+                    endsAfterRangeStart = end > range.start
                 } else if row.endIsNull {
-                    endsAfterStart = true
+                    endsAfterRangeStart = true
                 } else {
                     invalidSampled += 1
                     continue
                 }
             } else {
-                endsAfterStart = true
+                endsAfterRangeStart = true
             }
-            if (start < range.end || (includesFinalTimestamp && start == range.end)),
-                endsAfterStart
-            {
+            // An unknown lower bound cannot be excluded by the range's upper
+            // bound; the entry may have been alive for the whole window.
+            let startsBeforeRangeEnd: Bool
+            if let startNs {
+                startsBeforeRangeEnd = startNs < range.end
+                    || (includesFinalTimestamp && startNs == range.end)
+            } else {
+                startsBeforeRangeEnd = true
+            }
+            if startsBeforeRangeEnd, endsAfterRangeStart {
                 count += 1
             }
         }
@@ -2282,7 +2275,8 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 truncated: tailUnchecked || invalidSampled > 0
             ),
             tailUnchecked: tailUnchecked,
-            invalidSampled: invalidSampled
+            invalidSampled: invalidSampled,
+            unknownStartSampled: unknownStartSampled
         )
     }
 
@@ -2295,21 +2289,32 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         guard validation.capabilities.cpuCounters
             || validation.capabilities.processCounters
         else { return nil }
-        let measureOrder = try db.boundedSamplingOrderClause(of: "measure", deadline: deadline)
-        let measures = try db.query(
+        // Counter detail and this count must agree on interval intersection,
+        // so both go through `counterTimeFilter`. Pushing it into SQL keeps
+        // `limit` a bound on distinct matching series rather than on the
+        // scanned rowid prefix.
+        let timeFilter = counterTimeFilter(range: range)
+        var timePredicate = "(\(timeFilter.predicate))"
+        var bindings = timeFilter.bindings
+        if includesFinalTimestamp {
+            timePredicate = "(\(timePredicate) OR (typeof(m.ts) = 'integer' AND m.ts = ?))"
+            bindings.append(.int64(range.end))
+        }
+        bindings.append(.int64(Int64(limit) + 1))
+        let sampledFilterIDs = try db.query(
             """
-            SELECT ts, filter_id FROM measure
-            \(measureOrder) LIMIT ?
+            SELECT DISTINCT m.filter_id FROM measure AS m
+            WHERE typeof(m.filter_id) = 'integer' AND \(timePredicate)
+            ORDER BY m.filter_id ASC
+            LIMIT ?
             """,
-            bindings: [.int64(Int64(limit) + 1)],
+            bindings: bindings,
             stage: .querying,
             observesTaskCancellation: true,
             deadline: deadline
-        ) { row in
-            CounterMeasureSample(timestamp: row.int64(0), filterID: row.int64(1))
-        }
+        ) { $0.int64(0) }
         var filterSets: [(source: Int64, ids: Set<Int64>)] = []
-        var incomplete = measures.count > limit
+        var incomplete = sampledFilterIDs.count > limit
         if validation.capabilities.cpuCounters {
             let sample = try boundedFilterIDs(
                 table: "cpu_measure_filter", limit: limit, deadline: deadline
@@ -2325,16 +2330,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             incomplete = incomplete || sample.incomplete
         }
         var series: Set<CounterSeriesIdentity> = []
-        for (index, sample) in measures.prefix(limit).enumerated() {
+        for (index, sample) in sampledFilterIDs.prefix(limit).enumerated() {
             if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
-            guard let timestamp = sample.timestamp, let filterID = sample.filterID else {
+            guard let filterID = sample else {
                 incomplete = true
                 continue
             }
-            guard timestamp >= range.start,
-                timestamp < range.end
-                    || (includesFinalTimestamp && timestamp == range.end)
-            else { continue }
             for filter in filterSets where filter.ids.contains(filterID) {
                 series.insert(CounterSeriesIdentity(source: filter.source, series: filterID))
             }
@@ -2611,15 +2612,10 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let scopeID: Int64
     }
 
-    private struct EventSample {
-        let start: Int64?
-        let duration: Int64?
-        let durationIsNull: Bool
-    }
-
     private struct DirectorySample {
         let identity: Int64?
         let start: Int64?
+        let startIsNull: Bool
         let end: Int64?
         let endIsNull: Bool
     }
@@ -2633,11 +2629,11 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         /// This is distinct from an unchecked tail so machine output can
         /// classify real data anomalies without parsing human messages.
         let invalidSampled: Int64
-    }
-
-    private struct CounterMeasureSample {
-        let timestamp: Int64?
-        let filterID: Int64?
+        /// Number of counted rows whose `start_ts` is SQL NULL. These are
+        /// retained (an unknown lower bound cannot exclude the entry) but the
+        /// range scoping of the count is weaker for them, so the fact is
+        /// reported as a typed unavailable value rather than hidden.
+        let unknownStartSampled: Int64
     }
 
     private struct StatSample {
@@ -2700,6 +2696,48 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             return nil
         }
         return name
+    }
+
+    /// Typed lifecycle evidence for one directory count. The three signals are
+    /// deliberately distinct: an unchecked tail bounds the count, an
+    /// incompatible storage class is a real anomaly, and a NULL `start_ts`
+    /// only weakens range scoping for rows that are still counted.
+    private static func directoryLifecycleIssues(
+        table: String,
+        countField: String,
+        summary: DirectorySummary
+    ) -> [TraceDataQualityIssue] {
+        var issues: [TraceDataQualityIssue] = []
+        if summary.tailUnchecked {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .probeTruncated,
+                    scope: "\(table).lifecycle",
+                    message: "\(table) lifecycle: probe tail was not inspected; \(countField) is a lower bound"
+                )
+            )
+        }
+        if summary.invalidSampled > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .invalidValue,
+                    scope: "\(table).lifecycle",
+                    count: summary.invalidSampled,
+                    message: "\(table) lifecycle: invalid sampled value(s) excluded; \(countField) is a lower bound"
+                )
+            )
+        }
+        if summary.unknownStartSampled > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .unavailableValue,
+                    scope: "\(table).start_ts",
+                    count: summary.unknownStartSampled,
+                    message: "\(table).start_ts: \(summary.unknownStartSampled) sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+                )
+            )
+        }
+        return issues
     }
 
     private static func directoryPageIssues(

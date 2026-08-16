@@ -1287,15 +1287,31 @@ final class ParserIntegrationTests: XCTestCase {
         let full = try await engine.summarize(fullRequest)
         let metadata = try await repository.metadata()
         XCTAssertEqual(full.durationNs, metadata.durationNs)
-        XCTAssertGreaterThan(full.processCount, 0)
-        XCTAssertEqual(full.threadCount, 0)
-        XCTAssertTrue(full.dataQuality.warnings.contains { $0.contains("threadCount is a lower bound") })
+        // Counts are cross-checked against the directory repository rather
+        // than against whatever the summary happens to produce. The upstream
+        // export leaves process/thread start_ts NULL, which previously made
+        // both counts collapse to 0 while `processes`/`threads` returned
+        // hundreds of rows in the same envelope contract (AT-AN-001).
+        let directoryProcesses = try await repository.processes(
+            try ProcessQuery(limit: 10_000)
+        )
+        let directoryThreads = try await repository.threads(
+            try ThreadQuery(limit: 10_000)
+        )
+        XCTAssertFalse(directoryProcesses.truncated)
+        XCTAssertFalse(directoryThreads.truncated)
+        XCTAssertGreaterThan(directoryThreads.items.count, 0)
+        XCTAssertEqual(full.processCount, Int64(directoryProcesses.items.count))
+        XCTAssertEqual(full.threadCount, Int64(directoryThreads.items.count))
         XCTAssertGreaterThan(full.namedSliceCount ?? 0, 0)
         XCTAssertNil(full.cpuCount)
         XCTAssertNil(full.cpuSliceCount)
         XCTAssertNotNil(full.eventCountBySource)
         XCTAssertEqual(full.eventCountBySource?.reduce(0) { $0 + $1.count }, 6_138)
         XCTAssertTrue(full.dataQuality.warnings.contains { $0.contains("non-received") })
+        XCTAssertTrue(full.dataQuality.issues.contains {
+            $0.category == .unavailableValue && $0.scope == "thread.start_ts"
+        }, "an unknown lifecycle start must stay visible as typed evidence")
 
         let midpoint = metadata.durationNs / 2
         let scoped = try await engine.summarize(
@@ -1307,9 +1323,41 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertEqual(scoped.durationNs, midpoint)
         XCTAssertLessThanOrEqual(scoped.namedSliceCount ?? 0, full.namedSliceCount ?? 0)
-        XCTAssertEqual(scoped.threadCount, 0)
-        XCTAssertTrue(scoped.dataQuality.warnings.contains { $0.contains("lower bound") })
+        // Every thread in this export has an unknown lifecycle start, so none
+        // of them can be excluded by a window; the typed evidence says so.
+        XCTAssertEqual(scoped.threadCount, full.threadCount)
+        XCTAssertTrue(scoped.dataQuality.issues.contains {
+            $0.category == .unavailableValue && $0.scope == "thread.start_ts"
+        })
         XCTAssertNil(scoped.eventCountBySource)
+
+        // Range-scoped event counts must be computed by SQLite over the whole
+        // table, not over the first `limit` rows by rowid. A tail window used
+        // to report 0 because its rows lie past that prefix (AT-JSON-005).
+        let tailRange = try TraceTimeRange.query(
+            startNs: midpoint, endNs: metadata.durationNs
+        )
+        let tail = try await engine.summarize(
+            try TraceSummaryRequest(
+                range: tailRange,
+                maximumRowsPerSection: 10_000,
+                timeout: .seconds(30)
+            )
+        )
+        let tailSlices = try await repository.slices(
+            try TraceSliceQuery(
+                range: tailRange,
+                limit: 10_000,
+                deadline: ContinuousClock.now.advanced(by: .seconds(30))
+            )
+        )
+        XCTAssertFalse(tailSlices.truncated)
+        XCTAssertGreaterThan(tailSlices.items.count, 0)
+        XCTAssertEqual(tail.namedSliceCount, Int64(tailSlices.items.count))
+        XCTAssertFalse(
+            tail.truncatedSections.contains(.namedSliceCount),
+            "a count below the section budget is exact, not a lower bound"
+        )
 
         let first = try TraceSummaryJSONEncoder.encode(full)
         let second = try TraceSummaryJSONEncoder.encode(

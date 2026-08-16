@@ -347,8 +347,11 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(metadata.dataQuality.warnings.contains { $0.contains("non-received") })
         XCTAssertTrue(metadata.dataQuality.warnings.contains { $0.contains("negative") })
         XCTAssertEqual(full.cpuCount, TraceBoundedCount(value: 4, truncated: false))
-        XCTAssertEqual(full.processCount, TraceBoundedCount(value: 3, truncated: true))
-        XCTAssertEqual(full.threadCount, TraceBoundedCount(value: 3, truncated: true))
+        // 5 rows each: 3 with a fully known lifecycle, 1 with a NULL start_ts
+        // (already alive when capture began, AT-AN-001) and 1 with an inverted
+        // lifecycle. Only the inverted row is an anomaly.
+        XCTAssertEqual(full.processCount, TraceBoundedCount(value: 4, truncated: true))
+        XCTAssertEqual(full.threadCount, TraceBoundedCount(value: 4, truncated: true))
         XCTAssertEqual(full.cpuSliceCount?.value, 4)
         XCTAssertEqual(full.threadStateCount?.value, 3)
         XCTAssertEqual(full.namedSliceCount?.value, 3)
@@ -362,12 +365,25 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(full.qualityIssues.contains {
             $0.category == .invalidValue
                 && $0.scope == "process.lifecycle"
-                && $0.count == 2
-        })
+                && $0.count == 1
+        }, "only the inverted lifecycle row is an anomaly")
         XCTAssertTrue(full.qualityIssues.contains {
             $0.category == .invalidValue
                 && $0.scope == "thread.lifecycle"
-                && $0.count == 2
+                && $0.count == 1
+        }, "only the inverted lifecycle row is an anomaly")
+        // A NULL start_ts is retained in the count but weakens range scoping,
+        // so it is reported as a typed unavailable value, never as invalid
+        // data and never by silently dropping the row (AT-JSON-004).
+        XCTAssertTrue(full.qualityIssues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "process.start_ts"
+                && $0.count == 1
+        })
+        XCTAssertTrue(full.qualityIssues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "thread.start_ts"
+                && $0.count == 1
         })
         XCTAssertFalse(full.qualityIssues.contains {
             $0.category == .probeTruncated
@@ -383,8 +399,11 @@ final class RepositoryTests: XCTestCase {
             )
         )
         XCTAssertEqual(scoped.cpuCount?.value, 4, "CPU topology remains trace scoped")
-        XCTAssertEqual(scoped.processCount.value, 1)
-        XCTAssertEqual(scoped.threadCount.value, 1)
+        // 'active' [1200, unknown) overlaps [1200, 1400); 'unknown-lifetime'
+        // has no start bound and therefore cannot be excluded by the window.
+        // 'old' ends exactly at the window start and 'future' starts after it.
+        XCTAssertEqual(scoped.processCount.value, 2)
+        XCTAssertEqual(scoped.threadCount.value, 2)
         XCTAssertEqual(scoped.cpuSliceCount?.value, 2)
         XCTAssertEqual(scoped.threadStateCount?.value, 2)
         XCTAssertEqual(scoped.namedSliceCount?.value, 1)
@@ -448,8 +467,8 @@ final class RepositoryTests: XCTestCase {
             )
         )
 
-        XCTAssertEqual(facts.processCount, TraceBoundedCount(value: 3, truncated: true))
-        XCTAssertEqual(facts.threadCount, TraceBoundedCount(value: 3, truncated: true))
+        XCTAssertEqual(facts.processCount, TraceBoundedCount(value: 4, truncated: true))
+        XCTAssertEqual(facts.threadCount, TraceBoundedCount(value: 4, truncated: true))
         XCTAssertEqual(facts.cpuCount, TraceBoundedCount(value: 1, truncated: true))
         XCTAssertEqual(facts.cpuSliceCount, TraceBoundedCount(value: 1, truncated: true))
         XCTAssertEqual(facts.threadStateCount, TraceBoundedCount(value: 1, truncated: true))
