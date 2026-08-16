@@ -38,7 +38,19 @@ else
     pass "evidence carries no absolute user path"
 fi
 
-# Pinned identity must match the reviewed distribution.
+# Pinned identity must match the distribution this evidence was recorded against.
+#
+# These are deliberately NOT the currently pinned distribution. The retained
+# evidence is a real two-round device run, so its tool and parser identity are
+# frozen at whatever shipped when it was captured; rewriting these constants to
+# follow a re-pin would only assert that the recorded bytes had been edited.
+#
+# The 2026-08-16 re-pin therefore left Phase 6 attesting to a retired binary:
+# tool a7859d69… / parser 66887fae… now ship, while the rounds below ran on
+# 0c552cba… / 2e831626…. Closing that gap needs the DAYU 200 scenario in
+# docs/PHASE_6_SCENARIO.md re-run on the current pin — it cannot be done on the
+# host. Until then this gate proves the retained run is intact, not that the
+# shipping distribution has been exercised end to end on a device.
 expected_tool=0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65
 expected_parser=2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5
 expected_revision=447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6

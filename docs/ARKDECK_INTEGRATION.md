@@ -20,9 +20,25 @@ Ordinary daemon updates preserve the pin only while the live descriptor still ma
 install receipt; selecting different bytes requires an explicit descriptor argument.
 
 The LaunchAgent integration was merged in ArkDeck PR #1311 as
-`4e478b46f202a139dbeb2c91d79e36d6d7774fac`. The real run below used the preceding protected-main
-analyzer baseline `0d8f01964b058d954112604900db19dea28ef39f`; these identities are intentionally
-recorded separately.
+`4e478b46f202a139dbeb2c91d79e36d6d7774fac`. The real run below used the protected-main analyzer
+baseline `d6b9dd399340182b997e461fcabac835b5b5568e`; these identities are intentionally recorded
+separately.
+
+### Schema versions are a release coupling
+
+Everything ArkDeck verifies about a distribution comes from `distribution-manifest.json` except
+three values: `parserAdapterVersion`, `schemaAdapterVersion`, and `indexSchemaVersion`. Those it
+asserts as source literals in `ArkTraceSummaryInvocationContract`, and its envelope validator
+requires exact equality against our `provenance` block.
+
+So moving `TraceDatabaseStagingPreparer.indexVersion` — or either adapter version — is not a
+local change. Until a matching ArkDeck release lands, every analyzer Job fails **after admission**
+with `analyzer.schemaMismatch: trace-summary@1 produced JSON outside ArkTrace contract 1.0`, while
+`arkdeck operation list` still reports the operation `available`. The failure is invisible to a
+pin that predates the bump, so it surfaces only when the distribution is rebuilt.
+
+`95ab38d` moved the index schema from 2 to 3; ArkDeck PR #1340 carried the matching change. Diff a
+candidate's `provenance` block against those three literals before re-pinning.
 
 ## Real Artifact chain
 
@@ -47,11 +63,11 @@ RuntimeCapability was used by the analyzer.
 | Capture Job | `job-876a0741ebd945358b598a37b584c11a` |
 | Source Artifact | `ART-fd0a93c85a005703f6edf1cfb47a3daa` |
 | Source bytes | 1,240 bytes; SHA-256 `a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35` |
-| Analyzer Job | `job-9e47472de912cbe7e040757019421d57` |
-| Derived Artifact | `ART-13f8ddd3192811c11efc40c048a078eb` |
-| Derived bytes | 1,781 bytes; SHA-256 `009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe` |
-| Tool | SHA-256 `0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65` |
-| TraceStreamer | 4.3.7; SHA-256 `2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5` |
+| Analyzer Job | `job-103395125067567883342ceed0bc1b36` |
+| Derived Artifact | `ART-bd09e3971266d9fd9584b2dc17117c1b` |
+| Derived bytes | 1,760 bytes; SHA-256 `a76b2df77939caa56bb6f990b3e3e2fece1044ab530fbdca8ce027ffc2fb30de` |
+| Tool | SHA-256 `a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa` |
+| TraceStreamer | 4.3.7; SHA-256 `66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9` |
 
 After `launchctl kickstart -k`, the daemon returned ready, the operation remained available, and
 the derived Artifact remained readable with the same SHA-256. The path-free machine evidence is
