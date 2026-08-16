@@ -1,0 +1,158 @@
+name: CI
+
+# What this gate is and is not.
+#
+# The pinned TraceStreamer binary is a locally built artifact excluded by
+# .gitignore, and rebuilding it needs network access to the upstream third
+# party sources. A hosted runner therefore cannot execute the parser
+# integration tests: they XCTSkip themselves. This workflow is a necessary
+# check, not a sufficient one -- scripts/test_phase<N>.sh remain the release
+# authority and still have to be run on a machine that has the parser.
+#
+# What it does close is the hole that let a document-type regression reach
+# main: swift test was green while a shell gate that nothing ran was red.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-gates:
+    name: Build, test and offline gates
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record toolchain
+        run: |
+          {
+            echo '### Toolchain'
+            echo '```'
+            swift --version 2>&1
+            xcodebuild -version 2>&1
+            sw_vers 2>&1
+            echo "SDK: $(xcrun --show-sdk-version)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # The package builds warning-free today and that is worth holding. If a
+      # newer SDK introduces an unavoidable warning, relax this step rather
+      # than letting the invariant rot silently.
+      - name: Build (warnings are failures)
+        run: |
+          set -o pipefail
+          swift build 2>&1 | tee build.log
+          if grep -q 'warning:' build.log; then
+            echo '::error::swift build emitted warnings'
+            grep 'warning:' build.log
+            exit 1
+          fi
+
+      # Seven tests load the pinned parser bytes directly and fail rather than
+      # skip when it is absent: the five AppDistribution resolver tests copy
+      # the real binary into a synthetic bundle, and two CLI tests run real
+      # fixtures end to end. They are named individually so the rest of their
+      # classes still runs -- AppDistributionTests also holds the Info.plist
+      # and document-type checks, which are among the most valuable here.
+      - name: Test
+        run: |
+          set -o pipefail
+          swift test \
+            --skip 'ArkTraceAppSupportTests\.AppDistributionTests/testBundled' \
+            --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testCLITimeoutDrainsCacheRollbackBeforeReturning' \
+            --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testRealFixtureRunsAllEightCommandsInHumanAndMachineModes' \
+            2>&1 | tee test.log
+
+      # Skips are expected here only because the pinned parser is absent. A
+      # skip from any other target means a test started opting out for a
+      # reason this environment does not explain, which must not pass quietly.
+      - name: Reject unexpected skips
+        run: |
+          skipped=$(grep -c "' skipped (" test.log || true)
+          unexpected=$(grep "' skipped (" test.log \
+            | grep -v 'ArkTraceIntegrationTests\.' \
+            | grep -v 'ArkTraceParserTests\.' || true)
+          {
+            echo '### Tests'
+            echo "Excluded by --skip (need the pinned parser bytes): 7"
+            echo "XCTSkip at runtime (parser/fixture guards): ${skipped:-0}"
+            echo
+            echo 'Both groups require the locally built TraceStreamer binary.'
+            echo 'Run the phase scripts on a machine that has it before release.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$unexpected" ]; then
+            echo '::error::a test outside the parser-dependent targets skipped'
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi
+
+      # The app target lives in the Xcode project, outside the SwiftPM graph,
+      # so `swift build` never compiles it. It also has a "Copy Pinned
+      # TraceStreamer Bytes" phase that dittos the parser into the bundle, so
+      # it cannot build at all without that binary. These two steps therefore
+      # run only where it is present -- a self-hosted runner, or a hosted one
+      # that restored it. On a stock hosted runner they are skipped, and
+      # test_phase3_batch1.sh remains the place this is enforced.
+      #
+      # AppDistributionTests still binds Info.plist to
+      # ArkTraceAppDistribution.supportedTraceExtensions on every run, so the
+      # source-level half of the document-type contract is always checked.
+      - name: Build app target (unsigned)
+        id: app_build
+        if: hashFiles('ThirdParty/TraceStreamer/macx/trace_streamer') != ''
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ArkTrace.xcodeproj \
+            -target ArkTraceApp \
+            -configuration Debug \
+            SYMROOT="$RUNNER_TEMP/sym" \
+            OBJROOT="$RUNNER_TEMP/obj" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build 2>&1 | tee xcodebuild.log
+
+      - name: Verify app document types
+        if: steps.app_build.outcome == 'success'
+        run: scripts/verify_app_document_types.sh "$RUNNER_TEMP/sym/Debug/ArkTrace.app"
+
+      - name: Note skipped app checks
+        if: steps.app_build.outcome == 'skipped'
+        run: |
+          {
+            echo '### App bundle checks'
+            echo 'Skipped: the app target embeds the pinned TraceStreamer'
+            echo 'binary, which is not tracked. `scripts/test_phase3_batch1.sh`'
+            echo 'enforces the built-bundle document types on a machine that'
+            echo 'has it.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # These three need no parser binary and no external inputs.
+      - name: Offline release gates
+        run: |
+          scripts/verify_licenses.sh
+          scripts/verify_trace_streamer_lock.sh
+          scripts/test_phase6.sh
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs
+          path: |
+            build.log
+            test.log
+            xcodebuild.log
+          if-no-files-found: ignore
+          retention-days: 7
