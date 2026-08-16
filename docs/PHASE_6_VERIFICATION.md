@@ -124,6 +124,28 @@ Owner：ArkDeck analyzer envelope validator（或按「窗口裁剪」解读契�
 负载与 reload 策略收敛为 `TraceWorkload` 的三个显式开关。后续重跑用后者。拆分发生在比较判定
 之后，未改动任何已记录的数字。详见 PHASE_6_SCENARIO.md §1.1。
 
+## 7.1 用新 demo 的复现验证（2026-08-16）
+
+拆分之后在 `WaterFlowTraceDemo` 上按同一冻结场景重跑了一遍，唯一的变更是把
+`TraceWorkload.USE_BLANKET_RELOAD` 从 `true` 翻成 `false`——没有再临时改任何源码。
+证据：`Fixtures/release-evidence/phase6-loop-reproduction.json`。
+
+| 指标 | 首次闭环 | 复现 | 一致性 |
+|---|---:|---:|---|
+| M1 App 进程 shareOfOneCPU | −87.6% | **−82.1%** | 同向同量级 |
+| M2 App 主线程 | −88.2% | −85.7% | 同向同量级 |
+| M5 top-5 hot interval score | −20.6% | −20.7% | 几乎相同 |
+| 判定 | improved | **improved** | 一致 |
+
+绝对值同样对得上：baseline M1 首次 0.026339、复现 0.027471；采集前用 `/proc` 读到的
+进程 CPU 占用首次 2.38%、复现 2.38%，follow-up 降到 0.25%。namedSliceCount 从 3,348 掉到 50，
+与首次的 3,358 → 17 是同一现象。剩余差异属于设备逐次波动，不改变结论。
+
+这次复现没有任何被丢弃的采集：crash probe 已经不在这个工程里，屏幕前置条件一次到位。
+复现结束后 demo 被放回基线状态（`USE_BLANKET_RELOAD = true`），下次可直接重跑。
+
+本节是确认性证据，发布门 10 由 §9 的首次闭环关闭，不由本节重复关闭。
+
 ## 8. 审计结果
 
 | 项 | 结果 |

@@ -1,0 +1,121 @@
+{
+  "formatVersion": 1,
+  "recordedAtUTC": "2026-08-16T10:05:00Z",
+  "purpose": "independent re-run of the frozen PHASE_6_SCENARIO.md loop against the split-out WaterFlowTraceDemo, to show the closed loop reproduces without hand-editing sources",
+  "relationToGate10": "confirmatory; release gate 10 was already closed by phase6-real-debug-loop.json and is not re-closed here",
+  "scenario": {
+    "reference": "docs/PHASE_6_SCENARIO.md",
+    "id": "S1",
+    "frozenSectionsUnchanged": true,
+    "demoProject": "WaterFlowTraceDemo",
+    "changeUnderTest": "TraceWorkload.USE_BLANKET_RELOAD flipped true -> false; no other source edit",
+    "driverIdenticalAcrossRounds": true
+  },
+  "subject": {
+    "bundleName": "com.example.waterflowdemo",
+    "abilityName": "EntryAbility",
+    "osFullName": "OpenHarmony-7.0.0.37",
+    "targetID": "TGT-958780b2ffb7",
+    "bindingRevision": 3
+  },
+  "captureRequest": {
+    "operation": "capture.diagnostics@1",
+    "identicalAcrossRounds": true,
+    "durationSeconds": 10,
+    "traceCategories": ["ace", "app", "ark", "graphic", "sched", "freq", "idle"],
+    "traceBufferKB": 32768,
+    "uiDump": false
+  },
+  "rounds": {
+    "baseline": {
+      "flagState": "USE_BLANKET_RELOAD = true",
+      "deploy": {
+        "unsignedHapArtifactID": "ART-b2e811b019f9c30ce7be9d79c80a8df5",
+        "unsignedHapSHA256Prefix": "50d1f3576292b1b9",
+        "signJobID": "job-31a509779467a72012cc340ab31cf15a",
+        "signedHapArtifactID": "ART-4165aa4adc6820667c04f10c45fe3e36",
+        "deployJobID": "job-845fbdd154a302f3b1a3149620f7552f",
+        "deployState": "succeeded"
+      },
+      "capture": {
+        "jobID": "job-09654644ee0bf6aae1b9d19e0b4dbbcf",
+        "state": "succeeded",
+        "traceArtifactID": "ART-d5703761130b221d323c6abe798f6939",
+        "traceSHA256": "8ca24ea90cf40ed561f218a9df657b4c05c7abfaeba7257d149522685249a90f",
+        "traceByteCount": 2247409,
+        "durationNs": 10014787000
+      },
+      "summary": {
+        "jobID": "job-6fd95853462f83a3a3f28799a13cf7c0",
+        "cpuSliceCount": 3714,
+        "threadStateCount": 5758,
+        "namedSliceCount": 3348
+      },
+      "analyses": {
+        "cpu": {"jobID": "job-ce02b44cd25a9af2d69967fde68f05d5", "artifactID": "ART-c5c3b5a9afab1b856548b900dc74a8ad"},
+        "scheduling": {"jobID": "job-064cd393e88998be7506b59c60304f8e", "artifactID": "ART-53f8925ed470a8c8e5951368a1283ac7"},
+        "slices": {"jobID": "job-be8c104396a21086385686c0417ea386", "artifactID": "ART-0d50cff174c50c41c29b3e31ae894a75"},
+        "hot-intervals": {"jobID": "job-b4d71e641687912b5809e122685afa55", "artifactID": "ART-557a5ce044a7fd3255b1ad7a9a66a800"}
+      },
+      "processCPUSampledBeforeCapture": "2.38 percent of one core over 8 s, read from /proc utime+stime"
+    },
+    "followup": {
+      "flagState": "USE_BLANKET_RELOAD = false",
+      "deploy": {
+        "unsignedHapArtifactID": "ART-81fa71d2f717dc524ab5439b6a1e91c3",
+        "unsignedHapSHA256Prefix": "aacf7958783a149f",
+        "signJobID": "job-face83702cb7ac7ad01c85809db6b0ca",
+        "signedHapArtifactID": "ART-46a25c117761983f47b64346241c7855",
+        "deployJobID": "job-7d8d5c6f43cc6ffdf55a38ecf709f8d8",
+        "deployState": "succeeded"
+      },
+      "capture": {
+        "jobID": "job-667b8f9a3542507801aac6931c2a472c",
+        "state": "succeeded",
+        "traceArtifactID": "ART-3dbab91f3351605c76362748714894f6",
+        "traceSHA256": "f29c45a478415fdfa999476d1e971c5a4e1e0d2468d2919b23cae0ae009b9f99",
+        "traceByteCount": 1052010,
+        "durationNs": 10014741000
+      },
+      "summary": {
+        "jobID": "job-9745abd1161c404c784b15e3ac7d8a32",
+        "cpuSliceCount": 2725,
+        "threadStateCount": 4144,
+        "namedSliceCount": 50
+      },
+      "analyses": {
+        "cpu": {"jobID": "job-e772cff249c48aa1039f5e8ccaa1ed4e", "artifactID": "ART-3da3c468a8c125d1c50f7925bd6a62c0"},
+        "scheduling": {"jobID": "job-0c7da969c8da2ec407bd88af30f2743b", "artifactID": "ART-9ae092ad7c1e2150a773f1bab542821f"},
+        "slices": {"jobID": "job-88d5b8461ace5336cca10ff0056cb648", "artifactID": "ART-15cf39f23690a09c5f85aeb014c07bca"},
+        "hot-intervals": {"jobID": "job-b82f83ed7b279477a5cffced51f516b0", "artifactID": "ART-b847809fdfb364b0ba8bb75644a2b2b6"}
+      },
+      "processCPUSampledBeforeCapture": "0.25 percent of one core over 8 s, read from /proc utime+stime"
+    }
+  },
+  "comparison": {
+    "identityMapping": "process matched by name plus pid; ipid changed 22 to 17 and pid changed 20186 to 24289",
+    "M1_appProcessShareOfOneCPU": {"baseline": 0.027470978663849767, "followup": 0.004926038526607927, "relativeDelta": -0.8206820882908583},
+    "M2_appMainThreadShareOfOneCPU": {"baseline": 0.026751542494113954, "followup": 0.003813678256881531, "relativeDelta": -0.8574408089656647},
+    "M3_mainThreadRunningShare": {"baseline": 0.026751542494113954, "followup": 0.003813678256881531, "relativeDelta": -0.8574408089656647},
+    "M4_appLongSlices8ms": {"baseline": 0, "followup": 0, "signal": "none"},
+    "M5_top5HotIntervalScore": {"baseline": 2994437540, "followup": 2375656200, "relativeDelta": -0.20664359557822},
+    "verdict": "improved"
+  },
+  "agreementWithFirstRun": {
+    "firstRunEvidence": "phase6-real-debug-loop.json",
+    "verdictMatches": true,
+    "M1_firstRun": -0.8764348007394067,
+    "M1_reproduction": -0.8206820882908583,
+    "M2_firstRun": -0.8821292695722991,
+    "M2_reproduction": -0.8574408089656647,
+    "M5_firstRun": -0.20640354996357405,
+    "M5_reproduction": -0.20664359557822,
+    "note": "same direction, same order of magnitude and the same verdict under the frozen rule; the residual spread is ordinary device-to-run variance, not a change of conclusion"
+  },
+  "discardedAttempts": [],
+  "demoLeftAt": "USE_BLANKET_RELOAD = true, so the next run starts from the documented baseline",
+  "privacy": {
+    "absoluteUserPathsIncluded": false,
+    "thirdPartyProcessNamesIncluded": false
+  }
+}
