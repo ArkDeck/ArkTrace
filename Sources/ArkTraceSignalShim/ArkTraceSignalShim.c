@@ -61,7 +61,12 @@ int arktrace_signal_capture_start(void)
 
     struct sigaction action;
     action.sa_handler = arktrace_capture_signal;
+    // Block both captured signals for the duration of the handler. Without
+    // this, SIGTERM can nest inside the SIGINT handler and the read-modify-
+    // write of the pending counter can lose an increment.
     sigemptyset(&action.sa_mask);
+    sigaddset(&action.sa_mask, SIGINT);
+    sigaddset(&action.sa_mask, SIGTERM);
     action.sa_flags = 0;
     arktrace_signal_write_fd = descriptors[1];
     arktrace_pending_signal_count = 0;

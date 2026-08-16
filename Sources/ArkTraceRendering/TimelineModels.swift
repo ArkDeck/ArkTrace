@@ -106,6 +106,21 @@ public struct TimelineViewport: Hashable, Codable, Sendable {
         self.verticalOffsetPoints = verticalOffsetPoints
         self.generation = generation
     }
+
+    /// Converts a pan expressed in points into a saturating nanosecond delta.
+    ///
+    /// `nsPerPoint` is finite and positive by construction, but `points`
+    /// arrives from AppKit input. An infinite product saturates, which the
+    /// caller then clamps against the trace bounds. NaN is not a pan at all,
+    /// and it compares false against both saturation bounds, so it must be
+    /// rejected before the `Int64` conversion traps.
+    public func nanosecondDelta(forPoints points: Double) -> Int64 {
+        let raw = points * nsPerPoint
+        guard !raw.isNaN else { return 0 }
+        if raw >= Double(Int64.max) { return .max }
+        if raw <= Double(Int64.min) { return .min }
+        return Int64(raw.rounded())
+    }
 }
 
 public enum TimelineDetailPreference: String, Codable, Sendable {

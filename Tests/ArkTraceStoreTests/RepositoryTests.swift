@@ -347,8 +347,11 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(metadata.dataQuality.warnings.contains { $0.contains("non-received") })
         XCTAssertTrue(metadata.dataQuality.warnings.contains { $0.contains("negative") })
         XCTAssertEqual(full.cpuCount, TraceBoundedCount(value: 4, truncated: false))
-        XCTAssertEqual(full.processCount, TraceBoundedCount(value: 3, truncated: true))
-        XCTAssertEqual(full.threadCount, TraceBoundedCount(value: 3, truncated: true))
+        // 5 rows each: 3 with a fully known lifecycle, 1 with a NULL start_ts
+        // (already alive when capture began, AT-AN-001) and 1 with an inverted
+        // lifecycle. Only the inverted row is an anomaly.
+        XCTAssertEqual(full.processCount, TraceBoundedCount(value: 4, truncated: true))
+        XCTAssertEqual(full.threadCount, TraceBoundedCount(value: 4, truncated: true))
         XCTAssertEqual(full.cpuSliceCount?.value, 4)
         XCTAssertEqual(full.threadStateCount?.value, 3)
         XCTAssertEqual(full.namedSliceCount?.value, 3)
@@ -362,12 +365,25 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(full.qualityIssues.contains {
             $0.category == .invalidValue
                 && $0.scope == "process.lifecycle"
-                && $0.count == 2
-        })
+                && $0.count == 1
+        }, "only the inverted lifecycle row is an anomaly")
         XCTAssertTrue(full.qualityIssues.contains {
             $0.category == .invalidValue
                 && $0.scope == "thread.lifecycle"
-                && $0.count == 2
+                && $0.count == 1
+        }, "only the inverted lifecycle row is an anomaly")
+        // A NULL start_ts is retained in the count but weakens range scoping,
+        // so it is reported as a typed unavailable value, never as invalid
+        // data and never by silently dropping the row (AT-JSON-004).
+        XCTAssertTrue(full.qualityIssues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "process.start_ts"
+                && $0.count == 1
+        })
+        XCTAssertTrue(full.qualityIssues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "thread.start_ts"
+                && $0.count == 1
         })
         XCTAssertFalse(full.qualityIssues.contains {
             $0.category == .probeTruncated
@@ -383,8 +399,11 @@ final class RepositoryTests: XCTestCase {
             )
         )
         XCTAssertEqual(scoped.cpuCount?.value, 4, "CPU topology remains trace scoped")
-        XCTAssertEqual(scoped.processCount.value, 1)
-        XCTAssertEqual(scoped.threadCount.value, 1)
+        // 'active' [1200, unknown) overlaps [1200, 1400); 'unknown-lifetime'
+        // has no start bound and therefore cannot be excluded by the window.
+        // 'old' ends exactly at the window start and 'future' starts after it.
+        XCTAssertEqual(scoped.processCount.value, 2)
+        XCTAssertEqual(scoped.threadCount.value, 2)
         XCTAssertEqual(scoped.cpuSliceCount?.value, 2)
         XCTAssertEqual(scoped.threadStateCount?.value, 2)
         XCTAssertEqual(scoped.namedSliceCount?.value, 1)
@@ -448,8 +467,8 @@ final class RepositoryTests: XCTestCase {
             )
         )
 
-        XCTAssertEqual(facts.processCount, TraceBoundedCount(value: 3, truncated: true))
-        XCTAssertEqual(facts.threadCount, TraceBoundedCount(value: 3, truncated: true))
+        XCTAssertEqual(facts.processCount, TraceBoundedCount(value: 4, truncated: true))
+        XCTAssertEqual(facts.threadCount, TraceBoundedCount(value: 4, truncated: true))
         XCTAssertEqual(facts.cpuCount, TraceBoundedCount(value: 1, truncated: true))
         XCTAssertEqual(facts.cpuSliceCount, TraceBoundedCount(value: 1, truncated: true))
         XCTAssertEqual(facts.threadStateCount, TraceBoundedCount(value: 1, truncated: true))
@@ -648,6 +667,33 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(unicodeItems.map(\.count).sorted(), [7, 11])
     }
 
+    func testSchemaValidationObservesTaskCancellation() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        _ = repository
+        defer { try? FileManager.default.removeItem(at: url) }
+        // Schema introspection is bounded but can issue thousands of PRAGMA
+        // round trips, so it must not make a cancel request wait for the whole
+        // validation to finish.
+        let outcome = await Task { () -> Result<TraceSchemaAdapter.Validation, any Error> in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return Result(catching: {
+                let db = try TraceDatabase(
+                    url: url, readOnly: true, createIfMissing: false
+                )
+                return try TraceSchemaAdapter.validate(db)
+            })
+        }.value
+        switch outcome {
+        case .success:
+            XCTFail("validation must not complete after its task was cancelled")
+        case .failure(let error):
+            XCTAssertTrue(
+                error is CancellationError,
+                "expected CancellationError, got \(error)"
+            )
+        }
+    }
+
     func testSummarySamplingShapesAreVMBoundedBeforeFilteringOrSorting() throws {
         let (repository, url) = try makeSummaryRepository()
         _ = repository
@@ -672,7 +718,13 @@ final class RepositoryTests: XCTestCase {
             ("stat", "SELECT source, count FROM stat"),
             ("measure", "SELECT ts, filter_id FROM measure"),
         ].map { table, prefix in
-            "\(prefix) \(try db.boundedSamplingOrderClause(of: table)) LIMIT 2"
+            try { () -> String in
+                let sampling = try db.boundedSamplingStrategy(of: table)
+                return """
+                    \(prefix) \(sampling.tableQualifier)
+                    \(sampling.orderClause) LIMIT 2
+                    """
+            }()
         }
         for sql in statements {
             XCTAssertNoThrow(
@@ -694,12 +746,17 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO without_rowid_sample VALUES (2, 'b'), (1, 'a');
             """
         )
-        let withoutRowIDOrder = try db.boundedSamplingOrderClause(
+        let withoutRowIDSampling = try db.boundedSamplingStrategy(
             of: "without_rowid_sample"
         )
-        XCTAssertEqual(withoutRowIDOrder, "NOT INDEXED")
+        XCTAssertEqual(withoutRowIDSampling, .physicalOrder)
+        XCTAssertEqual(withoutRowIDSampling.tableQualifier, "NOT INDEXED")
+        XCTAssertEqual(withoutRowIDSampling.orderClause, "")
         let ordered = try db.query(
-            "SELECT sequence FROM without_rowid_sample \(withoutRowIDOrder) LIMIT 1",
+            """
+            SELECT sequence FROM without_rowid_sample \(withoutRowIDSampling.tableQualifier)
+            \(withoutRowIDSampling.orderClause) LIMIT 1
+            """,
             vmStepBudget: 1_000,
             stage: .querying
         ) { $0.int64(0) }
@@ -717,11 +774,14 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO mixed_direction_sample(a, b) SELECT value, value FROM n;
             """
         )
-        let mixedOrder = try db.boundedSamplingOrderClause(
+        let mixedSampling = try db.boundedSamplingStrategy(
             of: "mixed_direction_sample"
         )
-        XCTAssertEqual(mixedOrder, "NOT INDEXED")
-        let mixedSQL = "SELECT a FROM mixed_direction_sample \(mixedOrder) LIMIT 2"
+        XCTAssertEqual(mixedSampling, .physicalOrder)
+        let mixedSQL = """
+            SELECT a FROM mixed_direction_sample \(mixedSampling.tableQualifier)
+            \(mixedSampling.orderClause) LIMIT 2
+            """
         XCTAssertNoThrow(
             try db.query(
                 mixedSQL, vmStepBudget: 1_000, stage: .querying
@@ -741,8 +801,8 @@ final class RepositoryTests: XCTestCase {
             """
         )
         XCTAssertEqual(
-            try db.boundedSamplingOrderClause(of: "all_aliases_shadowed"),
-            "NOT INDEXED",
+            try db.boundedSamplingStrategy(of: "all_aliases_shadowed"),
+            .physicalOrder,
             "additive shadow columns without a PK remain compatible"
         )
         XCTAssertEqual(
@@ -766,12 +826,16 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO generated_alias_sample(id) SELECT value FROM n;
             """
         )
-        let generatedOrder = try db.boundedSamplingOrderClause(
+        let generatedSampling = try db.boundedSamplingStrategy(
             of: "generated_alias_sample"
         )
-        XCTAssertEqual(generatedOrder, "ORDER BY _rowid_ ASC")
-        let generatedSQL =
-            "SELECT id FROM generated_alias_sample \(generatedOrder) LIMIT 2"
+        XCTAssertEqual(generatedSampling, .rowIDOrder(alias: "_rowid_"))
+        XCTAssertEqual(generatedSampling.tableQualifier, "")
+        XCTAssertEqual(generatedSampling.orderClause, "ORDER BY _rowid_ ASC")
+        let generatedSQL = """
+            SELECT id FROM generated_alias_sample \(generatedSampling.tableQualifier)
+            \(generatedSampling.orderClause) LIMIT 2
+            """
         XCTAssertNoThrow(
             try db.query(
                 generatedSQL, vmStepBudget: 1_000, stage: .querying

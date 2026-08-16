@@ -410,11 +410,7 @@ public final class TraceDocumentController {
             let range: TraceTimeRange
             switch intent {
             case .panPoints(let points, let sourceViewport):
-                let raw = points * sourceViewport.nsPerPoint
-                let delta: Int64
-                if raw >= Double(Int64.max) { delta = Int64.max }
-                else if raw <= Double(Int64.min) { delta = Int64.min }
-                else { delta = Int64(raw.rounded()) }
+                let delta = sourceViewport.nanosecondDelta(forPoints: points)
                 range = try TimelineInteraction.pan(
                     range: sourceViewport.range, deltaNs: delta, within: bounds
                 )
@@ -590,8 +586,10 @@ public final class TraceDocumentController {
         let start = max(bounds.startNs, eventRange.startNs - min(eventRange.startNs, padding))
         let (rawEnd, overflow) = eventRange.endNs.addingReportingOverflow(padding)
         let end = min(bounds.endNs, overflow ? bounds.endNs : rawEnd)
-        guard start < end else { return }
-        setViewport(try! TraceTimeRange.query(startNs: start, endNs: end))
+        guard start < end,
+            let range = try? TraceTimeRange.query(startNs: start, endNs: end)
+        else { return }
+        setViewport(range)
     }
 
     private func scheduleSnapshot(preference: TimelineDetailPreference) {

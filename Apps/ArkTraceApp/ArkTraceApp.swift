@@ -44,6 +44,9 @@ struct ArkTraceNativeApp: App {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
+        // SPEC 2.3: the extension is only a picker/Finder hint; the parser and
+        // schema validation decide whether a file is actually supported.
+        panel.allowedContentTypes = ArkTraceAppDistribution.supportedTraceContentTypes
         panel.treatsFilePackagesAsDirectories = false
         if panel.runModal() == .OK, let url = panel.url { controller.open(url) }
     }
@@ -257,7 +260,7 @@ private struct TraceViewerRootView: View {
             ContentUnavailableView {
                 Label("Open a trace", systemImage: "waveform.path.ecg")
             } description: {
-                Text("Open, drop, or choose a recent .htrace/.systrace file.")
+                Text("Open, drop, or choose a recent .htrace/.ftrace/.systrace file.")
             } actions: {
                 Button("Open Trace…", action: presentOpenPanel)
                     .buttonStyle(.borderedProminent)
@@ -494,6 +497,9 @@ private struct TraceViewerRootView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
+        // SPEC 2.3: the extension is only a picker/Finder hint; the parser and
+        // schema validation decide whether a file is actually supported.
+        panel.allowedContentTypes = ArkTraceAppDistribution.supportedTraceContentTypes
         if panel.runModal() == .OK, let url = panel.url { controller.open(url) }
     }
 

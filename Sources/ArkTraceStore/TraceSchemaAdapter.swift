@@ -122,8 +122,15 @@ enum TraceSchemaAdapter {
     static func validate(_ db: TraceDatabase) throws -> Validation {
         let tables = try db.tableNames()
         var columnsByTable: [String: [TraceDatabase.ColumnInfo]] = [:]
+        // Up to `maximumSchemaTableCount` PRAGMA round trips. Bounded, but a
+        // hostile schema can still make it long enough that a cancel request
+        // must not have to wait for the whole introspection to finish.
         for table in tables {
-            columnsByTable[table] = try db.columns(of: table)
+            try Task.checkCancellation()
+            columnsByTable[table] = try db.columns(
+                of: table,
+                observesTaskCancellation: true
+            )
         }
 
         var missing: [String] = []
@@ -265,7 +272,8 @@ enum TraceSchemaAdapter {
         guard TraceDatabase.isSafeIdentifier(table) else { return false }
         return try db.query(
             "SELECT 1 FROM \(table) LIMIT 1",
-            stage: .validating
+            stage: .validating,
+                observesTaskCancellation: true
         ) { _ in true }.isEmpty == false
     }
 
@@ -313,7 +321,8 @@ enum TraceSchemaAdapter {
                 LIMIT 1
                 """,
                 vmStepBudget: relationshipVMInstructionBudget,
-                stage: .validating
+                stage: .validating,
+                observesTaskCancellation: true
             ) { _ in true }.isEmpty == false
         } catch is TraceDatabase.VMInstructionBudgetExceeded {
             throw ArkTraceError(
@@ -347,7 +356,8 @@ enum TraceSchemaAdapter {
                 )
                 """,
                 vmStepBudget: relationshipVMInstructionBudget,
-                stage: .validating
+                stage: .validating,
+                observesTaskCancellation: true
             ) { _ in true }
             guard duplicate.isEmpty else {
                 throw ArkTraceError(
@@ -388,7 +398,8 @@ enum TraceSchemaAdapter {
                 LIMIT 1
                 """,
                 vmStepBudget: relationshipVMInstructionBudget,
-                stage: .validating
+                stage: .validating,
+                observesTaskCancellation: true
             ) { _ in true }
             guard ambiguous.isEmpty else {
                 throw ArkTraceError(
@@ -416,7 +427,8 @@ enum TraceSchemaAdapter {
     ) throws -> (start: Int64, end: Int64, duration: Int64) {
         let rows = try db.query(
             "SELECT start_ts, end_ts FROM trace_range LIMIT 2",
-            stage: .validating
+            stage: .validating,
+                observesTaskCancellation: true
         ) { row in
             (row.int64(0), row.int64(1))
         }
@@ -484,7 +496,8 @@ enum TraceSchemaAdapter {
                 WHERE \(probe.predicate)
                 LIMIT 1
                 """,
-                stage: .validating
+                stage: .validating,
+                observesTaskCancellation: true
             ) { _ in true }
             guard invalid.isEmpty else {
                 throw ArkTraceError(
@@ -529,7 +542,8 @@ enum TraceSchemaAdapter {
                     LIMIT 1
                     """,
                     vmStepBudget: relationshipVMInstructionBudget,
-                    stage: .validating
+                    stage: .validating,
+                observesTaskCancellation: true
                 ) { _ in true }
             } catch is TraceDatabase.VMInstructionBudgetExceeded {
                 throw ArkTraceError(
@@ -817,7 +831,8 @@ enum TraceSchemaAdapter {
             ) AS sampled
             """,
             bindings: [.text(column.expectedType)],
-            stage: .validating
+            stage: .validating,
+                observesTaskCancellation: true
         ) { row in (row.int64(0) ?? 0, row.int64(1) ?? 0) }
         let counts = rows[0]
         return (min(counts.1, Int64(semanticProbeLimit)), counts.0 > semanticProbeLimit)
@@ -850,7 +865,8 @@ enum TraceSchemaAdapter {
                 LIMIT \(semanticProbeLimit + 1) OFFSET 0
             ) AS sampled
             """,
-            stage: .validating
+            stage: .validating,
+                observesTaskCancellation: true
         ) { row in
             (
                 row.int64(0) ?? 0, row.int64(1) ?? 0, row.int64(2) ?? 0,
@@ -895,7 +911,8 @@ enum TraceSchemaAdapter {
             ) AS sampled
             """,
             bindings: [.int64(lowerBound), .int64(upperBound)],
-            stage: .validating
+            stage: .validating,
+                observesTaskCancellation: true
         ) { row in
             (
                 row.int64(0) ?? 0,
