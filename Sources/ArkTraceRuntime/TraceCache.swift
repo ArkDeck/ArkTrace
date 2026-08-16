@@ -878,6 +878,9 @@ enum TraceContentAddressedCache {
             }
             let parsed = try await parser.parse(
                 source: sourceSnapshot.url,
+                // Verified equal to the keying hash a few lines above, owned by
+                // this session directory, and 0400 since scanSource wrote it.
+                sourceIsImmutableSnapshot: true,
                 destination: buildDatabase,
                 progress: parseProgress,
                 prepareDatabase: { databaseURL, progress in

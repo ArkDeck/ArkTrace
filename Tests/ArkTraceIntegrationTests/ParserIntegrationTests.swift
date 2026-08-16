@@ -260,6 +260,7 @@ final class ParserIntegrationTests: XCTestCase {
 
         func parse(
             source: URL,
+            sourceIsImmutableSnapshot: Bool,
             destination: URL,
             progress: TraceProgressHandler?,
             prepareDatabase: @escaping TraceDatabasePreparer
@@ -278,6 +279,7 @@ final class ParserIntegrationTests: XCTestCase {
             }
             return try await base.parse(
                 source: source,
+                sourceIsImmutableSnapshot: sourceIsImmutableSnapshot,
                 destination: destination,
                 progress: progress,
                 prepareDatabase: prepareDatabase
@@ -1365,6 +1367,65 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertEqual(first, second)
         try await session.close()
+    }
+
+    func testImmutableSnapshotIsParsedInPlaceWithIdenticalProvenance() async throws {
+        let (binary, fixture) = try requireEnvironment()
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-snapshot-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        // `preparationChunkHook` fires only while the parser copies the source;
+        // the parser-binary copy does not pass it. It is therefore an exact
+        // witness for whether a second full copy of the trace happened.
+        func parse(
+            immutable: Bool, into name: String
+        ) async throws -> (parsed: ParsedTrace, copiedChunks: Int) {
+            let counter = ChunkCounter()
+            let parser = try TraceStreamerProcessParser(
+                executableURL: binary,
+                preparationChunkHook: { counter.increment() },
+                finalizationHook: nil
+            )
+            let directory = root.appendingPathComponent(name, isDirectory: true)
+            try FileManager.default.createDirectory(
+                at: directory, withIntermediateDirectories: true
+            )
+            let parsed = try await parser.parse(
+                source: fixture,
+                sourceIsImmutableSnapshot: immutable,
+                destination: directory.appendingPathComponent("trace.sqlite"),
+                progress: nil,
+                prepareDatabase: { databaseURL, progress in
+                    try TraceDatabaseStagingPreparer.prepare(
+                        databaseURL: databaseURL, progress: progress
+                    )
+                }
+            )
+            return (parsed, counter.value())
+        }
+
+        let copied = try await parse(immutable: false, into: "copied")
+        XCTAssertGreaterThan(
+            copied.copiedChunks, 0, "the default path must still snapshot"
+        )
+
+        let inPlace = try await parse(immutable: true, into: "in-place")
+        XCTAssertEqual(
+            inPlace.copiedChunks, 0,
+            "an already-immutable snapshot must not be copied again"
+        )
+
+        // Skipping the copy must not weaken provenance: the parser still hashes
+        // what it actually parsed, before and after the run.
+        XCTAssertEqual(inPlace.parsed.sourceSHA256, copied.parsed.sourceSHA256)
+        XCTAssertEqual(inPlace.parsed.sourceByteCount, copied.parsed.sourceByteCount)
+        XCTAssertEqual(inPlace.parsed.parser, copied.parsed.parser)
+        XCTAssertEqual(
+            inPlace.parsed.databasePreparation.schemaFingerprint,
+            copied.parsed.databasePreparation.schemaFingerprint
+        )
     }
 
     func testPhase1ProgressReportsActualStagesInOrder() async throws {
@@ -4703,5 +4764,24 @@ private extension Array {
             result.append(await transform(element))
         }
         return result
+    }
+}
+
+
+/// Counts source-copy chunks observed through the parser's preparation hook.
+private final class ChunkCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+
+    func increment() {
+        lock.lock()
+        count += 1
+        lock.unlock()
+    }
+
+    func value() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return count
     }
 }

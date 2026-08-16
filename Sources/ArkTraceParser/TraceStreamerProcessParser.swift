@@ -181,6 +181,7 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     public func parse(
         source: URL,
+        sourceIsImmutableSnapshot: Bool = false,
         destination: URL,
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
@@ -199,6 +200,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         let preparationTask = Task.detached {
             try Self.prepareParse(
                 source: source,
+                sourceIsImmutableSnapshot: sourceIsImmutableSnapshot,
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
@@ -615,6 +617,7 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private static func prepareParse(
         source: URL,
+        sourceIsImmutableSnapshot: Bool,
         destination: URL,
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
@@ -624,6 +627,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         do {
             return try prepareParseUnchecked(
                 source: source,
+                sourceIsImmutableSnapshot: sourceIsImmutableSnapshot,
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
@@ -641,6 +645,7 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private static func prepareParseUnchecked(
         source: URL,
+        sourceIsImmutableSnapshot: Bool,
         destination: URL,
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
@@ -738,14 +743,24 @@ public struct TraceStreamerProcessParser: TraceParser {
                 useParentDirectory: true,
                 cleanupRemovalHook: cleanupRemovalHook
             )
-            let sourceSnapshotURL = directory.appendingPathComponent("source.trace")
-            try copyRegularFileCancellable(
-                from: canonicalSource,
-                to: sourceSnapshotURL,
-                permissions: 0o400,
-                chunkHook: preparationChunkHook,
-                cleanupRemovalHook: cleanupRemovalHook
-            )
+            // A caller that already materialised an immutable snapshot (the
+            // content-addressed cache does, pinned to the hash it keyed on)
+            // gets parsed from those exact bytes. Copying them a second time
+            // doubled both the peak staging footprint and the bytes moved for
+            // every cache miss, on traces that reach hundreds of megabytes.
+            let sourceSnapshotURL: URL
+            if sourceIsImmutableSnapshot {
+                sourceSnapshotURL = canonicalSource
+            } else {
+                sourceSnapshotURL = directory.appendingPathComponent("source.trace")
+                try copyRegularFileCancellable(
+                    from: canonicalSource,
+                    to: sourceSnapshotURL,
+                    permissions: 0o400,
+                    chunkHook: preparationChunkHook,
+                    cleanupRemovalHook: cleanupRemovalHook
+                )
+            }
             guard isRegularNonSymlinkFile(at: sourceSnapshotURL) else {
                 throw ArkTraceError(
                     code: .traceFileUnreadable,

@@ -200,6 +200,9 @@ public actor TraceSession {
             cancellationStage = .parsing
             let parsed = try await parser.parse(
                 source: source,
+                // The ephemeral path receives the caller's own file, which may
+                // change underneath us, so the parser must snapshot it.
+                sourceIsImmutableSnapshot: false,
                 destination: databaseURL,
                 progress: report,
                 prepareDatabase: { databaseURL, progress in

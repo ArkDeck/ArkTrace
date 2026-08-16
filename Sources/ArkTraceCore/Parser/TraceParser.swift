@@ -110,8 +110,15 @@ public protocol TraceParser: Sendable {
     /// must validate the identity-bearing parser bytes without launching the
     /// parser executable; a cache miss is where `parse` may launch it.
     func cacheIdentity() async throws -> TraceParserIdentity
+    /// `sourceIsImmutableSnapshot` states that the caller already owns an
+    /// immutable copy of the trace at `source` and will keep it unchanged and
+    /// alive for the whole call. An implementation must then parse those bytes
+    /// directly instead of copying them again; it still hashes them before and
+    /// after the parse, so a source that does change is still caught. Pass
+    /// false for a caller-supplied path that may be mutated underneath.
     func parse(
         source: URL,
+        sourceIsImmutableSnapshot: Bool,
         destination: URL,
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
