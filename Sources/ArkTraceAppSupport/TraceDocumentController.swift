@@ -76,7 +76,37 @@ public enum TraceViewerLayoutPolicy {
     }
 }
 
+/// Closed set of user-facing error titles.
+///
+/// AT-APP-008 asks for a localized title, but a library target cannot look one
+/// up without gaining a resource bundle, and SwiftPM's generated
+/// `Bundle.module` accessor embeds its build-machine path in the shipped
+/// binary -- the reason `Package.swift` keeps the resource target out of the
+/// production graph. So the title crosses the module boundary as a key, the
+/// same shape `TraceAppRecoveryAction` already uses, and the App resolves it
+/// against its own string catalog.
+public enum TraceAppErrorTitle: String, Hashable, Codable, Sendable, CaseIterable {
+    case traceCouldNotBeOpened = "error.title.traceCouldNotBeOpened"
+    case bundledParserUnavailable = "error.title.bundledParserUnavailable"
+    case cacheNeedsAttention = "error.title.cacheNeedsAttention"
+    case openingCancelled = "error.title.openingCancelled"
+    case couldNotFinish = "error.title.couldNotFinish"
+
+    /// Source-language text. Used for the VoiceOver announcement AppSupport
+    /// builds and as the fallback when no catalog entry is present.
+    public var sourceText: String {
+        switch self {
+        case .traceCouldNotBeOpened: "Trace could not be opened"
+        case .bundledParserUnavailable: "Bundled parser is unavailable"
+        case .cacheNeedsAttention: "Trace cache needs attention"
+        case .openingCancelled: "Opening was cancelled"
+        case .couldNotFinish: "ArkTrace could not finish"
+        }
+    }
+}
+
 public struct TraceAppErrorPresentation: Hashable, Sendable {
+    public let titleKey: TraceAppErrorTitle
     public let title: String
     public let reason: String
     public let recoveryAction: TraceAppRecoveryAction
@@ -85,21 +115,22 @@ public struct TraceAppErrorPresentation: Hashable, Sendable {
     public init(error: ArkTraceError) {
         switch error.code {
         case .traceFileUnreadable, .invalidArgument:
-            title = "Trace could not be opened"
+            titleKey = .traceCouldNotBeOpened
             recoveryAction = .chooseAnotherFile
         case .traceStreamerUnavailable, .traceStreamerIdentityMismatch:
-            title = "Bundled parser is unavailable"
+            titleKey = .bundledParserUnavailable
             recoveryAction = .retry
         case .traceCacheCorrupt:
-            title = "Trace cache needs attention"
+            titleKey = .cacheNeedsAttention
             recoveryAction = .openCacheSettings
         case .cancelled:
-            title = "Opening was cancelled"
+            titleKey = .openingCancelled
             recoveryAction = .dismiss
         default:
-            title = "ArkTrace could not finish"
+            titleKey = .couldNotFinish
             recoveryAction = error.retryable ? .retry : .dismiss
         }
+        title = titleKey.sourceText
         reason = error.message
         let details = error.details.keys.sorted().prefix(16).map {
             "\($0)=\(String((error.details[$0] ?? "").prefix(128)))"

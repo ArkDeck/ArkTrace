@@ -983,3 +983,6 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 10. ~~ArkTrace 自身 LICENSE 的选择~~——已决：MIT（2026-08-12 建仓时随初始提交确定，见 §22）；
 11. ~~无障碍契约（AT-APP-009～012、AC-AT-016）保留为 0.1 DoD 硬门，还是分层交付（0.1 保留键盘可达与 focus 基线，完整 VoiceOver/Reduce Motion 契约移至 0.2）。~~——已决定（2026-08-13，Phase 3 进入决策候选）：保留当前 SPEC 与 DoD，AT-APP-009～012 及 AC-AT-016 仍是 0.1 硬门。P3-T08 不得将 VoiceOver canvas semantics、focus restoration 或 Reduce Motion 降级为后续版本任务。
 12. ~~Release CLI 的 `--trace-streamer` override（§8.2 第 4 条）~~——已决（2026-08-16）：保留 Release override，删除"仅 Debug"这一从未成立的表述。两条理由都是实证的：发布门本身依赖它（`test_phase2.sh`、`test_phase4_agent_contract.sh` 用 Release CLI 传该 flag 驱动负例），且编译期 binary hash 锚点无法覆盖"未签名开发二进制 / 已签名分发二进制"这两个必须同时接受的哈希。完整论据见 §8.2。
+13. 本地化范围：0.1 是否真的交付英文以外的界面语言？现状是 `Localizable.xcstrings` 只有 7 条（2 条 Inspector 折叠按钮 + 本轮新增的 5 条 error banner 标题），App 其余界面文本与 VoiceOver 播报串仍是源码内硬编码英文。AT-APP-008 要求"本地化标题"已由 `TraceAppErrorTitle` 类型化 key 满足，但 AT-APP-009/010 要求的 icon-only accessible name 与播报文本尚未进入 catalog。
+    这里有一条实现约束需要先认掉：AppSupport 是 library target，要自己查表就得加 resources，而 SwiftPM 生成的 `Bundle.module` 访问器会把构建机路径写进分发产物——`Package.swift` 把资源 target 排除在生产依赖图外正是这个原因。因此凡是要本地化的字符串都必须以 typed key 穿过模块边界、由 App 侧解析，播报串（含插值计数）要一并改造。
+    两个选项：(a) 0.1 明确只发英文，把 AT-APP-009/010 的本地化要求降级为 0.2，SPEC 记录该权衡；(b) 按 typed-key 模式把 announce/accessible name 全量改造。本轮只完成了 error banner 标题这一条无歧义的部分。

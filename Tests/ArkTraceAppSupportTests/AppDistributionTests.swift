@@ -84,6 +84,51 @@ final class AppDistributionTests: XCTestCase {
         )
     }
 
+    func testEveryErrorTitleKeyHasAStringCatalogEntry() throws {
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalog = try JSONSerialization.jsonObject(
+            with: try Data(
+                contentsOf: root.appendingPathComponent(
+                    "Apps/ArkTraceApp/Localizable.xcstrings"
+                )
+            )
+        ) as? [String: Any]
+        let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
+
+        // The App renders the banner title through
+        // LocalizedStringKey(titleKey.rawValue). A case without an entry
+        // silently falls back to showing the raw key to the user.
+        for title in TraceAppErrorTitle.allCases {
+            let entry = try XCTUnwrap(
+                strings[title.rawValue] as? [String: Any],
+                "no catalog entry for \(title.rawValue)"
+            )
+            let localizations = try XCTUnwrap(
+                entry["localizations"] as? [String: Any]
+            )
+            let english = try XCTUnwrap(
+                (localizations["en"] as? [String: Any])?["stringUnit"]
+                    as? [String: Any]
+            )
+            XCTAssertEqual(
+                english["value"] as? String,
+                title.sourceText,
+                "catalog and sourceText disagree for \(title.rawValue)"
+            )
+        }
+
+        // Every error code must map to one of those keys.
+        for code in ArkTraceError.Code.allCases {
+            let presentation = TraceAppErrorPresentation(
+                error: ArkTraceError(code: code, stage: .request, message: "m")
+            )
+            XCTAssertEqual(presentation.title, presentation.titleKey.sourceText)
+        }
+    }
+
     func testSupportedTraceExtensionsResolveToUsablePanelContentTypes() throws {
         let types = ArkTraceAppDistribution.supportedTraceContentTypes
         XCTAssertEqual(

@@ -1,28 +1,113 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "Hide Inspector" : {
-      "comment" : "Button that collapses the Inspector pane.",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informationsbereich ausblenden"
+  "sourceLanguage": "en",
+  "strings": {
+    "Hide Inspector": {
+      "comment": "Button that collapses the Inspector pane.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informationsbereich ausblenden"
           }
         }
       }
     },
-    "Show Inspector" : {
-      "comment" : "Button that restores the Inspector pane.",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informationsbereich wieder einblenden"
+    "Show Inspector": {
+      "comment": "Button that restores the Inspector pane.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informationsbereich wieder einblenden"
+          }
+        }
+      }
+    },
+    "error.title.bundledParserUnavailable": {
+      "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehler: Mitgelieferter Parser ist nicht verfügbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bundled parser is unavailable"
+          }
+        }
+      }
+    },
+    "error.title.cacheNeedsAttention": {
+      "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehler: Trace-Cache erfordert Aufmerksamkeit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace cache needs attention"
+          }
+        }
+      }
+    },
+    "error.title.couldNotFinish": {
+      "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehler: ArkTrace konnte nicht abschließen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ArkTrace could not finish"
+          }
+        }
+      }
+    },
+    "error.title.openingCancelled": {
+      "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehler: Öffnen wurde abgebrochen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening was cancelled"
+          }
+        }
+      }
+    },
+    "error.title.traceCouldNotBeOpened": {
+      "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehler: Trace konnte nicht geöffnet werden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace could not be opened"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

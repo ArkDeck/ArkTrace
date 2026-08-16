@@ -418,7 +418,7 @@ private struct TraceViewerRootView: View {
 
     private func errorBanner(_ error: TraceAppErrorPresentation) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(error.title).font(.headline)
+            Text(LocalizedStringKey(error.titleKey.rawValue)).font(.headline)
             Text(error.reason).font(.callout)
             DisclosureGroup("Diagnostics", isExpanded: $showDiagnostics) {
                 Text(error.diagnostic)
