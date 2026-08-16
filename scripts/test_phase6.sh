@@ -154,6 +154,29 @@ grep -q '## 9. 成功指标（冻结）' "$scenario" || fail "frozen metric sect
 grep -q '## 10. 判定规则（冻结）' "$scenario" || fail "frozen decision rule section is missing"
 pass "frozen scenario sections present"
 
+# The confirmatory Phase 6 documents do not carry the release verdict, so they
+# are not re-derived here. They are still published evidence, so the two
+# invariants that hold for any evidence document are checked: it must parse,
+# and it must not leak a local path. Being unchecked is how a confirmatory file
+# rots into malformed JSON or grows an absolute path without anyone noticing.
+confirmatory_failures=$failures
+for name in phase6-capability-probe phase6-loop-reproduction \
+    phase6-context-closure phase6-lease-reresolution
+do
+    confirmatory="$repository_root/Fixtures/release-evidence/$name.json"
+    if [ ! -f "$confirmatory" ]; then
+        fail "confirmatory evidence is absent: $name.json"
+        continue
+    fi
+    jq -e . "$confirmatory" >/dev/null 2>&1 \
+        || fail "confirmatory evidence is not valid JSON: $name.json"
+    if grep -Eq '"/Users/|/home/|/private/var/folders' "$confirmatory"; then
+        fail "confirmatory evidence contains an absolute user path: $name.json"
+    fi
+done
+[ "$failures" -eq "$confirmatory_failures" ] \
+    && pass "confirmatory evidence parses and carries no absolute user path"
+
 if [ "$failures" -ne 0 ]; then
     printf 'phase6: %d check(s) failed\n' "$failures" >&2
     exit 1

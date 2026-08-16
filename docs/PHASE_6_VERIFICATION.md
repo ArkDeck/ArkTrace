@@ -44,6 +44,9 @@ PHASE_6_SCENARIO.md §0。
 
 ## 3. 两轮真实 Artifact
 
+> 历史记录。本节到 §5 描述的是 re-pin 之前那条分发上的首轮闭环。承载发布门 10 的是 §7.3 的在产分发
+> 重跑，留存机器证据与 `scripts/test_phase6.sh` 的常量都指向那一轮；判定同为 improved。见 §9。
+
 | | baseline | follow-up |
 |---|---|---|
 | capture job | `job-fb1bb39ad7727e44a7ce7277140810a4` | `job-720ac5215fcddacccde36e90401bc612` |

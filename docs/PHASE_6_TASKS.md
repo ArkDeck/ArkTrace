@@ -66,7 +66,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 ### P6-T02 — 通过 ArkDeck 产生 baseline Trace Artifact
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T01。**
 
 **交付**
@@ -80,14 +80,20 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 **验收**
 
-- [ ] baseline job terminal success；
-- [ ] Artifact 可由 lease 重新解析；
-- [ ] raw Trace hash 在后续分析前后不变；
-- [ ] provenance 足以关联 app/device/job。
+- [x] baseline job terminal success（`job-31019f3f…` state `succeeded`，`outcomeUnknown=false`、
+  `outstandingResidueCount=0`）；
+- [x] Artifact 可由 lease 重新解析（2026-08-16 用 `lease-v1:job-31019f3f…:ART-5b17a1a0…` 重新提交
+  `analyzer.summarize-trace@1`，job `job-890a4f84…` succeeded；follow-up 同样成立，见
+  `Fixtures/release-evidence/phase6-lease-reresolution.json`）；
+- [x] raw Trace hash 在后续分析前后不变（全部分析跑完之后重新计算，baseline `4b113194…`/2,135,494 B、
+  follow-up `5e1781a9…`/1,243,942 B，与采集时记录逐字节一致）；
+- [x] provenance 足以关联 app/device/job（capture job 绑定 `TGT-958780b2ffb7` / bindingRevision 3 /
+  `com.example.waterflowdemo` / OpenHarmony-7.0.0.37，derived artifact 的 derivation 块回指
+  source artifact ID、bytes 与 SHA-256）。
 
 ### P6-T03 — 生成 summary 与 bounded structured context
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T02。**
 
 **交付**
@@ -101,14 +107,18 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 **验收**
 
-- [ ] Agent 输入只有 structured Artifact/typed result；
-- [ ] source hash 在所有 derived Artifact 中一致；
-- [ ] limits 明确且输出完整；
-- [ ] 不启动 GUI、不解析 human log。
+- [x] Agent 输入只有 structured Artifact/typed result（evidence 包
+  `agentDecision.inputsWereStructuredArtifactsOnly=true`）；
+- [x] source hash 在所有 derived Artifact 中一致（每个 derived artifact 的 derivation 块记录它实际读到的
+  `sourceArtifactID`/`sourceByteCount`/`sourceSHA256`；两轮重解析各自回指采集记录里的同一个 hash）；
+- [x] limits 明确且输出完整（`analysisRequest` 冻结 `maxRows`/`maxEvents`/`maxOutputBytes`/`timeoutMs`/
+  `thresholdNsForSlices`，`dataQuality` 逐轮列出 status 与被截断的 section，没有隐式截断）；
+- [x] 不启动 GUI、不解析 human log（`agentDecision.guiAutomationUsed=false`、
+  `agentDecision.humanLogReadForEvidence=false`；hilog 只作为 capture artifact 保留，不作为判据）。
 
 ### P6-T04 — 让 Agent 形成 evidence-backed 判断和下一轮 typed request
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T03。**
 
 **交付**
@@ -123,7 +133,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 ### P6-T05 — 执行下一轮 typed request 并采集复验 Trace
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T04。**
 
 **交付**
@@ -137,14 +147,18 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 **验收**
 
-- [ ] 下一轮请求是 typed 且可审计；
-- [ ] revalidation capture 不是手动替换文件；
-- [ ] baseline 与 follow-up 参数差异明确；
-- [ ] 失败也有 terminal receipt。
+- [x] 下一轮请求是 typed 且可审计（`typedRequestChain.steps`：artifact import-hap →
+  `workspace.sign-openharmony-hap@1` → `debug.hap@1` → `capture.diagnostics@1`，每一步都有 job ID）；
+- [x] revalidation capture 不是手动替换文件（follow-up 的 HAP 经 sign job `job-2777b6eb…` 与 deploy job
+  `job-8842ed62…` 真实上机，trace 由 `job-2b8b5c88…` 采集，没有任何本地文件被当成 capture artifact）；
+- [x] baseline 与 follow-up 参数差异明确（`captureRequest.identicalAcrossRounds=true`，唯一改动是
+  `USE_BLANKET_RELOAD` true → false，`agentDecision.changedFile` 指名单一文件）；
+- [x] 失败也有 terminal receipt（context 轮次的失败 job `job-f06a3f3d…` 带 `analyzer.schemaMismatch`
+  真实 receipt 被保留并记入 `resolvedFindings`，没有被静默丢弃）。
 
 ### P6-T06 — 比较前后 Trace 并判定结果
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T05。**
 
 **交付**
@@ -158,7 +172,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 ### P6-T07 — 生成完整可审计闭环证据包
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T06。**
 
 **证据包**
@@ -181,7 +195,7 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 ### P6-T08 — 执行全系统性能、可靠性和发布审计
 
-**优先级：P1。**
+**优先级：P1。状态：Completed（2026-08-16）。**
 **依赖：P6-T07。**
 
 **交付**
@@ -197,19 +211,27 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
 
 ### P6-T09 — 关闭真实闭环发布门 10 并输出最终报告
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
 **依赖：P6-T08。**
 **关联：AC-AT-015、发布门 10。**
 
 **完成条件**
 
-- [ ] 至少一次真实 baseline → analysis → Agent decision → typed request → follow-up capture → comparison；
-- [ ] 全程无 fake/synthetic/manual GUI copy；
-- [ ] derived evidence 可由 source hashes/tool identities/request 重建；
-- [ ] 结论由结构化 evidence 支撑；
-- [ ] 发布门 10 关闭；
-- [ ] 输出 Final Verification Report；
-- [ ] 若阻塞，报告最小真实 blocker、owner、所需 authority/state change，发布门保持开放。
+- [x] 至少一次真实 baseline → analysis → Agent decision → typed request → follow-up capture → comparison
+  （`Fixtures/release-evidence/phase6-real-debug-loop.json` 两轮全链路；
+  `phase6-loop-reproduction.json` 为独立复现）；
+- [x] 全程无 fake/synthetic/manual GUI copy（`guiAutomationUsed=false`、
+  `humanLogReadForEvidence=false`，每一步 device 动作都是 typed request 且带 job ID）；
+- [x] derived evidence 可由 source hashes/tool identities/request 重建（2026-08-16 只凭 artifact lease
+  重跑 `analyzer.summarize-trace@1`，两轮 derived summary 与冻结记录逐字节相同：baseline
+  `c6518e48…`/3,035 B、follow-up `74390239…`/2,611 B，见 `phase6-lease-reresolution.json`）；
+- [x] 结论由结构化 evidence 支撑（M1～M5 全部取自 typed analysis artifact，判定按 §10 冻结规则；
+  `scripts/test_phase6.sh` 从记录数值离线重算同一判定）；
+- [x] 发布门 10 关闭（DESIGN §11 发布门 10 已标记关闭并引用本证据包）；
+- [x] 输出 Final Verification Report（[PHASE_6_VERIFICATION.md](./PHASE_6_VERIFICATION.md)）；
+- [x] 若阻塞，报告最小真实 blocker、owner、所需 authority/state change，发布门保持开放（§5.1 记录了
+  运行期出现的全部 blocker、owner 与解除方式；`kind=context` 的那条由 ArkDeck#1318 修复后端到端复验关闭，
+  没有在未解除时被记成通过）。
 
 ## 5. 阻塞处理
 
@@ -236,23 +258,27 @@ inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结
   `create-checkpoint` / `revert-patch` / `run-tests` 的 `defaultPolicyIssuance` 为 disabled，
   且 capability 管理面对 Agent 关闭。按 §0 修订记录改为宿主编译 + typed
   import/sign/deploy，保真度降级已显式声明。
-- **仍开放的 finding**：`analyzer.analyze-trace@1` `kind=context` 在真实 trace 上被
-  `validateCounterSample` 拒绝（counter 是阶梯函数，ArkTrace 会带上窗口前最后一个样本，而校验器
-  要求所有样本时间戳落在窗口内）。M1～M5 不依赖 context，闭环判定不受影响；§6 第 4 项未满足。
-  详见 §11.3 与证据包 `openFindings`。
+- **`analyzer.analyze-trace@1` `kind=context` 被 `validateCounterSample` 拒绝** —— counter 是阶梯
+  函数，ArkTrace 会带上窗口前最后一个样本，而校验器要求所有样本时间戳落在窗口内。ArkDeck#1318
+  （commit `28af92cb`）改为每个 series 允许一个 duration 覆盖窗口起点的 carry-in 样本后解除，并以
+  job `job-1b81c838…` 端到端复验通过；证据 `Fixtures/release-evidence/phase6-context-closure.json`，
+  证据包内为 `resolvedFindings`。§6 第 4 项两轮均已满足。详见 §11.3。
 - **发布门 10**：已由真实闭环关闭，判定 improved；证据
   `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`。
 
 ## 6. Exit Checklist
 
 - [x] 真实 OpenHarmony App 与设备（`com.example.waterflowdemo` / DAYU 200 / OpenHarmony-7.0.0.37）；
-- [x] 两轮真实 ArkDeck capture Artifact（`job-fb1bb39a…` 2,132,120 B 与 `job-720ac521…` 1,023,605 B）；
+- [x] 两轮真实 ArkDeck capture Artifact（承载发布门 10 的在产分发重跑：`job-31019f3f…` 2,135,494 B 与
+      `job-2b8b5c88…` 1,243,942 B；re-pin 之前的首轮 `job-fb1bb39a…` 2,132,120 B 与 `job-720ac521…`
+      1,023,605 B 保留为历史记录，见 PHASE_6_VERIFICATION.md §7.3 与 §9）；
 - [x] ArkTrace structured summary/analysis（summary + cpu/scheduling/slices/hot-intervals 共 10 份
-      derived Artifact）；context 一项未满足，原因见 §5.1；
+      derived Artifact）；context 一项也已满足（ArkDeck#1318 修复后端到端复验，见 §5.1）；
 - [x] evidence-backed Agent decision（命中候选 C1，排除 C4，引用具体 process/thread/slice 证据）；
 - [x] 下一轮 ArkDeck typed request（import-hap → sign-openharmony-hap@1 → debug.hap@1 →
       capture.diagnostics@1，全部 Catalog 可验证）；
-- [x] 前后 metric comparison（M1 −87.6%、M2 −88.2%、M5 −20.6%，判定 improved）；
+- [x] 前后 metric comparison（承载轮 M1 −87.09%、M2 −87.79%、M5 −9.10%，判定 improved；首轮为
+      −87.6% / −88.2% / −20.6%，同样判定 improved。M5 是佐证指标，不参与判定条件）；
 - [x] 完整 provenance/evidence package（`Fixtures/release-evidence/phase6-real-debug-loop.json`）；
 - [x] 系统级 audit（`scripts/test_phase6.sh` 全绿；Phase 1 gate 复跑；license 校验通过；
       privacy/无 GUI/无 raw SQL/无设备权限不变量已在 gate 内断言）；

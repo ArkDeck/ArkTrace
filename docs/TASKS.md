@@ -104,11 +104,14 @@ flowchart LR
 ### Phase 6 — Real Debug Loop
 
 - P6-T01：选择真实问题并冻结验收假设（Completed；冻结件 [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md)）；
-- P6-T02：ArkDeck baseline Trace Artifact（Completed；`job-fb1bb39a…`，2,132,120 B）；
-- P6-T03：summary 与 bounded structured analysis（Completed；context 一项未满足，见 §5.1）；
+- P6-T02：ArkDeck baseline Trace Artifact（Completed；承载轮 `job-31019f3f…`，2,135,494 B；首轮
+  `job-fb1bb39a…` 2,132,120 B 为 re-pin 之前的历史记录）；
+- P6-T03：summary 与 bounded structured analysis（Completed；context 一项也已满足，见
+  PHASE_6_TASKS.md §5.1）；
 - P6-T04：Agent evidence-backed 判断和下一轮 typed request（Completed；命中候选 C1）；
-- P6-T05：执行 typed request 并采集复验 Trace（Completed；`job-720ac521…`，1,023,605 B）；
-- P6-T06：比较前后 Trace（Completed；improved，M1 −87.6%）；
+- P6-T05：执行 typed request 并采集复验 Trace（Completed；承载轮 `job-2b8b5c88…`，1,243,942 B；
+  首轮 `job-720ac521…` 1,023,605 B 为历史记录）；
+- P6-T06：比较前后 Trace（Completed；improved，承载轮 M1 −87.09%，首轮 −87.6%）；
 - P6-T07：生成可审计闭环证据包（Completed；`phase6-real-debug-loop.json`）；
 - P6-T08：全系统性能、可靠性和发布审计（Completed；`scripts/test_phase6.sh` 全绿）；
 - P6-T09：关闭真实闭环发布门 10 并输出最终报告（Completed；[PHASE_6_VERIFICATION.md](./PHASE_6_VERIFICATION.md)）。
@@ -128,7 +131,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 | 7 | indexed large viewport query 性能 | Closed；20-sample large performance evidence | Phase 3 / P3-T09 |
 | 8 | ArkDeck multi-analyzer resolver 不弱化 pinned identity | Closed；ArkDeck PR #1309 / merge `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f` | Phase 5 / P5-T03/P5-T07 |
 | 9 | ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact | Closed；real capture/derived Artifact evidence + ArkDeck PR #1311 / merge `4e478b46f202a139dbeb2c91d79e36d6d7774fac` | Phase 5 / P5-T09 |
-| 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Closed（2026-08-16）；真实两轮 capture + typed 复验链路判定 improved（M1 −87.6%），证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh` | Phase 6 / P6-T09 |
+| 10 | baseline → analysis → Agent decision → typed request → follow-up capture → comparison | Closed（2026-08-16）；真实两轮 capture + typed 复验链路判定 improved，承载轮为在产分发重跑（M1 −87.09%；首轮 −87.6%），证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh` | Phase 6 / P6-T09 |
 
 发布门 3 已于 2026-08-14 由 exact source/license inventory、App/CLI 同源资源、签名 App 与最终 notarized ZIP 的逐字节复验关闭；事实证据见 DESIGN §24 与 `Fixtures/release-evidence/phase3-notarization.json`。
 

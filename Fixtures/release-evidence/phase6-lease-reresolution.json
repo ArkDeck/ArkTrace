@@ -1,0 +1,79 @@
+{
+  "formatVersion": 1,
+  "recordedAtUTC": "2026-08-16T16:15:00Z",
+  "purpose": "close the P6-T02 and P6-T03 acceptance items that phase6-real-debug-loop.json records the inputs for but does not itself demonstrate: that each raw Trace Artifact is still resolvable from its lease, that its bytes did not change while the analyses ran against it, and that the recorded derived summaries are reproducible from those leases alone",
+  "relationToGate10": "confirmatory; release gate 10 was closed by phase6-real-debug-loop.json and is not re-closed here",
+  "method": "submitted analyzer.summarize-trace@1 twice through the same daemon and typed request path used during the loop, passing only the recorded artifact lease as sourceArtifactRef, then compared the re-derived artifact against the values frozen in phase6-real-debug-loop.json",
+  "toolIdentity": {
+    "arkDeckDaemonSHA256": "df333470ae61a037e59573cc3a5713a928b905f5092da8d29ed23940372cf80d",
+    "arkTraceToolSHA256": "a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa",
+    "parserVersion": "4.3.7",
+    "parserBinarySHA256": "66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9",
+    "parserUpstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "parserBuildRecipeVersion": "e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06",
+    "schemaAdapterVersion": "2",
+    "indexSchemaVersion": 3,
+    "analyzerRef": "trace-summary@1",
+    "analyzerVersion": "0.1.0+1"
+  },
+  "rounds": {
+    "baseline": {
+      "lease": "lease-v1:job-31019f3f787570605943cb01779d33d3:ART-5b17a1a044873e71e6198bf17e97352a",
+      "leaseResolved": true,
+      "reresolutionJobID": "job-890a4f84aef208eb2633263eb7b1a819",
+      "reresolutionState": "succeeded",
+      "rawTrace": {
+        "recordedSHA256": "4b113194937df42bf6268c27d47f17aa418b1a35743938f30b6108429bb4eb74",
+        "observedSHA256": "4b113194937df42bf6268c27d47f17aa418b1a35743938f30b6108429bb4eb74",
+        "recordedByteCount": 2135494,
+        "observedByteCount": 2135494,
+        "unchangedAfterAllAnalyses": true
+      },
+      "derivedSummary": {
+        "recordedSHA256": "c6518e48d4c23886054c078567c8f2cfe7b739327295c7e4a777f5fd736daf2c",
+        "observedSHA256": "c6518e48d4c23886054c078567c8f2cfe7b739327295c7e4a777f5fd736daf2c",
+        "recordedByteCount": 3035,
+        "observedByteCount": 3035,
+        "byteIdentical": true,
+        "cpuSliceCount": 3409,
+        "threadStateCount": 5278,
+        "namedSliceCount": 3348,
+        "durationNs": 10014594000
+      }
+    },
+    "followup": {
+      "lease": "lease-v1:job-2b8b5c88bd2c1ef1cc6e18ce6bd46fe4:ART-5e0feb41341e4b92e86aa90328d00901",
+      "leaseResolved": true,
+      "reresolutionJobID": "job-f18f48157a9f3bc9e1d7b64cefeaeb72",
+      "reresolutionState": "succeeded",
+      "rawTrace": {
+        "recordedSHA256": "5e1781a94dd11cf7c64855eef7e3cd56c2ff4f08100e6631b682040ebde17f0b",
+        "observedSHA256": "5e1781a94dd11cf7c64855eef7e3cd56c2ff4f08100e6631b682040ebde17f0b",
+        "recordedByteCount": 1243942,
+        "observedByteCount": 1243942,
+        "unchangedAfterAllAnalyses": true
+      },
+      "derivedSummary": {
+        "recordedSHA256": "743902398d3f51dbeed3317d2cb20658735f4fa9dd0dc4788e0ccc3de83c5246",
+        "observedSHA256": "743902398d3f51dbeed3317d2cb20658735f4fa9dd0dc4788e0ccc3de83c5246",
+        "recordedByteCount": 2611,
+        "observedByteCount": 2611,
+        "byteIdentical": true,
+        "cpuSliceCount": 3153,
+        "threadStateCount": 4904,
+        "namedSliceCount": 16,
+        "durationNs": 10014767000
+      }
+    }
+  },
+  "sourceHashConsistency": {
+    "checked": "the derivation block each re-resolution wrote names the source artifact ID, byte count and SHA-256 it actually read",
+    "baselineDerivationSourceSHA256": "4b113194937df42bf6268c27d47f17aa418b1a35743938f30b6108429bb4eb74",
+    "followupDerivationSourceSHA256": "5e1781a94dd11cf7c64855eef7e3cd56c2ff4f08100e6631b682040ebde17f0b",
+    "matchesCaptureRecord": true
+  },
+  "limits": {
+    "retentionWindow": "the derived artifacts of these two re-resolution jobs carry retentionClass default with a 2026-08-23 deadline; the raw capture artifacts they read are the ones the loop produced and were still present when this ran",
+    "notProvenHere": "this shows the leases resolve and the summaries reproduce today on the shipping pin; it does not promise a lease resolves after its artifact's retention deadline passes, which is a store policy rather than a defect"
+  }
+}
