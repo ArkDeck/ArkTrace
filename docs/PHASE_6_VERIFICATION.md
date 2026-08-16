@@ -99,7 +99,7 @@ M4 无信号 → **improved**。`scripts/test_phase6.sh` 会从记录的数字�
 根因：counter 是阶梯函数，ArkTrace 会带上窗口前最后一个样本以确定窗口起点的取值；ArkDeck
 `validateCounterSample` 要求每个样本的时间戳都满足 `timestamp >= startNs && timestamp < endNs`。
 
-**修复**（ArkDeck PR #1318，commit `28af92cb`）：窗口前的样本只在它自己声明了能覆盖到窗口的
+**修复**（ArkDeck PR #1318，已合并）：窗口前的样本只在它自己声明了能覆盖到窗口的
 `durationNs` 时被接受，且每条 series 至多一个——光有一个早于窗口的时间戳仍然拒绝。窗口内样本与
 右开边界不变。
 
@@ -132,7 +132,7 @@ follow-up 轮也补跑了 context（`job-452aa3efa09ebc728eddfe7a77c92ef0`，97,
 **闭环后的 fixture 收敛**：上面那个 crash probe 开关暴露了结构问题——crash 与 trace 两种用途
 期望终态相反，却是两个可以各自开关的布尔量。判定完成后收敛为**一个 fixture 的一个互斥选择器**
 （`FixtureMode.MODE`），并从操作者 home 下的未跟踪目录移入 ArkDeck 仓库
-`tests/waterflow-demo`（ArkDeck PR #1329）。fixture 归 ArkDeck，因为只有它构建和部署该工程；
+`tests/waterflow-demo`（入库待 CHG-2026-062 授权）。fixture 归 ArkDeck，因为只有它构建和部署该工程；
 ArkTrace 只 trace 正在跑的进程。后续重跑把 `MODE` 设为 `traceWorkload` 即可。收敛发生在比较判定
 之后，未改动任何已记录的数字。详见 PHASE_6_SCENARIO.md §1.1。
 

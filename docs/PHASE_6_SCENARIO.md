@@ -73,7 +73,8 @@ P6-T01 要求在采集前写定成功标准。要写出**可测**的标准，必
 任何 10 秒采集窗口里都没有持续负载可测（§7 三次被丢弃的采集里有两次就是这个原因）。
 
 因此闭环完成后把两种用途收敛成**一个 fixture 的一个互斥选择器**，并把它从操作者 home 下的
-未跟踪目录移进 ArkDeck 仓库：**`ArkDeck/tests/waterflow-demo`**（ArkDeck PR #1329）。
+未跟踪目录移进 ArkDeck 仓库：**`ArkDeck/tests/waterflow-demo`**（入库需先由维护者合入
+CHG-2026-062 授予 `tests/**` 路径权限；见本节末）。
 
 `entry/src/main/ets/fixture/FixtureMode.ets` 的 `MODE` 单选：
 
