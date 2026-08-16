@@ -2,6 +2,7 @@ import ArkTraceCore
 import ArkTraceParser
 import Darwin
 import Foundation
+import UniformTypeIdentifiers
 
 /// Reviewed 0.1 distribution candidate. The app is intended for Developer-ID distribution
 /// without App Sandbox because it must execute the pinned child parser and
@@ -17,16 +18,17 @@ public enum ArkTraceAppDistribution {
     public static let permitsNetworkUpload = false
     public static let permitsDeviceAccess = false
 
-    public static func cacheURL(
-        fileManager: FileManager = .default
-    ) throws -> URL {
-        let base = try fileManager.url(
-            for: .cachesDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true
-        )
-        return base.appendingPathComponent(bundleIdentifier, isDirectory: true)
+    /// Reviewed file-picker and Finder hint extensions (SPEC 2.3). The format
+    /// is decided by the parser and schema validation, never by the extension;
+    /// this list only drives `CFBundleDocumentTypes` and the Open panel, and
+    /// `AppDistributionTests` fails closed when the two drift apart.
+    public static let supportedTraceExtensions = ["htrace", "ftrace", "systrace", "trace"]
+
+    /// Uniform types for the Open panel, derived from the same reviewed list.
+    /// Extensions the system does not know become dynamic types, which is the
+    /// documented way to filter on an app-specific extension.
+    public static var supportedTraceContentTypes: [UTType] {
+        supportedTraceExtensions.compactMap { UTType(filenameExtension: $0) }
     }
 }
 

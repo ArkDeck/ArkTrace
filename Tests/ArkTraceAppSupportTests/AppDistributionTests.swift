@@ -68,6 +68,34 @@ final class AppDistributionTests: XCTestCase {
         XCTAssertEqual(plist["CFBundleShortVersionString"] as? String, "$(MARKETING_VERSION)")
         XCTAssertEqual(plist["CFBundleVersion"] as? String, "$(CURRENT_PROJECT_VERSION)")
         XCTAssertEqual(plist["CFBundleIdentifier"] as? String, "$(PRODUCT_BUNDLE_IDENTIFIER)")
+
+        // Finder "Open With" and the Open panel must offer the same set the
+        // spec declares supported. `.ftrace` was declared in SPEC 2.3 and the
+        // README but missing from the bundle, so Finder never associated it.
+        let documentTypes = try XCTUnwrap(
+            plist["CFBundleDocumentTypes"] as? [[String: Any]]
+        )
+        let declaredExtensions = documentTypes.flatMap {
+            $0["CFBundleTypeExtensions"] as? [String] ?? []
+        }
+        XCTAssertEqual(
+            declaredExtensions,
+            ArkTraceAppDistribution.supportedTraceExtensions
+        )
+    }
+
+    func testSupportedTraceExtensionsResolveToUsablePanelContentTypes() throws {
+        let types = ArkTraceAppDistribution.supportedTraceContentTypes
+        XCTAssertEqual(
+            types.count,
+            ArkTraceAppDistribution.supportedTraceExtensions.count,
+            "every reviewed extension must yield a uniform type for the Open panel"
+        )
+        for (extensionName, type) in zip(
+            ArkTraceAppDistribution.supportedTraceExtensions, types
+        ) {
+            XCTAssertEqual(type.preferredFilenameExtension, extensionName)
+        }
     }
 
     func testBundledResolverMapsEachMissingRequiredFileToUnavailable() throws {
