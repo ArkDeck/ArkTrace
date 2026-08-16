@@ -8,7 +8,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 - **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
 - **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
 
-> **状态：Phase 1～5 已完成；Phase 3/4 的 large 发布门 6/7 已由真实 DAYU 200 证据关闭；Phase 6 已进入 P6-T01。** ArkDeck summary/deep operations 分别由 PR #1309/#1310 合入，LaunchAgent descriptor 安装由 PR #1311 合入；真实 capture Artifact 已经 pinned ArkTrace 产出 restart 后仍可读的 derived summary Artifact，发布门 8/9 均已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。674,044,067-byte DAYU 200 trace 保存在 Git 外的 content-addressed Release artifact，tracked CC-BY-4.0 grant、签名 review/provenance、完整性报告以及真实 cancellation/performance evidence 共同关闭 Gate 6/7。
+> **状态：Phase 1～5 已完成；Phase 3/4 的 large 发布门 6/7 已由真实 DAYU 200 证据关闭；Phase 6 已于 2026-08-16 以真实闭环完成 9/9 并关闭发布门 10：真实 App 在 DAYU 200 上经 typed capture → structured analysis → Agent 判断 → typed 复验链路，判定 improved（App 进程 CPU 占用 −87.6%），报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。至此 10 个发布门全部关闭。** ArkDeck summary/deep operations 分别由 PR #1309/#1310 合入，LaunchAgent descriptor 安装由 PR #1311 合入；真实 capture Artifact 已经 pinned ArkTrace 产出 restart 后仍可读的 derived summary Artifact，发布门 8/9 均已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。674,044,067-byte DAYU 200 trace 保存在 Git 外的 content-addressed Release artifact，tracked CC-BY-4.0 grant、签名 review/provenance、完整性报告以及真实 cancellation/performance evidence 共同关闭 Gate 6/7。
 
 ## 文档
 
@@ -17,6 +17,8 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 | [docs/DESIGN.md](docs/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
 | [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 总任务索引与发布门状态 |
+| [docs/PHASE_6_SCENARIO.md](docs/PHASE_6_SCENARIO.md) | Phase 6 冻结的真实场景、指标、判定规则与实测结果 |
+| [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md) | Phase 6 Final Verification Report：闭环链路、两轮 Artifact、Agent 判断、比较判定与审计 |
 | [docs/CLI.md](docs/CLI.md) | arktrace 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
 | [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | ArkDeck 可固定的 CLI App layout、manifest、签名/notarization、升级与回滚 |
 | [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile、真实 Artifact 链路、restart 与 Gate 9 证据 |
@@ -59,6 +61,10 @@ scripts/test_phase4.sh
 # Phase 5 gate：继承 reviewed medium gate，复核 CLI distribution 与真实 ArkDeck
 # capture Artifact → persisted summary Artifact；不会冒充尚缺的 large gate
 scripts/test_phase5.sh
+
+# Phase 6 gate：离线复核真实闭环证据的完整性、身份绑定与判定规则；
+# 证据缺失或判定与冻结规则不符时 fail closed
+scripts/test_phase6.sh
 ```
 
 `scripts/test_phase1.sh` 会在测试前校验 binary、manifest、arm64 architecture、fixture/license SHA/byte count/Git blob；缺失或漂移直接失败。通过后输出不超过 4 KiB 的 machine evidence。TraceStreamer binary 是本机构建产物并被 `.gitignore` 排除，不能只 clone 仓库后跳过构建。

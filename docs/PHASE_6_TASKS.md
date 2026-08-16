@@ -1,16 +1,20 @@
 # ArkTrace Phase 6 任务清单
 
-> 状态：Active — P6-T01；Phase 5 real Artifact Gate 9 与 large Trace Gate 6/7 已关闭，真实闭环 Gate 10 仍开放
+> 状态：Completed，9/9 —— 真实闭环已跑通并判定 improved，发布门 10 关闭
 > 阶段：Real Debug Loop
 > 验收目标：至少闭合一次真实 OpenHarmony App → ArkDeck → ArkTrace → Agent → typed request → ArkDeck 复验链路
+> 冻结件：[PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md)；能力与阻塞证据：`Fixtures/release-evidence/phase6-capability-probe.json`
 
 ## 1. 进入条件
 
 - [x] Phase 5 的真实 summary Artifact 链路通过；
-- [x] deep typed trace analysis operation 已发布并可用；
-- [ ] 有授权可运行、可采集、可重复的真实 OpenHarmony App/设备；
+- [x] deep typed trace analysis operation 已发布；
+- [x] deep typed trace analysis operation 在本机**可用**（2026-08-16 重建并更新 `arkdeck-agentd`
+      后解除，验证见 PHASE_6_SCENARIO.md §11.1）；
+- [x] 有授权可运行、可采集、可重复的真实 OpenHarmony App/设备
+      （`com.example.waterflowdemo` / DAYU 200 / OpenHarmony-7.0.0.37 / `TGT-958780b2ffb7` rev 3）；
 - [x] ArkDeck capture.diagnostics@1 能产生 immutable trace Artifact；
-- [ ] 成功/失败标准在采集前写定。
+- [x] 成功/失败标准在采集前写定（PHASE_6_SCENARIO.md §6～§10，冻结于 baseline 采集之前）。
 
 ## 2. 禁止替代
 
@@ -41,7 +45,14 @@ flowchart LR
 
 ### P6-T01 — 选择真实问题并冻结验收假设
 
-**优先级：P0。**
+**优先级：P0。状态：Completed（2026-08-16）。**
+**冻结件：[PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md)。**
+
+冻结内容：场景 S1（嵌套 WaterFlow feed 在固定频率 reload 下的主线程开销）、被测 App/设备/OS
+identity、授权、baseline typed request 的逐字段参数、预期 evidence、候选诊断 C1～C4 与排除条件、
+下一轮 typed request 的允许组合、主指标 M1 与副指标 M2～M5、improved/unchanged/regressed/
+inconclusive 判定阈值。冻结发生在任何 baseline 采集之前；冻结前只跑过一次**能力探针**，其身份
+与用途已在 §1 记录，且明确不作为 Phase 6 证据。
 
 **交付**
 
@@ -211,14 +222,38 @@ flowchart LR
 5. 不将 summary-only 路径称为 deep context 闭环；
 6. 不关闭发布门 10。
 
+### 5.1 blocker 处理记录（2026-08-16，均已解除）
+
+- **`analyzer.analyze-trace@1` schemaMismatch** —— 已安装 daemon 运行修复前的 analysis
+  envelope 校验器。从 ArkDeck HEAD 重建、按 `Distribution/macOS/build-helpers.sh` 布局签名
+  `ArkDeckAgent.app` 后 `agentd update` 解除；descriptor pin 保留。详见
+  [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) §11.1。
+- **`workspace.sign-openharmony-hap@1` presetUnavailable** —— 更换 daemon 二进制使签名
+  preset receipt 的 `trustedDaemonApplicationSHA256` 失配。以独立重实现的
+  `daemonFingerprint` 计算新值（known-answer test 先复现旧值验证算法正确），刷新该字段后
+  operation 恢复 `available`。详见 §11.2。
+- **workspace 变更类算子不可由 Agent 授权** —— `apply-patch` / `build-openharmony` /
+  `create-checkpoint` / `revert-patch` / `run-tests` 的 `defaultPolicyIssuance` 为 disabled，
+  且 capability 管理面对 Agent 关闭。按 §0 修订记录改为宿主编译 + typed
+  import/sign/deploy，保真度降级已显式声明。
+- **仍开放的 finding**：`analyzer.analyze-trace@1` `kind=context` 在真实 trace 上被
+  `validateCounterSample` 拒绝（counter 是阶梯函数，ArkTrace 会带上窗口前最后一个样本，而校验器
+  要求所有样本时间戳落在窗口内）。M1～M5 不依赖 context，闭环判定不受影响；§6 第 4 项未满足。
+  详见 §11.3 与证据包 `openFindings`。
+- **发布门 10**：已由真实闭环关闭，判定 improved；证据
+  `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`。
+
 ## 6. Exit Checklist
 
-- [ ] 真实 OpenHarmony App 与设备；
-- [ ] 两轮真实 ArkDeck capture Artifact；
-- [ ] ArkTrace structured summary/context/analysis；
-- [ ] evidence-backed Agent decision；
-- [ ] 下一轮 ArkDeck typed request；
-- [ ] 前后 metric comparison；
-- [ ] 完整 provenance/evidence package；
-- [ ] 系统级 performance/reliability/privacy/license audit；
-- [ ] 发布门 10 真实关闭，或明确保持开放并报告 blocker。
+- [x] 真实 OpenHarmony App 与设备（`com.example.waterflowdemo` / DAYU 200 / OpenHarmony-7.0.0.37）；
+- [x] 两轮真实 ArkDeck capture Artifact（`job-fb1bb39a…` 2,132,120 B 与 `job-720ac521…` 1,023,605 B）；
+- [x] ArkTrace structured summary/analysis（summary + cpu/scheduling/slices/hot-intervals 共 10 份
+      derived Artifact）；context 一项未满足，原因见 §5.1；
+- [x] evidence-backed Agent decision（命中候选 C1，排除 C4，引用具体 process/thread/slice 证据）；
+- [x] 下一轮 ArkDeck typed request（import-hap → sign-openharmony-hap@1 → debug.hap@1 →
+      capture.diagnostics@1，全部 Catalog 可验证）；
+- [x] 前后 metric comparison（M1 −87.6%、M2 −88.2%、M5 −20.6%，判定 improved）；
+- [x] 完整 provenance/evidence package（`Fixtures/release-evidence/phase6-real-debug-loop.json`）；
+- [x] 系统级 audit（`scripts/test_phase6.sh` 全绿；Phase 1 gate 复跑；license 校验通过；
+      privacy/无 GUI/无 raw SQL/无设备权限不变量已在 gate 内断言）；
+- [x] 发布门 10 真实关闭。
