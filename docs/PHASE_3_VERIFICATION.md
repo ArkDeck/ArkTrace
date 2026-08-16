@@ -120,6 +120,13 @@ DAYU 200 large fixture、真实 parser cancellation 与 20-sample production ben
   `usesAutomaticIndex=false`。真实 child cancellation 后 child 不存在，禁止的 cache/private/owner/
   quarantine residue 为 0；空的安全 `.owners` 目录不被伪报为 active owner。原子事实源为
   `Fixtures/release-evidence/phase3-large-performance.json`，文档不复制会随每次真实测量波动的精确值。
+- Storage 前提（2026-08-16，benchmark evidence `formatVersion` 3 → 4）：source snapshot 会被复制到
+  session 私有 staging 目录，跨卷时这是一次真实的整卷复制，其 IO 与空间不出现在任何 timing 字段里，
+  因此跨卷测得的 large 数值与同卷测得的不可直接比较。evidence 新增 `storage` 块记录
+  `sourceFilesystemID`/`stagingFilesystemID`/`sameFilesystem`/`stagedByteCount`；gate 断言四键精确闭合、
+  两个 device ID 非零（0 表示路径无法解析，读作 unknown 而非同卷）、`sameFilesystem` 必须等于两个 ID
+  的实际比较结果、`stagedByteCount` 必须等于 `traceByteCount`。跨卷运行仍然合法，只是不能再被记成同卷。
+  已冻结的 `formatVersion: 3` evidence 早于该字段，其 source/staging 是否同卷无法从文件本身判定。
 - Build hardening：`source-lock.json` 固定 upstream、13 个 source dependency 与 GN/Ninja
   URL/SHA/bytes；standalone patch、HTTPS rewrite 和构建脚本共同导出 recipe
   `e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06`。

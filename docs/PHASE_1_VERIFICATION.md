@@ -129,7 +129,7 @@ additive evidence，不改写 94-test Phase 1 主表。
 - 发布门 7（indexed large viewport query 性能）仍开放；Phase 1 只验证 index 存在、真实 query plan 与 10 万 identity target probe，不包含 viewport/event performance SLO。
 - counter capability 已改为顺序无关、budgeted filter identity 检查，重复/跨 scope identity fail closed；旧限制仅保留为历史记录。
 - data-quality 已使用 typed category，duration 合理上界、负 duration open-ended 与 counter duration 语义已有 Phase 3 regression。
-- source snapshot 在跨卷时可能产生完整复制 IO；large-trace gate 必须记录 source/staging filesystem 前提。
+- source snapshot 在跨卷时可能产生完整复制 IO；该前提已由 benchmark evidence 的 `storage` 块记录（schema `formatVersion: 4`），gate 断言 `sameFilesystem` 不能与两个 device ID 的实际关系相矛盾。`formatVersion: 3` 的历史 evidence 早于该字段，其 source/staging 是否同卷无法从文件本身判定。
 - claim 文件的 stale-owner 策略随 Phase 2 长寿命 cache destination 实现；Phase 1 session destination 使用新 UUID，崩溃残留不被后续 session 复用。
 - source/tool lock、standalone patch、tool archive hashes 与 content-derived recipe 已形成 P3-T10 候选；双 clean-build 已在独立私有 work roots 实跑并产生相同 unsigned binary。
 

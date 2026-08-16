@@ -339,7 +339,7 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 - 将 faultloggerd inline edit 改为独立 patch；
 - 增加 ssh://git@gitee.com/ 形式的 HTTPS rewrite；
 - 为 build recipe 引入基于输入内容的稳定版本；
-- large-trace gate 记录 source/staging 是否同一 filesystem；跨卷 snapshot 的真实复制 IO/空间必须计入验收证据；
-- 避免并行测试通过 `setenv` 修改进程全局 `PATH`，改用隔离的 resolver seam；
+- ~~large-trace gate 记录 source/staging 是否同一 filesystem；跨卷 snapshot 的真实复制 IO/空间必须计入验收证据~~——已完成（2026-08-16）：benchmark evidence 增加 `storage` 块（`sourceFilesystemID`/`stagingFilesystemID`/`sameFilesystem`/`stagedByteCount`），schema 随之升到 `formatVersion: 4`；`scripts/benchmark_phase3.sh` 断言四个键精确闭合、两个 device ID 非零、`sameFilesystem` 必须与两个 ID 的实际关系一致、`stagedByteCount` 必须等于 `traceByteCount`。跨卷运行不被禁止，但不能再被记成同卷；
+- ~~避免并行测试通过 `setenv` 修改进程全局 `PATH`，改用隔离的 resolver seam~~——已完成（2026-08-16）：`TraceStreamerResolver` 与 `ArkTraceBundledParserResolver` 暴露 `candidateExecutableURLs()`，测试断言植入的假二进制不在候选集内，不再改动 process-global 环境。
 
 这些条目应在分发前完成，但不能与 Phase 1 Parser/Store critical path 混为一个长期构建重构。

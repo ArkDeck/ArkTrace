@@ -347,8 +347,8 @@ jq -e \
     --arg parserSHA "$parser_sha" --arg provenanceSHA "$provenance_sha" \
     --arg provenanceSource "$provenance_source" --arg licenseSHA "$license_sha" \
     --argjson dirty "$worktree_dirty" '
-    .formatVersion == 3
-    and ((keys | sort) == ["analysisWorkload","arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","contextWorkload","databaseByteCount","deterministicAnalysisP50Ms","deterministicAnalysisP95Ms","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
+    .formatVersion == 4
+    and ((keys | sort) == ["analysisWorkload","arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","contextWorkload","databaseByteCount","deterministicAnalysisP50Ms","deterministicAnalysisP95Ms","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","storage","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
     and .fixtureClass == $class
     and .arkTraceBaseRevision == $base
     and .workingTreeDirty == ($dirty == 1)
@@ -368,6 +368,11 @@ jq -e \
     and ([.coldOpenMs,.parseMs,.validationMs,.indexMs] | all(type == "number" and . >= 0))
     and ((.machine | keys | sort) == ["architecture","model","operatingSystem","physicalMemoryBytes"])
     and (.machine.physicalMemoryBytes > 0)
+    and ((.storage | keys | sort) == ["sameFilesystem","sourceFilesystemID","stagedByteCount","stagingFilesystemID"])
+    and (.storage.sourceFilesystemID > 0)
+    and (.storage.stagingFilesystemID > 0)
+    and (.storage.sameFilesystem == (.storage.sourceFilesystemID == .storage.stagingFilesystemID))
+    and (.storage.stagedByteCount == .traceByteCount)
     and .iterations == 20
     and .maximumPrimitives == 20000
     and .cacheOpenP95Ms <= 1000

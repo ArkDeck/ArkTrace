@@ -715,6 +715,25 @@ final class ParserIntegrationTests: XCTestCase {
         )
     }
 
+    /// Device ID of the filesystem holding `url`, or 0 when it cannot be read.
+    ///
+    /// Walks up to the nearest existing ancestor, because a staging root is
+    /// session-owned and may already be gone by the time evidence is written -
+    /// the volume that held it is still the volume its parent is on. 0 is
+    /// deliberately not a valid device ID, so a path that resolves to nothing
+    /// reads as unknown rather than silently claiming the source and staging
+    /// roots shared a volume.
+    private static func filesystemID(of url: URL) -> UInt64 {
+        var current = url.standardizedFileURL
+        while true {
+            var info = stat()
+            if stat(current.path, &info) == 0 { return UInt64(info.st_dev) }
+            let parent = current.deletingLastPathComponent().standardizedFileURL
+            guard parent.path != current.path else { return 0 }
+            current = parent
+        }
+    }
+
     private static func machineArchitecture() -> String {
         #if arch(arm64)
         return "arm64"
@@ -2173,6 +2192,22 @@ final class ParserIntegrationTests: XCTestCase {
                 let operatingSystem: String
                 let physicalMemoryBytes: UInt64
             }
+            /// Where the source trace and the staging root actually live.
+            ///
+            /// The parser copies the trace into a session-owned staging
+            /// directory before parsing. When staging is on a different
+            /// filesystem than the source, that copy is a real cross-volume
+            /// transfer whose IO and space do not show up in any of the timing
+            /// fields below - so a large-trace number measured across volumes
+            /// is not comparable to one measured within a volume. Recording the
+            /// device IDs makes which case was measured a fact rather than an
+            /// assumption.
+            struct Storage: Encodable {
+                let sourceFilesystemID: UInt64
+                let stagingFilesystemID: UInt64
+                let sameFilesystem: Bool
+                let stagedByteCount: Int64
+            }
             let formatVersion: Int
             let arkTraceVersion: String
             let arkTraceBaseRevision: String
@@ -2180,6 +2215,7 @@ final class ParserIntegrationTests: XCTestCase {
             let arkTraceTestBinarySHA256: String
             let workingTreeDirty: Bool
             let machine: Machine
+            let storage: Storage
             let fixtureClass: String
             let traceSHA256: String
             let traceByteCount: Int64
@@ -2224,7 +2260,7 @@ final class ParserIntegrationTests: XCTestCase {
             let diagnostics: TraceDatabasePerformanceDiagnostics
         }
         let evidence = Phase3Evidence(
-            formatVersion: 3,
+            formatVersion: 4,
             arkTraceVersion: ArkTraceProduct.version,
             arkTraceBaseRevision: environment["ARKTRACE_BASE_REVISION"] ?? "unknown",
             arkTraceSourceTreeSHA256: try XCTUnwrap(
@@ -2243,6 +2279,13 @@ final class ParserIntegrationTests: XCTestCase {
                 architecture: Self.machineArchitecture(),
                 operatingSystem: ProcessInfo.processInfo.operatingSystemVersionString,
                 physicalMemoryBytes: ProcessInfo.processInfo.physicalMemory
+            ),
+            storage: .init(
+                sourceFilesystemID: Self.filesystemID(of: fixture),
+                stagingFilesystemID: Self.filesystemID(of: staging),
+                sameFilesystem: Self.filesystemID(of: fixture)
+                    == Self.filesystemID(of: staging),
+                stagedByteCount: metadata.sourceByteCount
             ),
             fixtureClass: fixtureClass,
             traceSHA256: metadata.traceSHA256,
