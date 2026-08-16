@@ -109,18 +109,20 @@ verify_candidate_app() {
         'Print :CFBundleDocumentTypes:0:CFBundleTypeRole' \
         "$candidate_app/Contents/Info.plist")" = "Viewer" \
         || fail "$candidate_name document role drifted"
-    test "$(/usr/libexec/PlistBuddy -c \
-        'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:0' \
-        "$candidate_app/Contents/Info.plist")" = "htrace" \
-        || fail "$candidate_name htrace document registration drifted"
-    test "$(/usr/libexec/PlistBuddy -c \
-        'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:1' \
-        "$candidate_app/Contents/Info.plist")" = "systrace" \
-        || fail "$candidate_name systrace document registration drifted"
-    test "$(/usr/libexec/PlistBuddy -c \
-        'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:2' \
-        "$candidate_app/Contents/Info.plist")" = "trace" \
-        || fail "$candidate_name trace document registration drifted"
+    # Compare the whole registered set against the tracked source plist rather
+    # than against positional literals. Adding one extension used to shift
+    # every later index and fail as if an unrelated type had been dropped, and
+    # a literal list here is a fourth copy that has to be kept in step by hand.
+    # ArkTraceAppSupport.supportedTraceExtensions is the reviewed root, and
+    # AppDistributionTests binds it to the source plist this reads.
+    declared_document_types=$(plutil -extract \
+        CFBundleDocumentTypes.0.CFBundleTypeExtensions json -o - \
+        "$repo_root/Apps/ArkTraceApp/Info.plist") \
+        || fail "tracked Info.plist document types are unreadable"
+    test "$(plutil -extract CFBundleDocumentTypes.0.CFBundleTypeExtensions \
+        json -o - "$candidate_app/Contents/Info.plist")" \
+        = "$declared_document_types" \
+        || fail "$candidate_name document registration drifted from the tracked Info.plist"
     test "$(lipo -archs "$executable")" = "arm64" \
         || fail "$candidate_name is not arm64-only"
     codesign -d --entitlements :- "$candidate_app" >"$entitlements_file" 2>/dev/null \
