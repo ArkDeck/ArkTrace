@@ -597,6 +597,32 @@ final class TimelineRenderingTests: XCTestCase {
         view.cacheDisplay(in: view.bounds, to: image)
     }
 
+    func testPanDeltaSaturatesAndRejectsNonFinitePointDeltas() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: .max),
+            widthPoints: 128,
+            heightPoints: 80,
+            generation: 1
+        )
+        // AppKit supplies the point delta. A non-finite value is not a pan and
+        // must not reach the Int64 conversion: NaN compares false against both
+        // saturation bounds, so an unguarded conversion would trap.
+        XCTAssertEqual(viewport.nanosecondDelta(forPoints: .nan), 0)
+        XCTAssertEqual(viewport.nanosecondDelta(forPoints: .signalingNaN), 0)
+        XCTAssertEqual(viewport.nanosecondDelta(forPoints: .infinity), .max)
+        XCTAssertEqual(viewport.nanosecondDelta(forPoints: -.infinity), .min)
+        XCTAssertEqual(viewport.nanosecondDelta(forPoints: 0), 0)
+
+        let fine = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 2
+        )
+        XCTAssertEqual(fine.nanosecondDelta(forPoints: 10), 100)
+        XCTAssertEqual(fine.nanosecondDelta(forPoints: -10), -100)
+    }
+
     func testViewportRejectsNonFiniteNanosecondsPerPoint() throws {
         XCTAssertThrowsError(
             try TimelineViewport(

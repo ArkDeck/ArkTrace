@@ -298,6 +298,10 @@ final class TraceDatabase {
             if progressController != nil {
                 sqlite3_progress_handler(handle, 0, nil, nil)
             }
+            // SQLite holds an unretained pointer to the controller for the
+            // whole statement, so its lifetime must outlive the step loop and
+            // end only after the handler is detached. Matches `execute`.
+            withExtendedLifetime(progressController) {}
         }
 
         for (offset, binding) in bindings.enumerated() {

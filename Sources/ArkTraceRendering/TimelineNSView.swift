@@ -697,11 +697,7 @@ public final class TimelineNSView: NSView {
         case .panBackward, .panForward:
             let points = source.viewport.widthPoints * 0.1
                 * (command == .panBackward ? -1 : 1)
-            let raw = points * source.viewport.nsPerPoint
-            let delta: Int64
-            if raw >= Double(Int64.max) { delta = .max }
-            else if raw <= Double(Int64.min) { delta = .min }
-            else { delta = Int64(raw.rounded()) }
+            let delta = source.viewport.nanosecondDelta(forPoints: points)
             guard let target = try? TimelineInteraction.pan(
                 range: source.viewport.range, deltaNs: delta, within: bounds
             ), target != source.viewport.range else { return nil }

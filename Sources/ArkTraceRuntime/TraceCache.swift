@@ -2575,13 +2575,20 @@ enum TraceContentAddressedCache {
 }
 
 public struct TraceCacheWatermarks: Hashable, Sendable {
-    public static let standard = try! TraceCacheWatermarks(
-        highBytes: 20 * 1_024 * 1_024 * 1_024,
-        lowBytes: 16 * 1_024 * 1_024 * 1_024
+    /// AT-CACHE-004 defaults. Built through the private initializer so the
+    /// reviewed constants cannot trap at load time.
+    public static let standard = TraceCacheWatermarks(
+        reviewedHighBytes: 20 * 1_024 * 1_024 * 1_024,
+        reviewedLowBytes: 16 * 1_024 * 1_024 * 1_024
     )
 
     public let highBytes: Int64
     public let lowBytes: Int64
+
+    private init(reviewedHighBytes: Int64, reviewedLowBytes: Int64) {
+        highBytes = reviewedHighBytes
+        lowBytes = reviewedLowBytes
+    }
 
     public init(
         highBytes: Int64 = 20 * 1_024 * 1_024 * 1_024,
