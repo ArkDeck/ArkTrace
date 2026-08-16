@@ -40,24 +40,19 @@ fi
 
 # Pinned identity must match the distribution this evidence was recorded against.
 #
-# These are deliberately NOT the currently pinned distribution. The retained
+# These follow the retained rounds, not whatever is pinned right now. The
 # evidence is a real two-round device run, so its tool and parser identity are
-# frozen at whatever shipped when it was captured; rewriting these constants to
-# follow a re-pin would only assert that the recorded bytes had been edited.
+# frozen at what shipped when it was captured; editing these constants without
+# re-running the scenario would assert only that the recorded bytes had been
+# changed.
 #
-# The 2026-08-16 re-pin therefore left Phase 6 attesting to a retired binary:
-# tool a7859d69… / parser 66887fae… now ship, while the rounds below ran on
-# 0c552cba… / 2e831626…. Closing that gap needs the DAYU 200 scenario in
-# docs/PHASE_6_SCENARIO.md re-run on the current pin — it cannot be done on the
-# host. Until then this gate proves the retained run is intact, not that the
-# shipping distribution has been exercised end to end on a device.
-#
-# The analysis half of that chain has since been verified on the current pin
-# against a fresh 948 KB DAYU 200 capture — see docs/PHASE_6_VERIFICATION.md
-# §7.2. What remains uncovered here is the two-round debug loop: host compile,
-# HAP import/sign, debug.hap@1 deploy, and the frozen comparison judgement.
-expected_tool=0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65
-expected_parser=2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5
+# The 2026-08-16 CLI re-pin therefore did not update them on its own — it left
+# this gate attesting a retired binary until the DAYU 200 scenario in
+# docs/PHASE_6_SCENARIO.md was re-run. That re-run has happened: both rounds
+# below were captured on the shipping distribution and reached the same verdict,
+# so tool and parser move together with the evidence here.
+expected_tool=a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa
+expected_parser=66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9
 expected_revision=447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6
 [ "$(jq -r '.toolIdentity.arkTraceBuildRevision' "$evidence")" = "$expected_tool" ] \
     || fail "ArkTrace build revision drifted from the pinned distribution"
@@ -125,9 +120,17 @@ jq -er '.comparison.identityMapping | test("pid")' "$evidence" >/dev/null \
     || fail "cross-round identity mapping is not recorded"
 pass "cross-round identity mapping recorded"
 
-# Discarded attempts must stay visible: a silently dropped run is a rewritten result.
-[ "$(jq -r '.discardedAttempts | length' "$evidence")" -ge 1 ] \
+# Discarded attempts must stay visible: a silently dropped run is a rewritten
+# result. A run that discarded nothing is a legitimate outcome, but it has to say
+# so — an empty list on its own is indistinguishable from an omitted one, so it
+# only passes when the evidence also states why there was nothing to discard.
+jq -e '.discardedAttempts | type == "array"' "$evidence" >/dev/null 2>&1 \
     || fail "discarded attempts were not recorded"
+if [ "$(jq -r '.discardedAttempts | length' "$evidence")" -eq 0 ]; then
+    jq -er 'select((.noDiscardedAttemptsReason // "") != "") | .noDiscardedAttemptsReason' \
+        "$evidence" >/dev/null 2>&1 \
+        || fail "an empty discarded-attempt list carries no explanation"
+fi
 jq -er '.discardedAttempts[] | select((.reason // "") == "") | .captureJobID' "$evidence" >/dev/null 2>&1 \
     && fail "a discarded attempt has no reason"
 pass "discarded attempts recorded with reasons"
