@@ -25,14 +25,90 @@ public enum TraceAccessibilityPriority: String, Hashable, Codable, Sendable {
     case urgent
 }
 
+/// Closed set of VoiceOver announcements.
+///
+/// Same reason as `TraceAppErrorTitle`: AppSupport is a library target, and
+/// giving it a resource bundle would make SwiftPM's generated `Bundle.module`
+/// accessor embed its build-machine path in the shipped binary. The message
+/// therefore crosses the module boundary as a key plus its numeric argument,
+/// and the App resolves it against the catalog (AT-APP-010).
+public enum TraceAccessibilityMessage: Hashable, Codable, Sendable {
+    case openingTrace
+    case openingCancelled
+    case traceClosed
+    case traceCloseFailed
+    case traceOpenFailed
+    case operationFailed
+    case rangeAnalysisComplete
+    case traceLoadedWithoutTimedEvents
+    case traceLoadedWithVisibleTracks(Int)
+    case searchFoundResults(Int)
+    case searchFoundAtLeastResults(Int)
+    case error(TraceAppErrorTitle)
+
+    public var localizationKey: String {
+        switch self {
+        case .openingTrace: "a11y.announce.openingTrace"
+        case .openingCancelled: "a11y.announce.openingCancelled"
+        case .traceClosed: "a11y.announce.traceClosed"
+        case .traceCloseFailed: "a11y.announce.traceCloseFailed"
+        case .traceOpenFailed: "a11y.announce.traceOpenFailed"
+        case .operationFailed: "a11y.announce.operationFailed"
+        case .rangeAnalysisComplete: "a11y.announce.rangeAnalysisComplete"
+        case .traceLoadedWithoutTimedEvents: "a11y.announce.traceLoadedWithoutTimedEvents"
+        case .traceLoadedWithVisibleTracks: "a11y.announce.traceLoadedWithVisibleTracks"
+        case .searchFoundResults: "a11y.announce.searchFoundResults"
+        case .searchFoundAtLeastResults: "a11y.announce.searchFoundAtLeastResults"
+        case .error(let title): title.rawValue
+        }
+    }
+
+    /// The single `%lld` argument the key expects, if any.
+    public var countArgument: Int? {
+        switch self {
+        case .traceLoadedWithVisibleTracks(let value),
+            .searchFoundResults(let value),
+            .searchFoundAtLeastResults(let value):
+            value
+        default:
+            nil
+        }
+    }
+
+    public var sourceText: String {
+        switch self {
+        case .openingTrace: "Opening trace"
+        case .openingCancelled: "Opening cancelled"
+        case .traceClosed: "Trace closed"
+        case .traceCloseFailed: "Trace close failed"
+        case .traceOpenFailed: "Trace failed"
+        case .operationFailed: "Operation failed"
+        case .rangeAnalysisComplete: "Range analysis complete"
+        case .traceLoadedWithoutTimedEvents: "Trace loaded, no timed events"
+        case .traceLoadedWithVisibleTracks(let value): "Trace loaded, \(value) visible tracks"
+        case .searchFoundResults(let value): "Search found \(value) results"
+        case .searchFoundAtLeastResults(let value): "Search found at least \(value) results"
+        case .error(let title): title.sourceText
+        }
+    }
+}
+
 public struct TraceAccessibilityAnnouncement: Hashable, Codable, Sendable {
     public let revision: UInt64
+    public let kind: TraceAccessibilityMessage
+    /// Source-language rendering. Kept so a caller that cannot localize still
+    /// has something to say.
     public let message: String
     public let priority: TraceAccessibilityPriority
 
-    public init(revision: UInt64, message: String, priority: TraceAccessibilityPriority) {
+    public init(
+        revision: UInt64,
+        kind: TraceAccessibilityMessage,
+        priority: TraceAccessibilityPriority
+    ) {
         self.revision = revision
-        self.message = String(message.prefix(512))
+        self.kind = kind
+        self.message = String(kind.sourceText.prefix(512))
         self.priority = priority
     }
 }
@@ -288,7 +364,7 @@ public final class TraceDocumentController {
         sourceURL = url.standardizedFileURL
         phase = .loading(.preparing)
         errorPresentation = nil
-        announce("Opening trace")
+        announce(.openingTrace)
         openTask = Task { [weak self] in
             await self?.performOpen(url.standardizedFileURL, generation: generation)
         }
@@ -303,7 +379,7 @@ public final class TraceDocumentController {
         cancelOutstandingWork()
         documentGeneration &+= 1
         phase = sourceURL == nil ? .idle : .loading(.cancelled)
-        announce("Opening cancelled")
+        announce(.openingCancelled)
     }
 
     public func close() async {
@@ -314,12 +390,12 @@ public final class TraceDocumentController {
             if let closing { try await closing.close() }
             document = nil
             resetDocumentState()
-            announce("Trace closed")
+            announce(.traceClosed)
         } catch {
             let typed = Self.typed(error, stage: .openingDatabase)
             errorPresentation = TraceAppErrorPresentation(error: typed)
             phase = .failed
-            announce(errorPresentation?.title ?? "Trace close failed", priority: .urgent)
+            announce(errorAnnouncement(fallback: .traceCloseFailed), priority: .urgent)
         }
     }
 
@@ -370,7 +446,7 @@ public final class TraceDocumentController {
                     guard let self, self.documentGeneration == generation,
                         self.selectedRange == range else { return }
                     self.rangeAnalysis = value
-                    self.announce("Range analysis complete")
+                    self.announce(.rangeAnalysisComplete)
                 }
             } catch {
                 self?.presentNonfatal(error, generation: generation)
@@ -401,8 +477,8 @@ public final class TraceDocumentController {
                     self.isSearching = false
                     self.announce(
                         result.truncated
-                            ? "Search found at least \(result.items.count) results"
-                            : "Search found \(result.items.count) results"
+                            ? .searchFoundAtLeastResults(result.items.count)
+                            : .searchFoundResults(result.items.count)
                     )
                 }
             } catch {
@@ -605,8 +681,10 @@ public final class TraceDocumentController {
             phase = .ready
             announce(
                 catalog.metadata.durationNs == 0
-                    ? "Trace loaded, no timed events"
-                    : "Trace loaded, \(catalog.groups.flatMap(\.tracks).filter { !$0.isCollapsed }.count) visible tracks"
+                    ? .traceLoadedWithoutTimedEvents
+                    : .traceLoadedWithVisibleTracks(
+                        catalog.groups.flatMap(\.tracks).filter { !$0.isCollapsed }.count
+                    )
             )
             scheduleCacheMaintenance()
         } catch {
@@ -615,11 +693,11 @@ public final class TraceDocumentController {
             let typed = Self.typed(error, stage: .openingDatabase)
             if typed.code == .cancelled || Task.isCancelled {
                 phase = .loading(.cancelled)
-                announce("Opening cancelled")
+                announce(.openingCancelled)
             } else {
                 errorPresentation = TraceAppErrorPresentation(error: typed)
                 phase = .failed
-                announce(errorPresentation?.title ?? "Trace failed", priority: .urgent)
+                announce(errorAnnouncement(fallback: .traceOpenFailed), priority: .urgent)
             }
         }
     }
@@ -849,19 +927,27 @@ public final class TraceDocumentController {
         let typed = Self.typed(error, stage: .analyzing)
         guard typed.code != .cancelled else { return }
         errorPresentation = TraceAppErrorPresentation(error: typed)
-        announce(errorPresentation?.title ?? "Operation failed", priority: .urgent)
+        announce(errorAnnouncement(fallback: .operationFailed), priority: .urgent)
     }
 
     private func announce(
-        _ message: String,
+        _ kind: TraceAccessibilityMessage,
         priority: TraceAccessibilityPriority = .polite
     ) {
         announcementRevision &+= 1
         accessibilityAnnouncement = TraceAccessibilityAnnouncement(
             revision: announcementRevision,
-            message: message,
+            kind: kind,
             priority: priority
         )
+    }
+
+    /// The banner already decided which typed title this error shows; the
+    /// announcement must say the same thing.
+    private func errorAnnouncement(
+        fallback: TraceAccessibilityMessage
+    ) -> TraceAccessibilityMessage {
+        errorPresentation.map { .error($0.titleKey) } ?? fallback
     }
 
     private static func typed(

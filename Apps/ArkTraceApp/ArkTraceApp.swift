@@ -282,6 +282,7 @@ private struct TraceViewerRootView: View {
                             selectedEventKey: controller.selectedEvent?.key,
                             focusRequestID: controller.timelineFocusRequestID,
                             interactionBounds: controller.timelineBounds,
+                            accessibilityLabelText: String(localized: "a11y.timeline.label"),
                             onSelectEvent: controller.selectEvent,
                             onHoverEvent: controller.hoverEvent,
                             onSelectRange: controller.selectRange,
@@ -503,6 +504,21 @@ private struct TraceViewerRootView: View {
         if panel.runModal() == .OK, let url = panel.url { controller.open(url) }
     }
 
+    /// AppSupport hands over a key and, for the counted messages, one numeric
+    /// argument. Resolving here keeps the string catalog in the app bundle
+    /// instead of giving a library target a resource bundle.
+    private func localizedAnnouncement(
+        _ announcement: TraceAccessibilityAnnouncement
+    ) -> String {
+        let format = NSLocalizedString(
+            announcement.kind.localizationKey,
+            value: announcement.message,
+            comment: "VoiceOver announcement"
+        )
+        guard let count = announcement.kind.countArgument else { return format }
+        return String(format: format, count)
+    }
+
     private func postAccessibilityAnnouncement(
         _ announcement: TraceAccessibilityAnnouncement
     ) {
@@ -511,7 +527,7 @@ private struct TraceViewerRootView: View {
             notification: .announcementRequested,
             userInfo:
             [
-                .announcement: announcement.message,
+                .announcement: localizedAnnouncement(announcement),
                 .priority: NSNumber(
                     value: announcement.priority == .urgent ? 90 : 50
                 ),

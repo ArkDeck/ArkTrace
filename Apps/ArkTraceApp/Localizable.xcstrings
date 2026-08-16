@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "ArkTrace and third-party license notices": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ArkTrace- und Drittanbieter-Lizenzhinweise"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ArkTrace and third-party license notices"
+          }
+        }
+      }
+    },
     "Hide Inspector": {
       "comment": "Button that collapses the Inspector pane.",
       "localizations": {
@@ -19,6 +36,210 @@
           "stringUnit": {
             "state": "translated",
             "value": "Informationsbereich wieder einblenden"
+          }
+        }
+      }
+    },
+    "a11y.announce.openingCancelled": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnen abgebrochen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening cancelled"
+          }
+        }
+      }
+    },
+    "a11y.announce.openingTrace": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace wird geöffnet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening trace"
+          }
+        }
+      }
+    },
+    "a11y.announce.operationFailed": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorgang fehlgeschlagen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Operation failed"
+          }
+        }
+      }
+    },
+    "a11y.announce.rangeAnalysisComplete": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereichsanalyse abgeschlossen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Range analysis complete"
+          }
+        }
+      }
+    },
+    "a11y.announce.searchFoundAtLeastResults": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suche fand mindestens %lld Ergebnisse"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search found at least %lld results"
+          }
+        }
+      }
+    },
+    "a11y.announce.searchFoundResults": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suche fand %lld Ergebnisse"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search found %lld results"
+          }
+        }
+      }
+    },
+    "a11y.announce.traceCloseFailed": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen des Trace fehlgeschlagen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace close failed"
+          }
+        }
+      }
+    },
+    "a11y.announce.traceClosed": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace geschlossen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace closed"
+          }
+        }
+      }
+    },
+    "a11y.announce.traceLoadedWithVisibleTracks": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace geladen, %lld sichtbare Spuren"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace loaded, %lld visible tracks"
+          }
+        }
+      }
+    },
+    "a11y.announce.traceLoadedWithoutTimedEvents": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace geladen, keine zeitbehafteten Ereignisse"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace loaded, no timed events"
+          }
+        }
+      }
+    },
+    "a11y.announce.traceOpenFailed": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace fehlgeschlagen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace failed"
+          }
+        }
+      }
+    },
+    "a11y.timeline.label": {
+      "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace-Zeitleiste"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace Timeline"
           }
         }
       }
