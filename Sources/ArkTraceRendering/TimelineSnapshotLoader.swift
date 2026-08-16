@@ -22,7 +22,11 @@ public actor TimelineSnapshotLoader {
         var issues: [TraceDataQualityIssue] = []
         let fairBudget = visible.isEmpty ? 0 : remaining / visible.count
         let prefetchedDensities: [TraceDensityResult]?
-        if fairBudget >= 1 {
+        // Density is the LOD estimate. When the caller has already committed
+        // to detail -- search reveal, for one -- the aggregate is computed and
+        // then thrown away, so every visible track pays for two indexed scans
+        // instead of one.
+        if fairBudget >= 1, request.preference != .detail {
             let bucketCount = max(
                 1, min(max(1, request.pixelWidth / 16), fairBudget)
             )
@@ -98,6 +102,21 @@ public actor TimelineSnapshotLoader {
         // are deliberately non-selectable and rendering may expand one across
         // several pixels; exact domain ranges and event counts stay intact.
         let bucketLimit = max(1, min(max(1, request.pixelWidth / 16), budget))
+        // An explicit detail request needs no estimate. `detailPrimitives`
+        // already reports an unavailable capability as an empty track and
+        // carries its own data-quality issues, so nothing is lost by not
+        // asking for the aggregate first.
+        guard request.preference != .detail else {
+            return try await detailPrimitives(
+                for: track,
+                range: request.viewport.range,
+                limit: budget,
+                deadline: request.deadline,
+                focusedEventKey: request.focusedEventKey,
+                repository: repository,
+                qualityIssues: &qualityIssues
+            )
+        }
         let density = if let prefetchedDensity {
             prefetchedDensity
         } else {

@@ -824,6 +824,58 @@ final class TimelineRenderingTests: XCTestCase {
         XCTAssertEqual(requestedSources, [source])
     }
 
+    func testExplicitDetailRequestSkipsTheDensityEstimateEntirely() async throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 100, endNs: 500),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 9
+        )
+        let slice = TraceSlice(
+            key: EventKey(table: .callstack, rowID: 3),
+            range: try TraceTimeRange(startNs: 150, endNs: 250),
+            threadKey: ThreadKey(itid: 1),
+            processKey: nil,
+            name: "revealed",
+            category: nil,
+            depth: nil,
+            parentEventKey: nil,
+            isAsync: false,
+            isOpenEnded: false
+        )
+        let repository = DensityRepository(
+            eventCount: 1,
+            slicePage: TraceEventPage(items: [slice], truncated: false)
+        )
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: [
+                TrackDescriptor(title: "thread 1", source: .namedSlice(ThreadKey(itid: 1)))
+            ],
+            pixelWidth: 100,
+            generation: viewport.generation,
+            preference: .detail,
+            maximumPrimitives: 20,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let snapshot = try await TimelineSnapshotLoader().load(
+            request, repository: repository
+        )
+
+        // Density is the LOD estimate. A caller that already asked for detail
+        // -- search reveal does -- used to pay for the aggregate anyway and
+        // then discard it, doubling the indexed scans per visible track.
+        let requestedSources = await repository.densitySources()
+        XCTAssertEqual(requestedSources, [], "detail mode must not estimate")
+        XCTAssertEqual(snapshot?.tracks.first?.primitives.count, 1)
+        XCTAssertTrue(
+            snapshot?.tracks.first?.primitives.allSatisfy {
+                if case .detail = $0 { return true }
+                return false
+            } == true
+        )
+    }
+
     func testZoomedOutLoaderUsesBoundedNonSelectableDensity() async throws {
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 0, endNs: 1_000_000),
