@@ -51,6 +51,11 @@ fi
 # docs/PHASE_6_SCENARIO.md re-run on the current pin — it cannot be done on the
 # host. Until then this gate proves the retained run is intact, not that the
 # shipping distribution has been exercised end to end on a device.
+#
+# The analysis half of that chain has since been verified on the current pin
+# against a fresh 948 KB DAYU 200 capture — see docs/PHASE_6_VERIFICATION.md
+# §7.2. What remains uncovered here is the two-round debug loop: host compile,
+# HAP import/sign, debug.hap@1 deploy, and the frozen comparison judgement.
 expected_tool=0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65
 expected_parser=2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5
 expected_revision=447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6
