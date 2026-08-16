@@ -66,6 +66,28 @@ P6-T01 要求在采集前写定成功标准。要写出**可测**的标准，必
   含二者），**不代表**无法解析进程/线程；deep analysis 能解析出 65 个进程、143 个线程；
 - `analyzer.analyze-trace@1` 当前在本机**不可用**，原因见第 11 节。
 
+## 1.1 被测 demo 已拆分（2026-08-16，闭环完成之后）
+
+本次闭环跑在 `WaterFlowLayoutDemo` 上，而那个工程同时承载着 ArkDeck 的 GJ-5 崩溃 demo——
+它的正常行为就是启动约 12 秒后由 `CrashProbe` 主动 abort 进程。两个目的直接冲突：进程一崩，
+任何 10 秒采集窗口里都没有持续负载可测（§7 三次被丢弃的采集里有两次就是这个原因）。
+
+因此闭环完成后把两者拆成了两个工程，各自只做一件事：
+
+| 工程 | 服务对象 | 关键机制 | 期望终态 |
+|---|---|---|---|
+| `WaterFlowLayoutDemo` | ArkDeck 自动调试闭环 | `CrashProbe.ENABLED`（已恢复为 `true`） | 进程崩溃并留下 fault block |
+| `WaterFlowTraceDemo` | ArkTrace 真实调试闭环 | `TraceWorkload` 确定性负载 | 进程存活并稳定产出可比较的工作量 |
+
+**后续重跑本场景应使用 `WaterFlowTraceDemo`。** 它把负载驱动与 reload 策略收敛成三个显式开关
+（`DRIVER_ENABLED` / `RELOAD_INTERVAL_MS` / `USE_BLANKET_RELOAD`），把 `USE_BLANKET_RELOAD`
+从 `true` 翻成 `false` 就是本次闭环施加的那处变更，因而闭环可被原样复现，而不必再临时改源码。
+
+两个工程的 `bundleName` 仍同为 `com.example.waterflowdemo`：本机 OpenHarmony 签名 profile 就是
+按该 bundle 签发的，改名后签不了名也就装不上。所以设备上同一时刻只装其中一个。第 2 节记录的
+identity 因此仍然成立，本文件的冻结内容与已归档证据不受该拆分影响——拆分发生在比较判定之后，
+且没有改变任何已记录的数字。
+
 ## 2. 被测对象身份
 
 | 项 | 值 |

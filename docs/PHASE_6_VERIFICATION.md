@@ -117,6 +117,13 @@ Owner：ArkDeck analyzer envelope validator（或按「窗口裁剪」解读契�
 场景物理前置条件（非被测变更，已记录）：唤醒并解锁屏幕、息屏超时改为 1,800,000 ms、
 关闭 App 内 crash probe（`CrashProbe.ENABLED = false`）。
 
+**闭环后的 demo 拆分**：上面那个 crash probe 开关暴露了结构问题——同一个工程同时承载 ArkDeck
+的崩溃 demo 与 ArkTrace 的性能 demo，两者期望终态相反。判定完成后拆为两个工程：
+`WaterFlowLayoutDemo` 恢复为 ArkDeck 崩溃 demo（`CrashProbe.ENABLED = true`，ArkDeck 侧 pin 的
+路径 / 模块 / 产物 / bundle / 崩溃签名保持不变），新增 `WaterFlowTraceDemo` 承载本场景，
+负载与 reload 策略收敛为 `TraceWorkload` 的三个显式开关。后续重跑用后者。拆分发生在比较判定
+之后，未改动任何已记录的数字。详见 PHASE_6_SCENARIO.md §1.1。
+
 ## 8. 审计结果
 
 | 项 | 结果 |
