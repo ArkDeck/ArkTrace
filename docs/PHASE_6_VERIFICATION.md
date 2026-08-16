@@ -160,19 +160,41 @@ ArkTrace 只 trace 正在跑的进程。后续重跑把 `MODE` 设为 `traceWork
 
 ## 8. 审计结果
 
+`scripts/test_phase5.sh` 会串起 Phase 1→2→3→4→5 的整条链，以下为其单次完整执行的结果
+（parser `e0167fbb…`，树为 `356abef` rebase 到当日 main 之后）：
+
 | 项 | 结果 |
 |---|---|
-| `scripts/test_phase6.sh` | 全部 12 项检查通过 |
-| `scripts/test_phase1.sh` | 通过；343 tests，0 skipped，parser `e0167fbb…` |
-| `scripts/test_phase2.sh` | 通过；343 tests，0 skipped；cache-open p95 25.076 ms（目标 ≤1 s）、metadata p95 0.000375 ms；CLI typed error/timeout/cancel status 全部符合契约 |
-| `scripts/verify_licenses.sh` | 通过；product=MIT，components=14，buildTools=2 |
+| `scripts/test_phase1.sh` | 通过；349 tests，0 skipped |
+| `scripts/test_phase2.sh` | 通过；351 tests，0 skipped；cache-open p95 28.805 ms（目标 ≤1 s）、metadata p95 0.000667 ms；CLI typed error/timeout/cancel status 全部符合契约 |
+| TraceStreamer build safety | 通过；外部 git 仓库未被改动 |
+| `scripts/verify_licenses.sh` | 通过；product=MIT，components=14，buildTools=2；fail-closed 负例成立 |
+| htrace integrity verifier | 通过；截断/摘要/分帧/拼接/重复/索引溢出全部被拒 |
+| Phase 3 benchmark contract | 通过；自证 large provenance 被拒 |
+| Phase 3 distribution contract | 通过；inner-first 签名、evidence 绑定、staple 先于 ZIP |
+| `scripts/test_phase3_batch1.sh` | 通过；继承 Phase 2 + app candidate + pinned parser |
+| Phase 3 medium benchmark | 通过；warm-up 不发布证据，正式轮发布 `sha256=00691e21…` |
+| Phase 4 Agent contract | 通过；真实 process/thread/query/context/analyze 路径确定且 path-free |
+| Phase 4 batch gate | 通过；继承 candidate + 真实 Agent CLI + 生产 Context/Analysis 性能 |
+| Phase 5 CLI distribution contract | 通过；两条 “verification failed” 是负例——被篡改的树必须被拒，且拒绝信息有界、不含路径 |
+| `scripts/test_phase5.sh` | **通过**；继承 medium gate + CLI distribution + 真实 ArkDeck capture→persisted summary Artifact |
+| `scripts/test_phase6.sh` | 通过；全部 12 项检查 |
 | 证据无用户绝对路径 | gate 内 grep 断言通过 |
 | 无 GUI automation / 无人读日志作证据 | 证据包声明 + gate 断言 |
 | 无 raw SQL、无设备权限 | ArkTrace 仅经 typed analyzer operation 被调用；capture/deploy 由 ArkDeck 执行 |
 | 隐私 | 证据只记录被测 App 自身 identity，未导出第三方 process/thread name |
 
-Phase 3/4/5 的完整 gate 依赖 large trace fixture、notarization 与签名分发等外部输入，
-本轮未重跑；其既有关闭证据未被本轮改动触及。
+**未能执行的部分**：Phase 3/4 的**完整**发布 gate 需要三项本机不存在的外部输入——
+`ARKTRACE_LARGE_TRACE`（674 MB DAYU 200 trace，存于 git 外的 content-addressed 外部存储）、
+`ARKTRACE_REVIEWED_SIGNED_APP` 与 `ARKTRACE_ACCESSIBILITY_EVIDENCE`。缺失时它们按设计 fail closed，
+未被伪装成通过；其既有关闭证据（发布门 6/7、Phase 4 large exit）由 retained signed evidence 承载，
+未被本轮任何改动触及。
+
+**一次首跑失败的定性**：`test_phase5.sh` 首次执行在末尾报
+`Phase 4 Agent contract failed: inspect-medium command failed`。排查确认这**不是回归**：
+`fetch_phase3_fixtures.sh` 需要从上游克隆 265 MB 的 `pbreader.htrace`，冷启动时尚未就绪。
+fixture 落地并通过 byte count / SHA-256 / git blob 三重校验后，该 gate 单独执行通过，
+随后的完整重跑（即上表）亦全部通过。
 
 ## 9. 发布门 10
 
