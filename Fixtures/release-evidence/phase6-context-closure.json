@@ -1,0 +1,70 @@
+{
+  "formatVersion": 1,
+  "recordedAtUTC": "2026-08-16T12:10:00Z",
+  "purpose": "close the last open Phase 6 finding: analyzer.analyze-trace@1 kind=context was refused on real traces, leaving PHASE_6_SCENARIO.md section 6 item 4 unmet",
+  "finding": {
+    "previouslyOpenIn": "phase6-real-debug-loop.json openFindings.contextCounterSampleWindow",
+    "originalFailureJobID": "job-f06a3f3df9166acb161ebea3b537a219",
+    "originalReason": "analyzer.schemaMismatch: trace-analysis@1 produced JSON outside ArkTrace analysis contract 1.0",
+    "rootCause": "a counter is a step function, so the value in force at a window's start was written before the window; ArkTrace carries that sample in, while ArkDeck validateCounterSample required every sample timestamp to satisfy timestamp >= startNs",
+    "status": "closed"
+  },
+  "fix": {
+    "owner": "ArkDeck",
+    "pullRequest": "ArkDeck#1318",
+    "branch": "agent/task-ati-001-context-counter-carry-in",
+    "commit": "28af92cb",
+    "rule": "a sample before the window is admitted only when it declares a durationNs whose end reaches the window, and a series accepts at most one such sample; in-window samples and the exclusive far edge are unchanged"
+  },
+  "daemonUnderTest": {
+    "builtFrom": "ArkDeck#1318 branch head",
+    "executableSHA256": "916f7ff0455d16f33cf34642adccf0cb9ebb99d62308147e9368405cda17cc23",
+    "daemonFingerprint": "14df3d4e4db4cf2d7fe64293ccefe866ef3a588c32b42c21495fa1bfd8a60693",
+    "signingReceiptRefreshed": true,
+    "signingOperationStillAvailable": true
+  },
+  "endToEndVerification": {
+    "baselineRound": {
+      "jobID": "job-1b81c838b4c19c8a9fe60d4efecfc6f7",
+      "state": "succeeded",
+      "sourceTraceArtifactID": "ART-d15ec022b82871520761843726e84c74",
+      "requestIdenticalToOriginalFailure": true,
+      "timestampNs": 7060484760,
+      "artifactID": "ART-38337b6f2d0dd2533f945639f75528cc",
+      "byteCount": 203241,
+      "windowStartNs": 7010484760,
+      "windowEndNs": 7110484760,
+      "processes": 59,
+      "threads": 163,
+      "slices": 167,
+      "cpuSlices": 72,
+      "carryInSamples": [
+        {"timestampNs": 6973870999, "durationNs": 63024001, "reachesNs": 7036895000},
+        {"timestampNs": 6973805999, "durationNs": 42263001, "reachesNs": 7016069000},
+        {"timestampNs": 6945057000, "durationNs": 87479000, "reachesNs": 7032536000},
+        {"timestampNs": 6954788999, "durationNs": 79071000, "reachesNs": 7033859999}
+      ],
+      "carryInPerSeries": [1, 1, 1, 1],
+      "carryInRuleSatisfied": "every carry-in reaches past the window start and no series carries more than one"
+    },
+    "followupRound": {
+      "jobID": "job-452aa3efa09ebc728eddfe7a77c92ef0",
+      "state": "succeeded",
+      "sourceTraceArtifactID": "ART-6bc7bd624e10c257e5a256aeda55ddc5",
+      "timestampNs": 5000000000,
+      "artifactID": "ART-e70e7aeb212f2bb156b19eaa2c47ce91",
+      "byteCount": 97333
+    }
+  },
+  "scenarioImpact": {
+    "section": "PHASE_6_SCENARIO.md section 6 item 4",
+    "requirement": "at least one context result around the hottest interval",
+    "previously": "unmet",
+    "now": "met for both rounds",
+    "metricsAffected": "none; M1 to M5 never depended on the context kind, so the recorded improved verdict is unchanged"
+  },
+  "privacy": {
+    "absoluteUserPathsIncluded": false,
+    "thirdPartyProcessNamesIncluded": false
+  }
+}

@@ -91,18 +91,30 @@ PHASE_6_SCENARIO.md §0。
 M4 无信号 → **improved**。`scripts/test_phase6.sh` 会从记录的数字重新推导该判定，
 不接受仅由文字声明的结论。
 
-## 6. 仍然开放的 finding
+## 6. 曾经开放的 finding（已关闭）
 
-`analyzer.analyze-trace@1` 的 `kind=context` 在真实 trace 上被拒
+`analyzer.analyze-trace@1` 的 `kind=context` 一度在真实 trace 上被拒
 （`job-f06a3f3df9166acb161ebea3b537a219`，`analyzer.schemaMismatch`）。
 
 根因：counter 是阶梯函数，ArkTrace 会带上窗口前最后一个样本以确定窗口起点的取值；ArkDeck
 `validateCounterSample` 要求每个样本的时间戳都满足 `timestamp >= startNs && timestamp < endNs`。
-实测 100 ms 窗口内 94 个 counter 样本中有 4 个时间戳为 6,973,805,999 / 6,973,870,999，
-而窗口起点是 7,010,484,760，且它们的 `durationNs` 覆盖进窗口。
 
-影响：PHASE_6_SCENARIO.md §6 第 4 项未满足。M1～M5 不依赖 context，闭环判定不受影响。
-Owner：ArkDeck analyzer envelope validator（或按「窗口裁剪」解读契约时归 ArkTrace）。
+**修复**（ArkDeck PR #1318，commit `28af92cb`）：窗口前的样本只在它自己声明了能覆盖到窗口的
+`durationNs` 时被接受，且每条 series 至多一个——光有一个早于窗口的时间戳仍然拒绝。窗口内样本与
+右开边界不变。
+
+**端到端验证**（2026-08-16）：从该分支重建并签名安装 daemon（`916f7ff0…`，signing receipt 同步
+刷新，`workspace.sign-openharmony-hap@1` 保持 available）后，用**与当初失败完全相同的 trace 和
+参数**重跑，`job-1b81c838b4c19c8a9fe60d4efecfc6f7` **succeeded**，产出 203,241 B 的
+`trace-analysis.json`（59 进程 / 163 线程 / 167 slice / 72 cpuSlice）。
+
+产物里的数据正好命中修复判据：4 个 carry-in 样本（每条 CPU idle series 各一个），
+时间戳 6,945,057,000～6,973,870,999，`durationNs` 分别覆盖到 7,016,069,000～7,036,895,000，
+全部越过窗口起点 7,010,484,760；每条 series 的 carry-in 计数为 `[1,1,1,1]`，满足"至多一个"。
+follow-up 轮也补跑了 context（`job-452aa3efa09ebc728eddfe7a77c92ef0`，97,333 B）。
+
+影响：PHASE_6_SCENARIO.md §6 第 4 项**由未满足转为两轮均满足**。M1～M5 从不依赖 context，
+已记录的 improved 判定不变。证据：`Fixtures/release-evidence/phase6-context-closure.json`。
 
 ## 7. 采集纪律
 

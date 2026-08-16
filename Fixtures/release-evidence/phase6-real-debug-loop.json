@@ -31,13 +31,26 @@
     "operation": "capture.diagnostics@1",
     "identicalAcrossRounds": true,
     "durationSeconds": 10,
-    "traceCategories": ["ace", "app", "ark", "graphic", "sched", "freq", "idle"],
+    "traceCategories": [
+      "ace",
+      "app",
+      "ark",
+      "graphic",
+      "sched",
+      "freq",
+      "idle"
+    ],
     "traceBufferKB": 32768,
     "uiDump": false
   },
   "analysisRequest": {
     "operation": "analyzer.analyze-trace@1",
-    "kinds": ["cpu", "scheduling", "slices", "hot-intervals"],
+    "kinds": [
+      "cpu",
+      "scheduling",
+      "slices",
+      "hot-intervals"
+    ],
     "startNs": 0,
     "endNsPerRound": "summary.result.durationNs",
     "thresholdNsForSlices": 8000000,
@@ -78,11 +91,35 @@
         "namedSliceCount": 3358
       },
       "analyses": {
-        "cpu": {"jobID": "job-0e97a34cf8072d6a72fb0b2543b6a7f7", "artifactID": "ART-48f1a31958c0747c36f8fadb07ad3328", "sha256": "619882a72a11b2573808ae96d34fd7355f30aad108bd02f8476f3204820b2034", "byteCount": 145471},
-        "scheduling": {"jobID": "job-594e9f595b5e9d96e6432e1f32388af5", "artifactID": "ART-46efdeaf51df26e9b38b21e5cd5d3a37", "sha256": "594e9d4d1f7d90c1b3d00a6dc76585b61a0d573456af4a6278e76f8e669b5a77", "byteCount": 145485},
-        "slices": {"jobID": "job-1743c1f024bf1678112a3a7c477204ed", "artifactID": "ART-742d72ecbb9bfbd487948c62929874b8", "sha256": "3f904072252f0d278ff34535dc6bdbbcc05fd2729f6f53c92da5eb3e10aa9d02", "byteCount": 134222},
-        "hot-intervals": {"jobID": "job-830dbe4c37edce40390e3a41bd29a21d", "artifactID": "ART-b6f7774d73881a3f219a170cdc8a5d87", "sha256": "351421931d0cd609e7b2fd5c1367b8ba2dd0a0b77a796b6fba453e61fa089a72", "byteCount": 145491},
-        "slicesDiagnostic1ms": {"jobID": "job-2a370e330d3cd0d53751a0bcfece266b", "thresholdNs": 1000000, "limit": 1000}
+        "cpu": {
+          "jobID": "job-0e97a34cf8072d6a72fb0b2543b6a7f7",
+          "artifactID": "ART-48f1a31958c0747c36f8fadb07ad3328",
+          "sha256": "619882a72a11b2573808ae96d34fd7355f30aad108bd02f8476f3204820b2034",
+          "byteCount": 145471
+        },
+        "scheduling": {
+          "jobID": "job-594e9f595b5e9d96e6432e1f32388af5",
+          "artifactID": "ART-46efdeaf51df26e9b38b21e5cd5d3a37",
+          "sha256": "594e9d4d1f7d90c1b3d00a6dc76585b61a0d573456af4a6278e76f8e669b5a77",
+          "byteCount": 145485
+        },
+        "slices": {
+          "jobID": "job-1743c1f024bf1678112a3a7c477204ed",
+          "artifactID": "ART-742d72ecbb9bfbd487948c62929874b8",
+          "sha256": "3f904072252f0d278ff34535dc6bdbbcc05fd2729f6f53c92da5eb3e10aa9d02",
+          "byteCount": 134222
+        },
+        "hot-intervals": {
+          "jobID": "job-830dbe4c37edce40390e3a41bd29a21d",
+          "artifactID": "ART-b6f7774d73881a3f219a170cdc8a5d87",
+          "sha256": "351421931d0cd609e7b2fd5c1367b8ba2dd0a0b77a796b6fba453e61fa089a72",
+          "byteCount": 145491
+        },
+        "slicesDiagnostic1ms": {
+          "jobID": "job-2a370e330d3cd0d53751a0bcfece266b",
+          "thresholdNs": 1000000,
+          "limit": 1000
+        }
       }
     },
     "followup": {
@@ -115,10 +152,30 @@
         "namedSliceCount": 17
       },
       "analyses": {
-        "cpu": {"jobID": "job-57b5cce8aeb71953865c46df9ceb21fe", "artifactID": "ART-e456dff470ee6b66e7db98d0188bd8be", "sha256": "7a5a3e175289190e798edc79f242e8ffbee0952b4bc7afc8c755d22df0da222f", "byteCount": 131901},
-        "scheduling": {"jobID": "job-8c675cdf810d28561e22358e9a95872c", "artifactID": "ART-ee2d72427d5a02725762fdac19d78721", "sha256": "341217058d0533b52b666793e565a36b8a3aaf9c158eff6f29eeb565bf1c57c4", "byteCount": 131915},
-        "slices": {"jobID": "job-f22b7e3720400c81e882b117c839a430", "artifactID": "ART-80f62862426151cf415b34e19bd64e83", "sha256": "8c7f3bfaee705b3c19b7608e4bfa235417b20283a480102a1e4b4d16a781cc65", "byteCount": 126544},
-        "hot-intervals": {"jobID": "job-5847e5909887e9d253fd0300df858fbb", "artifactID": "ART-1d8667edaad6bf038b9652cf1c011f72", "sha256": "728e98c0c6d5048657cd9830317b18627da15450ecc518df090b70bca667e8c4", "byteCount": 131921}
+        "cpu": {
+          "jobID": "job-57b5cce8aeb71953865c46df9ceb21fe",
+          "artifactID": "ART-e456dff470ee6b66e7db98d0188bd8be",
+          "sha256": "7a5a3e175289190e798edc79f242e8ffbee0952b4bc7afc8c755d22df0da222f",
+          "byteCount": 131901
+        },
+        "scheduling": {
+          "jobID": "job-8c675cdf810d28561e22358e9a95872c",
+          "artifactID": "ART-ee2d72427d5a02725762fdac19d78721",
+          "sha256": "341217058d0533b52b666793e565a36b8a3aaf9c158eff6f29eeb565bf1c57c4",
+          "byteCount": 131915
+        },
+        "slices": {
+          "jobID": "job-f22b7e3720400c81e882b117c839a430",
+          "artifactID": "ART-80f62862426151cf415b34e19bd64e83",
+          "sha256": "8c7f3bfaee705b3c19b7608e4bfa235417b20283a480102a1e4b4d16a781cc65",
+          "byteCount": 126544
+        },
+        "hot-intervals": {
+          "jobID": "job-5847e5909887e9d253fd0300df858fbb",
+          "artifactID": "ART-1d8667edaad6bf038b9652cf1c011f72",
+          "sha256": "728e98c0c6d5048657cd9830317b18627da15450ecc518df090b70bca667e8c4",
+          "byteCount": 131921
+        }
       }
     }
   },
@@ -156,19 +213,50 @@
   },
   "comparison": {
     "identityMapping": "process matched across rounds by process name plus pid; ipid changed 12 to 11 and pid changed 19406 to 19759, so internal keys were deliberately not reused",
-    "M1_appProcessShareOfOneCPU": {"baseline": 0.026339129546538387, "followup": 0.0032545997907685955, "relativeDelta": -0.8764348007394067},
-    "M2_appMainThreadShareOfOneCPU": {"baseline": 0.025637772205176462, "followup": 0.003021942936363158, "relativeDelta": -0.8821292695722991},
-    "M3_mainThreadRunningShare": {"baseline": 0.025637772205176462, "followup": 0.003021942936363158, "relativeDelta": -0.8821292695722991},
-    "M4_appLongSlices8ms": {"baseline": 0, "followup": 0, "signal": "none"},
-    "M5_top5HotIntervalScore": {"baseline": 2879312023, "followup": 2285011800, "relativeDelta": -0.20640354996357405},
+    "M1_appProcessShareOfOneCPU": {
+      "baseline": 0.026339129546538387,
+      "followup": 0.0032545997907685955,
+      "relativeDelta": -0.8764348007394067
+    },
+    "M2_appMainThreadShareOfOneCPU": {
+      "baseline": 0.025637772205176462,
+      "followup": 0.003021942936363158,
+      "relativeDelta": -0.8821292695722991
+    },
+    "M3_mainThreadRunningShare": {
+      "baseline": 0.025637772205176462,
+      "followup": 0.003021942936363158,
+      "relativeDelta": -0.8821292695722991
+    },
+    "M4_appLongSlices8ms": {
+      "baseline": 0,
+      "followup": 0,
+      "signal": "none"
+    },
+    "M5_top5HotIntervalScore": {
+      "baseline": 2879312023,
+      "followup": 2285011800,
+      "relativeDelta": -0.20640354996357405
+    },
     "verdict": "improved",
     "verdictRule": "improved requires M1 relative drop of at least 20 percent with M2 and M4 not rising more than 5 percent"
   },
   "dataQuality": {
     "baselineStatus": "warnings",
     "followupStatus": "warnings",
-    "baselineTruncatedSections": ["hotIntervals", "longSlices", "schedulingLatency", "topProcesses", "topThreads"],
-    "followupTruncatedSections": ["hotIntervals", "schedulingLatency", "topProcesses", "topThreads"]
+    "baselineTruncatedSections": [
+      "hotIntervals",
+      "longSlices",
+      "schedulingLatency",
+      "topProcesses",
+      "topThreads"
+    ],
+    "followupTruncatedSections": [
+      "hotIntervals",
+      "schedulingLatency",
+      "topProcesses",
+      "topThreads"
+    ]
   },
   "discardedAttempts": [
     {
@@ -188,7 +276,12 @@
     "device screen woken and unlocked, screen-off timeout overridden to 1800000 ms for the duration of the runs",
     "in-app ArkDeck GJ-5 crash probe disabled, which otherwise aborts the process 12 s after launch and prevented any sustained workload from being observable"
   ],
-  "openFindings": {
+  "privacy": {
+    "absoluteUserPathsIncluded": false,
+    "thirdPartyProcessNamesIncluded": false,
+    "note": "only the application under test is named; other process and thread names observed in the traces are treated as local sensitive artifacts and are not exported"
+  },
+  "resolvedFindings": {
     "contextCounterSampleWindow": {
       "operation": "analyzer.analyze-trace@1",
       "kind": "context",
@@ -196,13 +289,12 @@
       "reason": "analyzer.schemaMismatch: trace-analysis@1 produced JSON outside ArkTrace analysis contract 1.0",
       "rootCause": "ArkTrace emits the last counter sample that precedes the requested window because a counter is a step function whose value holds until the next sample; ArkDeck validateCounterSample requires every sample timestamp to satisfy timestamp >= rangeStart and timestamp < rangeEnd",
       "observed": "4 of 94 counter samples in a 100 ms window carried timestamps 6973805999 and 6973870999 against a window starting at 7010484760, each with a durationNs that reaches into the window",
-      "consequence": "PHASE_6_SCENARIO.md section 6 item 4 is unmet; M1 to M5 do not depend on the context kind and were unaffected",
-      "owner": "ArkDeck analyzer envelope validator, or ArkTrace if the contract is to be read as window-clipped"
+      "consequence": "PHASE_6_SCENARIO.md section 6 item 4 is now met for both rounds; M1..M5 never depended on the context kind",
+      "owner": "ArkDeck analyzer envelope validator, or ArkTrace if the contract is to be read as window-clipped",
+      "status": "closed 2026-08-16",
+      "fix": "ArkDeck#1318 commit 28af92cb admits one carry-in counter sample per series when its durationNs reaches the window",
+      "endToEndVerificationJobID": "job-1b81c838b4c19c8a9fe60d4efecfc6f7",
+      "closureEvidence": "phase6-context-closure.json"
     }
-  },
-  "privacy": {
-    "absoluteUserPathsIncluded": false,
-    "thirdPartyProcessNamesIncluded": false,
-    "note": "only the application under test is named; other process and thread names observed in the traces are treated as local sensitive artifacts and are not exported"
   }
 }
