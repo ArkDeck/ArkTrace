@@ -129,6 +129,60 @@ final class AppDistributionTests: XCTestCase {
         }
     }
 
+    func testEveryAccessibilityAnnouncementHasAStringCatalogEntry() throws {
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalog = try JSONSerialization.jsonObject(
+            with: try Data(
+                contentsOf: root.appendingPathComponent(
+                    "Apps/ArkTraceApp/Localizable.xcstrings"
+                )
+            )
+        ) as? [String: Any]
+        let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
+
+        // One representative value per case, including the counted ones.
+        let messages: [TraceAccessibilityMessage] = [
+            .openingTrace, .openingCancelled, .traceClosed, .traceCloseFailed,
+            .traceOpenFailed, .operationFailed, .rangeAnalysisComplete,
+            .traceLoadedWithoutTimedEvents,
+            .traceLoadedWithVisibleTracks(3),
+            .searchFoundResults(2),
+            .searchFoundAtLeastResults(2),
+        ] + TraceAppErrorTitle.allCases.map { .error($0) }
+
+        for message in messages {
+            let entry = try XCTUnwrap(
+                strings[message.localizationKey] as? [String: Any],
+                "no catalog entry for \(message.localizationKey)"
+            )
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: Any])
+            let english = try XCTUnwrap(
+                (localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any]
+            )
+            let format = try XCTUnwrap(english["value"] as? String)
+            // A counted message must carry exactly the one placeholder the App
+            // formats it with; a mismatch would either drop the number or read
+            // past the argument list.
+            let placeholders = format.components(separatedBy: "%lld").count - 1
+            XCTAssertEqual(
+                placeholders,
+                message.countArgument == nil ? 0 : 1,
+                "placeholder count wrong for \(message.localizationKey)"
+            )
+            if let count = message.countArgument {
+                XCTAssertEqual(String(format: format, count), message.sourceText)
+            } else {
+                XCTAssertEqual(format, message.sourceText)
+            }
+        }
+
+        // The timeline label the App injects into the AppKit view.
+        XCTAssertNotNil(strings["a11y.timeline.label"])
+    }
+
     func testSupportedTraceExtensionsResolveToUsablePanelContentTypes() throws {
         let types = ArkTraceAppDistribution.supportedTraceContentTypes
         XCTAssertEqual(

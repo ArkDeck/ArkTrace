@@ -797,7 +797,11 @@ public final class TimelineNSView: NSView {
 
     public override func accessibilityRoleDescription() -> String? { "timeline" }
 
-    public override func accessibilityLabel() -> String? { "Trace Timeline" }
+    /// Host-supplied so the App can resolve it from its string catalog; a
+    /// library target cannot without gaining a resource bundle (AT-APP-009).
+    public var accessibilityLabelText = "Trace Timeline"
+
+    public override func accessibilityLabel() -> String? { accessibilityLabelText }
 
     public override func accessibilityValue() -> Any? { accessibilitySummary }
 
@@ -954,6 +958,8 @@ public struct TimelineView: NSViewRepresentable {
     public let onZoomSelection: @MainActor () -> Void
     public let onResetViewport: @MainActor () -> Void
     public let interactionBounds: TraceTimeRange?
+    /// Supplied by the host so it can come from the app's string catalog.
+    public let accessibilityLabelText: String
 
     public init(
         snapshot: TimelineSnapshot?,
@@ -961,6 +967,7 @@ public struct TimelineView: NSViewRepresentable {
         selectedEventKey: EventKey? = nil,
         focusRequestID: UInt64 = 0,
         interactionBounds: TraceTimeRange? = nil,
+        accessibilityLabelText: String = "Trace Timeline",
         onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
@@ -973,6 +980,7 @@ public struct TimelineView: NSViewRepresentable {
         self.selectedEventKey = selectedEventKey
         self.focusRequestID = focusRequestID
         self.interactionBounds = interactionBounds
+        self.accessibilityLabelText = accessibilityLabelText
         self.onSelectEvent = onSelectEvent
         self.onHoverEvent = onHoverEvent
         self.onSelectRange = onSelectRange
@@ -983,6 +991,7 @@ public struct TimelineView: NSViewRepresentable {
 
     public func makeNSView(context: Context) -> TimelineNSView {
         let view = TimelineNSView(frame: .zero)
+        view.accessibilityLabelText = accessibilityLabelText
         view.snapshot = snapshot
         view.selection = selection
         view.selectedEventKey = selectedEventKey
@@ -999,6 +1008,7 @@ public struct TimelineView: NSViewRepresentable {
     }
 
     public func updateNSView(_ view: TimelineNSView, context: Context) {
+        view.accessibilityLabelText = accessibilityLabelText
         view.snapshot = snapshot
         view.selection = selection
         view.selectedEventKey = selectedEventKey
