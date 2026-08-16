@@ -34,6 +34,16 @@ PHASE_6_SCENARIO.md §0。
 | TraceStreamer | 4.3.7，upstream `447a0a49…`，binary `2e831626…` |
 | arkdeck-agentd | `6db51f07…`（本轮重建并签名安装） |
 
+> **本报告的工具身份已不是在产分发。** 2026-08-16 的 re-pin 把在产 tool 换成
+> `a7859d69…`、parser 换成 `66887fae…`（见 [ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md)
+> 与 `Fixtures/release-evidence/phase5-cli-distribution.json`）。上表两行记录的是本次两轮
+> 真机运行**当时**的字节，不随 re-pin 改写——改写只会变成"声明留存证据被编辑过"。
+>
+> 因此 `scripts/test_phase6.sh` 现在证明的是**留存证据完整**，不是在产分发已在真机上端到端
+> 跑通。要合上这个缺口，必须拿当前 pin 重跑
+> [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) 的 DAYU 200 场景；该场景需要真机，无法在宿主
+> 侧完成。发布前若要求门 10 覆盖在产分发，这是唯一待办。
+
 ## 3. 两轮真实 Artifact
 
 | | baseline | follow-up |
