@@ -342,18 +342,30 @@ protocol TraceParser: Sendable {
 
 生产解析器不从不受控 `PATH` 猜测工具。解析顺序为：
 
-1. 调用方显式注入且已验证的绝对路径；
+1. 调用方显式注入且已验证的绝对路径（CLI `--trace-streamer`，Debug 与 Release 皆可用）；
 2. ArkTrace.app bundle 中的固定资源路径；
-3. CLI 安装布局中的固定 `libexec` 路径；
-4. 仅 Debug 构建允许开发者 override。
+3. CLI 安装布局中的固定 `libexec` 路径。
 
-> **未决（2026-08-16 审查提出，见 §25 第 12 项）**：第 4 条在实现中尚未成立。
-> `TraceStreamerResolver.resolve(explicitExecutableURL:)` 没有 `#if DEBUG` 门，
-> 因此 Release CLI 的 `--trace-streamer` 在生产构建中同样可用。App 走
-> bundle-only 的 `ArkTraceBundledParserResolver`，ArkDeck 走固定 argv 的 closed
-> profile，两者都不暴露该 flag，所以当前生产链路不受影响；但本条与 SPEC §12.1
-> 对该 flag 的描述（"developer/explicit deployment only"）需要一次显式决策后再
-> 统一，不应由实现单方面确定。
+App 与 ArkDeck 都不经过第 1 条：App 用 bundle-only 的
+`ArkTraceBundledParserResolver`，ArkDeck 用固定 argv 的 closed profile，两者都不
+暴露该 flag。
+
+> **已决（2026-08-16，见 §25 第 12 项）**：早期草稿写的"仅 Debug 构建允许开发者
+> override"从未成立，且不能成立——`scripts/test_phase2.sh` 与
+> `scripts/test_phase4_agent_contract.sh` 都用 **Release** 构建的 CLI 配合
+> `--trace-streamer` 驱动发布门（含 parser-unavailable 与 identity-mismatch 负例）。
+> 把它关进 `#if DEBUG` 会直接打断这两个门。
+>
+> 同时评估过的替代方案是给 pinned 身份链加一个编译期 binary SHA-256 锚点，也不
+>可行：分发会重写 bundle 内的 manifest，把 `binarySHA256` 换成**签名后**的哈希
+> （`2e8316265f…`），而开发树里的同一份字节未签名（`e0167fbb13…`）。单一常量无法
+> 同时覆盖两者，两值白名单则要求每次签名都改源码。
+>
+> 因此保留 Release override，并明确其安全论据：它要求调用方**显式**传绝对路径，
+> 而调用方此时已经能在本机执行任意程序；`AT-PARSE-002` 要求的 identity 仍被完整
+> 记录到 machine envelope（hash 而非路径）；真正需要不可绕过 pin 的两条链路
+> （App、ArkDeck）都不暴露它。ArkDeck 另外用 descriptor 的 SHA-256 锁定整个分发，
+> 不依赖本条。
 
 每次运行记录：
 
@@ -970,4 +982,4 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 9. App 分发形态：是否启用 App Sandbox、Developer ID 直发还是 App Store、是否支持 Intel（universal binary）——影响 AT-APP-001 的 security-scoped bookmark、TraceStreamer 子进程调用、cache 路径与构建目标；
 10. ~~ArkTrace 自身 LICENSE 的选择~~——已决：MIT（2026-08-12 建仓时随初始提交确定，见 §22）；
 11. ~~无障碍契约（AT-APP-009～012、AC-AT-016）保留为 0.1 DoD 硬门，还是分层交付（0.1 保留键盘可达与 focus 基线，完整 VoiceOver/Reduce Motion 契约移至 0.2）。~~——已决定（2026-08-13，Phase 3 进入决策候选）：保留当前 SPEC 与 DoD，AT-APP-009～012 及 AC-AT-016 仍是 0.1 硬门。P3-T08 不得将 VoiceOver canvas semantics、focus restoration 或 Reduce Motion 降级为后续版本任务。
-12. Release CLI 的 `--trace-streamer` override（§8.2 第 4 条）：落实"仅 Debug"，还是保留 Release override 并为 pinned 身份链补一个编译期 binary SHA-256 锚点 + machine envelope 中的 `parser.pinned` 标记？当前 `TraceStreamerProcessParser` 只用编译期常量约束 upstream revision / adapter / build recipe / architecture，binary hash 仅与随可执行文件同目录的 `manifest.json` 自述值比对，因此一套自洽的 sidecar manifest 可以通过校验。App 与 ArkDeck 路径不暴露该 flag，生产链路不受影响。
+12. ~~Release CLI 的 `--trace-streamer` override（§8.2 第 4 条）~~——已决（2026-08-16）：保留 Release override，删除"仅 Debug"这一从未成立的表述。两条理由都是实证的：发布门本身依赖它（`test_phase2.sh`、`test_phase4_agent_contract.sh` 用 Release CLI 传该 flag 驱动负例），且编译期 binary hash 锚点无法覆盖"未签名开发二进制 / 已签名分发二进制"这两个必须同时接受的哈希。完整论据见 §8.2。

@@ -831,9 +831,31 @@ budget、单 document commit 与 typed exit contract。
   "truncation": {
     "truncated": false,
     "sections": []
+  },
+  "provenance": {
+    "schemaAdapterVersion": "2",
+    "indexSchemaVersion": 3,
+    "parserAdapterVersion": "1",
+    "parserBuildRecipeVersion": "64-lowercase-hex",
+    "upstreamDatabaseSha256": "64-lowercase-hex",
+    "upstreamDatabaseByteCount": 0
   }
 }
 ```
+
+`provenance` carries the derived-artifact identity a consumer needs to
+reproduce the result: which schema adapter and index schema built the Ready
+database, and the exact upstream export it was built from. It is present on
+every trace-backed success envelope and absent on informational commands that
+never open a trace. ArkDeck's `ArkTraceSummaryEnvelopeValidator` already
+requires it.
+
+`truncation.truncated` 为 true 表示"这个结果不是完整答案"，同时覆盖两类原因：还有
+未返回的匹配项，以及有值因存储类不兼容而被丢弃。两者的精确区分由
+`dataQuality.issues` 的 `probeTruncated` / `droppedValue` / `invalidValue` 类别表达。
+刻意不把 `truncated` 收窄为只表示前者（2026-08-16 审查决定）：消费者用它做的判断是
+"能不能把这个结果当完整事实用"，对该判断两类原因等价，收窄反而会让既有消费者在一部分
+不完整结果上误判为完整。
 
 ### 13.2 Error envelope
 
@@ -864,6 +886,13 @@ budget、单 document commit 与 typed exit contract。
 ### AT-JSON-001 Versioning
 
 `schemaVersion` 使用 `major.minor`。增加 optional field 是 minor-compatible；删除/改名/改变类型或语义必须增加 major。
+
+**已知与消费者实现的偏差（2026-08-16 审查记录）**：当前唯一的 machine 消费者
+ArkDeck 的 `ArkTraceSummaryEnvelopeValidator` 对 `schemaVersion` 做的是精确字符串
+相等（`== "1.0"`），不是 major 兼容判断。因此在 ArkDeck 放宽该判断之前，任何 minor
+bump 都是对它的破坏性变更，本条的 minor-compatible 承诺实际上不可兑现。新增 optional
+field 时应同时更新 §13.1 的 envelope 与 ArkDeck 的必需键集，而不是靠 bump minor
+表达。
 
 ### AT-JSON-002 Determinism
 
