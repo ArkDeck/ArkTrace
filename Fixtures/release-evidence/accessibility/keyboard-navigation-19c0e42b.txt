@@ -1,0 +1,18 @@
+ArkTrace accessibility walkthrough v1
+check: keyboardNavigation
+candidateTreeSHA256: 19c0e42b3635688366368dea0a1874694b9bf419ccc78789c7c6dc54c42de3f9
+reviewedAt: 2026-08-15T13:29:13Z
+reviewMethod: independent-agent-review
+reviewer: Codex independent Agent /root/phase4_a11y_review
+steps:
+1. Loaded the exact Developer ID signed candidate with the locked 67,837-byte zlib.htrace fixture (SHA-256 eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe).
+2. Entered 2956 in Search and pressed Return.
+3. Pressed Tab once from Search, then Right and Return on Timeline.
+4. Temporarily enabled Full Keyboard Access and traversed Timeline, Show Inspector, and Sidebar without a pointer.
+5. Restored Full Keyboard Access to its original off state.
+observations:
+- Search exposed TID 2956 with subtitle "TID 2956 · itid 49".
+- One Tab moved focus from Search to Trace Timeline.
+- Right focused the real TID 891 / callstack 863 BundleMgrProxy event at 12.045 s for 2.701 ms.
+- Return selected callstack 863; Inspector exposed the matching name, PID 198, TID 891, process key 39, and thread key 78.
+- This record transcribes the independent Agent's raw Computer Use observations; it does not claim a reviewer cryptographic signature.

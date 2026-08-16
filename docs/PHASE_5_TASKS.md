@@ -1,6 +1,6 @@
 # ArkTrace Phase 5 任务清单
 
-> 状态：Completed under explicit large-trace deferral — 9/9；Phase 3 Gate 6/7 已由后续独立 DAYU 200 evidence 关闭，Phase 4 总阶段状态仍单独跟踪
+> 状态：Completed，9/9；实施时的 large-trace deferral 已由后续独立 DAYU 200 evidence 与 Phase 4 完整 final gate 收口
 > 阶段：ArkDeck Integration
 > 验收目标：真实 ArkDeck Job 可把 Trace Artifact 交给 ArkTrace，并持久化结构化 Analysis Artifact
 

@@ -1,15 +1,15 @@
 # ArkTrace Phase 4 任务清单
 
-> 状态：Active，6/7 — P4-T01～T05 与 P4-T07 implementation review clean；P4-T06 的 signed large metrics 已取得并关闭 Gate 6/7，Phase 4 总阶段状态仍单独跟踪
+> 状态：Completed，7/7 — signed DAYU 200 large metrics、完整继承发布门与 Phase 4 final gate 均已通过
 > 阶段：Agent Query
 > 验收目标：Agent 无需解析 UI 或 human log，即可获得 bounded、deterministic Trace evidence
 
 ## 1. 进入条件
 
-- [ ] Phase 3 的 typed event repository、range 语义和 LOD 基础稳定；
-- [ ] CPU/process/thread/state/slice/counter 至少由一个真实 fixture 覆盖；
-- [ ] CLI JSON 1.0、limits、error 和 signal contract 已由 Phase 2 固定；
-- [ ] Renderer/App 不拥有任何无法从 Store/Analysis 复用的私有 Trace 语义。
+- [x] Phase 3 的 typed event repository、range 语义和 LOD 基础稳定；
+- [x] CPU/process/thread/state/slice/counter 至少由一个真实 fixture 覆盖；
+- [x] CLI JSON 1.0、limits、error 和 signal contract 已由 Phase 2 固定；
+- [x] Renderer/App 不拥有任何无法从 Store/Analysis 复用的私有 Trace 语义。
 
 ## 2. 阶段输出
 
@@ -191,7 +191,7 @@ P4-T01 和 P4-T02 可以并行。
 **优先级：P0。**
 **依赖：P4-T05。**
 **关联：AT-PERF-005/006、AC-AT-008～010/013。**
-**状态：Medium implementation/acceptance review clean；signed large evidence 已取得，阶段完成声明仍单独跟踪。**
+**状态：Completed — medium 与 signed DAYU 200 large acceptance/performance gate 均通过。**
 
 **使用真实 Trace 逐条验证**
 
@@ -209,9 +209,9 @@ P4-T01 和 P4-T02 可以并行。
 - medium 发布门在正式 20-sample measurement 前完整执行一次相同 production workload 作为
   warm-filesystem/runtime warm-up；该轮不得发布 evidence，也不得参与 percentile 或放宽下列阈值；
 - [x] medium context p95 ≤1s；
-- [ ] large context p95 ≤2s（signed evidence 已满足；本文件暂不据此自动改变 Phase 4 总状态）；
+- [x] large context p95 ≤2s；
 - [x] medium deterministic range analysis p95 ≤3s；
-- [ ] large deterministic range analysis p95 ≤5s（signed evidence 已满足；本文件暂不据此自动改变 Phase 4 总状态）；
+- [x] large deterministic range analysis p95 ≤5s；
 - [x] medium peak RSS、event/output counts 有记录；
 - [x] 未达到目标时保留真实 measured result，不伪报完成。
 
@@ -238,7 +238,7 @@ P4-T01 和 P4-T02 可以并行。
 - [x] no raw SQL/no GUI/no path leak；
 - [x] reviewed medium real trace gate 零 skip；
 - [x] medium context/analysis benchmark 有真实结果；
-- [ ] large context/analysis benchmark 已有 reviewed external evidence；Phase 4 Exit 状态仍待单独确认；
+- [x] large context/analysis benchmark 已有 reviewed external evidence，完整 Phase 4 Exit gate 返回 0；
 - [x] AC-AT-008/009/010/013 的 medium/contract 验收通过；AC-AT-015 的完整真实闭环由 Phase 6 验收。
 
 ## 6. P4-T01～T03 已 review 的流水证据（2026-08-14）
@@ -273,4 +273,13 @@ P4-T01 和 P4-T02 可以并行。
   明确排除以避免 evidence 自哈希循环。gate 会直接验证 Context ≤1s、deterministic analysis
   ≤3s、RSS ≤1.5 GiB，以及 Context events/bytes 与 analysis rows 均非空；
 - 跨进程 single-flight cancellation regression 不再用固定 100ms 猜测 waiter 生命周期，而在真实 key-lock contention 后才取消；定向 Release 连续 12 次、完整 Release **338/338** 与完整 batch gate 均通过；
-- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。该批当时只完成 T06 medium；2026-08-15 后续 signed DAYU 200 fixture 在相同 production workload 上满足 context ≤2s、analysis ≤5s 并关闭 Gate 6/7，精确值由 tracked performance JSON 唯一记录。该事实不在本次文档更新中自动改写 Phase 4 Exit。
+- 独立 reviewer 对 T04～T07 实现、tests、scripts 与文档的结论为 P0/P1/P2/P3 全 clean。该批当时只完成 T06 medium；2026-08-15 后续 signed DAYU 200 fixture 在相同 production workload 上满足 context ≤2s、analysis ≤5s 并关闭 Gate 6/7，精确值由 tracked performance JSON 唯一记录；完整 final gate 随后单独返回 0，正式关闭 Phase 4 Exit。
+
+## 8. Phase 4 Exit 收口证据（2026-08-15）
+
+- `scripts/test_phase4.sh` 继承 Phase 1～3 全部门，使用 674,044,067-byte DAYU 200 external Trace、tracked CC-BY-4.0 grant、签名 provenance/review、真实 cancellation 与 production benchmark；Trace 未进入普通 Git；
+- exact signed App candidate tree `19c0e42b3635688366368dea0a1874694b9bf419ccc78789c7c6dc54c42de3f9` 的六项 accessibility walkthrough 均由独立 Agent 在真实候选上通过，证据固定于 `Fixtures/release-evidence/accessibility-19c0e42b.json`；
+- Apple notarization submission `0b37f807-a37b-4f8f-bd1c-fcb6dc39cd72` 为 `Accepted`；retained final ZIP 的 byte count/SHA、receipt、Developer ID/Team/certificate、outer/helper CDHash、stapled ticket、Gatekeeper 与独立复验由 `Fixtures/release-evidence/phase4-notarization.json` 唯一绑定；
+- `scripts/verify_phase3_notarized_artifact.sh` 只接受 tracked HEAD evidence 与保留 ZIP 成对输入，真实执行 CRC、双层 strict signature、hardened runtime/timestamp、certificate、receipt ticketContents、stapler、Gatekeeper、license/parser closure，并证明移除唯一 Apple ticket 后 App 树重新等于 reviewed candidate；
+- retained-artifact 契约负例继续拒绝单边输入、dirty/untracked evidence、ZIP byte drift、symlink、receipt status/CDHash drift、self-attestation 与 unstapled artifact；实时 `scripts/package_phase3.sh` 路径仍要求 notary profile，不因离线复验路径而放宽；
+- 完整 gate 以 343 tests、0 skip 继承 Phase 1/2，TraceStreamer 双 clean-build SHA 一致，Phase 3 medium/large、Phase 4 Agent contract 及 Phase 4 production medium/large 均通过；最终逐字段性能事实仅以排除自哈希循环的 tracked performance JSON 为准。

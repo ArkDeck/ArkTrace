@@ -22,7 +22,7 @@ ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Tr
 | [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile、真实 Artifact 链路、restart 与 Gate 9 证据 |
 | [docs/PHASE_1_VERIFICATION.md](docs/PHASE_1_VERIFICATION.md) | Phase 1 requirement、fixture、hash、测试与已知限制证据 |
 | [docs/PHASE_2_VERIFICATION.md](docs/PHASE_2_VERIFICATION.md) | Phase 2 CLI contract、gate 与 cached-open benchmark 证据 |
-| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T10 的已 review 实现证据与仍开放外部门 |
+| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T10 的已 review 实现证据与后续外部门收口 |
 | [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision、构建配方、identity 与调用约束 |
 
 ## 构建与测试
@@ -63,11 +63,12 @@ scripts/test_phase5.sh
 
 `scripts/test_phase1.sh` 会在测试前校验 binary、manifest、arm64 architecture、fixture/license SHA/byte count/Git blob；缺失或漂移直接失败。通过后输出不超过 4 KiB 的 machine evidence。TraceStreamer binary 是本机构建产物并被 `.gitignore` 排除，不能只 clone 仓库后跳过构建。
 
-当前 Phase 4 reviewed medium evidence 由生产 `TraceContextBuilder` 与
+Phase 4 medium/large evidence 均由生产 `TraceContextBuilder` 与
 `TraceDeterministicAnalysisEngine` 直接采样；逐字段 20-sample 数值、机器信息、trace/parser、
 source-tree 与 test-binary identity 的事实源固定为
-`Fixtures/release-evidence/phase4-medium-agent-performance.json`。large 阈值与正式 Phase Exit
-仍等待 reviewed external large fixture，不能用 medium 结果替代。
+`Fixtures/release-evidence/phase4-medium-agent-performance.json` 与
+`Fixtures/release-evidence/phase3-large-performance.json`。reviewed DAYU 200 large fixture 已通过
+context/analysis 阈值，完整 `scripts/test_phase4.sh` 返回 0，Phase 4 Exit 为 7/7。
 
 裸 `swift build -c release --product arktrace` 产物仅用于开发编译，不带 reviewed
 parser/resource installation，不能作为以下命令的可执行发行版。P5-T02 完整安装单位是最终
@@ -101,7 +102,8 @@ Inspector 显示 event 或 range analysis。键盘基线包括方向键切换 ev
 
 Settings → Licenses 展示 ArkTrace MIT license 与随 App 打包的 third-party notice；CLI 的
 `arktrace licenses` 输出同一组经锁定的资源。当前已知限制是首发仅支持 Apple silicon/macOS 14+，不含 capture/device/network
-能力；large-trace 仍须提供上述外部发布证据。Developer ID 签名候选已获 Apple notarization
+能力。large Trace 保留在普通 Git 外的 content-addressed external artifact storage，其 tracked
+许可、签名 provenance/review、真实性能与 cancellation 已关闭 Gate 6/7。Developer ID 签名候选已获 Apple notarization
 `Accepted`，最终 stapled ZIP、实际 App 截图与人工 VoiceOver walkthrough 已由 exact
 candidate tree/CDHash 和 tracked artifact SHA 绑定；自动 UI 控制不可用时没有用合成图替代。
 

@@ -1,0 +1,17 @@
+ArkTrace accessibility walkthrough v1
+check: reduceMotion
+candidateTreeSHA256: 19c0e42b3635688366368dea0a1874694b9bf419ccc78789c7c6dc54c42de3f9
+reviewedAt: 2026-08-15T13:29:13Z
+reviewMethod: independent-agent-review
+reviewer: Codex independent Agent /root/phase4_a11y_review
+steps:
+1. Enabled Reduce Motion from its original off state while the exact signed candidate displayed zlib.htrace.
+2. Activated Zoom In once in the real toolbar.
+3. Observed Timeline semantics and controls after the viewport update.
+4. Restored Reduce Motion to its original off state and re-read the setting.
+observations:
+- Viewport changed directly from 0 ns–32.211 s to 8.053 s–24.158 s.
+- Timeline retained 24 visible tracks, the selected event, and pan, zoom, reset, and clear actions.
+- No repeated transition, flashing, autoplay, motion-only status, or loss of responsiveness was observed.
+- The restored setting was explicitly re-read as off.
+- This record transcribes the independent Agent's raw Computer Use observations; it does not claim a reviewer cryptographic signature.

@@ -1,9 +1,9 @@
 # ArkTrace.app 0.1 distribution decision
 
 Status: P3-T08 accessibility and P3-T10 Developer ID distribution evidence
-completed (2026-08-14). The exact manual artifacts and notarization record are
-tracked under `Fixtures/release-evidence/`; only the independent large-trace
-Phase 3 gates remain open.
+completed (2026-08-14); the later exact Phase 4 signed candidate, accessibility
+walkthrough, Apple notarization and retained final ZIP were independently
+reverified on 2026-08-15. The large-trace Gate 6/7 and Phase 4 final gate are closed.
 
 ## Target and signing
 
@@ -91,11 +91,13 @@ separate accessibility reviewer key is deliberately not required because it
 would not establish additional independence inside the same build workspace.
 The large-trace reviewer and redistribution-grant issuer remain independently
 key-bound in `Config/ArkTraceReleaseReviewers.json`. A caller cannot mutate the
-accessibility evidence or large-trace trust configuration during packaging. A missing Developer ID identity/team/profile,
-large-trace record, manual evidence artifact, notarization acceptance, staple,
-or Gatekeeper assessment causes the complete Phase 3 gate to fail closed. The
-2026-08-14 accessibility/package run satisfies the signed-App/manual/notary
-inputs; the complete Phase 3 gate remains blocked only by the independent large record.
+accessibility evidence or large-trace trust configuration during packaging. The
+live packaging path still requires the Developer ID identity/team/notary profile.
+For an already notarized exact candidate, the complete gate alternatively accepts
+only the retained physical ZIP and tracked notarization evidence together, then
+reruns receipt/CDHash, signature, staple, Gatekeeper, resource and candidate-tree
+closure through `scripts/verify_phase3_notarized_artifact.sh`; one-sided, dirty,
+self-attested, unstapled, sparse, symlinked or byte-drifted inputs fail closed.
 All distribution output roots must be physical owner-marked descendants of the
 repository `.build` directory or the physical system temporary root. External
 tool logs remain private; public failure diagnostics are bounded and path-redacted.

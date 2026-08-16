@@ -134,8 +134,10 @@ then
 fi
 [ ! -e "$preflight_repository/.build" ] \
     || fail "invalid build preflight mutated the reviewed build root"
-if "$preflight_repository/scripts/build_phase3_distribution_candidate.sh" \
-    >/dev/null 2>&1
+if ARKTRACE_DEVELOPER_ID_APPLICATION='Developer ID Application: Invalid (INVALIDTEAM)' \
+    ARKTRACE_DEVELOPMENT_TEAM='INVALIDTEAM' \
+    "$preflight_repository/scripts/build_phase3_distribution_candidate.sh" \
+        >/dev/null 2>&1
 then
     fail "invalid candidate preflight unexpectedly succeeded"
 fi
