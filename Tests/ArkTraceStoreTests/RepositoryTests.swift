@@ -667,6 +667,33 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(unicodeItems.map(\.count).sorted(), [7, 11])
     }
 
+    func testSchemaValidationObservesTaskCancellation() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        _ = repository
+        defer { try? FileManager.default.removeItem(at: url) }
+        // Schema introspection is bounded but can issue thousands of PRAGMA
+        // round trips, so it must not make a cancel request wait for the whole
+        // validation to finish.
+        let outcome = await Task { () -> Result<TraceSchemaAdapter.Validation, any Error> in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return Result(catching: {
+                let db = try TraceDatabase(
+                    url: url, readOnly: true, createIfMissing: false
+                )
+                return try TraceSchemaAdapter.validate(db)
+            })
+        }.value
+        switch outcome {
+        case .success:
+            XCTFail("validation must not complete after its task was cancelled")
+        case .failure(let error):
+            XCTAssertTrue(
+                error is CancellationError,
+                "expected CancellationError, got \(error)"
+            )
+        }
+    }
+
     func testSummarySamplingShapesAreVMBoundedBeforeFilteringOrSorting() throws {
         let (repository, url) = try makeSummaryRepository()
         _ = repository

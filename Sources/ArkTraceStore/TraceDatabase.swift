@@ -476,7 +476,8 @@ final class TraceDatabase {
             WHERE type = 'table'
             LIMIT \(Self.maximumSchemaTableCount + 1)
             """,
-            stage: .validating
+            stage: .validating,
+            observesTaskCancellation: true
         ) { $0.text(0) }
         guard sampledNames.count <= Self.maximumSchemaTableCount else {
             throw ArkTraceError(
