@@ -1,40 +1,40 @@
 {
   "artifact": {
-    "byteCount": 5076367,
-    "fileName": "ArkTraceCLI-0.1.0-20260814T105423Z.zip",
-    "sha256": "ad5cd371bf52ad632ac58aa78594cdfb4501259398a3c54df4b9ec8a36955d7a"
+    "byteCount": 5122912,
+    "fileName": "ArkTraceCLI-0.1.0-20260816T121858Z.zip",
+    "sha256": "f94c2d25640eb07c307e1ecd96ee4d92dbffd0b01302f9b2aaa0bca0d4a00645"
   },
   "candidate": {
-    "appTreeSHA256": "40112fa6ff845147109786701ad9cf3ae48ae4cde3f3faaa997814ce90f9e2ee",
+    "appTreeSHA256": "8b642c50eaab5f8100dfb3a891400ed2fb6b7dd9a689e27785c71c8c7aea9e41",
     "recordByteCount": 1919,
-    "recordFileName": "ArkTraceCLI-review-candidate-20260814T104921Z.app.json",
-    "recordSHA256": "579fddc3092b7531b5f4f3b3d5b69a38cede1523c52f0ffa2ddad8ed99a9fcbd"
+    "recordFileName": "ArkTraceCLI-review-candidate-20260816T121806Z.app.json",
+    "recordSHA256": "bee2bb347b8bfe9d909caf26c7bde096acf7465d70717e5468770c0ec92ceca0"
   },
-  "evidenceRevision": "cddcd508757db3ebc0f3c7fcad4458076ed07c57",
+  "evidenceRevision": "6ed197c66b21303bf1ae52ace63c659b9e8db30b",
   "finalDistribution": {
-    "appTreeSHA256": "7f3e50dbedcbac160d51da707070124ae8c8a1fa2b71044ca7df77c4d4649758",
-    "manifestSHA256": "443a04a711b6dfc6866e97d4177301e6d5901d8abe2e324d525f156b5bfbf25b",
+    "appTreeSHA256": "52c8e171a3793d37e21da44ac5a04209b0406463b825cd99213a148bd455095e",
+    "manifestSHA256": "a0818b4278d742e7bb84bf09b867357f330547a92bbc2b3b49809523381bec40",
     "resourceTreeSHA256": "3f79f263bfca14c80407e7d1f9d66a4bed3a5ddf5c6277c6071ba529bc6c9673"
   },
   "formatVersion": 1,
   "notarization": {
-    "artifactReceiptSHA256": "3e11eefa7bbb62df9eda0548bef9315415dd4d8900fa63955176913bc4ad9c81",
+    "artifactReceiptSHA256": "5730f2c7d3d0b5f454b339077e6a460785ce0e20ca8c090da1947405a4f7cb86",
     "finalArchiveReverified": true,
     "gatekeeperAssessment": "accepted",
-    "liveLogCanonicalCompactSHA256": "f6ec6fc579cfb5b148de7303e9110fd60ea821fcc7a40a78cc2f481b4e44c298",
+    "liveLogCanonicalCompactSHA256": "42f9c5b545878536fc8e02d24e3e231d6f00d2ee4c5714761eda18554c8054eb",
     "liveLogSemanticProjection": {
       "archiveFilename": "ArkTraceCLI-notary-submission.zip",
       "issues": null,
-      "jobId": "bf933f7e-9f67-443e-9f1c-34669837d7ac",
+      "jobId": "4fd2842e-9c8f-49c9-87e4-1df5a6964b17",
       "logFormatVersion": 1,
-      "sha256": "3894f078b9a640c9842757588f8c9bed89ad2ce83b581cc24ce9d4ecef0eafab",
+      "sha256": "906a759231c4ba442057204260559b201e9319c1a85ee02c141df8206af8ee43",
       "status": "Accepted",
       "statusCode": 0,
       "statusSummary": "Ready for distribution",
       "ticketContents": [
         {
           "arch": "arm64",
-          "cdhash": "dc77f43dc774a6eb489241bc8424db736570a035",
+          "cdhash": "5ec4ee07d78fa8ee9d6e94659c0e601121d7ee1f",
           "digestAlgorithm": "SHA-256",
           "path": "ArkTraceCLI-notary-submission.zip/ArkTraceCLI.app"
         },
@@ -46,7 +46,7 @@
         },
         {
           "arch": "arm64",
-          "cdhash": "dc77f43dc774a6eb489241bc8424db736570a035",
+          "cdhash": "5ec4ee07d78fa8ee9d6e94659c0e601121d7ee1f",
           "digestAlgorithm": "SHA-256",
           "path": "ArkTraceCLI-notary-submission.zip/ArkTraceCLI.app/Contents/MacOS/arktrace"
         },
@@ -56,15 +56,14 @@
           "digestAlgorithm": "SHA-256",
           "path": "ArkTraceCLI-notary-submission.zip/ArkTraceCLI.app/Contents/Helpers/trace_streamer"
         }
-      ],
-      "uploadDate": "2026-08-14T10:54:02.450Z"
+      ]
     },
     "nestedAndOuterSignaturesValid": true,
     "stapledTicketValidated": true,
     "status": "Accepted",
-    "submissionID": "bf933f7e-9f67-443e-9f1c-34669837d7ac"
+    "submissionID": "4fd2842e-9c8f-49c9-87e4-1df5a6964b17"
   },
-  "packagedAt": "2026-08-14T10:54:23Z",
+  "packagedAt": "2026-08-16T12:18:58Z",
   "product": {
     "architecture": "arm64",
     "build": "1",
@@ -72,7 +71,7 @@
     "jsonContract": "1.0",
     "version": "0.1.0"
   },
-  "recordedAt": "2026-08-14T10:55:29Z",
+  "recordedAt": "2026-08-16T13:24:00Z",
   "signing": {
     "certificateSHA1": "38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C",
     "identity": "Developer ID Application: Hanfeng Fu (8AQTYW5FKR)",
@@ -80,20 +79,25 @@
     "teamIdentifier": "8AQTYW5FKR"
   },
   "source": {
-    "revision": "cddcd508757db3ebc0f3c7fcad4458076ed07c57",
-    "treeSHA256": "778c5ad63371b89dd4f5454ea5c71db8bff89f8cb74c7dc397d773baaa8b98d4"
+    "revision": "6ed197c66b21303bf1ae52ace63c659b9e8db30b",
+    "treeSHA256": "4585ae7ca8057d91c44d81eab87119bf1c264b9d6abbdd8be087880e4660faae"
   },
   "tool": {
-    "binarySHA256": "0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65",
-    "byteCount": 6223392,
-    "codeDirectoryHash": "dc77f43dc774a6eb489241bc8424db736570a035"
+    "binarySHA256": "a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa",
+    "byteCount": 6395968,
+    "codeDirectoryHash": "5ec4ee07d78fa8ee9d6e94659c0e601121d7ee1f"
   },
   "traceStreamer": {
-    "binarySHA256": "2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5",
+    "binarySHA256": "66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9",
+    "buildRecipeVersion": "e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06",
     "byteCount": 12975168,
     "codeDirectoryHash": "9b4685ac5e54a930f434f4c5eb0b5536d844dae3",
-    "manifestSHA256": "2898d45fed668ca35f5bba21565184e716c38bcd4886bdba63536f79468173ca",
-    "signingRecordSHA256": "52ab5f1d10c89a4b63b0389d5d2be12b9c2f68305ff39651bf4a450f63a11028",
-    "unsignedBinarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf"
+    "manifestByteCount": 1634,
+    "manifestSHA256": "c1a7389fa613d860bc5d926bc29fd6a9ce9d446f1ead1deeac414887d240d6ad",
+    "reportedVersion": "4.3.7",
+    "signingRecordByteCount": 536,
+    "signingRecordSHA256": "8f1b42de4e77da312084d16ceac655bcff8178c9ec825f21968e650855a6a5a2",
+    "unsignedBinarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf",
+    "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
   }
 }
