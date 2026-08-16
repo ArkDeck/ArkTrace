@@ -1093,6 +1093,65 @@ final class RepositoryTests: XCTestCase {
         }
     }
 
+    func testReopeningAPreparedReadyDatabaseReusesItsIntrospection() async throws {
+        let preparation = try TraceDatabaseStagingPreparer.prepare(databaseURL: databaseURL)
+        // First open pays for quick_check, schema validation, the Ready index
+        // contract and the optional-column PRAGMAs.
+        _ = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation
+        )
+
+        // A concurrent batch opens one connection per query. Repeating that
+        // introspection on every one of them cost ~56 statements per
+        // connection, up to 32 connections per batch.
+        let observed = QueryRecorder()
+        _ = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation,
+            diagnosticQueryObserver: { sql, _ in observed.record(sql) }
+        )
+        let statements = observed.statements()
+        XCTAssertTrue(
+            statements.allSatisfy { !$0.contains("table_xinfo") },
+            "reopening must not re-read optional columns: \(statements)"
+        )
+        XCTAssertTrue(
+            statements.allSatisfy { !$0.contains("pragma_index_list") },
+            "reopening must not re-verify the index contract: \(statements)"
+        )
+        XCTAssertTrue(
+            statements.allSatisfy { !$0.contains("quick_check") },
+            "reopening must not re-run quick_check: \(statements)"
+        )
+
+        // A different preparation identity is a different key and must pay
+        // the full price again rather than trusting the memo.
+        let drifted = TraceDatabasePreparationResult(
+            schemaAdapterVersion: preparation.schemaAdapterVersion,
+            schemaFingerprint: preparation.schemaFingerprint,
+            indexVersion: preparation.indexVersion,
+            upstreamDatabaseSHA256: String(repeating: "a", count: 64),
+            upstreamDatabaseByteCount: preparation.upstreamDatabaseByteCount + 1
+        )
+        let reobserved = QueryRecorder()
+        _ = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: drifted,
+            diagnosticQueryObserver: { sql, _ in reobserved.record(sql) }
+        )
+        XCTAssertTrue(
+            reobserved.statements().contains { $0.contains("table_xinfo") },
+            "a different preparation identity must re-introspect"
+        )
+    }
+
     func testConcurrentEventBatchRejectsReadyPathReplacement() async throws {
         let seed = try TraceDatabase(url: databaseURL, readOnly: false)
         try seed.execute(
@@ -3174,5 +3233,24 @@ final class RepositoryTests: XCTestCase {
         } catch is CancellationError {
             // Expected typed Swift cancellation at the repository boundary.
         }
+    }
+}
+
+/// Collects the exact SQL a repository issues, so a test can assert what a
+/// second open of the same Ready database does *not* re-execute.
+private final class QueryRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var captured: [String] = []
+
+    func record(_ sql: String) {
+        lock.lock()
+        captured.append(sql)
+        lock.unlock()
+    }
+
+    func statements() -> [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return captured
     }
 }

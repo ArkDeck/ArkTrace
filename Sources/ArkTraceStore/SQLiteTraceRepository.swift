@@ -6,30 +6,84 @@ private struct RepositoryValidationCacheKey: Hashable {
     let preparation: TraceDatabasePreparationResult
 }
 
+/// Everything a repository learns about one Ready database that is a pure
+/// function of its bytes: the schema validation, the versioned index contract,
+/// and which optional columns exist. Grouping them lets a concurrent batch
+/// open extra connections without repeating the introspection.
+struct PreparedReadySchema: Sendable {
+    let validation: TraceSchemaAdapter.Validation
+    let processHasEndTs: Bool
+    let processHasThreadCount: Bool
+    let threadHasEndTs: Bool
+    let threadHasIsMainThread: Bool
+    let schedSliceHasEndState: Bool
+    let schedSliceHasPriority: Bool
+    let threadStateHasCPU: Bool
+    let callstackHasDepth: Bool
+    let callstackHasCategory: Bool
+    let callstackHasParentID: Bool
+    let callstackHasCookie: Bool
+    let measureHasDuration: Bool
+    let cpuFilterHasUnit: Bool
+    let processFilterHasUnit: Bool
+
+    /// Reads the optional-column set. The required set is already proven by
+    /// `TraceSchemaAdapter.validate`.
+    init(validation: TraceSchemaAdapter.Validation, database db: TraceDatabase) throws {
+        func columns(_ table: String) throws -> Set<String> {
+            Set(try db.columns(of: table).map(\.name))
+        }
+        let process = try columns("process")
+        let thread = try columns("thread")
+        let schedSlice = try columns("sched_slice")
+        let threadState = try columns("thread_state")
+        let callstack = try columns("callstack")
+        let measure = try columns("measure")
+        let cpuFilter = try columns("cpu_measure_filter")
+        let processFilter = try columns("process_measure_filter")
+        self.validation = validation
+        processHasEndTs = process.contains("end_ts")
+        processHasThreadCount = process.contains("thread_count")
+        threadHasEndTs = thread.contains("end_ts")
+        threadHasIsMainThread = thread.contains("is_main_thread")
+        schedSliceHasEndState = schedSlice.contains("end_state")
+        schedSliceHasPriority = schedSlice.contains("priority")
+        threadStateHasCPU = threadState.contains("cpu")
+        callstackHasDepth = callstack.contains("depth")
+        callstackHasCategory = callstack.contains("cat")
+        callstackHasParentID = callstack.contains("parent_id")
+        callstackHasCookie = callstack.contains("cookie")
+        measureHasDuration = measure.contains("dur")
+        cpuFilterHasUnit = cpuFilter.contains("unit")
+        processFilterHasUnit = processFilter.contains("unit")
+    }
+}
+
 /// Avoids rescanning a multi-gigabyte Ready database for every cache hit in
 /// one process. Keys include inode, size, mtime and ctime from the descriptor
 /// SQLite actually opened. Replacement or in-place mutation therefore misses
-/// and must pass quick_check plus full schema validation again. The bounded
-/// memo is never persisted across launches.
+/// and must pass quick_check, full schema validation, the Ready index contract
+/// and optional-column introspection again. The bounded memo is never
+/// persisted across launches.
 private final class RepositoryValidationCache: @unchecked Sendable {
     private let lock = NSLock()
-    private var values: [RepositoryValidationCacheKey: TraceSchemaAdapter.Validation] = [:]
+    private var values: [RepositoryValidationCacheKey: PreparedReadySchema] = [:]
     private var order: [RepositoryValidationCacheKey] = []
     private let maximumEntries = 64
 
-    func value(for key: RepositoryValidationCacheKey) -> TraceSchemaAdapter.Validation? {
+    func value(for key: RepositoryValidationCacheKey) -> PreparedReadySchema? {
         lock.lock()
         defer { lock.unlock() }
         return values[key]
     }
 
     func insert(
-        _ validation: TraceSchemaAdapter.Validation,
+        _ prepared: PreparedReadySchema,
         for key: RepositoryValidationCacheKey
     ) {
         lock.lock()
         defer { lock.unlock() }
-        if values.updateValue(validation, forKey: key) == nil {
+        if values.updateValue(prepared, forKey: key) == nil {
             order.append(key)
         }
         while order.count > maximumEntries {
@@ -141,11 +195,16 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 RepositoryValidationCacheKey(file: $0, preparation: preparation)
             }
         }
-        let validation: TraceSchemaAdapter.Validation
+        // Everything below this point is a pure function of the opened bytes,
+        // and the memo key already pins inode, size, mtime and ctime. A
+        // concurrent batch therefore opens its extra connections without
+        // repeating quick_check, schema validation, the Ready index contract,
+        // or eight PRAGMA round trips per connection.
+        let prepared: PreparedReadySchema
         if let validationCacheKey,
             let cached = repositoryValidationCache.value(for: validationCacheKey)
         {
-            validation = cached
+            prepared = cached
         } else {
             guard try db.quickCheckIsOK() else {
                 throw ArkTraceError(
@@ -154,24 +213,26 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     message: "SQLite quick_check failed"
                 )
             }
-            validation = try TraceSchemaAdapter.validate(db)
-        }
-        if let expectedPreparation {
-            guard expectedPreparation.schemaAdapterVersion
-                == TraceDatabaseStagingPreparer.schemaAdapterVersion,
-                expectedPreparation.indexVersion == TraceDatabaseStagingPreparer.indexVersion,
-                expectedPreparation.schemaFingerprint == validation.schemaFingerprint
-            else {
-                throw ArkTraceError(
-                    code: .traceDatabaseInvalid,
-                    stage: .openingDatabase,
-                    message: "Ready database identity does not match its preparation metadata"
-                )
+            let validation = try TraceSchemaAdapter.validate(db)
+            if let expectedPreparation {
+                guard expectedPreparation.schemaAdapterVersion
+                    == TraceDatabaseStagingPreparer.schemaAdapterVersion,
+                    expectedPreparation.indexVersion
+                        == TraceDatabaseStagingPreparer.indexVersion,
+                    expectedPreparation.schemaFingerprint == validation.schemaFingerprint
+                else {
+                    throw ArkTraceError(
+                        code: .traceDatabaseInvalid,
+                        stage: .openingDatabase,
+                        message: "Ready database identity does not match its preparation metadata"
+                    )
+                }
+                try TraceDatabaseStagingPreparer.validateReadyIndexes(in: db)
             }
-            try TraceDatabaseStagingPreparer.validateReadyIndexes(in: db)
-        }
-        if let validationCacheKey {
-            repositoryValidationCache.insert(validation, for: validationCacheKey)
+            prepared = try PreparedReadySchema(validation: validation, database: db)
+            if let validationCacheKey {
+                repositoryValidationCache.insert(prepared, for: validationCacheKey)
+            }
         }
 
         self.db = db
@@ -180,32 +241,21 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         self.databaseFileIdentity = databaseFileIdentity
         self.parserIdentity = parser
         self.source = source
-        self.validation = validation
-
-        let processColumns = Set(try db.columns(of: "process").map(\.name))
-        let threadColumns = Set(try db.columns(of: "thread").map(\.name))
-        let schedSliceColumns = Set(try db.columns(of: "sched_slice").map(\.name))
-        let threadStateColumns = Set(try db.columns(of: "thread_state").map(\.name))
-        let callstackColumns = Set(try db.columns(of: "callstack").map(\.name))
-        let measureColumns = Set(try db.columns(of: "measure").map(\.name))
-        let cpuFilterColumns = Set(try db.columns(of: "cpu_measure_filter").map(\.name))
-        let processFilterColumns = Set(
-            try db.columns(of: "process_measure_filter").map(\.name)
-        )
-        self.processHasEndTs = processColumns.contains("end_ts")
-        self.processHasThreadCount = processColumns.contains("thread_count")
-        self.threadHasEndTs = threadColumns.contains("end_ts")
-        self.threadHasIsMainThread = threadColumns.contains("is_main_thread")
-        self.schedSliceHasEndState = schedSliceColumns.contains("end_state")
-        self.schedSliceHasPriority = schedSliceColumns.contains("priority")
-        self.threadStateHasCPU = threadStateColumns.contains("cpu")
-        self.callstackHasDepth = callstackColumns.contains("depth")
-        self.callstackHasCategory = callstackColumns.contains("cat")
-        self.callstackHasParentID = callstackColumns.contains("parent_id")
-        self.callstackHasCookie = callstackColumns.contains("cookie")
-        self.measureHasDuration = measureColumns.contains("dur")
-        self.cpuFilterHasUnit = cpuFilterColumns.contains("unit")
-        self.processFilterHasUnit = processFilterColumns.contains("unit")
+        self.validation = prepared.validation
+        self.processHasEndTs = prepared.processHasEndTs
+        self.processHasThreadCount = prepared.processHasThreadCount
+        self.threadHasEndTs = prepared.threadHasEndTs
+        self.threadHasIsMainThread = prepared.threadHasIsMainThread
+        self.schedSliceHasEndState = prepared.schedSliceHasEndState
+        self.schedSliceHasPriority = prepared.schedSliceHasPriority
+        self.threadStateHasCPU = prepared.threadStateHasCPU
+        self.callstackHasDepth = prepared.callstackHasDepth
+        self.callstackHasCategory = prepared.callstackHasCategory
+        self.callstackHasParentID = prepared.callstackHasParentID
+        self.callstackHasCookie = prepared.callstackHasCookie
+        self.measureHasDuration = prepared.measureHasDuration
+        self.cpuFilterHasUnit = prepared.cpuFilterHasUnit
+        self.processFilterHasUnit = prepared.processFilterHasUnit
     }
 
     // MARK: - TraceRepositoryProtocol
