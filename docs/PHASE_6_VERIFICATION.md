@@ -117,11 +117,11 @@ Owner：ArkDeck analyzer envelope validator（或按「窗口裁剪」解读契�
 场景物理前置条件（非被测变更，已记录）：唤醒并解锁屏幕、息屏超时改为 1,800,000 ms、
 关闭 App 内 crash probe（`CrashProbe.ENABLED = false`）。
 
-**闭环后的 demo 拆分**：上面那个 crash probe 开关暴露了结构问题——同一个工程同时承载 ArkDeck
-的崩溃 demo 与 ArkTrace 的性能 demo，两者期望终态相反。判定完成后拆为两个工程：
-`WaterFlowLayoutDemo` 恢复为 ArkDeck 崩溃 demo（`CrashProbe.ENABLED = true`，ArkDeck 侧 pin 的
-路径 / 模块 / 产物 / bundle / 崩溃签名保持不变），新增 `WaterFlowTraceDemo` 承载本场景，
-负载与 reload 策略收敛为 `TraceWorkload` 的三个显式开关。后续重跑用后者。拆分发生在比较判定
+**闭环后的 fixture 收敛**：上面那个 crash probe 开关暴露了结构问题——crash 与 trace 两种用途
+期望终态相反，却是两个可以各自开关的布尔量。判定完成后收敛为**一个 fixture 的一个互斥选择器**
+（`FixtureMode.MODE`），并从操作者 home 下的未跟踪目录移入 ArkDeck 仓库
+`tests/waterflow-demo`（ArkDeck PR #1329）。fixture 归 ArkDeck，因为只有它构建和部署该工程；
+ArkTrace 只 trace 正在跑的进程。后续重跑把 `MODE` 设为 `traceWorkload` 即可。收敛发生在比较判定
 之后，未改动任何已记录的数字。详见 PHASE_6_SCENARIO.md §1.1。
 
 ## 7.1 用新 demo 的复现验证（2026-08-16）
@@ -142,7 +142,7 @@ Owner：ArkDeck analyzer envelope validator（或按「窗口裁剪」解读契�
 与首次的 3,358 → 17 是同一现象。剩余差异属于设备逐次波动，不改变结论。
 
 这次复现没有任何被丢弃的采集：crash probe 已经不在这个工程里，屏幕前置条件一次到位。
-复现结束后 demo 被放回基线状态（`USE_BLANKET_RELOAD = true`），下次可直接重跑。
+复现结束后 fixture 被放回基线状态（`USE_BLANKET_RELOAD = true`），下次可直接重跑。
 
 本节是确认性证据，发布门 10 由 §9 的首次闭环关闭，不由本节重复关闭。
 
