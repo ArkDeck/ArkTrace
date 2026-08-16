@@ -2193,11 +2193,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         deadline: ContinuousClock.Instant
     ) throws -> DirectorySummary {
         let endSelection = hasEndTimestamp ? ", end_ts" : ", NULL"
-        let order = try db.boundedSamplingOrderClause(of: table, deadline: deadline)
+        let sampling = try db.boundedSamplingStrategy(of: table, deadline: deadline)
         let rows = try db.query(
             """
-            SELECT \(identityColumn), start_ts\(endSelection) FROM \(table)
-            \(order) LIMIT ?
+            SELECT \(identityColumn), start_ts\(endSelection)
+            FROM \(table) \(sampling.tableQualifier)
+            \(sampling.orderClause) LIMIT ?
             """,
             bindings: [.int64(Int64(limit) + 1)],
             stage: .querying,
@@ -2352,9 +2353,12 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         limit: Int,
         deadline: ContinuousClock.Instant
     ) throws -> (ids: Set<Int64>, incomplete: Bool) {
-        let order = try db.boundedSamplingOrderClause(of: table, deadline: deadline)
+        let sampling = try db.boundedSamplingStrategy(of: table, deadline: deadline)
         let rows = try db.query(
-            "SELECT id FROM \(table) \(order) LIMIT ?",
+            """
+            SELECT id FROM \(table) \(sampling.tableQualifier)
+            \(sampling.orderClause) LIMIT ?
+            """,
             bindings: [.int64(Int64(limit) + 1)],
             stage: .querying,
             observesTaskCancellation: true,
@@ -2374,7 +2378,7 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         limit: Int,
         deadline: ContinuousClock.Instant
     ) throws -> EventSourceSummary {
-        let order = try db.boundedSamplingOrderClause(of: "stat", deadline: deadline)
+        let sampling = try db.boundedSamplingStrategy(of: "stat", deadline: deadline)
         let rows = try db.query(
             """
             SELECT
@@ -2388,7 +2392,8 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 CASE WHEN typeof(stat_type) = 'text' THEN 1 ELSE 0 END,
                 CASE WHEN typeof(stat_type) = 'text' AND stat_type = 'received'
                     THEN 1 ELSE 0 END
-            FROM stat \(order) LIMIT ?
+            FROM stat \(sampling.tableQualifier)
+            \(sampling.orderClause) LIMIT ?
             """,
             bindings: [.int64(Int64(limit) + 1)],
             stage: .querying,

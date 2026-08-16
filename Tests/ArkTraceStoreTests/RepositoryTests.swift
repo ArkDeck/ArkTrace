@@ -691,7 +691,13 @@ final class RepositoryTests: XCTestCase {
             ("stat", "SELECT source, count FROM stat"),
             ("measure", "SELECT ts, filter_id FROM measure"),
         ].map { table, prefix in
-            "\(prefix) \(try db.boundedSamplingOrderClause(of: table)) LIMIT 2"
+            try { () -> String in
+                let sampling = try db.boundedSamplingStrategy(of: table)
+                return """
+                    \(prefix) \(sampling.tableQualifier)
+                    \(sampling.orderClause) LIMIT 2
+                    """
+            }()
         }
         for sql in statements {
             XCTAssertNoThrow(
@@ -713,12 +719,17 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO without_rowid_sample VALUES (2, 'b'), (1, 'a');
             """
         )
-        let withoutRowIDOrder = try db.boundedSamplingOrderClause(
+        let withoutRowIDSampling = try db.boundedSamplingStrategy(
             of: "without_rowid_sample"
         )
-        XCTAssertEqual(withoutRowIDOrder, "NOT INDEXED")
+        XCTAssertEqual(withoutRowIDSampling, .physicalOrder)
+        XCTAssertEqual(withoutRowIDSampling.tableQualifier, "NOT INDEXED")
+        XCTAssertEqual(withoutRowIDSampling.orderClause, "")
         let ordered = try db.query(
-            "SELECT sequence FROM without_rowid_sample \(withoutRowIDOrder) LIMIT 1",
+            """
+            SELECT sequence FROM without_rowid_sample \(withoutRowIDSampling.tableQualifier)
+            \(withoutRowIDSampling.orderClause) LIMIT 1
+            """,
             vmStepBudget: 1_000,
             stage: .querying
         ) { $0.int64(0) }
@@ -736,11 +747,14 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO mixed_direction_sample(a, b) SELECT value, value FROM n;
             """
         )
-        let mixedOrder = try db.boundedSamplingOrderClause(
+        let mixedSampling = try db.boundedSamplingStrategy(
             of: "mixed_direction_sample"
         )
-        XCTAssertEqual(mixedOrder, "NOT INDEXED")
-        let mixedSQL = "SELECT a FROM mixed_direction_sample \(mixedOrder) LIMIT 2"
+        XCTAssertEqual(mixedSampling, .physicalOrder)
+        let mixedSQL = """
+            SELECT a FROM mixed_direction_sample \(mixedSampling.tableQualifier)
+            \(mixedSampling.orderClause) LIMIT 2
+            """
         XCTAssertNoThrow(
             try db.query(
                 mixedSQL, vmStepBudget: 1_000, stage: .querying
@@ -760,8 +774,8 @@ final class RepositoryTests: XCTestCase {
             """
         )
         XCTAssertEqual(
-            try db.boundedSamplingOrderClause(of: "all_aliases_shadowed"),
-            "NOT INDEXED",
+            try db.boundedSamplingStrategy(of: "all_aliases_shadowed"),
+            .physicalOrder,
             "additive shadow columns without a PK remain compatible"
         )
         XCTAssertEqual(
@@ -785,12 +799,16 @@ final class RepositoryTests: XCTestCase {
             INSERT INTO generated_alias_sample(id) SELECT value FROM n;
             """
         )
-        let generatedOrder = try db.boundedSamplingOrderClause(
+        let generatedSampling = try db.boundedSamplingStrategy(
             of: "generated_alias_sample"
         )
-        XCTAssertEqual(generatedOrder, "ORDER BY _rowid_ ASC")
-        let generatedSQL =
-            "SELECT id FROM generated_alias_sample \(generatedOrder) LIMIT 2"
+        XCTAssertEqual(generatedSampling, .rowIDOrder(alias: "_rowid_"))
+        XCTAssertEqual(generatedSampling.tableQualifier, "")
+        XCTAssertEqual(generatedSampling.orderClause, "ORDER BY _rowid_ ASC")
+        let generatedSQL = """
+            SELECT id FROM generated_alias_sample \(generatedSampling.tableQualifier)
+            \(generatedSampling.orderClause) LIMIT 2
+            """
         XCTAssertNoThrow(
             try db.query(
                 generatedSQL, vmStepBudget: 1_000, stage: .querying

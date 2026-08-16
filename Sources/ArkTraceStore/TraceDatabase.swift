@@ -520,14 +520,44 @@ final class TraceDatabase {
         }
     }
 
+    /// How a bounded sampling prefix keeps a stable order.
+    ///
+    /// The two cases occupy different syntactic slots -- `NOT INDEXED`
+    /// qualifies the table name, `ORDER BY` follows the WHERE clause -- so
+    /// they are deliberately not one interchangeable string. Splicing the
+    /// wrong one into the wrong slot is a syntax error rather than a silent
+    /// loss of ordering.
+    enum BoundedSamplingStrategy: Equatable {
+        /// Ordinary rowid table with an unshadowed row identity alias.
+        case rowIDOrder(alias: String)
+        /// WITHOUT ROWID storage, or an ordinary table whose every rowid alias
+        /// is shadowed. Physical B-tree/record order is already stable and
+        /// avoids a temp sort.
+        case physicalOrder
+
+        /// Text that must directly follow the table name.
+        var tableQualifier: String {
+            switch self {
+            case .rowIDOrder: ""
+            case .physicalOrder: "NOT INDEXED"
+            }
+        }
+
+        /// Text that must follow the WHERE clause, before LIMIT.
+        var orderClause: String {
+            switch self {
+            case .rowIDOrder(let alias): "ORDER BY \(alias) ASC"
+            case .physicalOrder: ""
+            }
+        }
+    }
+
     /// Returns a deterministic bounded-prefix scan without assuming every
-    /// compatible SQLite table exposes a hidden `rowid`. Ordinary tables use
-    /// an unshadowed rowid alias. WITHOUT ROWID tables and ordinary tables
-    /// that shadow every alias use `NOT INDEXED` physical B-tree/record order.
-    func boundedSamplingOrderClause(
+    /// compatible SQLite table exposes a hidden `rowid`.
+    func boundedSamplingStrategy(
         of table: String,
         deadline: ContinuousClock.Instant? = nil
-    ) throws -> String {
+    ) throws -> BoundedSamplingStrategy {
         guard Self.isSafeIdentifier(table) else {
             throw ArkTraceError(
                 code: .traceSchemaUnsupported,
@@ -556,14 +586,14 @@ final class TraceDatabase {
             )
         }
         if withoutRowID == 0, let rowIDAlias {
-            return "ORDER BY \(rowIDAlias) ASC"
+            return .rowIDOrder(alias: rowIDAlias)
         }
         // WITHOUT ROWID storage is already a stable primary-key B-tree, but
         // pragma_table_xinfo does not expose each declared ASC/DESC direction.
         // NOT INDEXED forces its physical record order and avoids a temp sort.
         // It also preserves additive compatibility when all rowid aliases of
         // an ordinary table are shadowed.
-        return "NOT INDEXED"
+        return .physicalOrder
     }
 
     /// Returns an unshadowed SQLite row identity alias for ordinary tables.
