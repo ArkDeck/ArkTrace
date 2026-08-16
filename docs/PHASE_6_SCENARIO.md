@@ -269,6 +269,30 @@ crash probe 终止）、`job-afc3f58600…`（App 在启动 12 s 后被 crash pr
 probe（`CrashProbe.ENABLED = false`），否则进程在启动 12 s 后自毁，任何 10 s 窗口都观察不到
 持续负载。两者都是场景物理前置条件，不是被测变更。
 
+## 10.2 在产分发上的重跑（2026-08-16）
+
+2026-08-16 的 CLI re-pin 换掉了 §10.1 所跑的 tool 与 parser，门 10 因此一度只覆盖已退役的分发。
+按本文件第 5、8 节原样重跑了整条闭环，唯一变更仍是 `USE_BLANKET_RELOAD` 由 `true` 翻成 `false`：
+
+| 指标 | baseline | follow-up | 相对变化 |
+|---|---:|---:|---:|
+| M1 App 进程 shareOfOneCPU | 0.027373 | 0.003533 | **−87.09%** |
+| M2 App 主线程 shareOfOneCPU | 0.026718 | 0.003262 | −87.79% |
+| M3 主线程 running 占比 | 0.026718 | 0.003262 | −87.79% |
+| M4 App ≥8 ms long slice | 0 | 0 | 无信号 |
+| M5 top-5 hot interval score | 2,950,501,540 | 2,682,148,400 | −9.10% |
+
+判定同为 **improved**（M1 −87.09% ≥ 20%，M2 未上升，M4 无信号）。M5 本轮只降 9.10%，
+它是佐证指标不参与判定条件；§10.1 那轮为 −20.6%，差异属设备逐次波动。
+
+命中的候选仍是 **C1**：1 ms 诊断阈值下 baseline 归属 App 的 slice 694.4 ms / 260 条，
+`CreateTaskMeasure` 20 次对应 10 s 窗口内 20 次 reload；follow-up 在同阈值下为 0 条，
+summary `namedSliceCount` 由 3,348 降到 16。主线程身份这次由 `context` 结果的
+`isMainThread: true` 直接确认，未依赖 `tid == pid` 回退。
+
+跨轮 pid 26630→29198、ipid 16→15，按 process name + pid 显式映射。本轮无被丢弃的采集。
+机器证据与门常量已一并指向该轮，第 6～10 节未改动。
+
 ## 11. 阻塞状态
 
 ### 11.1 已解除：`analyzer.analyze-trace@1`（2026-08-16）

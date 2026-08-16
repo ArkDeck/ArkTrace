@@ -1,36 +1,51 @@
 {
-  "formatVersion": 1,
-  "recordedAtUTC": "2026-08-16T06:30:00Z",
-  "scenario": {
-    "reference": "docs/PHASE_6_SCENARIO.md",
-    "id": "S1",
-    "frozenBeforeBaselineCapture": true,
-    "amendmentRecordedBeforeBaselineCapture": true,
-    "workloadDriver": "in-app deterministic feed reload every 500 ms while the Index page is foreground; identical in both rounds; disclosed test scaffolding, not the change under test"
+  "agentDecision": {
+    "candidateSelected": "C1",
+    "candidatesExcluded": {
+      "C4": "excluded because the app process, not a system compositor process, held the largest runningNs in the baseline"
+    },
+    "change": "LazyDataSource.reloadData now compares incoming rows against the previous ones by identity signature and emits per-index onDataChange only for rows that really differ, emitting nothing when the payload is identical, and still falling back to onDataReloaded on any structural difference",
+    "changedFile": "entry/src/main/ets/datasource/LazyDataSource.ets",
+    "facts": [
+      "baseline analyze --kind cpu topProcesses ranked e.waterflowdemo first at runningNs 274133000 over a 10014594000 ns range, shareOfOneCPU 0.027373, sliceCount 243",
+      "baseline topThreads showed the process main thread (tid equal to pid) holding 267574000 ns, which is 97.6 percent of the process total, so the cost is on the UI thread",
+      "the context result at the hottest interval carried isMainThread true on that same tid, so main-thread identity did not rest on the tid equals pid fallback",
+      "baseline slices at a 1 ms diagnostic threshold attributed 694.4 ms across 260 app slices, dominated by H:UITaskScheduler::FlushTask 95.60 ms over 40 slices, H:FlushLayoutTask 86.45 ms over 40 slices, H:CreateTaskMeasure[ListItem] 36.13 ms over 20 slices and H:CreateTaskMeasure[WaterFlow] 21.82 ms over 20 slices",
+      "the 20 CreateTaskMeasure occurrences match exactly the 20 reload cycles a 500 ms driver produces in a 10 s window",
+      "follow-up attributed 0 app slices at the same 1 ms threshold, and summary namedSliceCount fell from 3348 to 16"
+    ],
+    "guiAutomationUsed": false,
+    "humanLogReadForEvidence": false,
+    "inference": "each reload re-measured the whole nested WaterFlow subtree; the per-reload CreateTaskMeasure pair is the signature of LazyForEach discarding and rebuilding every item after a blanket reload notification",
+    "inputsWereStructuredArtifactsOnly": true,
+    "unknownDueToDataQuality": [
+      "summary processCount and threadCount are truncated sections and carry no value in either round",
+      "M4 has no app-attributable slice at the frozen 8 ms threshold in either round, so it carries no signal",
+      "analyzer.analyze-trace@1 kind=context could not be used; see openFindings.contextCounterSampleWindow"
+    ]
   },
-  "subject": {
-    "bundleName": "com.example.waterflowdemo",
-    "abilityName": "EntryAbility",
-    "deviceProductName": "OpenHarmony 3.2",
-    "osFullName": "OpenHarmony-7.0.0.37",
-    "hdcVersion": "3.2.0f",
-    "targetID": "TGT-958780b2ffb7",
-    "bindingRevision": 3
-  },
-  "toolIdentity": {
-    "arkTraceName": "arktrace",
-    "arkTraceVersion": "0.1.0",
-    "arkTraceBuildRevision": "0c552cbaac49d2ed641e999cb01163b3aa8bac5ce2015d52ef7caf552dabdc65",
-    "parserName": "trace_streamer",
-    "parserVersion": "4.3.7",
-    "parserUpstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
-    "parserBinarySHA256": "2e8316265f8fdc027614d81c7d71646a0eb7dfadffbb2503e13ee66287f937e5",
-    "arkDeckDaemonSHA256": "6db51f074722a8a0641e764020b1b5c546ad238599b520893d456dd575f04a7f"
+  "analysisRequest": {
+    "endNsPerRound": "summary.result.durationNs",
+    "kinds": [
+      "cpu",
+      "scheduling",
+      "slices",
+      "hot-intervals"
+    ],
+    "limit": 50,
+    "maxEvents": 60000,
+    "maxOutputBytes": 16777216,
+    "maxRows": 20000,
+    "operation": "analyzer.analyze-trace@1",
+    "startNs": 0,
+    "thresholdNsForSlices": 8000000,
+    "timeoutMs": 120000
   },
   "captureRequest": {
-    "operation": "capture.diagnostics@1",
-    "identicalAcrossRounds": true,
     "durationSeconds": 10,
+    "identicalAcrossRounds": true,
+    "operation": "capture.diagnostics@1",
+    "traceBufferKB": 32768,
     "traceCategories": [
       "ace",
       "app",
@@ -40,167 +55,235 @@
       "freq",
       "idle"
     ],
-    "traceBufferKB": 32768,
     "uiDump": false
   },
-  "analysisRequest": {
-    "operation": "analyzer.analyze-trace@1",
-    "kinds": [
-      "cpu",
-      "scheduling",
-      "slices",
-      "hot-intervals"
+  "comparison": {
+    "M1_appProcessShareOfOneCPU": {
+      "baseline": 0.02737335133106744,
+      "followup": 0.0035330826967816626,
+      "relativeDelta": -0.8709298450872626
+    },
+    "M2_appMainThreadShareOfOneCPU": {
+      "baseline": 0.026718407156595663,
+      "followup": 0.0032616834720168727,
+      "relativeDelta": -0.8779237305240445
+    },
+    "M3_mainThreadRunningShare": {
+      "baseline": 0.026718407156595663,
+      "followup": 0.0032616834720168727,
+      "relativeDelta": -0.8779237305240445
+    },
+    "M4_appLongSlices8ms": {
+      "baseline": 0,
+      "followup": 0,
+      "signal": "none"
+    },
+    "M5_top5HotIntervalScore": {
+      "baseline": 2950501540,
+      "followup": 2682148400,
+      "relativeDelta": -0.09095170307892807
+    },
+    "identityMapping": "process matched across rounds by process name plus pid; the application restarted between rounds so pid changed 26630 to 29198 and ipid changed 16 to 15, and internal keys were deliberately not reused",
+    "verdict": "improved",
+    "verdictRule": "improved requires M1 relative drop of at least 20 percent with M2 and M4 not rising more than 5 percent"
+  },
+  "dataQuality": {
+    "baselineStatus": "warnings",
+    "baselineTruncatedSections": [
+      "hotIntervals",
+      "longSlices",
+      "schedulingLatency",
+      "topProcesses",
+      "topThreads"
     ],
-    "startNs": 0,
-    "endNsPerRound": "summary.result.durationNs",
-    "thresholdNsForSlices": 8000000,
-    "limit": 50,
-    "timeoutMs": 120000,
-    "maxRows": 20000,
-    "maxEvents": 60000,
-    "maxOutputBytes": 16777216
+    "followupStatus": "warnings",
+    "followupTruncatedSections": [
+      "hotIntervals",
+      "schedulingLatency",
+      "topProcesses",
+      "topThreads"
+    ]
+  },
+  "discardedAttempts": [],
+  "formatVersion": 1,
+  "noDiscardedAttemptsReason": "both rounds were captured on the first attempt: the screen stayed awake and unlocked throughout, and the fixture ran in traceWorkload mode, so the process was alive with the 500 ms driver running for the whole window in each round",
+  "preconditionsEstablished": [
+    "device screen woken and unlocked for the duration of both rounds",
+    "fixture MODE set to traceWorkload, which keeps the process alive for the whole capture window instead of arming the ArkDeck crash probe"
+  ],
+  "privacy": {
+    "absoluteUserPathsIncluded": false,
+    "note": "only the application under test is named; other process and thread names observed in the traces are treated as local sensitive artifacts and are not exported",
+    "thirdPartyProcessNamesIncluded": false
+  },
+  "recordedAtUTC": "2026-08-16T15:35:00Z",
+  "resolvedFindings": {
+    "contextCounterSampleWindow": {
+      "closureEvidence": "phase6-context-closure.json",
+      "consequence": "PHASE_6_SCENARIO.md section 6 item 4 is now met for both rounds; M1..M5 never depended on the context kind",
+      "endToEndVerificationJobID": "job-1b81c838b4c19c8a9fe60d4efecfc6f7",
+      "failedJobID": "job-f06a3f3df9166acb161ebea3b537a219",
+      "fix": "ArkDeck#1318 commit 28af92cb admits one carry-in counter sample per series when its durationNs reaches the window",
+      "kind": "context",
+      "observed": "4 of 94 counter samples in a 100 ms window carried timestamps 6973805999 and 6973870999 against a window starting at 7010484760, each with a durationNs that reaches into the window",
+      "operation": "analyzer.analyze-trace@1",
+      "owner": "ArkDeck analyzer envelope validator, or ArkTrace if the contract is to be read as window-clipped",
+      "reason": "analyzer.schemaMismatch: trace-analysis@1 produced JSON outside ArkTrace analysis contract 1.0",
+      "rootCause": "ArkTrace emits the last counter sample that precedes the requested window because a counter is a step function whose value holds until the next sample; ArkDeck validateCounterSample requires every sample timestamp to satisfy timestamp >= rangeStart and timestamp < rangeEnd",
+      "status": "closed 2026-08-16"
+    }
   },
   "rounds": {
     "baseline": {
-      "deploy": {
-        "unsignedHapArtifactID": "ART-b089f5ebdbc6b79bbc8c5f8ed3204ad7",
-        "unsignedHapSHA256": "f6c8e6d2e4c64d2091a75369eff84a1b22df73a1d9009eb7925434126681a171",
-        "unsignedHapByteCount": 2745479,
-        "signJobID": "job-a4df4a07f33f7f1bc26ecf5022c786f4",
-        "signedHapArtifactID": "ART-95497ca24a637adc8e3f7c9b99a2a686",
-        "signedHapSHA256": "dd4ad26a32dfe5e3e56a87fcfd1f592e3155469a6b14ff8c80ea65589cfd833c",
-        "signedHapByteCount": 2807196,
-        "deployJobID": "job-58e1eb2cd2f92eca05136aee64afe46d",
-        "deployState": "succeeded"
-      },
-      "capture": {
-        "jobID": "job-fb1bb39ad7727e44a7ce7277140810a4",
-        "state": "succeeded",
-        "traceArtifactID": "ART-d15ec022b82871520761843726e84c74",
-        "traceSHA256": "f0aa075e85afa98401df4846df64a33af3269e5549f35b874637bf1f43a20edd",
-        "traceByteCount": 2132120,
-        "durationNs": 10014872000
-      },
-      "summary": {
-        "jobID": "job-e42560168f3c9ed977c58ff862734e2c",
-        "artifactID": "ART-1ab59509563053b5c9fb871ea3832541",
-        "sha256": "86ba48f05a50e3b29e32725aee864af231cd10b90e0b4c8fa9e9a01f1e3125c1",
-        "byteCount": 3053,
-        "cpuSliceCount": 3395,
-        "threadStateCount": 5139,
-        "namedSliceCount": 3358
-      },
       "analyses": {
         "cpu": {
-          "jobID": "job-0e97a34cf8072d6a72fb0b2543b6a7f7",
-          "artifactID": "ART-48f1a31958c0747c36f8fadb07ad3328",
-          "sha256": "619882a72a11b2573808ae96d34fd7355f30aad108bd02f8476f3204820b2034",
-          "byteCount": 145471
-        },
-        "scheduling": {
-          "jobID": "job-594e9f595b5e9d96e6432e1f32388af5",
-          "artifactID": "ART-46efdeaf51df26e9b38b21e5cd5d3a37",
-          "sha256": "594e9d4d1f7d90c1b3d00a6dc76585b61a0d573456af4a6278e76f8e669b5a77",
-          "byteCount": 145485
-        },
-        "slices": {
-          "jobID": "job-1743c1f024bf1678112a3a7c477204ed",
-          "artifactID": "ART-742d72ecbb9bfbd487948c62929874b8",
-          "sha256": "3f904072252f0d278ff34535dc6bdbbcc05fd2729f6f53c92da5eb3e10aa9d02",
-          "byteCount": 134222
+          "artifactID": "ART-e101fa6051ac2c9114e8928b57533868",
+          "byteCount": 159004,
+          "jobID": "job-777fffff5ad1b98789435a4ce04b34ba",
+          "sha256": "daf832f005b624f27d1df95a4353a13c03e1c4bd3fb33ea68027f03310cb44fa"
         },
         "hot-intervals": {
-          "jobID": "job-830dbe4c37edce40390e3a41bd29a21d",
-          "artifactID": "ART-b6f7774d73881a3f219a170cdc8a5d87",
-          "sha256": "351421931d0cd609e7b2fd5c1367b8ba2dd0a0b77a796b6fba453e61fa089a72",
-          "byteCount": 145491
+          "artifactID": "ART-2c233fa7ccf29b9fb0cbb9a1e4286081",
+          "byteCount": 159024,
+          "jobID": "job-57bfc3ec3b604ef59fedc90dec232017",
+          "sha256": "4ac10ffaa47b7d98f4ed12ae2c6e23f9c4718f57f98f5ea9d64d10dec71649a3"
+        },
+        "scheduling": {
+          "artifactID": "ART-06649112b0a64cd37fc3488b2ef7899c",
+          "byteCount": 159018,
+          "jobID": "job-b4f88bcf027a9121002ff4dd45f64719",
+          "sha256": "12cfe279b54332504b20c61816144345837da6c0396f14853f9dfc989b07cba3"
+        },
+        "slices": {
+          "artifactID": "ART-0f615d114bbeb5fbd988a0ca4014ab07",
+          "byteCount": 147761,
+          "jobID": "job-3c9498feba46514f56d5405e1328c25c",
+          "sha256": "c60c0cfcf6b2efd46166bee7d47cd842f28546e7eb5929154c1432de6bb27b28"
         },
         "slicesDiagnostic1ms": {
-          "jobID": "job-2a370e330d3cd0d53751a0bcfece266b",
-          "thresholdNs": 1000000,
-          "limit": 1000
+          "jobID": "job-a5e670bbce99533c6b73e2c405f26b1c",
+          "limit": 1000,
+          "thresholdNs": 1000000
         }
+      },
+      "capture": {
+        "durationNs": 10014594000,
+        "jobID": "job-31019f3f787570605943cb01779d33d3",
+        "state": "succeeded",
+        "traceArtifactID": "ART-5b17a1a044873e71e6198bf17e97352a",
+        "traceByteCount": 2135494,
+        "traceSHA256": "4b113194937df42bf6268c27d47f17aa418b1a35743938f30b6108429bb4eb74"
+      },
+      "deploy": {
+        "deployJobID": "job-9f3325ef40185fb889d9b2e3c9cde627",
+        "deployState": "succeeded",
+        "signJobID": "job-4fa5a7646d6b2e1290ef0159c839f48d",
+        "signedHapArtifactID": "ART-83db3cc3e47bf310709123d95d1ac8af",
+        "signedHapByteCount": 2812138,
+        "signedHapSHA256": "c10a7a0a8c2157b0181e2d16a71d7baaf04e8ef89e876431839ff3255937af57",
+        "unsignedHapArtifactID": "ART-36fd11b73980ebf8326101c3c63634e3",
+        "unsignedHapByteCount": 2751569,
+        "unsignedHapSHA256": "14ea09f8a63fb9f22601c22235a127b9e35e8fdd31e79d13b45a3263000c4bbc"
+      },
+      "summary": {
+        "artifactID": "ART-8a3df737b2b5ca86fe5f5ffa44c9e9a1",
+        "byteCount": 3035,
+        "cpuSliceCount": 3409,
+        "jobID": "job-2787ac90cb52977fcf3fc2349c185b8b",
+        "namedSliceCount": 3348,
+        "sha256": "c6518e48d4c23886054c078567c8f2cfe7b739327295c7e4a777f5fd736daf2c",
+        "threadStateCount": 5278
       }
     },
     "followup": {
-      "deploy": {
-        "unsignedHapArtifactID": "ART-a1b8b365aa21166617bb5576803ed8ef",
-        "unsignedHapSHA256": "bf60a049c4c1fa5c99de1360172f483941dce3be26ec01e48a11e156acbffa9a",
-        "unsignedHapByteCount": 2749613,
-        "signJobID": "job-67565401fc2e6db46bc3ede56d056ca5",
-        "signedHapArtifactID": "ART-690c428cff7cf9f1d9a16034e285854e",
-        "signedHapSHA256": "d00f8c54d6771802e86b157c36cd96be0a05170019c547083a7427345cccfe1f",
-        "signedHapByteCount": 2813094,
-        "deployJobID": "job-0d64e8414ab9ad68bcee1ff3ef958c49",
-        "deployState": "succeeded"
-      },
-      "capture": {
-        "jobID": "job-720ac5215fcddacccde36e90401bc612",
-        "state": "succeeded",
-        "traceArtifactID": "ART-6bc7bd624e10c257e5a256aeda55ddc5",
-        "traceSHA256": "5efdd13720bb714b856247783e42864b4eafe7f9440ece1dcc9ec4e352a83395",
-        "traceByteCount": 1023605,
-        "durationNs": 10014749000
-      },
-      "summary": {
-        "jobID": "job-e0ca65240b6cff2341888ee1818c4fb3",
-        "artifactID": "ART-a8fd99cad0bbd70dc8d7be1418009817",
-        "sha256": "84f7a64e01c49fe7098c8c6dcc3d9b47db18a7733d0cfe8b454a7a183f3867a4",
-        "byteCount": 2629,
-        "cpuSliceCount": 2670,
-        "threadStateCount": 4055,
-        "namedSliceCount": 17
-      },
       "analyses": {
         "cpu": {
-          "jobID": "job-57b5cce8aeb71953865c46df9ceb21fe",
-          "artifactID": "ART-e456dff470ee6b66e7db98d0188bd8be",
-          "sha256": "7a5a3e175289190e798edc79f242e8ffbee0952b4bc7afc8c755d22df0da222f",
-          "byteCount": 131901
-        },
-        "scheduling": {
-          "jobID": "job-8c675cdf810d28561e22358e9a95872c",
-          "artifactID": "ART-ee2d72427d5a02725762fdac19d78721",
-          "sha256": "341217058d0533b52b666793e565a36b8a3aaf9c158eff6f29eeb565bf1c57c4",
-          "byteCount": 131915
-        },
-        "slices": {
-          "jobID": "job-f22b7e3720400c81e882b117c839a430",
-          "artifactID": "ART-80f62862426151cf415b34e19bd64e83",
-          "sha256": "8c7f3bfaee705b3c19b7608e4bfa235417b20283a480102a1e4b4d16a781cc65",
-          "byteCount": 126544
+          "artifactID": "ART-6ecfad66477aa6e014180adb94f2b881",
+          "byteCount": 152248,
+          "jobID": "job-b08ec2e4d298c7b782c7cd05252f3065",
+          "sha256": "e2349c0d987b79d82b4812e2158fd7ef4765d93f899ba0fc4dad6b9ff8fea9fd"
         },
         "hot-intervals": {
-          "jobID": "job-5847e5909887e9d253fd0300df858fbb",
-          "artifactID": "ART-1d8667edaad6bf038b9652cf1c011f72",
-          "sha256": "728e98c0c6d5048657cd9830317b18627da15450ecc518df090b70bca667e8c4",
-          "byteCount": 131921
+          "artifactID": "ART-85bb7eca6aff965d3e9bac71439fa72b",
+          "byteCount": 152268,
+          "jobID": "job-b2ccf75df89f20f5325bddcc2c858e31",
+          "sha256": "db7e0b2ea1748f9d3f628888e876b9df0d7530948c7f6c2586dd78a6f03bf450"
+        },
+        "scheduling": {
+          "artifactID": "ART-fe312c4aca10fe027138441193809fa2",
+          "byteCount": 152262,
+          "jobID": "job-d29ebfa5cf063d7da751f076334ef3f1",
+          "sha256": "88e8bfd1f78f5c7358c798520ff978e5af27641e66190ed78ee5fe259fe92ea4"
+        },
+        "slices": {
+          "artifactID": "ART-b929fb0647a6bd610f73f13d246cb04e",
+          "byteCount": 147193,
+          "jobID": "job-94434aff3e57ff42b7dbd996e3819a48",
+          "sha256": "398cebf5ffb5a6ad1a2751f77cf140f17a05c009ac44e4ef7a0dd76cd64b1a39"
+        },
+        "slicesDiagnostic1ms": {
+          "jobID": "job-f1364be9eb4e56052297b0ef32851f47",
+          "limit": 1000,
+          "thresholdNs": 1000000
         }
+      },
+      "capture": {
+        "durationNs": 10014767000,
+        "jobID": "job-2b8b5c88bd2c1ef1cc6e18ce6bd46fe4",
+        "state": "succeeded",
+        "traceArtifactID": "ART-5e0feb41341e4b92e86aa90328d00901",
+        "traceByteCount": 1243942,
+        "traceSHA256": "5e1781a94dd11cf7c64855eef7e3cd56c2ff4f08100e6631b682040ebde17f0b"
+      },
+      "deploy": {
+        "deployJobID": "job-8842ed6228cfb49ba27c4b19414fc18f",
+        "deployState": "succeeded",
+        "signJobID": "job-2777b6eba71f710a0025244798f671fe",
+        "signedHapArtifactID": "ART-489c829f894ba8d6fd2c78218de00b6c",
+        "signedHapByteCount": 2812140,
+        "signedHapSHA256": "534bfe214ff175311242d1139f4fa46b43064a5b469e1192d92ac8c7049c9f97",
+        "unsignedHapArtifactID": "ART-6919e1b185e9fa3896e1e326b79f0e47",
+        "unsignedHapByteCount": 2751569,
+        "unsignedHapSHA256": "7bb71123298362413743a60bac1e6cfc548958bbbc1b5a8b032875fc99a866ac"
+      },
+      "summary": {
+        "artifactID": "ART-2ca65910c5e649703fe6c39b7982d995",
+        "byteCount": 2611,
+        "cpuSliceCount": 3153,
+        "jobID": "job-09bed8416f2f69b4ae71a0c29185e834",
+        "namedSliceCount": 16,
+        "sha256": "743902398d3f51dbeed3317d2cb20658735f4fa9dd0dc4788e0ccc3de83c5246",
+        "threadStateCount": 4904
       }
     }
   },
-  "agentDecision": {
-    "inputsWereStructuredArtifactsOnly": true,
-    "guiAutomationUsed": false,
-    "humanLogReadForEvidence": false,
-    "facts": [
-      "baseline analyze --kind cpu topProcesses ranked e.waterflowdemo first at runningNs 263783011 over a 10014872000 ns range, shareOfOneCPU 0.026339, sliceCount 229",
-      "baseline topThreads showed the process main thread (tid equal to pid) holding 256759007 ns, which is 97.3 percent of the process total, so the cost is on the UI thread",
-      "baseline slices at a 1 ms diagnostic threshold attributed 690.5 ms across 260 app slices, dominated by H:UITaskScheduler::FlushTask 95.03 ms over 40 slices, H:FlushLayoutTask 86.06 ms over 40 slices, H:CreateTaskMeasure[ListItem] 35.96 ms over 20 slices and H:CreateTaskMeasure[WaterFlow] 22.05 ms over 20 slices",
-      "the 20 CreateTaskMeasure occurrences match exactly the 20 reload cycles a 500 ms driver produces in a 10 s window"
-    ],
-    "inference": "each reload re-measured the whole nested WaterFlow subtree; the per-reload CreateTaskMeasure pair is the signature of LazyForEach discarding and rebuilding every item after a blanket reload notification",
-    "unknownDueToDataQuality": [
-      "summary processCount and threadCount are truncated sections and carry no value in either round",
-      "M4 has no app-attributable slice at the frozen 8 ms threshold in either round, so it carries no signal",
-      "analyzer.analyze-trace@1 kind=context could not be used; see openFindings.contextCounterSampleWindow"
-    ],
-    "candidateSelected": "C1",
-    "candidatesExcluded": {
-      "C4": "excluded because the app process, not a system compositor process, held the largest runningNs in the baseline"
-    },
-    "change": "LazyDataSource.reloadData now compares incoming rows against the previous ones by identity signature and emits per-index onDataChange only for rows that really differ, emitting nothing when the payload is identical, and still falling back to onDataReloaded on any structural difference",
-    "changedFile": "entry/src/main/ets/datasource/LazyDataSource.ets"
+  "scenario": {
+    "amendmentRecordedBeforeBaselineCapture": true,
+    "frozenBeforeBaselineCapture": true,
+    "id": "S1",
+    "reference": "docs/PHASE_6_SCENARIO.md",
+    "rerunOfFrozenScenario": true,
+    "rerunReason": "the 2026-08-16 CLI re-pin replaced the tool and parser the earlier rounds ran on, so gate 10 was attesting a retired distribution",
+    "workloadDriver": "in-app deterministic feed reload every 500 ms while the Index page is foreground; identical in both rounds; disclosed test scaffolding, not the change under test"
+  },
+  "subject": {
+    "abilityName": "EntryAbility",
+    "bindingRevision": 3,
+    "bundleName": "com.example.waterflowdemo",
+    "deviceProductName": "OpenHarmony 3.2",
+    "hdcVersion": "3.2.0f",
+    "osFullName": "OpenHarmony-7.0.0.37",
+    "targetID": "TGT-958780b2ffb7"
+  },
+  "toolIdentity": {
+    "arkDeckDaemonSHA256": "9768a99735025278a7c1712684276bdbb7e0a1eb8d57fdc368ef57abc76785d7",
+    "arkTraceBuildRevision": "a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa",
+    "arkTraceName": "arktrace",
+    "arkTraceVersion": "0.1.0",
+    "parserBinarySHA256": "66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9",
+    "parserName": "trace_streamer",
+    "parserUpstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "parserVersion": "4.3.7"
   },
   "typedRequestChain": {
     "note": "every device-touching step is a typed ArkDeck request; the compile that produced each HAP ran on the host toolchain because the workspace build operation cannot be authorised by an Agent (see PHASE_6_SCENARIO.md section 0)",
@@ -210,91 +293,5 @@
       "debug.hap@1 installOrReplace / retain / postRunAbilityState running",
       "capture.diagnostics@1 with the frozen parameters"
     ]
-  },
-  "comparison": {
-    "identityMapping": "process matched across rounds by process name plus pid; ipid changed 12 to 11 and pid changed 19406 to 19759, so internal keys were deliberately not reused",
-    "M1_appProcessShareOfOneCPU": {
-      "baseline": 0.026339129546538387,
-      "followup": 0.0032545997907685955,
-      "relativeDelta": -0.8764348007394067
-    },
-    "M2_appMainThreadShareOfOneCPU": {
-      "baseline": 0.025637772205176462,
-      "followup": 0.003021942936363158,
-      "relativeDelta": -0.8821292695722991
-    },
-    "M3_mainThreadRunningShare": {
-      "baseline": 0.025637772205176462,
-      "followup": 0.003021942936363158,
-      "relativeDelta": -0.8821292695722991
-    },
-    "M4_appLongSlices8ms": {
-      "baseline": 0,
-      "followup": 0,
-      "signal": "none"
-    },
-    "M5_top5HotIntervalScore": {
-      "baseline": 2879312023,
-      "followup": 2285011800,
-      "relativeDelta": -0.20640354996357405
-    },
-    "verdict": "improved",
-    "verdictRule": "improved requires M1 relative drop of at least 20 percent with M2 and M4 not rising more than 5 percent"
-  },
-  "dataQuality": {
-    "baselineStatus": "warnings",
-    "followupStatus": "warnings",
-    "baselineTruncatedSections": [
-      "hotIntervals",
-      "longSlices",
-      "schedulingLatency",
-      "topProcesses",
-      "topThreads"
-    ],
-    "followupTruncatedSections": [
-      "hotIntervals",
-      "schedulingLatency",
-      "topProcesses",
-      "topThreads"
-    ]
-  },
-  "discardedAttempts": [
-    {
-      "captureJobID": "job-115f3310edbc346ca030e83a07621388",
-      "reason": "device screen was locked, so the application had no foreground workload; discarded before any metric was read"
-    },
-    {
-      "captureJobID": "job-eaeb6d35eb1a4adb74e8d28977ffa129",
-      "reason": "screen re-locked on timeout during the window and the application had already been aborted by its own crash probe"
-    },
-    {
-      "captureJobID": "job-afc3f58600ec6ed653a424048ddcf40c",
-      "reason": "application aborted 12 s after launch by the in-app ArkDeck GJ-5 crash probe, so no sustained workload was present"
-    }
-  ],
-  "preconditionsEstablished": [
-    "device screen woken and unlocked, screen-off timeout overridden to 1800000 ms for the duration of the runs",
-    "in-app ArkDeck GJ-5 crash probe disabled, which otherwise aborts the process 12 s after launch and prevented any sustained workload from being observable"
-  ],
-  "privacy": {
-    "absoluteUserPathsIncluded": false,
-    "thirdPartyProcessNamesIncluded": false,
-    "note": "only the application under test is named; other process and thread names observed in the traces are treated as local sensitive artifacts and are not exported"
-  },
-  "resolvedFindings": {
-    "contextCounterSampleWindow": {
-      "operation": "analyzer.analyze-trace@1",
-      "kind": "context",
-      "failedJobID": "job-f06a3f3df9166acb161ebea3b537a219",
-      "reason": "analyzer.schemaMismatch: trace-analysis@1 produced JSON outside ArkTrace analysis contract 1.0",
-      "rootCause": "ArkTrace emits the last counter sample that precedes the requested window because a counter is a step function whose value holds until the next sample; ArkDeck validateCounterSample requires every sample timestamp to satisfy timestamp >= rangeStart and timestamp < rangeEnd",
-      "observed": "4 of 94 counter samples in a 100 ms window carried timestamps 6973805999 and 6973870999 against a window starting at 7010484760, each with a durationNs that reaches into the window",
-      "consequence": "PHASE_6_SCENARIO.md section 6 item 4 is now met for both rounds; M1..M5 never depended on the context kind",
-      "owner": "ArkDeck analyzer envelope validator, or ArkTrace if the contract is to be read as window-clipped",
-      "status": "closed 2026-08-16",
-      "fix": "ArkDeck#1318 commit 28af92cb admits one carry-in counter sample per series when its durationNs reaches the window",
-      "endToEndVerificationJobID": "job-1b81c838b4c19c8a9fe60d4efecfc6f7",
-      "closureEvidence": "phase6-context-closure.json"
-    }
   }
 }

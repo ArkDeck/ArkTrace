@@ -34,44 +34,13 @@ PHASE_6_SCENARIO.md §0。
 | TraceStreamer | 4.3.7，upstream `447a0a49…`，binary `2e831626…` |
 | arkdeck-agentd | `6db51f07…`（本轮重建并签名安装） |
 
-> **本报告的工具身份已不是在产分发。** 2026-08-16 的 re-pin 把在产 tool 换成
-> `a7859d69…`、parser 换成 `66887fae…`（见 [ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md)
-> 与 `Fixtures/release-evidence/phase5-cli-distribution.json`）。上表两行记录的是本次两轮
-> 真机运行**当时**的字节，不随 re-pin 改写——改写只会变成"声明留存证据被编辑过"。
+> **上表是首轮闭环（2026-08-16 早）的工具身份，已不是在产分发。** 同日的 CLI re-pin 把在产
+> tool 换成 `a7859d69…`、parser 换成 `66887fae…`。留存证据的身份不随 re-pin 改写——改写只会
+> 变成"声明留存证据被编辑过"。
 >
-> 因此 `scripts/test_phase6.sh` 现在证明的是**留存证据完整**，不是在产分发已在真机上端到端
-> 跑通。要合上这个缺口，必须拿当前 pin 重跑
-> [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) 的 DAYU 200 场景。见 §7.2：分析半条链已用在产
-> 分发在真机上验证过，仍缺的是两轮 debug loop 与判定。
-
-## 7.2 在产分发的真机分析验证（2026-08-16）
-
-门 10 的两轮 loop 尚未用新 pin 重跑，但**采集 → 分析**这半条链已经验证过了。同一台 DAYU 200、
-同一 `stableIdentitySHA256` `2406ead5…`、`PHASE_6_SCENARIO.md` §5 的冻结 inputs：
-
-| 步骤 | 结果 |
-|---|---|
-| `capture.diagnostics@1` | `job-0c9f86b7…` succeeded；`trace.htrace` 948,316 字节，SHA-256 `7061b3ad…` |
-| `analyzer.summarize-trace@1` | `job-5e7487e6…` succeeded；`ART-f32a4cc7…`，2,610 字节，SHA-256 `cf00eeec…` |
-| `analyzer.analyze-trace@1` | `cpu` / `scheduling` / `slices` / `hot-intervals` 四个 kind 在同一 range 上全部 succeeded |
-
-摘要结果：duration 10.014 s，56 进程 / 152 线程 / 2,510 CPU slice / 38 named slice，
-`truncated: false`，`indexSchemaVersion: 3`。ArkDeck 的 envelope validator 接受了新的 provenance。
-
-这条真机 trace 同时给了 COR-001 一个真实量级的对照——它的 56 个进程与 152 个线程 `start_ts`
-**全部为 NULL**。同一份 trace 分别喂给两个 pin 的二进制：
-
-| | 退役 pin `0c552cba…` | 在产 pin `a7859d69…` |
-|---|---|---|
-| `processCount` | 0 | 56 |
-| `threadCount` | 0 | 152 |
-| `truncated` | true | false |
-
-即退役分发会把这条真实设备 trace 报成零进程零线程。Phase 5 那个 1,240 字节小样本只暴露出
-1→2 / 0→2，真机上是 0→56 / 0→152。
-
-仍未覆盖：宿主编译 → import/sign HAP → `debug.hap@1` 部署 → 两轮比较判定。门 10 要覆盖在产
-分发，仍需完整重跑该场景。
+> **该缺口已在同日合上：§7.3 用在产分发完整重跑了两轮闭环**，判定同样是 improved。
+> `Fixtures/release-evidence/phase6-real-debug-loop.json` 与 `scripts/test_phase6.sh` 的
+> 常量现在都指向重跑那一轮，因此门 10 覆盖的是在产分发。本节以下 §3～§6 保留首轮的原始记录。
 
 ## 3. 两轮真实 Artifact
 
@@ -197,6 +166,83 @@ ArkTrace 只 trace 正在跑的进程。后续重跑把 `MODE` 设为 `traceWork
 
 本节是确认性证据，发布门 10 由 §9 的首次闭环关闭，不由本节重复关闭。
 
+## 7.2 在产分发的真机分析验证（2026-08-16）
+
+门 10 的两轮 loop 尚未用新 pin 重跑，但**采集 → 分析**这半条链已经验证过了。同一台 DAYU 200、
+同一 `stableIdentitySHA256` `2406ead5…`、`PHASE_6_SCENARIO.md` §5 的冻结 inputs：
+
+| 步骤 | 结果 |
+|---|---|
+| `capture.diagnostics@1` | `job-0c9f86b7…` succeeded；`trace.htrace` 948,316 字节，SHA-256 `7061b3ad…` |
+| `analyzer.summarize-trace@1` | `job-5e7487e6…` succeeded；`ART-f32a4cc7…`，2,610 字节，SHA-256 `cf00eeec…` |
+| `analyzer.analyze-trace@1` | `cpu` / `scheduling` / `slices` / `hot-intervals` 四个 kind 在同一 range 上全部 succeeded |
+
+摘要结果：duration 10.014 s，56 进程 / 152 线程 / 2,510 CPU slice / 38 named slice，
+`truncated: false`，`indexSchemaVersion: 3`。ArkDeck 的 envelope validator 接受了新的 provenance。
+
+这条真机 trace 同时给了 COR-001 一个真实量级的对照——它的 56 个进程与 152 个线程 `start_ts`
+**全部为 NULL**。同一份 trace 分别喂给两个 pin 的二进制：
+
+| | 退役 pin `0c552cba…` | 在产 pin `a7859d69…` |
+|---|---|---|
+| `processCount` | 0 | 56 |
+| `threadCount` | 0 | 152 |
+| `truncated` | true | false |
+
+即退役分发会把这条真实设备 trace 报成零进程零线程。Phase 5 那个 1,240 字节小样本只暴露出
+1→2 / 0→2，真机上是 0→56 / 0→152。
+
+本节只覆盖采集与分析半条链；两轮 debug loop 与判定由 §7.3 用同一在产分发补齐。
+
+## 7.3 在产分发上的完整重跑（2026-08-16）
+
+§7.2 只覆盖了采集与分析半条链。此处用**在产分发**把两轮闭环整条跑完，机器证据已替换为这一轮：
+`Fixtures/release-evidence/phase6-real-debug-loop.json`，`scripts/test_phase6.sh` 的
+`expected_tool` / `expected_parser` 随之指向 `a7859d69…` / `66887fae…`。
+
+链路与 §8 冻结形状一致：宿主 hvigor 编译（按 §0 声明为非 typed 步骤）→ `artifact import-hap`
+→ `workspace.sign-openharmony-hap@1`（preset `openharmony-release@1`）→ `debug.hap@1`
+（installOrReplace / retain / running）→ `capture.diagnostics@1`（§5 冻结 inputs，两轮逐字段相同）。
+施加的变更仍是 `USE_BLANKET_RELOAD` 由 `true` 翻成 `false`，其余源码一致。
+
+| | baseline | follow-up |
+|---|---|---|
+| capture job | `job-31019f3f…` | `job-2b8b5c88…` |
+| `trace.htrace` | `ART-5b17a1a0…`，2,135,494 B | `ART-5e0feb41…`，1,243,942 B |
+| trace 时长 | 10,014,594,000 ns | 10,014,767,000 ns |
+| cpu slice | 3,409 | 3,153 |
+| named slice | 3,348 | 16 |
+| App pid | 26630 | 29198 |
+
+| 指标 | baseline | follow-up | 相对变化 |
+|---|---:|---:|---:|
+| M1 App 进程 shareOfOneCPU | 0.027373 | 0.003533 | **−87.09%** |
+| M2 App 主线程 shareOfOneCPU | 0.026718 | 0.003262 | −87.79% |
+| M3 主线程 running 占比 | 0.026718 | 0.003262 | −87.79% |
+| M4 App ≥8 ms long slice | 0 | 0 | 无信号 |
+| M5 top-5 hot interval score | 2,950,501,540 | 2,682,148,400 | −9.10% |
+
+判定 **improved**：M1 下降 87.09% ≥ 20%，M2 未上升，M4 无信号不构成否决（§10 冻结规则）。
+M5 本轮只降 9.10%（首轮为 −20.6%），它是佐证指标，不参与判定条件。
+
+Agent 判断复现了首轮结论：baseline `topProcesses` 首位 `e.waterflowdemo`
+（runningNs 274,133,000，占 10.01 s 窗口 2.74%，是次位 render_service 的近 10 倍 → 排除 C4）；
+主线程占该进程 97.6%，且 context 结果在该 tid 上带 `isMainThread: true`，主线程身份不依赖
+`tid == pid` 回退判据；1 ms 诊断阈值下 App 归属 slice 694.4 ms / 260 条，集中于
+`H:UITaskScheduler::FlushTask`（95.60 ms×40）、`H:FlushLayoutTask`（86.45 ms×40）、
+`H:CreateTaskMeasure[ListItem]`（36.13 ms×20）、`H:CreateTaskMeasure[WaterFlow]`（21.82 ms×20）——
+20 次 measure 与 500 ms 驱动在 10 s 窗口内的 20 次 reload 精确对应 → **C1**。follow-up 在同一
+阈值下 App 归属 slice 为 0 条。
+
+跨轮身份映射按 §10 约束以 process name + pid 显式建立（pid 26630→29198，ipid 16→15），未复用
+内部 key。两轮 `limits` 完全一致（`limit` 50、`timeoutMs` 120000、`maxRows` 20000、
+`maxEvents` 60000、`maxOutputBytes` 16 MiB；M4 阈值 8 ms，诊断阈值 1 ms 另计）。
+
+两轮 `topProcesses` / `topThreads` 均被 `limit: 50` 截去 50 名之后的长尾（matched 68 / 65），
+但 App 在两轮都是 rank 1、归因完整，故不触发 §10 的 inconclusive 条件；首轮证据记录的截断集合
+与此一致。本轮**没有任何被丢弃的采集**：屏幕全程唤醒解锁，fixture 处于 `traceWorkload` 模式，
+进程在两轮的整个窗口内都存活并按 500 ms 节奏产生负载。
+
 ## 8. 审计结果
 
 `scripts/test_phase5.sh` 会串起 Phase 1→2→3→4→5 的整条链，以下为其单次完整执行的结果
@@ -241,3 +287,8 @@ fixture 落地并通过 byte count / SHA-256 / git blob 三重校验后，该 ga
 下一轮 ArkDeck typed request → follow-up capture → deterministic comparison 已完成，
 全程无 fake/synthetic trace、无手工替换 Artifact、无 GUI 复制。derived evidence 可由记录的
 source hash、tool/parser identity 与 request 参数重建。
+
+门 10 现在关闭在 **§7.3 的重跑**上，因为那一轮跑的是在产分发（tool `a7859d69…` /
+parser `66887fae…`）。留存机器证据与 `scripts/test_phase6.sh` 的常量都指向该轮。首轮闭环
+（§3～§5）与 §7.1 的复现保留为历史记录：它们跑在 re-pin 之前的分发上，结论同为 improved，
+但不再是门 10 的承载者。
