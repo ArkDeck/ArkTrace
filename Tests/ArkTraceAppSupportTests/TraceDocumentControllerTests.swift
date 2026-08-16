@@ -213,6 +213,58 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertTrue(store.documents().isEmpty)
     }
 
+    func testCacheMaintenanceRunsAfterOpenRatherThanGatingIt() async throws {
+        let suite = "ArkTraceMaintenanceTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("arktrace-maint-\(UUID().uuidString)", isDirectory: true)
+        let cache = root.appendingPathComponent("traces", isDirectory: true)
+        let staging = root.appendingPathComponent("staging", isDirectory: true)
+        for directory in [cache, staging] {
+            try FileManager.default.createDirectory(
+                at: directory, withIntermediateDirectories: true
+            )
+        }
+        defer { try? FileManager.default.removeItem(at: root) }
+        let maintenance = try TraceCacheMaintenance(
+            cacheDirectory: cache.resolvingSymlinksInPath().standardizedFileURL,
+            stagingDirectory: staging.resolvingSymlinksInPath().standardizedFileURL
+        )
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: maintenance,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(identity: "m"),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "arktrace-maint-\(UUID().uuidString).htrace"
+        )
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+        // Reaching Ready must not depend on housekeeping having finished; it
+        // used to run two full inventories and an owner scan before the
+        // parser was even started (AT-PERF-002).
+        XCTAssertEqual(controller.phase, .ready)
+
+        await controller.awaitCacheMaintenanceForTesting()
+        XCTAssertNotNil(
+            controller.cacheInventory,
+            "maintenance must still run, just not in front of the open"
+        )
+        XCTAssertNotNil(controller.cacheMaintenanceReport)
+        XCTAssertNil(controller.errorPresentation)
+    }
+
     func testCloseCleanupFailureRemainsVisibleAndRetryable() async throws {
         let suite = "ArkTraceCloseTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

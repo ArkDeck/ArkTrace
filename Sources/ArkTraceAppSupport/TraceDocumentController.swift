@@ -184,6 +184,7 @@ public final class TraceDocumentController {
     @ObservationIgnored private var viewportTask: Task<Void, Never>?
     @ObservationIgnored private var searchTask: Task<Void, Never>?
     @ObservationIgnored private var analysisTask: Task<Void, Never>?
+    @ObservationIgnored private var maintenanceTask: Task<Void, Never>?
     @ObservationIgnored private var documentGeneration: UInt64 = 0
     @ObservationIgnored private var viewportGeneration: UInt64 = 0
     @ObservationIgnored private var searchGeneration: UInt64 = 0
@@ -242,6 +243,7 @@ public final class TraceDocumentController {
         viewportTask?.cancel()
         searchTask?.cancel()
         analysisTask?.cancel()
+        maintenanceTask?.cancel()
         if let closing {
             Task { try? await closing.close() }
         }
@@ -451,6 +453,47 @@ public final class TraceDocumentController {
         catch { presentNonfatal(error, generation: documentGeneration) }
     }
 
+    /// Cache housekeeping is not a precondition for reading a trace, so it no
+    /// longer sits in front of `open`. It used to run two full inventories and
+    /// an owner-record scan there, which on a cache near its entry bound is
+    /// thousands of open/flock/lstat calls between the user's click and the
+    /// first byte of parsing (AT-PERF-002).
+    ///
+    /// Running it just after a successful open is also when eviction is most
+    /// relevant, and the entry that was just opened holds a shared lease, so
+    /// maintenance skips it rather than competing for it.
+    private func scheduleCacheMaintenance() {
+        guard let maintenance, maintenanceTask == nil else { return }
+        let generation = documentGeneration
+        maintenanceTask = Task { [weak self] in
+            let outcome: Result<TraceCacheMaintenanceReport, any Error>
+            do { outcome = .success(try await maintenance.maintain()) }
+            catch { outcome = .failure(error) }
+            guard let self else { return }
+            self.maintenanceTask = nil
+            switch outcome {
+            case .success(let report):
+                self.cacheMaintenanceReport = report
+                self.cacheInventory = report.after
+            case .failure(let error):
+                // Housekeeping that merely could not run is not worth
+                // interrupting the user for, but a failure that left an owned
+                // residual behind is, and the rest of the codebase gives that
+                // priority too.
+                if (error as? ArkTraceError)?.isOwnershipCleanupFailure == true {
+                    self.presentNonfatal(error, generation: generation)
+                }
+            }
+        }
+    }
+
+    /// Joins the background housekeeping task. Internal test seam so a test
+    /// can assert maintenance still runs after an open without polling; it is
+    /// deliberately not part of the public API.
+    func awaitCacheMaintenanceForTesting() async {
+        await maintenanceTask?.value
+    }
+
     public func purgeUnusedCache() async {
         guard let maintenance else { return }
         do {
@@ -470,10 +513,6 @@ public final class TraceDocumentController {
             document = nil
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            if let maintenance {
-                cacheMaintenanceReport = try await maintenance.maintain()
-                cacheInventory = cacheMaintenanceReport?.after
-            }
             let progress: TraceProgressHandler = { [weak self] stage in
                 Task { @MainActor [weak self] in
                     guard let self, self.documentGeneration == generation,
@@ -538,6 +577,7 @@ public final class TraceDocumentController {
                     ? "Trace loaded, no timed events"
                     : "Trace loaded, \(catalog.groups.flatMap(\.tracks).filter { !$0.isCollapsed }.count) visible tracks"
             )
+            scheduleCacheMaintenance()
         } catch {
             if let opened { try? await opened.close() }
             guard generation == documentGeneration else { return }
