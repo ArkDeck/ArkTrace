@@ -184,13 +184,15 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 ## 8. 分发前 Hardening
 
-[Phase 1](./PHASE_1_TASKS.md) §6 列出的 source/tool fully-locked build hardening 不阻塞当前 Parser critical path，但必须在外部分发前完成：
+[Phase 1](./PHASE_1_TASKS.md) §6 列出的分发前 hardening **已全部归零**，逐条证据见该节：
 
-- third-party exact source lock；
-- GN/Ninja URL 和 archive hash；
-- clean workdir byte-identical build；
-- standalone local patch；
-- SSH URL variants → HTTPS；
-- content-derived build recipe version。
+- ~~third-party exact source lock~~ 与 ~~GN/Ninja URL 和 archive hash~~——`ThirdParty/TraceStreamer/source-lock.json`
+  锁定 upstream、13 个 source dependency 与两个 tool archive 的 URL/SHA-256/byte count；
+- ~~clean workdir byte-identical build~~——`scripts/test_trace_streamer_reproducibility.sh` 实跑通过，
+  binary 保持 `e0167fbb…`；
+- ~~standalone local patch~~——`ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
+- ~~SSH URL variants → HTTPS~~——`git@gitee.com:` 与 `ssh://git@gitee.com/` 两种形式均被 rewrite；
+- ~~content-derived build recipe version~~——`BUILD_RECIPE_VERSION` 由四个输入的 SHA-256 派生，当前 `e4fec8cc…`；
+- ~~large-trace gate 记录 source/staging filesystem~~ 与 ~~测试不改 process-global `PATH`~~——2026-08-16 完成。
 
-该 hardening 应在 Phase 3 P3-T10 打包验收前归零；未完成时不能把“provenance 可追溯”表述为“所有构建输入已完全锁定”。
+因此“所有构建输入已完全锁定”现在是一个有证据支撑的表述，而不再是被这条 hardening 挡住的措辞。

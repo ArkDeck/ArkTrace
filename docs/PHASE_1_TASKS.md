@@ -43,11 +43,17 @@ Phase 1 的交付链路是：
 - **P1-T09：Phase close。** README、TraceStreamer 实测记录、DESIGN、任务索引与 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md) 已按实际实现收口。
 - DESIGN 已按当前定义关闭发布门 2；真实 fixture 发布门也已关闭。
 
-### Phase 1 后仍开放但不重开本阶段
+### Phase 1 结束时仍开放的项（均已在后续阶段关闭）
 
-- build manifest 记录了 third-party SHA，但普通 build 尚不消费这些 pin；DESIGN 已将完全 pre-pin 定义为后续 hardening，不作为本轮重新打开发布门 2 的理由；
-- DESIGN 中发布门 3 仍是第三方许可证清单，当前仍开放；不能仅依据 e710e78 的 commit subject 将其视为关闭。
-- 发布门 6 仍要求 Phase 3 的 large-trace + cache promotion 证据；Phase 1 的 13 MiB fixture、TERM/KILL 与 atomic Ready 只关闭 P1-T06/T07/T08，不提前关闭该门。
+以下是 Phase 1 收口当天的状态记录，保留是为了说明当时哪些结论**没有**被提前宣称。三条现在都已关闭，
+当前状态以 DESIGN §24 为准。
+
+- ~~build manifest 记录了 third-party SHA，但普通 build 尚不消费这些 pin~~——已关闭：`source-lock.json`
+  现在被普通 build 消费并逐项校验，见 §6；当时不作为重新打开发布门 2 的理由；
+- ~~DESIGN 中发布门 3 仍是第三方许可证清单，当前仍开放~~——已关闭（2026-08-14，P3-T10）；当时也不能仅依据
+  e710e78 的 commit subject 视为关闭。
+- ~~发布门 6 仍要求 Phase 3 的 large-trace + cache promotion 证据~~——已关闭（P3-T09，reviewed DAYU 200
+  large fixture）；Phase 1 的 13 MiB fixture、TERM/KILL 与 atomic Ready 当时只关闭 P1-T06/T07/T08。
 
 ## 3. 任务依赖（已完成）
 
@@ -333,12 +339,19 @@ Phase 1 要完成结构化取消实现；发布门 6 仍需后续 large trace + 
 
 以下工作重要，但按当前 reviewed DESIGN 不重新阻塞已关闭的发布门 2：
 
-- 将 manifest 中记录的所有 floating third-party SHA 转成普通 build 会消费的 source lock；
-- 固定 GN/Ninja 下载 URL 与 archive SHA；
-- 用两个 clean work directory 验证 byte-identical binary；
-- 将 faultloggerd inline edit 改为独立 patch；
-- 增加 ssh://git@gitee.com/ 形式的 HTTPS rewrite；
-- 为 build recipe 引入基于输入内容的稳定版本；
+- ~~将 manifest 中记录的所有 floating third-party SHA 转成普通 build 会消费的 source lock~~——已完成：
+  `ThirdParty/TraceStreamer/source-lock.json` 锁定 upstream 与 13 个 source dependency；
+- ~~固定 GN/Ninja 下载 URL 与 archive SHA~~——已完成：同一 lock 的 `tools` 段固定两者的 URL、SHA-256
+  与 byte count，构建脚本按值校验；
+- ~~用两个 clean work directory 验证 byte-identical binary~~——已完成：
+  `scripts/test_trace_streamer_reproducibility.sh` 实跑通过，两个独立 fresh worktree 的产物彼此、且与
+  仓库 binary 逐字节相同（`e0167fbb…`）；
+- ~~将 faultloggerd inline edit 改为独立 patch~~——已完成：
+  `ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch`；
+- ~~增加 ssh://git@gitee.com/ 形式的 HTTPS rewrite~~——已完成：构建脚本同时 rewrite
+  `git@gitee.com:openharmony/` 与 `ssh://git@gitee.com/openharmony/`；
+- ~~为 build recipe 引入基于输入内容的稳定版本~~——已完成：`BUILD_RECIPE_VERSION` 由 build script、
+  safety helper、source lock 与 local patch 四者的 SHA-256 派生，当前为 `e4fec8cc…`；
 - ~~large-trace gate 记录 source/staging 是否同一 filesystem；跨卷 snapshot 的真实复制 IO/空间必须计入验收证据~~——已完成（2026-08-16）：benchmark evidence 增加 `storage` 块（`sourceFilesystemID`/`stagingFilesystemID`/`sameFilesystem`/`stagedByteCount`），schema 随之升到 `formatVersion: 4`；`scripts/benchmark_phase3.sh` 断言四个键精确闭合、两个 device ID 非零、`sameFilesystem` 必须与两个 ID 的实际关系一致、`stagedByteCount` 必须等于 `traceByteCount`。跨卷运行不被禁止，但不能再被记成同卷；
 - ~~避免并行测试通过 `setenv` 修改进程全局 `PATH`，改用隔离的 resolver seam~~——已完成（2026-08-16）：`TraceStreamerResolver` 与 `ArkTraceBundledParserResolver` 暴露 `candidateExecutableURLs()`，测试断言植入的假二进制不在候选集内，不再改动 process-global 环境。
 
