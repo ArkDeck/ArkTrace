@@ -41,8 +41,37 @@ PHASE_6_SCENARIO.md §0。
 >
 > 因此 `scripts/test_phase6.sh` 现在证明的是**留存证据完整**，不是在产分发已在真机上端到端
 > 跑通。要合上这个缺口，必须拿当前 pin 重跑
-> [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) 的 DAYU 200 场景；该场景需要真机，无法在宿主
-> 侧完成。发布前若要求门 10 覆盖在产分发，这是唯一待办。
+> [PHASE_6_SCENARIO.md](./PHASE_6_SCENARIO.md) 的 DAYU 200 场景。见 §7.2：分析半条链已用在产
+> 分发在真机上验证过，仍缺的是两轮 debug loop 与判定。
+
+## 7.2 在产分发的真机分析验证（2026-08-16）
+
+门 10 的两轮 loop 尚未用新 pin 重跑，但**采集 → 分析**这半条链已经验证过了。同一台 DAYU 200、
+同一 `stableIdentitySHA256` `2406ead5…`、`PHASE_6_SCENARIO.md` §5 的冻结 inputs：
+
+| 步骤 | 结果 |
+|---|---|
+| `capture.diagnostics@1` | `job-0c9f86b7…` succeeded；`trace.htrace` 948,316 字节，SHA-256 `7061b3ad…` |
+| `analyzer.summarize-trace@1` | `job-5e7487e6…` succeeded；`ART-f32a4cc7…`，2,610 字节，SHA-256 `cf00eeec…` |
+| `analyzer.analyze-trace@1` | `cpu` / `scheduling` / `slices` / `hot-intervals` 四个 kind 在同一 range 上全部 succeeded |
+
+摘要结果：duration 10.014 s，56 进程 / 152 线程 / 2,510 CPU slice / 38 named slice，
+`truncated: false`，`indexSchemaVersion: 3`。ArkDeck 的 envelope validator 接受了新的 provenance。
+
+这条真机 trace 同时给了 COR-001 一个真实量级的对照——它的 56 个进程与 152 个线程 `start_ts`
+**全部为 NULL**。同一份 trace 分别喂给两个 pin 的二进制：
+
+| | 退役 pin `0c552cba…` | 在产 pin `a7859d69…` |
+|---|---|---|
+| `processCount` | 0 | 56 |
+| `threadCount` | 0 | 152 |
+| `truncated` | true | false |
+
+即退役分发会把这条真实设备 trace 报成零进程零线程。Phase 5 那个 1,240 字节小样本只暴露出
+1→2 / 0→2，真机上是 0→56 / 0→152。
+
+仍未覆盖：宿主编译 → import/sign HAP → `debug.hap@1` 部署 → 两轮比较判定。门 10 要覆盖在产
+分发，仍需完整重跑该场景。
 
 ## 3. 两轮真实 Artifact
 
