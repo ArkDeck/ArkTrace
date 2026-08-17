@@ -3,7 +3,7 @@ import ArkTraceCore
 /// Actor-isolated viewport loader. Every completion is checked against the
 /// latest generation, so an older pan/zoom request can never overwrite a new
 /// immutable snapshot.
-public actor TimelineSnapshotLoader {
+package actor TimelineSnapshotLoader {
     private var latestGeneration: UInt64 = 0
 
     public init() {}

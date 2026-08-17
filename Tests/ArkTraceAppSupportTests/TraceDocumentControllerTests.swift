@@ -159,11 +159,11 @@ final class TraceDocumentControllerTests: XCTestCase {
             }
         )
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-controller-\(UUID().uuidString)")
+            .appending(path: "arktrace-controller-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
-        let first = root.appendingPathComponent("first.htrace")
-        let second = root.appendingPathComponent("second.htrace")
+        let first = root.appending(path: "first.htrace")
+        let second = root.appending(path: "second.htrace")
         FileManager.default.createFile(atPath: first.path, contents: Data())
         FileManager.default.createFile(atPath: second.path, contents: Data())
 
@@ -197,10 +197,10 @@ final class TraceDocumentControllerTests: XCTestCase {
             maximumCount: 2
         )
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-recent-\(UUID().uuidString)")
+            .appending(path: "arktrace-recent-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
-        let urls = (0..<3).map { root.appendingPathComponent("\($0).htrace") }
+        let urls = (0..<3).map { root.appending(path: "\($0).htrace") }
         for url in urls { FileManager.default.createFile(atPath: url.path, contents: Data()) }
 
         try store.record(urls[0])
@@ -218,9 +218,9 @@ final class TraceDocumentControllerTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-maint-\(UUID().uuidString)", isDirectory: true)
-        let cache = root.appendingPathComponent("traces", isDirectory: true)
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-maint-\(UUID().uuidString)", directoryHint: .isDirectory)
+        let cache = root.appending(path: "traces", directoryHint: .isDirectory)
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         for directory in [cache, staging] {
             try FileManager.default.createDirectory(
                 at: directory, withIntermediateDirectories: true
@@ -243,9 +243,7 @@ final class TraceDocumentControllerTests: XCTestCase {
                 )
             }
         )
-        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-maint-\(UUID().uuidString).htrace"
-        )
+        let source = FileManager.default.temporaryDirectory.appending(path: "arktrace-maint-\(UUID().uuidString).htrace")
         FileManager.default.createFile(atPath: source.path, contents: Data())
         defer { try? FileManager.default.removeItem(at: source) }
 
@@ -282,9 +280,7 @@ final class TraceDocumentControllerTests: XCTestCase {
                 )
             }
         )
-        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-close-\(UUID().uuidString).htrace"
-        )
+        let source = FileManager.default.temporaryDirectory.appending(path: "arktrace-close-\(UUID().uuidString).htrace")
         FileManager.default.createFile(atPath: source.path, contents: Data())
         defer { try? FileManager.default.removeItem(at: source) }
         controller.open(source)
@@ -331,9 +327,7 @@ final class TraceDocumentControllerTests: XCTestCase {
                 )
             }
         )
-        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-a11y-\(UUID().uuidString).htrace"
-        )
+        let source = FileManager.default.temporaryDirectory.appending(path: "arktrace-a11y-\(UUID().uuidString).htrace")
         FileManager.default.createFile(atPath: source.path, contents: Data())
         defer { try? FileManager.default.removeItem(at: source) }
 
@@ -432,11 +426,11 @@ final class TraceDocumentControllerTests: XCTestCase {
             }
         )
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-replacement-\(UUID().uuidString)")
+            .appending(path: "arktrace-replacement-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
-        let first = root.appendingPathComponent("first.htrace")
-        let second = root.appendingPathComponent("second.htrace")
+        let first = root.appending(path: "first.htrace")
+        let second = root.appending(path: "second.htrace")
         FileManager.default.createFile(atPath: first.path, contents: Data())
         FileManager.default.createFile(atPath: second.path, contents: Data())
 
@@ -475,9 +469,7 @@ final class TraceDocumentControllerTests: XCTestCase {
                 )
             }
         )
-        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-zero-\(UUID().uuidString).htrace"
-        )
+        let source = FileManager.default.temporaryDirectory.appending(path: "arktrace-zero-\(UUID().uuidString).htrace")
         FileManager.default.createFile(atPath: source.path, contents: Data())
         defer { try? FileManager.default.removeItem(at: source) }
         controller.open(source)
@@ -531,9 +523,7 @@ final class TraceDocumentControllerTests: XCTestCase {
                 )
             }
         )
-        let source = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-reveal-\(UUID().uuidString).htrace"
-        )
+        let source = FileManager.default.temporaryDirectory.appending(path: "arktrace-reveal-\(UUID().uuidString).htrace")
         FileManager.default.createFile(atPath: source.path, contents: Data())
         defer { try? FileManager.default.removeItem(at: source) }
         controller.open(source)

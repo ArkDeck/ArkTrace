@@ -1,13 +1,13 @@
 /// Closed, Agent-facing event views. Adding a view is a versioned contract
 /// change; callers cannot name a table, column, SQL fragment, or expression.
-public enum TraceAgentQueryView: String, Codable, CaseIterable, Hashable, Sendable {
+package enum TraceAgentQueryView: String, Codable, CaseIterable, Hashable, Sendable {
     case cpuSlices
     case threadStates
     case slices
     case counters
 }
 
-public enum TraceAgentTextMatch: String, Codable, Sendable {
+package enum TraceAgentTextMatch: String, Codable, Sendable {
     case exact
     case prefix
     case contains
@@ -16,7 +16,7 @@ public enum TraceAgentTextMatch: String, Codable, Sendable {
 /// Superset of the typed filters accepted by the four closed views. The query
 /// engine rejects fields that do not belong to the selected view before any
 /// repository call is made.
-public struct TraceAgentQueryFilters: Hashable, Codable, Sendable {
+package struct TraceAgentQueryFilters: Hashable, Codable, Sendable {
     public static let none = TraceAgentQueryFilters(empty: ())
 
     public let cpu: Int64?
@@ -156,7 +156,7 @@ public struct TraceAgentQueryFilters: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceAgentQueryRequest: Sendable {
+package struct TraceAgentQueryRequest: Sendable {
     public let view: TraceAgentQueryView
     public let range: TraceTimeRange
     public let filters: TraceAgentQueryFilters
@@ -231,7 +231,7 @@ public struct TraceAgentQueryRequest: Sendable {
 /// event-array key selected by `view`; an empty selected array is still an
 /// explicit payload. This avoids dynamically named keys or raw row maps while
 /// making mixed-view documents impossible to decode.
-public struct TraceAgentCounterEvent: Hashable, Codable, Sendable {
+package struct TraceAgentCounterEvent: Hashable, Codable, Sendable {
     public let filterID: Int64
     public let name: String
     public let scope: CounterScope
@@ -281,7 +281,7 @@ public struct TraceAgentCounterEvent: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceAgentQueryResult: Hashable, Codable, Sendable {
+package struct TraceAgentQueryResult: Hashable, Codable, Sendable {
     public let view: TraceAgentQueryView
     public let range: TraceTimeRange
     public let filters: TraceAgentQueryFilters

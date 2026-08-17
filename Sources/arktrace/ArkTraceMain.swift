@@ -1,6 +1,7 @@
 import ArkTraceCLI
 import Darwin
 import Foundation
+import Synchronization
 
 @main
 struct ArkTraceMain {
@@ -33,23 +34,26 @@ struct ArkTraceMain {
     }
 }
 
-private final class CLIOperationCancellationBox: @unchecked Sendable {
-    private let lock = NSLock()
-    private var operation: Task<Int32, Never>?
-    private var cancellationRequested = false
+private final class CLIOperationCancellationBox: Sendable {
+    private struct State {
+        var operation: Task<Int32, Never>?
+        var cancellationRequested = false
+    }
+
+    private let state = Mutex(State())
 
     func install(_ operation: Task<Int32, Never>) {
-        let shouldCancel = lock.withLock {
-            self.operation = operation
-            return cancellationRequested
+        let shouldCancel = state.withLock { state in
+            state.operation = operation
+            return state.cancellationRequested
         }
         if shouldCancel { operation.cancel() }
     }
 
     func cancel() {
-        let operation = lock.withLock {
-            cancellationRequested = true
-            return self.operation
+        let operation = state.withLock { state in
+            state.cancellationRequested = true
+            return state.operation
         }
         operation?.cancel()
     }

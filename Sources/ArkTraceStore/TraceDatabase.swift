@@ -3,9 +3,9 @@ import Darwin
 import Foundation
 import SQLite3
 
-private let sqliteTransient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+private let sqliteTransient = unsafe unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-public struct TraceDatabaseFileIdentity: Equatable, Sendable {
+package struct TraceDatabaseFileIdentity: Equatable, Sendable {
     public let device: UInt64
     public let inode: UInt64
 
@@ -74,14 +74,19 @@ private final class SQLiteQueryProgressController {
 
 private let sqliteVMProgressCallback: @convention(c) (UnsafeMutableRawPointer?) -> Int32 = {
     context in
-    guard let context else { return 1 }
-    return Unmanaged<SQLiteQueryProgressController>.fromOpaque(context)
+    guard let context = unsafe context else { return 1 }
+    return unsafe Unmanaged<SQLiteQueryProgressController>.fromOpaque(context)
         .takeUnretainedValue()
         .advance()
 }
 
 /// Minimal SQLite3 wrapper. Not Sendable by design: an instance is owned by a
 /// single repository actor (DESIGN §9.2) or a single test.
+///
+/// `@safe`: the raw `sqlite3*` handle never escapes; every statement is
+/// prepared, stepped and finalized inside this file, so callers get a safe
+/// interface over the unsafe storage (SE-0458).
+@safe
 final class TraceDatabase {
     static let maximumSchemaTableCount = 4_096
 
@@ -92,14 +97,18 @@ final class TraceDatabase {
         case text(String)
     }
 
+    /// `@safe`: a `Row` is only ever handed to the row callback while the
+    /// owning statement is between `sqlite3_step` and reset, and the column
+    /// accessors copy every value out before returning.
+    @safe
     struct Row {
         let statement: OpaquePointer
 
         func int64(_ index: Int32) -> Int64? {
-            guard sqlite3_column_type(statement, index) == SQLITE_INTEGER else {
+            guard unsafe sqlite3_column_type(statement, index) == SQLITE_INTEGER else {
                 return nil
             }
-            return sqlite3_column_int64(statement, index)
+            return unsafe sqlite3_column_int64(statement, index)
         }
 
         func text(_ index: Int32) -> String? {
@@ -108,17 +117,17 @@ final class TraceDatabase {
         }
 
         func textBytes(_ index: Int32) -> Data? {
-            guard sqlite3_column_type(statement, index) == SQLITE_TEXT,
-                let bytes = sqlite3_column_text(statement, index)
+            guard unsafe sqlite3_column_type(statement, index) == SQLITE_TEXT,
+                let bytes = unsafe sqlite3_column_text(statement, index)
             else {
                 return nil
             }
-            let count = Int(sqlite3_column_bytes(statement, index))
-            return Data(bytes: bytes, count: count)
+            let count = unsafe Int(sqlite3_column_bytes(statement, index))
+            return unsafe Data(bytes: bytes, count: count)
         }
 
         func isNull(_ index: Int32) -> Bool {
-            sqlite3_column_type(statement, index) == SQLITE_NULL
+            unsafe sqlite3_column_type(statement, index) == SQLITE_NULL
         }
     }
 
@@ -150,20 +159,20 @@ final class TraceDatabase {
         // rejects a database-file symlink without rejecting canonical temp roots.
         let parent = url.deletingLastPathComponent()
         var canonicalParent = [CChar](repeating: 0, count: Int(PATH_MAX))
-        let resolved = parent.path.withCString {
-            Darwin.realpath($0, &canonicalParent)
+        let resolved = unsafe parent.path.withCString {
+            unsafe Darwin.realpath($0, &canonicalParent)
         }
-        let openURL = resolved.map {
-            URL(fileURLWithPath: String(cString: $0), isDirectory: true)
-                .appendingPathComponent(url.lastPathComponent)
+        let openURL = unsafe resolved.map {
+            unsafe URL(filePath: String(cString: $0), directoryHint: .isDirectory)
+                .appending(path: url.lastPathComponent)
         } ?? url
         let bindingDescriptor: Int32?
         let sqliteOpenPath: String
         let fileIdentity: TraceDatabaseFileIdentity?
         let fileSnapshot: TraceDatabaseFileSnapshot?
         if readOnly {
-            let descriptor = openURL.path.withCString {
-                Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+            let descriptor = unsafe openURL.path.withCString {
+                unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
             }
             guard descriptor >= 0 else {
                 throw ArkTraceError(
@@ -173,7 +182,7 @@ final class TraceDatabase {
                 )
             }
             var info = stat()
-            guard Darwin.fstat(descriptor, &info) == 0,
+            guard unsafe Darwin.fstat(descriptor, &info) == 0,
                 (info.st_mode & S_IFMT) == S_IFREG
             else {
                 _ = Darwin.close(descriptor)
@@ -211,10 +220,10 @@ final class TraceDatabase {
         if readOnly || !createIfMissing {
             flags |= SQLITE_OPEN_NOFOLLOW
         }
-        let rc = sqlite3_open_v2(sqliteOpenPath, &db, flags, nil)
-        guard rc == SQLITE_OK, let db else {
-            if let db {
-                sqlite3_close_v2(db)
+        let rc = unsafe sqlite3_open_v2(sqliteOpenPath, &db, flags, nil)
+        guard rc == SQLITE_OK, let db = unsafe db else {
+            if let db = unsafe db {
+                unsafe sqlite3_close_v2(db)
             }
             if let bindingDescriptor { _ = Darwin.close(bindingDescriptor) }
             throw ArkTraceError(
@@ -224,7 +233,7 @@ final class TraceDatabase {
                 details: ["sqliteCode": String(rc)]
             )
         }
-        self.handle = db
+        unsafe self.handle = db
         self.bindingDescriptor = bindingDescriptor
         self.fileIdentity = fileIdentity
         self.fileSnapshot = fileSnapshot
@@ -232,7 +241,7 @@ final class TraceDatabase {
     }
 
     deinit {
-        sqlite3_close_v2(handle)
+        unsafe sqlite3_close_v2(handle)
         if let bindingDescriptor { _ = Darwin.close(bindingDescriptor) }
     }
 
@@ -255,9 +264,10 @@ final class TraceDatabase {
             throw Self.timeout(stage: stage)
         }
         var statement: OpaquePointer?
-        guard sqlite3_prepare_v2(handle, sql, -1, &statement, nil) == SQLITE_OK, let statement
+        guard unsafe sqlite3_prepare_v2(handle, sql, -1, &statement, nil) == SQLITE_OK,
+            let statement = unsafe statement
         else {
-            throw ArkTraceError(
+            throw unsafe ArkTraceError(
                 code: Self.failureCode(for: stage),
                 stage: stage,
                 message: "Failed to prepare internal SQLite statement",
@@ -266,9 +276,9 @@ final class TraceDatabase {
         }
         defer {
             if let vmStepObserver {
-                vmStepObserver(Int(sqlite3_stmt_status(statement, SQLITE_STMTSTATUS_VM_STEP, 0)))
+                unsafe vmStepObserver(Int(sqlite3_stmt_status(statement, SQLITE_STMTSTATUS_VM_STEP, 0)))
             }
-            sqlite3_finalize(statement)
+            unsafe sqlite3_finalize(statement)
         }
 
         let progressInterval: Int32 = 100
@@ -287,7 +297,7 @@ final class TraceDatabase {
             progressController = nil
         }
         if let progressController {
-            sqlite3_progress_handler(
+            unsafe sqlite3_progress_handler(
                 handle,
                 progressInterval,
                 sqliteVMProgressCallback,
@@ -296,7 +306,7 @@ final class TraceDatabase {
         }
         defer {
             if progressController != nil {
-                sqlite3_progress_handler(handle, 0, nil, nil)
+                unsafe sqlite3_progress_handler(handle, 0, nil, nil)
             }
             // SQLite holds an unretained pointer to the controller for the
             // whole statement, so its lifetime must outlive the step loop and
@@ -309,9 +319,9 @@ final class TraceDatabase {
             let rc: Int32
             switch binding {
             case .int64(let value):
-                rc = sqlite3_bind_int64(statement, index, value)
+                rc = unsafe sqlite3_bind_int64(statement, index, value)
             case .text(let value):
-                rc = sqlite3_bind_text(statement, index, value, -1, sqliteTransient)
+                rc = unsafe sqlite3_bind_text(statement, index, value, -1, sqliteTransient)
             }
             guard rc == SQLITE_OK else {
                 throw ArkTraceError(
@@ -329,12 +339,12 @@ final class TraceDatabase {
                 try Task.checkCancellation()
             }
             if let deadline, ContinuousClock.now >= deadline {
-                sqlite3_interrupt(handle)
+                unsafe sqlite3_interrupt(handle)
                 throw Self.timeout(stage: stage)
             }
-            switch sqlite3_step(statement) {
+            switch unsafe sqlite3_step(statement) {
             case SQLITE_ROW:
-                results.append(try map(Row(statement: statement)))
+                unsafe results.append(try map(Row(statement: statement)))
             case SQLITE_DONE:
                 if observesTaskCancellation {
                     try Task.checkCancellation()
@@ -386,7 +396,7 @@ final class TraceDatabase {
                 progressHook: nil
             )
             progressController = controller
-            sqlite3_progress_handler(
+            unsafe sqlite3_progress_handler(
                 handle,
                 1_000,
                 sqliteVMProgressCallback,
@@ -397,11 +407,11 @@ final class TraceDatabase {
         }
         defer {
             if observesTaskCancellation {
-                sqlite3_progress_handler(handle, 0, nil, nil)
+                unsafe sqlite3_progress_handler(handle, 0, nil, nil)
             }
         }
         let rc = withExtendedLifetime(progressController) {
-            sqlite3_exec(handle, sql, nil, nil, nil)
+            unsafe sqlite3_exec(handle, sql, nil, nil, nil)
         }
         if rc == SQLITE_INTERRUPT,
             progressController?.cancelled == true || (observesTaskCancellation && Task.isCancelled)
@@ -445,7 +455,7 @@ final class TraceDatabase {
     }
 
     func flush() throws {
-        let rc = sqlite3_db_cacheflush(handle)
+        let rc = unsafe sqlite3_db_cacheflush(handle)
         guard rc == SQLITE_OK else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,

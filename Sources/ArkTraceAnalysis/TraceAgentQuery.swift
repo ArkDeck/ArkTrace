@@ -5,7 +5,7 @@ import Foundation
 ///
 /// The engine only translates reviewed typed filters into repository query
 /// values. It never accepts a table, column, SQL fragment, or expression.
-public struct TraceAgentQueryEngine: Sendable {
+package struct TraceAgentQueryEngine: Sendable {
     struct BatchEntry: Sendable {
         let view: TraceAgentQueryView
         let filters: TraceAgentQueryFilters

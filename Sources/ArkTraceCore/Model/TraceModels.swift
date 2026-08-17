@@ -92,7 +92,7 @@ public struct TraceDataQualityIssue: Hashable, Codable, Sendable {
 /// Closed machine-facing vocabulary for quality scopes emitted by ArkTrace.
 /// Store and presentation boundaries share this fact source so a new typed
 /// warning cannot silently become an encoding failure.
-public enum TraceDataQualityScope {
+package enum TraceDataQualityScope {
     public static let machineAllowed: Set<String> = [
         "process.start_ts", "process.end_ts", "process.lifecycle",
         "process.name",
@@ -227,7 +227,7 @@ public struct TraceMetadata: Codable, Sendable {
     }
 }
 
-public struct TraceProcess: Codable, Sendable, Hashable {
+package struct TraceProcess: Codable, Sendable, Hashable {
     public let key: ProcessKey
     public let pid: Int64
     public let name: String?
@@ -266,7 +266,7 @@ public struct TraceProcess: Codable, Sendable, Hashable {
     }
 }
 
-public struct TraceThread: Codable, Sendable, Hashable {
+package struct TraceThread: Codable, Sendable, Hashable {
     public let key: ThreadKey
     public let processKey: ProcessKey?
     public let tid: Int64

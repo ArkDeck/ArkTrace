@@ -1,5 +1,6 @@
 import ArkTraceCore
 import Foundation
+import Synchronization
 
 struct CLIDeadlineClock: Sendable {
     let now: @Sendable () -> ContinuousClock.Instant
@@ -16,24 +17,19 @@ struct CLIDeadlineClock: Sendable {
 /// Coarse lifecycle position of the operation the CLI deadline wraps, updated
 /// by the executor/application at phase boundaries so a deadline expiry can
 /// name the stage it actually interrupted instead of a hardcoded one.
-final class CLIOperationStage: @unchecked Sendable {
-    private let lock = NSLock()
-    private var value: ArkTraceError.Stage
+final class CLIOperationStage: Sendable {
+    private let value: Mutex<ArkTraceError.Stage>
 
     init(_ initial: ArkTraceError.Stage) {
-        value = initial
+        value = Mutex(initial)
     }
 
     func set(_ stage: ArkTraceError.Stage) {
-        lock.lock()
-        value = stage
-        lock.unlock()
+        value.withLock { $0 = stage }
     }
 
     var current: ArkTraceError.Stage {
-        lock.lock()
-        defer { lock.unlock() }
-        return value
+        value.withLock { $0 }
     }
 
     @TaskLocal static var active: CLIOperationStage?

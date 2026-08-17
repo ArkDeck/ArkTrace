@@ -1,29 +1,3 @@
-/// Trace-relative time in nanoseconds (AT-TIME-001/002).
-/// All public times are Int64 nanoseconds relative to trace start.
-public struct TraceInstant: Hashable, Codable, Sendable, Comparable {
-    public let nanoseconds: Int64
-
-    public init(nanoseconds: Int64) {
-        self.nanoseconds = nanoseconds
-    }
-
-    public static func < (lhs: TraceInstant, rhs: TraceInstant) -> Bool {
-        lhs.nanoseconds < rhs.nanoseconds
-    }
-}
-
-public struct TraceDuration: Hashable, Codable, Sendable, Comparable {
-    public let nanoseconds: Int64
-
-    public init(nanoseconds: Int64) {
-        self.nanoseconds = nanoseconds
-    }
-
-    public static func < (lhs: TraceDuration, rhs: TraceDuration) -> Bool {
-        lhs.nanoseconds < rhs.nanoseconds
-    }
-}
-
 /// Half-open interval `[startNs, endNs)` (AT-TIME-003).
 ///
 /// Event ranges allow the degenerate `startNs == endNs` form, which represents

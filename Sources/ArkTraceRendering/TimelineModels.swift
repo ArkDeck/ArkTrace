@@ -123,7 +123,7 @@ public struct TimelineViewport: Hashable, Codable, Sendable {
     }
 }
 
-public enum TimelineDetailPreference: String, Codable, Sendable {
+package enum TimelineDetailPreference: String, Codable, Sendable {
     case automatic
     case detail
     case density
@@ -136,7 +136,7 @@ public enum TimelineViewportIntent: Sendable {
 
 /// Bounded keyboard actions supported by the single Timeline accessibility
 /// element. Navigation never materializes events outside the current snapshot.
-public enum TimelineKeyboardCommand: Hashable, Sendable {
+package enum TimelineKeyboardCommand: Hashable, Sendable {
     case previousEvent
     case nextEvent
     case previousTrack
@@ -158,7 +158,7 @@ public enum TimelineAccessibilityLayout {
     public static let primaryToolbarTargetPoints: CGFloat = 40
 }
 
-public enum TimelineInteraction {
+package enum TimelineInteraction {
     public static func pan(
         range: TraceTimeRange,
         deltaNs: Int64,
@@ -226,7 +226,7 @@ public enum TimelineInteraction {
     }
 }
 
-public struct ViewportRequest: Sendable {
+package struct ViewportRequest: Sendable {
     public let viewport: TimelineViewport
     public let tracks: [TrackDescriptor]
     public let pixelWidth: Int

@@ -29,11 +29,11 @@ final class GoldenFixtureTests: XCTestCase {
                 "nested machine quality leaked a diagnostic path for \(fixture.name)"
             )
             if ProcessInfo.processInfo.environment["ARKTRACE_UPDATE_MACHINE_GOLDENS"] == "1" {
-                let sourceDirectory = URL(fileURLWithPath: #filePath)
+                let sourceDirectory = URL(filePath: #filePath)
                     .deletingLastPathComponent()
-                    .appendingPathComponent("Fixtures/MachineJSON", isDirectory: true)
+                    .appending(path: "Fixtures/MachineJSON", directoryHint: .isDirectory)
                 try actual.write(
-                    to: sourceDirectory.appendingPathComponent("\(fixture.name).json"),
+                    to: sourceDirectory.appending(path: "\(fixture.name).json"),
                     options: .atomic
                 )
             }
@@ -597,8 +597,8 @@ private func goldenSnapshot(
 ) throws -> CLIMachineTraceSnapshot {
     try CLIMachineTraceSnapshot(
         parsed: ParsedTrace(
-            databaseURL: URL(fileURLWithPath: "/dev/null"),
-            metadataSidecarURL: URL(fileURLWithPath: "/dev/null"),
+            databaseURL: URL(filePath: "/dev/null"),
+            metadataSidecarURL: URL(filePath: "/dev/null"),
             parser: metadata.parser,
             sourceSHA256: metadata.traceSHA256,
             sourceByteCount: metadata.sourceByteCount,

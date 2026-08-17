@@ -40,8 +40,8 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
 
     func resolveBuildRevision() throws -> String {
         let expected = try mappedIdentity()
-        let descriptor = executableURL.path.withCString {
-            open($0, O_RDONLY | O_CLOEXEC | O_NOFOLLOW)
+        let descriptor = unsafe executableURL.path.withCString {
+            unsafe open($0, O_RDONLY | O_CLOEXEC | O_NOFOLLOW)
         }
         guard descriptor >= 0 else {
             throw Self.identityFailure(reason: "executableOpenFailed")
@@ -89,8 +89,8 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
         var buffer = [UInt8](repeating: 0, count: 1 * 1_024 * 1_024)
         while true {
             if Task.isCancelled { throw CancellationError() }
-            let count = buffer.withUnsafeMutableBytes { rawBuffer in
-                pread(descriptor, rawBuffer.baseAddress, rawBuffer.count, offset)
+            let count = unsafe buffer.withUnsafeMutableBytes { rawBuffer in
+                unsafe pread(descriptor, rawBuffer.baseAddress, rawBuffer.count, offset)
             }
             if count < 0 {
                 if errno == EINTR { continue }
@@ -106,7 +106,7 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
         guard offset == expectedSize else {
             throw Self.identityFailure(reason: "executableChanged")
         }
-        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+        return hasher.finalize().lowercaseHexString()
     }
 
     private struct FileSnapshot: Equatable {
@@ -120,7 +120,7 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
 
     private static func snapshot(descriptor: Int32) throws -> FileSnapshot {
         var status = stat()
-        guard fstat(descriptor, &status) == 0,
+        guard unsafe fstat(descriptor, &status) == 0,
             (status.st_mode & S_IFMT) == S_IFREG,
             status.st_size >= 0
         else {
@@ -145,12 +145,12 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
     }
 
     private static func currentMappedExecutable() throws -> MappedExecutable {
-        guard let header = _dyld_get_image_header(0) else {
+        guard let header = unsafe _dyld_get_image_header(0) else {
             throw identityFailure(reason: "mappedExecutableUnavailable")
         }
         var info = proc_regionwithpathinfo()
-        let byteCount = withUnsafeMutablePointer(to: &info) {
-            proc_pidinfo(
+        let byteCount = unsafe withUnsafeMutablePointer(to: &info) {
+            unsafe proc_pidinfo(
                 getpid(),
                 PROC_PIDREGIONPATHINFO,
                 UInt64(UInt(bitPattern: UnsafeRawPointer(header))),
@@ -167,16 +167,16 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
         else {
             throw identityFailure(reason: "mappedExecutableInvalid")
         }
-        let path = withUnsafePointer(to: &info.prp_vip.vip_path) { pointer in
-            pointer.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) {
-                String(cString: $0)
+        let path = unsafe withUnsafePointer(to: &info.prp_vip.vip_path) { pointer in
+            unsafe pointer.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) {
+                unsafe String(cString: $0)
             }
         }
         guard path.hasPrefix("/"), !path.contains("\0") else {
             throw identityFailure(reason: "mappedExecutablePathInvalid")
         }
         return MappedExecutable(
-            url: URL(fileURLWithPath: path, isDirectory: false),
+            url: URL(filePath: path, directoryHint: .notDirectory),
             identity: CLIExecutableFileIdentity(
                 device: UInt64(status.vst_dev),
                 inode: status.vst_ino

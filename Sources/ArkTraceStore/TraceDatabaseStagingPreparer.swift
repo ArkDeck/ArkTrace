@@ -2,14 +2,15 @@ import ArkTraceCore
 import CryptoKit
 import Foundation
 import SQLite3
+import Synchronization
 
 /// Bounded, path-free SQLite runtime facts used by `arktrace doctor`.
-public struct TraceSQLiteRuntimeInfo: Equatable, Sendable {
+package struct TraceSQLiteRuntimeInfo: Equatable, Sendable {
     public let version: String
     public let isThreadSafe: Bool
 
     public static var current: TraceSQLiteRuntimeInfo {
-        TraceSQLiteRuntimeInfo(
+        unsafe TraceSQLiteRuntimeInfo(
             version: String(cString: sqlite3_libversion()),
             isThreadSafe: sqlite3_threadsafe() != 0
         )
@@ -18,7 +19,7 @@ public struct TraceSQLiteRuntimeInfo: Equatable, Sendable {
 
 /// Bounded, machine-readable evidence for the Phase 3 large-viewport gate.
 /// Plans contain only ArkTrace-owned SQL/index identifiers, never input paths.
-public struct TraceDatabasePerformanceDiagnostics: Codable, Sendable {
+package struct TraceDatabasePerformanceDiagnostics: Codable, Sendable {
     public let relationshipVMInstructionBudget: Int
     public let relationshipProbeSteps: [String: Int]
     public let queryPlans: [String: [String]]
@@ -46,26 +47,19 @@ public struct TraceDatabasePerformanceDiagnostics: Codable, Sendable {
     }
 }
 
-final class TracePerformanceSQLCapture: @unchecked Sendable {
-    private let lock = NSLock()
-    private var captured: [(String, Int)] = []
+final class TracePerformanceSQLCapture: Sendable {
+    private let captured = Mutex<[(String, Int)]>([])
 
     func record(_ sql: String, bindingCount: Int) {
-        lock.lock()
-        captured.append((sql, bindingCount))
-        lock.unlock()
+        captured.withLock { $0.append((sql, bindingCount)) }
     }
 
     func reset() {
-        lock.lock()
-        captured.removeAll(keepingCapacity: true)
-        lock.unlock()
+        captured.withLock { $0.removeAll(keepingCapacity: true) }
     }
 
     func productionStatement() throws -> (String, [TraceDatabase.Binding]) {
-        lock.lock()
-        let value = captured
-        lock.unlock()
+        let value = captured.withLock { $0 }
         let candidates = value.filter {
             $0.0.contains("FROM sched_slice AS s")
                 || $0.0.contains("FROM thread_state AS s")
@@ -93,7 +87,7 @@ final class TracePerformanceSQLCapture: @unchecked Sendable {
 /// Validates and indexes a private parser output before the parser may expose
 /// it as a Ready database. Every identifier below is an ArkTrace constant;
 /// no caller or upstream text is interpolated into DDL.
-public enum TraceDatabaseStagingPreparer {
+package enum TraceDatabaseStagingPreparer {
     /// Public cache identity for the currently accepted TraceStreamer schema
     /// contract. Runtime includes this value in every content-addressed key.
     public static let schemaAdapterVersion = TraceSchemaAdapter.version
@@ -742,7 +736,7 @@ public enum TraceDatabaseStagingPreparer {
             try Task.checkCancellation()
         }
         return (
-            hasher.finalize().map { String(format: "%02x", $0) }.joined(),
+            hasher.finalize().lowercaseHexString(),
             byteCount
         )
     }

@@ -10,14 +10,14 @@ private func encodeNullable<T: Encodable, Key: CodingKey>(
     else { try values.encodeNil(forKey: key) }
 }
 
-public enum TraceDeterministicAnalysisKind: String, Codable, Sendable {
+package enum TraceDeterministicAnalysisKind: String, Codable, Sendable {
     case deterministicBatch
 }
 
 /// Exact effective parameters that shaped a deterministic analysis result.
 /// Defaults have already been materialized; no omitted field is inferred by a
 /// consumer (SPEC §10.1).
-public struct TraceDeterministicAnalysisParameters: Hashable, Codable, Sendable {
+package struct TraceDeterministicAnalysisParameters: Hashable, Codable, Sendable {
     public let filters: TraceAgentQueryFilters
     public let maximumCPUSlices: Int
     public let maximumProcessSlices: Int
@@ -37,7 +37,7 @@ public struct TraceDeterministicAnalysisParameters: Hashable, Codable, Sendable 
     public let timeoutAttoseconds: Int64
 }
 
-public struct TraceDeterministicAnalysisRequest: Sendable {
+package struct TraceDeterministicAnalysisRequest: Sendable {
     public let range: TraceTimeRange
     public let filters: TraceAgentQueryFilters
     public let maximumCPUSlices: Int
@@ -121,7 +121,7 @@ public struct TraceDeterministicAnalysisRequest: Sendable {
     }
 }
 
-public struct TraceRunningProcess: Hashable, Codable, Sendable {
+package struct TraceRunningProcess: Hashable, Codable, Sendable {
     public let processKey: ProcessKey
     public let pid: Int64?
     public let name: String?
@@ -144,7 +144,7 @@ public struct TraceRunningProcess: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceRunningThread: Hashable, Codable, Sendable {
+package struct TraceRunningThread: Hashable, Codable, Sendable {
     public let threadKey: ThreadKey
     public let processKey: ProcessKey?
     public let tid: Int64?
@@ -174,7 +174,7 @@ public struct TraceRunningThread: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceThreadStateDistribution: Hashable, Codable, Sendable {
+package struct TraceThreadStateDistribution: Hashable, Codable, Sendable {
     public let threadKey: ThreadKey
     public let processKey: ProcessKey?
     public let tid: Int64?
@@ -204,7 +204,7 @@ public struct TraceThreadStateDistribution: Hashable, Codable, Sendable {
     }
 }
 
-public struct TracePercentiles: Hashable, Codable, Sendable {
+package struct TracePercentiles: Hashable, Codable, Sendable {
     public let p50Ns: Int64
     public let p90Ns: Int64
     public let p95Ns: Int64
@@ -212,12 +212,12 @@ public struct TracePercentiles: Hashable, Codable, Sendable {
     public let maxNs: Int64
 }
 
-public enum TraceSchedulingUnsupportedReason: String, Codable, Sendable {
+package enum TraceSchedulingUnsupportedReason: String, Codable, Sendable {
     case capabilityUnavailable
     case noProvableRunnableTransitions
 }
 
-public struct TraceSchedulingLatencySample: Hashable, Codable, Sendable {
+package struct TraceSchedulingLatencySample: Hashable, Codable, Sendable {
     public let threadKey: ThreadKey
     public let runnableEventKey: EventKey
     public let runningEventKey: EventKey
@@ -226,7 +226,7 @@ public struct TraceSchedulingLatencySample: Hashable, Codable, Sendable {
     public let latencyNs: Int64
 }
 
-public struct TraceSchedulingLatencyResult: Hashable, Codable, Sendable {
+package struct TraceSchedulingLatencyResult: Hashable, Codable, Sendable {
     public let supported: Bool
     public let unsupportedReason: TraceSchedulingUnsupportedReason?
     public let count: Int
@@ -249,7 +249,7 @@ public struct TraceSchedulingLatencyResult: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceHotIntervalScore: Hashable, Codable, Sendable {
+package struct TraceHotIntervalScore: Hashable, Codable, Sendable {
     /// Fixed public conversion from a context-switch observation to score time.
     public static let contextSwitchWeightNs: Int64 = 1_000_000
 
@@ -260,14 +260,14 @@ public struct TraceHotIntervalScore: Hashable, Codable, Sendable {
     public let total: Int64
 }
 
-public struct TraceHotInterval: Hashable, Codable, Sendable {
+package struct TraceHotInterval: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
     public let score: TraceHotIntervalScore
     public let cpuSliceCount: Int
     public let namedSliceCount: Int
 }
 
-public struct TraceAnalysisSectionStatus: Hashable, Codable, Sendable {
+package struct TraceAnalysisSectionStatus: Hashable, Codable, Sendable {
     public let returnedCount: Int
     public let matchedCount: Int?
     public let truncated: Bool
@@ -284,7 +284,7 @@ public struct TraceAnalysisSectionStatus: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceDeterministicAnalysisSections: Hashable, Codable, Sendable {
+package struct TraceDeterministicAnalysisSections: Hashable, Codable, Sendable {
     public let cpuUtilization: TraceAnalysisSectionStatus
     public let topProcesses: TraceAnalysisSectionStatus
     public let topThreads: TraceAnalysisSectionStatus
@@ -294,7 +294,7 @@ public struct TraceDeterministicAnalysisSections: Hashable, Codable, Sendable {
     public let hotIntervals: TraceAnalysisSectionStatus
 }
 
-public struct TraceDeterministicAnalysis: Hashable, Codable, Sendable {
+package struct TraceDeterministicAnalysis: Hashable, Codable, Sendable {
     public let kind: TraceDeterministicAnalysisKind
     public let parameters: TraceDeterministicAnalysisParameters
     public let range: TraceTimeRange
@@ -391,7 +391,7 @@ public struct TraceDeterministicAnalysis: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceDeterministicAnalysisEngine: Sendable {
+package struct TraceDeterministicAnalysisEngine: Sendable {
     private struct ProcessAccumulator {
         var pid: Int64?
         var name: String?

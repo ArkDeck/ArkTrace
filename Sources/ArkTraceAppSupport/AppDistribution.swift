@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 /// implemented by P3-T05.
 public enum ArkTraceAppDistribution {
     public static let bundleIdentifier = "com.arktrace.ArkTrace"
-    public static let minimumSystemVersion = "14.0"
+    public static let minimumSystemVersion = "26.0"
     public static let appleSiliconOnly = true
     public static let appSandboxEnabled = false
     public static let signingCandidate = "Developer ID Application"
@@ -35,7 +35,7 @@ public enum ArkTraceAppDistribution {
 /// Production resolver is bundle-only. There is intentionally no PATH or
 /// environment fallback: a missing or drifted bundle is a typed unavailable/
 /// identity failure, never a launch of an ambient executable.
-public struct ArkTraceBundledParserResolver: Sendable {
+package struct ArkTraceBundledParserResolver: Sendable {
     public let bundleURL: URL
 
     public init(bundleURL: URL = Bundle.main.bundleURL) {
@@ -96,32 +96,17 @@ public struct ArkTraceBundledParserResolver: Sendable {
         else { return false }
         var current = root
         for (index, component) in components.enumerated() {
-            current.appendPathComponent(String(component), isDirectory: false)
+            current.append(path: String(component), directoryHint: .notDirectory)
             let expected = index == components.count - 1 ? S_IFREG : S_IFDIR
             guard Self.hasMode(current, expected: expected) else { return false }
         }
         let mode = executable ? (R_OK | X_OK) : R_OK
-        return candidate.path.withCString { Darwin.access($0, mode) } == 0
+        return unsafe candidate.path.withCString { unsafe Darwin.access($0, mode) } == 0
     }
 
     private static func hasMode(_ url: URL, expected: mode_t) -> Bool {
         var info = stat()
-        return url.path.withCString { Darwin.lstat($0, &info) } == 0
+        return unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) } == 0
             && (info.st_mode & S_IFMT) == expected
     }
 }
-
-/// Debug-only explicit override. App production code does not instantiate
-/// this type and never reads PATH/environment variables.
-#if DEBUG
-public struct ArkTraceDeveloperParserResolver: Sendable {
-    public init() {}
-
-    public func resolve(executableURL: URL) throws -> TraceStreamerProcessParser {
-        try TraceStreamerResolver(
-            appBundleURL: URL(fileURLWithPath: "/nonexistent", isDirectory: true),
-            cliExecutableURL: nil
-        ).resolve(explicitExecutableURL: executableURL)
-    }
-}
-#endif

@@ -24,9 +24,9 @@ ArkTrace 复用 pinned 的 OpenHarmony TraceStreamer，将 `.htrace` / `.ftrace`
 
 ## 环境要求
 
-- Apple silicon Mac，macOS 14 及以上
-- Swift 6 toolchain（构建 App 需要 Xcode）
-- `jq` —— macOS 15 起随系统提供，更早版本 `brew install jq`
+- Apple silicon Mac，macOS 26 及以上
+- Swift 6.3 toolchain / Xcode 26.6（构建 App 需要 Xcode）
+- `jq` —— macOS 15 起随系统提供
 - 首次构建 pinned TraceStreamer 需要网络访问
 
 ## 快速开始
@@ -91,7 +91,7 @@ CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 
 
 截至 2026-08-16，Phase 0–6（57/57 任务）全部完成，**10 个发布门全部关闭**。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/TASKS.md](docs/TASKS.md)，最终报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。
 
-首发已知限制：仅支持 Apple silicon / macOS 14+；仅离线分析——不含 capture、设备与网络能力。
+首发已知限制：仅支持 Apple silicon / macOS 26+；仅离线分析——不含 capture、设备与网络能力。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
 
 ## 文档
 

@@ -20,7 +20,7 @@ private enum TraceEventQueryValidation {
     }
 }
 
-public struct CpuSliceQuery: Sendable {
+package struct CpuSliceQuery: Sendable {
     public let range: TraceTimeRange
     public let cpu: Int64?
     public let processKey: ProcessKey?
@@ -53,7 +53,7 @@ public struct CpuSliceQuery: Sendable {
     }
 }
 
-public struct ThreadStateQuery: Sendable {
+package struct ThreadStateQuery: Sendable {
     public let range: TraceTimeRange
     public let cpu: Int64?
     public let processKey: ProcessKey?
@@ -99,13 +99,13 @@ public struct ThreadStateQuery: Sendable {
     }
 }
 
-public enum TraceSliceNameFilter: Hashable, Sendable {
+package enum TraceSliceNameFilter: Hashable, Sendable {
     case exact(String)
     case prefix(String)
     case contains(String)
 }
 
-public struct TraceSliceQuery: Sendable {
+package struct TraceSliceQuery: Sendable {
     public let range: TraceTimeRange
     public let eventKey: EventKey?
     public let processKey: ProcessKey?
@@ -181,7 +181,7 @@ public struct TraceSliceQuery: Sendable {
     }
 }
 
-public struct CounterQuery: Sendable {
+package struct CounterQuery: Sendable {
     public let range: TraceTimeRange
     public let filterID: Int64?
     public let cpu: Int64?
@@ -234,7 +234,7 @@ public struct CounterQuery: Sendable {
     }
 }
 
-public enum CounterNameFilter: Hashable, Sendable {
+package enum CounterNameFilter: Hashable, Sendable {
     case exact(String)
     case prefix(String)
     case contains(String)

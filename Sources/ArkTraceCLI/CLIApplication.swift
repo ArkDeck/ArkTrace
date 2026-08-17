@@ -1,7 +1,7 @@
 import ArkTraceCore
 import Foundation
 
-public struct CLIApplication: Sendable {
+package struct CLIApplication: Sendable {
     struct LicenseSnapshot: Sendable {
         let notice: Data
         let productLicense: Data
@@ -29,7 +29,7 @@ public struct CLIApplication: Sendable {
     private let beforeSuccessCommit: (@Sendable () -> Void)?
     private let beforeEncoding: (@Sendable () async throws -> Void)?
 
-    public init(
+    package init(
         parser: CLIArgumentParser = CLIArgumentParser(),
         renderer: CLIHumanRenderer = CLIHumanRenderer(),
         machineEncoder: CLIMachineEncoder = CLIMachineEncoder(),
@@ -69,7 +69,7 @@ public struct CLIApplication: Sendable {
     }
 
     @discardableResult
-    public func run(
+    package func run(
         arguments: [String],
         writer: any CLIOutputWriting
     ) async -> Int32 {

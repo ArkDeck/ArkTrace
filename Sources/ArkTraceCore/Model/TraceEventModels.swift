@@ -1,6 +1,6 @@
 /// Capability-aware, bounded result for every event-table query. An
 /// unavailable capability is distinct from a supported query with no rows.
-public struct TraceEventPage<Element: Sendable>: Sendable {
+package struct TraceEventPage<Element: Sendable>: Sendable {
     public let items: [Element]
     public let truncated: Bool
     public let capabilityAvailable: Bool
@@ -24,7 +24,7 @@ public struct TraceEventPage<Element: Sendable>: Sendable {
 }
 
 /// Scheduling interval returned only from the detail event repository.
-public struct CpuSlice: Hashable, Codable, Sendable {
+package struct CpuSlice: Hashable, Codable, Sendable {
     public let key: EventKey
     public let range: TraceTimeRange
     public let cpu: Int64
@@ -92,7 +92,7 @@ public struct CpuSlice: Hashable, Codable, Sendable {
     }
 }
 
-public enum TraceThreadState: String, Codable, Sendable, CaseIterable {
+package enum TraceThreadState: String, Codable, Sendable, CaseIterable {
     case running
     case runnable
     case sleeping
@@ -100,7 +100,7 @@ public enum TraceThreadState: String, Codable, Sendable, CaseIterable {
     case stopped
 }
 
-public struct ThreadStateInterval: Hashable, Codable, Sendable {
+package struct ThreadStateInterval: Hashable, Codable, Sendable {
     public let key: EventKey
     public let range: TraceTimeRange
     public let threadKey: ThreadKey
@@ -171,7 +171,7 @@ public struct ThreadStateInterval: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceSlice: Hashable, Codable, Sendable {
+package struct TraceSlice: Hashable, Codable, Sendable {
     public let key: EventKey
     public let range: TraceTimeRange
     public let threadKey: ThreadKey?
@@ -248,12 +248,12 @@ public struct TraceSlice: Hashable, Codable, Sendable {
     }
 }
 
-public enum CounterScope: String, Codable, Sendable {
+package enum CounterScope: String, Codable, Sendable {
     case cpu
     case process
 }
 
-public struct CounterSample: Hashable, Codable, Sendable {
+package struct CounterSample: Hashable, Codable, Sendable {
     public let key: EventKey
     public let timestampNs: Int64
     public let value: Int64
@@ -282,7 +282,7 @@ public struct CounterSample: Hashable, Codable, Sendable {
     private enum CodingKeys: String, CodingKey { case key, timestampNs, value, durationNs }
 }
 
-public struct CounterSeries: Hashable, Codable, Sendable {
+package struct CounterSeries: Hashable, Codable, Sendable {
     public let filterID: Int64
     public let name: String
     public let scope: CounterScope

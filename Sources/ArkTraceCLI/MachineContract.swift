@@ -3,20 +3,20 @@ import ArkTraceCore
 import ArkTraceRuntime
 import Foundation
 
-public struct CLIMachineSchemaVersion: Hashable, Codable, Sendable {
-    public static let current = CLIMachineSchemaVersion(validatedMajor: 1, minor: 0)
+package struct CLIMachineSchemaVersion: Hashable, Codable, Sendable {
+    package static let current = CLIMachineSchemaVersion(validatedMajor: 1, minor: 0)
 
-    public let major: Int
-    public let minor: Int
+    package let major: Int
+    package let minor: Int
 
-    public init(major: Int, minor: Int) throws {
+    package init(major: Int, minor: Int) throws {
         guard major >= 0, major <= 999, minor >= 0, minor <= 999 else {
             throw CLIParsing.invalid("Machine schema version is invalid")
         }
         self.init(validatedMajor: major, minor: minor)
     }
 
-    public init(_ value: String) throws {
+    package init(_ value: String) throws {
         let parts = value.split(separator: ".", omittingEmptySubsequences: false)
         guard parts.count == 2,
             let major = Int(parts[0]), let minor = Int(parts[1]),
@@ -33,13 +33,13 @@ public struct CLIMachineSchemaVersion: Hashable, Codable, Sendable {
     }
 
     /// Minor releases are additive; only a different major is incompatible.
-    public func isCompatible(with supported: CLIMachineSchemaVersion) -> Bool {
+    package func isCompatible(with supported: CLIMachineSchemaVersion) -> Bool {
         major == supported.major
     }
 
-    public var stringValue: String { "\(major).\(minor)" }
+    package var stringValue: String { "\(major).\(minor)" }
 
-    public init(from decoder: Decoder) throws {
+    package init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let value = try container.decode(String.self)
         do {
@@ -52,13 +52,13 @@ public struct CLIMachineSchemaVersion: Hashable, Codable, Sendable {
         }
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(stringValue)
     }
 }
 
-public indirect enum CLIJSONValue: Hashable, Codable, Sendable {
+package indirect enum CLIJSONValue: Hashable, Codable, Sendable {
     case null
     case bool(Bool)
     case int64(Int64)
@@ -67,7 +67,7 @@ public indirect enum CLIJSONValue: Hashable, Codable, Sendable {
     case array([CLIJSONValue])
     case object([String: CLIJSONValue])
 
-    public init(from decoder: Decoder) throws {
+    package init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() { self = .null }
         else if let value = try? container.decode(Bool.self) { self = .bool(value) }
@@ -85,7 +85,7 @@ public indirect enum CLIJSONValue: Hashable, Codable, Sendable {
         }
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
         case .null: try container.encodeNil()
@@ -99,12 +99,12 @@ public indirect enum CLIJSONValue: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineTool: Hashable, Codable, Sendable {
-    public let name: String
-    public let version: String
-    public let buildRevision: String
+package struct CLIMachineTool: Hashable, Codable, Sendable {
+    package let name: String
+    package let version: String
+    package let buildRevision: String
 
-    public init(name: String, version: String, buildRevision: String) throws {
+    package init(name: String, version: String, buildRevision: String) throws {
         guard name == ArkTraceCLITool.name,
             version == ArkTraceCLITool.version,
             CLIMachineParserIdentity.isSHA256(buildRevision)
@@ -121,7 +121,7 @@ public struct CLIMachineTool: Hashable, Codable, Sendable {
         self.buildRevision = buildRevision
     }
 
-    public init(from decoder: Decoder) throws {
+    package init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
             name: container.decode(String.self, forKey: .name),
@@ -137,11 +137,11 @@ public struct CLIMachineTool: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineParserIdentity: Hashable, Codable, Sendable {
-    public let name: String
-    public let version: String
-    public let upstreamRevision: String
-    public let binarySHA256: String
+package struct CLIMachineParserIdentity: Hashable, Codable, Sendable {
+    package let name: String
+    package let version: String
+    package let upstreamRevision: String
+    package let binarySHA256: String
 
     private enum CodingKeys: String, CodingKey {
         case name
@@ -150,7 +150,7 @@ public struct CLIMachineParserIdentity: Hashable, Codable, Sendable {
         case binarySHA256 = "binarySha256"
     }
 
-    public init(_ identity: TraceParserIdentity) throws {
+    package init(_ identity: TraceParserIdentity) throws {
         guard Self.safe(identity.name, maximumBytes: 128),
             Self.safe(identity.reportedVersion, maximumBytes: 128),
             Self.isLowercaseHex(identity.upstreamRevision, count: 40),
@@ -171,17 +171,11 @@ public struct CLIMachineParserIdentity: Hashable, Codable, Sendable {
     }
 
     private static func isLowercaseHex(_ value: String, count: Int) -> Bool {
-        value.utf8.count == count && value.utf8.allSatisfy {
-            ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
-                || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
-        }
+        ArkTraceIdentityGrammar.isLowercaseHex(value, count: count)
     }
 
     static func isSHA256(_ value: String) -> Bool {
-        value.utf8.count == 64 && value.utf8.allSatisfy {
-            ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
-                || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
-        }
+        ArkTraceIdentityGrammar.isSHA256(value)
     }
 
     static func invalidProvenance() -> ArkTraceError {
@@ -193,14 +187,14 @@ public struct CLIMachineParserIdentity: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineTrace: Hashable, Codable, Sendable {
-    public let sha256: String
-    public let byteCount: Int64
-    public let durationNs: Int64
-    public let parser: CLIMachineParserIdentity
-    public let schemaFingerprint: String
+package struct CLIMachineTrace: Hashable, Codable, Sendable {
+    package let sha256: String
+    package let byteCount: Int64
+    package let durationNs: Int64
+    package let parser: CLIMachineParserIdentity
+    package let schemaFingerprint: String
 
-    public init(metadata: TraceMetadata) throws {
+    package init(metadata: TraceMetadata) throws {
         guard CLIMachineParserIdentity.isSHA256(metadata.traceSHA256),
             metadata.sourceByteCount >= 0,
             metadata.durationNs >= 0,
@@ -216,13 +210,13 @@ public struct CLIMachineTrace: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineProvenance: Hashable, Codable, Sendable {
-    public let parserAdapterVersion: String
-    public let parserBuildRecipeVersion: String
-    public let schemaAdapterVersion: String
-    public let indexSchemaVersion: Int
-    public let upstreamDatabaseSHA256: String
-    public let upstreamDatabaseByteCount: Int64
+package struct CLIMachineProvenance: Hashable, Codable, Sendable {
+    package let parserAdapterVersion: String
+    package let parserBuildRecipeVersion: String
+    package let schemaAdapterVersion: String
+    package let indexSchemaVersion: Int
+    package let upstreamDatabaseSHA256: String
+    package let upstreamDatabaseByteCount: Int64
 
     private enum CodingKeys: String, CodingKey {
         case parserAdapterVersion
@@ -233,7 +227,7 @@ public struct CLIMachineProvenance: Hashable, Codable, Sendable {
         case upstreamDatabaseByteCount
     }
 
-    public init(
+    package init(
         parser: TraceParserIdentity,
         preparation: TraceDatabasePreparationResult
     ) throws {
@@ -264,11 +258,11 @@ public struct CLIMachineProvenance: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineRequest: Hashable, Codable, Sendable {
-    public let command: String
-    public let parameters: [String: CLIJSONValue]
+package struct CLIMachineRequest: Hashable, Codable, Sendable {
+    package let command: String
+    package let parameters: [String: CLIJSONValue]
 
-    public init(command: String, parameters: [String: CLIJSONValue] = [:]) throws {
+    package init(command: String, parameters: [String: CLIJSONValue] = [:]) throws {
         guard Self.isSafeIdentifier(command), command.utf8.count <= 64,
             parameters.count <= 64,
             parameters.keys.allSatisfy({ Self.isSafeIdentifier($0) && $0.utf8.count <= 64 })
@@ -305,7 +299,7 @@ public struct CLIMachineRequest: Hashable, Codable, Sendable {
     }
 }
 
-public extension CLIInvocation {
+package extension CLIInvocation {
     func machineRequest() throws -> CLIMachineRequest {
         switch command {
         case .help:
@@ -418,13 +412,13 @@ private extension TraceAgentQueryFilters {
     }
 }
 
-public struct CLIMachineLimits: Hashable, Codable, Sendable {
-    public let timeoutMs: Int64
-    public let maxRows: Int
-    public let maxEvents: Int
-    public let maxOutputBytes: Int
+package struct CLIMachineLimits: Hashable, Codable, Sendable {
+    package let timeoutMs: Int64
+    package let maxRows: Int
+    package let maxEvents: Int
+    package let maxOutputBytes: Int
 
-    public init(_ limits: CLILimits) {
+    package init(_ limits: CLILimits) {
         timeoutMs = limits.timeoutMs
         maxRows = limits.maxRows
         maxEvents = limits.maxEvents
@@ -432,11 +426,11 @@ public struct CLIMachineLimits: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineDataQualityWarning: Hashable, Codable, Sendable {
-    public let category: TraceDataQualityIssue.Category
-    public let scope: String?
-    public let count: Int64?
-    public let message: String?
+package struct CLIMachineDataQualityWarning: Hashable, Codable, Sendable {
+    package let category: TraceDataQualityIssue.Category
+    package let scope: String?
+    package let count: Int64?
+    package let message: String?
 
     private enum CodingKeys: String, CodingKey {
         case category
@@ -471,7 +465,7 @@ public struct CLIMachineDataQualityWarning: Hashable, Codable, Sendable {
 
     private static let allowedScopes = TraceDataQualityScope.machineAllowed
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(category, forKey: .category)
         if let scope { try container.encode(scope, forKey: .scope) }
@@ -483,11 +477,11 @@ public struct CLIMachineDataQualityWarning: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineDataQuality: Hashable, Codable, Sendable {
-    public let status: TraceDataQuality.Status
-    public let warnings: [CLIMachineDataQualityWarning]
+package struct CLIMachineDataQuality: Hashable, Codable, Sendable {
+    package let status: TraceDataQuality.Status
+    package let warnings: [CLIMachineDataQualityWarning]
 
-    public init(_ quality: TraceDataQuality) throws {
+    package init(_ quality: TraceDataQuality) throws {
         guard quality.issues.count <= 4_096 else {
             throw ArkTraceError(
                 code: .outputLimitExceeded,
@@ -512,11 +506,11 @@ public struct CLIMachineDataQuality: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineTruncation: Hashable, Codable, Sendable {
-    public let truncated: Bool
-    public let sections: [String]
+package struct CLIMachineTruncation: Hashable, Codable, Sendable {
+    package let truncated: Bool
+    package let sections: [String]
 
-    public init(sections: [String] = []) throws {
+    package init(sections: [String] = []) throws {
         guard sections.count <= 256,
             sections.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 128 })
         else {
@@ -532,18 +526,18 @@ public struct CLIMachineTruncation: Hashable, Codable, Sendable {
     }
 }
 
-public enum CLIMachineDoctorStatus: String, Codable, Sendable {
+package enum CLIMachineDoctorStatus: String, Codable, Sendable {
     case ok
     case warning
     case failed
 }
 
-public struct CLIMachineDoctorCheck: Hashable, Codable, Sendable {
-    public let code: String
-    public let name: String
-    public let status: CLIMachineDoctorStatus
+package struct CLIMachineDoctorCheck: Hashable, Codable, Sendable {
+    package let code: String
+    package let name: String
+    package let status: CLIMachineDoctorStatus
 
-    public init(code: String, name: String, status: CLIMachineDoctorStatus) throws {
+    package init(code: String, name: String, status: CLIMachineDoctorStatus) throws {
         try CLIMachineValueValidation.requireSafeIdentifier(code, maximumBytes: 64)
         guard let canonicalName = Self.canonicalNames[code], name == canonicalName else {
             throw CLIMachineValueValidation.contractFailure(reason: "unknownDoctorCheck")
@@ -571,11 +565,11 @@ public struct CLIMachineDoctorCheck: Hashable, Codable, Sendable {
     ]
 }
 
-public struct CLIMachineDoctorResult: Hashable, Codable, Sendable {
-    public let selfTest: Bool
-    public let checks: [CLIMachineDoctorCheck]
+package struct CLIMachineDoctorResult: Hashable, Codable, Sendable {
+    package let selfTest: Bool
+    package let checks: [CLIMachineDoctorCheck]
 
-    public init(selfTest: Bool, checks: [CLIMachineDoctorCheck]) throws {
+    package init(selfTest: Bool, checks: [CLIMachineDoctorCheck]) throws {
         let identities = checks.map(\.code)
         let ranks = identities.compactMap {
             CLIMachineDoctorCheck.canonicalOrder.firstIndex(of: $0)
@@ -592,10 +586,10 @@ public struct CLIMachineDoctorResult: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineInspectResult: Hashable, Codable, Sendable {
-    public let cacheHit: Bool
-    public let capabilities: TraceCapabilities
-    public let indexSchemaVersion: Int
+package struct CLIMachineInspectResult: Hashable, Codable, Sendable {
+    package let cacheHit: Bool
+    package let capabilities: TraceCapabilities
+    package let indexSchemaVersion: Int
 
     fileprivate init(
         cacheHit: Bool,
@@ -611,9 +605,9 @@ public struct CLIMachineInspectResult: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineRange: Hashable, Codable, Sendable {
-    public let startNs: Int64
-    public let endNs: Int64
+package struct CLIMachineRange: Hashable, Codable, Sendable {
+    package let startNs: Int64
+    package let endNs: Int64
 
     fileprivate init(_ range: TraceTimeRange) {
         startNs = range.startNs
@@ -621,9 +615,9 @@ public struct CLIMachineRange: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineEventSourceCount: Hashable, Codable, Sendable {
-    public let source: String
-    public let count: Int64
+package struct CLIMachineEventSourceCount: Hashable, Codable, Sendable {
+    package let source: String
+    package let count: Int64
 
     fileprivate init(_ value: TraceEventSourceCount) throws {
         try CLIMachineValueValidation.requireBoundedText(value.source, maximumBytes: 1_024)
@@ -635,18 +629,18 @@ public struct CLIMachineEventSourceCount: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineSummaryResult: Hashable, Codable, Sendable {
-    public let range: CLIMachineRange
-    public let durationNs: Int64
-    public let cpuCount: Int64?
-    public let processCount: Int64
-    public let threadCount: Int64
-    public let cpuSliceCount: Int64?
-    public let threadStateCount: Int64?
-    public let namedSliceCount: Int64?
-    public let counterSeriesCount: Int64?
-    public let eventCountBySource: [CLIMachineEventSourceCount]?
-    public let capabilities: TraceCapabilities
+package struct CLIMachineSummaryResult: Hashable, Codable, Sendable {
+    package let range: CLIMachineRange
+    package let durationNs: Int64
+    package let cpuCount: Int64?
+    package let processCount: Int64
+    package let threadCount: Int64
+    package let cpuSliceCount: Int64?
+    package let threadStateCount: Int64?
+    package let namedSliceCount: Int64?
+    package let counterSeriesCount: Int64?
+    package let eventCountBySource: [CLIMachineEventSourceCount]?
+    package let capabilities: TraceCapabilities
 
     private enum CodingKeys: String, CodingKey {
         case range
@@ -688,7 +682,7 @@ public struct CLIMachineSummaryResult: Hashable, Codable, Sendable {
         capabilities = summary.capabilities
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(range, forKey: .range)
         try container.encode(durationNs, forKey: .durationNs)
@@ -704,13 +698,13 @@ public struct CLIMachineSummaryResult: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineProcess: Hashable, Codable, Sendable {
-    public let key: Int64
-    public let pid: Int64
-    public let name: String?
-    public let startNs: Int64?
-    public let endNs: Int64?
-    public let threadCount: Int?
+package struct CLIMachineProcess: Hashable, Codable, Sendable {
+    package let key: Int64
+    package let pid: Int64
+    package let name: String?
+    package let startNs: Int64?
+    package let endNs: Int64?
+    package let threadCount: Int?
 
     private enum CodingKeys: String, CodingKey {
         case key
@@ -740,7 +734,7 @@ public struct CLIMachineProcess: Hashable, Codable, Sendable {
         threadCount = process.threadCount
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(key, forKey: .key)
         try container.encode(pid, forKey: .pid)
@@ -751,8 +745,8 @@ public struct CLIMachineProcess: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineProcessesResult: Hashable, Codable, Sendable {
-    public let items: [CLIMachineProcess]
+package struct CLIMachineProcessesResult: Hashable, Codable, Sendable {
+    package let items: [CLIMachineProcess]
 
     fileprivate init(_ page: BoundedPage<TraceProcess>) throws {
         guard page.items.count <= 100_000 else {
@@ -762,16 +756,16 @@ public struct CLIMachineProcessesResult: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineThread: Hashable, Codable, Sendable {
-    public let key: Int64
-    public let processKey: Int64?
-    public let tid: Int64
-    public let pid: Int64?
-    public let name: String?
-    public let processName: String?
-    public let startNs: Int64?
-    public let endNs: Int64?
-    public let isMainThread: Bool?
+package struct CLIMachineThread: Hashable, Codable, Sendable {
+    package let key: Int64
+    package let processKey: Int64?
+    package let tid: Int64
+    package let pid: Int64?
+    package let name: String?
+    package let processName: String?
+    package let startNs: Int64?
+    package let endNs: Int64?
+    package let isMainThread: Bool?
 
     private enum CodingKeys: String, CodingKey {
         case key
@@ -810,7 +804,7 @@ public struct CLIMachineThread: Hashable, Codable, Sendable {
         isMainThread = thread.isMainThread
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(key, forKey: .key)
         try container.encodeNullable(processKey, forKey: .processKey)
@@ -824,8 +818,8 @@ public struct CLIMachineThread: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineThreadsResult: Hashable, Codable, Sendable {
-    public let items: [CLIMachineThread]
+package struct CLIMachineThreadsResult: Hashable, Codable, Sendable {
+    package let items: [CLIMachineThread]
 
     fileprivate init(_ page: BoundedPage<TraceThread>) throws {
         guard page.items.count <= 100_000 else {
@@ -835,7 +829,7 @@ public struct CLIMachineThreadsResult: Hashable, Codable, Sendable {
     }
 }
 
-public struct CLIMachineAgentQueryResult: Encodable, Sendable {
+package struct CLIMachineAgentQueryResult: Encodable, Sendable {
     private let value: TraceAgentQueryResult
     private let dataQuality: CLIMachineDataQuality
 
@@ -849,7 +843,7 @@ public struct CLIMachineAgentQueryResult: Encodable, Sendable {
         dataQuality = try CLIMachineDataQuality(value.dataQuality)
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(value.view, forKey: .view)
         try container.encode(value.range, forKey: .range)
@@ -901,7 +895,7 @@ private struct CLIMachineContextSummary: Encodable, Sendable {
     }
 }
 
-public struct CLIMachineContextResult: Encodable, Sendable {
+package struct CLIMachineContextResult: Encodable, Sendable {
     private let value: TraceContext
     private let dataQuality: CLIMachineDataQuality
     private let summary: CLIMachineContextSummary
@@ -917,7 +911,7 @@ public struct CLIMachineContextResult: Encodable, Sendable {
         summary = try CLIMachineContextSummary(value.summary)
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(value.range, forKey: .range)
         try container.encode(value.filters, forKey: .filters)
@@ -933,7 +927,7 @@ public struct CLIMachineContextResult: Encodable, Sendable {
     }
 }
 
-public struct CLIMachineDeterministicAnalysisResult: Encodable, Sendable {
+package struct CLIMachineDeterministicAnalysisResult: Encodable, Sendable {
     private let value: TraceDeterministicAnalysis
     private let dataQuality: CLIMachineDataQuality
 
@@ -948,7 +942,7 @@ public struct CLIMachineDeterministicAnalysisResult: Encodable, Sendable {
         dataQuality = try CLIMachineDataQuality(value.dataQuality)
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(value.kind, forKey: .kind)
         try container.encode(value.parameters, forKey: .parameters)
@@ -965,9 +959,9 @@ public struct CLIMachineDeterministicAnalysisResult: Encodable, Sendable {
     }
 }
 
-public struct CLIMachineAnalyzeResult: Encodable, Sendable {
-    public let kind: CLIAnalyzeKind
-    public let analysis: CLIMachineDeterministicAnalysisResult
+package struct CLIMachineAnalyzeResult: Encodable, Sendable {
+    package let kind: CLIAnalyzeKind
+    package let analysis: CLIMachineDeterministicAnalysisResult
 
     fileprivate init(kind: CLIAnalyzeKind, analysis: TraceDeterministicAnalysis) throws {
         self.kind = kind
@@ -975,7 +969,7 @@ public struct CLIMachineAnalyzeResult: Encodable, Sendable {
     }
 }
 
-public enum CLIMachineCommandResult: Encodable, Sendable {
+package enum CLIMachineCommandResult: Encodable, Sendable {
     case doctor(CLIMachineDoctorResult)
     case inspect(CLIMachineInspectResult)
     case summary(CLIMachineSummaryResult)
@@ -985,7 +979,7 @@ public enum CLIMachineCommandResult: Encodable, Sendable {
     case context(CLIMachineContextResult)
     case analyze(CLIMachineAnalyzeResult)
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         switch self {
         case .doctor(let result): try result.encode(to: encoder)
         case .inspect(let result): try result.encode(to: encoder)
@@ -1184,7 +1178,7 @@ extension TraceSession: CLIMachineTraceSession {
 /// Domain-owned evidence returned by command executors. Construction is
 /// module-internal and trace results are obtained through CLIMachineTraceSession;
 /// external executors cannot forge a successful machine envelope.
-public struct CLIMachineCommandPayload: Sendable {
+package struct CLIMachineCommandPayload: Sendable {
     private enum Storage: Sendable {
         case doctor(CLIMachineDoctorResult, truncated: Bool)
         case inspect(CLIMachineTraceSnapshot, CLIMachineInspectResult)
@@ -2107,16 +2101,16 @@ private extension KeyedEncodingContainer {
     }
 }
 
-public struct CLIMachineSuccessEnvelope<Result: Encodable & Sendable>: Encodable, Sendable {
-    public let schemaVersion: CLIMachineSchemaVersion
-    public let tool: CLIMachineTool
-    public let trace: CLIMachineTrace?
-    public let request: CLIMachineRequest
-    public let limits: CLIMachineLimits
-    public let result: Result
-    public let dataQuality: CLIMachineDataQuality
-    public let truncation: CLIMachineTruncation
-    public let provenance: CLIMachineProvenance?
+package struct CLIMachineSuccessEnvelope<Result: Encodable & Sendable>: Encodable, Sendable {
+    package let schemaVersion: CLIMachineSchemaVersion
+    package let tool: CLIMachineTool
+    package let trace: CLIMachineTrace?
+    package let request: CLIMachineRequest
+    package let limits: CLIMachineLimits
+    package let result: Result
+    package let dataQuality: CLIMachineDataQuality
+    package let truncation: CLIMachineTruncation
+    package let provenance: CLIMachineProvenance?
 
     private enum CodingKeys: String, CodingKey {
         case schemaVersion
@@ -2151,7 +2145,7 @@ public struct CLIMachineSuccessEnvelope<Result: Encodable & Sendable>: Encodable
         self.provenance = provenance
     }
 
-    public func encode(to encoder: Encoder) throws {
+    package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(schemaVersion, forKey: .schemaVersion)
         try container.encode(tool, forKey: .tool)
@@ -2167,14 +2161,14 @@ public struct CLIMachineSuccessEnvelope<Result: Encodable & Sendable>: Encodable
     }
 }
 
-public struct CLIMachineError: Hashable, Codable, Sendable {
-    public let code: ArkTraceError.Code
-    public let message: String
-    public let retryable: Bool
-    public let stage: ArkTraceError.Stage
-    public let details: [String: CLIJSONValue]
+package struct CLIMachineError: Hashable, Codable, Sendable {
+    package let code: ArkTraceError.Code
+    package let message: String
+    package let retryable: Bool
+    package let stage: ArkTraceError.Stage
+    package let details: [String: CLIJSONValue]
 
-    public init(_ error: ArkTraceError) {
+    package init(_ error: ArkTraceError) {
         let error = error.normalizedForPublicContract()
         code = error.code
         message = Self.canonicalMessage(for: error.code)
@@ -2304,13 +2298,13 @@ public struct CLIMachineError: Hashable, Codable, Sendable {
     ]
 }
 
-public struct CLIMachineErrorEnvelope: Encodable, Sendable {
-    public let schemaVersion: CLIMachineSchemaVersion
-    public let tool: CLIMachineTool
-    public let request: CLIMachineRequest
-    public let error: CLIMachineError
+package struct CLIMachineErrorEnvelope: Encodable, Sendable {
+    package let schemaVersion: CLIMachineSchemaVersion
+    package let tool: CLIMachineTool
+    package let request: CLIMachineRequest
+    package let error: CLIMachineError
 
-    public init(
+    package init(
         tool: CLIMachineTool,
         request: CLIMachineRequest,
         error: ArkTraceError

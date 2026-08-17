@@ -110,7 +110,7 @@ public final class TimelineNSView: NSView {
 
     public override func becomeFirstResponder() -> Bool {
         needsDisplay = true
-        NSAccessibility.post(element: self, notification: .focusedUIElementChanged)
+        unsafe NSAccessibility.post(element: self, notification: .focusedUIElementChanged)
         return true
     }
 
@@ -143,7 +143,7 @@ public final class TimelineNSView: NSView {
 
     public func event(at point: CGPoint) -> EventKey? {
         guard let source = displayedSnapshot else { return nil }
-        let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
+        let scale = unsafe window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         var candidate: (style: Int, order: Int, key: EventKey)?
         var order = 0
         for track in source.tracks {
@@ -271,7 +271,7 @@ public final class TimelineNSView: NSView {
     /// synchronous and only considers primitives already in the bounded
     /// immutable snapshot.
     @discardableResult
-    public func performKeyboardCommand(_ command: TimelineKeyboardCommand) -> Bool {
+    package func performKeyboardCommand(_ command: TimelineKeyboardCommand) -> Bool {
         switch command {
         case .previousEvent:
             return moveEvent(by: -1)
@@ -364,7 +364,7 @@ public final class TimelineNSView: NSView {
         context.setFillColor(NSColor.controlBackgroundColor.cgColor)
         context.fill(CGRect(x: 0, y: 0, width: bounds.width, height: TimelineGeometry.rulerHeight))
         context.setStrokeColor(NSColor.separatorColor.cgColor)
-        context.setLineWidth(1 / (window?.backingScaleFactor ?? 2))
+        unsafe context.setLineWidth(1 / (window?.backingScaleFactor ?? 2))
         context.move(to: CGPoint(x: 0, y: TimelineGeometry.rulerHeight))
         context.addLine(to: CGPoint(x: bounds.width, y: TimelineGeometry.rulerHeight))
         context.strokePath()
@@ -386,7 +386,7 @@ public final class TimelineNSView: NSView {
         dirtyRect: CGRect,
         context: CGContext
     ) {
-        let scale = window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
+        let scale = unsafe window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
         for (index, track) in snapshot.tracks.enumerated() {
             let trackFrame = TimelineGeometry.trackFrame(track)
             guard trackFrame.maxY >= dirtyRect.minY, trackFrame.minY <= dirtyRect.maxY else { continue }
@@ -756,7 +756,7 @@ public final class TimelineNSView: NSView {
 
     private func postAccessibilityValueChanged() {
         accessibilityValueChangedHook?()
-        NSAccessibility.post(element: self, notification: .valueChanged)
+        unsafe NSAccessibility.post(element: self, notification: .valueChanged)
     }
 
     private func distance(_ lhs: Int64, _ rhs: Int64) -> UInt64 {
@@ -931,15 +931,26 @@ public final class TimelineNSView: NSView {
         }
     }
 
+    /// Fixed three-fraction-digit style matching the previous
+    /// `String(format: "%.3f")` output byte for byte: POSIX decimal point, no
+    /// grouping separator, so canvas labels and accessibility values stay
+    /// stable across user locales. A shared `FormatStyle` value is cheap to
+    /// reuse per label; Foundation memoizes the backing formatter by style.
+    private static let fixedFraction3 = FloatingPointFormatStyle<Double>(
+        locale: Locale(identifier: "en_US_POSIX")
+    )
+    .precision(.fractionLength(3))
+    .grouping(.never)
+
     private static func timeLabel(_ nanoseconds: Int64) -> String {
         if nanoseconds >= 1_000_000_000 {
-            return String(format: "%.3f s", Double(nanoseconds) / 1_000_000_000)
+            return fixedFraction3.format(Double(nanoseconds) / 1_000_000_000) + " s"
         }
         if nanoseconds >= 1_000_000 {
-            return String(format: "%.3f ms", Double(nanoseconds) / 1_000_000)
+            return fixedFraction3.format(Double(nanoseconds) / 1_000_000) + " ms"
         }
         if nanoseconds >= 1_000 {
-            return String(format: "%.3f µs", Double(nanoseconds) / 1_000)
+            return fixedFraction3.format(Double(nanoseconds) / 1_000) + " µs"
         }
         return "\(nanoseconds) ns"
     }
@@ -1045,7 +1056,7 @@ public extension TimelineNSView {
     /// Shared focus restoration boundary used by the SwiftUI coordinator and
     /// hosted-window accessibility regressions.
     func requestKeyboardFocus() {
-        window?.makeFirstResponder(self)
+        unsafe window?.makeFirstResponder(self)
     }
 }
 

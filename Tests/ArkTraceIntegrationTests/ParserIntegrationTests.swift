@@ -446,7 +446,7 @@ final class ParserIntegrationTests: XCTestCase {
     }
 
     private static var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
+        URL(filePath: #filePath)
             .deletingLastPathComponent()  // ParserIntegrationTests.swift
             .deletingLastPathComponent()  // ArkTraceIntegrationTests
             .deletingLastPathComponent()  // Tests
@@ -455,8 +455,8 @@ final class ParserIntegrationTests: XCTestCase {
     private static func traceStreamerURL() -> URL? {
         let environment = ProcessInfo.processInfo.environment
         let candidates = [
-            environment["ARKTRACE_TRACE_STREAMER"].map(URL.init(fileURLWithPath:)),
-            repoRoot.appendingPathComponent("ThirdParty/TraceStreamer/macx/trace_streamer"),
+            environment["ARKTRACE_TRACE_STREAMER"].map { URL(filePath: $0) },
+            repoRoot.appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer"),
         ]
         return candidates.compactMap { $0 }
             .first { FileManager.default.isExecutableFile(atPath: $0.path) }
@@ -465,16 +465,15 @@ final class ParserIntegrationTests: XCTestCase {
     private static func fixtureURL() -> URL? {
         let environment = ProcessInfo.processInfo.environment
         let candidates = [
-            environment["ARKTRACE_TEST_TRACE"].map(URL.init(fileURLWithPath:)),
-            repoRoot.appendingPathComponent("Fixtures/traces/hiprofiler_data_ability.htrace"),
+            environment["ARKTRACE_TEST_TRACE"].map { URL(filePath: $0) },
+            repoRoot.appending(path: "Fixtures/traces/hiprofiler_data_ability.htrace"),
         ]
         return candidates.compactMap { $0 }
             .first { FileManager.default.isReadableFile(atPath: $0.path) }
     }
 
     private static var evidenceURL: URL {
-        repoRoot.appendingPathComponent(
-            "Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json")
+        repoRoot.appending(path: "Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json")
     }
 
     private static let lockedFixtureProvenance: [
@@ -532,7 +531,7 @@ final class ParserIntegrationTests: XCTestCase {
     }
 
     private static func lockedFixtureURL(named name: String) -> URL {
-        repoRoot.appendingPathComponent("Fixtures/traces/\(name)")
+        repoRoot.appending(path: "Fixtures/traces/\(name)")
     }
 
     private func sha256AndSize(
@@ -604,7 +603,7 @@ final class ParserIntegrationTests: XCTestCase {
                 message: "Fixture changed while hashing"
             )
         }
-        let hash = hasher.finalize().map { String(format: "%02x", $0) }.joined()
+        let hash = hasher.finalize().lowercaseHexString()
         return (hash, byteCount)
     }
 
@@ -644,8 +643,8 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testPhase3StreamingIdentityRejectsGrowthBeyondInitialSize() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-identity-growth-\(UUID().uuidString)")
-        let file = root.appendingPathComponent("trace")
+            .appending(path: "arktrace-identity-growth-\(UUID().uuidString)")
+        let file = root.appending(path: "trace")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         try Data("initial".utf8).write(to: file)
@@ -749,7 +748,7 @@ final class ParserIntegrationTests: XCTestCase {
         var hasher = Insecure.SHA1()
         hasher.update(data: Data("blob \(data.count)\0".utf8))
         hasher.update(data: data)
-        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+        return hasher.finalize().lowercaseHexString()
     }
 
     private func rowCount(_ table: String, in db: TraceDatabase) throws -> Int64 {
@@ -769,7 +768,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(try gitBlobOID(at: source), fixture.upstreamBlob)
 
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-evidence-\(UUID().uuidString)")
+            .appending(path: "arktrace-evidence-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let session = try await TraceSession.open(
             source: source,
@@ -971,7 +970,7 @@ final class ParserIntegrationTests: XCTestCase {
         counter: URL? = nil
     ) throws -> ProcessBox {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+        process.executableURL = URL(filePath: "/usr/bin/xcrun")
         process.arguments = [
             "xctest",
             "-XCTest",
@@ -1037,10 +1036,7 @@ final class ParserIntegrationTests: XCTestCase {
 
     private static func replacePromotionBuild(at build: URL) throws {
         let displaced = build.deletingLastPathComponent()
-            .appendingPathComponent(
-                ".displaced-\(build.lastPathComponent)",
-                isDirectory: true
-            )
+            .appending(path: ".displaced-\(build.lastPathComponent)", directoryHint: .isDirectory)
         try FileManager.default.moveItem(at: build, to: displaced)
         try FileManager.default.createDirectory(
             at: build,
@@ -1048,7 +1044,7 @@ final class ParserIntegrationTests: XCTestCase {
             attributes: [.posixPermissions: 0o700]
         )
         try Data("replacement".utf8).write(
-            to: build.appendingPathComponent("marker")
+            to: build.appending(path: "marker")
         )
     }
 
@@ -1081,7 +1077,7 @@ final class ParserIntegrationTests: XCTestCase {
         }
         let evidence = try Self.lockedEvidence()
         let manifest = try TraceStreamerManifest.load(
-            from: binary.deletingLastPathComponent().appendingPathComponent("manifest.json")
+            from: binary.deletingLastPathComponent().appending(path: "manifest.json")
         )
         let actualBinary = try sha256AndSize(at: binary)
         XCTAssertEqual(evidence.formatVersion, 1)
@@ -1148,7 +1144,7 @@ final class ParserIntegrationTests: XCTestCase {
             let fixtureURL = Self.lockedFixtureURL(named: fixture.name)
             XCTAssertEqual(try gitBlobOID(at: fixtureURL), fixture.upstreamBlob)
         }
-        let licenseURL = Self.repoRoot.appendingPathComponent(evidence.upstream.licensePath)
+        let licenseURL = Self.repoRoot.appending(path: evidence.upstream.licensePath)
         XCTAssertTrue(FileManager.default.isReadableFile(atPath: licenseURL.path))
         let licenseIdentity = try sha256AndSize(at: licenseURL)
         XCTAssertEqual(licenseIdentity.sha256, evidence.upstream.licenseSHA256)
@@ -1234,7 +1230,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testParseRealTraceAndQuery() async throws {
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-integration-\(UUID().uuidString)")
+            .appending(path: "arktrace-integration-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
 
         let session = try await TraceSession.open(
@@ -1249,7 +1245,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(metadata.traceSHA256.count, 64)
         XCTAssertEqual(metadata.schemaFingerprint.count, 64)
         let manifest = try TraceStreamerManifest.load(
-            from: binary.deletingLastPathComponent().appendingPathComponent("manifest.json")
+            from: binary.deletingLastPathComponent().appending(path: "manifest.json")
         )
         XCTAssertEqual(metadata.parser.binarySHA256, manifest.binarySHA256)
         XCTAssertEqual(metadata.parser.reportedVersion, manifest.reportedVersion)
@@ -1291,7 +1287,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testRealTraceSummaryIsDeterministicAndRangeScoped() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-summary-real-\(UUID().uuidString)")
+            .appending(path: "arktrace-summary-real-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let session = try await TraceSession.open(
             source: fixture,
@@ -1380,8 +1376,8 @@ final class ParserIntegrationTests: XCTestCase {
             "a count below the section budget is exact, not a lower bound"
         )
 
-        let first = try TraceSummaryJSONEncoder.encode(full)
-        let second = try TraceSummaryJSONEncoder.encode(
+        let first = try SummaryCanonicalTestEncoder.encode(full)
+        let second = try SummaryCanonicalTestEncoder.encode(
             try await engine.summarize(fullRequest)
         )
         XCTAssertEqual(first, second)
@@ -1391,7 +1387,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testImmutableSnapshotIsParsedInPlaceWithIdenticalProvenance() async throws {
         let (binary, fixture) = try requireEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-snapshot-\(UUID().uuidString)")
+            .appending(path: "arktrace-snapshot-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -1407,14 +1403,14 @@ final class ParserIntegrationTests: XCTestCase {
                 preparationChunkHook: { counter.increment() },
                 finalizationHook: nil
             )
-            let directory = root.appendingPathComponent(name, isDirectory: true)
+            let directory = root.appending(path: name, directoryHint: .isDirectory)
             try FileManager.default.createDirectory(
                 at: directory, withIntermediateDirectories: true
             )
             let parsed = try await parser.parse(
                 source: fixture,
                 sourceIsImmutableSnapshot: immutable,
-                destination: directory.appendingPathComponent("trace.sqlite"),
+                destination: directory.appending(path: "trace.sqlite"),
                 progress: nil,
                 prepareDatabase: { databaseURL, progress in
                     try TraceDatabaseStagingPreparer.prepare(
@@ -1450,7 +1446,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testPhase1ProgressReportsActualStagesInOrder() async throws {
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-progress-\(UUID().uuidString)")
+            .appending(path: "arktrace-progress-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let recorder = StageRecorder()
 
@@ -1476,10 +1472,10 @@ final class ParserIntegrationTests: XCTestCase {
         let environment = ProcessInfo.processInfo.environment
         guard environment["ARKTRACE_PHASE1_GATE"] == "1" else { return }
         let outputPath = try XCTUnwrap(environment["ARKTRACE_PHASE1_EVIDENCE_OUTPUT"])
-        let outputURL = URL(fileURLWithPath: outputPath)
+        let outputURL = URL(filePath: outputPath)
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-gate-\(UUID().uuidString)")
+            .appending(path: "arktrace-gate-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let recorder = StageRecorder()
         let session = try await TraceSession.open(
@@ -1562,7 +1558,7 @@ final class ParserIntegrationTests: XCTestCase {
         let environment = ProcessInfo.processInfo.environment
         guard environment["ARKTRACE_PHASE2_GATE"] == "1" else { return }
         let outputPath = try XCTUnwrap(environment["ARKTRACE_PHASE2_EVIDENCE_OUTPUT"])
-        let outputURL = URL(fileURLWithPath: outputPath)
+        let outputURL = URL(filePath: outputPath)
         let (binary, fixture) = try requireCacheEnvironment()
         let parser = try TraceStreamerProcessParser(executableURL: binary)
         let parserIdentity = try await parser.identity()
@@ -1570,9 +1566,9 @@ final class ParserIntegrationTests: XCTestCase {
             at: fixture, maximumByteCount: 2_147_483_648
         )
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-phase2-benchmark-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-phase2-benchmark-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let initial = try await TraceSession.open(
@@ -1678,14 +1674,14 @@ final class ParserIntegrationTests: XCTestCase {
         guard environment["ARKTRACE_PHASE3_GATE"] == "1" else { return }
         let fixtureClass = environment["ARKTRACE_PHASE3_FIXTURE_CLASS"] ?? "medium"
         XCTAssertTrue(["medium", "large"].contains(fixtureClass))
-        let outputURL = URL(fileURLWithPath: try XCTUnwrap(
+        let outputURL = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_PHASE3_EVIDENCE_OUTPUT"]
         ))
-        let fixture = URL(fileURLWithPath: try XCTUnwrap(
+        let fixture = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_PHASE3_TRACE"]
                 ?? environment["ARKTRACE_PHASE3_MEDIUM_TRACE"]
         ))
-        let parserURL = URL(fileURLWithPath: try XCTUnwrap(
+        let parserURL = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_TRACE_STREAMER"]
         ))
         let fixtureBytes = try XCTUnwrap(
@@ -1700,9 +1696,9 @@ final class ParserIntegrationTests: XCTestCase {
         }
 
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-phase3-benchmark-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-phase3-benchmark-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = try TraceStreamerProcessParser(executableURL: parserURL)
         let parserIdentity = try await parser.identity()
@@ -2365,13 +2361,13 @@ final class ParserIntegrationTests: XCTestCase {
     func testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
         guard environment["ARKTRACE_PHASE3_LARGE_CANCELLATION"] == "1" else { return }
-        let fixture = URL(fileURLWithPath: try XCTUnwrap(
+        let fixture = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_PHASE3_TRACE"]
         ))
-        let parserURL = URL(fileURLWithPath: try XCTUnwrap(
+        let parserURL = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_TRACE_STREAMER"]
         ))
-        let evidenceURL = URL(fileURLWithPath: try XCTUnwrap(
+        let evidenceURL = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_PHASE3_LARGE_CANCELLATION_EVIDENCE"]
         ))
         let fixtureBytes = try XCTUnwrap(
@@ -2381,9 +2377,9 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertLessThanOrEqual(fixtureBytes, 2 * 1_024 * 1_024 * 1_024)
 
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-phase3-large-cancel-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-phase3-large-cancel-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let launchBarrier = ProcessLaunchBarrier()
         let (launchEvents, launchContinuation) = AsyncStream.makeStream(
@@ -2663,7 +2659,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testCancellationTerminatesParser() async throws {
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cancel-\(UUID().uuidString)")
+            .appending(path: "arktrace-cancel-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
 
         let task = Task.detached {
@@ -2688,10 +2684,10 @@ final class ParserIntegrationTests: XCTestCase {
     func testCancellationDuringStagingQuickCheckCannotPromoteReady() async throws {
         let (binary, fixture) = try requireEnvironment()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-quick-check-cancel-\(UUID().uuidString)")
+            .appending(path: "arktrace-quick-check-cancel-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = BlockingCancellationBarrier()
         let parser = try TraceStreamerProcessParser(executableURL: binary)
 
@@ -2730,7 +2726,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testConcurrentSessionsSharingStagingRootUseDistinctDatabases() async throws {
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-concurrent-\(UUID().uuidString)")
+            .appending(path: "arktrace-concurrent-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let parser = try TraceStreamerProcessParser(executableURL: binary)
 
@@ -2756,7 +2752,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testCancellationDuringRepositoryValidationCannotReturnReadySession() async throws {
         let (binary, fixture) = try requireEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-repository-cancel-\(UUID().uuidString)")
+            .appending(path: "arktrace-repository-cancel-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let barrier = CancellationBarrier()
 
@@ -2785,9 +2781,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testContentCacheMissThenHitKeepsPathFreeMetadataAndActiveLease() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-hit-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-hit-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -2916,9 +2912,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testConcurrentCachedOpenIsSingleFlight() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-single-flight-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-single-flight-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -2949,23 +2945,19 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheCrossProcessWorker() async throws {
         let environment = ProcessInfo.processInfo.environment
         guard let action = environment["ARKTRACE_CACHE_WORKER_ACTION"] else { return }
-        let root = URL(fileURLWithPath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_ROOT"]))
-        let binary = URL(
-            fileURLWithPath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_BINARY"])
-        )
-        let fixture = URL(
-            fileURLWithPath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_FIXTURE"])
-        )
-        let result = environment["ARKTRACE_CACHE_WORKER_RESULT"].map(URL.init(fileURLWithPath:))
-        let ready = environment["ARKTRACE_CACHE_WORKER_READY"].map(URL.init(fileURLWithPath:))
-        let release = environment["ARKTRACE_CACHE_WORKER_RELEASE"].map(URL.init(fileURLWithPath:))
-        let counter = environment["ARKTRACE_CACHE_WORKER_COUNTER"].map(URL.init(fileURLWithPath:))
+        let root = URL(filePath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_ROOT"]))
+        let binary = URL(filePath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_BINARY"]))
+        let fixture = URL(filePath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_FIXTURE"]))
+        let result = environment["ARKTRACE_CACHE_WORKER_RESULT"].map { URL(filePath: $0) }
+        let ready = environment["ARKTRACE_CACHE_WORKER_READY"].map { URL(filePath: $0) }
+        let release = environment["ARKTRACE_CACHE_WORKER_RELEASE"].map { URL(filePath: $0) }
+        let counter = environment["ARKTRACE_CACHE_WORKER_COUNTER"].map { URL(filePath: $0) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary),
             processCounterURL: counter
         )
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
 
         let waitForRelease: @Sendable () -> Void = {
             guard let release else { return }
@@ -2997,7 +2989,7 @@ final class ParserIntegrationTests: XCTestCase {
             waitForRelease()
         } else if action == "cloexec" {
             let child = Process()
-            child.executableURL = URL(fileURLWithPath: "/bin/sleep")
+            child.executableURL = URL(filePath: "/bin/sleep")
             child.arguments = ["3"]
             child.standardOutput = FileHandle.nullDevice
             child.standardError = FileHandle.nullDevice
@@ -3018,13 +3010,13 @@ final class ParserIntegrationTests: XCTestCase {
     func testCrossProcessSingleFlightCancellationLeaseAndCLOEXEC() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-process-\(UUID().uuidString)")
+            .appending(path: "arktrace-cache-process-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
 
-        let counter = root.appendingPathComponent("export.count")
-        let firstResult = root.appendingPathComponent("first.result")
-        let secondResult = root.appendingPathComponent("second.result")
+        let counter = root.appending(path: "export.count")
+        let firstResult = root.appending(path: "first.result")
+        let secondResult = root.appending(path: "second.result")
         let first = try launchCacheWorker(
             action: "open",
             root: root,
@@ -3056,9 +3048,9 @@ final class ParserIntegrationTests: XCTestCase {
 
         // A separate process holds the per-key single-flight lock. The local
         // waiter must observe cancellation without waiting for that process.
-        let waitRoot = root.appendingPathComponent("waiter", isDirectory: true)
-        let keyReady = root.appendingPathComponent("key.ready")
-        let keyRelease = root.appendingPathComponent("key.release")
+        let waitRoot = root.appending(path: "waiter", directoryHint: .isDirectory)
+        let keyReady = root.appending(path: "key.ready")
+        let keyRelease = root.appending(path: "key.release")
         let keyHolder = try launchCacheWorker(
             action: "hold-key",
             root: waitRoot,
@@ -3073,8 +3065,8 @@ final class ParserIntegrationTests: XCTestCase {
             try await TraceSession.openCached(
                 source: fixture,
                 parser: try TraceStreamerProcessParser(executableURL: binary),
-                stagingDirectory: waitRoot.appendingPathComponent("local-staging"),
-                cacheDirectory: waitRoot.appendingPathComponent("cache"),
+                stagingDirectory: waitRoot.appending(path: "local-staging"),
+                cacheDirectory: waitRoot.appending(path: "cache"),
                 hooks: TraceCacheTestHooks(
                     keyLockContended: { keyContention.signal() }
                 )
@@ -3098,8 +3090,8 @@ final class ParserIntegrationTests: XCTestCase {
         // A shared lease held by another process prevents mutation. Once the
         // mutation enters, it retains key+exclusive lease until its closure
         // finishes, so a third process cannot reopen the entry mid-mutation.
-        let leaseReady = root.appendingPathComponent("lease.ready")
-        let leaseRelease = root.appendingPathComponent("lease.release")
+        let leaseReady = root.appending(path: "lease.ready")
+        let leaseRelease = root.appending(path: "lease.release")
         let leaseHolder = try launchCacheWorker(
             action: "hold-lease",
             root: root,
@@ -3109,12 +3101,12 @@ final class ParserIntegrationTests: XCTestCase {
             release: leaseRelease
         )
         try await waitForFile(leaseReady)
-        let metadata = try cacheMetadata(in: root.appendingPathComponent("cache"))
+        let metadata = try cacheMetadata(in: root.appending(path: "cache"))
         let contention = OneShotSignal()
         let mutation = PromotionBarrier()
         let mutationTask = Task {
             try await TraceContentAddressedCache.withExclusiveEntryMutation(
-                cacheDirectory: root.appendingPathComponent("cache"),
+                cacheDirectory: root.appending(path: "cache"),
                 key: metadata.cacheKey,
                 contentionHook: { contention.signal() },
                 operation: { mutation.pause(at: $0) }
@@ -3126,7 +3118,7 @@ final class ParserIntegrationTests: XCTestCase {
         let leaseHolderStatus = await leaseHolder.wait()
         XCTAssertEqual(leaseHolderStatus, 0)
         _ = await mutation.waitUntilReached()
-        let guardedResult = root.appendingPathComponent("guarded.result")
+        let guardedResult = root.appending(path: "guarded.result")
         let guardedReader = try launchCacheWorker(
             action: "open",
             root: root,
@@ -3144,7 +3136,7 @@ final class ParserIntegrationTests: XCTestCase {
 
         // The lease descriptor is O_CLOEXEC. A long-lived exec child started
         // by a cache holder must not keep the lease alive after its parent closes.
-        let cloexecResult = root.appendingPathComponent("cloexec.result")
+        let cloexecResult = root.appending(path: "cloexec.result")
         let cloexecWorker = try launchCacheWorker(
             action: "cloexec",
             root: root,
@@ -3155,7 +3147,7 @@ final class ParserIntegrationTests: XCTestCase {
         try await waitForFile(cloexecResult)
         let mutationStart = ContinuousClock.now
         try await TraceContentAddressedCache.withExclusiveEntryMutation(
-            cacheDirectory: root.appendingPathComponent("cache"),
+            cacheDirectory: root.appending(path: "cache"),
             key: metadata.cacheKey,
             operation: { _ in }
         )
@@ -3167,9 +3159,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCorruptCacheIsQuarantinedAndRebuiltOnce() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-corrupt-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-corrupt-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -3195,7 +3187,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertFalse(rebuiltCacheHit)
         XCTAssertEqual(parser.count(), 2)
         XCTAssertTrue(try TraceDatabase(url: databaseURL, readOnly: true).quickCheckIsOK())
-        let corruptRoot = cache.appendingPathComponent(".corrupt", isDirectory: true)
+        let corruptRoot = cache.appending(path: ".corrupt", directoryHint: .isDirectory)
         XCTAssertEqual(
             try FileManager.default.contentsOfDirectory(atPath: corruptRoot.path).count,
             1
@@ -3206,9 +3198,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testInPlaceCacheMutationCannotReuseProcessValidationMemo() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-in-place-corrupt-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-in-place-corrupt-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -3322,9 +3314,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCachePromotionIsInvisibleUntilAtomicRename() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-atomic-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-atomic-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -3343,7 +3335,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
         XCTAssertFalse(
             FileManager.default.fileExists(
-                atPath: publicEntry.appendingPathComponent("database.sqlite").path
+                atPath: publicEntry.appending(path: "database.sqlite").path
             )
         )
         barrier.resume()
@@ -3355,9 +3347,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testPrivateBuildSessionAndReadyEntryCarryCrashOwnerEvidence() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-owner-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-owner-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let barrier = PromotionBarrier()
         let task = Task {
@@ -3370,8 +3362,8 @@ final class ParserIntegrationTests: XCTestCase {
             )
         }
         let publicEntry = await barrier.waitUntilReached()
-        let sessionOwners = staging.appendingPathComponent(".owners", isDirectory: true)
-        let buildOwners = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let sessionOwners = staging.appending(path: ".owners", directoryHint: .isDirectory)
+        let buildOwners = cache.appending(path: ".staging/.owners", directoryHint: .isDirectory)
         let sessionMarker = try XCTUnwrap(
             FileManager.default.contentsOfDirectory(
                 at: sessionOwners,
@@ -3407,16 +3399,22 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertEqual(readyEvidence["state"] as? String, "ready")
         let relativePath = try XCTUnwrap(readyEvidence["relativePath"] as? String)
-        XCTAssertEqual(cache.appendingPathComponent(relativePath), publicEntry)
+        // The evidence names the public entry directory; the explicit hint
+        // keeps the trailing-slash form identical to the layout URL without
+        // the legacy initializer's hidden filesystem stat.
+        XCTAssertEqual(
+            cache.appending(path: relativePath, directoryHint: .isDirectory),
+            publicEntry
+        )
         try await session.close()
     }
 
     func testCancellationAfterPromotionQuarantinesOwnedReadyEntry() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-promote-cancel-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-promote-cancel-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -3443,7 +3441,7 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertEqual(error.stage, .openingDatabase)
         }
         XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
-        let corruptRoot = cache.appendingPathComponent(".corrupt", isDirectory: true)
+        let corruptRoot = cache.appending(path: ".corrupt", directoryHint: .isDirectory)
         XCTAssertEqual(
             try FileManager.default.contentsOfDirectory(atPath: corruptRoot.path).count,
             1
@@ -3456,9 +3454,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCancellationAtMissReadyHandoffRollsBackPublicEntry() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-handoff-cancel-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-handoff-cancel-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let handoff = PromotionBarrier()
         let task = Task {
@@ -3486,7 +3484,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
         XCTAssertEqual(
             try FileManager.default.contentsOfDirectory(
-                atPath: cache.appendingPathComponent(".corrupt").path
+                atPath: cache.appending(path: ".corrupt").path
             ).count,
             1
         )
@@ -3496,9 +3494,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testPromotionRejectsBuildPathReplacementAfterSourceIdentityCheck() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-source-swap-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-source-swap-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let entryRecorder = URLRecorder()
         do {
@@ -3514,10 +3512,7 @@ final class ParserIntegrationTests: XCTestCase {
                     },
                     beforePromotionBuildCleanup: { original in
                         let movedAgain = original.deletingLastPathComponent()
-                            .appendingPathComponent(
-                                ".moved-again-\(original.lastPathComponent)",
-                                isDirectory: true
-                            )
+                            .appending(path: ".moved-again-\(original.lastPathComponent)", directoryHint: .isDirectory)
                         try FileManager.default.moveItem(at: original, to: movedAgain)
                     }
                 )
@@ -3529,7 +3524,7 @@ final class ParserIntegrationTests: XCTestCase {
         }
         let publicEntry = try XCTUnwrap(entryRecorder.snapshot())
         XCTAssertFalse(FileManager.default.fileExists(atPath: publicEntry.path))
-        let corruptRoot = cache.appendingPathComponent(".corrupt", isDirectory: true)
+        let corruptRoot = cache.appending(path: ".corrupt", directoryHint: .isDirectory)
         let quarantines = try FileManager.default.contentsOfDirectory(
             at: corruptRoot,
             includingPropertiesForKeys: nil
@@ -3537,10 +3532,10 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(quarantines.count, 1)
         XCTAssertTrue(
             FileManager.default.fileExists(
-                atPath: quarantines[0].appendingPathComponent("marker").path
+                atPath: quarantines[0].appending(path: "marker").path
             )
         )
-        let buildStaging = cache.appendingPathComponent(".staging", isDirectory: true)
+        let buildStaging = cache.appending(path: ".staging", directoryHint: .isDirectory)
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(atPath: buildStaging.path)
                 .filter { $0 != ".owners" }
@@ -3548,7 +3543,7 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: buildStaging.appendingPathComponent(".owners").path
+                atPath: buildStaging.appending(path: ".owners").path
             ).isEmpty
         )
         XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
@@ -3557,9 +3552,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testPromotionMismatchIsolationFailureRetainsOwnerEvidence() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-source-swap-fail-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-source-swap-fail-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let entryRecorder = URLRecorder()
         do {
@@ -3592,24 +3587,21 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: publicEntry.path))
         XCTAssertTrue(
             FileManager.default.fileExists(
-                atPath: publicEntry.appendingPathComponent("marker").path
+                atPath: publicEntry.appending(path: "marker").path
             )
         )
         XCTAssertTrue(
             FileManager.default.fileExists(
                 atPath: publicEntry.deletingLastPathComponent()
-                    .appendingPathComponent(
-                        ".displaced-\(publicEntry.lastPathComponent)",
-                        isDirectory: true
-                    ).path
+                    .appending(path: ".displaced-\(publicEntry.lastPathComponent)", directoryHint: .isDirectory).path
             )
         )
-        let buildStaging = cache.appendingPathComponent(".staging", isDirectory: true)
+        let buildStaging = cache.appending(path: ".staging", directoryHint: .isDirectory)
         let residuals = try FileManager.default.contentsOfDirectory(atPath: buildStaging.path)
             .filter { $0 != ".owners" }
         XCTAssertTrue(residuals.isEmpty)
         let owners = try FileManager.default.contentsOfDirectory(
-            at: buildStaging.appendingPathComponent(".owners", isDirectory: true),
+            at: buildStaging.appending(path: ".owners", directoryHint: .isDirectory),
             includingPropertiesForKeys: nil
         )
         let markers = owners.filter { $0.pathExtension == "lock" }
@@ -3623,13 +3615,10 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertEqual(evidence["formatVersion"] as? Int, 1)
         let relativePath = try XCTUnwrap(evidence["relativePath"] as? String)
-        let evidencedDirectory = cache.appendingPathComponent(relativePath)
+        let evidencedDirectory = cache.appending(path: relativePath)
             .standardizedFileURL
         let displacedOriginal = publicEntry.deletingLastPathComponent()
-            .appendingPathComponent(
-                ".displaced-\(publicEntry.lastPathComponent)",
-                isDirectory: true
-            ).standardizedFileURL
+            .appending(path: ".displaced-\(publicEntry.lastPathComponent)", directoryHint: .isDirectory).standardizedFileURL
         XCTAssertEqual(evidencedDirectory, displacedOriginal)
         var evidencedInfo = stat()
         XCTAssertEqual(
@@ -3646,7 +3635,7 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: cache.appendingPathComponent(".corrupt").path
+                atPath: cache.appending(path: ".corrupt").path
             ).isEmpty
         )
         XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
@@ -3655,10 +3644,10 @@ final class ParserIntegrationTests: XCTestCase {
     func testPromotionRelocationOutsideRecoveryRootPreservesSafeEvidence() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-outside-relocation-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
-        let outside = root.appendingPathComponent("outside-original", isDirectory: true)
+            .appending(path: "arktrace-cache-outside-relocation-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
+        let outside = root.appending(path: "outside-original", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         do {
             _ = try await TraceSession.openCached(
@@ -3685,7 +3674,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: outside.path))
         var outsideInfo = stat()
         XCTAssertEqual(outside.path.withCString { Darwin.lstat($0, &outsideInfo) }, 0)
-        let ownersRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let ownersRoot = cache.appending(path: ".staging/.owners", directoryHint: .isDirectory)
         let owners = try FileManager.default.contentsOfDirectory(
             at: ownersRoot,
             includingPropertiesForKeys: nil
@@ -3714,9 +3703,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testPromotionEvidenceCommitRejectsRelocationToCacheSibling() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-evidence-sibling-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-evidence-sibling-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let publicEntry = URLRecorder()
         let relocatedEntry = URLRecorder()
@@ -3729,10 +3718,7 @@ final class ParserIntegrationTests: XCTestCase {
                 hooks: TraceCacheTestHooks(
                     beforePromotion: { publicEntry.record($0) },
                     beforePromotionEvidenceCommit: { entry in
-                        let sibling = cache.appendingPathComponent(
-                            ".post-promote-\(UUID().uuidString)",
-                            isDirectory: true
-                        )
+                        let sibling = cache.appending(path: ".post-promote-\(UUID().uuidString)", directoryHint: .isDirectory)
                         try FileManager.default.moveItem(at: entry, to: sibling)
                         relocatedEntry.record(sibling)
                     }
@@ -3749,7 +3735,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: sibling.path))
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: cache.appendingPathComponent(".staging/.owners").path
+                atPath: cache.appending(path: ".staging/.owners").path
             ).isEmpty
         )
         XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
@@ -3758,10 +3744,10 @@ final class ParserIntegrationTests: XCTestCase {
     func testPromotionEvidenceCommitOutsideRecoveryRootRetainsOwnerEvidence() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-evidence-outside-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
-        let outside = root.appendingPathComponent("outside-promoted", isDirectory: true)
+            .appending(path: "arktrace-cache-evidence-outside-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
+        let outside = root.appending(path: "outside-promoted", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let publicEntry = URLRecorder()
         do {
@@ -3788,7 +3774,7 @@ final class ParserIntegrationTests: XCTestCase {
             FileManager.default.fileExists(atPath: try XCTUnwrap(publicEntry.snapshot()).path)
         )
         XCTAssertTrue(FileManager.default.fileExists(atPath: outside.path))
-        let ownersRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let ownersRoot = cache.appending(path: ".staging/.owners", directoryHint: .isDirectory)
         let owners = try FileManager.default.contentsOfDirectory(
             at: ownersRoot,
             includingPropertiesForKeys: nil
@@ -3807,9 +3793,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testPromotionRelocationAfterFinalIdentityCheckRetainsReadyEvidence() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-final-commit-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-final-commit-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let publicEntry = URLRecorder()
         let relocatedEntry = URLRecorder()
@@ -3822,10 +3808,7 @@ final class ParserIntegrationTests: XCTestCase {
                 hooks: TraceCacheTestHooks(
                     beforePromotion: { publicEntry.record($0) },
                     afterPromotionFinalIdentityCheck: { entry in
-                        let sibling = cache.appendingPathComponent(
-                            ".after-final-check-\(UUID().uuidString)",
-                            isDirectory: true
-                        )
+                        let sibling = cache.appending(path: ".after-final-check-\(UUID().uuidString)", directoryHint: .isDirectory)
                         try FileManager.default.moveItem(at: entry, to: sibling)
                         try FileManager.default.copyItem(at: sibling, to: entry)
                         relocatedEntry.record(sibling)
@@ -3842,7 +3825,7 @@ final class ParserIntegrationTests: XCTestCase {
         )
         let sibling = try XCTUnwrap(relocatedEntry.snapshot())
         XCTAssertFalse(FileManager.default.fileExists(atPath: sibling.path))
-        let ownersRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let ownersRoot = cache.appending(path: ".staging/.owners", directoryHint: .isDirectory)
         let owners = try FileManager.default.contentsOfDirectory(
             at: ownersRoot,
             includingPropertiesForKeys: nil
@@ -3853,9 +3836,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testReadyHandoffRejectsValidPublicReplacement() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-handoff-swap-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-handoff-swap-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let original = URLRecorder()
         let relocated = URLRecorder()
@@ -3868,10 +3851,7 @@ final class ParserIntegrationTests: XCTestCase {
                 hooks: TraceCacheTestHooks(
                     beforeReadyHandoff: { entry, _ in
                         original.record(entry)
-                        let sibling = cache.appendingPathComponent(
-                            ".handoff-original-\(UUID().uuidString)",
-                            isDirectory: true
-                        )
+                        let sibling = cache.appending(path: ".handoff-original-\(UUID().uuidString)", directoryHint: .isDirectory)
                         do {
                             try FileManager.default.moveItem(at: entry, to: sibling)
                             try FileManager.default.copyItem(at: sibling, to: entry)
@@ -3896,7 +3876,7 @@ final class ParserIntegrationTests: XCTestCase {
         )
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: cache.appendingPathComponent(".staging/.owners").path
+                atPath: cache.appending(path: ".staging/.owners").path
             ).isEmpty
         )
     }
@@ -3904,9 +3884,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testReadyHandoffRejectsRepositoryDirectoryABA() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-repository-aba-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-repository-aba-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let originalSibling = URLRecorder()
         let replacementSibling = URLRecorder()
@@ -3918,10 +3898,7 @@ final class ParserIntegrationTests: XCTestCase {
                 cacheDirectory: cache,
                 hooks: TraceCacheTestHooks(
                     afterPromotion: { entry in
-                        let original = cache.appendingPathComponent(
-                            ".aba-original-\(UUID().uuidString)",
-                            isDirectory: true
-                        )
+                        let original = cache.appending(path: ".aba-original-\(UUID().uuidString)", directoryHint: .isDirectory)
                         do {
                             try FileManager.default.moveItem(at: entry, to: original)
                             try FileManager.default.copyItem(at: original, to: entry)
@@ -3935,10 +3912,7 @@ final class ParserIntegrationTests: XCTestCase {
                             XCTFail("missing ABA original")
                             return
                         }
-                        let replacement = cache.appendingPathComponent(
-                            ".aba-replacement-\(UUID().uuidString)",
-                            isDirectory: true
-                        )
+                        let replacement = cache.appending(path: ".aba-replacement-\(UUID().uuidString)", directoryHint: .isDirectory)
                         do {
                             try FileManager.default.moveItem(at: entry, to: replacement)
                             try FileManager.default.moveItem(at: original, to: entry)
@@ -3965,9 +3939,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheMissReadyHandoffRejectsMetadataReplacement() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-miss-metadata-swap-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-miss-metadata-swap-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         do {
             _ = try await TraceSession.openCached(
@@ -3977,10 +3951,8 @@ final class ParserIntegrationTests: XCTestCase {
                 cacheDirectory: cache,
                 hooks: TraceCacheTestHooks(
                     beforeReadyHandoff: { entry, _ in
-                        let metadata = entry.appendingPathComponent("metadata.json")
-                        let original = cache.appendingPathComponent(
-                            ".miss-metadata-original-\(UUID().uuidString)"
-                        )
+                        let metadata = entry.appending(path: "metadata.json")
+                        let original = cache.appending(path: ".miss-metadata-original-\(UUID().uuidString)")
                         do {
                             try FileManager.default.moveItem(at: metadata, to: original)
                             try FileManager.default.copyItem(at: original, to: metadata)
@@ -4000,9 +3972,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheHitMetadataReplacementIsQuarantinedAndRebuilt() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-hit-metadata-swap-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-hit-metadata-swap-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -4023,10 +3995,8 @@ final class ParserIntegrationTests: XCTestCase {
             hooks: TraceCacheTestHooks(
                 beforeReadyHandoff: { entry, _ in
                     guard firstHandoff.take() else { return }
-                    let metadata = entry.appendingPathComponent("metadata.json")
-                    let original = cache.appendingPathComponent(
-                        ".hit-metadata-original-\(UUID().uuidString)"
-                    )
+                    let metadata = entry.appending(path: "metadata.json")
+                    let original = cache.appending(path: ".hit-metadata-original-\(UUID().uuidString)")
                     do {
                         try FileManager.default.moveItem(at: metadata, to: original)
                         try FileManager.default.copyItem(at: original, to: metadata)
@@ -4044,7 +4014,7 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testOwnerEvidenceReplacementFailurePreservesLastCommittedJSON() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-evidence-\(UUID().uuidString)")
+            .appending(path: "arktrace-owner-evidence-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         let directory = try await TraceContentAddressedCache.createOwnedDirectory(
             root: root,
@@ -4091,7 +4061,7 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testOwnedDirectoryHandleCreationFailureCleansDirectoryAndEvidence() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-handle-fail-\(UUID().uuidString)")
+            .appending(path: "arktrace-owner-handle-fail-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         do {
             _ = try await TraceContentAddressedCache.createOwnedDirectory(
@@ -4105,14 +4075,14 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(contents, [".owners"])
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: root.appendingPathComponent(".owners").path
+                atPath: root.appending(path: ".owners").path
             ).isEmpty
         )
     }
 
     func testOwnedDirectoryIdentityFailureDoesNotDeletePathReplacement() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-identity-swap-\(UUID().uuidString)")
+            .appending(path: "arktrace-owner-identity-swap-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         let originalPath = URLRecorder()
         do {
@@ -4131,7 +4101,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: replacement.path))
         XCTAssertEqual(
             try String(
-                contentsOf: replacement.appendingPathComponent("marker"),
+                contentsOf: replacement.appending(path: "marker"),
                 encoding: .utf8
             ),
             "replacement"
@@ -4139,22 +4109,19 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertFalse(
             FileManager.default.fileExists(
                 atPath: replacement.deletingLastPathComponent()
-                    .appendingPathComponent(
-                        ".displaced-\(replacement.lastPathComponent)",
-                        isDirectory: true
-                    ).path
+                    .appending(path: ".displaced-\(replacement.lastPathComponent)", directoryHint: .isDirectory).path
             )
         )
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: root.appendingPathComponent(".owners").path
+                atPath: root.appending(path: ".owners").path
             ).isEmpty
         )
     }
 
     func testInjectedInitialDirectoryOpenFailureRetainsBoundedCreatingEvidence() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-unbound-\(UUID().uuidString)")
+            .appending(path: "arktrace-owner-unbound-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         do {
             _ = try await TraceContentAddressedCache.createOwnedDirectory(
@@ -4171,7 +4138,7 @@ final class ParserIntegrationTests: XCTestCase {
             ).first { $0.lastPathComponent.hasPrefix("session-") }
         )
         XCTAssertTrue(FileManager.default.fileExists(atPath: residual.path))
-        let ownersRoot = root.appendingPathComponent(".owners", isDirectory: true)
+        let ownersRoot = root.appending(path: ".owners", directoryHint: .isDirectory)
         let owners = try FileManager.default.contentsOfDirectory(
             at: ownersRoot,
             includingPropertiesForKeys: nil
@@ -4193,7 +4160,7 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testFirstReentrantDirectoryHookRunsAfterIdentityBinding() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-bound-swap-\(UUID().uuidString)")
+            .appending(path: "arktrace-owner-bound-swap-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         let publicPath = URLRecorder()
         let directory = try await TraceContentAddressedCache.createOwnedDirectory(
@@ -4208,7 +4175,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertNotEqual(directory.url, replacement)
         XCTAssertTrue(
             FileManager.default.fileExists(
-                atPath: replacement.appendingPathComponent("marker").path
+                atPath: replacement.appending(path: "marker").path
             )
         )
         XCTAssertTrue(FileManager.default.fileExists(atPath: directory.url.path))
@@ -4219,14 +4186,14 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.url.path))
         XCTAssertTrue(
             FileManager.default.fileExists(
-                atPath: replacement.appendingPathComponent("marker").path
+                atPath: replacement.appending(path: "marker").path
             )
         )
     }
 
     func testOwnedDirectoryMkdirEEXISTNeverClaimsForeignDirectory() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-mkdir-race-\(UUID().uuidString)")
+            .appending(path: "arktrace-owner-mkdir-race-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         let foreign = URLRecorder()
         do {
@@ -4240,7 +4207,7 @@ final class ParserIntegrationTests: XCTestCase {
                         withIntermediateDirectories: false
                     )
                     try Data("foreign".utf8).write(
-                        to: target.appendingPathComponent("marker")
+                        to: target.appending(path: "marker")
                     )
                 }
             )
@@ -4248,12 +4215,12 @@ final class ParserIntegrationTests: XCTestCase {
         } catch {}
         let target = try XCTUnwrap(foreign.snapshot())
         XCTAssertEqual(
-            try String(contentsOf: target.appendingPathComponent("marker")),
+            try String(contentsOf: target.appending(path: "marker")),
             "foreign"
         )
         XCTAssertTrue(
             try FileManager.default.contentsOfDirectory(
-                atPath: root.appendingPathComponent(".owners").path
+                atPath: root.appending(path: ".owners").path
             ).isEmpty
         )
     }
@@ -4261,9 +4228,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheLeaseCoversHitValidationThroughReadyHandoff() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-hit-lease-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-hit-lease-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -4316,9 +4283,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheLeaseCoversMissPromotionThroughReadyHandoff() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-miss-lease-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-miss-lease-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let handoff = PromotionBarrier()
         let parser = CountingParser(
@@ -4368,9 +4335,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheRollbackProbeFailureOverridesCancellationWithoutPaths() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-probe-fail-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let cache = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-probe-fail-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let cache = root.appending(path: "cache", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let barrier = PromotionBarrier()
         let task = Task {
@@ -4403,7 +4370,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testEphemeralSessionCloseRemovesReadyDatabase() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-ephemeral-close-\(UUID().uuidString)")
+            .appending(path: "arktrace-ephemeral-close-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let session = try await TraceSession.open(
             source: fixture,
@@ -4425,8 +4392,8 @@ final class ParserIntegrationTests: XCTestCase {
     func testEphemeralReadyHandoffRejectsDirectoryAndRepositoryABA() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-ephemeral-handoff-aba-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-ephemeral-handoff-aba-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let publicPath = URLRecorder()
         let originalSibling = URLRecorder()
@@ -4443,10 +4410,7 @@ final class ParserIntegrationTests: XCTestCase {
                                 includingPropertiesForKeys: nil
                             ).first { $0.lastPathComponent.hasPrefix("session-") }
                         )
-                        let sibling = staging.appendingPathComponent(
-                            ".ephemeral-original-\(UUID().uuidString)",
-                            isDirectory: true
-                        )
+                        let sibling = staging.appending(path: ".ephemeral-original-\(UUID().uuidString)", directoryHint: .isDirectory)
                         try FileManager.default.moveItem(at: entry, to: sibling)
                         try FileManager.default.copyItem(at: sibling, to: entry)
                         publicPath.record(entry)
@@ -4474,7 +4438,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testEphemeralCloseFailureRetainsOwnershipForSerializedRetry() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-ephemeral-close-retry-\(UUID().uuidString)")
+            .appending(path: "arktrace-ephemeral-close-retry-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let probe = BlockingOneShotProbeFailure()
         let session = try await TraceSession.open(
@@ -4512,9 +4476,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testEphemeralStagingRootSymlinkIsRejectedWithoutWriteThrough() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-ephemeral-symlink-\(UUID().uuidString)")
-        let victim = root.appendingPathComponent("victim", isDirectory: true)
-        let stagingLink = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-ephemeral-symlink-\(UUID().uuidString)")
+        let victim = root.appending(path: "victim", directoryHint: .isDirectory)
+        let stagingLink = root.appending(path: "staging", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: victim, withIntermediateDirectories: true)
         try FileManager.default.createSymbolicLink(at: stagingLink, withDestinationURL: victim)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -4537,7 +4501,7 @@ final class ParserIntegrationTests: XCTestCase {
     func testEphemeralCancellationCleanupFailureOverridesCancelled() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let staging = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-ephemeral-cleanup-fail-\(UUID().uuidString)")
+            .appending(path: "arktrace-ephemeral-cleanup-fail-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
         let barrier = CancellationBarrier()
         let task = Task {
@@ -4572,10 +4536,10 @@ final class ParserIntegrationTests: XCTestCase {
     func testCacheRootSymlinkIsRejectedWithoutWritingThroughIt() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cache-symlink-\(UUID().uuidString)")
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
-        let victim = root.appendingPathComponent("victim", isDirectory: true)
-        let cacheLink = root.appendingPathComponent("cache", isDirectory: true)
+            .appending(path: "arktrace-cache-symlink-\(UUID().uuidString)")
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
+        let victim = root.appending(path: "victim", directoryHint: .isDirectory)
+        let cacheLink = root.appending(path: "cache", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: victim, withIntermediateDirectories: true)
         try FileManager.default.createSymbolicLink(at: cacheLink, withDestinationURL: victim)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -4601,9 +4565,9 @@ final class ParserIntegrationTests: XCTestCase {
         let (binary, fixture) = try requireCacheEnvironment()
         let original = try sha256AndSize(at: fixture)
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-maintenance-\(UUID().uuidString)")
-        let cache = root.appendingPathComponent("traces", isDirectory: true)
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-maintenance-\(UUID().uuidString)")
+        let cache = root.appending(path: "traces", directoryHint: .isDirectory)
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let session = try await TraceSession.open(
             source: fixture,
@@ -4638,9 +4602,9 @@ final class ParserIntegrationTests: XCTestCase {
     func testBuildingEvidenceBoundToReadyEntryUsesReadyLeaseTransaction() async throws {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-building-ready-\(UUID().uuidString)")
-        let cache = root.appendingPathComponent("traces", isDirectory: true)
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-building-ready-\(UUID().uuidString)")
+        let cache = root.appending(path: "traces", directoryHint: .isDirectory)
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let session = try await TraceSession.openCached(
             source: fixture,
@@ -4649,7 +4613,7 @@ final class ParserIntegrationTests: XCTestCase {
             cacheDirectory: cache
         )
         let entry = await session.parsed.databaseURL.deletingLastPathComponent()
-        let ownerRoot = cache.appendingPathComponent(".staging/.owners", isDirectory: true)
+        let ownerRoot = cache.appending(path: ".staging/.owners", directoryHint: .isDirectory)
         let evidenceURLs = try FileManager.default.contentsOfDirectory(
             at: ownerRoot,
             includingPropertiesForKeys: nil
@@ -4681,16 +4645,14 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testCacheMaintenanceEvictsLeastRecentlyAccessedReadyEntryFirst() async throws {
         let (binary, oldFixture) = try requireCacheEnvironment()
-        let newFixture = Self.repoRoot.appendingPathComponent(
-            "Fixtures/traces/hiprofiler_data_ability.htrace"
-        )
+        let newFixture = Self.repoRoot.appending(path: "Fixtures/traces/hiprofiler_data_ability.htrace")
         guard FileManager.default.isReadableFile(atPath: newFixture.path) else {
             throw XCTSkip("second LRU fixture is unavailable")
         }
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-lru-\(UUID().uuidString)")
-        let cache = root.appendingPathComponent("traces", isDirectory: true)
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-lru-\(UUID().uuidString)")
+        let cache = root.appending(path: "traces", directoryHint: .isDirectory)
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = try TraceStreamerProcessParser(executableURL: binary)
         let older = try await TraceSession.openCached(
@@ -4738,20 +4700,20 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testCacheMaintenanceRecoversOnlyBoundStaleOwnersAndOrphanMarkers() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-owner-recovery-\(UUID().uuidString)")
-        let cache = root.appendingPathComponent("traces", isDirectory: true)
-        let staging = root.appendingPathComponent("staging", isDirectory: true)
+            .appending(path: "arktrace-owner-recovery-\(UUID().uuidString)")
+        let cache = root.appending(path: "traces", directoryHint: .isDirectory)
+        let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         var stale: TraceOwnedDirectory? = try await TraceContentAddressedCache
             .createOwnedDirectory(root: staging, prefix: "session-")
         let staleURL = try XCTUnwrap(stale).url
         stale = nil
 
-        let owners = staging.appendingPathComponent(".owners", isDirectory: true)
+        let owners = staging.appending(path: ".owners", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: owners, withIntermediateDirectories: true)
         let creatingBase = "session-unbound"
-        let creatingMarker = owners.appendingPathComponent("\(creatingBase).lock")
-        let creatingEvidence = owners.appendingPathComponent("\(creatingBase).json")
+        let creatingMarker = owners.appending(path: "\(creatingBase).lock")
+        let creatingEvidence = owners.appending(path: "\(creatingBase).json")
         FileManager.default.createFile(atPath: creatingMarker.path, contents: Data())
         let evidenceObject: [String: Any] = [
             "formatVersion": 1,
@@ -4762,7 +4724,7 @@ final class ParserIntegrationTests: XCTestCase {
             withJSONObject: evidenceObject,
             options: [.sortedKeys]
         ).write(to: creatingEvidence)
-        let orphanMarker = owners.appendingPathComponent("session-orphan.lock")
+        let orphanMarker = owners.appending(path: "session-orphan.lock")
         FileManager.default.createFile(atPath: orphanMarker.path, contents: Data())
 
         let maintenance = try TraceCacheMaintenance(
@@ -4782,18 +4744,18 @@ final class ParserIntegrationTests: XCTestCase {
         let home = FileManager.default.homeDirectoryForCurrentUser
         XCTAssertThrowsError(
             try TraceCacheMaintenance(
-                cacheDirectory: home.appendingPathComponent("traces"),
-                stagingDirectory: home.appendingPathComponent("staging")
+                cacheDirectory: home.appending(path: "traces"),
+                stagingDirectory: home.appending(path: "staging")
             )
         ) { error in
             XCTAssertEqual((error as? ArkTraceError)?.code, .invalidArgument)
         }
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-maintenance-root-\(UUID().uuidString)")
+            .appending(path: "arktrace-maintenance-root-\(UUID().uuidString)")
         XCTAssertThrowsError(
             try TraceCacheMaintenance(
-                cacheDirectory: root.appendingPathComponent("child/../traces"),
-                stagingDirectory: root.appendingPathComponent("staging")
+                cacheDirectory: root.appending(path: "child/../traces"),
+                stagingDirectory: root.appending(path: "staging")
             )
         )
     }
@@ -4826,5 +4788,17 @@ private final class ChunkCounter: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         return count
+    }
+}
+
+/// Encodes a summary with the same canonical configuration the production
+/// machine envelope uses ([.sortedKeys, .withoutEscapingSlashes]); the
+/// standalone Analysis encoder it replaces asserted bytes no production path
+/// ever emitted.
+private enum SummaryCanonicalTestEncoder {
+    static func encode(_ summary: TraceSummary) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return try encoder.encode(summary)
     }
 }

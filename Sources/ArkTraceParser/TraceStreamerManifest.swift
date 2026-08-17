@@ -6,7 +6,7 @@ import Foundation
 /// The identity-bearing fields are required and are validated before the
 /// executable can be launched. The remaining fields preserve the build
 /// evidence emitted by `scripts/build_trace_streamer.sh`.
-public struct TraceStreamerManifest: Codable, Equatable, Sendable {
+package struct TraceStreamerManifest: Codable, Equatable, Sendable {
     public let name: String
     public let upstreamRepository: String
     public let upstreamRevision: String
@@ -87,13 +87,7 @@ public struct TraceStreamerManifest: Codable, Equatable, Sendable {
     }
 
     private static func requireHex(_ value: String, field: String, count: Int) throws {
-        let scalars = value.unicodeScalars
-        guard scalars.count == count,
-            scalars.allSatisfy({
-                (UnicodeScalar("0").value...UnicodeScalar("9").value).contains($0.value)
-                    || (UnicodeScalar("a").value...UnicodeScalar("f").value).contains($0.value)
-            })
-        else {
+        guard ArkTraceIdentityGrammar.isLowercaseHex(value, count: count) else {
             throw manifestError(reason: "invalidField", field: field)
         }
     }
@@ -197,7 +191,7 @@ enum TraceStreamerBinaryInspector {
 /// Resolves only the deployment locations reviewed in DESIGN §8.2. Candidate
 /// selection never consults PATH, and an invalid higher-priority candidate is
 /// returned as an error instead of falling through to another binary.
-public struct TraceStreamerResolver: Sendable {
+package struct TraceStreamerResolver: Sendable {
     public let appBundleURL: URL
     public let cliExecutableURL: URL?
 
@@ -241,26 +235,26 @@ public struct TraceStreamerResolver: Sendable {
 
     public static func appBundleExecutableURL(bundleURL: URL) -> URL {
         bundleURL
-            .appendingPathComponent("Contents", isDirectory: true)
-            .appendingPathComponent("Helpers", isDirectory: true)
-            .appendingPathComponent("trace_streamer", isDirectory: false)
+            .appending(path: "Contents", directoryHint: .isDirectory)
+            .appending(path: "Helpers", directoryHint: .isDirectory)
+            .appending(path: "trace_streamer", directoryHint: .notDirectory)
     }
 
     public static func appBundleManifestURL(bundleURL: URL) -> URL {
         bundleURL
-            .appendingPathComponent("Contents", isDirectory: true)
-            .appendingPathComponent("Resources", isDirectory: true)
-            .appendingPathComponent("TraceStreamer", isDirectory: true)
-            .appendingPathComponent("manifest.json", isDirectory: false)
+            .appending(path: "Contents", directoryHint: .isDirectory)
+            .appending(path: "Resources", directoryHint: .isDirectory)
+            .appending(path: "TraceStreamer", directoryHint: .isDirectory)
+            .appending(path: "manifest.json", directoryHint: .notDirectory)
     }
 
     public static func cliLibexecURL(cliExecutableURL: URL) -> URL? {
         let binDirectory = cliExecutableURL.deletingLastPathComponent()
         guard binDirectory.lastPathComponent == "bin" else { return nil }
         return binDirectory.deletingLastPathComponent()
-            .appendingPathComponent("libexec", isDirectory: true)
-            .appendingPathComponent("arktrace", isDirectory: true)
-            .appendingPathComponent("trace_streamer", isDirectory: false)
+            .appending(path: "libexec", directoryHint: .isDirectory)
+            .appending(path: "arktrace", directoryHint: .isDirectory)
+            .appending(path: "trace_streamer", directoryHint: .notDirectory)
     }
 
     /// Every location this resolver will ever consider, in resolution order.

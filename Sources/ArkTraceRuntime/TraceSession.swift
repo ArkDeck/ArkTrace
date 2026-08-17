@@ -3,6 +3,7 @@ import ArkTraceParser
 import ArkTraceStore
 import Darwin
 import Foundation
+import Synchronization
 
 /// One loaded trace, shared by App and CLI (DESIGN §10).
 ///
@@ -10,28 +11,30 @@ import Foundation
 /// session directory. Cancellation follows structured concurrency: cancelling
 /// the calling task terminates the parser and never leaves a public partial
 /// cache entry.
-public actor TraceSession {
-    private final class ProgressRelay: @unchecked Sendable {
-        private let lock = NSLock()
+package actor TraceSession {
+    private final class ProgressRelay: Sendable {
+        private struct State {
+            var last: TraceLoadingStage?
+            var terminal = false
+        }
+
         private let observer: TraceProgressHandler?
-        private var last: TraceLoadingStage?
-        private var terminal = false
+        private let state = Mutex(State())
 
         init(observer: TraceProgressHandler?) {
             self.observer = observer
         }
 
         func emit(_ stage: TraceLoadingStage) {
-            lock.lock()
-            guard !terminal, last != stage else {
-                lock.unlock()
-                return
+            let shouldEmit = state.withLock { state in
+                guard !state.terminal, state.last != stage else { return false }
+                state.last = stage
+                state.terminal = stage == .ready || stage == .failed || stage == .cancelled
+                return true
             }
-            last = stage
-            terminal = stage == .ready || stage == .failed || stage == .cancelled
-            let observer = observer
-            lock.unlock()
-            observer?(stage)
+            // The observer runs outside the lock so a re-entrant progress
+            // callback can never deadlock the relay.
+            if shouldEmit { observer?(stage) }
         }
     }
 
@@ -196,7 +199,7 @@ public actor TraceSession {
             )
             sessionDirectory = directory
             try Task.checkCancellation()
-            let databaseURL = directory.url.appendingPathComponent("trace.sqlite")
+            let databaseURL = directory.url.appending(path: "trace.sqlite")
             cancellationStage = .parsing
             let parsed = try await parser.parse(
                 source: source,
@@ -363,30 +366,6 @@ public actor TraceSession {
         return (sidecar, snapshot.fileIdentity)
     }
 
-    /// Delegates to the one reviewed bounded reader in Core. Cancellation is
-    /// rethrown so a cancelled read is not reported as an invalid sidecar.
-    private static func readBoundedRegularFileSnapshot(
-        at url: URL,
-        maximumByteCount: Int
-    ) throws -> (data: Data, fileIdentity: TraceDatabaseFileIdentity)? {
-        do {
-            let contents = try ArkTraceBoundedRegularFile.readContents(
-                at: url,
-                maximumByteCount: maximumByteCount
-            )
-            return (
-                contents.data,
-                TraceDatabaseFileIdentity(
-                    device: contents.device,
-                    inode: contents.inode
-                )
-            )
-        } catch is CancellationError {
-            throw CancellationError()
-        } catch {
-            return nil
-        }
-    }
 
     private static func cancelled(stage: ArkTraceError.Stage) -> ArkTraceError {
         ArkTraceError(

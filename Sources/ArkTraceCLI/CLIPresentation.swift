@@ -18,12 +18,12 @@ struct CLIHumanDoctorDetails: Sendable {
     let schemaAdapterVersion: String
 }
 
-public struct CLIHumanRenderer: Sendable {
+package struct CLIHumanRenderer: Sendable {
     private static let maximumTerminalFieldBytes = 4_096
 
-    public init() {}
+    package init() {}
 
-    public func help() -> Data {
+    package func help() -> Data {
         Data(
             ("""
             Usage: arktrace [global-options] <command> [command-options]
@@ -49,11 +49,11 @@ public struct CLIHumanRenderer: Sendable {
         )
     }
 
-    public func version() -> Data {
+    package func version() -> Data {
         Data("\(ArkTraceCLITool.name) \(ArkTraceCLITool.version)\n".utf8)
     }
 
-    public func error(_ error: ArkTraceError) -> Data {
+    package func error(_ error: ArkTraceError) -> Data {
         Data("error: \(error.code.rawValue): \(error.message)\n".utf8)
     }
 
@@ -341,16 +341,13 @@ public struct CLIHumanRenderer: Sendable {
 /// Encoding policy is separate from human rendering. P2-T04 supplies the
 /// versioned envelope models; this utility already fixes deterministic key
 /// ordering and optional pretty formatting without writing to stdout itself.
-public struct CLIMachineEncoder: Sendable {
-    public init() {}
+package struct CLIMachineEncoder: Sendable {
+    package init() {}
 
-    public func encode<T: Encodable>(_ value: T, pretty: Bool) throws -> Data {
-        try encode(value, pretty: pretty, maximumBytes: Int.max)
-    }
 
     /// Fully materializes and validates one canonical UTF-8 document before
     /// the caller attempts stdout. The byte budget includes the final newline.
-    public func encode<T: Encodable>(
+    package func encode<T: Encodable>(
         _ value: T,
         pretty: Bool,
         maximumBytes: Int
@@ -369,7 +366,7 @@ public struct CLIMachineEncoder: Sendable {
     /// enforced by typed envelope/result fields plus forbidden semantic keys;
     /// arbitrary result strings are data and are never guessed to be paths or
     /// SQL from their spelling.
-    public func validateDocument(_ data: Data, maximumBytes: Int) throws {
+    package func validateDocument(_ data: Data, maximumBytes: Int) throws {
         guard maximumBytes >= 0, data.count <= maximumBytes else {
             throw ArkTraceError(
                 code: .outputLimitExceeded,
@@ -434,31 +431,31 @@ public struct CLIMachineEncoder: Sendable {
     }
 }
 
-public protocol CLIOutputWriting: Sendable {
+package protocol CLIOutputWriting: Sendable {
     func writeStdout(_ data: Data) throws
     func writeStderr(_ data: Data) throws
 }
 
-public struct CLIFileOutputWriter: CLIOutputWriting {
-    public init() {}
+package struct CLIFileOutputWriter: CLIOutputWriting {
+    package init() {}
 
-    public func writeStdout(_ data: Data) throws {
+    package func writeStdout(_ data: Data) throws {
         try FileHandle.standardOutput.write(contentsOf: data)
     }
 
-    public func writeStderr(_ data: Data) throws {
+    package func writeStderr(_ data: Data) throws {
         try FileHandle.standardError.write(contentsOf: data)
     }
 }
 
-public struct CLICommandOutput: Sendable {
+package struct CLICommandOutput: Sendable {
     /// Human-only presentation bytes. In `--json` mode the application ignores
     /// these bytes and encodes `machinePayload` itself.
-    public let stdout: Data
-    public let stderr: Data
-    public let machinePayload: CLIMachineCommandPayload?
+    package let stdout: Data
+    package let stderr: Data
+    package let machinePayload: CLIMachineCommandPayload?
 
-    public init(
+    package init(
         stdout: Data = Data(),
         stderr: Data = Data()
     ) {
@@ -478,14 +475,14 @@ public struct CLICommandOutput: Sendable {
     }
 }
 
-public protocol CLICommandExecuting: Sendable {
+package protocol CLICommandExecuting: Sendable {
     func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput
 }
 
-public struct CLIUnavailableCommandExecutor: CLICommandExecuting {
-    public init() {}
+package struct CLIUnavailableCommandExecutor: CLICommandExecuting {
+    package init() {}
 
-    public func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
+    package func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
         throw ArkTraceError(
             code: .analysisUnsupported,
             stage: .analyzing,
@@ -494,8 +491,8 @@ public struct CLIUnavailableCommandExecutor: CLICommandExecuting {
     }
 }
 
-public enum CLIExitStatus {
-    public static func status(for error: ArkTraceError) -> Int32 {
+package enum CLIExitStatus {
+    package static func status(for error: ArkTraceError) -> Int32 {
         switch error.code {
         case .invalidArgument:
             2

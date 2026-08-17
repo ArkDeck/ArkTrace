@@ -7,7 +7,11 @@ reverified on 2026-08-15. The large-trace Gate 6/7 and Phase 4 final gate are cl
 
 ## Target and signing
 
-- macOS 14 or later, Apple silicon (`arm64`) first release;
+- macOS 26 or later, Apple silicon (`arm64`) — current baseline. Historical
+  signed candidates in `Fixtures/release-evidence/` were produced against the
+  earlier macOS 14 baseline and are kept as recorded evidence, not as proof
+  that the macOS 26 baseline has shipped; the next signed candidate must be
+  built, notarized and verified against 26.0;
 - direct Developer ID distribution and notarization; App Store/TestFlight and
   Intel are explicitly deferred until the child-process and performance
   evidence is repeated for those channels;

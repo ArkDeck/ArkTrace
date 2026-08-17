@@ -1,4 +1,4 @@
-public enum TraceDensitySource: Hashable, Codable, Sendable {
+package enum TraceDensitySource: Hashable, Codable, Sendable {
     case cpu(Int64)
     case threadState(ThreadKey)
     case namedSlice(ThreadKey?)
@@ -6,7 +6,7 @@ public enum TraceDensitySource: Hashable, Codable, Sendable {
     case processCounter(filterID: Int64, processKey: ProcessKey?)
 }
 
-public struct TraceDensityQuery: Sendable {
+package struct TraceDensityQuery: Sendable {
     public let range: TraceTimeRange
     public let source: TraceDensitySource
     public let bucketCount: Int
@@ -60,7 +60,7 @@ public struct TraceDensityBucket: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceDensityResult: Sendable {
+package struct TraceDensityResult: Sendable {
     public let buckets: [TraceDensityBucket]
     public let capabilityAvailable: Bool
     public let dataQuality: TraceDataQuality

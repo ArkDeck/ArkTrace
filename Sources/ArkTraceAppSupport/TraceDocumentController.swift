@@ -5,6 +5,21 @@ import ArkTraceRendering
 import ArkTraceRuntime
 import Foundation
 import Observation
+import OSLog
+
+/// Points-of-interest signposts for the app's cold-start and open chain.
+/// Signposting writes to the in-memory os_log buffer only; it must never add
+/// file or database I/O of its own (AT-PERF gate).
+package enum TraceAppSignposts {
+    public static let poster = OSSignposter(
+        subsystem: "com.arktrace.ArkTrace",
+        category: .pointsOfInterest
+    )
+
+    public static func event(_ name: StaticString) {
+        poster.emitEvent(name)
+    }
+}
 
 public enum TraceDocumentPhase: Hashable, Sendable {
     case idle
@@ -274,8 +289,15 @@ public final class TraceDocumentController {
     public private(set) var rangeAnalysis: TraceRangeAnalysis?
     public private(set) var searchResults = TraceSearchResults(items: [], truncated: false)
     public private(set) var isSearching = false
+    /// Live text of the toolbar search field. Owned here (not as view-local
+    /// `@State`) so only the views that actually read it — the search field
+    /// and the sidebar's results section — re-evaluate per keystroke, while
+    /// the root layout and timeline chrome stay untouched.
+    public var searchFieldText = ""
     public private(set) var cacheInventory: TraceCacheInventory?
-    public private(set) var cacheMaintenanceReport: TraceCacheMaintenanceReport?
+    /// The app never displays the raw report; it is observable state for the
+    /// package (tests assert maintenance ran), so it stays off the public API.
+    package private(set) var cacheMaintenanceReport: TraceCacheMaintenanceReport?
     public private(set) var recentDocuments: [TraceRecentDocument] = []
     public private(set) var errorPresentation: TraceAppErrorPresentation?
     public private(set) var cacheHit = false
@@ -298,15 +320,15 @@ public final class TraceDocumentController {
     @ObservationIgnored private var catalogThreads: [TraceThread] = []
     @ObservationIgnored private var pendingSelectionKey: EventKey?
     @ObservationIgnored private var announcementRevision: UInt64 = 0
+    @ObservationIgnored private var firstWindowMarked = false
+    @ObservationIgnored private var timelineDisplayMarked = false
 
     public convenience init(
         bundleURL: URL = Bundle.main.bundleURL,
         recentStore: TraceRecentDocumentStore = TraceRecentDocumentStore()
     ) {
         let cache = TraceCacheDefaults.rootDirectory
-        let staging = cache.deletingLastPathComponent().appendingPathComponent(
-            "staging", isDirectory: true
-        )
+        let staging = cache.deletingLastPathComponent().appending(path: "staging", directoryHint: .isDirectory)
         let maintenance = try? TraceCacheMaintenance(
             cacheDirectory: cache,
             stagingDirectory: staging
@@ -342,6 +364,22 @@ public final class TraceDocumentController {
         self.maintenance = maintenance
         self.opener = opener
         recentDocuments = recentStore.documents()
+        TraceAppSignposts.event("AppModelReady")
+    }
+
+    /// Idempotent first-window mark, called from the root view's `onAppear`.
+    public func markFirstWindowAppeared() {
+        guard !firstWindowMarked else { return }
+        firstWindowMarked = true
+        TraceAppSignposts.event("FirstWindowAppeared")
+    }
+
+    /// Idempotent per-document mark, called when the timeline canvas for the
+    /// current document first appears on screen.
+    public func markTimelineDisplayed() {
+        guard !timelineDisplayMarked else { return }
+        timelineDisplayMarked = true
+        TraceAppSignposts.event("FirstTimelineDisplayed")
     }
 
     deinit {
@@ -357,10 +395,12 @@ public final class TraceDocumentController {
     }
 
     public func open(_ url: URL) {
+        TraceAppSignposts.event("OpenRequested")
         cancelOutstandingWork()
         documentGeneration &+= 1
         let generation = documentGeneration
         clearViewerStateForReplacement()
+        timelineDisplayMarked = false
         sourceURL = url.standardizedFileURL
         phase = .loading(.preparing)
         errorPresentation = nil
@@ -629,12 +669,14 @@ public final class TraceDocumentController {
                 }
             }
             opened = try await opener(url, progress)
+            TraceAppSignposts.event("CacheParserReady")
             guard generation == documentGeneration, !Task.isCancelled else {
                 if let opened { try? await opened.close() }
                 return
             }
             guard let opened else { return }
             let catalog = try await Self.loadCatalog(repository: opened.repository)
+            TraceAppSignposts.event("CatalogReady")
             guard generation == documentGeneration, !Task.isCancelled else {
                 try? await opened.close()
                 return
@@ -1015,15 +1057,34 @@ public final class TraceDocumentController {
             )
         }
         let range = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
-        let threads = try await repository.threads(
-            ThreadQuery(limit: 1_000, deadline: deadline)
+        // After metadata, the thread directory, CPU slices and counter series
+        // are mutually independent read-only queries. One repository event
+        // batch runs them concurrently through the Store's own
+        // clone-and-verify connection path — identity checks and per-query
+        // limits are exactly those of the sequential form — under one shared
+        // deadline. Assembly below keeps the deterministic group order.
+        let wantsCpuSlices = metadata.capabilities.cpuScheduling
+        let wantsCounters = metadata.capabilities.cpuCounters
+            || metadata.capabilities.processCounters
+        let batch = try TraceRepositoryEventBatch(
+            cpuSlices: wantsCpuSlices
+                ? [CpuSliceQuery(range: range, limit: 20_000, deadline: deadline)] : [],
+            counters: wantsCounters
+                ? [CounterQuery(range: range, limit: 2_000, deadline: deadline)] : [],
+            threads: [ThreadQuery(limit: 1_000, deadline: deadline)]
         )
+        let batchResult = try await repository.eventBatch(batch)
+        guard let threads = batchResult.threads.first else {
+            throw ArkTraceError(
+                code: .internalError,
+                stage: .querying,
+                message: "Catalog batch omitted the thread directory"
+            )
+        }
         var groups: [TraceTrackGroup] = []
 
-        let cpuPage = metadata.capabilities.cpuScheduling
-            ? try await repository.cpuSlices(
-                CpuSliceQuery(range: range, limit: 20_000, deadline: deadline)
-            )
+        let cpuPage = wantsCpuSlices
+            ? (batchResult.cpuSlices.first ?? .unavailable)
             : .unavailable
         let cpus = Array(Set(cpuPage.items.map(\.cpu))).sorted()
         groups.append(
@@ -1080,11 +1141,8 @@ public final class TraceDocumentController {
             )
         )
 
-        let counterPage = metadata.capabilities.cpuCounters
-            || metadata.capabilities.processCounters
-            ? try await repository.counters(
-                CounterQuery(range: range, limit: 2_000, deadline: deadline)
-            )
+        let counterPage = wantsCounters
+            ? (batchResult.counters.first ?? .unavailable)
             : .unavailable
         let cpuSeries = counterPage.items.filter { $0.scope == .cpu }
         let processSeries = counterPage.items.filter { $0.scope == .process }

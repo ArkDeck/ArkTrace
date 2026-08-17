@@ -1,5 +1,6 @@
 import ArkTraceCore
 import Foundation
+import Synchronization
 
 private struct RepositoryValidationCacheKey: Hashable {
     let file: TraceDatabaseFileSnapshot
@@ -65,29 +66,30 @@ struct PreparedReadySchema: Sendable {
 /// and must pass quick_check, full schema validation, the Ready index contract
 /// and optional-column introspection again. The bounded memo is never
 /// persisted across launches.
-private final class RepositoryValidationCache: @unchecked Sendable {
-    private let lock = NSLock()
-    private var values: [RepositoryValidationCacheKey: PreparedReadySchema] = [:]
-    private var order: [RepositoryValidationCacheKey] = []
+private final class RepositoryValidationCache: Sendable {
+    private struct State {
+        var values: [RepositoryValidationCacheKey: PreparedReadySchema] = [:]
+        var order: [RepositoryValidationCacheKey] = []
+    }
+
+    private let state = Mutex(State())
     private let maximumEntries = 64
 
     func value(for key: RepositoryValidationCacheKey) -> PreparedReadySchema? {
-        lock.lock()
-        defer { lock.unlock() }
-        return values[key]
+        state.withLock { $0.values[key] }
     }
 
     func insert(
         _ prepared: PreparedReadySchema,
         for key: RepositoryValidationCacheKey
     ) {
-        lock.lock()
-        defer { lock.unlock() }
-        if values.updateValue(prepared, forKey: key) == nil {
-            order.append(key)
-        }
-        while order.count > maximumEntries {
-            values.removeValue(forKey: order.removeFirst())
+        state.withLock { state in
+            if state.values.updateValue(prepared, forKey: key) == nil {
+                state.order.append(key)
+            }
+            while state.order.count > maximumEntries {
+                state.values.removeValue(forKey: state.order.removeFirst())
+            }
         }
     }
 }
@@ -100,6 +102,7 @@ private enum RepositoryEventBatchItem: Sendable {
     case slice(Int, TraceEventPage<TraceSlice>)
     case counter(Int, TraceEventPage<CounterSeries>)
     case density(Int, TraceDensityResult)
+    case threadDirectory(Int, BoundedPage<TraceThread>)
 }
 
 enum TracePerformanceQuery: Sendable {
@@ -113,7 +116,7 @@ enum TracePerformanceQuery: Sendable {
 
 /// What the repository knows about the original trace file; the exported
 /// database alone cannot provide this (and must not, see AT-PARSE-004).
-public struct TraceSourceDescriptor: Sendable {
+package struct TraceSourceDescriptor: Sendable {
     public let traceSHA256: String
     public let sourceByteCount: Int64
     public let sourceFormat: String?
@@ -131,7 +134,7 @@ public struct TraceSourceDescriptor: Sendable {
 /// is bound, never interpolated (AT-DB-006); directory queries are bounded
 /// with limit+1 truncation detection (AT-QUERY-002); public times are
 /// trace-relative Int64 nanoseconds (AT-TIME-001/002).
-public actor SQLiteTraceRepository: TraceRepositoryProtocol {
+package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     public nonisolated let databaseFileIdentity: TraceDatabaseFileIdentity
     private let databaseURL: URL
     private let expectedPreparation: TraceDatabasePreparationResult?
@@ -298,6 +301,9 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var densities = Array<TraceDensityResult?>(
             repeating: nil, count: batch.densities.count
         )
+        var threadDirectories = Array<BoundedPage<TraceThread>?>(
+            repeating: nil, count: batch.threads.count
+        )
 
         try await withThrowingTaskGroup(of: RepositoryEventBatchItem.self) { group in
             func clone() throws -> SQLiteTraceRepository {
@@ -341,6 +347,11 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     .density(index, try await clone().density(query))
                 }
             }
+            for (index, query) in batch.threads.enumerated() {
+                group.addTask {
+                    .threadDirectory(index, try await clone().threads(query))
+                }
+            }
             for try await item in group {
                 switch item {
                 case .cpu(let index, let page): cpu[index] = page
@@ -348,12 +359,14 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 case .slice(let index, let page): slices[index] = page
                 case .counter(let index, let page): counters[index] = page
                 case .density(let index, let result): densities[index] = result
+                case .threadDirectory(let index, let page): threadDirectories[index] = page
                 }
             }
         }
         guard cpu.allSatisfy({ $0 != nil }), states.allSatisfy({ $0 != nil }),
             slices.allSatisfy({ $0 != nil }), counters.allSatisfy({ $0 != nil }),
-            densities.allSatisfy({ $0 != nil })
+            densities.allSatisfy({ $0 != nil }),
+            threadDirectories.allSatisfy({ $0 != nil })
         else {
             throw ArkTraceError(
                 code: .internalError,
@@ -366,7 +379,8 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
             threadStates: states.map { $0! },
             slices: slices.map { $0! },
             counters: counters.map { $0! },
-            densities: densities.map { $0! }
+            densities: densities.map { $0! },
+            threads: threadDirectories.map { $0! }
         )
     }
 
@@ -378,17 +392,20 @@ public actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var slices: [TraceEventPage<TraceSlice>] = []
         var counters: [TraceEventPage<CounterSeries>] = []
         var densities: [TraceDensityResult] = []
+        var threadDirectories: [BoundedPage<TraceThread>] = []
         for query in batch.cpuSlices { cpu.append(try await cpuSlices(query)) }
         for query in batch.threadStates { states.append(try await threadStates(query)) }
         for query in batch.slices { slices.append(try await self.slices(query)) }
         for query in batch.counters { counters.append(try await self.counters(query)) }
         for query in batch.densities { densities.append(try await density(query)) }
+        for query in batch.threads { threadDirectories.append(try await threads(query)) }
         return TraceRepositoryEventBatchResult(
             cpuSlices: cpu,
             threadStates: states,
             slices: slices,
             counters: counters,
-            densities: densities
+            densities: densities,
+            threads: threadDirectories
         )
     }
 

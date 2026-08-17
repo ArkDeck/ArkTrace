@@ -15,13 +15,13 @@ enum CLIResourceLocator {
     ) throws -> URL {
         var candidates: [URL] = []
         if let testingRootPath {
-            candidates.append(URL(fileURLWithPath: testingRootPath, isDirectory: true))
+            candidates.append(URL(filePath: testingRootPath, directoryHint: .isDirectory))
         }
         candidates.append(
             bundleURL
-                .appendingPathComponent("Contents", isDirectory: true)
-                .appendingPathComponent("Resources", isDirectory: true)
-                .appendingPathComponent("ArkTraceCLIResources", isDirectory: true)
+                .appending(path: "Contents", directoryHint: .isDirectory)
+                .appending(path: "Resources", directoryHint: .isDirectory)
+                .appending(path: "ArkTraceCLIResources", directoryHint: .isDirectory)
         )
         if let executableURL {
             let executableDirectory = executableURL.deletingLastPathComponent()
@@ -33,8 +33,8 @@ enum CLIResourceLocator {
                 candidates.append(
                     executableDirectory
                         .deletingLastPathComponent()
-                        .appendingPathComponent("share", isDirectory: true)
-                        .appendingPathComponent("arktrace", isDirectory: true)
+                        .appending(path: "share", directoryHint: .isDirectory)
+                        .appending(path: "arktrace", directoryHint: .isDirectory)
                 )
             }
         }

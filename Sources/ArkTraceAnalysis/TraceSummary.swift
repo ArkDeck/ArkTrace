@@ -1,7 +1,7 @@
 import ArkTraceCore
 import Foundation
 
-public enum TraceSummarySection: String, Codable, Sendable, CaseIterable {
+package enum TraceSummarySection: String, Codable, Sendable, CaseIterable {
     case cpuCount
     case processCount
     case threadCount
@@ -12,7 +12,7 @@ public enum TraceSummarySection: String, Codable, Sendable, CaseIterable {
     case eventCountBySource
 }
 
-public struct TraceSummaryRequest: Sendable {
+package struct TraceSummaryRequest: Sendable {
     public let range: TraceTimeRange?
     public let maximumRowsPerSection: Int
     public let maximumEventsPerSection: Int
@@ -62,7 +62,7 @@ public struct TraceSummaryRequest: Sendable {
 
 /// Deterministic, path-free summary reduction (AT-AN-001/009). Optional event
 /// counts represent unsupported evidence, never a guessed zero.
-public struct TraceSummary: Hashable, Codable, Sendable {
+package struct TraceSummary: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
     public let durationNs: Int64
     public let cpuCount: Int64?
@@ -158,7 +158,7 @@ public struct TraceSummary: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceSummaryEngine: Sendable {
+package struct TraceSummaryEngine: Sendable {
     private let repository: any TraceRepositoryProtocol
 
     public init(repository: any TraceRepositoryProtocol) {
@@ -376,16 +376,5 @@ public struct TraceSummaryEngine: Sendable {
             message: "Summary deadline was reached",
             retryable: true
         )
-    }
-}
-
-/// Canonical encoder for Analysis-owned result bytes. The later machine
-/// envelope may wrap these fields, but must preserve their deterministic order
-/// and integer representation (AT-JSON-002/003).
-public enum TraceSummaryJSONEncoder {
-    public static func encode(_ summary: TraceSummary) throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(summary)
     }
 }

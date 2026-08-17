@@ -583,7 +583,7 @@ def validate_info_plist(
         "CFBundlePackageType": "APPL",
         "CFBundleShortVersionString": "0.1.0",
         "CFBundleVersion": "1",
-        "LSMinimumSystemVersion": "14.0",
+        "LSMinimumSystemVersion": "26.0",
         "LSBackgroundOnly": True,
         "NSHighResolutionCapable": True,
     }

@@ -3,23 +3,23 @@ import ArkTraceCore
 import ArkTraceParser
 import Foundation
 
-public enum ArkTraceCLITool {
-    public static let name = ArkTraceProduct.commandName
-    public static let version = ArkTraceProduct.version
+package enum ArkTraceCLITool {
+    package static let name = ArkTraceProduct.commandName
+    package static let version = ArkTraceProduct.version
 }
 
-public struct CLILimits: Equatable, Sendable {
-    public static let defaultTimeoutMs: Int64 = 30_000
-    public static let defaultMaxRows = 10_000
-    public static let defaultMaxEvents = 10_000
-    public static let defaultMaxOutputBytes = 8 * 1_024 * 1_024
+package struct CLILimits: Equatable, Sendable {
+    package static let defaultTimeoutMs: Int64 = 30_000
+    package static let defaultMaxRows = 10_000
+    package static let defaultMaxEvents = 10_000
+    package static let defaultMaxOutputBytes = 8 * 1_024 * 1_024
 
-    public let timeoutMs: Int64
-    public let maxRows: Int
-    public let maxEvents: Int
-    public let maxOutputBytes: Int
+    package let timeoutMs: Int64
+    package let maxRows: Int
+    package let maxEvents: Int
+    package let maxOutputBytes: Int
 
-    public init(
+    package init(
         timeoutMs: Int64 = defaultTimeoutMs,
         maxRows: Int = defaultMaxRows,
         maxEvents: Int = defaultMaxEvents,
@@ -44,14 +44,14 @@ public struct CLILimits: Equatable, Sendable {
     }
 }
 
-public struct CLIGlobalOptions: Equatable, Sendable {
-    public let json: Bool
-    public let pretty: Bool
-    public let limits: CLILimits
-    public let traceStreamerURL: URL?
-    public let noCache: Bool
+package struct CLIGlobalOptions: Equatable, Sendable {
+    package let json: Bool
+    package let pretty: Bool
+    package let limits: CLILimits
+    package let traceStreamerURL: URL?
+    package let noCache: Bool
 
-    public init(
+    package init(
         json: Bool,
         pretty: Bool,
         limits: CLILimits,
@@ -71,14 +71,14 @@ public struct CLIGlobalOptions: Equatable, Sendable {
     /// Reuses the pinned resolver. An explicit developer path is configuration
     /// only here; TraceSession subsequently invokes async identity validation
     /// before parsing any source bytes.
-    public func resolveParser(
+    package func resolveParser(
         using resolver: TraceStreamerResolver = TraceStreamerResolver()
     ) throws -> TraceStreamerProcessParser {
         try resolver.resolve(explicitExecutableURL: traceStreamerURL)
     }
 }
 
-public enum CLICommand: Equatable, Sendable {
+package enum CLICommand: Equatable, Sendable {
     case help
     case version
     case licenses
@@ -100,13 +100,13 @@ public enum CLICommand: Equatable, Sendable {
     case analyze(trace: String, options: CLIAnalyzeOptions)
 }
 
-public struct CLIQueryOptions: Equatable, Sendable {
-    public let view: TraceAgentQueryView
-    public let range: TraceTimeRange
-    public let filters: TraceAgentQueryFilters
-    public let limit: Int
+package struct CLIQueryOptions: Equatable, Sendable {
+    package let view: TraceAgentQueryView
+    package let range: TraceTimeRange
+    package let filters: TraceAgentQueryFilters
+    package let limit: Int
 
-    public init(
+    package init(
         view: TraceAgentQueryView,
         range: TraceTimeRange,
         filters: TraceAgentQueryFilters,
@@ -119,17 +119,17 @@ public struct CLIQueryOptions: Equatable, Sendable {
     }
 }
 
-public struct CLIContextOptions: Equatable, Sendable {
-    public let time: TraceContextTimeSelection
-    public let filters: TraceAgentQueryFilters
+package struct CLIContextOptions: Equatable, Sendable {
+    package let time: TraceContextTimeSelection
+    package let filters: TraceAgentQueryFilters
 
-    public init(time: TraceContextTimeSelection, filters: TraceAgentQueryFilters) {
+    package init(time: TraceContextTimeSelection, filters: TraceAgentQueryFilters) {
         self.time = time
         self.filters = filters
     }
 }
 
-public enum CLIAnalyzeKind: String, Codable, CaseIterable, Hashable, Sendable {
+package enum CLIAnalyzeKind: String, Codable, CaseIterable, Hashable, Sendable {
     case cpu
     case scheduling
     case slices
@@ -137,14 +137,14 @@ public enum CLIAnalyzeKind: String, Codable, CaseIterable, Hashable, Sendable {
     case hotIntervals = "hot-intervals"
 }
 
-public struct CLIAnalyzeOptions: Equatable, Sendable {
-    public let kind: CLIAnalyzeKind
-    public let range: TraceTimeRange?
-    public let filters: TraceAgentQueryFilters
-    public let thresholdNs: Int64
-    public let limit: Int
+package struct CLIAnalyzeOptions: Equatable, Sendable {
+    package let kind: CLIAnalyzeKind
+    package let range: TraceTimeRange?
+    package let filters: TraceAgentQueryFilters
+    package let thresholdNs: Int64
+    package let limit: Int
 
-    public init(
+    package init(
         kind: CLIAnalyzeKind,
         range: TraceTimeRange?,
         filters: TraceAgentQueryFilters,
@@ -159,11 +159,11 @@ public struct CLIAnalyzeOptions: Equatable, Sendable {
     }
 }
 
-public struct CLIInvocation: Equatable, Sendable {
-    public let options: CLIGlobalOptions
-    public let command: CLICommand
+package struct CLIInvocation: Equatable, Sendable {
+    package let options: CLIGlobalOptions
+    package let command: CLICommand
 
-    public init(options: CLIGlobalOptions, command: CLICommand) {
+    package init(options: CLIGlobalOptions, command: CLICommand) {
         self.options = options
         self.command = command
     }
