@@ -1,128 +1,123 @@
 # ArkTrace
 
-macOS 原生 OpenHarmony Trace Workbench：同一套核心同时服务人（原生 Viewer）与 AI Agent（确定性 CLI 分析）。
+[![CI](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkDeck/ArkTrace/actions/workflows/ci.yml)
+[![Swift](https://img.shields.io/badge/Swift-6.0-F05138?logo=swift&logoColor=white)](Package.swift)
+[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B%20·%20Apple%20silicon-blue?logo=apple)](docs/APP_DISTRIBUTION.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-ArkTrace 复用 OpenHarmony TraceStreamer 将 `.htrace` / `.ftrace` 等离线 Trace 解析为本地 SQLite，在其上提供：
+**English** | [简体中文](README.zh-CN.md)
 
-- **ArkTrace.app** — SwiftUI + CoreGraphics 原生 Timeline Viewer（CPU / Process / Thread / Slice / Counter、Zoom / Pan / Search / Inspector）
-- **arktrace CLI** — 面向 Agent 的 typed、bounded、versioned JSON 查询与分析；含 `doctor` / `inspect` / `summary` / `processes` / `threads` / `query` / `context` / `analyze`，以及 fail-closed `licenses`
-- **ArkDeck 集成** — 作为 ArkDeck 自动调试闭环中的 host-only Trace Analysis Engine（零设备能力）
+**Native macOS trace workbench for OpenHarmony** — one core that serves both humans, through a native timeline viewer, and AI agents, through a deterministic CLI.
 
-> **状态：Phase 1～5 已完成；Phase 3/4 的 large 发布门 6/7 已由真实 DAYU 200 证据关闭；Phase 6 已于 2026-08-16 以真实闭环完成 9/9 并关闭发布门 10：真实 App 在 DAYU 200 上经 typed capture → structured analysis → Agent 判断 → typed 复验链路，判定 improved（App 进程 CPU 占用 −87.09%；该数字取自承载发布门的在产分发重跑，re-pin 之前的首轮为 −87.6%，同样判定 improved），报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。至此 10 个发布门全部关闭。** ArkDeck summary/deep operations 分别由 PR #1309/#1310 合入，LaunchAgent descriptor 安装由 PR #1311 合入；真实 capture Artifact 已经 pinned ArkTrace 产出 restart 后仍可读的 derived summary Artifact，发布门 8/9 均已关闭。P5-T02 的 Developer ID artifact 已获 Apple notarization `Accepted` 并完成 staple、Gatekeeper、quarantine smoke 与逐字节复核。674,044,067-byte DAYU 200 trace 保存在 Git 外的 content-addressed Release artifact，tracked CC-BY-4.0 grant、签名 review/provenance、完整性报告以及真实 cancellation/performance evidence 共同关闭 Gate 6/7。
+ArkTrace reuses the pinned OpenHarmony TraceStreamer to parse offline traces (`.htrace` / `.ftrace` / `.systrace`) into a local SQLite database, and builds on top of it:
 
-## 文档
+- **ArkTrace.app** — a SwiftUI + CoreGraphics native timeline viewer: CPU / process / thread / slice / counter tracks with zoom, pan, search, range selection and an inspector with range analysis.
+- **`arktrace` CLI** — typed, bounded, versioned JSON queries and analysis built for agents: `doctor`, `inspect`, `summary`, `processes`, `threads`, `query`, `context`, `analyze`, plus a fail-closed `licenses` command.
+- **ArkDeck integration** — a host-only Trace Analysis Engine inside [ArkDeck](https://github.com/ArkDeck)'s automated debugging loop, with zero device capability by design.
 
-| 文档 | 内容 |
-|---|---|
-| [docs/DESIGN.md](docs/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
-| [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
-| [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 总任务索引与发布门状态 |
-| [docs/PHASE_6_SCENARIO.md](docs/PHASE_6_SCENARIO.md) | Phase 6 冻结的真实场景、指标、判定规则与实测结果 |
-| [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md) | Phase 6 Final Verification Report：闭环链路、两轮 Artifact、Agent 判断、比较判定与审计 |
-| [docs/CLI.md](docs/CLI.md) | arktrace 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
-| [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | ArkDeck 可固定的 CLI App layout、manifest、签名/notarization、升级与回滚 |
-| [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile、真实 Artifact 链路、restart 与 Gate 9 证据 |
-| [docs/PHASE_1_VERIFICATION.md](docs/PHASE_1_VERIFICATION.md) | Phase 1 requirement、fixture、hash、测试与已知限制证据 |
-| [docs/PHASE_2_VERIFICATION.md](docs/PHASE_2_VERIFICATION.md) | Phase 2 CLI contract、gate 与 cached-open benchmark 证据 |
-| [docs/PHASE_3_VERIFICATION.md](docs/PHASE_3_VERIFICATION.md) | Phase 3 T01～T10 的已 review 实现证据与后续外部门收口 |
-| [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision、构建配方、identity 与调用约束 |
+## Highlights
 
-## 构建与测试
+- **Deterministic and agent-friendly.** Machine JSON 1.0 emitted as a single document on stdout, typed errors with stable exit codes, and explicit row / event / byte / deadline budgets — no raw SQL, no unbounded output.
+- **Local and private.** Everything runs on your Mac. Parsed traces live in a content-addressed local cache; `--no-cache` switches to a session-owned ephemeral database.
+- **Reproducible parser.** The bundled TraceStreamer is pinned to an exact upstream revision with a byte-reproducible build recipe and a fully tracked license inventory.
+- **Evidence-driven releases.** Every phase ships behind fail-closed verification gates, closed with real-device (DAYU 200) evidence rather than claims.
 
-要求 Apple silicon Mac、Swift 6 toolchain、`jq`（macOS 15 起随系统提供，更早版本 `brew install jq`），以及本地构建的 pinned TraceStreamer；Phase gate 的其余工具（`git`、`shasum`、`file`、`grep`）均为 macOS 自带：
+## Requirements
+
+- Apple silicon Mac running macOS 14 or later
+- Swift 6 toolchain (Xcode for building the app)
+- `jq` — ships with macOS 15+; on earlier versions `brew install jq`
+- Network access the first time you build the pinned TraceStreamer
+
+## Quick start
+
+### 1. Build the pinned parser
+
+The TraceStreamer binary is a locally built artifact excluded from Git — cloning alone is not enough:
 
 ```bash
-# 构建/更新 ThirdParty/TraceStreamer/macx/trace_streamer + manifest.json
 scripts/build_trace_streamer.sh
+```
 
-# 构建 libraries/arktrace 与运行普通 regression
+This produces `ThirdParty/TraceStreamer/macx/trace_streamer` and its identity manifest. Pinned revision and build recipe: [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md).
+
+### 2. Build and test
+
+```bash
 swift build -c release --product arktrace
 swift test
-
-# Phase 1 正式验收：clean build、真实 parser/fixture、全量零 skip
-scripts/test_phase1.sh
-
-# Phase 2 正式验收候选：Phase 1 + Release CLI contract/signal/benchmark gate
-scripts/test_phase2.sh
-
-# Phase 3 本地批次 gate：Phase 2 + signed App/parser bundle/document types/smoke
-scripts/test_phase3_batch1.sh
-
-# Phase 3 完整发布 gate：再执行 parser 双 clean-build、medium/large benchmark、
-# large cancellation 以及 Developer ID/notarization；缺少外部输入时 fail closed
-scripts/test_phase3.sh
-
-# Phase 4 本地批次：继承 Phase 3 candidate + real Agent CLI + medium benchmark
-scripts/test_phase4_batch1.sh
-
-# Phase 4 完整 gate：额外继承 Phase 3 全部外部发布门；缺输入时 fail closed
-scripts/test_phase4.sh
-
-# Phase 5 gate：继承 reviewed medium gate，复核 CLI distribution 与真实 ArkDeck
-# capture Artifact → persisted summary Artifact；不会冒充尚缺的 large gate
-scripts/test_phase5.sh
-
-# Phase 6 gate：离线复核真实闭环证据的完整性、身份绑定与判定规则；
-# 证据缺失或判定与冻结规则不符时 fail closed
-scripts/test_phase6.sh
 ```
 
-`scripts/test_phase1.sh` 会在测试前校验 binary、manifest、arm64 architecture、fixture/license SHA/byte count/Git blob；缺失或漂移直接失败。通过后输出不超过 4 KiB 的 machine evidence。TraceStreamer binary 是本机构建产物并被 `.gitignore` 排除，不能只 clone 仓库后跳过构建。
+### 3. Query a trace from the CLI
 
-Phase 4 medium/large evidence 均由生产 `TraceContextBuilder` 与
-`TraceDeterministicAnalysisEngine` 直接采样；逐字段 20-sample 数值、机器信息、trace/parser、
-source-tree 与 test-binary identity 的事实源固定为
-`Fixtures/release-evidence/phase4-medium-agent-performance.json` 与
-`Fixtures/release-evidence/phase3-large-performance.json`。reviewed DAYU 200 large fixture 已通过
-context/analysis 阈值，完整 `scripts/test_phase4.sh` 返回 0，Phase 4 Exit 为 7/7。
-
-裸 `swift build -c release --product arktrace` 产物仅用于开发编译，不带 reviewed
-parser/resource installation，不能作为以下命令的可执行发行版。P5-T02 完整安装单位是最终
-ZIP 中的 `ArkTraceCLI-0.1.0` 目录；解包并验证后统一从 App 内的 production CLI 运行：
+A small sample trace ships in the repository, so this works out of the box:
 
 ```bash
-tool='<install-root>/ArkTraceCLI-0.1.0/ArkTraceCLI.app/Contents/MacOS/arktrace'
-"$tool" doctor --self-test
-"$tool" inspect trace.htrace
-"$tool" --json summary trace.htrace
-"$tool" --json processes trace.htrace --limit 100
-"$tool" --json threads trace.htrace --pid 42 --limit 100
-"$tool" --json query trace.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
-"$tool" --json context trace.htrace --timestamp-ns 500000 --window-ms 1
-"$tool" --json analyze trace.htrace --kind range --start-ns 0 --end-ns 1000000
-"$tool" licenses
+PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
+.build/release/arktrace --trace-streamer "$PARSER" inspect Fixtures/traces/zlib.htrace
+.build/release/arktrace --trace-streamer "$PARSER" --json summary Fixtures/traces/zlib.htrace
+.build/release/arktrace --trace-streamer "$PARSER" --json processes Fixtures/traces/zlib.htrace --limit 100
+.build/release/arktrace --trace-streamer "$PARSER" --json query Fixtures/traces/zlib.htrace --view cpu-slices --start-ns 0 --end-ns 1000000
+.build/release/arktrace --trace-streamer "$PARSER" --json context Fixtures/traces/zlib.htrace --timestamp-ns 500000 --window-ms 1
+.build/release/arktrace --trace-streamer "$PARSER" --json analyze Fixtures/traces/zlib.htrace --kind range --start-ns 0 --end-ns 1000000
 ```
 
-默认使用 content-addressed cache；`--no-cache` 使用 session-owned ephemeral DB。Machine JSON
-stdout 只提交一个完整 document，typed error 与 exit status、limits、signal/cancellation 和隐私
-契约见 [docs/CLI.md](docs/CLI.md)。
+> **Note** — the bare `swift build` product is a development build: it carries no reviewed parser or license resources, so `doctor --self-test` and `licenses` fail closed, and the parser must be passed explicitly (the CLI never searches `PATH`). The full install unit is the signed, notarized `ArkTraceCLI.app` described in [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md); production and ArkDeck execute its `Contents/MacOS/arktrace` directly, which locates the bundled parser on its own.
 
-## ArkTrace.app 使用
+Full command reference, Machine JSON contract, limits, signal handling and privacy guarantees: [docs/CLI.md](docs/CLI.md).
 
-用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过
-File → Open、Finder Open With、拖放或 Recent 打开 `.htrace` / `.ftrace` / `.systrace`；
-Reload 会重新打开当前原始 Trace。Sidebar 控制 track，Timeline 支持鼠标/触控板 pan/zoom、
-range selection 与真实 event selection，Search 可按 PID/TID/process/thread/slice 定位，
-Inspector 显示 event 或 range analysis。键盘基线包括方向键切换 event/track、Option+方向键
-平移、`+`/`-` 缩放、Return 选择、`F` 缩放 selection、`0` 重置及 Escape 清除。
+### 4. Run the viewer
 
-Settings → Licenses 展示 ArkTrace MIT license 与随 App 打包的 third-party notice；CLI 的
-`arktrace licenses` 输出同一组经锁定的资源。当前已知限制是首发仅支持 Apple silicon/macOS 14+，不含 capture/device/network
-能力。large Trace 保留在普通 Git 外的 content-addressed external artifact storage，其 tracked
-许可、签名 provenance/review、真实性能与 cancellation 已关闭 Gate 6/7。Developer ID 签名候选已获 Apple notarization
-`Accepted`，最终 stapled ZIP、实际 App 截图与人工 VoiceOver walkthrough 已由 exact
-candidate tree/CDHash 和 tracked artifact SHA 绑定；自动 UI 控制不可用时没有用合成图替代。
+Open `ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
 
-## TraceStreamer 怎么获得
+The sidebar toggles tracks; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; search locates events by PID / TID / process / thread / slice name; the inspector shows event details or range analysis. Keyboard basics: arrow keys move across events and tracks, <kbd>Option</kbd>+arrows pan, <kbd>+</kbd>/<kbd>-</kbd> zoom, <kbd>Return</kbd> selects, <kbd>F</kbd> zooms to the selection, <kbd>0</kbd> resets, <kbd>Esc</kbd> clears.
 
-ArkTrace 不重写 parser，复用 pinned 的 upstream TraceStreamer。Canonical upstream 为 [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host)；`source-lock.json` 锁定 upstream、13 个 source dependency 和 GN/Ninja artifact，独立 patch 与构建脚本共同生成 content-derived recipe identity。`scripts/test_trace_streamer_reproducibility.sh` 要求两个 fresh worktree 产出 byte-identical binary。完整 source-closure inventory、exact license bytes 与 notice 已落地；发布门 3 已由签名 App 与最终 notarized ZIP 的逐字节复验关闭。
+## Testing and release gates
 
-## ArkDeck 怎么接入
+`swift test` covers the regular regression suite. Releases are guarded by cumulative, fail-closed phase gates that verify real parser output, CLI contracts, benchmarks, signing/notarization and end-to-end evidence — each inherits everything before it and fails closed when required external inputs are missing:
 
-通过 ArkDeck 现有 `analyzer.summarize-trace@1` typed operation 调用 pinned `arktrace` CLI（immutable Artifact lease 输入、derived `trace-summary.json` 输出）；ArkTrace 永不获得设备控制能力（DESIGN §16、SPECIFICATION §18）。
+```bash
+scripts/test_phase1.sh   # clean build, real parser + fixtures, zero skipped tests
+scripts/test_phase2.sh   # + release CLI contract, signal and benchmark gates
+scripts/test_phase3.sh   # + signed app, document types, notarization, large-trace gates
+scripts/test_phase4.sh   # + agent CLI contract, medium/large performance gates
+scripts/test_phase5.sh   # + CLI distribution and the real ArkDeck artifact chain
+scripts/test_phase6.sh   # offline audit of the real closed-loop evidence
+```
 
-Phase 5 最初以 ArkDeck `60bfa76d6fba3ff1ea9abad031aefa077f5fbbfe` 重新审计，summary integration 在治理修复后的 `26de01e100d3fcbde4dfefeb20cf47e2a7b6ae9b` 上冻结，并由 PR #1309 合入为 `528b521c7a6ace44e225ffbc3d1e1797b9c1a54f`。独立的 `analyzer.analyze-trace@1` deep typed operation 随后由 PR #1310 合入为 `0d8f01964b058d954112604900db19dea28ef39f`；既有 summary descriptor 与输出保持不变。LaunchAgent descriptor 的显式 pin/preserve/drift contract 由 PR #1311 合入为 `4e478b46f202a139dbeb2c91d79e36d6d7774fac`。真实 ArkDeck capture Artifact 已通过该 production profile 生成并持久化 exact summary Artifact，restart 后复核通过；完整 identity 见 [ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md)。两条 operation 均使用 [CLI distribution contract](docs/CLI_DISTRIBUTION.md) 固定签名 tool/parser/JSON identity。
+CI builds, tests and runs the offline gates on every pull request, but hosted runners cannot build the pinned parser, so parser-integration tests skip there — the phase scripts remain the release authority.
+
+## Status
+
+Phases 0–6 (57/57 tasks) are complete and **all 10 release gates are closed** as of 2026-08-16. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
+
+Known limitations of the first release: Apple silicon / macOS 14+ only; offline analysis only — no capture, device or network capability.
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [docs/DESIGN.md](docs/DESIGN.md) | Product and technical design: evidence baseline, architecture, domain model, TraceStreamer integration, renderer, ArkDeck boundary, release gates |
+| [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | Normative requirements (`AT-*`), machine JSON contract, end-to-end acceptance scenarios (`AC-AT-*`), Definition of Done |
+| [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 task index and release-gate status |
+| [docs/CLI.md](docs/CLI.md) | `arktrace` installation, commands, flags, Machine JSON, exit status, signals and privacy |
+| [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | Pinnable CLI app layout, manifest, signing/notarization, upgrade and rollback |
+| [docs/APP_DISTRIBUTION.md](docs/APP_DISTRIBUTION.md) | ArkTrace.app signing, notarization and distribution decisions |
+| [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md) | ArkDeck production profile, real artifact chain, restart and Gate 9 evidence |
+| [docs/TRACE_STREAMER.md](docs/TRACE_STREAMER.md) | Pinned TraceStreamer revision, build recipe, identity and invocation constraints |
+| [docs/DAYU200_LARGE_HTRACE_INTEGRITY.md](docs/DAYU200_LARGE_HTRACE_INTEGRITY.md) | Integrity investigation of the real-device large trace kept outside Git as a content-addressed release artifact |
+| Verification reports: [Phase 1](docs/PHASE_1_VERIFICATION.md) · [Phase 2](docs/PHASE_2_VERIFICATION.md) · [Phase 3](docs/PHASE_3_VERIFICATION.md) · [Phase 6](docs/PHASE_6_VERIFICATION.md) | Per-phase evidence: fixtures, hashes, benchmarks, gates and known limitations |
+
+## ArkDeck integration
+
+ArkDeck invokes the pinned `arktrace` CLI through its typed operations `analyzer.summarize-trace@1` and `analyzer.analyze-trace@1` — immutable trace artifact leases in, derived analysis artifacts out. Both operations pin the signed tool, parser and JSON identity via the [CLI distribution contract](docs/CLI_DISTRIBUTION.md), and ArkTrace never gains device control. Details and the full identity chain: [docs/ARKDECK_INTEGRATION.md](docs/ARKDECK_INTEGRATION.md).
+
+## TraceStreamer provenance
+
+ArkTrace does not rewrite the parser; it reuses the pinned upstream TraceStreamer from [openharmony/developtools_smartperf_host @ GitCode](https://gitcode.com/openharmony/developtools_smartperf_host). `source-lock.json` locks the upstream, 13 source dependencies and the GN/Ninja artifacts; independent patches and build scripts yield a content-derived recipe identity, and `scripts/test_trace_streamer_reproducibility.sh` requires two fresh worktrees to produce byte-identical binaries.
 
 ## License
 
-[MIT](LICENSE)。捆绑 TraceStreamer 的 14 个 source components、2 个 build tools、许可证表达式与 exact license bytes 见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 `ThirdParty/TraceStreamer/license-inventory.json`；`scripts/verify_licenses.sh` 对清单、source lock 与文件 SHA/大小做 fail-closed 校验。
+ArkTrace is released under the [MIT License](LICENSE).
+
+The bundled TraceStreamer's 14 source components, 2 build tools, license expressions and exact license bytes are tracked in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `ThirdParty/TraceStreamer/license-inventory.json`; `scripts/verify_licenses.sh` verifies the inventory, source lock and file hashes fail-closed. In the app, **Settings → Licenses** shows the same locked set that `arktrace licenses` prints.
