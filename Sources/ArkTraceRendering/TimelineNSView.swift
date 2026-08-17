@@ -64,19 +64,50 @@ public final class TimelineNSView: NSView {
     private var dragInitialSelection: TraceTimeRange?
     private var suppressAccessibilityNotifications = false
     private var trackingAreaReference: NSTrackingArea?
+    /// Last known pointer position in view coordinates, or nil while the
+    /// pointer is outside. It is the zoom anchor for `W`/`S`, matching
+    /// upstream's `centerXPercentage`.
+    private var pointerLocation: CGPoint?
+
+    /// One batched density fill: the owning track's palette color plus the
+    /// existing eight-step intensity ramp.
+    private struct DensityPaintKey: Hashable, Comparable {
+        let color: TimelineColor
+        let intensity: Int
+
+        static func < (lhs: Self, rhs: Self) -> Bool {
+            (lhs.intensity, lhs.color) < (rhs.intensity, rhs.color)
+        }
+    }
+
     private struct DensityPaths {
         let backingScale: CGFloat
-        let paths: [CGPath?]
+        let paths: [DensityPaintKey: CGPath]
+    }
+
+    /// One batched detail fill. The semantic style stays the outer sort key so
+    /// the paint order — and with it the hit-test priority in ``event(at:)`` —
+    /// is exactly what it was before events gained individual colors.
+    private struct DetailPaintKey: Hashable, Comparable {
+        let style: DetailVisualStyle
+        let color: TimelineColor
+
+        static func < (lhs: Self, rhs: Self) -> Bool {
+            (lhs.style.rawValue, lhs.color) < (rhs.style.rawValue, rhs.color)
+        }
     }
 
     private struct DetailLabel {
         let value: String
         let frame: CGRect
+        /// Resolved from the fill's luminance, because most of the palette is
+        /// too light to carry a white label.
+        let color: TimelineColor
     }
 
     private struct DetailPaths {
         let backingScale: CGFloat
-        let paths: [DetailVisualStyle: CGPath]
+        let paths: [DetailPaintKey: CGPath]
         let labels: [DetailLabel]
         let events: [EventKey: (TimelineDetailPrimitive, CGRect)]
     }
@@ -215,7 +246,18 @@ public final class TimelineNSView: NSView {
 
     public override func mouseMoved(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
+        updatePointerLocation(point)
         onHoverEvent?(self.event(at: point))
+    }
+
+    public override func mouseExited(with event: NSEvent) {
+        updatePointerLocation(nil)
+    }
+
+    /// Records the pointer position that anchors `W` / `S`. Also the seam tests
+    /// use to place the pointer without synthesizing an `NSEvent`.
+    package func updatePointerLocation(_ point: CGPoint?) {
+        pointerLocation = point
     }
 
     public override func magnify(with event: NSEvent) {
@@ -242,8 +284,8 @@ public final class TimelineNSView: NSView {
     }
 
     public override func keyDown(with event: NSEvent) {
-        let option = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            .contains(.option)
+        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        let option = modifiers.contains(.option)
         switch event.keyCode {
         case 123:
             performKeyboardCommand(option ? .panBackward : .previousEvent)
@@ -254,11 +296,24 @@ public final class TimelineNSView: NSView {
         case 126:
             performKeyboardCommand(.previousTrack)
         default:
+            // A Command-modified key belongs to the menu, not to the timeline.
+            // Letting `W` swallow ⌘W would break Close Window.
+            guard !modifiers.contains(.command) else {
+                super.keyDown(with: event)
+                return
+            }
             switch event.charactersIgnoringModifiers?.lowercased() {
             case "+", "=": performKeyboardCommand(.zoomIn)
             case "-", "_": performKeyboardCommand(.zoomOut)
             case "\r", "\n": performKeyboardCommand(.selectFocusedEvent)
-            case "f": performKeyboardCommand(.zoomSelection)
+            // SmartPerf Host's navigation cluster: W/S zoom about the pointer,
+            // A/D pan, and `[` / `]` are upstream aliases for its zoom-to-
+            // selection key, which ArkTrace already binds to F.
+            case "w": performKeyboardCommand(.zoomInAtPointer)
+            case "s": performKeyboardCommand(.zoomOutAtPointer)
+            case "a": performKeyboardCommand(.panBackward)
+            case "d": performKeyboardCommand(.panForward)
+            case "f", "[", "]": performKeyboardCommand(.zoomSelection)
             case "0": performKeyboardCommand(.resetViewport)
             case "\u{1b}": performKeyboardCommand(.clearSelection)
             default:
@@ -281,12 +336,9 @@ public final class TimelineNSView: NSView {
             return moveTrack(by: -1)
         case .nextTrack:
             return moveTrack(by: 1)
-        case .panBackward, .panForward:
-            guard let intent = viewportIntent(for: command), let onViewportIntent
-            else { return false }
-            onViewportIntent(intent)
-            return true
-        case .zoomIn, .zoomOut:
+        case .panBackward, .panForward,
+            .zoomIn, .zoomOut,
+            .zoomInAtPointer, .zoomOutAtPointer:
             guard let intent = viewportIntent(for: command), let onViewportIntent
             else { return false }
             onViewportIntent(intent)
@@ -347,7 +399,9 @@ public final class TimelineNSView: NSView {
         if let trackingAreaReference { removeTrackingArea(trackingAreaReference) }
         let area = NSTrackingArea(
             rect: bounds,
-            options: [.activeInKeyWindow, .mouseMoved, .inVisibleRect],
+            options: [
+                .activeInKeyWindow, .mouseMoved, .mouseEnteredAndExited, .inVisibleRect,
+            ],
             owner: self,
             userInfo: nil
         )
@@ -410,10 +464,18 @@ public final class TimelineNSView: NSView {
         }
     }
 
-    /// Density primitives are non-selectable and carry only intensity. Merge
-    /// all immutable tracks into eight snapshot-wide alpha paths. Hover,
-    /// focus, and selection redraws then perform eight fills instead of up to
-    /// eight fills per track, while retaining vector-sharp bucket boundaries.
+    /// Density primitives are non-selectable and carry only intensity, so they
+    /// are merged into snapshot-wide alpha paths: hover, focus and selection
+    /// redraws perform a handful of fills instead of up to eight per track,
+    /// while retaining vector-sharp bucket boundaries.
+    ///
+    /// An aggregate bucket has no single event to take a color from, so the
+    /// band takes the owning track's identity color and keeps the intensity in
+    /// the alpha ramp. That is ArkTrace's own encoding rather than an upstream
+    /// one — upstream has no density level of detail — and it exists so an
+    /// overview of many tracks is still readable as separate tracks. The batch
+    /// count is therefore bounded by visible tracks × 8 rather than by 8, which
+    /// is still a small constant against the per-primitive fills this avoids.
     private func drawDensityOverlay(
         _ snapshot: TimelineSnapshot,
         backingScale: CGFloat,
@@ -423,13 +485,15 @@ public final class TimelineNSView: NSView {
         if let densityPathCache, densityPathCache.backingScale == backingScale {
             cached = densityPathCache
         } else {
-            var paths = Array<CGMutablePath?>(repeating: nil, count: 8)
+            var paths: [DensityPaintKey: CGMutablePath] = [:]
             let minimumWidth = 1 / max(1, backingScale)
             for track in snapshot.tracks where !track.primitives.isEmpty {
+                let color = Self.trackColor(for: track.descriptor)
                 for primitive in track.primitives {
                     guard case .density(let density) = primitive else { continue }
                     let intensity = min(7, Int(log2(Double(max(1, density.bucket.eventCount)))))
-                    let path = paths[intensity] ?? CGMutablePath()
+                    let key = DensityPaintKey(color: color, intensity: intensity)
+                    let path = paths[key] ?? CGMutablePath()
                     let startX = TimelineGeometry.x(
                         for: density.bucket.range.startNs, viewport: snapshot.viewport
                     )
@@ -444,27 +508,33 @@ public final class TimelineNSView: NSView {
                             height: max(1, CGFloat(track.height) - 6)
                         )
                     )
-                    paths[intensity] = path
+                    paths[key] = path
                 }
             }
             cached = DensityPaths(backingScale: backingScale, paths: paths)
             densityPathCache = cached
-            pathCacheBuildHook?("density", paths.compactMap { $0 }.count)
+            pathCacheBuildHook?("density", paths.count)
         }
-        for intensity in cached.paths.indices {
-            guard let path = cached.paths[intensity] else { continue }
-            let alpha = min(0.9, 0.18 + Double(intensity) * 0.1)
-            context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(alpha).cgColor)
+        for key in cached.paths.keys.sorted() {
+            guard let path = cached.paths[key] else { continue }
+            let alpha = min(0.9, 0.18 + Double(key.intensity) * 0.1)
+            context.setFillColor(key.color.cgColor(alpha: alpha))
             context.addPath(path)
             context.fillPath()
         }
     }
 
     /// Detail event geometry is immutable within a snapshot. Batch its static
-    /// color fills by semantic category, retain the real event/frame mapping
-    /// for hit testing and focus outlines, and draw labels only for the few
-    /// sufficiently wide events. This keeps 20k-detail snapshots from issuing
-    /// one CoreGraphics fill call per event on every hover redraw.
+    /// color fills, retain the real event/frame mapping for hit testing and
+    /// focus outlines, and draw labels only for the few sufficiently wide
+    /// events. This keeps 20k-detail snapshots from issuing one CoreGraphics
+    /// fill call per event on every hover redraw.
+    ///
+    /// Batching survives per-event colors because the palette is closed: an
+    /// event's fill comes from a fixed twenty-entry table or the fixed thread
+    /// state table, so the number of distinct fills is bounded by the palette
+    /// and not by the number of events. The semantic style stays the outer
+    /// batch key so the paint order is unchanged.
     private func drawDetailOverlay(
         _ snapshot: TimelineSnapshot,
         backingScale: CGFloat,
@@ -474,7 +544,7 @@ public final class TimelineNSView: NSView {
         if let detailPathCache, detailPathCache.backingScale == backingScale {
             cached = detailPathCache
         } else {
-            var mutablePaths: [DetailVisualStyle: CGMutablePath] = [:]
+            var mutablePaths: [DetailPaintKey: CGMutablePath] = [:]
             var labels: [DetailLabel] = []
             var events: [EventKey: (TimelineDetailPrimitive, CGRect)] = [:]
             for track in snapshot.tracks {
@@ -486,15 +556,24 @@ public final class TimelineNSView: NSView {
                         viewport: snapshot.viewport,
                         backingScale: backingScale
                     )
-                    let style = Self.visualStyle(for: detail.category)
-                    let path = mutablePaths[style] ?? CGMutablePath()
+                    let color = TimelineDetailPalette.color(for: detail)
+                    let key = DetailPaintKey(
+                        style: Self.visualStyle(for: detail.category), color: color
+                    )
+                    let path = mutablePaths[key] ?? CGMutablePath()
                     path.addRect(frame)
-                    mutablePaths[style] = path
+                    mutablePaths[key] = path
                     events[detail.eventKey] = (detail, frame)
                     if let label = detail.label,
                         frame.width >= TimelineGeometry.minimumLabelWidth
                     {
-                        labels.append(DetailLabel(value: label, frame: frame))
+                        labels.append(
+                            DetailLabel(
+                                value: label,
+                                frame: frame,
+                                color: color.preferredLabelColor
+                            )
+                        )
                     }
                 }
             }
@@ -507,16 +586,13 @@ public final class TimelineNSView: NSView {
             detailPathCache = cached
             pathCacheBuildHook?("detail", mutablePaths.count)
         }
-        for style in DetailVisualStyle.allCases {
-            guard let path = cached.paths[style] else { continue }
-            context.setFillColor(Self.color(for: style).cgColor)
+        for key in cached.paths.keys.sorted() {
+            guard let path = cached.paths[key] else { continue }
+            context.setFillColor(key.color.cgColor)
             context.addPath(path)
             context.fillPath()
         }
-        let labelAttributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 9),
-            .foregroundColor: NSColor.white,
-        ]
+        let labelFont = NSFont.systemFont(ofSize: 9)
         for label in cached.labels {
             context.saveGState()
             context.clip(to: label.frame.insetBy(dx: 1, dy: 1))
@@ -525,7 +601,10 @@ public final class TimelineNSView: NSView {
                     x: label.frame.minX + TimelineGeometry.horizontalLabelInset,
                     y: label.frame.minY + max(1, (label.frame.height - 11) / 2)
                 ),
-                withAttributes: labelAttributes
+                withAttributes: [
+                    .font: labelFont,
+                    .foregroundColor: NSColor(cgColor: label.color.cgColor) ?? .labelColor,
+                ]
             )
             context.restoreGState()
         }
@@ -702,17 +781,9 @@ public final class TimelineNSView: NSView {
                 range: source.viewport.range, deltaNs: delta, within: bounds
             ), target != source.viewport.range else { return nil }
             return .panPoints(points, sourceViewport: source.viewport)
-        case .zoomIn, .zoomOut:
-            let anchor: Int64
-            if let selection {
-                anchor = selection.startNs + selection.durationNs / 2
-            } else if let focused = focusedDetail() {
-                anchor = focused.range.startNs
-            } else {
-                anchor = source.viewport.range.startNs
-                    + source.viewport.range.durationNs / 2
-            }
-            let scale = command == .zoomIn ? 0.5 : 2.0
+        case .zoomIn, .zoomOut, .zoomInAtPointer, .zoomOutAtPointer:
+            let anchor = zoomAnchor(for: command, in: source)
+            let scale = command == .zoomIn || command == .zoomInAtPointer ? 0.5 : 2.0
             guard let target = try? TimelineInteraction.zoom(
                 range: source.viewport.range, anchorNs: anchor,
                 scale: scale, within: bounds
@@ -721,6 +792,29 @@ public final class TimelineNSView: NSView {
         default:
             return nil
         }
+    }
+
+    /// `W` / `S` zoom about the pointer, as upstream does. The pointer is only
+    /// an anchor while it is actually over the timeline; otherwise — pointer
+    /// off the canvas, or the command arriving from assistive technology rather
+    /// than from a key — these fall back to the same selection / focused-event
+    /// / center chain the `+` and `-` keys use.
+    private func zoomAnchor(
+        for command: TimelineKeyboardCommand,
+        in source: TimelineSnapshot
+    ) -> Int64 {
+        if command == .zoomInAtPointer || command == .zoomOutAtPointer,
+            let pointerLocation, bounds.contains(pointerLocation)
+        {
+            return TimelineGeometry.time(forX: pointerLocation.x, viewport: source.viewport)
+        }
+        if let selection {
+            return selection.startNs + selection.durationNs / 2
+        }
+        if let focused = focusedDetail() {
+            return focused.range.startNs
+        }
+        return source.viewport.range.startNs + source.viewport.range.durationNs / 2
     }
 
     private func focus(eventKey: EventKey, notifyAccessibility: Bool = true) {
@@ -806,7 +900,7 @@ public final class TimelineNSView: NSView {
     public override func accessibilityValue() -> Any? { accessibilitySummary }
 
     public override func accessibilityHelp() -> String? {
-        "Use arrow keys to move between real events and tracks, Return to select, Option-Left or Option-Right to pan, plus or minus to zoom, F to zoom the selected range, 0 to reset, and Escape to clear selection."
+        "Use arrow keys to move between real events and tracks, Return to select, Option-Left or Option-Right to pan, plus or minus to zoom, W or S to zoom about the pointer, A or D to pan, F to zoom the selected range, 0 to reset, and Escape to clear selection."
     }
 
     public override func accessibilityChildren() -> [Any]? {
@@ -906,15 +1000,12 @@ public final class TimelineNSView: NSView {
         }
     }
 
-    private static func color(for style: DetailVisualStyle) -> NSColor {
-        switch style {
-        case .running: return .systemGreen
-        case .runnable: return .systemOrange
-        case .blocked: return .systemRed
-        case .sleeping: return .systemBlue
-        case .counter: return .systemPurple
-        case .accent: return .controlAccentColor
-        }
+    /// Identity color for a whole track, used by the aggregate density bands.
+    /// Hashed from the stable track ID rather than the title so a track keeps
+    /// its color across sessions and cannot change color when a thread name
+    /// resolves late.
+    private static func trackColor(for descriptor: TrackDescriptor) -> TimelineColor {
+        TimelinePalette.trackIdentityColor(descriptor.id.rawValue)
     }
 
     private static func renderIdentity(

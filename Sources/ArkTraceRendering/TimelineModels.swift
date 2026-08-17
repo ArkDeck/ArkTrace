@@ -145,6 +145,12 @@ package enum TimelineKeyboardCommand: Hashable, Sendable {
     case panForward
     case zoomIn
     case zoomOut
+    /// SmartPerf Host's `W` / `S`. Same zoom step as ``zoomIn`` / ``zoomOut``,
+    /// but anchored at the pointer the way upstream anchors on its
+    /// `centerXPercentage`, so the trace grows around what is under the cursor
+    /// instead of around the selection or the viewport center.
+    case zoomInAtPointer
+    case zoomOutAtPointer
     case selectFocusedEvent
     case zoomSelection
     case resetViewport

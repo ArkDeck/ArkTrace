@@ -70,7 +70,24 @@ Full command reference, Machine JSON contract, limits, signal handling and priva
 
 Open `ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
 
-The sidebar toggles tracks; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; search locates events by PID / TID / process / thread / slice name; the inspector shows event details or range analysis. Keyboard basics: arrow keys move across events and tracks, <kbd>Option</kbd>+arrows pan, <kbd>+</kbd>/<kbd>-</kbd> zoom, <kbd>Return</kbd> selects, <kbd>F</kbd> zooms to the selection, <kbd>0</kbd> resets, <kbd>Esc</kbd> clears.
+The sidebar toggles tracks; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; search locates events by PID / TID / process / thread / slice name; the inspector shows event details or range analysis.
+
+Keyboard, following SmartPerf Host where it has a binding:
+
+| Keys | Action |
+|---|---|
+| <kbd>W</kbd> / <kbd>S</kbd> | Zoom in / out about the pointer |
+| <kbd>A</kbd> / <kbd>D</kbd> | Pan backward / forward |
+| <kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd> | Zoom to the selected range |
+| <kbd>←</kbd> / <kbd>→</kbd> | Previous / next real event in the track |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Adjacent visible track |
+| <kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Pan by ~10% of the viewport |
+| <kbd>+</kbd> / <kbd>-</kbd> | Zoom about the selection or viewport center |
+| <kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd> | Select focused event · reset zoom · clear selection |
+
+Hold a key to keep zooming or panning — macOS key repeat drives it. Unlike the web UI, the shortcuts are scoped to the focused timeline, so typing `w` or `s` in the search field stays typing.
+
+Slices are colored the way SmartPerf Host colors them: a CPU slice takes its running process's color, a named slice hashes its own name into upstream's twenty-entry palette (digits stripped, so `ipc::41` and `ipc::42` match), and thread states use upstream's fixed state colors. The same slice therefore has the same color in either tool. Details and the exact ported functions: [docs/DESIGN.md](docs/DESIGN.md) §13.5.
 
 ## Testing and release gates
 

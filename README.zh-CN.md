@@ -70,7 +70,24 @@ PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
 
 用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过 **File → Open**、Finder「打开方式」、拖放或 Recents 打开 `.htrace` / `.ftrace` / `.systrace`；**Reload** 会从原始文件重新打开当前 Trace。
 
-Sidebar 控制轨道显隐；Timeline 支持鼠标/触控板 pan 与 zoom、range selection 与真实 event selection；Search 可按 PID / TID / process / thread / slice 名称定位；Inspector 展示 event 详情或 range analysis。键盘基线：方向键在 event / 轨道间移动，<kbd>Option</kbd>+方向键平移，<kbd>+</kbd>/<kbd>-</kbd> 缩放，<kbd>Return</kbd> 选择，<kbd>F</kbd> 缩放到 selection，<kbd>0</kbd> 重置，<kbd>Esc</kbd> 清除。
+Sidebar 控制轨道显隐；Timeline 支持鼠标/触控板 pan 与 zoom、range selection 与真实 event selection；Search 可按 PID / TID / process / thread / slice 名称定位；Inspector 展示 event 详情或 range analysis。
+
+键盘快捷键，凡 SmartPerf Host 有对应绑定的都保持一致：
+
+| 按键 | 动作 |
+|---|---|
+| <kbd>W</kbd> / <kbd>S</kbd> | 以指针位置为锚点放大 / 缩小 |
+| <kbd>A</kbd> / <kbd>D</kbd> | 左移 / 右移 |
+| <kbd>F</kbd>、<kbd>[</kbd>、<kbd>]</kbd> | 缩放到选中区间 |
+| <kbd>←</kbd> / <kbd>→</kbd> | 同一轨道的前一 / 后一真实 event |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | 相邻可见轨道 |
+| <kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | 平移约一个 viewport 的 10% |
+| <kbd>+</kbd> / <kbd>-</kbd> | 围绕 selection 或 viewport center 缩放 |
+| <kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd> | 选择 focused event · 重置缩放 · 清除选择 |
+
+按住不放即可连续缩放或平移，由 macOS 的按键重复驱动。与 Web 版不同，这些快捷键只作用于获得 focus 的 Timeline，因此在搜索框里输入 `w`、`s` 仍然是输入文字。
+
+Slice 配色与 SmartPerf Host 一致：CPU slice 取所属进程的颜色，named slice 用自身名称（去掉数字后）散列到上游的二十色调色板，因此 `ipc::41` 与 `ipc::42` 同色；thread state 使用上游固定的状态色。同一个 slice 在两个工具里颜色相同。所移植的具体函数见 [docs/DESIGN.md](docs/DESIGN.md) §13.5。
 
 ## 测试与发布门
 
