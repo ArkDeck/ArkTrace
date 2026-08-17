@@ -14,6 +14,7 @@ final class TraceViewerAnalysisTests: XCTestCase {
         private(set) var processQueries: [ProcessQuery] = []
         private(set) var threadQueries: [ThreadQuery] = []
         private(set) var threadStateQueries: [ThreadStateQuery] = []
+        private(set) var cpuSliceQueries: [CpuSliceQuery] = []
 
         /// The range/limit pairs each engine actually asked for.
         func threadStateQueryShapes() -> [(TraceTimeRange, Int)] {
@@ -103,6 +104,7 @@ final class TraceViewerAnalysisTests: XCTestCase {
         }
 
         func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
+            cpuSliceQueries.append(query)
             if let cpuDelay { try await Task.sleep(for: cpuDelay) }
             return TraceEventPage(
                 items: Array(cpuRows.prefix(query.limit)),
@@ -446,14 +448,17 @@ final class TraceViewerAnalysisTests: XCTestCase {
                 parentEventKey: nil, isAsync: false, isOpenEnded: false
             ),
         ]
-        let result = try await TraceRangeAnalysisEngine(
-            repository: Repository(slices: named, cpuSlices: [first, second])
-        ).analyze(
+        let repository = Repository(slices: named, cpuSlices: [first, second])
+        let result = try await TraceRangeAnalysisEngine(repository: repository).analyze(
             TraceRangeAnalysisRequest(
                 range: range, maximumSlices: 2, topThreadLimit: 2,
                 longSliceLimit: 2
             )
         )
+        // CPU utilization and top threads reduce one scheduling page. A second
+        // byte-identical query here is duplicated Store work, not a second budget.
+        let issuedCPUQueries = await repository.cpuSliceQueries.count
+        XCTAssertEqual(issuedCPUQueries, 1)
         XCTAssertEqual(result.cpuUtilization.map(\.occupiedNs), [350])
         XCTAssertEqual(result.cpuUtilization.map(\.rawRunningNs), [350])
         XCTAssertEqual(result.cpuUtilization.map(\.sliceCount), [2])

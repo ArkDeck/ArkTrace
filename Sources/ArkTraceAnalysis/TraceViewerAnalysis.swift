@@ -413,41 +413,48 @@ package struct TraceRangeAnalysisEngine: Sendable {
         do {
         let deadline = ContinuousClock.now.advanced(by: request.timeout)
         try Self.check(deadline)
-        let cpuPage = try await repository.cpuSlices(
-            CpuSliceQuery(
-                range: request.range,
-                limit: request.maximumSlices,
-                deadline: deadline
+        // CPU utilization and top threads are two reductions over one scheduling
+        // page, not two Store budgets: `TraceRangeAnalysisRequest` exposes a
+        // single `maximumSlices`, so the two queries could only ever be
+        // byte-identical. Same rule the deterministic engine states — one
+        // immutable page per distinct query; distinct limits or filters would
+        // stay independent. The truncation flags stay per-section because
+        // `topThreads` is additionally cut by `topThreadLimit` after reduction.
+        // The three distinct queries go out in one batch, which the Store
+        // answers concurrently; three is far inside
+        // `TraceRepositoryEventBatch.maximumQueryCount`.
+        let pages = try await repository.eventBatch(
+            TraceRepositoryEventBatch(
+                cpuSlices: [
+                    CpuSliceQuery(
+                        range: request.range,
+                        limit: request.maximumSlices,
+                        deadline: deadline
+                    ),
+                ],
+                // Same query shape and limit the deterministic analysis uses,
+                // so the shared reduction below sees the identical interval set
+                // and the App and CLI cannot disagree (DESIGN §4.3 invariant 3).
+                threadStates: [
+                    ThreadStateQuery(
+                        range: request.range,
+                        limit: request.maximumStateIntervals,
+                        deadline: deadline
+                    ),
+                ],
+                slices: [
+                    TraceSliceQuery(
+                        range: request.range,
+                        minimumDurationNs: request.minimumLongSliceDurationNs,
+                        limit: request.maximumSlices,
+                        deadline: deadline
+                    ),
+                ]
             )
         )
-        try Self.check(deadline)
-        let threadPage = try await repository.cpuSlices(
-            CpuSliceQuery(
-                range: request.range,
-                limit: request.maximumSlices,
-                deadline: deadline
-            )
-        )
-        try Self.check(deadline)
-        let namedPage = try await repository.slices(
-            TraceSliceQuery(
-                range: request.range,
-                minimumDurationNs: request.minimumLongSliceDurationNs,
-                limit: request.maximumSlices,
-                deadline: deadline
-            )
-        )
-        try Self.check(deadline)
-        // Same query shape and limit the deterministic analysis uses, so the
-        // shared reduction below sees the identical interval set and the App
-        // and CLI cannot disagree (DESIGN §4.3 invariant 3).
-        let statePage = try await repository.threadStates(
-            ThreadStateQuery(
-                range: request.range,
-                limit: request.maximumStateIntervals,
-                deadline: deadline
-            )
-        )
+        let cpuPage = pages.cpuSlices[0]
+        let statePage = pages.threadStates[0]
+        let namedPage = pages.slices[0]
         try Self.check(deadline)
         var cpu: [Int64: (raw: Int64, count: Int)] = [:]
         var threads: [ThreadKey: ThreadAccumulator] = [:]
@@ -458,10 +465,6 @@ package struct TraceRangeAnalysisEngine: Sendable {
             currentCPU.raw = Self.saturatedAdd(currentCPU.raw, overlap)
             currentCPU.count = min(Int.max, currentCPU.count + 1)
             cpu[slice.cpu] = currentCPU
-        }
-        for (index, slice) in threadPage.items.enumerated() {
-            if index.isMultiple(of: 256) { try Self.check(deadline) }
-            let overlap = slice.range.clippedOverlapNs(with: request.range)
             if let key = slice.threadKey {
                 var value = threads[key] ?? ThreadAccumulator()
                 value.tid = value.tid ?? slice.tid
@@ -540,7 +543,6 @@ package struct TraceRangeAnalysisEngine: Sendable {
         )
         try Self.check(deadline)
         var issues = cpuPage.dataQuality.issues
-            + threadPage.dataQuality.issues
             + namedPage.dataQuality.issues
             + statePage.dataQuality.issues
         let overlapCPUCount = cpuRows.reduce(into: 0) {
@@ -565,7 +567,7 @@ package struct TraceRangeAnalysisEngine: Sendable {
                 )
             )
         }
-        if threadPage.truncated {
+        if cpuPage.truncated {
             issues.append(
                 TraceDataQualityIssue(
                     category: .probeTruncated,
@@ -613,15 +615,14 @@ package struct TraceRangeAnalysisEngine: Sendable {
             threadStateDistribution: stateRows,
             sliceNameAggregates: sliceAggregates,
             cpuUtilizationTruncated: cpuPage.truncated,
-            topThreadsTruncated: threadPage.truncated
+            topThreadsTruncated: cpuPage.truncated
                 || topRows.count > request.topThreadLimit,
             longSlicesTruncated: longTruncated,
             threadStateDistributionTruncated: statePage.truncated,
             // The aggregate reduces the same page the long-slice list uses, so
             // a truncated page means the totals are a lower bound.
             sliceNameAggregatesTruncated: namedPage.truncated,
-            truncated: cpuPage.truncated || threadPage.truncated || longTruncated
-                || statePage.truncated,
+            truncated: cpuPage.truncated || longTruncated || statePage.truncated,
             dataQuality: TraceDataQuality(issues: issues)
         )
         } catch {
