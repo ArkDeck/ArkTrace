@@ -164,6 +164,22 @@ package enum TimelinePalette {
         funcColors[hash(String(identity), modulus: funcColors.count)]
     }
 
+    /// Upstream `ColorUtils.JANK_COLOR`, ported verbatim. Only indices 0, 2 and
+    /// 3 are reachable because `jank_tag` is only ever 0, 1 or 3.
+    static let jankColors: [TimelineColor] = [
+        "#42A14D", "#C0CE85", "#FF651D", "#E8BE44", "#009DFA", "#E97978",
+    ].compactMap { TimelineColor(hex: $0) }
+
+    /// `jank_tag` 1 → orange, 3 → yellow, otherwise the normal frame colour.
+    public static func jankColor(tag: Int64) -> TimelineColor {
+        guard jankColors.count >= 4 else { return greyColor }
+        switch tag {
+        case 1: return jankColors[2]
+        case 3: return jankColors[3]
+        default: return jankColors[0]
+        }
+    }
+
     /// Upstream `ProcedureWorkerFunc`: `FUNC_COLOR[hashFunc(name, depth, n)]`.
     public static func color(forSliceName name: String, depth: Int = 0) -> TimelineColor {
         funcColors[hashFunc(name, depth: depth, modulus: funcColors.count)]
@@ -285,6 +301,11 @@ package enum TimelineDetailPalette {
                 raw: detail.inspector?.state ?? detail.label,
                 normalized: normalizedState(for: detail.category)
             )
+        case .frame:
+            // Upstream's JANK_COLOR: index 0 normal, 2 for jank_tag 1, 3 for
+            // jank_tag 3 (`ProcedureWorkerJank.ts`). Colour is a second signal
+            // only -- the label and Inspector say "jank" in words (AT-APP-011).
+            return TimelinePalette.jankColor(tag: detail.jankTag)
         case .namedSlice, .counter:
             return nameColor(for: detail)
         case nil:

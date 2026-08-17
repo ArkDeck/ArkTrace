@@ -4,6 +4,7 @@ package enum TraceDensitySource: Hashable, Codable, Sendable {
     case namedSlice(ThreadKey?)
     case cpuCounter(filterID: Int64, cpu: Int64?)
     case processCounter(filterID: Int64, processKey: ProcessKey?)
+    case frame(processKey: ProcessKey?)
 }
 
 package struct TraceDensityQuery: Sendable {

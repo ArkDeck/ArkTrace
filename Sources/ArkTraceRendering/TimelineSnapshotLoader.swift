@@ -4,6 +4,12 @@ import ArkTraceCore
 /// latest generation, so an older pan/zoom request can never overwrite a new
 /// immutable snapshot.
 package actor TimelineSnapshotLoader {
+    /// Ceiling on depth rows a single track may reserve. Real traces reach
+    /// depth 17, so the cap is not normally hit; it exists so a pathological
+    /// stack cannot make one track taller than any viewport and push every
+    /// other track out of reach.
+    static let maximumDepthRows = 32
+
     private var latestGeneration: UInt64 = 0
 
     public init() {}
@@ -30,17 +36,33 @@ package actor TimelineSnapshotLoader {
             let bucketCount = max(
                 1, min(max(1, request.pixelWidth / 16), fairBudget)
             )
-            let batch = try TraceRepositoryEventBatch(
-                densities: try visible.map {
-                    try TraceDensityQuery(
-                        range: request.viewport.range,
-                        source: $0.source.densitySource,
-                        bucketCount: bucketCount,
-                        deadline: request.deadline
-                    )
-                }
-            )
-            prefetchedDensities = try await repository.eventBatch(batch).densities
+            let queries = try visible.map {
+                try TraceDensityQuery(
+                    range: request.viewport.range,
+                    source: $0.source.densitySource,
+                    bucketCount: bucketCount,
+                    deadline: request.deadline
+                )
+            }
+            // One density query per visible track, but a batch carries at most
+            // `maximumQueryCount`. The visible track count is a UI property and
+            // is not bounded by that cap -- a trace with many counter series
+            // exceeds it -- so the prefetch runs in successive full batches
+            // instead of failing the whole viewport. Results are concatenated
+            // in query order, which is the visible-track order the loop below
+            // indexes by.
+            var densities: [TraceDensityResult] = []
+            densities.reserveCapacity(queries.count)
+            for chunk in queries.chunked(by: TraceRepositoryEventBatch.maximumQueryCount) {
+                try Task.checkCancellation()
+                guard request.generation == latestGeneration else { return nil }
+                densities.append(
+                    contentsOf: try await repository.eventBatch(
+                        try TraceRepositoryEventBatch(densities: chunk)
+                    ).densities
+                )
+            }
+            prefetchedDensities = densities
         } else {
             prefetchedDensities = nil
         }
@@ -64,13 +86,30 @@ package actor TimelineSnapshotLoader {
                 )
             }
             guard request.generation == latestGeneration else { return nil }
+            // The track stretches to the deepest call actually in this
+            // viewport, so a shallow region of a deep thread stays compact and
+            // panning into nesting grows the track. Depth beyond the cap is
+            // drawn on the last row rather than off the track (geometry clamps
+            // it) and is reported as truncation, never dropped silently.
+            let observedDepth = trackPrimitives.reduce(0) { current, primitive in
+                guard case .detail(let detail) = primitive else { return current }
+                return max(current, detail.depth)
+            }
+            let rowCount = min(observedDepth + 1, Self.maximumDepthRows)
+            appendTruncation(
+                observedDepth + 1 > Self.maximumDepthRows,
+                scope: "timeline.namedSlice.depth",
+                to: &issues
+            )
+            let height = TimelineGeometry.trackHeight(depthRowCount: rowCount)
             snapshots.append(
                 TimelineTrackSnapshot(
-                    descriptor: track, y: y, height: 28, primitives: trackPrimitives
+                    descriptor: track, y: y, height: height,
+                    primitives: trackPrimitives, depthRowCount: rowCount
                 )
             )
             remaining = max(0, remaining - trackPrimitives.count)
-            y += 28
+            y += height
         }
         guard request.generation == latestGeneration else { return nil }
         return TimelineSnapshot(
@@ -172,7 +211,11 @@ package actor TimelineSnapshotLoader {
                         trackID: track.id,
                         eventKey: $0.key,
                         range: try eventRange(start: $0.startNs, end: $0.endNs),
-                        label: $0.tid.map { "TID \($0)" },
+                        label: Self.cpuSliceLabel(
+                            processName: $0.processName,
+                            threadName: $0.threadName,
+                            tid: $0.tid
+                        ),
                         category: "cpu",
                         inspector: TraceEventInspector(
                             key: $0.key,
@@ -191,7 +234,8 @@ package actor TimelineSnapshotLoader {
                             category: "cpu",
                             state: $0.endState,
                             value: nil,
-                            unit: nil
+                            unit: nil,
+                            priority: $0.priority
                         )
                     )
                 )
@@ -232,6 +276,59 @@ package actor TimelineSnapshotLoader {
                             value: nil,
                             unit: nil
                         )
+                    )
+                )
+            }
+        case .frame(let processKey):
+            let page = try await repository.frames(
+                TraceFrameQuery(
+                    range: range, processKey: processKey, limit: limit,
+                    deadline: deadline
+                )
+            )
+            qualityIssues.append(contentsOf: page.dataQuality.issues)
+            appendTruncation(page.truncated, scope: "timeline.frame", to: &qualityIssues)
+            return try page.items.map { frame in
+                let tag = TraceFrame.jankTag(frame.flag)
+                return .detail(
+                    TimelineDetailPrimitive(
+                        trackID: track.id,
+                        eventKey: frame.key,
+                        range: try eventRange(start: frame.startNs, end: frame.endNs),
+                        // Jank is stated in words, never by colour alone
+                        // (AT-APP-011). The label is the first place a reader
+                        // looks, so it carries it too.
+                        label: Self.frameLabel(frame, jankTag: tag),
+                        category: "frame",
+                        inspector: TraceEventInspector(
+                            key: frame.key,
+                            type: .frame,
+                            name: Self.frameLabel(frame, jankTag: tag),
+                            range: frame.range,
+                            semanticDurationNs: frame.isOpenEnded
+                                ? nil : frame.range.durationNs,
+                            isOpenEnded: frame.isOpenEnded,
+                            processKey: frame.processKey,
+                            threadKey: frame.threadKey,
+                            pid: frame.pid,
+                            tid: nil,
+                            cpu: nil,
+                            processName: frame.processName,
+                            threadName: nil,
+                            category: "frame",
+                            // Reuses the Inspector's existing state row, so the
+                            // jank verdict is copyable text and reaches
+                            // VoiceOver through the established path.
+                            state: Self.jankStateText(tag),
+                            value: frame.vsync,
+                            unit: "vsync"
+                        ),
+                        // Expected sits above its actual frame, which is the
+                        // pairing upstream shows. `vsync` + process is the pair
+                        // key: `frame_slice.dst` is NULL throughout real
+                        // captures, so it cannot be used for this.
+                        depth: frame.kind == .expected ? 0 : 1,
+                        jankTag: tag
                     )
                 )
             }
@@ -287,7 +384,10 @@ package actor TimelineSnapshotLoader {
                             state: nil,
                             value: nil,
                             unit: nil
-                        )
+                        ),
+                        // A schema without `callstack.depth` yields nil here,
+                        // which collapses to a single row rather than failing.
+                        depth: track.showsNestedDepth ? Int($0.depth ?? 0) : 0
                     )
                 )
             }
@@ -400,6 +500,50 @@ package actor TimelineSnapshotLoader {
         }
     }
 
+    /// A frame's label says which side of the vsync it is and, when the frame
+    /// janked, says so in words.
+    static func frameLabel(_ frame: TraceFrame, jankTag: Int64) -> String {
+        let side = frame.kind == .expected ? "expected" : "actual"
+        let base = "vsync \(frame.vsync) \(side)"
+        guard jankTag != 0 else { return base }
+        return base + " · jank"
+    }
+
+    /// Text form of upstream's `jank_tag`, used for the Inspector row and the
+    /// accessibility value.
+    static func jankStateText(_ jankTag: Int64) -> String {
+        switch jankTag {
+        case 1: "jank"
+        case 3: "jank (deadline missed)"
+        default: "on time"
+        }
+    }
+
+    /// Upstream labels a CPU slice with the owning process and thread rather
+    /// than a bare TID (`database/ui-worker/cpu/ProcedureWorkerCPU.ts:282-320`
+    /// draws `processName [pid]` above `threadName [tid] [Prio:n]`). ArkTrace
+    /// keeps one line because a track band is a single 28pt row; the renderer
+    /// still only draws it when the primitive is wide enough and clips inside
+    /// the primitive (AT-RENDER-005).
+    ///
+    /// The fallback chain never yields an empty label: process and thread name
+    /// are each optional, and a row with neither falls back to the TID. A slice
+    /// with no identifying field at all gets no label rather than a blank one.
+    static func cpuSliceLabel(
+        processName: String?,
+        threadName: String?,
+        tid: Int64?
+    ) -> String? {
+        let names = [processName, threadName]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+        let suffix = tid.map { " [\($0)]" } ?? ""
+        if names.isEmpty {
+            return tid.map { "TID \($0)" }
+        }
+        return names.joined(separator: " · ") + suffix
+    }
+
     private func appendTruncation(
         _ truncated: Bool,
         scope: String,
@@ -413,5 +557,15 @@ package actor TimelineSnapshotLoader {
                 message: "Timeline detail primitives reached the viewport budget"
             )
         )
+    }
+}
+
+extension Array {
+    /// Splits into consecutive slices of at most `size`, preserving order.
+    fileprivate func chunked(by size: Int) -> [[Element]] {
+        guard size > 0, count > size else { return isEmpty ? [] : [self] }
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
+        }
     }
 }

@@ -1041,6 +1041,434 @@ final class TimelineRenderingTests: XCTestCase {
         XCTAssertEqual(snapshot?.primitiveCount, 3)
     }
 
+    /// Visible track count is a UI property; the repository event batch caps at
+    /// `maximumQueryCount`. A trace with many counter series has more visible
+    /// tracks than that cap, and the density prefetch must chunk rather than
+    /// fail the whole viewport -- otherwise the window shows "Trace unavailable".
+    func testDensityPrefetchChunksBeyondTheEventBatchQueryCap() async throws {
+        let trackCount = TraceRepositoryEventBatch.maximumQueryCount * 2 + 1
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000_000),
+            widthPoints: 100,
+            heightPoints: 2_000,
+            generation: 7
+        )
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: (0..<trackCount).map {
+                TrackDescriptor(
+                    title: "Counter \($0)",
+                    source: .processCounter(
+                        filterID: Int64($0), processKey: ProcessKey(ipid: 1)
+                    )
+                )
+            },
+            pixelWidth: 100,
+            generation: 7,
+            preference: .density,
+            maximumPrimitives: trackCount * 4,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let snapshot = try await TimelineSnapshotLoader().load(
+            request, repository: DensityRepository(eventCount: 1_000_000)
+        )
+        XCTAssertEqual(snapshot?.tracks.count, trackCount)
+        // Each track kept its own density result rather than being shifted by a
+        // chunk boundary.
+        XCTAssertTrue(snapshot?.tracks.allSatisfy { !$0.primitives.isEmpty } == true)
+    }
+
+    /// Upstream labels a CPU slice with its process and thread
+    /// (`ProcedureWorkerCPU.ts:282-320`), not a bare TID. Each name is
+    /// optional, so the fallback chain has to keep producing something
+    /// identifying -- and must never produce an empty label.
+    func testCPUSliceLabelFallsBackThroughProcessThreadAndTID() {
+        XCTAssertEqual(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: "render_service", threadName: "RSRenderThread", tid: 645
+            ),
+            "render_service · RSRenderThread [645]"
+        )
+        XCTAssertEqual(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: "render_service", threadName: nil, tid: 645
+            ),
+            "render_service [645]"
+        )
+        XCTAssertEqual(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: nil, threadName: "RSRenderThread", tid: 645
+            ),
+            "RSRenderThread [645]"
+        )
+        XCTAssertEqual(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: nil, threadName: nil, tid: 645
+            ),
+            "TID 645"
+        )
+        // An empty stored name is not an identifying name.
+        XCTAssertEqual(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: "", threadName: "", tid: 645
+            ),
+            "TID 645"
+        )
+        // Nothing to say at all yields no label rather than a blank one.
+        XCTAssertNil(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: nil, threadName: nil, tid: nil
+            )
+        )
+        XCTAssertEqual(
+            TimelineSnapshotLoader.cpuSliceLabel(
+                processName: "render_service", threadName: "RSRenderThread", tid: nil
+            ),
+            "render_service · RSRenderThread"
+        )
+    }
+
+    /// Depth splits a named-slice track into rows (upstream
+    /// `ProcedureWorkerFunc.ts:237` `depth * 18 + 3`). The invariant that
+    /// matters is AT-RENDER-003: the frame the renderer draws and the frame
+    /// hit-testing uses come from one function, so a click on a nested slice
+    /// selects that slice and not the one drawn above or below it.
+    @MainActor
+    func testNestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 1_000, endNs: 2_000),
+            widthPoints: 100,
+            heightPoints: 200,
+            generation: 1
+        )
+        let descriptor = TrackDescriptor(
+            title: "main", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        // Nested calls: the child is fully inside the parent, so only depth
+        // separates them. Without depth rows they would overlap exactly.
+        func slice(_ rowID: Int64, _ depth: Int) throws -> TimelinePrimitive {
+            .detail(
+                TimelineDetailPrimitive(
+                    trackID: descriptor.id,
+                    eventKey: EventKey(table: .callstack, rowID: rowID),
+                    range: try TraceTimeRange(startNs: 1_200, endNs: 1_800),
+                    label: "frame",
+                    category: "slice",
+                    depth: depth
+                )
+            )
+        }
+        let primitives = [try slice(1, 0), try slice(2, 1), try slice(3, 2)]
+        let rowCount = 3
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor,
+            y: 0,
+            height: TimelineGeometry.trackHeight(depthRowCount: rowCount),
+            primitives: primitives,
+            depthRowCount: rowCount
+        )
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 100, height: 200))
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport,
+            tracks: [track],
+            generation: 1,
+            dataQuality: TraceDataQuality()
+        )
+
+        var frames: [CGRect] = []
+        for (index, primitive) in primitives.enumerated() {
+            let frame = TimelineGeometry.frame(
+                for: primitive, in: track, viewport: viewport, backingScale: 2
+            )
+            frames.append(frame)
+            guard case .detail(let detail) = primitive else { return XCTFail() }
+            // The drawn frame is what hit-testing resolves, within the 1 point
+            // AT-RENDER-003 allows.
+            XCTAssertEqual(
+                view.event(at: CGPoint(x: frame.midX, y: frame.midY)),
+                detail.eventKey,
+                "depth \(index) frame is not its own hit target"
+            )
+        }
+        // Rows are disjoint and ordered top to bottom.
+        XCTAssertEqual(frames.map(\.minY), frames.map(\.minY).sorted())
+        for (shallow, deep) in zip(frames, frames.dropFirst()) {
+            XCTAssertFalse(shallow.intersects(deep))
+            XCTAssertEqual(deep.minY, shallow.maxY, accuracy: 0.001)
+        }
+        // Every row stays inside the track it belongs to.
+        let trackFrame = TimelineGeometry.trackFrame(track)
+        for frame in frames {
+            XCTAssertGreaterThanOrEqual(frame.minY, trackFrame.minY)
+            XCTAssertLessThanOrEqual(frame.maxY, trackFrame.maxY)
+        }
+    }
+
+    /// End-to-end through the real loader: a nested call stack has to arrive as
+    /// per-depth rows with a track tall enough to hold them, and flattening the
+    /// track has to put everything back on one row without losing slices.
+    func testLoaderBuildsDepthRowsAndFlatteningReturnsToOneBand() async throws {
+        let threadKey = ThreadKey(itid: 1)
+        // A 5-deep stack, each level nested inside the previous one.
+        let slices = try (0..<5).map { depth in
+            TraceSlice(
+                key: EventKey(table: .callstack, rowID: Int64(depth) + 1),
+                range: try TraceTimeRange(
+                    startNs: 100 + Int64(depth) * 10,
+                    endNs: 900 - Int64(depth) * 10
+                ),
+                threadKey: threadKey,
+                processKey: ProcessKey(ipid: 1),
+                pid: 1, tid: 100, processName: "p", threadName: "t",
+                name: "frame\(depth)", category: "slice", depth: Int64(depth),
+                parentEventKey: nil, isAsync: false, isOpenEnded: false
+            )
+        }
+        let repository = DensityRepository(
+            eventCount: 5,
+            slicePage: TraceEventPage(items: slices, truncated: false)
+        )
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 400,
+            heightPoints: 400,
+            generation: 1
+        )
+
+        func snapshot(showsNestedDepth: Bool, generation: UInt64) async throws
+            -> TimelineTrackSnapshot
+        {
+            let request = try ViewportRequest(
+                viewport: try TimelineViewport(
+                    range: viewport.range,
+                    widthPoints: 400,
+                    heightPoints: 400,
+                    generation: generation
+                ),
+                tracks: [
+                    TrackDescriptor(
+                        title: "t",
+                        source: .namedSlice(threadKey),
+                        showsNestedDepth: showsNestedDepth
+                    )
+                ],
+                pixelWidth: 400,
+                generation: generation,
+                preference: .detail,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+            let loaded = try await TimelineSnapshotLoader().load(
+                request, repository: repository
+            )
+            return try XCTUnwrap(loaded?.tracks.first)
+        }
+
+        let expanded = try await snapshot(showsNestedDepth: true, generation: 1)
+        XCTAssertEqual(expanded.depthRowCount, 5)
+        XCTAssertEqual(
+            expanded.height, TimelineGeometry.trackHeight(depthRowCount: 5)
+        )
+        XCTAssertGreaterThan(expanded.height, 28)
+        let depths = expanded.primitives.compactMap { primitive -> Int? in
+            guard case .detail(let detail) = primitive else { return nil }
+            return detail.depth
+        }
+        XCTAssertEqual(depths.sorted(), [0, 1, 2, 3, 4])
+        // Distinct rows: the staircase, not one solid band.
+        let rows = Set(
+            expanded.primitives.map {
+                TimelineGeometry.frame(
+                    for: $0, in: expanded, viewport: viewport, backingScale: 2
+                ).minY
+            }
+        )
+        XCTAssertEqual(rows.count, 5)
+
+        let flattened = try await snapshot(showsNestedDepth: false, generation: 2)
+        XCTAssertEqual(flattened.depthRowCount, 1)
+        XCTAssertEqual(flattened.height, 28)
+        // Flattening changes layout only -- every slice is still present.
+        XCTAssertEqual(flattened.primitives.count, expanded.primitives.count)
+        let flattenedRows = Set(
+            flattened.primitives.map {
+                TimelineGeometry.frame(
+                    for: $0, in: flattened, viewport: viewport, backingScale: 2
+                ).minY
+            }
+        )
+        XCTAssertEqual(flattenedRows.count, 1)
+    }
+
+    /// DESIGN §13.5 / AT-RENDER-008: fill batches are bounded by the palette,
+    /// not by event count. Depth multiplies how many primitives a single track
+    /// can hold, so the bound has to survive a deep stack too — batching keys
+    /// on colour, and depth deliberately does not reach the colour.
+    @MainActor
+    func testDeepStackKeepsFillBatchesBoundedByThePalette() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 20_000),
+            widthPoints: 500,
+            heightPoints: 800,
+            generation: 91
+        )
+        let descriptor = TrackDescriptor(
+            title: "deep", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        let rowCount = 16
+        // 20k primitives spread over 16 depth rows, with many distinct names.
+        let primitives = try (0..<20_000).map { index in
+            TimelinePrimitive.detail(
+                TimelineDetailPrimitive(
+                    trackID: descriptor.id,
+                    eventKey: EventKey(table: .callstack, rowID: Int64(index) + 1),
+                    range: try TraceTimeRange(
+                        startNs: Int64(index % 1_000) * 20,
+                        endNs: Int64(index % 1_000) * 20 + 10
+                    ),
+                    label: "slice-\(index)",
+                    category: "slice",
+                    depth: index % rowCount
+                )
+            )
+        }
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor,
+            y: 0,
+            height: TimelineGeometry.trackHeight(depthRowCount: rowCount),
+            primitives: primitives,
+            depthRowCount: rowCount
+        )
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 500, height: 800))
+        var detailBuilds: [Int] = []
+        view.pathCacheBuildHook = { kind, bucketCount in
+            if kind == "detail" { detailBuilds.append(bucketCount) }
+        }
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport,
+            tracks: [track],
+            generation: 91,
+            dataQuality: TraceDataQuality()
+        )
+        let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        XCTAssertEqual(detailBuilds.count, 1, "one path build per snapshot generation")
+        let buckets = try XCTUnwrap(detailBuilds.first)
+        XCTAssertLessThanOrEqual(
+            buckets,
+            TimelinePalette.funcColors.count,
+            "20k primitives over 16 depth rows must still batch by palette size"
+        )
+    }
+
+    /// A track with no nesting has to keep the geometry it had before depth
+    /// existed, otherwise every CPU, thread-state and counter lane shifts.
+    func testSingleDepthTrackGeometryIsUnchanged() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 1_000, endNs: 2_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 1
+        )
+        let descriptor = TrackDescriptor(title: "CPU 0", source: .cpu(0))
+        let primitive = TimelinePrimitive.detail(
+            TimelineDetailPrimitive(
+                trackID: descriptor.id,
+                eventKey: EventKey(table: .schedSlice, rowID: 1),
+                range: try TraceTimeRange(startNs: 1_250, endNs: 1_500)
+            )
+        )
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor, y: 0, height: 28, primitives: [primitive]
+        )
+        XCTAssertEqual(TimelineGeometry.trackHeight(depthRowCount: 1), 28)
+        let frame = TimelineGeometry.frame(
+            for: primitive, in: track, viewport: viewport, backingScale: 2
+        )
+        XCTAssertEqual(frame.minY, TimelineGeometry.rulerHeight + 3, accuracy: 0.001)
+        XCTAssertEqual(frame.height, 22, accuracy: 0.001)
+    }
+
+    /// `callstack.depth` is optional in the schema. When it is absent the
+    /// loader yields depth 0 for every slice, which must render as one solid
+    /// band with no reserved-but-empty rows underneath it.
+    func testAbsentDepthCollapsesToASingleBandWithoutGaps() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 1
+        )
+        let descriptor = TrackDescriptor(
+            title: "main", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        let primitives = try (1...3).map { rowID in
+            TimelinePrimitive.detail(
+                TimelineDetailPrimitive(
+                    trackID: descriptor.id,
+                    eventKey: EventKey(table: .callstack, rowID: Int64(rowID)),
+                    range: try TraceTimeRange(
+                        startNs: Int64(rowID) * 100, endNs: Int64(rowID) * 100 + 50
+                    )
+                )
+            )
+        }
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor,
+            y: 0,
+            height: TimelineGeometry.trackHeight(depthRowCount: 1),
+            primitives: primitives,
+            depthRowCount: 1
+        )
+        XCTAssertEqual(track.height, 28)
+        for primitive in primitives {
+            let frame = TimelineGeometry.frame(
+                for: primitive, in: track, viewport: viewport, backingScale: 2
+            )
+            XCTAssertEqual(frame.minY, TimelineGeometry.rulerHeight + 3, accuracy: 0.001)
+            XCTAssertEqual(frame.height, 22, accuracy: 0.001)
+        }
+    }
+
+    /// A depth deeper than the track reserved rows for is drawn on the last
+    /// row. Letting it fall outside the track would make it unhittable, since
+    /// hit-testing first requires the point to be inside the track frame.
+    func testDepthBeyondReservedRowsClampsInsideTheTrack() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 200,
+            generation: 1
+        )
+        let descriptor = TrackDescriptor(
+            title: "main", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        let deep = TimelinePrimitive.detail(
+            TimelineDetailPrimitive(
+                trackID: descriptor.id,
+                eventKey: EventKey(table: .callstack, rowID: 9),
+                range: try TraceTimeRange(startNs: 100, endNs: 900),
+                depth: 99
+            )
+        )
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor,
+            y: 0,
+            height: TimelineGeometry.trackHeight(depthRowCount: 2),
+            primitives: [deep],
+            depthRowCount: 2
+        )
+        let frame = TimelineGeometry.frame(
+            for: deep, in: track, viewport: viewport, backingScale: 2
+        )
+        let trackFrame = TimelineGeometry.trackFrame(track)
+        XCTAssertLessThanOrEqual(frame.maxY, trackFrame.maxY)
+        XCTAssertEqual(
+            frame.minY,
+            TimelineGeometry.rulerHeight + 3 + TimelineGeometry.depthRowSpan,
+            accuracy: 0.001
+        )
+    }
+
     func testStaleGenerationCompletionIsDiscarded() async throws {
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 0, endNs: 1_000),

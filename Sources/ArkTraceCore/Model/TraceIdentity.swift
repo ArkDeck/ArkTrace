@@ -18,11 +18,20 @@ public struct ThreadKey: Hashable, Codable, Sendable {
 }
 
 /// Source table of a selectable event (AT-ID-003).
+///
+/// Counter samples have two physical sources. TraceStreamer writes process
+/// counter samples to `process_measure` and CPU counter samples to `measure`;
+/// `measure` remains a compatible secondary source for process counters in
+/// databases that wrote them there. Row identity is only unique within one
+/// physical table, so the two carry distinct cases rather than sharing
+/// `.measure`.
 public enum TraceEventTable: String, Codable, Sendable {
     case schedSlice = "sched_slice"
     case threadState = "thread_state"
     case callstack = "callstack"
     case measure = "measure"
+    case processMeasure = "process_measure"
+    case frameSlice = "frame_slice"
 }
 
 /// Event identity: stable within one parser/cache identity (AT-ID-003).

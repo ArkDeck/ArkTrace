@@ -1876,6 +1876,365 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(capabilities.processCounters)
     }
 
+    /// Upstream reads process counter samples from `process_measure`
+    /// (`database/sql/ProcessThread.sql.ts:544-560`). Real TraceStreamer
+    /// exports leave `measure` empty and put every process sample there, so a
+    /// repository that only reads `measure` reports the capability as
+    /// unavailable and the whole counter lane disappears.
+    func testProcessCounterSamplesComeFromProcessMeasureWhenMeasureIsEmpty() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            INSERT INTO process_measure VALUES (1100, 10, 1, 7);
+            INSERT INTO process_measure VALUES (1200, 10, 2, 7);
+            INSERT INTO process_measure VALUES (1300, 10, 3, 7);
+            """
+        )
+
+        let repository = try makeRepository()
+        let capabilities = try await repository.metadata().capabilities
+        XCTAssertTrue(capabilities.processCounters)
+        XCTAssertFalse(capabilities.cpuCounters)
+
+        let result = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(result.capabilityAvailable)
+        XCTAssertEqual(result.items.count, 1)
+        let series = try XCTUnwrap(result.items.first)
+        XCTAssertEqual(series.name, "H:VSync-app")
+        XCTAssertEqual(series.scope, .process)
+        XCTAssertEqual(series.samples.count, 3)
+        XCTAssertEqual(series.samples.map(\.value), [1, 2, 3])
+        // Row identity belongs to the physical table the sample came from, so
+        // it cannot be confused with a `measure` row of the same rowid.
+        XCTAssertEqual(
+            series.samples.map(\.key.table), Array(repeating: .processMeasure, count: 3)
+        )
+        // `dur` is read from the source table, not from `measure`.
+        XCTAssertEqual(series.samples.compactMap(\.durationNs), [10, 10, 10])
+    }
+
+    /// Databases that did write process samples into `measure` keep working,
+    /// and a database carrying both sources merges them into one deterministic
+    /// page rather than failing the duplicate-identity check (AT-QUERY-001).
+    func testProcessCountersReadLegacyMeasureAndMergeBothSourcesDeterministically()
+        async throws
+    {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'legacy', 1);
+            INSERT INTO measure VALUES (1100, 10, 1, 7);
+            """
+        )
+
+        var result = try await makeRepository().counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(result.items.first?.samples.map(\.key.table), [.measure])
+
+        // Both physical tables now carry samples for the same series. Row
+        // identity 1 exists in each; merging must keep both and order them.
+        try db.execute(
+            """
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            INSERT INTO process_measure VALUES (1100, 10, 2, 7);
+            """
+        )
+        result = try await makeRepository().counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        let series = try XCTUnwrap(result.items.first)
+        XCTAssertEqual(series.samples.count, 2)
+        XCTAssertEqual(series.samples.map(\.key.table), [.measure, .processMeasure])
+        XCTAssertEqual(series.samples.map(\.value), [1, 2])
+    }
+
+    /// CPU counters stay on `measure` (upstream `Cpu.sql.ts:127-134`). A
+    /// database whose process samples moved to `process_measure` must not
+    /// change what the CPU scope reads or reports.
+    func testCPUCounterPathIsUnaffectedByProcessSampleTable() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO cpu_measure_filter VALUES (3, 'cpu-idle', 0);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            INSERT INTO measure VALUES (1100, 10, 5, 3);
+            INSERT INTO process_measure VALUES (1200, 10, 9, 7);
+            """
+        )
+
+        let repository = try makeRepository()
+        let capabilities = try await repository.metadata().capabilities
+        XCTAssertTrue(capabilities.cpuCounters)
+        XCTAssertTrue(capabilities.processCounters)
+
+        let result = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                cpu: 0,
+                limit: 100,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(result.items.count, 1)
+        let series = try XCTUnwrap(result.items.first)
+        XCTAssertEqual(series.name, "cpu-idle")
+        XCTAssertEqual(series.scope, .cpu)
+        XCTAssertEqual(series.samples.map(\.key.table), [.measure])
+        XCTAssertEqual(series.samples.map(\.value), [5])
+    }
+
+    /// Density and the counter page must agree on which rows exist, otherwise
+    /// the overview band contradicts the detail lane it summarizes.
+    func testProcessCounterDensityCountsProcessMeasureSamples() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            INSERT INTO process_measure VALUES (1100, 0, 1, 7);
+            INSERT INTO process_measure VALUES (1150, 0, 2, 7);
+            INSERT INTO process_measure VALUES (1600, 0, 3, 7);
+            """
+        )
+
+        let result = try await makeRepository().density(
+            TraceDensityQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                source: .processCounter(filterID: 7, processKey: ProcessKey(ipid: 1)),
+                bucketCount: 2,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        let counts: [Int64] = result.buckets.map { $0.eventCount }
+        XCTAssertEqual(counts, [2, 1])
+    }
+
+    /// The `args` encoding is upstream's, taken from the `args_view` definition
+    /// TraceStreamer writes into every exported database at the pinned
+    /// revision. The branch that matters: **only `datatype == 1` dereferences
+    /// `value` through `data_dict`** — every other type uses the integer.
+    func testSliceArgumentsResolveNamesAndFollowUpstreamDatatypeRules() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            UPDATE callstack SET argsetid = 5 WHERE id = 1;
+            CREATE TABLE args (
+                id INTEGER, key INTEGER, datatype INTEGER, value INTEGER, argset INTEGER
+            );
+            CREATE TABLE data_dict (id INTEGER, data TEXT);
+            CREATE TABLE data_type (id INTEGER, typeId INTEGER, desc TEXT);
+            INSERT INTO data_type VALUES (0, 0, 'int32_t'), (1, 1, 'string'),
+                (2, 2, 'double'), (3, 3, 'boolean');
+            INSERT INTO data_dict VALUES
+                (10, 'destination name'), (11, 'transaction id'),
+                (12, 'reply transaction?'), (13, 'OS_IPC_0_235');
+            -- datatype 1: value 13 is a dict id and must resolve to text.
+            INSERT INTO args VALUES (1, 10, 1, 13, 5);
+            -- datatype 0: value is the integer itself, NOT a dict id.
+            INSERT INTO args VALUES (2, 11, 0, 318071, 5);
+            -- datatype 3: also the raw integer.
+            INSERT INTO args VALUES (3, 12, 3, 0, 5);
+            -- A different argset must not leak in.
+            INSERT INTO args VALUES (4, 10, 1, 13, 6);
+            """
+        )
+        let repository = try makeRepository()
+        let page = try await repository.arguments(
+            TraceArgumentQuery(
+                argSetID: 5, deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(page.capabilityAvailable)
+        XCTAssertFalse(page.truncated)
+        XCTAssertEqual(
+            page.items.map(\.key),
+            ["destination name", "transaction id", "reply transaction?"],
+            "keys always resolve through data_dict"
+        )
+        XCTAssertEqual(
+            page.items.map(\.value),
+            ["OS_IPC_0_235", "318071", "0"],
+            "only datatype 1 dereferences value; 318071 must not become a dict lookup"
+        )
+        XCTAssertEqual(
+            page.items.map(\.typeName), ["string", "int32_t", "boolean"]
+        )
+    }
+
+    /// A trace without `args` is not an error: the capability is optional and
+    /// the Inspector simply shows no section (AT-DB-004).
+    func testSliceArgumentsAreUnavailableWithoutTheArgsTables() async throws {
+        let repository = try makeRepository()
+        let page = try await repository.arguments(
+            TraceArgumentQuery(
+                argSetID: 1, deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertFalse(page.capabilityAvailable)
+        XCTAssertTrue(page.items.isEmpty)
+    }
+
+    /// One slice's argument list is bounded so a malformed set cannot flood the
+    /// Inspector (AT-DB-007).
+    func testSliceArgumentsAreBoundedAndReportTruncation() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            CREATE TABLE args (
+                id INTEGER, key INTEGER, datatype INTEGER, value INTEGER, argset INTEGER
+            );
+            CREATE TABLE data_dict (id INTEGER, data TEXT);
+            CREATE TABLE data_type (id INTEGER, typeId INTEGER, desc TEXT);
+            INSERT INTO data_dict VALUES (1, 'k');
+            WITH RECURSIVE n(v) AS (SELECT 1 UNION ALL SELECT v + 1 FROM n WHERE v < 20)
+            INSERT INTO args SELECT v, 1, 0, v, 7 FROM n;
+            """
+        )
+        let page = try await makeRepository().arguments(
+            TraceArgumentQuery(
+                argSetID: 7, limit: 5,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(page.items.count, 5)
+        XCTAssertTrue(page.truncated, "a bounded list must say it is bounded")
+    }
+
+    /// `frame_slice.type` is the opposite of what the names suggest and was
+    /// verified against the pinned upstream plus real captures: **0 is the
+    /// actual frame, 1 the expected one**. Getting this backwards would swap
+    /// every lane, so it is asserted explicitly.
+    func testFrameTypeEncodingMatchesUpstreamAndJankFollowsFlag() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE frame_slice (
+                id INTEGER, ts INTEGER, vsync INTEGER, ipid INTEGER, itid INTEGER,
+                dur INTEGER, dst INTEGER, type INTEGER, type_desc TEXT, flag INTEGER
+            );
+            -- One vsync: an actual frame flagged as jank, and its expected pair.
+            INSERT INTO frame_slice VALUES (1, 1100, 900, 1, 1, 100, NULL, 0, 'actural', 1);
+            INSERT INTO frame_slice VALUES (2, 1100, 900, 1, 1, 80, NULL, 1, 'expect', 2);
+            -- flag 3 is the other jank class; it does not occur in the capture
+            -- we verified against, but upstream treats it as jank.
+            INSERT INTO frame_slice VALUES (3, 1300, 901, 1, 1, 60, NULL, 0, 'actural', 3);
+            -- flag 2 is the most common value in real traces and is NOT jank.
+            INSERT INTO frame_slice VALUES (4, 1400, 902, 1, 1, 60, NULL, 0, 'actural', 2);
+            -- An unrecognised type must be dropped, never guessed at.
+            INSERT INTO frame_slice VALUES (5, 1500, 903, 1, 1, 60, NULL, 9, '?', 0);
+            """
+        )
+        let repository = try makeRepository()
+        let page = try await repository.frames(
+            TraceFrameQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(page.capabilityAvailable)
+        XCTAssertEqual(page.items.count, 4, "the unknown type is dropped")
+        let byRow = Dictionary(
+            uniqueKeysWithValues: page.items.map { ($0.key.rowID, $0) }
+        )
+        XCTAssertEqual(byRow[1]?.kind, .actual, "type 0 is the ACTUAL frame")
+        XCTAssertEqual(byRow[2]?.kind, .expected, "type 1 is the EXPECTED frame")
+        XCTAssertEqual(byRow[1]?.vsync, 900)
+        XCTAssertEqual(byRow[2]?.vsync, 900, "the pair shares a vsync")
+
+        // Upstream jank_tag: 1 and 3 are jank, everything else is not.
+        XCTAssertTrue(byRow[1]?.isJank == true, "flag 1 is jank")
+        XCTAssertTrue(byRow[3]?.isJank == true, "flag 3 is jank")
+        XCTAssertFalse(byRow[4]?.isJank == true, "flag 2 is the common value, not jank")
+        XCTAssertEqual(TraceFrame.jankTag(1), 1)
+        XCTAssertEqual(TraceFrame.jankTag(3), 3)
+        XCTAssertEqual(TraceFrame.jankTag(2), 0)
+        XCTAssertEqual(TraceFrame.jankTag(nil), 0)
+        // The raw flag survives so an unknown value is never reinterpreted.
+        XCTAssertEqual(byRow[4]?.flag, 2)
+        XCTAssertEqual(byRow[1]?.key.table, .frameSlice)
+    }
+
+    /// A capture without `frame_slice` reports the capability as unavailable
+    /// instead of failing to open (AT-DB-004).
+    func testFramesAreUnavailableWithoutTheTable() async throws {
+        let page = try await makeRepository().frames(
+            TraceFrameQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertFalse(page.capabilityAvailable)
+        XCTAssertTrue(page.items.isEmpty)
+    }
+
+    func testFramesAreBoundedAndOrderedDeterministically() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE frame_slice (
+                id INTEGER, ts INTEGER, vsync INTEGER, ipid INTEGER, itid INTEGER,
+                dur INTEGER, dst INTEGER, type INTEGER, type_desc TEXT, flag INTEGER
+            );
+            WITH RECURSIVE n(v) AS (SELECT 1 UNION ALL SELECT v + 1 FROM n WHERE v < 30)
+            INSERT INTO frame_slice
+                SELECT v, 1000 + v, v, 1, 1, 5, NULL, 0, 'actural', 2 FROM n;
+            """
+        )
+        let page = try await makeRepository().frames(
+            TraceFrameQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 10,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(page.items.count, 10)
+        XCTAssertTrue(page.truncated)
+        XCTAssertEqual(
+            page.items.map(\.range.startNs), page.items.map(\.range.startNs).sorted(),
+            "frames come back in a deterministic time order (AT-QUERY-001)"
+        )
+    }
+
     func testCounterCapabilityFindsMatchingIdentityBeyondLegacyProbePrefix() async throws {
         let db = try TraceDatabase(url: databaseURL, readOnly: false)
         try db.execute(
@@ -1908,7 +2267,17 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(result.items.first?.name, "tail match")
     }
 
-    func testCounterCapabilityBudgetExhaustionFailsClosedInsteadOfReportingUnavailable() throws {
+    /// A probe that runs out of budget says something about the probe, not
+    /// about the database (AT-DB-004). The optional capability degrades to
+    /// unavailable and the undecided relationship is reported; refusing to
+    /// open the trace would be a resource limit of ours masquerading as an
+    /// incompatible schema.
+    ///
+    /// This is not a corner case: the pinned upstream `pbreader.htrace` has
+    /// 58 540 `measure` rows and zero of them related to
+    /// `process_measure_filter`, and proving that negative costs the full
+    /// scan. Failing closed here made that entire fixture unopenable.
+    func testCounterCapabilityBudgetExhaustionReportsUnavailableInsteadOfRefusingTheTrace() async throws {
         let db = try TraceDatabase(url: databaseURL, readOnly: false)
         try db.execute(
             """
@@ -1924,16 +2293,67 @@ final class RepositoryTests: XCTestCase {
             """
         )
 
-        XCTAssertThrowsError(try makeRepository()) { error in
-            let error = error as? ArkTraceError
-            XCTAssertEqual(error?.code, .traceSchemaUnsupported)
-            XCTAssertEqual(error?.stage, .validating)
-            XCTAssertEqual(error?.details["reason"], "vmStepBudgetExceeded")
-            XCTAssertEqual(
-                error?.details["relationship"],
-                "measure.filter_id->cpu_measure_filter.id"
+        let repository = try makeRepository()
+        let metadata = try await repository.metadata()
+        XCTAssertFalse(
+            metadata.capabilities.cpuCounters,
+            "an undecided source must not be claimed as a capability"
+        )
+        let issue = try XCTUnwrap(
+            metadata.dataQuality.issues.first { $0.scope == "schema.counterSource" },
+            "the degradation must be reported, not silent"
+        )
+        XCTAssertEqual(issue.category, .probeTruncated)
+        XCTAssertTrue(
+            issue.message?.contains("measure.filter_id->cpu_measure_filter.id") == true,
+            "the issue must name the relationship that could not be decided"
+        )
+    }
+
+    /// The shape real traces have: the primary source proves the scope while
+    /// the compatibility source cannot be decided. The capability stays true,
+    /// the query layer reads only the proven table, and the undecided one is
+    /// still reported.
+    func testAProvenPrimarySourceKeepsTheCapabilityWhenTheSecondaryIsUndecidable() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (ts INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (1, 'mem', 1);
+            INSERT INTO process_measure VALUES (1500, 42, 1);
+            WITH RECURSIVE ids(value) AS (
+                SELECT 1 UNION ALL SELECT value + 1 FROM ids WHERE value < 120000
             )
-        }
+            INSERT INTO measure SELECT 1500, 1, 900000 + value FROM ids;
+            """
+        )
+
+        let repository = try makeRepository()
+        let metadata = try await repository.metadata()
+        XCTAssertTrue(
+            metadata.capabilities.processCounters,
+            "the proven primary source still carries the scope"
+        )
+        XCTAssertTrue(
+            metadata.dataQuality.issues.contains {
+                $0.scope == "schema.counterSource"
+                    && $0.message?.contains(
+                        "measure.filter_id->process_measure_filter.id"
+                    ) == true
+            }
+        )
+        // The proven source is the one that is read.
+        let page = try await repository.counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 10,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(page.items.first?.samples.first?.key.table, .processMeasure)
     }
 
     func testDuplicateCounterFilterIdentityFailsClosedAcrossRowsAndScopes() throws {

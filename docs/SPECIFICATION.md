@@ -136,6 +136,11 @@ eventStart < queryEnd && eventEnd > queryStart
 
 可选择的 event identity 至少包含 source table 和 row ID，且在同一 parser/cache identity 下稳定。
 
+Source table 指**物理表**，不是语义类别。Row ID 只在一张物理表内唯一，因此当同一类 event 有多个来源表时，
+每个来源表必须是独立的取值，不得共用一个 case。counter 样本即属此类：CPU counter 来自 `measure`，
+process counter 来自 `process_measure`，两者的 identity 分别是 `measure` 与 `process_measure`
+（见 AT-DB-003 的 counter 来源表）。
+
 ## 5. Parser 规格
 
 ### AT-PARSE-001 Parser protocol
@@ -236,9 +241,60 @@ callstack(id,ts,dur,callid,name)
 
 同一语义的 alias 只有经过显式、测试覆盖的 adapter 才可接受。
 
+Counter 是 optional capability，其 required 列在被读到时才生效。**每个 scope 的样本来源表必须与上游一致**：
+
+```text
+cpu_measure_filter(id,name,cpu)          ← CPU counter filter
+process_measure_filter(id,name,ipid)     ← process counter filter
+measure(ts,value,filter_id)              ← CPU counter 样本；process counter 的兼容次来源
+process_measure(ts,value,filter_id)      ← process counter 样本（主来源）
+```
+
+依据：上游 CPU counter 读 `measure`（`database/sql/Cpu.sql.ts:127-134`），process counter 读
+`process_measure`（`database/sql/ProcessThread.sql.ts:544-560` `queryProcessMemData`）。两张样本表
+列结构相同。真实 TraceStreamer 导出把 process 样本全部写进 `process_measure`，`measure` 为 0 行，
+因此只读 `measure` 会让 `capabilities.processCounters` 恒为 false。
+
+`measure` 保留为 process scope 的次来源，用于确实把 process 样本写进 `measure` 的库。一个 scope 的
+可用性等于「至少一张来源表与其 filter 表存在实际 join 关系」；两个来源都有数据时合并为一页，排序键
+含来源表，去重按 (物理表, row ID)（AT-QUERY-001、AT-ID-003）。filter id 的跨 scope 唯一性只在
+**同一张物理表同时服务两个 scope** 时才要求——来源表不同时两个 id 空间互相独立。
+
+`frame_slice` 是 **optional** 表，缺失时不得报错、不生成帧泳道：
+
+```text
+frame_slice(id,ts,dur,vsync,ipid,type,flag)   ← type 0=actual、1=expect（与命名直觉相反）
+```
+
+`type` 与 `flag` 的语义取自 pin 版上游，**不得凭猜测实现**：`type = 0` 为 actual、`type = 1` 为 expect；
+jank 判定为上游 `jank_tag`，**只有 `flag` 1 与 3 是 jank**，其余（含真机中最常见的 2）不是。
+未识别的 `type` 必须丢弃并计入 data quality，不得猜测。**expect/actual 的配对必须用 `vsync` + `ipid`**：
+`dst` 列在真实采集中全为 NULL。
+
+Slice 参数（args）是另一组 **optional** 表，缺失时不得报错、Inspector 不显示该段：
+
+```text
+args(key,datatype,value,argset)   ← key 与（仅当 datatype==1 时）value 都是 data_dict 索引
+data_dict(id,data)                ← 名字与字符串值的字典
+data_type(typeId,desc)            ← 0=int32_t 1=string 2=double 3=boolean
+callstack.argsetid                ← optional 列，指向 args.argset
+```
+
+编码取自 TraceStreamer 自己写进每个导出库的 `args_view` 定义（pin revision
+`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`），**不得凭猜测实现**：`args.key` 恒为 `data_dict` 索引；
+**只有 `datatype == 1` 时 `args.value` 才是 `data_dict` 索引**，其余类型直接使用该整数。SmartPerf 的 UI
+自身从不解释 `datatype`，它消费该视图的列（`bean/BinderArgBean.ts`）。
+
 ### AT-DB-004 Additive compatibility
 
 新增表或新增 optional column 不得导致拒绝；required column 缺失、类型/单位语义不兼容或 required join 失败必须返回 `TRACE_SCHEMA_UNSUPPORTED`。
+
+**optional capability 的探测预算不得升级为拒绝打开。** required relationship 的探测超出 VM-step 预算
+必须 fail closed（AT-DB-005），但 optional capability 的来源探测超预算只说明**本次没能判定**，不说明
+数据库不兼容 —— 预算是 ArkTrace 自己的资源上限，不是数据的性质。此时该来源按「未证明、不读取」处理，
+并且**必须**记录一条 data-quality issue 指明是哪条关系没能判定；不得静默降级，也不得因此使一份其余部分
+完全有效的 trace 打不开。证否一条关系在未索引的样本表上是线性的且无法提前退出，因此这是常态而非边角：
+pin 版上游 `pbreader.htrace` 的 `measure` 有 58 540 行、与 `process_measure_filter` **零**关联。
 
 ### AT-DB-005 Integrity
 
@@ -939,6 +995,19 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 
 主界面至少包含 Toolbar、Track Sidebar、Timeline、Inspector，并按 leading-to-trailing 的 Sidebar → Timeline → Inspector 阅读/操作顺序组织。Timeline 必须保持主区域。窗口或文字空间不足时先折叠 Inspector，再允许 Sidebar compact；每个折叠 pane 必须有可见且可键盘触达的 disclosure control。文字 pane 不得依赖不能适应本地化、字体或窗口缩放的固定宽高。除刻意二维滚动的 Timeline 外，不得出现非必要横向滚动。
 
+**Track Sidebar 的组织维度是混合的**：跨进程的泳道（CPU、CPU counter）按种类分组；由线程或进程拥有的
+泳道（thread state、named slice、process counter、frame）按**进程**分组，每个进程一个可折叠节点，
+同一线程的 thread state 与 named slice 泳道相邻。理由与实测依据见 DESIGN §13.3 —— 纯进程树会在真机 trace 上造出
+约 749 个单子节点，反而损害 AT-APP-003 要求的可扫描性。
+
+泳道必须可**置顶（pin）**：置顶集合以用户排定的顺序显示在 Sidebar 顶部，可折叠，且折叠控件与置顶操作
+都必须可键盘触达（AT-APP-009）。置顶集合的条数必须有界，且不得产生非必要横向滚动。置顶一条隐藏泳道
+必须同时使其可见。置顶集合与时间轴标注共享同一生命周期与持久化语义（AT-APP-004）。
+
+每条 per-thread track 的标题必须带上所属进程名（形如 `processName · threadName`）：线程名在进程间大量
+重复，裸线程名不构成标识。默认展开哪些进程必须由**可解释的活动量**决定（而非列表位置），未展开的进程
+仍须列出且可搜索、可手动展开 —— 不得因默认收起而使其不可达。
+
 ### AT-APP-004 Timeline controls
 
 必须提供：
@@ -946,22 +1015,81 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 - time ruler；
 - horizontal pan；
 - zoom in/out；
-- cursor-anchored pinch/scroll zoom；
+- cursor-anchored pinch/scroll zoom。**滚轮缩放必须存在**（上游 `Ctrl + Scroll wheel`）：接滚轮鼠标的
+  用户不得只能靠捏合。修饰键按下时读纵轴滚动并转成缩放，锚点与捏合共用同一段计算；不带修饰时横向平移
+  与纵向滚动穿透的既有行为不得改变；
 - zoom to selection；
 - reset zoom；
-- track expand/collapse。
+- track expand/collapse；
+- **range selection 的两个端点必须可单独拖动**（上游 `RangeRuler.ts:88-89` 的 `markAObj`/`markBObj`）：
+  拖一端时另一端不动；端点 hit area 不小于 24×24 pt 且相邻目标不重叠（AT-APP-011）；拖拽反馈不得只靠
+  颜色表达，且光标提示区域必须与实际命中区域一致；
+- **时间轴标注**：时间点书签（flag）与区间书签（A/B mark）；
+- **frame / jank 泳道**：每个有帧数据的进程一条，expect 与 actual 各占一行、上下相邻。
+  **jank 状态不得只靠颜色表达**（AT-APP-011）——必须同时出现在 label、Inspector 与 accessibility value。
+
+标注是 session 状态，**不得进入 `TimelineSnapshot`**（AT-RENDER-002 要求 snapshot 是 immutable 的
+bounded 查询结果）。flag 由 ruler 点击创建；mark 由当前选区创建，并区分临时（被下一个临时 mark 取代）
+与保留（累积）两种。标注必须可改名、换色、删除，并在打开新 trace 时清除（AT-APP-002）。
+
+标注键位必须遵守既有作用域约定：只在 Timeline 持有 focus 时生效，不拦截文本输入，**⌘ 修饰的字母一律
+交回菜单**。因此标注跳转使用 Control 修饰，且不得夺走裸 `[` / `]` 既有的 zoom-to-selection 含义。
+
+标注**持久化到 trace cache**，按 trace 内容哈希定位。写入的 sidecar 不得包含用户绝对路径、文件名或
+bookmark（AT-APP-001）；哈希不匹配、版本不认或内容损坏时必须降级为「没有标注」，不得因此使打开 trace
+失败。临时 mark 不持久化。
 
 ### AT-APP-005 Selection
 
 支持 hover、click event selection、drag range selection。选中 event 后 Inspector 至少显示：name/type、pid/tid、cpu、startNs、durationNs、process/thread、category/state 和稳定 event key（Developer detail 中）。
 
+Slice 参数（args）必须可见：选中一条带 `argsetid` 的 slice 时，Inspector 显示**解名后**的键值对与其类型。
+参数按 slice 选中时才查询——绝不在构建 snapshot 时逐 primitive 查询，那会让一个视口产生上万次查询——
+且条数有上限，超限必须标注（AT-DB-007）。无 `args` 表的 trace 不显示该段、不报错。
+
+CPU slice 另须显示 scheduler **priority**（上游 `ProcedureWorkerCPU.ts:282-320` 把它画进 slice 文字）。
+该字段只对 CPU slice 有值，其他 event type 一律不渲染该行 —— optional 字段缺省时不得出现空行。
+
 ### AT-APP-006 Range Inspector
 
-选中 range 后必须异步显示 bounded CPU utilization、top threads 和 long slices；analysis 未完成时 UI 仍可 pan/zoom/cancel。
+选中 range 后必须异步显示 bounded CPU utilization、top threads、**thread state 分布**和 long slices；
+analysis 未完成时 UI 仍可 pan/zoom/cancel。
+
+top threads 必须给出**逐 CPU 的时长拆分**（上游 `sheet/cpu/TabPaneCpuByThread.ts` 的 `cpu${i}` 列）。
+拆分是对已取回 page 的再分组，不得为此新增查询：各分量之和必须**恒等于**该行总时长，受限时两者以同一
+方式受限。
+
+Thread state 分布按 thread × state 列出 clipped duration、占区间百分比与 interval 数。它与 CLI
+`analyze` 的 `threadStateDistribution` **必须逐项相等**：两条路径复用 Analysis 中同一个 reduction
+实现、同一种 bounded query 形状与 limit（DESIGN §4.3 不变量 3）。state 名必须以**文字**出现并进入
+accessibility value，不得只靠颜色区分（AT-APP-011）。
+
+区间内的 thread × state 组合数可以远多于 Inspector 能有效呈现的行数，因此列表按耗时降序**显示有界的
+前 N 行**，并同时说明总行数；interval page 触顶时另有独立的 truncation 提示。受限必须可见，不得把
+受限聚合呈现成完整结果。
+
+还必须提供**按 slice 名聚合的统计表**（上游 `sheet/process/TabPaneSlices.ts:395-398`）：name、
+区间内总时长、平均时长、occurrences。它回答「一共花了多少、调了几次」——「调 1 万次、每次很短、
+总和最贵」这类热点是单条最长 slice 列表答不出来的。要求：
+
+- 时长用 clipped overlap（DESIGN §12.2、AT-TIME-003/004）；instant（`dur == 0`）计入 occurrences
+  但不贡献时长（AT-TIME-006）；`dur` 为 NULL/负数按 open-ended 处理（AT-TIME-005），即延伸到 trace
+  末尾后再 clip；
+- 列可排序，默认按总时长降序；
+- 点击一行跳回时间轴并选中该名字在区间内的**第一个** occurrence（按事件序），复用既有 reveal 路径；
+- **聚合基于 bounded page 时必须显式标注为下界**，不得把受限聚合呈现成精确总量。这是本节的正确性底线。
+
+`selfTime` 暂不提供：它需要每条 slice 的直接子节点，而 bounded page 可能缺子节点从而使 selfTime 偏大。
+在能精确计算或能标注受限之前，不给出该列 —— 无标注的错误数值比没有数值更糟。
 
 ### AT-APP-007 Search
 
 支持 PID、TID、process name、thread name、slice name。结果选择后跳转并在可用 detail LOD 下高亮真实 event/track。
+
+结果列表必须可**纯键盘逐条浏览**：上/下逐条前进/后退并 reveal，Return 跳转。逐条步进**不得把键盘 focus
+移出结果列表**（AT-APP-009）——否则第二次按键会落在别处，步进就不成立；把 focus 交给 Timeline 是
+Return 这一步显式的动作。当前所在条目必须以**文字**表达位置（第 n / 共 m），不得只靠行高亮
+（AT-APP-011）。结果集变化时游标必须复位，不得指向上一次查询的行。
 
 ### AT-APP-008 Error presentation
 
@@ -981,6 +1109,10 @@ Timeline 的最低键盘 contract：
 - SmartPerf Host 导航簇：`W` / `S` 缩放，`A` / `D` 平移，`[` / `]` 等价于 `F`。`W` / `S` 必须以指针位置为锚点（指针不在 Timeline 上时退回 `+` / `-` 的锚点链）。这些绑定只在 Timeline 持有 focus 时生效，不得拦截文本输入；带 Command 修饰的字母必须交回菜单。
 
 sheet/dialog/disclosure 关闭后必须恢复 focus 到触发 control；pane 被折叠且包含当前 focus 时，focus 必须移到对应 disclosure control。
+
+键位表必须在 App 内可查，按 macOS 惯例挂在 Help 菜单（`W`/`A`/`S`/`D`、`[`/`]`、`0`、`F` 都不是 macOS 惯例，
+不打开 README 无从发现）。App 内的键位表与 README 的键位表**必须同源**，由同一份数据生成，并有断言在
+任一处漂移时失败。该入口**不得占用 `/` 键**。
 
 ### AT-APP-010 VoiceOver semantics
 
@@ -1008,6 +1140,19 @@ MainActor 只做 UI state 与 drawing。任何单次主线程同步数据库/文
 
 Renderer 输入必须是 immutable `TimelineSnapshot`，包含 viewport、track layout、LOD 和 hit-test primitives。
 
+Track layout 必须自描述：track 声明它预留的调用深度行数，且 `height` 与该行数一致，使行距可由
+snapshot 反推而不是由绘制方假定 —— 这是 draw 与 hit-test 不会漂移的前提（AT-RENDER-003）。
+Named slice 的 primitive 携带调用深度并据此选择行；其他 event type 深度恒为 0。深于预留行数的
+primitive 必须 clamp 在 track 内，不得画到 track 之外。无 `callstack.depth` 的 schema 退化为单行，
+不报错、不留空行。
+
+Hover 反馈（tooltip 与同名联动高亮）必须是**叠加层**：不得参与基础填充批次，也不得使批处理缓存失效 ——
+否则填充批次数会变成指针移动的函数，违反 AT-RENDER-008。hover 内容只能取自 snapshot 中已有的 primitive，
+不得发起查询；且不得触发 accessibility 播报（AT-APP-010）。
+
+**深度不得进入 event 填充色**：上游在 pin 版对 func slice 的颜色 hash 传字面 `0`，所以同名 slice
+在任意深度必须同色（AT-RENDER-008 与移植调色板的目的一致）。
+
 ### AT-RENDER-003 Coordinate consistency
 
 Draw 与 hit-test 必须使用同一 time-to-x 和 track layout。缩放后 event visual frame 与 hit target 偏差不得超过 1 point。
@@ -1019,6 +1164,11 @@ Detail event 可绘制为至少 1 physical pixel，但其 domain range 不得修
 ### AT-RENDER-005 Text
 
 Label 只在可用宽度满足最小阈值时绘制，必须 clip 在 primitive 内，不能通过绘制文本导致额外 event view。
+
+CPU slice 的 label 为 `processName · threadName [tid]`（上游 `ProcedureWorkerCPU.ts:282-320` 分两行画
+`processName [pid]` 与 `threadName [tid] [Prio:n]`；ArkTrace 的 track 带是单行 28pt，故合并为一行）。
+名称是 optional，回退链为 process+thread → 其中之一 → `TID n`；两者皆缺且无 tid 时**不画 label**，
+不得出现空标签。
 
 ### AT-RENDER-006 Interaction latency
 

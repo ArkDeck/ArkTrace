@@ -6,6 +6,25 @@ import Foundation
 /// (DESIGN §9.1). Required tables missing → `TRACE_SCHEMA_UNSUPPORTED`;
 /// additive upstream columns and unrelated new tables are compatible
 /// (AT-DB-004).
+/// Physical table a counter sample was read from. Upstream reads process
+/// counter samples from `process_measure`
+/// (`database/sql/ProcessThread.sql.ts:544-560` `queryProcessMemData`) and CPU
+/// counter samples from `measure` (`database/sql/Cpu.sql.ts:127-134`). Both
+/// tables declare the same columns (`type ts dur value filter_id`), so the
+/// only thing that varies per source is which table the FROM clause names and
+/// which `EventKey` case its row identity belongs to.
+enum CounterSampleTable: String, Sendable {
+    case measure = "measure"
+    case processMeasure = "process_measure"
+
+    var eventTable: TraceEventTable {
+        switch self {
+        case .measure: .measure
+        case .processMeasure: .processMeasure
+        }
+    }
+}
+
 enum TraceSchemaAdapter {
     static let version = "2"
     private static let semanticProbeLimit = 1_024
@@ -23,6 +42,14 @@ enum TraceSchemaAdapter {
         let durationNs: Int64
         let dataQuality: TraceDataQuality
         let eventSourceCountsAvailable: Bool
+        /// Sample tables proven to join to `cpu_measure_filter`, in read
+        /// order. Non-empty exactly when `capabilities.cpuCounters`.
+        let cpuCounterSampleTables: [CounterSampleTable]
+        /// Sample tables proven to join to `process_measure_filter`, in read
+        /// order: upstream's `process_measure` first, then `measure` for
+        /// databases that wrote process samples there. Non-empty exactly when
+        /// `capabilities.processCounters`.
+        let processCounterSampleTables: [CounterSampleTable]
     }
 
     private enum DeclaredAffinity: String {
@@ -194,18 +221,29 @@ enum TraceSchemaAdapter {
             ],
             in: columnsByTable
         )
-        let cpuCountersAvailable = try hasCompatibleJoinRows(
+        // CPU counters stay on `measure` (upstream `Cpu.sql.ts:127-134`).
+        // Process counters read `process_measure` first (upstream
+        // `ProcessThread.sql.ts:544-560`); `measure` remains a secondary
+        // source so databases that wrote process samples there keep working.
+        var counterSourceIssues: [TraceDataQualityIssue] = []
+        let cpuCounterSampleTables = try counterSampleTables(
             db,
+            candidates: [.measure],
             filterTable: "cpu_measure_filter",
             scopeColumn: .integer("cpu"),
-            in: columnsByTable
+            in: columnsByTable,
+            unprovenRelationships: &counterSourceIssues
         )
-        let processCountersAvailable = try hasCompatibleJoinRows(
+        let processCounterSampleTables = try counterSampleTables(
             db,
+            candidates: [.processMeasure, .measure],
             filterTable: "process_measure_filter",
             scopeColumn: .integer("ipid"),
-            in: columnsByTable
+            in: columnsByTable,
+            unprovenRelationships: &counterSourceIssues
         )
+        let cpuCountersAvailable = !cpuCounterSampleTables.isEmpty
+        let processCountersAvailable = !processCounterSampleTables.isEmpty
         if cpuCountersAvailable {
             try validateUniqueCounterFilterIdentity(
                 db, filterTable: "cpu_measure_filter"
@@ -216,7 +254,14 @@ enum TraceSchemaAdapter {
                 db, filterTable: "process_measure_filter"
             )
         }
-        if cpuCountersAvailable, processCountersAvailable {
+        // Filter identities only become ambiguous when one physical sample
+        // table serves both scopes: a row there would join to a filter row in
+        // each. Separate sample tables keep the two id spaces independent, so
+        // requiring disjointness then would reject a compatible database.
+        let sharesSampleTable = cpuCounterSampleTables.contains {
+            processCounterSampleTables.contains($0)
+        }
+        if sharesSampleTable {
             try validateDisjointCounterFilterIdentities(db)
         }
         let capabilities = TraceCapabilities(
@@ -238,11 +283,16 @@ enum TraceSchemaAdapter {
         let range = try traceRange(db)
         try validateRequiredIdentities(db)
         try validateRequiredRelationships(db)
-        let dataQuality = try qualityEvidence(
+        let evidence = try qualityEvidence(
             db,
             range: range,
             columnsByTable: columnsByTable
         )
+        // A counter source that could not be decided within the budget is a
+        // reported degradation, not a silent one.
+        let dataQuality = counterSourceIssues.isEmpty
+            ? evidence
+            : TraceDataQuality(issues: evidence.issues + counterSourceIssues)
 
         return Validation(
             capabilities: capabilities,
@@ -251,7 +301,9 @@ enum TraceSchemaAdapter {
             traceEndTs: range.end,
             durationNs: range.duration,
             dataQuality: dataQuality,
-            eventSourceCountsAvailable: eventSourceCountsAvailable
+            eventSourceCountsAvailable: eventSourceCountsAvailable,
+            cpuCounterSampleTables: cpuCounterSampleTables,
+            processCounterSampleTables: processCounterSampleTables
         )
     }
 
@@ -289,33 +341,64 @@ enum TraceSchemaAdapter {
         return try hasRows(db, table: table)
     }
 
+    /// Outcome of probing one counter sample source.
+    ///
+    /// ``unproven`` is distinct from ``absent`` on purpose. "Absent" is a fact
+    /// about the database; "unproven" is a fact about the probe, and the two
+    /// must not be confused when the result is reported.
+    private enum CounterSourceProbe {
+        case proven
+        case absent
+        case unproven
+    }
+
     /// Counter capability requires an actual relationship, not merely two
     /// non-empty tables. The VM budget bounds adversarial work without making
     /// capability depend on whichever rows SQLite happens to return in the
     /// first 1,024 physical records.
-    private static func hasCompatibleJoinRows(
+    ///
+    /// Exceeding the budget yields ``CounterSourceProbe/unproven`` rather than
+    /// an error. Proving a *negative* over an unindexed sample table is linear
+    /// in its row count and cannot early-exit, so a database whose `measure`
+    /// table simply has nothing to do with `process_measure_filter` costs the
+    /// full scan to rule out — the pinned upstream `pbreader.htrace` fixture is
+    /// exactly that shape (58 540 `measure` rows, zero of them related). Making
+    /// that fatal would refuse to open a valid trace over an *optional*
+    /// capability, which AT-DB-004's optional semantics rule out. The caller
+    /// records the unproven relationship as a data-quality issue so the
+    /// degradation is visible instead of silent.
+    private static func probeCounterSource(
         _ db: TraceDatabase,
+        sampleTable: CounterSampleTable,
         filterTable: String,
         scopeColumn: RequiredColumn,
         in columnsByTable: [String: [TraceDatabase.ColumnInfo]]
-    ) throws -> Bool {
+    ) throws -> CounterSourceProbe {
         guard TraceDatabase.isSafeIdentifier(filterTable),
-            hasCompatibleTable("measure", columns: measureColumns, in: columnsByTable),
+            hasCompatibleTable(
+                sampleTable.rawValue, columns: measureColumns, in: columnsByTable
+            ),
             hasCompatibleTable(
                 filterTable,
                 columns: measureFilterColumns + [scopeColumn],
                 in: columnsByTable
             )
         else {
-            return false
+            return .absent
         }
         do {
-            return try db.query(
+            // The sample table drives the join. Neither table is indexed on
+            // the join column, so SQLite builds an automatic index over
+            // whichever side is inner; with the filter table inner that is the
+            // small one (tens of rows) instead of the sample table (tens of
+            // thousands), and `LIMIT 1` stops at the first related sample.
+            // Reversing this exceeds the VM budget on real traces.
+            let related = try db.query(
                 """
                 SELECT 1
-                FROM \(filterTable) AS sampled_filter
-                CROSS JOIN measure AS sampled_measure
-                    ON sampled_measure.filter_id = sampled_filter.id
+                FROM \(sampleTable.rawValue) AS sampled_measure
+                CROSS JOIN \(filterTable) AS sampled_filter
+                    ON sampled_filter.id = sampled_measure.filter_id
                 WHERE typeof(sampled_measure.filter_id) = 'integer'
                     AND typeof(sampled_filter.id) = 'integer'
                 LIMIT 1
@@ -324,17 +407,52 @@ enum TraceSchemaAdapter {
                 stage: .validating,
                 observesTaskCancellation: true
             ) { _ in true }.isEmpty == false
+            return related ? .proven : .absent
         } catch is TraceDatabase.VMInstructionBudgetExceeded {
-            throw ArkTraceError(
-                code: .traceSchemaUnsupported,
-                stage: .validating,
-                message: "Counter capability relationship exceeds validation budget",
-                details: [
-                    "reason": "vmStepBudgetExceeded",
-                    "relationship": "measure.filter_id->\(filterTable).id",
-                ]
-            )
+            return .unproven
         }
+    }
+
+    /// Resolves which physical tables actually carry samples for one counter
+    /// scope. Probing every candidate keeps capability and query agreed on the
+    /// same set: a scope is available exactly when at least one source proves
+    /// the relationship, and the query layer reads exactly the sources listed
+    /// here.
+    private static func counterSampleTables(
+        _ db: TraceDatabase,
+        candidates: [CounterSampleTable],
+        filterTable: String,
+        scopeColumn: RequiredColumn,
+        in columnsByTable: [String: [TraceDatabase.ColumnInfo]],
+        unprovenRelationships: inout [TraceDataQualityIssue]
+    ) throws -> [CounterSampleTable] {
+        var resolved: [CounterSampleTable] = []
+        for candidate in candidates {
+            switch try probeCounterSource(
+                db,
+                sampleTable: candidate,
+                filterTable: filterTable,
+                scopeColumn: scopeColumn,
+                in: columnsByTable
+            ) {
+            case .proven:
+                resolved.append(candidate)
+            case .absent:
+                continue
+            case .unproven:
+                unprovenRelationships.append(
+                    TraceDataQualityIssue(
+                        category: .probeTruncated,
+                        scope: "schema.counterSource",
+                        message:
+                            "\(candidate.rawValue).filter_id->\(filterTable).id "
+                            + "could not be decided within the validation budget; "
+                            + "that source is not read"
+                    )
+                )
+            }
+        }
+        return resolved
     }
 
     /// A measure identity must resolve to exactly one filter row. Duplicate

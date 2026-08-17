@@ -112,6 +112,45 @@ final class TimelinePaletteTests: XCTestCase {
         }
     }
 
+    /// The depth-layering work (P7-T04) makes real call depth available at the
+    /// point where fill colour is chosen, and `hashFunc` accepts a depth — so
+    /// passing it through is the obvious-looking change. It would be wrong:
+    /// at the pinned upstream revision `ProcedureWorkerFunc` passes a literal
+    /// `0`, not `funcNode.depth` (UPSTREAM_ALIGNMENT_AUDIT §5), so a slice must
+    /// keep one colour no matter how deep it sits. `hashFunc` above proves the
+    /// depth argument *does* change the result, which is exactly why the
+    /// renderer must not supply it.
+    func testSameSliceNameKeepsOneColourAtEveryDepth() throws {
+        let names = [
+            "binder transaction",
+            "H:RSMainThread::DoComposition",
+            "ashmem_alloc",
+            "H:OnVsyncEvent",
+        ]
+        for name in names {
+            let expected = TimelinePalette.color(forSliceName: name)
+            XCTAssertEqual(
+                TimelinePalette.color(forSliceName: name, depth: 0), expected,
+                "\(name) must use the depth-0 colour"
+            )
+            // Every primitive the renderer can produce, across depths.
+            for depth in 0...20 {
+                let primitive = TimelineDetailPrimitive(
+                    trackID: TimelineTrackID(rawValue: "named-slice:1"),
+                    eventKey: EventKey(table: .callstack, rowID: Int64(depth) + 1),
+                    range: try TraceTimeRange(startNs: 0, endNs: 10),
+                    label: name,
+                    category: "slice",
+                    depth: depth
+                )
+                XCTAssertEqual(
+                    TimelineDetailPalette.color(for: primitive), expected,
+                    "\(name) changed colour at depth \(depth)"
+                )
+            }
+        }
+    }
+
     /// `ColorUtils.colorForTid` over the decimal identity.
     func testProcessIdentityColorsMatchUpstream() {
         let vectors: [(Int64, String)] = [

@@ -24,7 +24,17 @@ struct PreparedReadySchema: Sendable {
     let callstackHasCategory: Bool
     let callstackHasParentID: Bool
     let callstackHasCookie: Bool
-    let measureHasDuration: Bool
+    let callstackHasArgSetID: Bool
+    /// `args` + its two dictionaries. Optional capability (AT-DB-004): a trace
+    /// without them simply has no arguments to show.
+    let argumentsAvailable: Bool
+    /// `frame_slice`. Optional capability: a capture without frame data shows
+    /// the lane group as unavailable rather than failing to open.
+    let framesAvailable: Bool
+    /// `dur` presence per counter sample table. The two sources are
+    /// introspected separately because the optional column is additive and a
+    /// database may carry it on one table only (AT-DB-004).
+    let counterSampleHasDuration: [CounterSampleTable: Bool]
     let cpuFilterHasUnit: Bool
     let processFilterHasUnit: Bool
 
@@ -39,9 +49,17 @@ struct PreparedReadySchema: Sendable {
         let schedSlice = try columns("sched_slice")
         let threadState = try columns("thread_state")
         let callstack = try columns("callstack")
-        let measure = try columns("measure")
         let cpuFilter = try columns("cpu_measure_filter")
         let processFilter = try columns("process_measure_filter")
+        // Only tables validation proved as sample sources are introspected;
+        // an absent table yields no columns rather than an error.
+        var sampleHasDuration: [CounterSampleTable: Bool] = [:]
+        for table in Set(
+            validation.cpuCounterSampleTables + validation.processCounterSampleTables
+        ) {
+            sampleHasDuration[table] = try columns(table.rawValue).contains("dur")
+        }
+        counterSampleHasDuration = sampleHasDuration
         self.validation = validation
         processHasEndTs = process.contains("end_ts")
         processHasThreadCount = process.contains("thread_count")
@@ -54,7 +72,14 @@ struct PreparedReadySchema: Sendable {
         callstackHasCategory = callstack.contains("cat")
         callstackHasParentID = callstack.contains("parent_id")
         callstackHasCookie = callstack.contains("cookie")
-        measureHasDuration = measure.contains("dur")
+        callstackHasArgSetID = callstack.contains("argsetid")
+        let args = try columns("args")
+        let dataDict = try columns("data_dict")
+        argumentsAvailable = callstackHasArgSetID
+            && args.isSuperset(of: ["key", "datatype", "value", "argset"])
+            && dataDict.isSuperset(of: ["id", "data"])
+        framesAvailable = try columns("frame_slice")
+            .isSuperset(of: ["id", "ts", "dur", "vsync", "ipid", "type", "flag"])
         cpuFilterHasUnit = cpuFilter.contains("unit")
         processFilterHasUnit = processFilter.contains("unit")
     }
@@ -153,9 +178,26 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     private let callstackHasCategory: Bool
     private let callstackHasParentID: Bool
     private let callstackHasCookie: Bool
-    private let measureHasDuration: Bool
+    private let callstackHasArgSetID: Bool
+    private let argumentsAvailable: Bool
+    private let framesAvailable: Bool
+    private let counterSampleHasDuration: [CounterSampleTable: Bool]
     private let cpuFilterHasUnit: Bool
     private let processFilterHasUnit: Bool
+
+    /// Counter samples are instants when the source table omits `dur`.
+    private func hasDuration(_ table: CounterSampleTable) -> Bool {
+        counterSampleHasDuration[table] ?? false
+    }
+
+    /// Every table carrying samples for either scope, deduplicated and in a
+    /// fixed order so queries spanning both scopes stay deterministic.
+    private func orderedCounterSampleTables() -> [CounterSampleTable] {
+        var seen: Set<CounterSampleTable> = []
+        return (validation.cpuCounterSampleTables
+            + validation.processCounterSampleTables)
+            .filter { seen.insert($0).inserted }
+    }
 
     public init(
         databaseURL: URL,
@@ -256,7 +298,10 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         self.callstackHasCategory = prepared.callstackHasCategory
         self.callstackHasParentID = prepared.callstackHasParentID
         self.callstackHasCookie = prepared.callstackHasCookie
-        self.measureHasDuration = prepared.measureHasDuration
+        self.callstackHasArgSetID = prepared.callstackHasArgSetID
+        self.argumentsAvailable = prepared.argumentsAvailable
+        self.framesAvailable = prepared.framesAvailable
+        self.counterSampleHasDuration = prepared.counterSampleHasDuration
         self.cpuFilterHasUnit = prepared.cpuFilterHasUnit
         self.processFilterHasUnit = prepared.processFilterHasUnit
     }
@@ -1117,6 +1162,12 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let asyncSelection = callstackHasCookie
             ? "CASE WHEN typeof(s.cookie) = 'integer' AND s.cookie <> 0 THEN 1 ELSE 0 END"
             : "0"
+        // Only when the caller asked. `argsetid` is in no ArkTrace index, so
+        // naming it here is what decides whether the viewport's hottest query
+        // gets a covering-index plan (DESIGN §9.4 / §14.2.4).
+        let argSetSelection = callstackHasArgSetID && query.includesArgumentSet
+            ? "CASE WHEN typeof(s.argsetid) = 'integer' THEN s.argsetid ELSE NULL END"
+            : "NULL"
         var invalidValueTerms = [
             "CASE WHEN p.pid IS NOT NULL AND typeof(p.pid) <> 'integer' THEN 1 ELSE 0 END",
             "CASE WHEN t.tid IS NOT NULL AND typeof(t.tid) <> 'integer' THEN 1 ELSE 0 END",
@@ -1163,7 +1214,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 \(parentSelection), \(asyncSelection),
                 CASE WHEN s.callid IS NOT NULL AND s.callid <> 0
                     AND t.itid IS NULL THEN 1 ELSE 0 END,
-                \(invalidValueTerms.joined(separator: " + "))
+                \(invalidValueTerms.joined(separator: " + ")),
+                \(argSetSelection)
             FROM callstack AS s
             LEFT JOIN thread AS t ON t.itid = s.callid
             LEFT JOIN process AS p ON p.ipid = t.ipid
@@ -1184,7 +1236,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 auxiliaryNumber: nil, parentID: row.int64(12),
                 isAsync: row.int64(13) == 1,
                 missingProcess: false, missingThread: row.int64(14) == 1,
-                invalidOptionalValueCount: row.int64(15) ?? 0
+                invalidOptionalValueCount: row.int64(15) ?? 0,
+                argSetID: row.int64(16)
             )
         }
         var items: [TraceSlice] = []
@@ -1232,6 +1285,144 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         )
     }
 
+    /// Resolves one slice's argument set.
+    ///
+    /// Replicates TraceStreamer's own `args_view` (quoted verbatim on
+    /// ``TraceEventArgument``) rather than selecting from the view: ArkTrace
+    /// validates concrete tables everywhere else, and the query needs its own
+    /// bound and ordering, which a bare `SELECT * FROM args_view` cannot carry
+    /// (AT-DB-006/007). The `datatype == 1` branch is upstream's, not ours.
+    public func arguments(
+        _ query: TraceArgumentQuery
+    ) async throws -> TraceEventPage<TraceEventArgument> {
+        guard argumentsAvailable else { return .unavailable }
+        let rows = try db.query(
+            """
+            SELECT keyDict.data, a.datatype, t.desc, valueDict.data, a.value
+            FROM args AS a
+            LEFT JOIN data_dict AS keyDict ON keyDict.id = a.key
+            LEFT JOIN data_type AS t ON t.typeId = a.datatype
+            LEFT JOIN data_dict AS valueDict ON valueDict.id = a.value
+            WHERE typeof(a.argset) = 'integer' AND a.argset = ?
+            ORDER BY a.id ASC
+            LIMIT ?
+            """,
+            bindings: [.int64(query.argSetID), .int64(Int64(query.limit) + 1)],
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row -> TraceEventArgument? in
+            guard let key = row.text(0), !key.isEmpty else { return nil }
+            let datatype = row.int64(1)
+            // Upstream: only the string type dereferences `value` through
+            // `data_dict`; everything else is the integer itself.
+            let value: String?
+            if datatype == 1 {
+                value = row.text(3)
+            } else if let raw = row.int64(4) {
+                value = String(raw)
+            } else {
+                value = nil
+            }
+            guard let value else { return nil }
+            return TraceEventArgument(key: key, value: value, typeName: row.text(2))
+        }
+        let items = rows.compactMap { $0 }
+        try checkQueryBoundary(query.deadline)
+        return TraceEventPage(
+            items: Array(items.prefix(query.limit)),
+            truncated: rows.count > query.limit,
+            capabilityAvailable: true
+        )
+    }
+
+    /// Frames for a viewport.
+    ///
+    /// `type` is decoded through ``TraceFrameKind``, whose numbering is
+    /// upstream's and is **not** what the names suggest: 0 is the actual frame,
+    /// 1 the expected one. Rows with any other `type` are dropped rather than
+    /// guessed at.
+    public func frames(_ query: TraceFrameQuery) async throws -> TraceEventPage<TraceFrame> {
+        guard framesAvailable else { return .unavailable }
+        let range = try validatedAbsoluteRange(query.range)
+        var conditions = [
+            "typeof(f.ts) = 'integer'", "typeof(f.vsync) = 'integer'",
+            "typeof(f.type) = 'integer'",
+        ]
+        var bindings = TraceEventIntersection.bindings(
+            queryStart: range.start, queryEnd: range.end,
+            traceEnd: validation.traceEndTs
+        )
+        conditions.insert(TraceEventIntersection.sqlPredicate(alias: "f"), at: 0)
+        if let processKey = query.processKey {
+            conditions.append("typeof(f.ipid) = 'integer' AND f.ipid = ?")
+            bindings.append(.int64(processKey.ipid))
+        }
+        bindings.append(.int64(Int64(query.limit) + 1))
+        let rows = try db.query(
+            """
+            SELECT f.id, f.ts, f.dur, f.vsync, f.type, f.flag, f.ipid, f.itid,
+                p.pid, p.name
+            FROM frame_slice AS f
+            LEFT JOIN process AS p ON p.ipid = f.ipid
+            WHERE \(conditions.joined(separator: " AND "))
+            ORDER BY f.ts ASC, f.id ASC
+            LIMIT ?
+            """,
+            bindings: bindings,
+            stage: .querying,
+            observesTaskCancellation: true,
+            deadline: query.deadline
+        ) { row -> (Int64?, Int64?, Int64?, Bool, Int64?, Int64?, Int64?, Int64?, Int64?, Int64?, String?) in
+            (
+                row.int64(0), row.int64(1), row.int64(2), row.isNull(2), row.int64(3),
+                row.int64(4), row.int64(5), row.int64(6), row.int64(7), row.int64(8),
+                row.text(9)
+            )
+        }
+        var items: [TraceFrame] = []
+        var quality = EventQuality()
+        for (index, row) in rows.prefix(query.limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
+            guard let id = row.0 else {
+                throw Self.invalidIdentity(table: "frame_slice")
+            }
+            guard let vsync = row.4, let rawType = row.5,
+                let kind = TraceFrameKind(rawValue: rawType)
+            else {
+                // An unrecognised `type` is not silently reinterpreted.
+                quality.invalidNumeric += 1
+                continue
+            }
+            let interval = try eventInterval(
+                timestamp: row.1, duration: row.2, durationIsNull: row.3,
+                table: "frame_slice", quality: &quality
+            )
+            guard let interval else { continue }
+            items.append(
+                TraceFrame(
+                    key: EventKey(table: .frameSlice, rowID: id),
+                    range: try TraceTimeRange(
+                        startNs: interval.start, endNs: interval.end
+                    ),
+                    kind: kind,
+                    vsync: vsync,
+                    processKey: row.7.map { ProcessKey(ipid: $0) },
+                    threadKey: row.8.map { ThreadKey(itid: $0) },
+                    pid: row.9,
+                    processName: row.10,
+                    flag: row.6,
+                    isOpenEnded: interval.openEnded
+                )
+            )
+        }
+        try checkQueryBoundary(query.deadline)
+        return eventPage(
+            items: items, sourceRows: rows.count, limit: query.limit,
+            table: "frame_slice", quality: quality
+        )
+    }
+
     public func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries> {
         let cpuAvailable = validation.capabilities.cpuCounters
         let processAvailable = validation.capabilities.processCounters
@@ -1239,45 +1430,75 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         if query.cpu != nil, !cpuAvailable { return .unavailable }
         if query.processKey != nil || query.pid != nil, !processAvailable { return .unavailable }
         let range = try validatedAbsoluteRange(query.range)
-        guard let rowID = try db.unshadowedRowIDAlias(
-            of: "measure", deadline: query.deadline
-        ) else {
-            throw ArkTraceError(
-                code: .traceSchemaUnsupported,
-                stage: .querying,
-                message: "Counter samples have no stable row identity",
-                details: ["missingCapability": "counterSampleIdentity"]
-            )
+        // Row identity is per physical table, so each source resolves its own
+        // unshadowed alias. Resolving them up front keeps a schema without a
+        // usable identity a validation-shaped failure rather than a partial
+        // page.
+        var rowIDAliases: [CounterSampleTable: String] = [:]
+        for table in Set(
+            validation.cpuCounterSampleTables + validation.processCounterSampleTables
+        ) {
+            guard let alias = try db.unshadowedRowIDAlias(
+                of: table.rawValue, deadline: query.deadline
+            ) else {
+                throw ArkTraceError(
+                    code: .traceSchemaUnsupported,
+                    stage: .querying,
+                    message: "Counter samples have no stable row identity",
+                    details: [
+                        "missingCapability": "counterSampleIdentity",
+                        "table": table.rawValue,
+                    ]
+                )
+            }
+            rowIDAliases[table] = alias
         }
         var samples: [CounterResultRow] = []
         var sourceTruncated = false
         if cpuAvailable, query.processKey == nil, query.pid == nil {
-            let result = try counterRows(
-                filterTable: "cpu_measure_filter", scopeColumn: "cpu",
-                scopeValue: query.cpu, filterID: query.filterID, pid: nil,
-                name: query.name,
-                hasUnit: cpuFilterHasUnit,
-                rowID: rowID, range: range, limit: query.limit,
-                deadline: query.deadline, sourceOrder: 0
-            )
-            samples.append(contentsOf: result.rows)
-            sourceTruncated = sourceTruncated || result.truncated
+            for sampleTable in validation.cpuCounterSampleTables {
+                let result = try counterRows(
+                    sampleTable: sampleTable,
+                    filterTable: "cpu_measure_filter", scopeColumn: "cpu",
+                    scopeValue: query.cpu, filterID: query.filterID, pid: nil,
+                    name: query.name,
+                    hasUnit: cpuFilterHasUnit,
+                    rowID: rowIDAliases[sampleTable]!, range: range,
+                    limit: query.limit,
+                    deadline: query.deadline, sourceOrder: 0
+                )
+                samples.append(contentsOf: result.rows)
+                sourceTruncated = sourceTruncated || result.truncated
+            }
         }
         if processAvailable, query.cpu == nil {
-            let result = try counterRows(
-                filterTable: "process_measure_filter", scopeColumn: "ipid",
-                scopeValue: query.processKey?.ipid, filterID: query.filterID,
-                pid: query.pid, name: query.name,
-                hasUnit: processFilterHasUnit,
-                rowID: rowID, range: range, limit: query.limit,
-                deadline: query.deadline, sourceOrder: 1
-            )
-            samples.append(contentsOf: result.rows)
-            sourceTruncated = sourceTruncated || result.truncated
+            for sampleTable in validation.processCounterSampleTables {
+                let result = try counterRows(
+                    sampleTable: sampleTable,
+                    filterTable: "process_measure_filter", scopeColumn: "ipid",
+                    scopeValue: query.processKey?.ipid, filterID: query.filterID,
+                    pid: query.pid, name: query.name,
+                    hasUnit: processFilterHasUnit,
+                    rowID: rowIDAliases[sampleTable]!, range: range,
+                    limit: query.limit,
+                    deadline: query.deadline, sourceOrder: 1
+                )
+                samples.append(contentsOf: result.rows)
+                sourceTruncated = sourceTruncated || result.truncated
+            }
         }
+        // Row identity only orders within one table, so the source table joins
+        // the sort key: two sources merged into one page must still produce
+        // one total order (AT-QUERY-001).
         samples.sort {
-            ($0.timestamp, $0.rowID, $0.sourceOrder, $0.filterID)
-                < ($1.timestamp, $1.rowID, $1.sourceOrder, $1.filterID)
+            (
+                $0.timestamp, $0.sampleTable.rawValue, $0.rowID, $0.sourceOrder,
+                $0.filterID
+            )
+                < (
+                    $1.timestamp, $1.sampleTable.rawValue, $1.rowID,
+                    $1.sourceOrder, $1.filterID
+                )
         }
         let totalTruncated = sourceTruncated || samples.count > query.limit
         let selected = samples.prefix(query.limit)
@@ -1295,7 +1516,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             let key = CounterSeriesKey(
                 sourceOrder: row.sourceOrder, filterID: row.filterID, scopeID: row.scopeID
             )
-            let eventKey = EventKey(table: .measure, rowID: row.rowID)
+            let eventKey = EventKey(
+                table: row.sampleTable.eventTable, rowID: row.rowID
+            )
             guard seenSampleKeys.insert(eventKey).inserted else {
                 throw ArkTraceError(
                     code: .queryFailed,
@@ -1399,23 +1622,20 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             )
         }
 
-        var bindings: [TraceDatabase.Binding] = [
+        // Each case owns its full binding list. Counter sources repeat the
+        // bucket expression once per physical sample table, so the leading
+        // bucket bindings cannot be shared across the switch.
+        let bucketBindings: [TraceDatabase.Binding] = [
             .int64(range.start), .int64(range.start), .int64(bucketWidth),
         ]
+        var bindings: [TraceDatabase.Binding] = []
         let sampleSQL: String
         let timeQualityScope: String
-        let counterInvalidDurationSelection = measureHasDuration
-            ? "CASE WHEN m.dur IS NOT NULL AND typeof(m.dur) <> 'integer' "
-                + "THEN 1 ELSE 0 END"
-            : "0"
-        let counterClampedDurationSelection = measureHasDuration
-            ? "CASE WHEN typeof(m.dur) = 'integer' AND m.dur > 0 "
-                + "AND (m.dur > ? OR m.ts + m.dur > ?) THEN 1 ELSE 0 END"
-            : "0"
         switch query.source {
         case .cpu(let cpu):
             guard validation.capabilities.cpuScheduling else { return .unavailable }
             timeQualityScope = "sched_slice.ts"
+            bindings.append(contentsOf: bucketBindings)
             bindings.append(.int64(validation.traceStartTs))
             bindings.append(.int64(validation.traceEndTs))
             bindings.append(contentsOf: TraceEventIntersection.bindings(
@@ -1437,6 +1657,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         case .threadState(let threadKey):
             guard validation.capabilities.threadStates else { return .unavailable }
             timeQualityScope = "thread_state.ts"
+            bindings.append(contentsOf: bucketBindings)
             bindings.append(.int64(validation.traceStartTs))
             bindings.append(.int64(validation.traceEndTs))
             bindings.append(contentsOf: TraceEventIntersection.bindings(
@@ -1458,6 +1679,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         case .namedSlice(let threadKey):
             guard validation.capabilities.namedSlices else { return .unavailable }
             timeQualityScope = "callstack.ts"
+            bindings.append(contentsOf: bucketBindings)
             bindings.append(.int64(validation.traceStartTs))
             bindings.append(.int64(validation.traceEndTs))
             bindings.append(contentsOf: TraceEventIntersection.bindings(
@@ -1485,59 +1707,52 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         case .cpuCounter(let filterID, let cpu):
             guard validation.capabilities.cpuCounters else { return .unavailable }
             timeQualityScope = "measure.ts"
-            let timeFilter = counterTimeFilter(range: range)
+            let source = counterDensitySource(
+                sampleTables: validation.cpuCounterSampleTables,
+                filterTable: "cpu_measure_filter", scopeColumn: "cpu",
+                scopeValue: cpu, filterID: filterID, range: range,
+                bucketCount: query.bucketCount, bucketWidth: bucketWidth
+            )
+            sampleSQL = source.sql
+            bindings = source.bindings
+        case .frame(let processKey):
+            guard framesAvailable else { return .unavailable }
+            timeQualityScope = "frame_slice.ts"
+            bindings.append(contentsOf: bucketBindings)
             bindings.append(.int64(validation.traceStartTs))
             bindings.append(.int64(validation.traceEndTs))
-            if measureHasDuration {
-                bindings.append(.int64(validation.durationNs))
-                bindings.append(.int64(validation.traceEndTs))
+            bindings.append(contentsOf: TraceEventIntersection.bindings(
+                queryStart: range.start, queryEnd: range.end,
+                traceEnd: validation.traceEndTs
+            ))
+            let processCondition: String
+            if let processKey {
+                bindings.append(.int64(processKey.ipid))
+                processCondition = "AND typeof(f.ipid) = 'integer' AND f.ipid = ?"
+            } else {
+                processCondition = ""
             }
-            bindings.append(contentsOf: timeFilter.bindings)
-            bindings.append(.int64(filterID))
-            if let cpu { bindings.append(.int64(cpu)) }
             sampleSQL = """
                 SELECT MIN(\(query.bucketCount - 1), MAX(0,
-                        CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
+                        CASE WHEN f.ts <= ? THEN 0 ELSE (f.ts - ?) / ? END
                     )) AS bucket,
-                    CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
-                    \(counterInvalidDurationSelection) AS invalid_duration,
-                    \(counterClampedDurationSelection) AS clamped_duration
-                FROM measure AS m
-                INNER JOIN cpu_measure_filter AS f ON f.id = m.filter_id
-                WHERE typeof(m.ts) = 'integer'
-                    AND typeof(m.filter_id) = 'integer'
-                    AND typeof(f.id) = 'integer' AND typeof(f.cpu) = 'integer'
-                    AND \(timeFilter.predicate)
-                    AND f.id = ? \(cpu == nil ? "" : "AND f.cpu = ?")
+                    CASE WHEN f.ts < ? OR f.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    0 AS invalid_duration, 0 AS clamped_duration
+                FROM frame_slice AS f
+                WHERE \(TraceEventIntersection.sqlPredicate(alias: "f"))
+                    \(processCondition)
                 """
         case .processCounter(let filterID, let processKey):
             guard validation.capabilities.processCounters else { return .unavailable }
-            timeQualityScope = "measure.ts"
-            let timeFilter = counterTimeFilter(range: range)
-            bindings.append(.int64(validation.traceStartTs))
-            bindings.append(.int64(validation.traceEndTs))
-            if measureHasDuration {
-                bindings.append(.int64(validation.durationNs))
-                bindings.append(.int64(validation.traceEndTs))
-            }
-            bindings.append(contentsOf: timeFilter.bindings)
-            bindings.append(.int64(filterID))
-            if let processKey { bindings.append(.int64(processKey.ipid)) }
-            sampleSQL = """
-                SELECT MIN(\(query.bucketCount - 1), MAX(0,
-                        CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
-                    )) AS bucket,
-                    CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
-                    \(counterInvalidDurationSelection) AS invalid_duration,
-                    \(counterClampedDurationSelection) AS clamped_duration
-                FROM measure AS m
-                INNER JOIN process_measure_filter AS f ON f.id = m.filter_id
-                WHERE typeof(m.ts) = 'integer'
-                    AND typeof(m.filter_id) = 'integer'
-                    AND typeof(f.id) = 'integer' AND typeof(f.ipid) = 'integer'
-                    AND \(timeFilter.predicate)
-                    AND f.id = ? \(processKey == nil ? "" : "AND f.ipid = ?")
-                """
+            timeQualityScope = "process_measure.ts"
+            let source = counterDensitySource(
+                sampleTables: validation.processCounterSampleTables,
+                filterTable: "process_measure_filter", scopeColumn: "ipid",
+                scopeValue: processKey?.ipid, filterID: filterID, range: range,
+                bucketCount: query.bucketCount, bucketWidth: bucketWidth
+            )
+            sampleSQL = source.sql
+            bindings = source.bindings
         }
 
         let rows = try db.query(
@@ -1866,6 +2081,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     }
 
     private func counterRows(
+        sampleTable: CounterSampleTable,
         filterTable: String,
         scopeColumn: String,
         scopeValue: Int64?,
@@ -1885,7 +2101,10 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             "typeof(f.\(scopeColumn)) = 'integer'", "typeof(f.name) = 'text'",
             "length(CAST(f.name AS BLOB)) <= 256",
         ]
-        let timeFilter = counterTimeFilter(range: range)
+        let sampleHasDuration = hasDuration(sampleTable)
+        let timeFilter = counterTimeFilter(
+            range: range, hasDuration: sampleHasDuration
+        )
         conditions.append(timeFilter.predicate)
         var bindings = timeFilter.bindings
         if let filterID {
@@ -1921,10 +2140,10 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             }
         }
         bindings.append(.int64(Int64(limit) + 1))
-        let durationSelection = measureHasDuration
+        let durationSelection = sampleHasDuration
             ? "CASE WHEN typeof(m.dur) = 'integer' THEN m.dur ELSE NULL END"
             : "0"
-        let durationStateSelection = measureHasDuration
+        let durationStateSelection = sampleHasDuration
             ? "CASE WHEN m.dur IS NULL THEN 1 "
                 + "WHEN typeof(m.dur) = 'integer' THEN 2 ELSE 3 END"
             : "0"
@@ -1945,7 +2164,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             ? "CASE WHEN f.ipid <> 0 AND p.ipid IS NULL THEN 1 ELSE 0 END"
             : "0"
         var invalidValueTerms: [String] = []
-        if measureHasDuration {
+        if sampleHasDuration {
             invalidValueTerms.append(
                 "CASE WHEN m.dur IS NOT NULL AND typeof(m.dur) <> 'integer' "
                     + "THEN 1 ELSE 0 END"
@@ -1974,7 +2193,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 \(durationSelection), \(durationStateSelection),
                 \(unitSelection), \(invalidSelection),
                 \(pidSelection), \(processNameSelection), \(missingProcessSelection)
-            FROM measure AS m
+            FROM \(sampleTable.rawValue) AS m
             INNER JOIN \(filterTable) AS f ON f.id = m.filter_id
             \(processJoin)
             WHERE \(conditions.joined(separator: " AND "))
@@ -1995,6 +2214,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 )
             }
             return CounterResultRow(
+                sampleTable: sampleTable,
                 rowID: rowID, timestamp: timestamp, value: value,
                 filterID: filterID, name: name, scopeID: scopeID,
                 sourceOrder: sourceOrder, duration: row.int64(6),
@@ -2010,14 +2230,81 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         return (Array(rows.prefix(limit)), rows.count > limit)
     }
 
+    /// Builds the counter-density subquery for one scope. A scope whose
+    /// samples live in more than one physical table contributes one branch per
+    /// table, merged with UNION ALL so the bucket histogram counts exactly the
+    /// rows `counters()` would page. Each branch repeats the bucket expression,
+    /// so bindings are emitted alongside the SQL rather than assembled by the
+    /// caller.
+    private func counterDensitySource(
+        sampleTables: [CounterSampleTable],
+        filterTable: String,
+        scopeColumn: String,
+        scopeValue: Int64?,
+        filterID: Int64,
+        range: (start: Int64, end: Int64),
+        bucketCount: Int,
+        bucketWidth: Int64
+    ) -> (sql: String, bindings: [TraceDatabase.Binding]) {
+        var branches: [String] = []
+        var bindings: [TraceDatabase.Binding] = []
+        for sampleTable in sampleTables {
+            let sampleHasDuration = hasDuration(sampleTable)
+            let timeFilter = counterTimeFilter(
+                range: range, hasDuration: sampleHasDuration
+            )
+            let invalidDuration = sampleHasDuration
+                ? "CASE WHEN m.dur IS NOT NULL AND typeof(m.dur) <> 'integer' "
+                    + "THEN 1 ELSE 0 END"
+                : "0"
+            let clampedDuration = sampleHasDuration
+                ? "CASE WHEN typeof(m.dur) = 'integer' AND m.dur > 0 "
+                    + "AND (m.dur > ? OR m.ts + m.dur > ?) THEN 1 ELSE 0 END"
+                : "0"
+            bindings.append(.int64(range.start))
+            bindings.append(.int64(range.start))
+            bindings.append(.int64(bucketWidth))
+            bindings.append(.int64(validation.traceStartTs))
+            bindings.append(.int64(validation.traceEndTs))
+            if sampleHasDuration {
+                bindings.append(.int64(validation.durationNs))
+                bindings.append(.int64(validation.traceEndTs))
+            }
+            bindings.append(contentsOf: timeFilter.bindings)
+            bindings.append(.int64(filterID))
+            if let scopeValue { bindings.append(.int64(scopeValue)) }
+            branches.append(
+                """
+                SELECT MIN(\(bucketCount - 1), MAX(0,
+                        CASE WHEN m.ts <= ? THEN 0 ELSE (m.ts - ?) / ? END
+                    )) AS bucket,
+                    CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
+                    \(invalidDuration) AS invalid_duration,
+                    \(clampedDuration) AS clamped_duration
+                FROM \(sampleTable.rawValue) AS m
+                INNER JOIN \(filterTable) AS f ON f.id = m.filter_id
+                WHERE typeof(m.ts) = 'integer'
+                    AND typeof(m.filter_id) = 'integer'
+                    AND typeof(f.id) = 'integer'
+                    AND typeof(f.\(scopeColumn)) = 'integer'
+                    AND \(timeFilter.predicate)
+                    AND f.id = ?
+                    \(scopeValue == nil ? "" : "AND f.\(scopeColumn) = ?")
+                """
+            )
+        }
+        return (branches.joined(separator: "\nUNION ALL\n"), bindings)
+    }
+
     /// Counter detail and density must agree on interval intersection. A
-    /// schema without measure.dur contains instant samples. If an optional
+    /// sample table without `dur` contains instant samples. If an optional
     /// duration has an incompatible dynamic storage class, retain that row as
     /// an instant; bounded quality evidence reports the dropped value.
     private func counterTimeFilter(
-        range: (start: Int64, end: Int64)
+        range: (start: Int64, end: Int64),
+        hasDuration: Bool
     ) -> (predicate: String, bindings: [TraceDatabase.Binding]) {
-        guard measureHasDuration else {
+        guard hasDuration else {
             return (
                 "m.ts >= ? AND m.ts < ?",
                 [.int64(range.start), .int64(range.end)]
@@ -2360,51 +2647,82 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         // Counter detail and this count must agree on interval intersection,
         // so both go through `counterTimeFilter`. Pushing it into SQL keeps
         // `limit` a bound on distinct matching series rather than on the
-        // scanned rowid prefix.
-        let timeFilter = counterTimeFilter(range: range)
-        var timePredicate = "(\(timeFilter.predicate))"
-        var bindings = timeFilter.bindings
-        if includesFinalTimestamp {
-            timePredicate = "(\(timePredicate) OR (typeof(m.ts) = 'integer' AND m.ts = ?))"
-            bindings.append(.int64(range.end))
+        // scanned rowid prefix. Every table that carries samples for either
+        // scope contributes, otherwise a series whose samples live only in
+        // `process_measure` would be missing from the count.
+        // The sampled filter id keeps the table it came from. Filter id spaces
+        // are only proven disjoint when one table serves both scopes, so a
+        // `process_measure` sample must not be credited to a `cpu_measure_filter`
+        // row that happens to share its id.
+        let sampleTables = orderedCounterSampleTables()
+        var branches: [String] = []
+        var bindings: [TraceDatabase.Binding] = []
+        for (tableIndex, sampleTable) in sampleTables.enumerated() {
+            let timeFilter = counterTimeFilter(
+                range: range, hasDuration: hasDuration(sampleTable)
+            )
+            var timePredicate = "(\(timeFilter.predicate))"
+            var branchBindings = timeFilter.bindings
+            if includesFinalTimestamp {
+                timePredicate =
+                    "(\(timePredicate) OR (typeof(m.ts) = 'integer' AND m.ts = ?))"
+                branchBindings.append(.int64(range.end))
+            }
+            bindings.append(contentsOf: branchBindings)
+            branches.append(
+                """
+                SELECT DISTINCT \(tableIndex) AS sample_table, m.filter_id AS filter_id
+                FROM \(sampleTable.rawValue) AS m
+                WHERE typeof(m.filter_id) = 'integer' AND \(timePredicate)
+                """
+            )
         }
         bindings.append(.int64(Int64(limit) + 1))
         let sampledFilterIDs = try db.query(
             """
-            SELECT DISTINCT m.filter_id FROM measure AS m
-            WHERE typeof(m.filter_id) = 'integer' AND \(timePredicate)
-            ORDER BY m.filter_id ASC
+            SELECT sample_table, filter_id FROM (
+                \(branches.joined(separator: "\nUNION ALL\n"))
+            )
+            ORDER BY sample_table ASC, filter_id ASC
             LIMIT ?
             """,
             bindings: bindings,
             stage: .querying,
             observesTaskCancellation: true,
             deadline: deadline
-        ) { $0.int64(0) }
-        var filterSets: [(source: Int64, ids: Set<Int64>)] = []
+        ) { ($0.int64(0), $0.int64(1)) }
+        var filterSets: [(source: Int64, tables: Set<CounterSampleTable>, ids: Set<Int64>)] = []
         var incomplete = sampledFilterIDs.count > limit
         if validation.capabilities.cpuCounters {
             let sample = try boundedFilterIDs(
                 table: "cpu_measure_filter", limit: limit, deadline: deadline
             )
-            filterSets.append((0, sample.ids))
+            filterSets.append(
+                (0, Set(validation.cpuCounterSampleTables), sample.ids)
+            )
             incomplete = incomplete || sample.incomplete
         }
         if validation.capabilities.processCounters {
             let sample = try boundedFilterIDs(
                 table: "process_measure_filter", limit: limit, deadline: deadline
             )
-            filterSets.append((1, sample.ids))
+            filterSets.append(
+                (1, Set(validation.processCounterSampleTables), sample.ids)
+            )
             incomplete = incomplete || sample.incomplete
         }
         var series: Set<CounterSeriesIdentity> = []
         for (index, sample) in sampledFilterIDs.prefix(limit).enumerated() {
             if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
-            guard let filterID = sample else {
+            guard let tableIndex = sample.0, let filterID = sample.1,
+                tableIndex >= 0, tableIndex < Int64(sampleTables.count)
+            else {
                 incomplete = true
                 continue
             }
-            for filter in filterSets where filter.ids.contains(filterID) {
+            let sampleTable = sampleTables[Int(tableIndex)]
+            for filter in filterSets
+            where filter.tables.contains(sampleTable) && filter.ids.contains(filterID) {
                 series.insert(CounterSeriesIdentity(source: filter.source, series: filterID))
             }
         }
@@ -2633,6 +2951,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         let missingProcess: Bool
         let missingThread: Bool
         let invalidOptionalValueCount: Int64
+        var argSetID: Int64?
     }
 
     private struct EventInterval {
@@ -2653,6 +2972,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     }
 
     private struct CounterResultRow {
+        /// Physical table the row came from; `rowID` is only unique within it.
+        let sampleTable: CounterSampleTable
         let rowID: Int64
         let timestamp: Int64
         let value: Int64

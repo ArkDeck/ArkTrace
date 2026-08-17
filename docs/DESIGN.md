@@ -56,11 +56,18 @@ ArkTrace 是一个独立的 macOS 原生 Trace Workbench。它同时提供：
 | `sched_slice` | CPU 调度时间片 | `id`, `ts`, `dur`, `ts_end`, `cpu`, `itid`, `ipid`, `end_state`, `priority`, `arg_setid` |
 | `thread_state` | 线程状态 | `id`, `ts`, `dur`, `cpu`, `itid`, `tid`, `pid`, `state`, `arg_setid` |
 | `callstack` | named slice / function | `id`, `ts`, `dur`, `callid`, `cat`, `name`, `depth`, async/trace fields |
-| `measure` | Counter 样本 | `type`, `ts`, `dur`, `value`, `filter_id` |
+| `measure` | CPU counter 样本；process counter 的兼容次来源 | `type`, `ts`, `dur`, `value`, `filter_id` |
+| `process_measure` | Process counter 样本（主来源） | `type`, `ts`, `dur`, `value`, `filter_id` |
 | `cpu_measure_filter` | CPU counter 描述 | `id`, `name`, `cpu` |
 | `process_measure_filter` | Process counter 描述 | `id`, `name`, `ipid` |
 | `stat` | 解析统计与质量信息 | `event_name`, `stat_type`, `count`, `serverity`, `source` |
 | `meta` | parser 元数据，可选 | `name`, `value` |
+
+**Counter 样本的来源表按 scope 区分**，这是上游行为而非实现细节：CPU counter 读 `measure`
+（`database/sql/Cpu.sql.ts:127-134`），process counter 读 `process_measure`
+（`database/sql/ProcessThread.sql.ts:544-560` `queryProcessMemData`）。两表列结构相同。四个 DAYU 200
+真机解析库中 `measure` 为 0 行、`process_measure` 为 3.3 万–5 万行，所以两个 scope 共用 `measure`
+会让 process counter 泳道在真实 trace 上恒为不可用。
 
 SmartPerf 的可复用语义包括：
 
@@ -425,7 +432,44 @@ struct TraceSchemaCapabilities {
 }
 ```
 
-Schema fingerprint 是排序后的完整 table/column/type/PK 描述的 SHA-256；v2 preimage 使用固定域标记、版本、record count，并对每条 record 及其中每个 UTF-8 字段使用 64-bit length prefix，合法标识符或 declared type 中的 `|`、换行等字节不能造成序列化碰撞。来自 `sqlite_master` 的标识符统一按 SQLite 规则转义，带空格、连字符或引号的合法表/列不能被跳过；schema 最多允许 4,096 张表，枚举只读取 `LIMIT 4097`，超限返回 `TRACE_SCHEMA_UNSUPPORTED`。新增无关列是兼容变化；required 列缺失、SQLite declared affinity 与字段语义不兼容、或关键 join 不成立是 `TRACE_SCHEMA_UNSUPPORTED`。`trace_range` 唯一性只读取 `LIMIT 2`。required relationship source 最多采样 1,024 行，目标表不截断，整个 join 受 250,000 SQLite VM-step progress budget 约束；超预算 fail closed。事件 capability 只有在所需列 affinity 兼容且事件表非空时成立；optional counter capability 还必须在两侧有界样本内存在 `measure.filter_id → filter.id` 的真实 join，空表或互不相交的 filter ID 不能宣称完整能力。
+Schema fingerprint 是排序后的完整 table/column/type/PK 描述的 SHA-256；v2 preimage 使用固定域标记、版本、record count，并对每条 record 及其中每个 UTF-8 字段使用 64-bit length prefix，合法标识符或 declared type 中的 `|`、换行等字节不能造成序列化碰撞。来自 `sqlite_master` 的标识符统一按 SQLite 规则转义，带空格、连字符或引号的合法表/列不能被跳过；schema 最多允许 4,096 张表，枚举只读取 `LIMIT 4097`，超限返回 `TRACE_SCHEMA_UNSUPPORTED`。新增无关列是兼容变化；required 列缺失、SQLite declared affinity 与字段语义不兼容、或关键 join 不成立是 `TRACE_SCHEMA_UNSUPPORTED`。`trace_range` 唯一性只读取 `LIMIT 2`。required relationship source 最多采样 1,024 行，目标表不截断，整个 join 受 250,000 SQLite VM-step progress budget 约束；超预算 fail closed。事件 capability 只有在所需列 affinity 兼容且事件表非空时成立；optional counter capability 还必须在有界样本内存在 `<样本表>.filter_id → <filter 表>.id` 的真实 join，空表或互不相交的 filter ID 不能宣称完整能力。
+
+Counter 的样本表按 scope 探测：CPU scope 只探 `measure`，process scope 依次探 `process_measure` 与
+`measure`（§2.1）。一个 scope 可用 = 其候选表中至少一张成立；成立的表构成该 scope 的读取顺序，query
+层只读这个集合，capability 与查询因此不会出现「说有、查不到」的分歧。探测查询让**样本表驱动 join**
+（`FROM <样本表> CROSS JOIN <filter 表>`）：两侧都没有 join 列索引，SQLite 会为内侧建 automatic
+index，把小的 filter 表放内侧才是几十行而不是几万行；反过来写会在真机库上直接撞穿 250,000 VM-step
+预算。filter id 的跨 scope 唯一性只在**同一张物理表同时服务两个 scope** 时校验。
+
+**探测超预算不是「数据库不兼容」**（P7-T13 修正）。required relationship 超预算仍 fail closed，但
+counter 来源探测超预算只表示**本次没能判定**：该来源按「未证明、不读取」处理，并记一条
+`schema.counterSource` 的 data-quality issue 指明是哪条关系没判定。理由是证否一条关系在未索引的样本表上
+线性且无法提前退出 —— pin 版上游 `pbreader.htrace` 的 `measure` 有 58 540 行、与
+`process_measure_filter` **零**关联，正好是这个形状。P7-T01 把 `measure` 加为 process scope 的次要来源后，
+这条本来罕见的路径变成了常态，结果是**整份 fixture 打不开**。把 ArkTrace 自己的资源上限说成 schema
+不兼容是类别错误；AT-DB-004 的 optional 语义要求降级而不是拒绝。
+
+### 9.1.1 schemaAdapterVersion 的处置（P7-T01）
+
+P7-T01 把 process counter 的样本来源表从 `measure` 改为 `process_measure`，**不 bump**
+`TraceSchemaAdapter.version`（保持 `"2"`）。
+
+理由：`schemaAdapterVersion` 存在的目的是让过时的 cache 条目失效，但本仓库**从不持久化 capabilities**
+—— `TraceCacheMetadata` 与 `TraceDatabasePreparationResult` 只存 `schemaAdapterVersion`、
+`schemaFingerprint`、`indexVersion` 与上游 DB 摘要，`RepositoryValidationCache` 显式声明不跨进程持久化。
+cache 的产物是 Ready SQLite 数据库本身，`capabilities` 在每次打开时由 `TraceSchemaAdapter.validate`
+重算。counter 又没有任何 ArkTrace 索引（§9.4 只覆盖 sched_slice / thread_state / callstack），所以旧
+Ready DB 与新代码完全兼容。结论：升级后旧 cache 条目直接复用并立刻报告 `processCounters: true`，
+**不需要用户 purge**，方案 B 没有本来设想的那项代价。
+
+代价对照面：bump 会让每个 ArkDeck analyzer Job 在 admission 之后失败于 `analyzer.schemaMismatch`，
+直到配套的 ArkDeck release 落地（[ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md) §Schema versions
+are a release coupling）。既然 bump 换不来任何用户可见收益，就不承担这个跨仓库成本。
+
+`schemaFingerprint` 不受影响：它由解析库里的全部表算出，不是由 ArkTrace 的 required 集合算出，增加读表
+不改 fingerprint。已实测 —— `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 的
+`schemaFingerprint` 与两个 fixture 的 `capabilities` 在 `ParserIntegrationTests` 中逐项断言且全绿，
+证据文件无需 re-pin。
 
 ### 9.2 Store
 
@@ -641,15 +685,91 @@ Zoom 以鼠标位置为 anchor，pan 保持 Int64 时间。布局和 hit-test �
 
 ### 13.3 Track
 
-MVP track 类型：
+Track 类型（`TimelineTrackSource` 的全部 case）：
 
-- CPU Scheduling；
-- Process；
-- Thread State；
-- Named Slice / Function；
-- 已证实存在时的 Counter。
+- CPU Scheduling（每 CPU 一条）；
+- Thread State（每线程一条）；
+- Named Slice / Function（每线程一条，按调用深度分行）；
+- Counter —— CPU scope 与 process scope 各自成条，已证实存在时才出现；
+- Frame —— 每个有帧数据的进程一条，expect 与 actual 各占一行（P7-T11）。
+
+**这里没有 "Process" 一项**，见下。
 
 Track descriptor 与 event data 分离。Collapse 只影响可见 layout/query，不丢弃 session 数据。Density LOD 是统计图层，不能伪装成原始事件供 Inspector 选择。
+
+**"Process" 是 track 的分组维度，不是 track source**（P7-T06 消除了此前的文档漂移）。进程不画自己的
+泳道；它是一个可折叠节点，把属于它的线程与 counter 泳道收在一起。组织方式是**混合**的：
+
+| 顶层组 | 内容 | 为什么 |
+|---|---|---|
+| CPUs | 每个 CPU 一条 | CPU 是跨进程的，塞进任一进程都是虚构 |
+| CPU Counters | `cpu_measure_filter` 的 series | 同上 |
+| 每个进程一个节点 | 该进程各线程的 thread state + named slice 泳道（**同一线程的两条相邻**），再加该进程的 process counter | 上游 process → thread 树的实质收益：相邻 + 一键折叠 |
+| Unattributed | 无归属进程的线程与 slice | 不静默丢弃 |
+
+**为什么不是纯进程树。** 真机 trace 的前 1 000 条线程横跨 **785 个进程，其中只有 36 个拥有一条以上
+线程** —— 纯进程树会造出约 749 个只有一个子节点的折叠项，把 Sidebar 的可扫描性变差而不是变好
+（AT-APP-003）。同名线程的歧义（`uinput` ×477、`OS_GC_Thread` ×195）由 track title 统一带上进程名解决，
+不依赖树结构。
+
+**默认可见集合按活动量决定**，不再是「前 N 条」的位置阈值：进程按其在已取回 CPU slice 页中的调度片数
+降序排列，只有最忙的前 `defaultExpandedProcessCount` 个进程默认展开，其余节点仍然列出、可搜索、可手动
+展开。活动量直接由 CPU 泳道本就要取的那一页算出，**不新增查询**。
+
+#### Named slice 的调用深度分层（P7-T04）
+
+上游每层调用深度占一条独立泳道（`database/ui-worker/ProcedureWorkerFunc.ts:237`
+`funcNode.frame.y = funcNode.depth! * 18 + 3`）。ArkTrace 采用同一模型，但几何由 snapshot 自描述：
+
+- `TimelineDetailPrimitive.depth` 携带调用深度，named slice 之外的 event 恒为 0；
+- `TimelineTrackSnapshot.depthRowCount` 声明该 track 预留的行数，`height` 恰好等于
+  `2 × trackVerticalInset + depthRowCount × depthRowSpan`；
+- `TimelineGeometry.frame(for:in:viewport:backingScale:)` 由 `track.height` 与 `depthRowCount`
+  反推行距，因此 **draw 与 hit-test 共用同一函数、同一行距**（AT-RENDER-003）。深于预留行数的
+  primitive 被 clamp 到最后一行，而不是画到 track 之外 —— 落在 track 外的图元永远无法被命中。
+
+行距取 22pt、上下各留 3pt，于是 `depthRowCount == 1` 的 track 高度仍是 28pt、band 仍是 22pt：
+**没有深度的 CPU / thread state / counter 泳道几何逐点不变**，且单个 event 的可点高度也不变
+（22pt，与 AT-APP-011 的既有状况一致）。track 高度按**当前 viewport 内实际出现的最大深度**伸展，
+所以浅区域不会为深栈付出高度；上限 32 行，超出部分记为 truncation 而不是静默丢弃。
+
+**配色不随 depth 变化。** pin 版上游对 func slice 传的第二参是字面 `0` 而非真实 depth
+（[UPSTREAM_ALIGNMENT_AUDIT](./UPSTREAM_ALIGNMENT_AUDIT.md) §5），因此拿到 depth 之后把它传进
+`hashFunc` 会立刻偏离上游。`TimelinePaletteTests` 有专门断言锁住「同名 slice 在任意 depth 同色」。
+
+**Primitive 预算的重新论证。** `detailBudget(pixelWidth:)` 仍是 `min(20k, max(2k, pixelWidth × 8))`，
+不按 depth 放大。理由：该预算约束的是**一次 snapshot 的总图元数**，即内存与绘制工作量，这个上限与
+深度无关。深度改变的是「一条 track 能有意义地展示多少图元」——原先"可见图元数 ≈ 像素宽度"的心智模型
+不再成立，现在是"像素宽度 × 深度"，所以深栈 track 会更早耗尽自己那份配额并触发 truncation
+（有 quality issue 上报，不是静默截断）。绘制成本的真正约束是填充批次数受调色板规模封闭
+（§13.5 / AT-RENDER-008）：批次按颜色聚合，而深度不进入颜色，所以 20k 图元铺在 16 层深度上时
+批次数依旧 ≤ 调色板大小 —— 这一条有独立断言。
+
+#### Frame / jank 泳道（P7-T11）
+
+每个有帧数据的进程一条 `Frames` 泳道，**expect 与 actual 各占一行**（复用 §13.3 的 depth 行几何：
+expected 在第 0 行、actual 在第 1 行），因此配对关系直接是视觉上的上下相邻。
+
+三处编码都在 pin 版核准过，且都与直觉相反或与本仓库既有文档冲突，故逐条记录：
+
+- **`type = 0` 是 actual，`type = 1` 是 expect**（`type_desc` 为 `actural` / `expect`，上游
+  `queryActualFrameDate` 用 `a.type = 0`）。写反会把两行整体调换；
+- **jank 判定只认 `flag` 1 与 3**（上游 `jank_tag`，`Janks.sql.ts:150`）。真机里最常见的 `flag = 2`
+  （37 428 行）**不是** jank；
+- **配对用 `vsync` + `ipid`，不用 `dst`** —— `frame_slice.dst` 在真机库中 42 796 行**全为 NULL**，
+  上游 `fs.dst = sf.id` 的路径取不到任何东西。这是与 G01 同类的「schema 有、数据没有」陷阱。
+
+**jank 不只靠颜色**（AT-APP-011）：label 直接写 `vsync N actual · jank`，Inspector 的 state 行写
+`jank` / `jank (deadline missed)` / `on time`，并经既有路径进入 accessibility value。颜色是第二信号，
+取自上游 `ColorUtils.JANK_COLOR`（tag 1 橙 `#FF651D`、tag 3 黄 `#E8BE44`、否则 `#42A14D`）。
+
+capability 为 optional：无 `frame_slice` 的 trace 不生成该泳道、不报错。未触及
+`TraceSchemaAdapter.version`，因此不涉及 ArkDeck 耦合。
+
+**深度折叠是独立于可见性的一维。** `TrackDescriptor.isCollapsed` 表示"整条 track 不渲染"，是 199
+线程下 Sidebar 可用的前提（AT-APP-003）；`showsNestedDepth` 表示"把调用栈压平到一行"。两者语义不同，
+复用同一个开关会让"隐藏泳道"这个能力消失，因此保持分离。压平只改变渲染布局，session 数据不丢，
+展开即恢复。
 
 ### 13.4 Draw cycle
 
@@ -706,15 +826,129 @@ Timeline 是刻意保留的二维工作区：横向滚动表示时间，纵向�
 
 - Open、Drag & Drop、Recent、Reload；
 - trackpad/mouse pan；
-- cursor-anchored zoom；
+- cursor-anchored zoom（捏合，或按住 ⌥/⌃ 滚轮 —— 见 §14.2.5）；
 - click event selection；
-- drag range selection；
+- drag range selection，**端点可单独拖动**（§14.2.5）；
 - zoom to selection、reset；
 - expand/collapse tracks；
 - keyboard searchable process/thread/slice；
+- **时间轴标注**：在 ruler 上点击放置 flag（时间点书签），从当前选区建立 A/B mark（区间书签）；
 - Cancel parse/query/analysis。
 
 App 只显示 Core typed error 的本地化表述，不解析 TraceStreamer log 推断错误。
+
+#### 14.2.1 标注层（P7-T07）
+
+标注**不进 `TimelineSnapshot`**。snapshot 是一次 viewport generation 的 immutable bounded 查询结果
+（AT-RENDER-002），而标注是用户状态，必须跨越每一次 pan/zoom/reload 存活 —— 把它折进 snapshot 等于让
+它成为查询的函数，语义正好相反。因此 `TimelineAnnotations`（flag 集合 + mark 集合）由
+`TraceDocumentController` 持有，与 snapshot 并列传给 `TimelineView`。
+
+- **flag** 是时间点书签：ruler 点击创建（ruler 上没有事件，手势无歧义），渲染为 ruler 上的小旗 + 跨泳道竖线；
+- **mark** 是区间书签，从当前 range 或选中 event 的范围建立。与上游一致地区分**临时**（`m`，被下一个临时
+  mark 取代）与**保留**（`Shift+m`，累积）；
+- 颜色用**独立于 slice 调色板**的一小组固定色，并以**索引**而非原始色值存储 —— 标注是用户自己的标记，
+  不应读起来像另一条数据；
+- 标注 id 是单调计数器而非 UUID，使一次 session 产生的 id 可在测试中复现；
+- **生命周期**：随 session 存在，打开新 trace 时清空（AT-APP-002）；
+- **持久化到 trace cache**（开放问题 5 已裁决为持久化）。sidecar 写在
+  `<cacheRoot>/<traceSHA256>/<parserKey>/annotations.json`，即**与 `database.sqlite` 同级的 entry 目录内**，
+  而不是 trace 级。原因是 eviction 只对 trace 目录做 `rmdir`（仅当空目录才成功），trace 级文件会在条目被
+  清理后变成 inventory 从不统计的孤儿目录；entry 级则随条目一起被既有的 owned-directory 删除路径带走。
+  代价是换 parser / 改 schema adapter version 会让 cache key 变化从而丢失标注 —— 而那正是 Ready 数据库
+  本来也要重建的时刻。
+- **不写用户路径**：sidecar 只存 trace 内容哈希与标注本身，不含绝对路径、文件名或 bookmark
+  （AT-APP-001）。凭内容哈希定位，意味着同一份字节换个位置打开仍能取回标注；
+- **失败即降级**：sidecar 缺失、截断、版本不认或哈希对不上，一律当作「没有标注」，绝不因书签而挡住打开
+  trace。写入用临时文件 + `replaceItemAt` 原子替换，空集合删除 sidecar 而不是留下 `[]`；
+- **临时 mark 不持久化**：它表达的是当前选区，不是书签，存下来只会在下次打开时复活一段陈旧高亮。
+
+#### 14.2.4 Slice 参数（P7-T10）
+
+`args` 的编码**不是猜的**：它来自 TraceStreamer 自己写进每个导出库的 `args_view` 定义（在
+`sqlite_master` 里逐字可读），在 pin revision 上核对过，且已在真机库上逐行比对通过。关键分支只有一条 ——
+**只有 `datatype == 1` 时 `value` 才是 `data_dict` 索引**。上游 UI 从不自己解释 `datatype`
+（`grep -rn datatype ide/src/trace` 零命中），它直接消费视图的列。
+
+ArkTrace **复刻该 join 而不是 SELECT 那个视图**：ArkTrace 在其他地方一律校验具体表，且这条查询需要自己的
+上限与排序，而 `SELECT * FROM args_view` 承载不了（AT-DB-006/007）。视图定义逐字抄在
+`TraceEventArgument` 的文档注释里，将来上游改了能对出来。
+
+**按选中时查询，不随 snapshot 构建**：一个视口有上万条 slice，逐 primitive 查参数会摧毁 bounded page 的
+全部意义。
+
+`argsetid` **也不随 primitive 携带**（P7-T13 修正）。它最初挂在 primitive 上，理由是「选中时解析不额外
+花查询」；medium fixture 上的实测推翻了这个账：没有任何 ArkTrace 索引覆盖 `callstack.argsetid`，
+在视口查询里点它的名字就让全场最热的那条查询从 `COVERING INDEX` 掉成 `SEARCH … USING INDEX`，
+每行多一次表查找 —— `viewport.namedSlice.detail` p95 从 3.09 ms 涨到 3.72 ms（+20%）。
+现在 `TraceSliceQuery.includesArgumentSet` 默认关闭，视口不取它；选中一条 slice 时用带
+`eventKey` 的**单行**有界查询取回 argsetid，再查参数。省下的是每帧每行，付出的是每次选中一行。
+把它加进索引本可以两全，但那要动 `TraceDatabaseStagingPreparer.indexVersion` —— 那是跨仓库的
+release coupling（[ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md)），换不来用户可见收益。
+
+两处**刻意没有扩大契约**：`argsetid` 不进 slice 的 Machine JSON，args 能力也没有加进
+`TraceCapabilities`。两者都会改动 agent 面向的版本化契约，而本任务要的是 App Inspector；能力用
+`TraceEventPage.capabilityAvailable` 表达（AT-DB-004 的 optional 语义），缺表即不可用、不报错。
+若将来确实要把 args 暴露给 Agent，那是一次独立的契约决策。
+
+#### 14.2.3 Hover tooltip 与同名联动（P7-T09）
+
+hover 是**纯叠加层**，这是硬约束而非风格选择：ArkTrace 的事件填充走 `DetailPaintKey` 批处理缓存，
+若 hover 参与基础批次，批次数就会变成鼠标移动的函数，直接违反 §13.5 / AT-RENDER-008「一次 snapshot 内的
+填充批次数由调色板规模约束，不随事件数增长」。
+
+- **同名联动**：上游用 `globalAlpha = 0.7` 把同名 slice 一起调淡
+  （`ProcedureWorkerFunc.ts:257-258`）。ArkTrace 改为用背景色**罩一层**，而不是换一种更浅的颜色重填 ——
+  重填意味着每个被 hover 的名字都产生一个新 `DetailPaintKey`、每次指针采样都要重建缓存；罩层复用缓存里
+  已有的 frame，对批次数零贡献。匹配用的名字与填充配色取自同一来源，因此「同色」与「同族」不会打架；
+- **tooltip** 内容取自已挂在 primitive 上的 `TraceEventInspector`，**hover 不发起任何查询**
+  （AT-RENDER-006）；到右边界时向左翻转而不是裁掉文字（上游 `TraceRow.ts:1409-1421`）；
+- **不播报**：hover 不触发任何 accessibility 通知（AT-APP-010 禁止高频 hover 逐帧播报）。Inspector 的
+  hover 分支不变 —— tooltip 是补充，完整、可复制、可访问的语义仍在 Inspector；
+- **Reduce Motion 无条件满足**（AT-APP-012）：tooltip 原地出现，没有位移动画可禁用。
+
+#### 14.2.2 泳道置顶（P7-T08）
+
+按进程分组解决了「一个进程的泳道在一起」，但解决不了「盯住来自四个不同进程的四条泳道」—— 那四条按定义
+分散在四个折叠节点里。置顶区就是补这一条：泳道可 pin，pin 集合以用户排定的**顺序**显示在 Sidebar 顶部，
+可折叠（原生 `DisclosureGroup`，键盘可达；**未绑上游的裸 `b` 键** —— 单字母全局键与 DESIGN §14.3 的
+作用域约定冲突，且 `b` 在 Timeline 上没有已建立的含义）。
+
+- pin 一条隐藏的泳道会同时使其可见 —— pin 了却看不到是个陷阱；
+- 置顶区有条数上限，超过就不再是「一眼可扫」而是 Sidebar 的第二份副本；
+- 置顶集合与标注**共用同一个 sidecar**（§14.2.1），因此生命周期一致：随 trace 持久化、按内容哈希定位、
+  打开新 trace 时清空。恢复时按当前 catalog 过滤，旧解析留下的 track id 不会变成幽灵行。
+
+#### 14.2.5 指针手势与快捷键帮助（P7-T12）
+
+**滚轮缩放。** 上游把缩放绑在 `Ctrl + Scroll wheel`（`component/SpKeyboard.html.ts` 的 Mouse Controls），
+ArkTrace 此前只有捏合，接滚轮鼠标的用户没有缩放手势。现在带 ⌥ **或** ⌃ 的滚轮转成 zoom intent，锚点与
+`magnify(with:)` 共用同一段计算（同一个 `zoom(at:scale:in:)`），因此捏合与滚轮不可能锚在不同位置。
+两个修饰键都收：⌃+滚轮在很多机器上被系统的「缩放」辅助功能占用，⌥ 是 macOS 上「另一个轴 / 更精细手势」
+的惯例。**只读纵轴**（滚轮鼠标唯一有的轴），所以带修饰的横向滚动仍是平移而不是误触发缩放；**平移路径
+一字未改**，仍消费原始 `scrollingDeltaX`（把 line 单位归一化会让既有的滚轮平移一下子长 16 倍）。
+legacy 滚轮的 delta 以 line 计，归一化为 16 pt/line 后一格约 17% 缩放；单次事件的指数被夹在 ±1，
+甩一下触控板不会把 viewport 甩飞。
+
+**框选端点可拖拽。** 上游在 timer shaft 里用 `markAObj`/`markBObj` 保留端点身份
+（`RangeRuler.ts:88-89`、`:332-339`）。ArkTrace 的 ruler 已经归 flag 所有，所以把手放在**选区在轨道区的
+两条竖边**上：按下时先做端点命中判定，命中则只移动那一端，另一端作为锚点不动；越过锚点时两端自然交换
+身份（拖动的手柄始终跟着指针）。
+
+- **hit area**：每个把手 24 pt 宽 × 整个轨道区高，满足 AT-APP-011 的 24×24 下限；选区窄于 24 pt 时，
+  两个 24 pt 目标无法都居中而不重叠，此时以中点为界、各自**向外**延展，既保住 24 pt 又不重叠；
+- **代价是明写的**：选区存在时，两条边各 24 pt 的列里按下会抓把手而不是选中事件。这个代价有界 ——
+  选区是用户自己拉出来的，按事件本来就会清掉选区，Esc 可直接取消；
+- **反馈是形状不是颜色**（AT-APP-011）：指针进入把手时光标变为左右调整光标、把手变宽并出现纹路；
+  光标区域与命中区域由同一段几何产生，测试断言两者一致 —— 承诺了把手却抓不到，比没有把手更糟；
+- 端点 hover 与 slice hover 一样是**纯叠加层**：重绘但不碰批处理缓存，也不播报（AT-RENDER-008 /
+  AT-APP-010）。
+
+**快捷键帮助**（AUDIT G15）。上游用 `/` 打开键位面板；macOS 的惯例是 Help 菜单，且 `/` 在 Timeline 上
+更值得留给将来的搜索入口，所以这里**不绑 `/`**。键位表只有**一处来源**：`TraceShortcutCatalog`。
+README 的三张表由它生成，`ShortcutCatalogTests` 双向断言（每张表逐字出现在两份 README 里，且 README 里
+不存在 catalog 生成不出来的键位行），实测「改 README → 断言失败」。App 的 Help 窗口渲染同一个 catalog，
+测试在源码层面禁止 App 源文件里出现 `<kbd>`，避免长出第二份清单。
 
 ### 14.3 Keyboard、VoiceOver 与 motion
 
@@ -725,6 +959,10 @@ App 只显示 Core typed error 的本地化表述，不解析 TraceStreamer log 
 - `Option-Left` / `Option-Right` 平移约一个 viewport 的 10%，`+` / `-` 围绕当前 selection 或 viewport center 缩放；
 - 与 SmartPerf Host 对齐的导航簇：`W` / `S` 以指针位置为锚点放大/缩小，`A` / `D` 平移，`[` / `]` 是上游 zoom-to-selection 的别名（ArkTrace 已绑定在 `F`）。按住不放由 macOS 按键重复驱动连续缩放/平移，而不是自建 60fps 动画——每次 viewport 变化都要经过 bounded snapshot loader，逐帧驱动会与 generation 模型冲突。上游因为监听 `document` 才需要 `flagInputFocus` 守卫；ArkTrace 的绑定属于获得 focus 的 Timeline，因此搜索框里的 `w`、`s` 仍是输入。⌘ 修饰的字母一律交回菜单，`W` 不会吞掉 ⌘W；
 - `Return` 选择 focused event，`F` zoom to selection，`0` reset，`Escape` 清除 transient range/selection；
+- 标注簇（与上游同义）：裸 `,` / `.` 把最近的 flag 滚回视野，`Ctrl+,` / `Ctrl+.` 跳到上/下一个 flag，
+  `Ctrl+[` / `Ctrl+]` 在 mark 间跳转，`m` / `Shift+m` 把当前选区标记为临时/保留 mark。**修饰键选 Control
+  而非 ⌘**：⌘ 一律交回菜单（⌘M 必须仍是 Minimize），而裸 `[` / `]` 已经是 zoom-to-selection 的别名，
+  所以 mark 跳转必须带修饰键。这些绑定同样只在 Timeline 持有 focus 时生效，搜索框里的 `m`、`,`、`.` 仍是输入；
 - sheet、dialog 或 error disclosure 关闭后，focus 返回触发它的 control；pane 收起时，focus 转移到对应 disclosure control。
 
 Canvas 不为数十万事件创建 accessibility element。它向 VoiceOver 暴露 focused track 摘要、当前 focused/selected event、当前 viewport/range 和可用键盘动作；Inspector 提供完整、可复制的语义详情，Search 提供到任意可查事件的替代导航路径。Selection、loading、结果计数、完成和错误变化通过原生 accessibility notification 宣告，但高频 pan/hover 不逐帧播报。

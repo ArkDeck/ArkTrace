@@ -240,6 +240,10 @@ package protocol TraceRepositoryProtocol: Sendable {
         _ query: ThreadStateQuery
     ) async throws -> TraceEventPage<ThreadStateInterval>
     func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice>
+    func arguments(
+        _ query: TraceArgumentQuery
+    ) async throws -> TraceEventPage<TraceEventArgument>
+    func frames(_ query: TraceFrameQuery) async throws -> TraceEventPage<TraceFrame>
     func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries>
     func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult
     func eventBatch(_ batch: TraceRepositoryEventBatch) async throws
@@ -320,6 +324,16 @@ package extension TraceRepositoryProtocol {
     func threadStates(
         _ query: ThreadStateQuery
     ) async throws -> TraceEventPage<ThreadStateInterval> {
+        .unavailable
+    }
+
+    func arguments(
+        _ query: TraceArgumentQuery
+    ) async throws -> TraceEventPage<TraceEventArgument> {
+        .unavailable
+    }
+
+    func frames(_ query: TraceFrameQuery) async throws -> TraceEventPage<TraceFrame> {
         .unavailable
     }
 

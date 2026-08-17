@@ -1,5 +1,6 @@
 import ArkTraceCore
 import CoreGraphics
+import Foundation
 
 public struct TimelineTrackID: Hashable, Codable, Sendable, Comparable {
     public let rawValue: String
@@ -19,6 +20,8 @@ public enum TimelineTrackSource: Hashable, Codable, Sendable {
     case namedSlice(ThreadKey?)
     case cpuCounter(filterID: Int64, cpu: Int64?)
     case processCounter(filterID: Int64, processKey: ProcessKey?)
+    /// Expected and actual frames for one process, drawn as two rows.
+    case frame(ProcessKey?)
 
     public var stableID: TimelineTrackID {
         switch self {
@@ -35,6 +38,10 @@ public enum TimelineTrackSource: Hashable, Codable, Sendable {
             return TimelineTrackID(
                 rawValue: "process-counter:\(filterID):\(processKey.map { String($0.ipid) } ?? "all")"
             )
+        case .frame(let processKey):
+            return TimelineTrackID(
+                rawValue: "frame:\(processKey.map { String($0.ipid) } ?? "all")"
+            )
         }
     }
 
@@ -47,6 +54,8 @@ public enum TimelineTrackSource: Hashable, Codable, Sendable {
             return .cpuCounter(filterID: filterID, cpu: cpu)
         case .processCounter(let filterID, let processKey):
             return .processCounter(filterID: filterID, processKey: processKey)
+        case .frame(let processKey):
+            return .frame(processKey: processKey)
         }
     }
 }
@@ -55,13 +64,28 @@ public struct TrackDescriptor: Hashable, Codable, Sendable {
     public let id: TimelineTrackID
     public let title: String
     public let source: TimelineTrackSource
+    /// Track visibility. A collapsed track is not rendered at all; this is how
+    /// a 199-thread trace stays navigable (AT-APP-003).
     public let isCollapsed: Bool
+    /// Whether nested call depth gets its own row. Independent of
+    /// ``isCollapsed``: hiding a track and flattening its call stack are
+    /// different requests, and overloading one control would remove the
+    /// ability to hide. Only named-slice tracks have depth to flatten; false
+    /// draws depth 0 alone, in one row, and never discards session data
+    /// (DESIGN §13.3).
+    public let showsNestedDepth: Bool
 
-    public init(title: String, source: TimelineTrackSource, isCollapsed: Bool = false) {
+    public init(
+        title: String,
+        source: TimelineTrackSource,
+        isCollapsed: Bool = false,
+        showsNestedDepth: Bool = true
+    ) {
         self.id = source.stableID
         self.title = title
         self.source = source
         self.isCollapsed = isCollapsed
+        self.showsNestedDepth = showsNestedDepth
     }
 }
 
@@ -157,11 +181,79 @@ package enum TimelineKeyboardCommand: Hashable, Sendable {
     case clearSelection
 }
 
+/// Which edge of a range selection a gesture is acting on. Upstream keeps the
+/// same identity in `RangeRuler.ts:88-89` as `markAObj` / `markBObj`, so an
+/// endpoint drag moves one edge and leaves the other where it is.
+package enum TimelineSelectionEndpoint: Hashable, Sendable {
+    case start
+    case end
+}
+
 public enum TimelineAccessibilityLayout {
     /// AT-APP-011 hard floor for every custom interactive target.
     public static let minimumTargetPoints: CGFloat = 24
     /// Desktop primary-toolbar target used by the native App shell.
     public static let primaryToolbarTargetPoints: CGFloat = 40
+}
+
+/// What one scroll gesture means to the timeline. Resolved from the event's
+/// deltas and modifiers before any viewport work, so the mapping is testable
+/// without synthesizing an `NSEvent`.
+package enum TimelineScrollResolution: Hashable, Sendable {
+    /// Not ours: let the enclosing scroll view have it (vertical scrolling).
+    case passThrough
+    case pan(points: Double)
+    /// Same units as ``TimelineViewportIntent/zoom``: below 1 narrows the
+    /// viewport, above 1 widens it.
+    case zoom(scale: Double)
+}
+
+/// Scroll-wheel semantics.
+///
+/// Upstream binds `Ctrl + Scroll wheel` to zoom (`component/SpKeyboard.html.ts`
+/// Mouse Controls). ArkTrace accepts ⌃ and ⌥ both: ⌃-scroll is taken by the
+/// system's zoom accessibility feature on many machines, and ⌥ is the macOS
+/// convention for "the other axis / the finer gesture".
+package enum TimelineScrollGesture {
+    /// Points a legacy wheel detent is worth. AppKit reports non-precise
+    /// deltas in lines; this is the same order as the line height AppKit's own
+    /// scroll views use, so one detent is a visible but not violent step.
+    static let pointsPerLine: Double = 16
+    /// Zoom exponent per point of scroll. One wheel detent (16 points) is
+    /// `exp(-0.16)` ≈ 0.85, i.e. about 17% per detent.
+    static let zoomExponentPerPoint: Double = 0.01
+    /// Ceiling on a single event's exponent, so a flung trackpad cannot
+    /// teleport the viewport: at most e× in or out per event.
+    static let maximumZoomExponent: Double = 1
+
+    /// Deltas below this are noise from the orthogonal axis of a gesture.
+    static let deadZonePoints: Double = 0.01
+
+    static func resolve(
+        deltaX: Double,
+        deltaY: Double,
+        hasPreciseDeltas: Bool,
+        zooms: Bool
+    ) -> TimelineScrollResolution {
+        let vertical = hasPreciseDeltas ? deltaY : deltaY * pointsPerLine
+        // Zoom reads the vertical axis only, which is the one a wheel mouse
+        // has. A modified horizontal scroll keeps panning rather than becoming
+        // an accidental zoom.
+        if zooms, abs(vertical) > deadZonePoints {
+            let exponent = min(
+                maximumZoomExponent,
+                max(-maximumZoomExponent, vertical * zoomExponentPerPoint)
+            )
+            // Scrolling up (positive delta) zooms in, matching the sign
+            // convention `magnify(with:)` uses for a pinch-out.
+            return .zoom(scale: exp(-exponent))
+        }
+        // Panning keeps consuming the raw horizontal delta it always did:
+        // normalizing it here would silently make every existing wheel pan
+        // sixteen times longer.
+        guard abs(deltaX) > deadZonePoints else { return .passThrough }
+        return .pan(points: deltaX)
+    }
 }
 
 package enum TimelineInteraction {
@@ -294,6 +386,14 @@ public struct TimelineDetailPrimitive: Hashable, Codable, Sendable {
     public let label: String?
     public let category: String?
     public let inspector: TraceEventInspector?
+    /// Call depth for named slices; every other event type is 0. Depth selects
+    /// the row within the track and is deliberately **not** part of the fill
+    /// colour: upstream passes a literal `0` as the second argument of its
+    /// colour hash at the pinned revision, so mixing real depth in here would
+    /// silently diverge from it (UPSTREAM_ALIGNMENT_AUDIT §5).
+    public let depth: Int
+    /// Upstream's `jank_tag` for frame primitives; 0 for everything else.
+    public let jankTag: Int64
 
     public init(
         trackID: TimelineTrackID,
@@ -301,7 +401,9 @@ public struct TimelineDetailPrimitive: Hashable, Codable, Sendable {
         range: TraceTimeRange,
         label: String? = nil,
         category: String? = nil,
-        inspector: TraceEventInspector? = nil
+        inspector: TraceEventInspector? = nil,
+        depth: Int = 0,
+        jankTag: Int64 = 0
     ) {
         self.trackID = trackID
         self.eventKey = eventKey
@@ -309,6 +411,8 @@ public struct TimelineDetailPrimitive: Hashable, Codable, Sendable {
         self.label = label
         self.category = category
         self.inspector = inspector
+        self.depth = max(0, depth)
+        self.jankTag = jankTag
     }
 }
 
@@ -337,17 +441,24 @@ public struct TimelineTrackSnapshot: Hashable, Codable, Sendable {
     public let y: Double
     public let height: Double
     public let primitives: [TimelinePrimitive]
+    /// Depth rows this track reserves, at least 1. `height` is sized for
+    /// exactly this many rows, so geometry can derive one row's stride from
+    /// the snapshot instead of assuming a constant — draw and hit-test then
+    /// cannot drift apart (AT-RENDER-003).
+    public let depthRowCount: Int
 
     public init(
         descriptor: TrackDescriptor,
         y: Double,
         height: Double,
-        primitives: [TimelinePrimitive]
+        primitives: [TimelinePrimitive],
+        depthRowCount: Int = 1
     ) {
         self.descriptor = descriptor
         self.y = y
         self.height = height
         self.primitives = primitives
+        self.depthRowCount = max(1, depthRowCount)
     }
 }
 

@@ -231,35 +231,55 @@ public struct TraceAppErrorPresentation: Hashable, Sendable {
     }
 }
 
+/// Top-level track organisation. CPU and CPU-counter lanes stay grouped by
+/// kind because they are inherently cross-process — a CPU belongs to no one
+/// process, so filing it under one would be a fiction. Everything owned by a
+/// thread (its state lane, its named slices) or by a process (its counters) is
+/// grouped by process instead, so one process's lanes sit together and collapse
+/// together, which is what upstream's process → thread tree gives.
 public enum TraceTrackGroupKind: String, Hashable, Codable, Sendable, CaseIterable {
     case cpu
-    case threadState
-    case namedSlice
     case cpuCounter
-    case processCounter
+    case process
+    /// Slices and threads with no owning process.
+    case unattributed
 }
 
 public struct TraceTrackGroup: Hashable, Codable, Sendable, Identifiable {
+    /// Stable across reloads and unique per group. `kind` alone cannot be the
+    /// identity now that there is one group per process.
+    public let id: String
     public let kind: TraceTrackGroupKind
+    /// Set only on `.process` groups.
+    public let processKey: ProcessKey?
     public let title: String
     public let capabilityAvailable: Bool
     public let truncated: Bool
     public var tracks: [TrackDescriptor]
 
-    public var id: TraceTrackGroupKind { kind }
-
     public init(
+        id: String,
         kind: TraceTrackGroupKind,
+        processKey: ProcessKey? = nil,
         title: String,
         capabilityAvailable: Bool,
         truncated: Bool,
         tracks: [TrackDescriptor]
     ) {
+        self.id = id
         self.kind = kind
+        self.processKey = processKey
         self.title = title
         self.capabilityAvailable = capabilityAvailable
         self.truncated = truncated
         self.tracks = tracks
+    }
+
+    public static func cpuGroupID() -> String { "cpu" }
+    public static func cpuCounterGroupID() -> String { "cpu-counter" }
+    public static func unattributedGroupID() -> String { "unattributed" }
+    public static func processGroupID(_ key: ProcessKey) -> String {
+        "process:\(key.ipid)"
     }
 }
 
@@ -267,7 +287,24 @@ struct TraceOpenedDocument: Sendable {
     let repository: any TraceRepositoryProtocol
     let cacheHit: Bool
     let cacheMetadata: TraceCacheMetadata?
+    /// Nil when this open has no cache entry, in which case view state stays
+    /// session-scoped instead of failing.
+    var viewStateStore: TraceViewStateStore?
     let close: @Sendable () async throws -> Void
+
+    init(
+        repository: any TraceRepositoryProtocol,
+        cacheHit: Bool,
+        cacheMetadata: TraceCacheMetadata?,
+        viewStateStore: TraceViewStateStore? = nil,
+        close: @escaping @Sendable () async throws -> Void
+    ) {
+        self.repository = repository
+        self.cacheHit = cacheHit
+        self.cacheMetadata = cacheMetadata
+        self.viewStateStore = viewStateStore
+        self.close = close
+    }
 }
 
 typealias TraceDocumentOpener = @Sendable (
@@ -284,10 +321,34 @@ public final class TraceDocumentController {
     public private(set) var trackGroups: [TraceTrackGroup] = []
     public private(set) var snapshot: TimelineSnapshot?
     public private(set) var selectedEvent: TraceEventInspector?
+    /// Arguments of the selected slice, fetched on selection rather than with
+    /// the snapshot: a viewport holds tens of thousands of slices and one
+    /// query each would defeat the bounded-page design.
+    public private(set) var selectedEventArguments: [TraceEventArgument] = []
+    /// True when the set was longer than the Inspector's bound, so a partial
+    /// list is never presented as the whole set.
+    public private(set) var selectedEventArgumentsTruncated = false
     public private(set) var hoveredEvent: TraceEventInspector?
     public private(set) var selectedRange: TraceTimeRange?
+    /// Flags and A/B marks the user placed. Session state, not query state:
+    /// cleared when the document is replaced (AT-APP-002) and never written to
+    /// analysis output.
+    public private(set) var annotations = TimelineAnnotations()
+    /// Lanes the user pinned, in their arranged order. Ordered rather than a
+    /// set because the point of pinning four lanes is to watch them side by
+    /// side in a chosen order.
+    public private(set) var favoriteTrackIDs: [TimelineTrackID] = []
     public private(set) var rangeAnalysis: TraceRangeAnalysis?
-    public private(set) var searchResults = TraceSearchResults(items: [], truncated: false)
+    public private(set) var searchResults = TraceSearchResults(items: [], truncated: false) {
+        didSet {
+            guard searchResults != oldValue else { return }
+            searchSelectionIndex = nil
+        }
+    }
+    /// Which result keyboard stepping is standing on, or `nil` before the
+    /// first step. A new result set drops it: the index would otherwise point
+    /// at a row from a previous query.
+    public private(set) var searchSelectionIndex: Int?
     public private(set) var isSearching = false
     /// Live text of the toolbar search field. Owned here (not as view-local
     /// `@State`) so only the views that actually read it — the search field
@@ -319,6 +380,10 @@ public final class TraceDocumentController {
     @ObservationIgnored private var searchGeneration: UInt64 = 0
     @ObservationIgnored private var catalogThreads: [TraceThread] = []
     @ObservationIgnored private var pendingSelectionKey: EventKey?
+    /// Monotonic annotation identity. A counter rather than a UUID so the ids
+    /// a session produces are reproducible in tests.
+    @ObservationIgnored private var nextAnnotationID = 1
+    @ObservationIgnored private var argumentsTask: Task<Void, Never>?
     @ObservationIgnored private var announcementRevision: UInt64 = 0
     @ObservationIgnored private var firstWindowMarked = false
     @ObservationIgnored private var timelineDisplayMarked = false
@@ -345,10 +410,14 @@ public final class TraceDocumentController {
                     storagePolicy: .contentAddressed(cacheDirectory: cache),
                     progress: progress
                 )
+                let cacheMetadata = await session.cacheMetadata
                 return TraceOpenedDocument(
                     repository: await session.repository,
                     cacheHit: await session.cacheHit,
-                    cacheMetadata: await session.cacheMetadata,
+                    cacheMetadata: cacheMetadata,
+                    viewStateStore: TraceViewStateStore(
+                        cacheDirectory: cache, metadata: cacheMetadata
+                    ),
                     close: { try await session.close() }
                 )
             }
@@ -440,15 +509,41 @@ public final class TraceDocumentController {
     }
 
     public func toggleTrack(_ id: TimelineTrackID) {
+        updateTrack(id) { current in
+            TrackDescriptor(
+                title: current.title,
+                source: current.source,
+                isCollapsed: !current.isCollapsed,
+                showsNestedDepth: current.showsNestedDepth
+            )
+        }
+    }
+
+    /// Flattens or restores a track's call-depth rows. Separate from
+    /// ``toggleTrack(_:)``: hiding a lane and flattening its call stack are
+    /// different requests. Flattening only changes the rendered layout — the
+    /// session keeps every slice and expanding restores them.
+    public func toggleTrackDepth(_ id: TimelineTrackID) {
+        updateTrack(id) { current in
+            TrackDescriptor(
+                title: current.title,
+                source: current.source,
+                isCollapsed: current.isCollapsed,
+                showsNestedDepth: !current.showsNestedDepth
+            )
+        }
+    }
+
+    private func updateTrack(
+        _ id: TimelineTrackID,
+        _ transform: (TrackDescriptor) -> TrackDescriptor
+    ) {
         for groupIndex in trackGroups.indices {
             guard let trackIndex = trackGroups[groupIndex].tracks.firstIndex(where: {
                 $0.id == id
             }) else { continue }
-            let current = trackGroups[groupIndex].tracks[trackIndex]
-            trackGroups[groupIndex].tracks[trackIndex] = TrackDescriptor(
-                title: current.title,
-                source: current.source,
-                isCollapsed: !current.isCollapsed
+            trackGroups[groupIndex].tracks[trackIndex] = transform(
+                trackGroups[groupIndex].tracks[trackIndex]
             )
             scheduleSnapshot(preference: .automatic)
             return
@@ -459,6 +554,66 @@ public final class TraceDocumentController {
         pendingSelectionKey = nil
         selectedEvent = key.flatMap { inspector(for: $0) }
         if key != nil { selectRange(nil) }
+        loadArguments(for: key)
+    }
+
+    /// Looks up the selected slice's arguments. A trace without an `args` table
+    /// simply yields none — the Inspector then shows no section at all rather
+    /// than an empty one or an error (AT-DB-004 optional capability).
+    private func loadArguments(for key: EventKey?) {
+        argumentsTask?.cancel()
+        selectedEventArguments = []
+        selectedEventArgumentsTruncated = false
+        guard let key, key.table == .callstack,
+            let event = selectedEvent, event.key == key,
+            let repository = document?.repository
+        else { return }
+        let generation = documentGeneration
+        argumentsTask = Task { [weak self] in
+            guard let argSetID = await Self.argumentSetID(
+                for: event, in: repository
+            ) else { return }
+            guard let query = try? TraceArgumentQuery(
+                argSetID: argSetID,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            ), let page = try? await repository.arguments(query) else { return }
+            guard let self, !Task.isCancelled, generation == self.documentGeneration,
+                self.selectedEvent?.key == key
+            else { return }
+            self.selectedEventArguments = page.items
+            self.selectedEventArgumentsTruncated = page.truncated
+        }
+    }
+
+    /// Resolves one selected slice's arg set with a bounded query keyed by the
+    /// event itself.
+    ///
+    /// It deliberately does *not* ride along on the snapshot. `argsetid` is in
+    /// no ArkTrace index, so carrying it through the viewport query costs a
+    /// table lookup per visible slice and drops that query off its covering
+    /// index — measured at +20% p95 on the pinned medium fixture. Here it is
+    /// one row for the one slice the user selected (DESIGN §14.2.4).
+    private static func argumentSetID(
+        for event: TraceEventInspector,
+        in repository: any TraceRepositoryProtocol
+    ) async -> Int64? {
+        // An instant has a degenerate range; widen it by a nanosecond so the
+        // query range stays valid (AT-TIME-006).
+        guard let range = try? TraceTimeRange.query(
+            startNs: event.range.startNs,
+            endNs: max(event.range.startNs + 1, event.range.endNs)
+        ),
+            let query = try? TraceSliceQuery(
+                range: range,
+                eventKey: event.key,
+                threadKey: event.threadKey,
+                includesArgumentSet: true,
+                limit: 1,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            ),
+            let page = try? await repository.slices(query)
+        else { return nil }
+        return page.items.first?.argSetID
     }
 
     public func hoverEvent(_ key: EventKey?) {
@@ -531,7 +686,53 @@ public final class TraceDocumentController {
         }
     }
 
+    /// Walks the result list one row at a time, revealing as it goes.
+    ///
+    /// Deliberately does *not* move keyboard focus: stepping is only usable if
+    /// the next press lands in the same list, so the timeline is updated
+    /// underneath while focus stays where the user is typing (AT-APP-009).
+    /// ``activateSearchResult()`` is the separate, explicit "go there" step.
+    @discardableResult
+    public func stepSearchResult(by delta: Int) -> Bool {
+        let items = searchResults.items
+        guard !items.isEmpty, delta != 0 else { return false }
+        let target: Int
+        if let searchSelectionIndex {
+            target = searchSelectionIndex + delta
+            // Stops at the ends rather than wrapping: a wrap in a truncated
+            // result list reads as "there is more" when there is not.
+            guard items.indices.contains(target) else { return false }
+        } else {
+            target = delta > 0 ? 0 : items.count - 1
+        }
+        searchSelectionIndex = target
+        reveal(items[target], movesFocus: false)
+        return true
+    }
+
+    /// Commits the stepped-to result. Same reveal, but focus follows to the
+    /// timeline, which is where the user is going next.
+    @discardableResult
+    public func activateSearchResult() -> Bool {
+        guard let searchSelectionIndex,
+            searchResults.items.indices.contains(searchSelectionIndex)
+        else { return false }
+        reveal(searchResults.items[searchSelectionIndex])
+        return true
+    }
+
+    /// Selects a row without revealing it, so pointer selection and keyboard
+    /// stepping share one cursor.
+    public func selectSearchResult(at index: Int) {
+        guard searchResults.items.indices.contains(index) else { return }
+        searchSelectionIndex = index
+    }
+
     public func reveal(_ result: TraceSearchResult) {
+        reveal(result, movesFocus: true)
+    }
+
+    private func reveal(_ result: TraceSearchResult, movesFocus: Bool) {
         switch result.kind {
         case .process:
             let threadKeys = Set(
@@ -549,8 +750,184 @@ public final class TraceDocumentController {
             pendingSelectionKey = result.eventKey
         }
         if let range = result.range { revealRange(range) }
-        timelineFocusRequestID &+= 1
+        if movesFocus { timelineFocusRequestID &+= 1 }
         scheduleSnapshot(preference: result.eventKey == nil ? .automatic : .detail)
+    }
+
+    /// Jumps from a slice-name row to that name's first occurrence in the
+    /// selected range. Deliberately builds a `TraceSearchResult` and goes
+    /// through ``reveal(_:)`` rather than adding a second reveal path — track
+    /// admission, expansion, range framing and focus already live there.
+    public func revealSliceAggregate(_ aggregate: TraceSliceNameAggregate) {
+        reveal(
+            TraceSearchResult(
+                kind: .slice,
+                title: aggregate.name,
+                subtitle: nil,
+                processKey: nil,
+                threadKey: aggregate.firstThreadKey,
+                eventKey: aggregate.firstEventKey,
+                range: aggregate.firstRange
+            )
+        )
+    }
+
+    // MARK: - Annotations
+
+    /// Places a flag at `timestampNs`. Colours cycle so consecutive flags stay
+    /// distinguishable without asking the user to pick one.
+    @discardableResult
+    public func addFlag(atNs timestampNs: Int64, label: String? = nil) -> TimelineFlag? {
+        guard let bounds = try? traceBounds() else { return nil }
+        let clamped = min(max(timestampNs, bounds.startNs), bounds.endNs)
+        let flag = TimelineFlag(
+            id: nextAnnotationID,
+            timestampNs: clamped,
+            label: label ?? "Flag \(annotations.flags.count + 1)",
+            colorIndex: annotations.flags.count
+        )
+        nextAnnotationID += 1
+        annotations.flags.append(flag)
+        persistViewState()
+        return flag
+    }
+
+    public func updateFlag(id: Int, label: String? = nil, colorIndex: Int? = nil) {
+        guard let index = annotations.flags.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        if let label { annotations.flags[index].label = label }
+        if let colorIndex { annotations.flags[index].colorIndex = colorIndex }
+        persistViewState()
+    }
+
+    public func removeFlag(id: Int) {
+        annotations.flags.removeAll { $0.id == id }
+        persistViewState()
+    }
+
+    /// Turns the current selection — a dragged range, or the selected event's
+    /// own extent — into a mark. Upstream's `m` keeps only the latest transient
+    /// mark; `Shift+m` accumulates.
+    @discardableResult
+    public func addMark(isPersistent: Bool, label: String? = nil) -> TimelineMark? {
+        let range = selectedRange ?? selectedEvent.map(\.range)
+        guard let range, range.startNs < range.endNs else { return nil }
+        if !isPersistent { annotations.marks.removeAll { !$0.isPersistent } }
+        let mark = TimelineMark(
+            id: nextAnnotationID,
+            range: range,
+            label: label ?? (isPersistent ? "Mark \(annotations.marks.count + 1)" : "Mark"),
+            colorIndex: annotations.marks.count,
+            isPersistent: isPersistent
+        )
+        nextAnnotationID += 1
+        annotations.marks.append(mark)
+        persistViewState()
+        return mark
+    }
+
+    public func updateMark(id: Int, label: String? = nil, colorIndex: Int? = nil) {
+        guard let index = annotations.marks.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        if let label { annotations.marks[index].label = label }
+        if let colorIndex { annotations.marks[index].colorIndex = colorIndex }
+        persistViewState()
+    }
+
+    public func removeMark(id: Int) {
+        annotations.marks.removeAll { $0.id == id }
+        persistViewState()
+    }
+
+    /// One funnel for every mutation. The payload is a handful of records, so
+    /// writing straight through keeps "what is on disk" trivially equal to
+    /// "what is on screen" — no debounce window in which a crash loses edits.
+    private func persistViewState() {
+        document?.viewStateStore?.save(
+            annotations: annotations, favoriteTrackIDs: favoriteTrackIDs
+        )
+    }
+
+    // MARK: - Favourite tracks
+
+    public func isFavorite(_ id: TimelineTrackID) -> Bool {
+        favoriteTrackIDs.contains(id)
+    }
+
+    /// Pins or unpins a lane. Pinning also makes it visible — pinning a hidden
+    /// lane and then not seeing it would be a trap.
+    public func toggleFavorite(_ id: TimelineTrackID) {
+        if let index = favoriteTrackIDs.firstIndex(of: id) {
+            favoriteTrackIDs.remove(at: index)
+        } else {
+            guard favoriteTracks().count < Self.maximumFavoriteTracks else { return }
+            favoriteTrackIDs.append(id)
+            updateTrack(id) { current in
+                TrackDescriptor(
+                    title: current.title,
+                    source: current.source,
+                    isCollapsed: false,
+                    showsNestedDepth: current.showsNestedDepth
+                )
+            }
+        }
+        persistViewState()
+    }
+
+    /// Reorders the pinned set. Upstream lets the user drag pinned rows; the
+    /// order is the whole point of pinning several at once.
+    public func moveFavorite(from source: Int, to destination: Int) {
+        guard favoriteTrackIDs.indices.contains(source),
+            (0...favoriteTrackIDs.count).contains(destination)
+        else { return }
+        let id = favoriteTrackIDs.remove(at: source)
+        let index = destination > source ? destination - 1 : destination
+        favoriteTrackIDs.insert(id, at: min(max(0, index), favoriteTrackIDs.count))
+        persistViewState()
+    }
+
+    /// The pinned descriptors, in pinned order, skipping ids the current trace
+    /// no longer has.
+    public func favoriteTracks() -> [TrackDescriptor] {
+        let byID = Dictionary(
+            trackGroups.flatMap(\.tracks).map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return favoriteTrackIDs.compactMap { byID[$0] }
+    }
+
+    /// A pinned area only helps while it stays scannable; past this it is just
+    /// a second copy of the sidebar.
+    static let maximumFavoriteTracks = 12
+
+    public func handleAnnotationCommand(_ command: TimelineAnnotationCommand) {
+        guard let viewport = snapshot?.viewport else { return }
+        let anchor = viewport.range.startNs + viewport.range.durationNs / 2
+        switch command {
+        case .createMark(let isPersistent):
+            addMark(isPersistent: isPersistent)
+        case .nextFlag:
+            annotations.flag(after: anchor).map { revealRange($0.pointRange) }
+        case .previousFlag:
+            annotations.flag(before: anchor).map { revealRange($0.pointRange) }
+        case .nextMark:
+            annotations.mark(after: anchor).map { revealRange($0.range) }
+        case .previousMark:
+            annotations.mark(before: anchor).map { revealRange($0.range) }
+        case .scrollNearestFlagIntoView:
+            // Bare `,`/`.` upstream: bring the closest flag back on screen
+            // without treating it as "move to the next one".
+            let nearest = annotations.orderedFlags.min {
+                abs($0.timestampNs - anchor) < abs($1.timestampNs - anchor)
+            }
+            guard let nearest,
+                nearest.timestampNs < viewport.range.startNs
+                    || nearest.timestampNs > viewport.range.endNs
+            else { return }
+            revealRange(nearest.pointRange)
+        }
     }
 
     public func handleViewportIntent(_ intent: TimelineViewportIntent) {
@@ -711,6 +1088,17 @@ public final class TraceDocumentController {
                 return
             }
             document = opened
+            // Restore this trace's bookmarks. Keyed by content hash, so the
+            // same bytes bring back the same annotations wherever they live now.
+            if let restored = opened.viewStateStore?.load(), !restored.isEmpty {
+                annotations = restored.annotations
+                nextAnnotationID = (restored.annotations.flags.map(\.id)
+                    + restored.annotations.marks.map(\.id)).max().map { $0 + 1 } ?? 1
+                // Only pin lanes this trace actually has: a stale id from an
+                // earlier parse must not create a phantom row.
+                let known = Set(catalog.groups.flatMap(\.tracks).map(\.id))
+                favoriteTrackIDs = restored.favoriteTrackIDs.filter(known.contains)
+            }
             metadata = catalog.metadata
             catalogThreads = catalog.threads
             trackGroups = catalog.groups
@@ -851,8 +1239,11 @@ public final class TraceDocumentController {
                     matches = false
                 }
                 if matches, track.isCollapsed {
+                    // Revealing a hidden track must not silently re-expand a
+                    // call stack the user chose to flatten.
                     trackGroups[groupIndex].tracks[trackIndex] = TrackDescriptor(
-                        title: track.title, source: track.source, isCollapsed: false
+                        title: track.title, source: track.source, isCollapsed: false,
+                        showsNestedDepth: track.showsNestedDepth
                     )
                 }
             }
@@ -893,6 +1284,8 @@ public final class TraceDocumentController {
         trackGroups = []
         snapshot = nil
         selectedEvent = nil
+        selectedEventArguments = []
+        selectedEventArgumentsTruncated = false
         hoveredEvent = nil
         selectedRange = nil
         rangeAnalysis = nil
@@ -909,6 +1302,11 @@ public final class TraceDocumentController {
         selectedEvent = nil
         hoveredEvent = nil
         selectedRange = nil
+        // Annotations belong to the trace that was open, so a replacement
+        // session must not inherit them (AT-APP-002).
+        annotations = TimelineAnnotations()
+        favoriteTrackIDs = []
+        nextAnnotationID = 1
         rangeAnalysis = nil
         searchResults = TraceSearchResults(items: [], truncated: false)
         isSearching = false
@@ -928,7 +1326,6 @@ public final class TraceDocumentController {
     private func admitThreadTracks(threadKey: ThreadKey, title: String) {
         if metadata?.capabilities.threadStates == true {
             admitTrack(
-                kind: .threadState,
                 descriptor: TrackDescriptor(
                     title: title,
                     source: .threadState(threadKey)
@@ -941,7 +1338,6 @@ public final class TraceDocumentController {
     private func admitNamedSliceTrack(threadKey: ThreadKey?, title: String) {
         guard metadata?.capabilities.namedSlices == true else { return }
         admitTrack(
-            kind: .namedSlice,
             descriptor: TrackDescriptor(
                 title: threadKey == nil ? "Unattributed Slices" : title,
                 source: .namedSlice(threadKey)
@@ -949,19 +1345,80 @@ public final class TraceDocumentController {
         )
     }
 
-    private func admitTrack(kind: TraceTrackGroupKind, descriptor: TrackDescriptor) {
-        guard let group = trackGroups.firstIndex(where: { $0.kind == kind }) else {
+    /// Which group a track belongs to. Derived from the track's own source so
+    /// admission and catalog assembly cannot disagree about where a lane lives.
+    private func groupID(for source: TimelineTrackSource) -> String {
+        switch source {
+        case .cpu:
+            return TraceTrackGroup.cpuGroupID()
+        case .cpuCounter:
+            return TraceTrackGroup.cpuCounterGroupID()
+        case .processCounter(_, let processKey), .frame(let processKey):
+            return processKey.map(TraceTrackGroup.processGroupID)
+                ?? TraceTrackGroup.unattributedGroupID()
+        case .threadState(let threadKey):
+            return processGroupID(forThread: threadKey)
+        case .namedSlice(let threadKey):
+            guard let threadKey else { return TraceTrackGroup.unattributedGroupID() }
+            return processGroupID(forThread: threadKey)
+        }
+    }
+
+    private func processGroupID(forThread threadKey: ThreadKey) -> String {
+        guard let processKey = catalogThreads.first(where: { $0.key == threadKey })?
+            .processKey
+        else { return TraceTrackGroup.unattributedGroupID() }
+        return TraceTrackGroup.processGroupID(processKey)
+    }
+
+    private func admitTrack(descriptor: TrackDescriptor) {
+        let id = groupID(for: descriptor.source)
+        guard let group = trackGroups.firstIndex(where: { $0.id == id }) else {
+            // Revealing a thread whose process was not in the catalog page:
+            // create the process node rather than dropping the track.
+            appendGroup(id: id, descriptor: descriptor)
             return
         }
         if let existing = trackGroups[group].tracks.firstIndex(where: {
             $0.id == descriptor.id
         }) {
             if trackGroups[group].tracks[existing].isCollapsed {
-                trackGroups[group].tracks[existing] = descriptor
+                // Preserve the user's depth choice while making it visible.
+                trackGroups[group].tracks[existing] = TrackDescriptor(
+                    title: descriptor.title,
+                    source: descriptor.source,
+                    isCollapsed: false,
+                    showsNestedDepth: trackGroups[group].tracks[existing]
+                        .showsNestedDepth
+                )
             }
             return
         }
         trackGroups[group].tracks.append(descriptor)
+    }
+
+    private func appendGroup(id: String, descriptor: TrackDescriptor) {
+        let thread = catalogThreads.first { thread in
+            switch descriptor.source {
+            case .threadState(let key): return thread.key == key
+            case .namedSlice(let key): return key.map { thread.key == $0 } ?? false
+            default: return false
+            }
+        }
+        guard let processKey = thread?.processKey else { return }
+        trackGroups.append(
+            TraceTrackGroup(
+                id: id,
+                kind: .process,
+                processKey: processKey,
+                title: Self.processGroupTitle(
+                    name: thread?.processName, pid: thread?.pid, key: processKey
+                ),
+                capabilityAvailable: true,
+                truncated: false,
+                tracks: [descriptor]
+            )
+        )
     }
 
     private func presentNonfatal(_ error: Error, generation: UInt64) {
@@ -1027,33 +1484,19 @@ public final class TraceDocumentController {
             return Catalog(
                 metadata: metadata,
                 threads: [],
-                groups: [
-                    TraceTrackGroup(
-                        kind: .cpu, title: "CPUs",
-                        capabilityAvailable: metadata.capabilities.cpuScheduling,
-                        truncated: false, tracks: []
-                    ),
-                    TraceTrackGroup(
-                        kind: .threadState, title: "Thread State",
-                        capabilityAvailable: metadata.capabilities.threadStates,
-                        truncated: false, tracks: []
-                    ),
-                    TraceTrackGroup(
-                        kind: .namedSlice, title: "Processes & Named Slices",
-                        capabilityAvailable: metadata.capabilities.namedSlices,
-                        truncated: false, tracks: []
-                    ),
-                    TraceTrackGroup(
-                        kind: .cpuCounter, title: "CPU Counters",
-                        capabilityAvailable: metadata.capabilities.cpuCounters,
-                        truncated: false, tracks: []
-                    ),
-                    TraceTrackGroup(
-                        kind: .processCounter, title: "Process Counters",
-                        capabilityAvailable: metadata.capabilities.processCounters,
-                        truncated: false, tracks: []
-                    ),
-                ]
+                groups: Self.crossProcessGroups(
+                    metadata: metadata, cpuTracks: [], cpuCounterTracks: [],
+                    cpuTruncated: false, counterTruncated: false
+                )
+                    + [
+                        TraceTrackGroup(
+                            id: TraceTrackGroup.unattributedGroupID(),
+                            kind: .unattributed,
+                            title: "Unattributed",
+                            capabilityAvailable: metadata.capabilities.namedSlices,
+                            truncated: false, tracks: []
+                        )
+                    ]
             )
         }
         let range = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
@@ -1081,94 +1524,285 @@ public final class TraceDocumentController {
                 message: "Catalog batch omitted the thread directory"
             )
         }
-        var groups: [TraceTrackGroup] = []
-
         let cpuPage = wantsCpuSlices
             ? (batchResult.cpuSlices.first ?? .unavailable)
             : .unavailable
-        let cpus = Array(Set(cpuPage.items.map(\.cpu))).sorted()
-        groups.append(
-            TraceTrackGroup(
-                kind: .cpu,
-                title: "CPUs",
-                capabilityAvailable: cpuPage.capabilityAvailable,
-                truncated: cpuPage.truncated,
-                tracks: cpus.enumerated().map {
-                    TrackDescriptor(
-                        title: "CPU \($0.element)",
-                        source: .cpu($0.element),
-                        isCollapsed: $0.offset >= 16
-                    )
-                }
-            )
-        )
-
-        groups.append(
-            TraceTrackGroup(
-                kind: .threadState,
-                title: "Thread State",
-                capabilityAvailable: metadata.capabilities.threadStates,
-                truncated: threads.truncated,
-                tracks: metadata.capabilities.threadStates
-                    ? threads.items.enumerated().map {
-                        TrackDescriptor(
-                            title: $0.element.name ?? "TID \($0.element.tid)",
-                            source: .threadState($0.element.key),
-                            isCollapsed: $0.offset >= 24
-                        )
-                    } : []
-            )
-        )
-        groups.append(
-            TraceTrackGroup(
-                kind: .namedSlice,
-                title: "Processes & Named Slices",
-                capabilityAvailable: metadata.capabilities.namedSlices,
-                truncated: threads.truncated,
-                tracks: metadata.capabilities.namedSlices
-                    ? [TrackDescriptor(
-                        title: "Unattributed Slices",
-                        source: .namedSlice(nil),
-                        isCollapsed: true
-                    )] + threads.items.enumerated().map {
-                        TrackDescriptor(
-                            title: ($0.element.processName.map { "\($0) · " } ?? "")
-                                + ($0.element.name ?? "TID \($0.element.tid)"),
-                            source: .namedSlice($0.element.key),
-                            isCollapsed: $0.offset >= 24
-                        )
-                    } : []
-            )
-        )
-
         let counterPage = wantsCounters
             ? (batchResult.counters.first ?? .unavailable)
             : .unavailable
-        let cpuSeries = counterPage.items.filter { $0.scope == .cpu }
-        let processSeries = counterPage.items.filter { $0.scope == .process }
-        groups.append(
-            TraceTrackGroup(
-                kind: .cpuCounter,
-                title: "CPU Counters",
-                capabilityAvailable: metadata.capabilities.cpuCounters,
-                truncated: counterPage.truncated,
-                tracks: uniqueCounterTracks(cpuSeries)
+        let cpus = Array(Set(cpuPage.items.map(\.cpu))).sorted()
+        let cpuTracks = cpus.enumerated().map {
+            TrackDescriptor(
+                title: "CPU \($0.element)",
+                source: .cpu($0.element),
+                isCollapsed: $0.offset >= 16
+            )
+        }
+        let cpuCounterTracks = uniqueCounterTracks(
+            counterPage.items.filter { $0.scope == .cpu }
+        )
+        var groups = crossProcessGroups(
+            metadata: metadata,
+            cpuTracks: cpuTracks,
+            cpuCounterTracks: cpuCounterTracks,
+            cpuTruncated: cpuPage.truncated,
+            counterTruncated: counterPage.truncated
+        )
+        // Which processes have frames at all. One bounded probe rather than a
+        // lane per process speculatively: a capture without frame data must not
+        // sprout empty lanes.
+        let framePage = try? await repository.frames(
+            TraceFrameQuery(
+                range: range, limit: 20_000, deadline: deadline
             )
         )
+        let frameProcessKeys = Set(
+            (framePage?.capabilityAvailable == true ? framePage?.items ?? [] : [])
+                .compactMap(\.processKey)
+        )
         groups.append(
-            TraceTrackGroup(
-                kind: .processCounter,
-                title: "Process Counters",
-                capabilityAvailable: metadata.capabilities.processCounters,
-                truncated: counterPage.truncated,
-                tracks: uniqueCounterTracks(processSeries)
+            contentsOf: processGroups(
+                metadata: metadata,
+                threads: threads.items,
+                threadsTruncated: threads.truncated,
+                cpuSlices: cpuPage.items,
+                counters: counterPage.items.filter { $0.scope == .process },
+                counterTruncated: counterPage.truncated,
+                frameProcessKeys: frameProcessKeys
             )
         )
         return Catalog(metadata: metadata, threads: threads.items, groups: groups)
     }
 
+    /// Groups that belong to no single process. Kept first so the lanes that
+    /// describe the whole machine stay at a stable, predictable place.
+    private static func crossProcessGroups(
+        metadata: TraceMetadata,
+        cpuTracks: [TrackDescriptor],
+        cpuCounterTracks: [TrackDescriptor],
+        cpuTruncated: Bool,
+        counterTruncated: Bool
+    ) -> [TraceTrackGroup] {
+        [
+            TraceTrackGroup(
+                id: TraceTrackGroup.cpuGroupID(),
+                kind: .cpu,
+                title: "CPUs",
+                capabilityAvailable: metadata.capabilities.cpuScheduling,
+                truncated: cpuTruncated,
+                tracks: cpuTracks
+            ),
+            TraceTrackGroup(
+                id: TraceTrackGroup.cpuCounterGroupID(),
+                kind: .cpuCounter,
+                title: "CPU Counters",
+                capabilityAvailable: metadata.capabilities.cpuCounters,
+                truncated: counterTruncated,
+                tracks: cpuCounterTracks
+            ),
+        ]
+    }
+
+    /// How many processes start expanded. A real trace has 785 processes behind
+    /// its first 1,000 threads and only 36 of them own more than one thread, so
+    /// expanding everything would bury the few that matter. Busiest first, the
+    /// rest collapsed but present and searchable.
+    static let defaultExpandedProcessCount = 8
+
+    /// One collapsible node per process: its threads' state and slice lanes
+    /// adjacent, then its counters. Ordered by scheduled time so the processes
+    /// that did the work come first.
+    private static func processGroups(
+        metadata: TraceMetadata,
+        threads: [TraceThread],
+        threadsTruncated: Bool,
+        cpuSlices: [CpuSlice],
+        counters: [CounterSeries],
+        counterTruncated: Bool,
+        frameProcessKeys: Set<ProcessKey> = []
+    ) -> [TraceTrackGroup] {
+        // Activity is measured from the CPU slices already fetched for the CPU
+        // lanes -- no extra query buys this ordering.
+        var scheduledByProcess: [ProcessKey: Int] = [:]
+        for slice in cpuSlices {
+            guard let key = slice.processKey else { continue }
+            scheduledByProcess[key, default: 0] += 1
+        }
+
+        var threadsByProcess: [ProcessKey: [TraceThread]] = [:]
+        var unattributedThreads: [TraceThread] = []
+        for thread in threads {
+            if let key = thread.processKey {
+                threadsByProcess[key, default: []].append(thread)
+            } else {
+                unattributedThreads.append(thread)
+            }
+        }
+        var countersByProcess: [ProcessKey: [CounterSeries]] = [:]
+        var unattributedCounters: [CounterSeries] = []
+        for series in counters {
+            if let key = series.processKey {
+                countersByProcess[key, default: []].append(series)
+            } else {
+                unattributedCounters.append(series)
+            }
+        }
+
+        let processKeys = Set(threadsByProcess.keys)
+            .union(countersByProcess.keys)
+            .union(frameProcessKeys)
+        let ordered = processKeys.sorted {
+            let lhs = scheduledByProcess[$0] ?? 0
+            let rhs = scheduledByProcess[$1] ?? 0
+            if lhs != rhs { return lhs > rhs }
+            let lhsThreads = threadsByProcess[$0]?.count ?? 0
+            let rhsThreads = threadsByProcess[$1]?.count ?? 0
+            if lhsThreads != rhsThreads { return lhsThreads > rhsThreads }
+            return $0.ipid < $1.ipid
+        }
+
+        var groups: [TraceTrackGroup] = []
+        for (offset, key) in ordered.enumerated() {
+            let processThreads = (threadsByProcess[key] ?? []).sorted {
+                if $0.tid != $1.tid { return $0.tid < $1.tid }
+                return $0.key.itid < $1.key.itid
+            }
+            let expanded = offset < defaultExpandedProcessCount
+            var tracks: [TrackDescriptor] = []
+            for thread in processThreads {
+                // State and slices for one thread sit next to each other, which
+                // is the point of grouping by process.
+                if metadata.capabilities.threadStates {
+                    tracks.append(
+                        TrackDescriptor(
+                            title: threadTrackTitle(thread),
+                            source: .threadState(thread.key),
+                            isCollapsed: !expanded
+                        )
+                    )
+                }
+                if metadata.capabilities.namedSlices {
+                    tracks.append(
+                        TrackDescriptor(
+                            title: threadTrackTitle(thread),
+                            source: .namedSlice(thread.key),
+                            isCollapsed: !expanded
+                        )
+                    )
+                }
+            }
+            // One frame lane per process that has frames; expected and actual
+            // share it as two rows.
+            if frameProcessKeys.contains(key) {
+                tracks.append(
+                    TrackDescriptor(
+                        title: "Frames",
+                        source: .frame(key),
+                        isCollapsed: !expanded
+                    )
+                )
+            }
+            tracks.append(
+                contentsOf: uniqueCounterTracks(
+                    countersByProcess[key] ?? [], isCollapsed: !expanded
+                )
+            )
+            guard !tracks.isEmpty else { continue }
+            let name = processThreads.compactMap(\.processName).first
+                ?? countersByProcess[key]?.compactMap(\.processName).first
+            let pid = processThreads.compactMap(\.pid).first
+                ?? countersByProcess[key]?.compactMap(\.pid).first
+            groups.append(
+                TraceTrackGroup(
+                    id: TraceTrackGroup.processGroupID(key),
+                    kind: .process,
+                    processKey: key,
+                    title: processGroupTitle(name: name, pid: pid, key: key),
+                    capabilityAvailable: true,
+                    truncated: threadsTruncated,
+                    tracks: tracks
+                )
+            )
+        }
+
+        var unattributedTracks: [TrackDescriptor] = []
+        if metadata.capabilities.namedSlices {
+            unattributedTracks.append(
+                TrackDescriptor(
+                    title: "Unattributed Slices",
+                    source: .namedSlice(nil),
+                    isCollapsed: true
+                )
+            )
+        }
+        for thread in unattributedThreads {
+            if metadata.capabilities.threadStates {
+                unattributedTracks.append(
+                    TrackDescriptor(
+                        title: threadTrackTitle(thread),
+                        source: .threadState(thread.key),
+                        isCollapsed: true
+                    )
+                )
+            }
+            if metadata.capabilities.namedSlices {
+                unattributedTracks.append(
+                    TrackDescriptor(
+                        title: threadTrackTitle(thread),
+                        source: .namedSlice(thread.key),
+                        isCollapsed: true
+                    )
+                )
+            }
+        }
+        unattributedTracks.append(
+            contentsOf: uniqueCounterTracks(unattributedCounters, isCollapsed: true)
+        )
+        if !unattributedTracks.isEmpty {
+            groups.append(
+                TraceTrackGroup(
+                    id: TraceTrackGroup.unattributedGroupID(),
+                    kind: .unattributed,
+                    title: "Unattributed",
+                    capabilityAvailable: metadata.capabilities.namedSlices
+                        || metadata.capabilities.threadStates,
+                    truncated: counterTruncated,
+                    tracks: unattributedTracks
+                )
+            )
+        }
+        return groups
+    }
+
+    private static func processGroupTitle(
+        name: String?,
+        pid: Int64?,
+        key: ProcessKey
+    ) -> String {
+        let label = name.flatMap { $0.isEmpty ? nil : $0 }
+        switch (label, pid) {
+        case (let label?, let pid?): return "\(label) [\(pid)]"
+        case (let label?, nil): return label
+        case (nil, let pid?): return "PID \(pid)"
+        case (nil, nil): return "ipid \(key.ipid)"
+        }
+    }
+
+    /// One title form for every per-thread track, so the same thread reads the
+    /// same way whichever group it appears in. Process name first because that
+    /// is what disambiguates: thread names collide across processes far more
+    /// often than they identify.
+    static func threadTrackTitle(_ thread: TraceThread) -> String {
+        let threadName = thread.name ?? "TID \(thread.tid)"
+        guard let processName = thread.processName, !processName.isEmpty else {
+            return threadName
+        }
+        return "\(processName) · \(threadName)"
+    }
+
     private static func uniqueCounterTracks(
-        _ series: [CounterSeries]
+        _ series: [CounterSeries],
+        isCollapsed: Bool? = nil
     ) -> [TrackDescriptor] {
         var seen: Set<String> = []
         var result: [TrackDescriptor] = []
@@ -1182,7 +1816,9 @@ public final class TraceDocumentController {
                 TrackDescriptor(
                     title: item.unit.map { "\(item.name) (\($0))" } ?? item.name,
                     source: source,
-                    isCollapsed: result.count >= 16
+                    // Inside a process group the group's own expansion decides;
+                    // a flat kind group falls back to its own running cap.
+                    isCollapsed: isCollapsed ?? (result.count >= 16)
                 )
             )
         }

@@ -115,6 +115,16 @@ package struct TraceSliceQuery: Sendable {
     public let name: TraceSliceNameFilter?
     public let minimumDurationNs: Int64?
     public let depth: Int64?
+    /// Whether the result carries `TraceSlice.argSetID`.
+    ///
+    /// Off by default because it is the difference between a covering-index
+    /// plan and a table lookup per row: no ArkTrace index covers
+    /// `callstack.argsetid`, so selecting it turns the viewport's hottest query
+    /// into `SEARCH … USING INDEX` and costs measurably on a real trace
+    /// (medium fixture: 3.09 → 3.72 ms p95). The one caller that needs the id
+    /// asks for a single already-selected slice, where the extra lookup is one
+    /// row (DESIGN §14.2.4).
+    public let includesArgumentSet: Bool
     public let limit: Int
     public let deadline: ContinuousClock.Instant
 
@@ -128,6 +138,7 @@ package struct TraceSliceQuery: Sendable {
         name: TraceSliceNameFilter? = nil,
         minimumDurationNs: Int64? = nil,
         depth: Int64? = nil,
+        includesArgumentSet: Bool = false,
         limit: Int = 10_000,
         deadline: ContinuousClock.Instant
     ) throws {
@@ -176,6 +187,7 @@ package struct TraceSliceQuery: Sendable {
         self.name = name
         self.minimumDurationNs = minimumDurationNs
         self.depth = depth
+        self.includesArgumentSet = includesArgumentSet
         self.limit = limit
         self.deadline = deadline
     }

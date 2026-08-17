@@ -1,9 +1,9 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-17 / Phase 0–6 全部完成，10 个发布门全部关闭；Phase 7 Upstream Alignment 已按上游对齐审计开出 13 项任务，尚未开工
+> 状态基线：2026-08-18 / Phase 0–7 全部完成，10 个发布门全部关闭
 > 任务总数：70
-> 已完成：57（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 七项 + Phase 5 九项 + Phase 6 九项）
-> 进行中：Phase 7 十三项，0/13
+> 已完成：70（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 七项 + Phase 5 九项 + Phase 6 九项 + Phase 7 十三项）
+> 进行中：无
 > 当前状态：全部发布门关闭；Phase 6 真实闭环判定 improved，证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`。Phase 7 的证据基线是 [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md)
 
 ## 1. 阶段总览
@@ -17,7 +17,7 @@
 | 4 | Agent Query | 7 | Completed，7/7；完整继承发布门与 final medium/large gate 通过 | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
 | 5 | ArkDeck Integration | 9 | Completed under explicit large-trace deferral，9/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Completed，9/9；Gate 10 closed | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
-| 7 | Upstream Alignment | 13 | Not started，0/13 | 上游能做的离线看 trace 能力补齐到不影响真实分析 | [PHASE_7_TASKS.md](./PHASE_7_TASKS.md) |
+| 7 | Upstream Alignment | 13 | Completed，13/13 | 上游能做的离线看 trace 能力补齐到不影响真实分析 | [PHASE_7_TASKS.md](./PHASE_7_TASKS.md) |
 
 ## 2. 总体依赖
 
@@ -125,19 +125,44 @@ flowchart LR
 [PHASE_7_TASKS.md](./PHASE_7_TASKS.md)。**该阶段有明确的非目标清单（PHASE_7_TASKS §6），
 不得因「上游有」而扩大范围。**
 
-- P7-T01：修复 process counter 的样本来源表（P0；含 `schemaAdapterVersion` 的 ArkDeck 跨仓库耦合决策）；
-- P7-T02：Range Inspector 补 thread state 分布（P0）；
-- P7-T03：CPU slice 标签补进程/线程名与 priority（P0）；
-- P7-T04：named slice 按调用深度分层渲染（P0；必须先于 P7-T06）；
-- P7-T05：按 slice 名聚合的区间统计表（P0）；
-- P7-T06：泳道按进程分组（P1）；
-- P7-T07：时间轴标注：flag 与 A/B mark（P2）；
-- P7-T08：泳道收藏 / 置顶（P2）；
-- P7-T09：hover tooltip 与同名 slice 联动高亮（P2）；
-- P7-T10：slice 参数（args）进 Inspector（P2）；
-- P7-T11：frame / jank 泳道（P2）；
-- P7-T12：小项补齐批次（滚轮缩放、框选端点、逐 CPU 拆分列、搜索键盘步进、Help 键位表）（P2）；
-- P7-T13：Phase 7 gate、上游对齐回归与文档收口（P0，阶段出口）。
+- P7-T01：修复 process counter 的样本来源表（P0；Completed 2026-08-17。`schemaAdapterVersion` 裁决为
+  **不 bump**，理由见 [DESIGN.md](./DESIGN.md) §9.1.1；顺带修复 density 预取超出 event batch 32 查询上限
+  导致 App 打不开真机 trace 的阻塞）；
+- P7-T02：Range Inspector 补 thread state 分布（P0；Completed 2026-08-17。App 与 CLI 复用同一
+  `stateDistribution` 实现，等价性有断言锁定）；
+- P7-T03：CPU slice 标签补进程/线程名与 priority（P0；Completed 2026-08-17。单行
+  `processName · threadName [tid]`，Inspector 增加只对 CPU slice 生效的 priority）；
+- P7-T04：named slice 按调用深度分层渲染（P0；Completed 2026-08-17。深度折叠是独立于可见性的
+  `showsNestedDepth` 一维，未复用 `isCollapsed`；预算不按 depth 放大，论证见 DESIGN §13.3。
+  两条验收留到 P7-T13：zlib 人眼确认、medium/large benchmark）；
+- P7-T05：按 slice 名聚合的区间统计表（P0；Completed 2026-08-17。reduction 版，复用已取回的 slice
+  page 不新增查询；受限时显式标注为下界；selfTime 按论证暂不做）；
+- P7-T06：泳道按进程分组（P1；Completed 2026-08-17。裁决为**混合**组织：CPU/CPU counter 按种类，
+  per-thread 与 process counter 按进程；默认展开最忙的 8 个进程）；
+- P7-T07：时间轴标注：flag 与 A/B mark（P2；Completed 2026-08-17。标注层独立于 snapshot；
+  裁决为**持久化到 trace cache**，sidecar 在 entry 目录内、按内容哈希定位、不写用户路径）；
+- P7-T08：泳道收藏 / 置顶（P2；Completed 2026-08-17。置顶集合与标注共用同一 sidecar，
+  因此生命周期天然一致；未绑上游的裸 `b` 键，理由见 DESIGN §14.2.2）；
+- P7-T09：hover tooltip 与同名 slice 联动高亮（P2；Completed 2026-08-17。同名联动用背景色罩层
+  而非重填，因此不参与批处理缓存；15 次 hover 仍只 1 次批次构建，有断言且已实测可失败）；
+- P7-T10：slice 参数（args）进 Inspector（P2；Completed 2026-08-17。编码取自 pin 版 `args_view`
+  定义并在真机库逐行验证；刻意不改 agent 面向的 Machine JSON 契约，理由见 DESIGN §14.2.4）；
+- P7-T11：frame / jank 泳道（P2；Completed 2026-08-17。编码已在 pin 版核准
+  （`type 0=actual/1=expect`、`flag 1/3=jank`）并修正了任务书「dst 指向配对行」的错误——真机库 dst
+  全为 NULL，按 vsync+ipid 配对；expect/actual 复用 depth 行几何各占一行；jank 进 label/Inspector/
+  accessibility 而非只靠颜色。large benchmark 同 T04 留到 P7-T13）；
+- P7-T12：小项补齐批次（滚轮缩放、框选端点、逐 CPU 拆分列、搜索键盘步进、Help 键位表）（P2；
+  Completed 2026-08-18。⌥/⌃+滚轮与捏合共用同一段锚点计算，平移路径一字未改；端点把手 24 pt 且窄选区
+  以中点为界向外延展保证不重叠，光标区域与命中区域同源；逐 CPU 拆分之和恒等于总时长，已在真机库与 SQL
+  逐列对齐；搜索步进不夺 focus（AT-APP-009），位置以文字表达；键位表单一来源 `TraceShortcutCatalog`，
+  README 双语三张表由它生成，改 README 会失败已实测）；
+- P7-T13：Phase 7 gate、上游对齐回归与文档收口（P0，阶段出口；Completed 2026-08-18。
+  `scripts/test_phase7.sh` 建立并全绿，30 条上游对齐断言在 gate 里被要求「跑过且通过」，删掉一条会
+  失败；逐条实测「破坏 → 失败」，其中一条实测发现断言不够敏感并已加强。在 pin 版上游 medium
+  fixture 上抓到两条 Phase 7 自引入的真回归并修复：counter 探针超预算把有效 trace 判为不兼容、
+  `argsetid` 把视口最热查询挤下 covering index；两条的契约改动都先落在 SPECIFICATION / DESIGN。
+  未动三个 ArkDeck 钉住的版本字面量；large benchmark 与两处窗口内人眼确认因环境缺 fixture / 屏幕
+  休眠未做，已在 PHASE_7_TASKS.md 保留为未勾选）。
 
 ## 4. 发布门归属
 
@@ -183,7 +208,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
     scripts/test_phase4.sh
     scripts/test_phase5.sh
     scripts/test_phase6.sh
-    scripts/test_phase7.sh   # 待 P7-T13 建立
+    scripts/test_phase7.sh
 
 规则：
 
