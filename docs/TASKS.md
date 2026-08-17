@@ -1,9 +1,10 @@
 # ArkTrace 全阶段任务索引
 
-> 状态基线：2026-08-16 / reviewed DAYU 200 large fixture 已关闭发布门 6/7；Phase 4 完整 final gate 已通过并完成 7/7；Phase 5 以真实 ArkDeck Artifact 链路完成 9/9 并关闭 Gate 8/9；Phase 6 以真实闭环完成 9/9 并关闭 Gate 10
-> 任务总数：57
+> 状态基线：2026-08-17 / Phase 0–6 全部完成，10 个发布门全部关闭；Phase 7 Upstream Alignment 已按上游对齐审计开出 13 项任务，尚未开工
+> 任务总数：70
 > 已完成：57（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 七项 + Phase 5 九项 + Phase 6 九项）
-> 当前状态：全部发布门关闭；Phase 6 真实闭环判定 improved，证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`
+> 进行中：Phase 7 十三项，0/13
+> 当前状态：全部发布门关闭；Phase 6 真实闭环判定 improved，证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`。Phase 7 的证据基线是 [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md)
 
 ## 1. 阶段总览
 
@@ -16,6 +17,7 @@
 | 4 | Agent Query | 7 | Completed，7/7；完整继承发布门与 final medium/large gate 通过 | typed query/context/analyze，无需解析 UI | [PHASE_4_TASKS.md](./PHASE_4_TASKS.md) |
 | 5 | ArkDeck Integration | 9 | Completed under explicit large-trace deferral，9/9 | ArkDeck Trace Artifact → persisted Analysis Artifact | [PHASE_5_TASKS.md](./PHASE_5_TASKS.md) |
 | 6 | Real Debug Loop | 9 | Completed，9/9；Gate 10 closed | 至少闭合一次真实 Agent typed 复验链路 | [PHASE_6_TASKS.md](./PHASE_6_TASKS.md) |
+| 7 | Upstream Alignment | 13 | Not started，0/13 | 上游能做的离线看 trace 能力补齐到不影响真实分析 | [PHASE_7_TASKS.md](./PHASE_7_TASKS.md) |
 
 ## 2. 总体依赖
 
@@ -27,6 +29,7 @@ flowchart LR
     P3 --> P4["Phase 4\nAgent Query"]
     P4 --> P5["Phase 5\nArkDeck"]
     P5 --> P6["Phase 6\nReal Loop"]
+    P6 --> P7["Phase 7\nUpstream Alignment"]
 ~~~
 
 阶段默认必须按 Exit Checklist 依次进入。2026-08-14 用户明确要求暂时跳过独立 large Trace、进入 Phase 5；该产品排程授权当时只允许推进不依赖 large fixture 的 ArkDeck integration，不能作为发布豁免。Gate 6/7 后来由 2026-08-15 的独立采集/审核、许可、真实 cancellation 与 benchmark 单独关闭。
@@ -116,6 +119,26 @@ flowchart LR
 - P6-T08：全系统性能、可靠性和发布审计（Completed；`scripts/test_phase6.sh` 全绿）；
 - P6-T09：关闭真实闭环发布门 10 并输出最终报告（Completed；[PHASE_6_VERIFICATION.md](./PHASE_6_VERIFICATION.md)）。
 
+### Phase 7 — Upstream Alignment
+
+证据基线 [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md)；任务详情与硬约束见
+[PHASE_7_TASKS.md](./PHASE_7_TASKS.md)。**该阶段有明确的非目标清单（PHASE_7_TASKS §6），
+不得因「上游有」而扩大范围。**
+
+- P7-T01：修复 process counter 的样本来源表（P0；含 `schemaAdapterVersion` 的 ArkDeck 跨仓库耦合决策）；
+- P7-T02：Range Inspector 补 thread state 分布（P0）；
+- P7-T03：CPU slice 标签补进程/线程名与 priority（P0）；
+- P7-T04：named slice 按调用深度分层渲染（P0；必须先于 P7-T06）；
+- P7-T05：按 slice 名聚合的区间统计表（P0）；
+- P7-T06：泳道按进程分组（P1）；
+- P7-T07：时间轴标注：flag 与 A/B mark（P2）；
+- P7-T08：泳道收藏 / 置顶（P2）；
+- P7-T09：hover tooltip 与同名 slice 联动高亮（P2）；
+- P7-T10：slice 参数（args）进 Inspector（P2）；
+- P7-T11：frame / jank 泳道（P2）；
+- P7-T12：小项补齐批次（滚轮缩放、框选端点、逐 CPU 拆分列、搜索键盘步进、Help 键位表）（P2）；
+- P7-T13：Phase 7 gate、上游对齐回归与文档收口（P0，阶段出口）。
+
 ## 4. 发布门归属
 
 DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit message 或局部测试改写其含义。
@@ -160,6 +183,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
     scripts/test_phase4.sh
     scripts/test_phase5.sh
     scripts/test_phase6.sh
+    scripts/test_phase7.sh   # 待 P7-T13 建立
 
 规则：
 
