@@ -8,6 +8,7 @@ import SwiftUI
 @main
 struct ArkTraceNativeApp: App {
     @State private var controller = TraceDocumentController()
+    @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         WindowGroup {
@@ -23,7 +24,21 @@ struct ArkTraceNativeApp: App {
                     .keyboardShortcut("r")
                     .disabled(controller.sourceURL == nil)
             }
+            // Upstream lists its bindings behind `/`; on macOS this belongs on
+            // the Help menu, and `/` stays free for a future search entry
+            // point on the timeline. The default Help item is replaced rather
+            // than joined: ArkTrace ships no help book for it to open.
+            CommandGroup(replacing: .help) {
+                Button("Keyboard Shortcuts") {
+                    openWindow(id: ArkTraceWindow.keyboardShortcuts)
+                }
+            }
         }
+
+        Window("Keyboard Shortcuts", id: ArkTraceWindow.keyboardShortcuts) {
+            ShortcutHelpView()
+        }
+        .defaultSize(width: 520, height: 620)
 
         Settings {
             SettingsRootView(controller: controller)
@@ -258,8 +273,59 @@ private struct TraceViewerRootView: View {
 /// Observation boundary: recent documents, the search echo/results, and the
 /// track tree. Never reads `snapshot`, `phase`, or selection state, so
 /// viewport churn cannot rebuild the sidebar.
+/// One lane row: visibility, optional depth control, and the pin toggle.
+/// Shared by the pinned area and the process groups so a lane looks and behaves
+/// the same in both places.
+private struct TrackRow: View {
+    var controller: TraceDocumentController
+    let track: TrackDescriptor
+    var isPinnedArea = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Toggle(
+                track.title,
+                isOn: Binding(
+                    get: { !track.isCollapsed },
+                    set: { _ in controller.toggleTrack(track.id) }
+                )
+            )
+            .toggleStyle(.checkbox)
+            .arktraceAccessibleTarget()
+            // Only named slices nest, so only they can be flattened.
+            if case .namedSlice = track.source {
+                DepthDisclosureButton(
+                    isExpanded: track.showsNestedDepth,
+                    title: track.title,
+                    action: { controller.toggleTrackDepth(track.id) }
+                )
+            }
+            Spacer(minLength: 2)
+            Button {
+                controller.toggleFavorite(track.id)
+            } label: {
+                Image(
+                    systemName: controller.isFavorite(track.id) ? "pin.fill" : "pin"
+                )
+                .imageScale(.small)
+            }
+            .buttonStyle(.borderless)
+            .help(controller.isFavorite(track.id) ? "Unpin lane" : "Pin lane")
+            .accessibilityLabel(
+                controller.isFavorite(track.id)
+                    ? "Unpin \(track.title)" : "Pin \(track.title)"
+            )
+            .arktraceAccessibleTarget()
+        }
+        // The pinned copy and the in-group copy are the same lane; distinguish
+        // them for VoiceOver so the duplicate is not confusing.
+        .accessibilityHint(isPinnedArea ? "In the pinned area" : "")
+    }
+}
+
 private struct TraceViewerSidebar: View {
     var controller: TraceDocumentController
+    @State private var favoritesExpanded = true
 
     var body: some View {
         List {
@@ -278,35 +344,26 @@ private struct TraceViewerSidebar: View {
                 }
             }
             if !controller.searchFieldText.isEmpty || controller.isSearching {
-                Section("Search Results") {
-                    if controller.isSearching {
-                        ProgressView().controlSize(.small)
-                    } else if controller.searchResults.items.isEmpty {
-                        Text("No matches")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(Array(controller.searchResults.items.enumerated()), id: \.offset) {
-                            _, result in
-                            Button { controller.reveal(result) } label: {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(result.title).lineLimit(1)
-                                    if let subtitle = result.subtitle {
-                                        Text(subtitle)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                    }
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .arktraceAccessibleTarget()
+                SearchResultsSection(controller: controller)
+            }
+            // Pinned lanes stay at the top so a handful of lanes from different
+            // processes can be watched together without hiding everything else.
+            if !controller.favoriteTracks().isEmpty {
+                Section {
+                    DisclosureGroup(isExpanded: $favoritesExpanded) {
+                        ForEach(controller.favoriteTracks(), id: \.id) { track in
+                            TrackRow(
+                                controller: controller, track: track, isPinnedArea: true
+                            )
                         }
-                        if controller.searchResults.truncated {
-                            Text("More matches exist")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        .onMove { indices, destination in
+                            guard let source = indices.first else { return }
+                            controller.moveFavorite(from: source, to: destination)
                         }
+                    } label: {
+                        Text("Pinned")
                     }
+                    .arktraceAccessibleTarget()
                 }
             }
             ForEach(controller.trackGroups) { group in
@@ -322,15 +379,7 @@ private struct TraceViewerSidebar: View {
                                 .foregroundStyle(.secondary)
                         } else {
                             ForEach(group.tracks, id: \.id) { track in
-                                Toggle(
-                                    track.title,
-                                    isOn: Binding(
-                                        get: { !track.isCollapsed },
-                                        set: { _ in controller.toggleTrack(track.id) }
-                                    )
-                                )
-                                .toggleStyle(.checkbox)
-                                .arktraceAccessibleTarget()
+                                TrackRow(controller: controller, track: track)
                             }
                         }
                     } label: {
@@ -347,6 +396,82 @@ private struct TraceViewerSidebar: View {
             }
         }
         .listStyle(.sidebar)
+    }
+}
+
+/// The search result list, and the only place keyboard stepping lives.
+///
+/// Arrow keys move a cursor through the matches and reveal each one as they
+/// go, without moving keyboard focus out of the list: a stepper the user has
+/// to re-focus after every step is not a stepper (AT-APP-009). Return commits
+/// — that is when focus follows to the timeline. The position is also stated
+/// in words, which is upstream's "n / m" counter and keeps the cursor from
+/// being signalled by the row highlight alone (AT-APP-011).
+private struct SearchResultsSection: View {
+    var controller: TraceDocumentController
+    @FocusState private var focusedIndex: Int?
+
+    var body: some View {
+        Section("Search Results") {
+            if controller.isSearching {
+                ProgressView().controlSize(.small)
+            } else if controller.searchResults.items.isEmpty {
+                Text("No matches")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(Array(controller.searchResults.items.enumerated()), id: \.offset) {
+                    index, result in
+                    Button {
+                        controller.selectSearchResult(at: index)
+                        controller.activateSearchResult()
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(result.title).lineLimit(1)
+                            if let subtitle = result.subtitle {
+                                Text(subtitle)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .arktraceAccessibleTarget()
+                    .focused($focusedIndex, equals: index)
+                    .listRowBackground(
+                        controller.searchSelectionIndex == index
+                            ? Color.accentColor.opacity(0.18) : Color.clear
+                    )
+                    .accessibilityAddTraits(
+                        controller.searchSelectionIndex == index ? .isSelected : []
+                    )
+                    .onKeyPress(.upArrow) { step(-1, from: index) }
+                    .onKeyPress(.downArrow) { step(1, from: index) }
+                }
+                if let position = controller.searchSelectionIndex {
+                    Text(
+                        "\(position + 1) of \(controller.searchResults.items.count)"
+                            + (controller.searchResults.truncated ? "+" : "")
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                } else if controller.searchResults.truncated {
+                    Text("More matches exist")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        // The cursor leads, focus follows it, so holding an arrow key walks
+        // the list instead of stalling on the first row.
+        .onChange(of: controller.searchSelectionIndex) { _, index in
+            if let index { focusedIndex = index }
+        }
+    }
+
+    private func step(_ delta: Int, from index: Int) -> KeyPress.Result {
+        controller.selectSearchResult(at: index)
+        return controller.stepSearchResult(by: delta) ? .handled : .ignored
     }
 }
 
@@ -381,6 +506,7 @@ private struct TraceTimelinePane: View {
                     ScrollView([.horizontal, .vertical]) {
                         TimelineView(
                             snapshot: snapshot,
+                            annotations: controller.annotations,
                             selection: controller.selectedRange,
                             selectedEventKey: controller.selectedEvent?.key,
                             focusRequestID: controller.timelineFocusRequestID,
@@ -389,6 +515,8 @@ private struct TraceTimelinePane: View {
                             onSelectEvent: controller.selectEvent,
                             onHoverEvent: controller.hoverEvent,
                             onSelectRange: controller.selectRange,
+                            onCreateFlag: { controller.addFlag(atNs: $0) },
+                            onAnnotationCommand: controller.handleAnnotationCommand,
                             onViewportIntent: controller.handleViewportIntent,
                             onZoomSelection: controller.zoomToSelection,
                             onResetViewport: controller.resetViewport
@@ -453,11 +581,16 @@ private struct TraceInspectorPane: View {
                 }
                 Divider()
                 if let event = controller.selectedEvent {
-                    EventInspectorView(event: event)
+                    EventInspectorView(
+                        event: event,
+                        arguments: controller.selectedEventArguments,
+                        argumentsTruncated: controller.selectedEventArgumentsTruncated
+                    )
                 } else if let range = controller.selectedRange {
                     RangeInspectorView(
                         range: range,
-                        analysis: controller.rangeAnalysis
+                        analysis: controller.rangeAnalysis,
+                        onRevealSlice: { controller.revealSliceAggregate($0) }
                     )
                 } else if let hovered = controller.hoveredEvent {
                     Text("Hover").font(.subheadline.weight(.semibold))
@@ -473,6 +606,10 @@ private struct TraceInspectorPane: View {
                 } else {
                     Text("Select an event or drag a time range.")
                         .foregroundStyle(.secondary)
+                }
+                if !controller.annotations.isEmpty {
+                    Divider()
+                    AnnotationInspectorView(controller: controller)
                 }
             }
             .padding(14)
@@ -731,8 +868,167 @@ private struct InspectorFocusButton: NSViewRepresentable {
     }
 }
 
+/// Editable list of the user's flags and marks. Lives in the Inspector rather
+/// than a bottom sheet: ArkTrace carries this semantics in the Inspector, and
+/// upstream's tab-sheet architecture is explicitly not being ported.
+private struct AnnotationInspectorView: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Annotations").font(.title3.weight(.semibold))
+            // Say where they live, so "will these be here tomorrow?" has a
+            // visible answer.
+            Text("Saved with this trace — they return when you reopen it.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if controller.annotations.flags.isEmpty {
+                Text("Click the time ruler to place a flag.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Flags").font(.subheadline.weight(.semibold))
+                ForEach(controller.annotations.orderedFlags) { flag in
+                    AnnotationRow(
+                        label: flag.label,
+                        detail: time(flag.timestampNs),
+                        colorIndex: flag.colorIndex,
+                        onRename: { controller.updateFlag(id: flag.id, label: $0) },
+                        onCycleColor: {
+                            controller.updateFlag(
+                                id: flag.id, colorIndex: flag.colorIndex + 1
+                            )
+                        },
+                        onDelete: { controller.removeFlag(id: flag.id) }
+                    )
+                }
+            }
+
+            if !controller.annotations.marks.isEmpty {
+                Text("Marks").font(.subheadline.weight(.semibold))
+                ForEach(controller.annotations.orderedMarks) { mark in
+                    AnnotationRow(
+                        label: mark.label
+                            + (mark.isPersistent ? "" : " (temporary)"),
+                        detail: time(mark.range.startNs) + " – "
+                            + time(mark.range.endNs),
+                        colorIndex: mark.colorIndex,
+                        onRename: { controller.updateMark(id: mark.id, label: $0) },
+                        onCycleColor: {
+                            controller.updateMark(
+                                id: mark.id, colorIndex: mark.colorIndex + 1
+                            )
+                        },
+                        onDelete: { controller.removeMark(id: mark.id) }
+                    )
+                }
+            }
+        }
+        .textSelection(.enabled)
+    }
+}
+
+private struct AnnotationRow: View {
+    let label: String
+    let detail: String
+    let colorIndex: Int
+    let onRename: (String) -> Void
+    let onCycleColor: () -> Void
+    let onDelete: () -> Void
+
+    @State private var draft: String = ""
+    @State private var isEditing = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Button(action: onCycleColor) {
+                Circle()
+                    .fill(Color(nsColor: NSColor(cgColor: colorCG) ?? .labelColor))
+                    .frame(width: 10, height: 10)
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Change colour of \(label)")
+            .arktraceAccessibleTarget()
+
+            if isEditing {
+                TextField("Name", text: $draft)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit {
+                        onRename(draft)
+                        isEditing = false
+                    }
+            } else {
+                Button {
+                    draft = label
+                    isEditing = true
+                } label: {
+                    Text(label).lineLimit(1)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Rename \(label)")
+                .arktraceAccessibleTarget()
+            }
+
+            Spacer(minLength: 4)
+            Text(detail)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Button(action: onDelete) {
+                Image(systemName: "trash").imageScale(.small)
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Delete \(label)")
+            .arktraceAccessibleTarget()
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityValue(detail)
+    }
+
+    private var colorCG: CGColor {
+        TimelineAnnotationColor.cgColor(at: colorIndex)
+    }
+}
+
+/// Flattens or restores a named-slice track's call-depth rows. Keyboard
+/// reachable and labelled in words, so the expanded state is never conveyed by
+/// the chevron's rotation alone (AT-APP-009/011).
+private struct DepthDisclosureButton: View {
+    let isExpanded: Bool
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                .imageScale(.small)
+        }
+        .buttonStyle(.borderless)
+        .help(
+            isExpanded
+                ? String(
+                    localized: "Flatten call depth",
+                    comment: "Collapses a track's nested call stack to one row."
+                )
+                : String(
+                    localized: "Show call depth",
+                    comment: "Expands a track's nested call stack into per-depth rows."
+                )
+        )
+        .accessibilityLabel(
+            isExpanded
+                ? "Flatten call depth for \(title)"
+                : "Show call depth for \(title)"
+        )
+        .accessibilityValue(isExpanded ? "Expanded" : "Flattened")
+        .arktraceAccessibleTarget()
+    }
+}
+
 private struct EventInspectorView: View {
     let event: TraceEventInspector
+    var arguments: [TraceEventArgument] = []
+    var argumentsTruncated = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
@@ -755,8 +1051,31 @@ private struct EventInspectorView: View {
             optional("Thread", event.threadName)
             optional("Category", event.category)
             optional("State", event.state)
+            // Only CPU slices carry a priority; every other type leaves it nil
+            // and `optional` renders no row.
+            optional("Priority", event.priority)
             optional("Value", event.value)
             optional("Unit", event.unit)
+            // Only slices carrying an argument set have this; a trace without
+            // an `args` table shows no section at all rather than an empty one.
+            if !arguments.isEmpty {
+                Divider()
+                Text("Arguments").font(.subheadline.weight(.semibold))
+                ForEach(Array(arguments.enumerated()), id: \.offset) { _, argument in
+                    LabeledContent(argument.key, value: argument.value)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel(argument.key)
+                        .accessibilityValue(
+                            argument.typeName.map { "\(argument.value), \($0)" }
+                                ?? argument.value
+                        )
+                }
+                if argumentsTruncated {
+                    Text("More arguments exist")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .textSelection(.enabled)
     }
@@ -769,9 +1088,169 @@ private struct EventInspectorView: View {
     }
 }
 
+private enum SliceAggregateSort: String, CaseIterable {
+    case total
+    case average
+    case occurrences
+    case name
+
+    var title: String {
+        switch self {
+        case .total: "Total"
+        case .average: "Avg"
+        case .occurrences: "Count"
+        case .name: "Name"
+        }
+    }
+}
+
 private struct RangeInspectorView: View {
     let range: TraceTimeRange
     let analysis: TraceRangeAnalysis?
+    var onRevealSlice: (TraceSliceNameAggregate) -> Void = { _ in }
+
+    @State private var sliceSort: SliceAggregateSort = .total
+
+    /// The distribution has one row per thread × state pair, which on a
+    /// many-threaded trace is far more than an Inspector pane can usefully
+    /// show. Rows are ranked by time spent so the expensive states surface
+    /// first, and the count below always says how many exist.
+    private static let displayedStateRowLimit = 50
+
+    private struct StateRow: Identifiable {
+        let id: String
+        let value: TraceThreadStateDistribution
+    }
+
+    private var stateRows: [StateRow] {
+        guard let analysis else { return [] }
+        return analysis.threadStateDistribution.sorted {
+            if $0.durationNs != $1.durationNs { return $0.durationNs > $1.durationNs }
+            if $0.threadKey.itid != $1.threadKey.itid {
+                return $0.threadKey.itid < $1.threadKey.itid
+            }
+            return $0.rawState < $1.rawState
+        }
+        .prefix(Self.displayedStateRowLimit)
+        .map { StateRow(id: "\($0.threadKey.itid)/\($0.rawState)", value: $0) }
+    }
+
+    private func threadTitle(_ value: TraceThreadStateDistribution) -> String {
+        value.tid.map { "TID \($0)" } ?? "itid \(value.threadKey.itid)"
+    }
+
+    private func statePercentage(_ value: TraceThreadStateDistribution) -> String {
+        value.percentageOfRange.formatted(.percent.precision(.fractionLength(1)))
+    }
+
+    private func stateRowTitle(_ value: TraceThreadStateDistribution) -> String {
+        let thread: String = threadTitle(value)
+        let state: String = value.rawState
+        return thread + " · " + state
+    }
+
+    private func stateRowDetail(_ value: TraceThreadStateDistribution) -> String {
+        let duration: String = time(value.durationNs)
+        let percentage: String = statePercentage(value)
+        let intervals: String = String(value.intervalCount)
+        return duration + " · " + percentage + " · " + intervals + " intervals"
+    }
+
+    private func topThreadTitle(_ value: TraceTopThread) -> String {
+        value.name ?? value.tid.map { "TID \($0)" } ?? "itid \(value.threadKey.itid)"
+    }
+
+    private func topThreadDetail(_ value: TraceTopThread) -> String {
+        let duration: String = time(value.occupiedNs)
+        let share: String = value.shareOfOneCPU.formatted(
+            .percent.precision(.fractionLength(1))
+        )
+        return duration + " · " + share
+    }
+
+    /// The `cpu${i}` split upstream's CPU-by-thread sheet shows. The parts sum
+    /// to the row's total by construction — both reduce the same page — so the
+    /// two lines can be read against each other.
+    private func topThreadCPUSplit(_ value: TraceTopThread, separator: String) -> String {
+        value.cpuBreakdown
+            .map { share -> String in
+                let cpu: String = String(share.cpu)
+                let duration: String = time(share.occupiedNs)
+                return "CPU " + cpu + " " + duration
+            }
+            .joined(separator: separator)
+    }
+
+    private func stateRowAccessibilityLabel(
+        _ value: TraceThreadStateDistribution
+    ) -> String {
+        let thread: String = threadTitle(value)
+        let state: String = value.rawState
+        return thread + ", state " + state
+    }
+
+    private func stateRowAccessibilityValue(
+        _ value: TraceThreadStateDistribution
+    ) -> String {
+        let duration: String = time(value.durationNs)
+        let percentage: String = statePercentage(value)
+        let intervals: String = String(value.intervalCount)
+        return duration + ", " + percentage + " of range, " + intervals + " intervals"
+    }
+
+    private func stateRowCountSummary(_ analysis: TraceRangeAnalysis) -> String {
+        let shown: String = String(stateRows.count)
+        let total: String = String(analysis.threadStateDistribution.count)
+        return "Showing " + shown + " of " + total + " thread states"
+    }
+
+    private static let displayedSliceRowLimit = 50
+
+    private var sliceRows: [TraceSliceNameAggregate] {
+        guard let analysis else { return [] }
+        let sorted: [TraceSliceNameAggregate]
+        switch sliceSort {
+        case .total:
+            sorted = analysis.sliceNameAggregates  // already total-descending
+        case .average:
+            sorted = analysis.sliceNameAggregates.sorted {
+                if $0.averageDurationNs != $1.averageDurationNs {
+                    return $0.averageDurationNs > $1.averageDurationNs
+                }
+                return $0.name < $1.name
+            }
+        case .occurrences:
+            sorted = analysis.sliceNameAggregates.sorted {
+                if $0.occurrences != $1.occurrences {
+                    return $0.occurrences > $1.occurrences
+                }
+                return $0.name < $1.name
+            }
+        case .name:
+            sorted = analysis.sliceNameAggregates.sorted { $0.name < $1.name }
+        }
+        return Array(sorted.prefix(Self.displayedSliceRowLimit))
+    }
+
+    private func sliceRowDetail(_ value: TraceSliceNameAggregate) -> String {
+        let total: String = time(value.totalDurationNs)
+        let average: String = time(value.averageDurationNs)
+        let count: String = String(value.occurrences)
+        return total + " · avg " + average + " · ×" + count
+    }
+
+    private func sliceRowAccessibilityValue(_ value: TraceSliceNameAggregate) -> String {
+        let total: String = time(value.totalDurationNs)
+        let average: String = time(value.averageDurationNs)
+        let count: String = String(value.occurrences)
+        return "total " + total + ", average " + average + ", " + count + " occurrences"
+    }
+
+    private func sliceRowCountSummary(_ analysis: TraceRangeAnalysis) -> String {
+        let shown: String = String(sliceRows.count)
+        let total: String = String(analysis.sliceNameAggregates.count)
+        return "Showing " + shown + " of " + total + " slice names"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -791,15 +1270,102 @@ private struct RangeInspectorView: View {
                 }
                 Text("Top Threads").font(.subheadline.weight(.semibold))
                 ForEach(analysis.topThreads, id: \.threadKey) { value in
-                    LabeledContent(
-                        value.name ?? value.tid.map { "TID \($0)" }
-                            ?? "itid \(value.threadKey.itid)",
-                        value: time(value.occupiedNs)
-                            + " · "
-                            + value.shareOfOneCPU.formatted(
-                                .percent.precision(.fractionLength(1))
-                            )
+                    VStack(alignment: .leading, spacing: 1) {
+                        LabeledContent(
+                            topThreadTitle(value), value: topThreadDetail(value)
+                        )
+                        if !value.cpuBreakdown.isEmpty {
+                            Text(topThreadCPUSplit(value, separator: " · "))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(topThreadTitle(value))
+                    .accessibilityValue(
+                        topThreadDetail(value) + ", "
+                            + topThreadCPUSplit(value, separator: ", ")
                     )
+                }
+                Text("Thread States").font(.subheadline.weight(.semibold))
+                if analysis.threadStateDistribution.isEmpty {
+                    Text("No thread state intervals in this range.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(stateRows) { row in
+                        // The state name is text, never colour alone
+                        // (AT-APP-011), and the same words reach VoiceOver.
+                        LabeledContent(
+                            stateRowTitle(row.value),
+                            value: stateRowDetail(row.value)
+                        )
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel(stateRowAccessibilityLabel(row.value))
+                        .accessibilityValue(stateRowAccessibilityValue(row.value))
+                    }
+                    if analysis.threadStateDistribution.count > stateRows.count {
+                        Text(stateRowCountSummary(analysis))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if analysis.threadStateDistributionTruncated {
+                        Label(
+                            "Thread states reached their interval budget",
+                            systemImage: "ellipsis.circle"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+                }
+                Text("Slices by Name").font(.subheadline.weight(.semibold))
+                if analysis.sliceNameAggregates.isEmpty {
+                    Text("No named slices in this range.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    // Sortable columns: each header sets the sort key. Total
+                    // descending is the default because it answers "what cost
+                    // the most", which the long-slice list cannot.
+                    HStack(spacing: 8) {
+                        ForEach(SliceAggregateSort.allCases, id: \.rawValue) { option in
+                            Button(option.title) { sliceSort = option }
+                                .buttonStyle(.borderless)
+                                .font(.caption.weight(sliceSort == option ? .bold : .regular))
+                                .accessibilityLabel("Sort slices by \(option.title)")
+                                .accessibilityAddTraits(
+                                    sliceSort == option ? [.isSelected] : []
+                                )
+                                .arktraceAccessibleTarget()
+                        }
+                    }
+                    if analysis.sliceNameAggregatesTruncated {
+                        // A bounded reduction must never read as an exact total.
+                        Label(
+                            "Totals are a lower bound: slice page reached its budget",
+                            systemImage: "exclamationmark.triangle"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+                    ForEach(sliceRows, id: \.firstEventKey) { row in
+                        Button {
+                            onRevealSlice(row)
+                        } label: {
+                            LabeledContent(row.name, value: sliceRowDetail(row))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel(row.name)
+                        .accessibilityValue(sliceRowAccessibilityValue(row))
+                        .accessibilityHint("Reveals the first occurrence on the timeline")
+                        .arktraceAccessibleTarget()
+                    }
+                    if analysis.sliceNameAggregates.count > sliceRows.count {
+                        Text(sliceRowCountSummary(analysis))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Text("Long Slices").font(.subheadline.weight(.semibold))
                 ForEach(analysis.longSlices, id: \.key) { value in
@@ -819,6 +1385,48 @@ private struct RangeInspectorView: View {
             }
         }
         .textSelection(.enabled)
+    }
+}
+
+// MARK: - Keyboard shortcuts
+
+enum ArkTraceWindow {
+    static let keyboardShortcuts = "arktrace.window.keyboardShortcuts"
+}
+
+/// The in-app half of the shortcut reference. Rendered from
+/// ``TraceShortcutCatalog``, which is the same source the README tables are
+/// generated from — `ShortcutCatalogTests` fails if either drifts, so there is
+/// no second list to keep in step by hand.
+private struct ShortcutHelpView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                ForEach(TraceShortcutCatalog.sections) { section in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(section.title)
+                            .font(.headline)
+                        ForEach(section.shortcuts) { shortcut in
+                            LabeledContent(shortcut.action) {
+                                Text(shortcut.keys)
+                                    .font(.system(.body, design: .monospaced))
+                                    .textSelection(.enabled)
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel(shortcut.action)
+                            .accessibilityValue(shortcut.keys)
+                        }
+                    }
+                }
+                Text(
+                    "Timeline shortcuts act on the focused timeline, so typing in the search field stays typing."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }
 

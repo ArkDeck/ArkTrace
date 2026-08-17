@@ -70,6 +70,13 @@ while IFS= read -r path; do
             # The phase6 offline gate binds this frozen scenario document.
             contracts=true
             ;;
+        README.md|README.zh-CN.md)
+            # `ShortcutCatalogTests` generates the shortcut tables in both
+            # READMEs from `TraceShortcutCatalog` and fails on drift. Skipping
+            # the SwiftPM lane for a README-only edit would skip exactly the
+            # change that assertion exists to catch.
+            swiftpm=true
+            ;;
         docs/*|*.md|.gitignore)
             # Documentation-only paths request no compile lane on their own.
             ;;

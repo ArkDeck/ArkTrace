@@ -30,8 +30,14 @@ lane_app=false
 lane_contracts=false'
 
 expect "docs-only change skips every compile lane" "$docs_only" \
+    'docs/DESIGN.md
+docs/SPECIFICATION.md'
+
+expect "README change selects the SwiftPM lane (shortcut tables are asserted)" \
+    'lane_swiftpm=true
+lane_app=false
+lane_contracts=false' \
     'README.md
-docs/DESIGN.md
 README.zh-CN.md'
 
 expect "source change selects SwiftPM and app lanes" \

@@ -11,7 +11,7 @@
 
 ArkTrace reuses the pinned OpenHarmony TraceStreamer to parse offline traces (`.htrace` / `.ftrace` / `.systrace`) into a local SQLite database, and builds on top of it:
 
-- **ArkTrace.app** — a SwiftUI + CoreGraphics native timeline viewer: CPU / process / thread / slice / counter tracks with zoom, pan, search, range selection and an inspector with range analysis.
+- **ArkTrace.app** — a SwiftUI + CoreGraphics native timeline viewer: CPU / thread-state / named-slice / counter / frame tracks grouped by process, with call-depth rows, zoom, pan, search, range selection, timeline flags and marks, and an inspector with range analysis.
 - **`arktrace` CLI** — typed, bounded, versioned JSON queries and analysis built for agents: `doctor`, `inspect`, `summary`, `processes`, `threads`, `query`, `context`, `analyze`, plus a fail-closed `licenses` command.
 - **ArkDeck integration** — a host-only Trace Analysis Engine inside [ArkDeck](https://github.com/ArkDeck)'s automated debugging loop, with zero device capability by design.
 
@@ -21,6 +21,7 @@ ArkTrace reuses the pinned OpenHarmony TraceStreamer to parse offline traces (`.
 - **Local and private.** Everything runs on your Mac. Parsed traces live in a content-addressed local cache; `--no-cache` switches to a session-owned ephemeral database.
 - **Reproducible parser.** The bundled TraceStreamer is pinned to an exact upstream revision with a byte-reproducible build recipe and a fully tracked license inventory.
 - **Evidence-driven releases.** Every phase ships behind fail-closed verification gates, closed with real-device (DAYU 200) evidence rather than claims.
+- **Reads a trace the way SmartPerf Host does.** Slice colours, call-depth nesting, jank tagging and the navigation keys follow the pinned upstream, so the same slice looks and reads the same in either tool — and each of those claims is an assertion in `scripts/test_phase7.sh`, not a promise.
 
 ## Requirements
 
@@ -84,8 +85,31 @@ Keyboard, following SmartPerf Host where it has a binding:
 | <kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Pan by ~10% of the viewport |
 | <kbd>+</kbd> / <kbd>-</kbd> | Zoom about the selection or viewport center |
 | <kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd> | Select focused event · reset zoom · clear selection |
+| <kbd>,</kbd> / <kbd>.</kbd> | Scroll the nearest flag back into view |
+| <kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd> | Jump to the previous / next flag |
+| <kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd> | Mark the selection — temporary / kept |
+| <kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd> | Jump to the previous / next mark |
 
-Hold a key to keep zooming or panning — macOS key repeat drives it. Unlike the web UI, the shortcuts are scoped to the focused timeline, so typing `w` or `s` in the search field stays typing.
+Pointer, on the timeline:
+
+| Keys | Action |
+|---|---|
+| Drag | Select a time range; drag either edge to adjust it |
+| Scroll | Pan horizontally |
+| <kbd>Option</kbd> or <kbd>Ctrl</kbd> + Scroll | Zoom about the pointer |
+| Pinch | Zoom about the pointer |
+| Click the time ruler | Place a flag at that instant |
+
+Search Results:
+
+| Keys | Action |
+|---|---|
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Previous / next match, revealing it on the timeline |
+| <kbd>Return</kbd> | Go to the selected match and move focus to the timeline |
+
+All three tables are also in the app under **Help → Keyboard Shortcuts**, generated from the same source as this page. Flags and marks are listed in the Inspector, where they can be renamed, recolored and deleted. They are saved with the trace — reopening the same file brings them back — and are keyed by the trace's content hash, so nothing about where the file lives is written down.
+
+Hold a key to keep zooming or panning — macOS key repeat drives it. Unlike the web UI, the shortcuts are scoped to the focused timeline, so typing `w`, `s` or `m` in the search field stays typing, and ⌘-modified keys always reach the menu.
 
 Slices are colored the way SmartPerf Host colors them: a CPU slice takes its running process's color, a named slice hashes its own name into upstream's twenty-entry palette (digits stripped, so `ipc::41` and `ipc::42` match), and thread states use upstream's fixed state colors. The same slice therefore has the same color in either tool. Details and the exact ported functions: [docs/DESIGN.md](docs/DESIGN.md) §13.5.
 
@@ -100,15 +124,16 @@ scripts/test_phase3.sh   # + signed app, document types, notarization, large-tra
 scripts/test_phase4.sh   # + agent CLI contract, medium/large performance gates
 scripts/test_phase5.sh   # + CLI distribution and the real ArkDeck artifact chain
 scripts/test_phase6.sh   # offline audit of the real closed-loop evidence
+scripts/test_phase7.sh   # upstream-alignment regressions + viewport performance on the real medium fixture
 ```
 
 CI builds, tests and runs the offline gates on every pull request, but hosted runners cannot build the pinned parser, so parser-integration tests skip there — the phase scripts remain the release authority.
 
 ## Status
 
-Phases 0–6 (57/57 tasks) are complete and **all 10 release gates are closed** as of 2026-08-16. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
+Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) behind `scripts/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
 
-Known limitations of the first release: Apple silicon / macOS 26+ only; offline analysis only — no capture, device or network capability. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
+Known limitations of the first release: Apple silicon / macOS 26+ only; offline analysis only — no capture, device or network capability. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
 
 ## Documentation
 

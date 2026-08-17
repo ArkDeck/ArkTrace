@@ -174,7 +174,9 @@ package struct TraceRunningThread: Hashable, Codable, Sendable {
     }
 }
 
-package struct TraceThreadStateDistribution: Hashable, Codable, Sendable {
+/// Public because the App renders it from `TraceRangeAnalysis`, alongside the
+/// already-public `TraceCPUUtilization` / `TraceTopThread` / `TraceLongSlice`.
+public struct TraceThreadStateDistribution: Hashable, Codable, Sendable {
     public let threadKey: ThreadKey
     public let processKey: ProcessKey?
     public let tid: Int64?
@@ -762,7 +764,11 @@ package struct TraceDeterministicAnalysisEngine: Sendable {
         return (Array(rows.prefix(limit)), rows.count)
     }
 
-    private static func stateDistribution(
+    /// Shared by the CLI's deterministic analysis and the App's range analysis.
+    /// DESIGN §4.3 invariant 3 requires one implementation: given the same
+    /// bounded interval page and range, both paths must produce the identical
+    /// distribution, so this stays the only place the reduction is written.
+    static func stateDistribution(
         _ intervals: [ThreadStateInterval],
         _ range: TraceTimeRange,
         _ deadline: ContinuousClock.Instant

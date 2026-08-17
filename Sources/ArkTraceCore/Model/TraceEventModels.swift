@@ -92,7 +92,9 @@ package struct CpuSlice: Hashable, Codable, Sendable {
     }
 }
 
-package enum TraceThreadState: String, Codable, Sendable, CaseIterable {
+/// Public because `TraceThreadStateDistribution` carries it and the App renders
+/// that distribution in the Range Inspector.
+public enum TraceThreadState: String, Codable, Sendable, CaseIterable {
     case running
     case runnable
     case sleeping
@@ -171,6 +173,76 @@ package struct ThreadStateInterval: Hashable, Codable, Sendable {
     }
 }
 
+/// Which side of a vsync a frame row describes.
+///
+/// The numeric encoding is upstream's and was verified against the pinned
+/// revision plus real captures, because it is the opposite of what the names
+/// suggest: **`type = 0` is the actual frame and `type = 1` is the expected
+/// one** (`type_desc` reads `actural` / `expect` respectively, and upstream's
+/// `queryActualFrameDate` selects `type = 0`).
+package enum TraceFrameKind: Int64, Codable, Sendable, CaseIterable {
+    case actual = 0
+    case expected = 1
+}
+
+/// One `frame_slice` row.
+package struct TraceFrame: Hashable, Codable, Sendable {
+    public let key: EventKey
+    public let range: TraceTimeRange
+    public let kind: TraceFrameKind
+    /// The vsync this frame belongs to. Actual and expected frames of the same
+    /// vsync in the same process are the pair.
+    public let vsync: Int64
+    public let processKey: ProcessKey?
+    public let threadKey: ThreadKey?
+    public let pid: Int64?
+    public let processName: String?
+    /// Raw `frame_slice.flag`, kept exactly as stored so an unknown value is
+    /// never silently reinterpreted.
+    public let flag: Int64?
+    public let isOpenEnded: Bool
+
+    public init(
+        key: EventKey,
+        range: TraceTimeRange,
+        kind: TraceFrameKind,
+        vsync: Int64,
+        processKey: ProcessKey? = nil,
+        threadKey: ThreadKey? = nil,
+        pid: Int64? = nil,
+        processName: String? = nil,
+        flag: Int64?,
+        isOpenEnded: Bool
+    ) {
+        self.key = key
+        self.range = range
+        self.kind = kind
+        self.vsync = vsync
+        self.processKey = processKey
+        self.threadKey = threadKey
+        self.pid = pid
+        self.processName = processName
+        self.flag = flag
+        self.isOpenEnded = isOpenEnded
+    }
+
+    /// Upstream's `jank_tag`: `CASE WHEN flag == 1 THEN 1 WHEN flag == 3 THEN 3
+    /// ELSE 0 END`, evaluated over a frame **and its pair**
+    /// (`Janks.sql.ts:150`). Only 1 and 3 are jank; flag 2 — the most common
+    /// value in real captures — is not.
+    public static func jankTag(_ flag: Int64?) -> Int64 {
+        switch flag {
+        case 1: 1
+        case 3: 3
+        default: 0
+        }
+    }
+
+    public var isJank: Bool { Self.jankTag(flag) != 0 }
+    public var startNs: Int64 { range.startNs }
+    public var endNs: Int64 { range.endNs }
+}
+
 package struct TraceSlice: Hashable, Codable, Sendable {
     public let key: EventKey
     public let range: TraceTimeRange
@@ -186,6 +258,9 @@ package struct TraceSlice: Hashable, Codable, Sendable {
     public let parentEventKey: EventKey?
     public let isAsync: Bool
     public let isOpenEnded: Bool
+    /// `callstack.argsetid`: the argument set this slice carries, if any.
+    /// Optional column, and null for most slices.
+    public let argSetID: Int64?
 
     public init(
         key: EventKey,
@@ -201,7 +276,8 @@ package struct TraceSlice: Hashable, Codable, Sendable {
         depth: Int64?,
         parentEventKey: EventKey?,
         isAsync: Bool,
-        isOpenEnded: Bool
+        isOpenEnded: Bool,
+        argSetID: Int64? = nil
     ) {
         self.key = key
         self.range = range
@@ -217,6 +293,7 @@ package struct TraceSlice: Hashable, Codable, Sendable {
         self.parentEventKey = parentEventKey
         self.isAsync = isAsync
         self.isOpenEnded = isOpenEnded
+        self.argSetID = argSetID
     }
 
     public var startNs: Int64 { range.startNs }
@@ -239,6 +316,32 @@ package struct TraceSlice: Hashable, Codable, Sendable {
         try container.encodeOptional(parentEventKey, forKey: .parentEventKey)
         try container.encode(isAsync, forKey: .isAsync)
         try container.encode(isOpenEnded, forKey: .isOpenEnded)
+    }
+
+    /// `argSetID` is deliberately absent from the coded form. It is a lookup
+    /// handle the App uses to fetch a slice's arguments; adding it to the
+    /// agent-facing Machine JSON would change a versioned contract for no
+    /// benefit the CLI asked for. Decoding therefore restores it as nil, which
+    /// is what any consumer of the encoded form should assume.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        key = try container.decode(EventKey.self, forKey: .key)
+        range = try container.decode(TraceTimeRange.self, forKey: .range)
+        threadKey = try container.decodeIfPresent(ThreadKey.self, forKey: .threadKey)
+        processKey = try container.decodeIfPresent(ProcessKey.self, forKey: .processKey)
+        pid = try container.decodeIfPresent(Int64.self, forKey: .pid)
+        tid = try container.decodeIfPresent(Int64.self, forKey: .tid)
+        processName = try container.decodeIfPresent(String.self, forKey: .processName)
+        threadName = try container.decodeIfPresent(String.self, forKey: .threadName)
+        name = try container.decode(String.self, forKey: .name)
+        category = try container.decodeIfPresent(String.self, forKey: .category)
+        depth = try container.decodeIfPresent(Int64.self, forKey: .depth)
+        parentEventKey = try container.decodeIfPresent(
+            EventKey.self, forKey: .parentEventKey
+        )
+        isAsync = try container.decode(Bool.self, forKey: .isAsync)
+        isOpenEnded = try container.decode(Bool.self, forKey: .isOpenEnded)
+        argSetID = nil
     }
 
     private enum CodingKeys: String, CodingKey {

@@ -183,17 +183,30 @@ final class CatalogBatchTests: XCTestCase {
         let directCalls = await repository.directCallNames
         XCTAssertFalse(directCalls.contains("threads"), "threads must ride the batch")
 
-        // Deterministic assembly: fixed group order and capability flags.
+        // Deterministic assembly: cross-process groups first at a fixed place,
+        // then one node per process.
         XCTAssertEqual(
             controller.trackGroups.map(\.kind),
-            [.cpu, .threadState, .namedSlice, .cpuCounter, .processCounter]
+            [.cpu, .cpuCounter, .process, .unattributed]
+        )
+        XCTAssertEqual(
+            controller.trackGroups.map(\.id),
+            ["cpu", "cpu-counter", "process:3", "unattributed"]
         )
         XCTAssertTrue(controller.trackGroups[0].truncated, "cpu page truncation must propagate")
+        XCTAssertEqual(controller.trackGroups[2].title, "app [30]")
+        XCTAssertEqual(controller.trackGroups[2].processKey, ProcessKey(ipid: 3))
+        // One thread contributes its state lane and its slice lane, adjacent.
         XCTAssertEqual(
-            controller.trackGroups[1].tracks.map(\.title), ["worker"],
-            "thread directory rows must build the thread-state tracks"
+            controller.trackGroups[2].tracks.map(\.source),
+            [.threadState(ThreadKey(itid: 7)), .namedSlice(ThreadKey(itid: 7))],
+            "a thread's state and slices must sit next to each other"
         )
-        XCTAssertFalse(controller.trackGroups[4].capabilityAvailable)
+        XCTAssertEqual(
+            controller.trackGroups[2].tracks.map(\.title),
+            ["app · worker", "app · worker"],
+            "per-thread titles carry the process name"
+        )
         await controller.close()
     }
 
@@ -215,9 +228,14 @@ final class CatalogBatchTests: XCTestCase {
         XCTAssertTrue(batch.cpuSlices.isEmpty, "capability-unavailable queries must not be issued")
         XCTAssertTrue(batch.counters.isEmpty)
         XCTAssertEqual(batch.threads.count, 1)
+        // With every capability off there are no per-thread or counter lanes,
+        // so only the two cross-process groups remain and both report
+        // unavailable rather than being silently dropped.
         XCTAssertEqual(
-            controller.trackGroups.map(\.capabilityAvailable),
-            [false, false, false, false, false]
+            controller.trackGroups.map(\.kind), [.cpu, .cpuCounter]
+        )
+        XCTAssertEqual(
+            controller.trackGroups.map(\.capabilityAvailable), [false, false]
         )
         await controller.close()
     }

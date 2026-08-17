@@ -33,7 +33,8 @@ source offer for this distribution.
 timeline color logic from the same upstream repository, taken at the revision
 pinned in `ThirdParty/TraceStreamer/source-lock.json`
 (`447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`), which is Apache-2.0. The port
-covers `ColorUtils.FUNC_COLOR_B`, `ColorUtils.hash`, `ColorUtils.hashFunc`,
+covers `ColorUtils.FUNC_COLOR_B`, `ColorUtils.JANK_COLOR`, `ColorUtils.hash`,
+`ColorUtils.hashFunc`,
 `ColorUtils.colorForThread` / `colorForTid` / `colorForName`,
 `ColorUtils.funcTextColor` and `Utils.getStateColor` from
 `ide/src/trace/component/trace/base/`. It exists so a slice keeps the same

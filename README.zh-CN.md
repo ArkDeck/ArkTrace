@@ -11,7 +11,7 @@
 
 ArkTrace 复用 pinned 的 OpenHarmony TraceStreamer，将 `.htrace` / `.ftrace` / `.systrace` 等离线 Trace 解析为本地 SQLite，并在其上构建：
 
-- **ArkTrace.app** —— SwiftUI + CoreGraphics 原生 Timeline Viewer：CPU / Process / Thread / Slice / Counter 轨道，支持 zoom、pan、搜索、range selection 与带 range analysis 的 Inspector。
+- **ArkTrace.app** —— SwiftUI + CoreGraphics 原生 Timeline Viewer：CPU / thread state / named slice / counter / frame 泳道按进程分组，named slice 按调用深度分层，支持 zoom、pan、搜索、range selection、时间轴 flag 与 mark，以及带 range analysis 的 Inspector。
 - **`arktrace` CLI** —— 面向 Agent 的 typed、bounded、versioned JSON 查询与分析：`doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`，以及 fail-closed 的 `licenses`。
 - **ArkDeck 集成** —— 作为 [ArkDeck](https://github.com/ArkDeck) 自动调试闭环中的 host-only Trace Analysis Engine，设计上零设备能力。
 
@@ -21,6 +21,7 @@ ArkTrace 复用 pinned 的 OpenHarmony TraceStreamer，将 `.htrace` / `.ftrace`
 - **本地运行、保护隐私。** 一切都在你的 Mac 上完成。解析结果存于 content-addressed 本地缓存；`--no-cache` 切换为 session-owned 临时数据库。
 - **可复现的 parser。** 捆绑的 TraceStreamer 锁定到确切的上游 revision，构建配方逐字节可复现，license 清单完整可追溯。
 - **证据驱动的发布。** 每个阶段都由 fail-closed 验证门把守，并以真机（DAYU 200）证据而非口头声明关闭。
+- **按 SmartPerf Host 的方式读 trace。** slice 配色、调用深度嵌套、jank 标记与导航键位都跟随 pin 版上游，同一个 slice 在两个工具里看起来、读起来都一样 —— 而且每一条都是 `scripts/test_phase7.sh` 里的断言，不是口头承诺。
 
 ## 环境要求
 
@@ -78,14 +79,37 @@ Sidebar 控制轨道显隐；Timeline 支持鼠标/触控板 pan 与 zoom、rang
 |---|---|
 | <kbd>W</kbd> / <kbd>S</kbd> | 以指针位置为锚点放大 / 缩小 |
 | <kbd>A</kbd> / <kbd>D</kbd> | 左移 / 右移 |
-| <kbd>F</kbd>、<kbd>[</kbd>、<kbd>]</kbd> | 缩放到选中区间 |
+| <kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd> | 缩放到选中区间 |
 | <kbd>←</kbd> / <kbd>→</kbd> | 同一轨道的前一 / 后一真实 event |
 | <kbd>↑</kbd> / <kbd>↓</kbd> | 相邻可见轨道 |
 | <kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | 平移约一个 viewport 的 10% |
 | <kbd>+</kbd> / <kbd>-</kbd> | 围绕 selection 或 viewport center 缩放 |
 | <kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd> | 选择 focused event · 重置缩放 · 清除选择 |
+| <kbd>,</kbd> / <kbd>.</kbd> | 把最近的 flag 滚回视野 |
+| <kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd> | 跳到上一个 / 下一个 flag |
+| <kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd> | 把当前选区标记为 mark —— 临时 / 保留 |
+| <kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd> | 在 mark 之间跳转 |
 
-按住不放即可连续缩放或平移，由 macOS 的按键重复驱动。与 Web 版不同，这些快捷键只作用于获得 focus 的 Timeline，因此在搜索框里输入 `w`、`s` 仍然是输入文字。
+时间轴上的指针操作：
+
+| 按键 | 动作 |
+|---|---|
+| 拖动 | 框选时间区间；拖动任一边界可单独调整 |
+| 滚动 | 横向平移 |
+| <kbd>Option</kbd> 或 <kbd>Ctrl</kbd> + 滚动 | 以指针位置为锚点缩放 |
+| 捏合 | 以指针位置为锚点缩放 |
+| 点击时间标尺 | 在该时刻放置一个 flag |
+
+搜索结果：
+
+| 按键 | 动作 |
+|---|---|
+| <kbd>↑</kbd> / <kbd>↓</kbd> | 上一条 / 下一条匹配，并在时间轴上跳到它 |
+| <kbd>Return</kbd> | 跳到选中的匹配，并把 focus 交给 Timeline |
+
+以上三张表在 App 里也能查到：**帮助 → Keyboard Shortcuts**，与本页同源生成。flag 与 mark 在 Inspector 中列出，可改名、换色、删除。它们随 trace 保存，重新打开同一份文件即恢复；按 trace 内容哈希定位，因此不会记录文件位置。
+
+按住不放即可连续缩放或平移，由 macOS 的按键重复驱动。与 Web 版不同，这些快捷键只作用于获得 focus 的 Timeline，因此在搜索框里输入 `w`、`s`、`m` 仍然是输入文字，带 ⌘ 的组合键始终交回菜单。
 
 Slice 配色与 SmartPerf Host 一致：CPU slice 取所属进程的颜色，named slice 用自身名称（去掉数字后）散列到上游的二十色调色板，因此 `ipc::41` 与 `ipc::42` 同色；thread state 使用上游固定的状态色。同一个 slice 在两个工具里颜色相同。所移植的具体函数见 [docs/DESIGN.md](docs/DESIGN.md) §13.5。
 
@@ -100,15 +124,16 @@ scripts/test_phase3.sh   # + 签名 App、document types、notarization、large-
 scripts/test_phase4.sh   # + Agent CLI contract、medium/large 性能 gate
 scripts/test_phase5.sh   # + CLI distribution 与真实 ArkDeck Artifact 链路
 scripts/test_phase6.sh   # 离线复核真实闭环证据
+scripts/test_phase7.sh   # 上游对齐回归 + 真机 medium fixture 的 viewport 性能
 ```
 
 CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 runner 无法构建 pinned parser，parser 集成测试在其上会 skip——phase 脚本仍是发布的最终裁决。
 
 ## 项目状态
 
-截至 2026-08-16，Phase 0–6（57/57 任务）全部完成，**10 个发布门全部关闭**。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/TASKS.md](docs/TASKS.md)，最终报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。
+Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `scripts/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/TASKS.md](docs/TASKS.md)，最终报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。
 
-首发已知限制：仅支持 Apple silicon / macOS 26+；仅离线分析——不含 capture、设备与网络能力。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
+首发已知限制：仅支持 Apple silicon / macOS 26+；仅离线分析——不含 capture、设备与网络能力。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
 
 ## 文档
 
@@ -116,7 +141,7 @@ CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 
 |---|---|
 | [docs/DESIGN.md](docs/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
-| [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 任务索引与发布门状态 |
+| [docs/TASKS.md](docs/TASKS.md) | Phase 0–7 任务索引与发布门状态 |
 | [docs/CLI.md](docs/CLI.md) | `arktrace` 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |
 | [docs/CLI_DISTRIBUTION.md](docs/CLI_DISTRIBUTION.md) | 可固定的 CLI App layout、manifest、签名/notarization、升级与回滚 |
 | [docs/APP_DISTRIBUTION.md](docs/APP_DISTRIBUTION.md) | ArkTrace.app 签名、notarization 与分发决策 |

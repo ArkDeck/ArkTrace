@@ -40,6 +40,11 @@ private func pinAppSupportSurface(
     _ = controller.searchResults.items
     _ = controller.searchResults.truncated
     _ = controller.isSearching
+    // Keyboard stepping through the results list.
+    _ = controller.searchSelectionIndex
+    controller.selectSearchResult(at: 0)
+    _ = controller.stepSearchResult(by: 1)
+    _ = controller.activateSearchResult()
     controller.searchFieldText = "query"
     _ = controller.cacheInventory?.totalByteCount
     _ = controller.cacheInventory?.entryCount
@@ -116,6 +121,7 @@ private func pinRenderingSurface(
 ) {
     _ = TimelineView(
         snapshot: snapshot,
+        annotations: TimelineAnnotations(),
         selection: nil,
         selectedEventKey: inspector.key,
         focusRequestID: 0,
@@ -124,16 +130,39 @@ private func pinRenderingSurface(
         onSelectEvent: { _ in },
         onHoverEvent: { _ in },
         onSelectRange: { _ in },
+        onCreateFlag: { (_: Int64) in },
+        onAnnotationCommand: { (_: TimelineAnnotationCommand) in },
         onViewportIntent: { (_: TimelineViewportIntent) in },
         onZoomSelection: {},
         onResetViewport: {}
     )
     _ = TimelineAccessibilityLayout.primaryToolbarTargetPoints
+    // Selection-endpoint dragging and wheel zoom are entirely inside
+    // `TimelineNSView`, so nothing new is promised outside the package: the
+    // minimum target size is the one value the App's own controls share.
+    _ = TimelineAccessibilityLayout.minimumTargetPoints
+    // The App renders and edits annotations, so their surface must stay
+    // reachable from outside the package.
+    var annotations = TimelineAnnotations()
+    annotations.flags.append(
+        TimelineFlag(id: 1, timestampNs: 0, label: "f", colorIndex: 0)
+    )
+    _ = annotations.orderedFlags.map(\.label)
+    _ = annotations.orderedMarks.map(\.isPersistent)
+    _ = annotations.flag(after: 0)
+    _ = annotations.flag(before: 0)
+    _ = annotations.mark(after: 0)
+    _ = annotations.mark(before: 0)
+    _ = annotations.isEmpty
+    _ = TimelineAnnotationColor.count
+    _ = TimelineAnnotationColor.cgColor(at: 0)
     for track in snapshot.tracks {
         _ = track.descriptor.title
         _ = track.descriptor.id
         _ = track.descriptor.isCollapsed
+        _ = track.descriptor.showsNestedDepth
         _ = track.descriptor.source
+        _ = track.depthRowCount
         for primitive in track.primitives {
             if case .detail(let detail) = primitive {
                 _ = detail.eventKey
@@ -164,6 +193,8 @@ private func pinCoreSurface(inspector: TraceEventInspector) throws {
     _ = inspector.state
     _ = inspector.value
     _ = inspector.unit
+    // CPU slices carry scheduler priority; the Inspector renders it.
+    _ = inspector.priority
 
     let range = try TraceTimeRange.query(startNs: 0, endNs: 1)
     _ = range.durationNs
@@ -196,11 +227,42 @@ private func pinAnalysisSurface(analysis: TraceRangeAnalysis) {
         _ = value.tid
         _ = value.occupiedNs
         _ = value.shareOfOneCPU
+        // The per-CPU split the Range Inspector shows beside the total.
+        for share in value.cpuBreakdown {
+            _ = share.cpu
+            _ = share.occupiedNs
+            _ = share.sliceCount
+        }
     }
     for value in analysis.longSlices {
         _ = value.key
         _ = value.name
         _ = value.range.durationNs
     }
+    // The Range Inspector renders the thread state distribution, so every
+    // field it reads has to stay reachable from outside the package.
+    for value in analysis.threadStateDistribution {
+        _ = value.threadKey
+        _ = value.processKey
+        _ = value.tid
+        _ = value.pid
+        _ = value.rawState
+        _ = value.normalizedState?.rawValue
+        _ = value.durationNs
+        _ = value.percentageOfRange
+        _ = value.intervalCount
+    }
+    _ = analysis.threadStateDistributionTruncated
+    // Slice-name aggregates and the bounded-total flag the table must show.
+    for value in analysis.sliceNameAggregates {
+        _ = value.name
+        _ = value.totalDurationNs
+        _ = value.averageDurationNs
+        _ = value.occurrences
+        _ = value.firstEventKey
+        _ = value.firstRange.startNs
+        _ = value.firstThreadKey?.itid
+    }
+    _ = analysis.sliceNameAggregatesTruncated
     _ = analysis.truncated
 }

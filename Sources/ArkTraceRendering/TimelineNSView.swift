@@ -31,7 +31,9 @@ public final class TimelineNSView: NSView {
         didSet {
             guard selection != oldValue else { return }
             needsDisplay = true
-            if dragStartX == nil, !suppressAccessibilityNotifications {
+            // The endpoint handles moved with it.
+            unsafe window?.invalidateCursorRects(for: self)
+            if dragMode == nil, !suppressAccessibilityNotifications {
                 postAccessibilityValueChanged()
             }
         }
@@ -46,9 +48,21 @@ public final class TimelineNSView: NSView {
             if !suppressAccessibilityNotifications { postAccessibilityValueChanged() }
         }
     }
+    /// User annotations. Kept beside the snapshot, never inside it: a snapshot
+    /// is one viewport generation's bounded query result, annotations outlive
+    /// every pan and zoom of the session.
+    public var annotations = TimelineAnnotations() {
+        didSet {
+            guard annotations != oldValue else { return }
+            needsDisplay = true
+        }
+    }
     public var onSelectEvent: (@MainActor (EventKey?) -> Void)?
     public var onHoverEvent: (@MainActor (EventKey?) -> Void)?
     public var onSelectRange: (@MainActor (TraceTimeRange?) -> Void)?
+    /// Ruler click: create a flag at that instant.
+    public var onCreateFlag: (@MainActor (Int64) -> Void)?
+    public var onAnnotationCommand: (@MainActor (TimelineAnnotationCommand) -> Void)?
     public var onViewportIntent: (@MainActor (TimelineViewportIntent) -> Void)?
     public var onZoomSelection: (@MainActor () -> Void)?
     public var onResetViewport: (@MainActor () -> Void)?
@@ -58,10 +72,29 @@ public final class TimelineNSView: NSView {
 
     public private(set) var focusedEventKey: EventKey?
     public private(set) var focusedTrackID: TimelineTrackID?
+    /// Pointer-driven, overlay-only. Deliberately not `selectedEventKey`: that
+    /// one moves focus and posts accessibility changes.
+    private(set) var hoveredEventKey: EventKey?
+
+    /// What the in-flight mouse drag is doing. Both cases carry the trace time
+    /// that stays put, not a view x: a drag that outlives a viewport change
+    /// then keeps its anchor on the same instant of the trace rather than on
+    /// the same pixel column.
+    package enum DragMode: Equatable {
+        /// Sweeping out a fresh range from the press point.
+        case newRange(anchorNs: Int64)
+        /// Moving one edge of the existing selection; the anchor is the edge
+        /// that stays. The dragged edge is free to cross the anchor, at which
+        /// point it simply becomes the other edge — the same behaviour
+        /// upstream's `movingMark` has.
+        case endpoint(TimelineSelectionEndpoint, anchorNs: Int64)
+    }
 
     private var previousSnapshot: TimelineSnapshot?
-    private var dragStartX: CGFloat?
+    private(set) var dragMode: DragMode?
     private var dragInitialSelection: TraceTimeRange?
+    /// Pointer-driven, overlay-only, like ``hoveredEventKey``.
+    private(set) var hoveredSelectionEndpoint: TimelineSelectionEndpoint?
     private var suppressAccessibilityNotifications = false
     private var trackingAreaReference: NSTrackingArea?
     /// Last known pointer position in view coordinates, or nil while the
@@ -165,6 +198,7 @@ public final class TimelineNSView: NSView {
         guard let source = displayedSnapshot else { return }
         drawRuler(source, context: context)
         drawTracks(source, dirtyRect: dirtyRect, context: context)
+        drawAnnotations(source, context: context)
         drawSelection(source, context: context)
         if snapshot?.isLoading == true {
             context.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.06).cgColor)
@@ -201,40 +235,78 @@ public final class TimelineNSView: NSView {
 
     public override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
+        // Upstream places a flag by clicking the ruler; the ruler carries no
+        // events, so the gesture is unambiguous.
+        if point.y < TimelineGeometry.rulerHeight, let source = displayedSnapshot {
+            unsafe window?.makeFirstResponder(self)
+            onCreateFlag?(
+                TimelineGeometry.time(forX: point.x, viewport: source.viewport)
+            )
+            return
+        }
+        // An existing selection's edges outrank the events beneath them. The
+        // cost is a 24 point column at each edge where a press adjusts the
+        // range instead of selecting an event, and it is bounded: a selection
+        // only exists because the user made one, pressing an event clears it
+        // anyway, and Escape removes it outright.
+        if let source = displayedSnapshot, let selection,
+            let endpoint = TimelineGeometry.selectionEndpoint(
+                at: point, selection: selection, viewport: source.viewport
+            )
+        {
+            unsafe window?.makeFirstResponder(self)
+            dragMode = .endpoint(
+                endpoint,
+                anchorNs: endpoint == .start ? selection.endNs : selection.startNs
+            )
+            dragInitialSelection = selection
+            return
+        }
         if let selected = self.event(at: point) {
-            dragStartX = nil
+            dragMode = nil
             dragInitialSelection = nil
             onSelectRange?(nil)
             onSelectEvent?(selected)
         } else {
+            guard let source = displayedSnapshot else { return }
             onSelectEvent?(nil)
-            dragStartX = point.x
+            dragMode = .newRange(
+                anchorNs: TimelineGeometry.time(forX: point.x, viewport: source.viewport)
+            )
             dragInitialSelection = selection
         }
     }
 
     public override func mouseDragged(with event: NSEvent) {
-        guard let startX = dragStartX, let source = displayedSnapshot else { return }
-        let endX = convert(event.locationInWindow, from: nil).x
-        let first = TimelineGeometry.time(forX: startX, viewport: source.viewport)
-        let second = TimelineGeometry.time(forX: endX, viewport: source.viewport)
-        guard first != second else {
-            selection = nil
-            onSelectRange?(nil)
+        guard let dragMode, let source = displayedSnapshot else { return }
+        let anchor: Int64
+        switch dragMode {
+        case .newRange(let anchorNs), .endpoint(_, let anchorNs): anchor = anchorNs
+        }
+        let pointerX = convert(event.locationInWindow, from: nil).x
+        let moved = TimelineGeometry.time(forX: pointerX, viewport: source.viewport)
+        guard anchor != moved else {
+            // A zero-width range is not a range. Sweeping one out yields no
+            // selection; collapsing an existing one onto its anchor leaves the
+            // last non-degenerate value in place rather than destroying it.
+            if case .newRange = dragMode {
+                selection = nil
+                onSelectRange?(nil)
+            }
             return
         }
         let range = try? TraceTimeRange.query(
-            startNs: min(first, second),
-            endNs: max(first, second)
+            startNs: min(anchor, moved),
+            endNs: max(anchor, moved)
         )
         selection = range
         onSelectRange?(range)
     }
 
     public override func mouseUp(with event: NSEvent) {
-        if dragStartX != nil { mouseDragged(with: event) }
-        if dragStartX != nil { commitRangeSelectionAccessibilityChange(from: dragInitialSelection) }
-        dragStartX = nil
+        if dragMode != nil { mouseDragged(with: event) }
+        if dragMode != nil { commitRangeSelectionAccessibilityChange(from: dragInitialSelection) }
+        dragMode = nil
         dragInitialSelection = nil
     }
 
@@ -247,11 +319,77 @@ public final class TimelineNSView: NSView {
     public override func mouseMoved(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         updatePointerLocation(point)
-        onHoverEvent?(self.event(at: point))
+        updateHoveredSelectionEndpoint(at: point)
+        // An endpoint handle covers the events beneath it, so it also takes
+        // their hover: the pointer is offering to move the edge, not to
+        // inspect a slice.
+        let key = hoveredSelectionEndpoint == nil ? self.event(at: point) : nil
+        updateHover(key)
+        onHoverEvent?(key)
     }
 
     public override func mouseExited(with event: NSEvent) {
         updatePointerLocation(nil)
+        updateHoveredSelectionEndpoint(at: nil)
+        updateHover(nil)
+        onHoverEvent?(nil)
+    }
+
+    /// Selection-edge hover. Overlay-only and silent, for the same reasons
+    /// ``updateHover(_:)`` is: it redraws the handle wider, never touches the
+    /// batched path caches, and posts nothing to assistive technology
+    /// (AT-APP-010).
+    package func updateHoveredSelectionEndpoint(at point: CGPoint?) {
+        let endpoint: TimelineSelectionEndpoint?
+        if let point, let source = displayedSnapshot, let selection {
+            endpoint = TimelineGeometry.selectionEndpoint(
+                at: point, selection: selection, viewport: source.viewport
+            )
+        } else {
+            endpoint = nil
+        }
+        guard hoveredSelectionEndpoint != endpoint else { return }
+        hoveredSelectionEndpoint = endpoint
+        needsDisplay = true
+    }
+
+    /// The pointer becomes a resize cursor over a handle. Shape, not colour:
+    /// AT-APP-011 rules out signalling an affordance by colour alone, and the
+    /// handle simultaneously widens under the pointer.
+    public override func resetCursorRects() {
+        super.resetCursorRects()
+        for rect in selectionHandleCursorRects() {
+            addCursorRect(rect, cursor: .resizeLeftRight)
+        }
+    }
+
+    /// Where the resize cursor appears. Kept beside the hit test rather than
+    /// derived independently: a cursor that promises a handle the press does
+    /// not grab is worse than no cursor at all, and the tests assert the two
+    /// agree.
+    package func selectionHandleCursorRects() -> [CGRect] {
+        guard let source = displayedSnapshot, let selection else { return [] }
+        let bodyHeight = max(0, bounds.height - TimelineGeometry.rulerHeight)
+        guard bodyHeight > 0 else { return [] }
+        let reach = TimelineGeometry.selectionHandleReach
+        return [selection.startNs, selection.endNs].map { time in
+            let center = TimelineGeometry.x(for: time, viewport: source.viewport)
+            return CGRect(
+                x: center - reach, y: TimelineGeometry.rulerHeight,
+                width: 2 * reach, height: bodyHeight
+            )
+        }
+    }
+
+    /// Hover is a pure overlay concern. It redraws, but it must never drop the
+    /// batched path caches -- rebuilding them per pointer sample would make the
+    /// fill batch count a function of mouse movement, which DESIGN §13.5 and
+    /// AT-RENDER-008 forbid. It must also stay silent: AT-APP-010 rules out
+    /// per-frame accessibility announcements from hover.
+    package func updateHover(_ key: EventKey?) {
+        guard hoveredEventKey != key else { return }
+        hoveredEventKey = key
+        needsDisplay = true
     }
 
     /// Records the pointer position that anchors `W` / `S`. Also the seam tests
@@ -263,24 +401,44 @@ public final class TimelineNSView: NSView {
     public override func magnify(with event: NSEvent) {
         guard let source = displayedSnapshot else { return }
         let point = convert(event.locationInWindow, from: nil)
-        let anchor = TimelineGeometry.time(forX: point.x, viewport: source.viewport)
-        onViewportIntent?(
-            .zoom(
-                anchorNs: anchor,
-                scale: exp(-Double(event.magnification)),
-                sourceViewport: source.viewport
-            )
-        )
+        zoom(at: point, scale: exp(-Double(event.magnification)), in: source)
     }
 
     public override func scrollWheel(with event: NSEvent) {
-        let horizontal = Double(event.scrollingDeltaX)
-        guard abs(horizontal) > 0.01 else {
+        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        let resolution = TimelineScrollGesture.resolve(
+            deltaX: Double(event.scrollingDeltaX),
+            deltaY: Double(event.scrollingDeltaY),
+            hasPreciseDeltas: event.hasPreciseScrollingDeltas,
+            zooms: modifiers.contains(.option) || modifiers.contains(.control)
+        )
+        switch resolution {
+        case .passThrough:
             super.scrollWheel(with: event)
-            return
+        case .pan(let points):
+            guard let source = displayedSnapshot else { return }
+            onViewportIntent?(.panPoints(points, sourceViewport: source.viewport))
+        case .zoom(let scale):
+            guard let source = displayedSnapshot else { return }
+            zoom(
+                at: convert(event.locationInWindow, from: nil),
+                scale: scale,
+                in: source
+            )
         }
-        guard let source = displayedSnapshot else { return }
-        onViewportIntent?(.panPoints(horizontal, sourceViewport: source.viewport))
+    }
+
+    /// The one pointer-anchored zoom. A pinch and a modified wheel differ only
+    /// in how they arrive at a scale; both grow the trace around whatever is
+    /// under the cursor.
+    private func zoom(at point: CGPoint, scale: Double, in source: TimelineSnapshot) {
+        onViewportIntent?(
+            .zoom(
+                anchorNs: TimelineGeometry.time(forX: point.x, viewport: source.viewport),
+                scale: scale,
+                sourceViewport: source.viewport
+            )
+        )
     }
 
     public override func keyDown(with event: NSEvent) {
@@ -299,6 +457,31 @@ public final class TimelineNSView: NSView {
             // A Command-modified key belongs to the menu, not to the timeline.
             // Letting `W` swallow ⌘W would break Close Window.
             guard !modifiers.contains(.command) else {
+                super.keyDown(with: event)
+                return
+            }
+            // Annotation keys, matching upstream's cluster. Control is the
+            // modifier because ⌘ belongs to the menu and bare `[`/`]` are
+            // already zoom-to-selection aliases.
+            let control = modifiers.contains(.control)
+            switch (event.charactersIgnoringModifiers?.lowercased(), control) {
+            case (",", true): onAnnotationCommand?(.previousFlag); return
+            case (".", true): onAnnotationCommand?(.nextFlag); return
+            case ("[", true): onAnnotationCommand?(.previousMark); return
+            case ("]", true): onAnnotationCommand?(.nextMark); return
+            case (",", false), (".", false):
+                onAnnotationCommand?(.scrollNearestFlagIntoView)
+                return
+            case ("m", _):
+                // Shift keeps the mark; bare `m` is the transient one.
+                onAnnotationCommand?(
+                    .createMark(isPersistent: modifiers.contains(.shift))
+                )
+                return
+            default:
+                break
+            }
+            guard !control else {
                 super.keyDown(with: event)
                 return
             }
@@ -608,12 +791,150 @@ public final class TimelineNSView: NSView {
             )
             context.restoreGState()
         }
+        drawSameNameHoverWash(cached, context: context)
         var outlined = Set<EventKey>()
         for key in [selectedEventKey, focusedEventKey].compactMap({ $0 }) {
             guard outlined.insert(key).inserted,
                 let (detail, frame) = cached.events[key]
             else { continue }
             drawEventState(detail, frame: frame, context: context)
+        }
+        drawHoverTooltip(cached, context: context)
+    }
+
+    /// Upstream lightens every slice sharing the hovered slice's name
+    /// (`ProcedureWorkerFunc.ts:257-258`, `globalAlpha = 0.7`), which is how a
+    /// high-frequency function becomes visible as a family rather than as
+    /// scattered blocks.
+    ///
+    /// ArkTrace washes them with the background colour instead of re-filling
+    /// them in a lighter colour. Re-filling would mean a new
+    /// ``DetailPaintKey`` per hovered name and a cache rebuild on every pointer
+    /// sample; a wash reuses the frames already in the cache and adds nothing
+    /// to the batch count.
+    private func drawSameNameHoverWash(_ cached: DetailPaths, context: CGContext) {
+        guard let hoveredEventKey,
+            let (hovered, _) = cached.events[hoveredEventKey],
+            let name = Self.hoverName(of: hovered)
+        else { return }
+        context.saveGState()
+        context.setFillColor(
+            NSColor.windowBackgroundColor.withAlphaComponent(0.42).cgColor
+        )
+        for (_, entry) in cached.events
+        where Self.hoverName(of: entry.0) == name {
+            context.fill(entry.1)
+        }
+        context.restoreGState()
+    }
+
+    /// The name a slice is matched on. Same source the fill colour uses, so
+    /// "same colour" and "same family" cannot disagree.
+    static func hoverName(of detail: TimelineDetailPrimitive) -> String? {
+        guard let name = detail.inspector?.name ?? detail.label, !name.isEmpty
+        else { return nil }
+        return name
+    }
+
+    /// A tooltip at the pointer carrying what the hovered slice is, so the
+    /// common question does not require a trip to the Inspector. Content comes
+    /// from the inspector already attached to the primitive — hovering issues
+    /// no query (AT-RENDER-006).
+    ///
+    /// It appears in place, with no motion: Reduce Motion must not change what
+    /// the user can find out (AT-APP-012).
+    private func drawHoverTooltip(_ cached: DetailPaths, context: CGContext) {
+        guard let pointerLocation, let hoveredEventKey,
+            let (hovered, _) = cached.events[hoveredEventKey],
+            let text = Self.tooltipText(for: hovered)
+        else { return }
+        let font = NSFont.systemFont(ofSize: 11)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font, .foregroundColor: NSColor.labelColor,
+        ]
+        let textSize = (text as NSString).size(withAttributes: attributes)
+        let padding: CGFloat = 5
+        let size = CGSize(
+            width: min(textSize.width + padding * 2, max(80, bounds.width - 8)),
+            height: textSize.height + padding * 2
+        )
+        // Flip away from the pointer at the right edge rather than clipping the
+        // text there (upstream `TraceRow.ts:1409-1421`).
+        var origin = CGPoint(x: pointerLocation.x + 12, y: pointerLocation.y + 14)
+        if origin.x + size.width > bounds.maxX - 4 {
+            origin.x = max(4, pointerLocation.x - 12 - size.width)
+        }
+        origin.y = min(max(TimelineGeometry.rulerHeight + 2, origin.y),
+                       max(TimelineGeometry.rulerHeight + 2, bounds.maxY - size.height - 4))
+        let frame = CGRect(origin: origin, size: size)
+        context.saveGState()
+        let path = CGPath(
+            roundedRect: frame, cornerWidth: 4, cornerHeight: 4, transform: nil
+        )
+        context.addPath(path)
+        context.setFillColor(NSColor.controlBackgroundColor.withAlphaComponent(0.97).cgColor)
+        context.fillPath()
+        context.addPath(path)
+        context.setStrokeColor(NSColor.separatorColor.cgColor)
+        context.setLineWidth(1)
+        context.strokePath()
+        context.clip(to: frame.insetBy(dx: padding, dy: padding))
+        (text as NSString).draw(
+            at: CGPoint(x: frame.minX + padding, y: frame.minY + padding),
+            withAttributes: attributes
+        )
+        context.restoreGState()
+    }
+
+    static func tooltipText(for detail: TimelineDetailPrimitive) -> String? {
+        guard let name = hoverName(of: detail) else { return nil }
+        guard let inspector = detail.inspector else { return name }
+        if inspector.isOpenEnded { return "\(name) · open ended" }
+        guard let duration = inspector.semanticDurationNs else { return name }
+        return "\(name) · \(timeLabel(duration))"
+    }
+
+    /// Marks first, then flags, so a flag standing inside a mark stays visible.
+    /// Drawn between the tracks and the transient selection: annotations are
+    /// persistent context, the selection is the thing being acted on now.
+    private func drawAnnotations(_ snapshot: TimelineSnapshot, context: CGContext) {
+        guard !annotations.isEmpty else { return }
+        let viewport = snapshot.viewport
+        let bodyTop = TimelineGeometry.rulerHeight
+        let bodyHeight = max(0, bounds.height - bodyTop)
+
+        for mark in annotations.orderedMarks {
+            guard mark.range.startNs <= viewport.range.endNs,
+                mark.range.endNs >= viewport.range.startNs
+            else { continue }
+            let start = TimelineGeometry.x(for: mark.range.startNs, viewport: viewport)
+            let end = TimelineGeometry.x(for: mark.range.endNs, viewport: viewport)
+            let color = TimelineAnnotationPalette.color(at: mark.colorIndex)
+            context.setFillColor(color.cgColor(alpha: 0.12))
+            context.fill(
+                CGRect(
+                    x: start, y: bodyTop, width: max(1, end - start), height: bodyHeight
+                )
+            )
+            // Both edges get a rule so a mark narrower than a point is still
+            // locatable.
+            context.setFillColor(color.cgColor(alpha: 0.85))
+            context.fill(CGRect(x: start, y: bodyTop, width: 1, height: bodyHeight))
+            context.fill(CGRect(x: max(start, end - 1), y: bodyTop, width: 1, height: bodyHeight))
+        }
+
+        for flag in annotations.orderedFlags {
+            guard flag.timestampNs >= viewport.range.startNs,
+                flag.timestampNs <= viewport.range.endNs
+            else { continue }
+            let x = TimelineGeometry.x(for: flag.timestampNs, viewport: viewport)
+            let color = TimelineAnnotationPalette.color(at: flag.colorIndex)
+            context.setFillColor(color.cgColor(alpha: 0.9))
+            context.fill(CGRect(x: x, y: bodyTop, width: 1, height: bodyHeight))
+            // A pennant in the ruler, so a flag outside the visible tracks is
+            // still findable without scrolling vertically.
+            context.setFillColor(color.cgColor)
+            context.fill(CGRect(x: x, y: 2, width: 7, height: 8))
         }
     }
 
@@ -643,6 +964,45 @@ public final class TimelineNSView: NSView {
             )
         )
         context.restoreGState()
+        drawSelectionHandle(.start, atX: start, context: context)
+        drawSelectionHandle(.end, atX: end, context: context)
+    }
+
+    /// A solid bar on each edge, so the draggable endpoint is visible before
+    /// the pointer is anywhere near it. Under the pointer — or while being
+    /// dragged — it thickens and gains grip notches: the affordance changes
+    /// shape, not just colour (AT-APP-011).
+    private func drawSelectionHandle(
+        _ endpoint: TimelineSelectionEndpoint,
+        atX x: CGFloat,
+        context: CGContext
+    ) {
+        let isActive = hoveredSelectionEndpoint == endpoint
+            || draggedSelectionEndpoint == endpoint
+        let width: CGFloat = isActive ? 5 : 2
+        let top = TimelineGeometry.rulerHeight
+        let height = max(0, bounds.height - top)
+        guard height > 0 else { return }
+        // Grown inward so the bar stays inside the range it delimits.
+        let originX = endpoint == .start ? x : x - width
+        context.setFillColor(NSColor.selectedContentBackgroundColor.cgColor)
+        context.fill(CGRect(x: originX, y: top, width: width, height: height))
+        guard isActive else { return }
+        context.setFillColor(NSColor.alternateSelectedControlTextColor.cgColor)
+        let notchCenter = top + height / 2
+        for offset in [CGFloat(-4), 0, 4] {
+            context.fill(
+                CGRect(x: originX + 1, y: notchCenter + offset, width: width - 2, height: 1)
+            )
+        }
+    }
+
+    /// The edge currently following the pointer. Derived from the anchor
+    /// rather than from the endpoint the drag started on, so after a crossing
+    /// the feedback is on the edge the user is actually moving.
+    private var draggedSelectionEndpoint: TimelineSelectionEndpoint? {
+        guard case .endpoint(_, let anchorNs) = dragMode, let selection else { return nil }
+        return selection.startNs == anchorNs ? .end : .start
     }
 
     private func drawEventState(
@@ -1050,12 +1410,15 @@ public final class TimelineNSView: NSView {
 @MainActor
 public struct TimelineView: NSViewRepresentable {
     public let snapshot: TimelineSnapshot?
+    public let annotations: TimelineAnnotations
     public let selection: TraceTimeRange?
     public let selectedEventKey: EventKey?
     public let focusRequestID: UInt64
     public let onSelectEvent: @MainActor (EventKey?) -> Void
     public let onHoverEvent: @MainActor (EventKey?) -> Void
     public let onSelectRange: @MainActor (TraceTimeRange?) -> Void
+    public let onCreateFlag: @MainActor (Int64) -> Void
+    public let onAnnotationCommand: @MainActor (TimelineAnnotationCommand) -> Void
     public let onViewportIntent: @MainActor (TimelineViewportIntent) -> Void
     public let onZoomSelection: @MainActor () -> Void
     public let onResetViewport: @MainActor () -> Void
@@ -1065,6 +1428,7 @@ public struct TimelineView: NSViewRepresentable {
 
     public init(
         snapshot: TimelineSnapshot?,
+        annotations: TimelineAnnotations = TimelineAnnotations(),
         selection: TraceTimeRange? = nil,
         selectedEventKey: EventKey? = nil,
         focusRequestID: UInt64 = 0,
@@ -1073,11 +1437,15 @@ public struct TimelineView: NSViewRepresentable {
         onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
+        onCreateFlag: @escaping @MainActor (Int64) -> Void = { _ in },
+        onAnnotationCommand: @escaping @MainActor (TimelineAnnotationCommand) -> Void
+            = { _ in },
         onViewportIntent: @escaping @MainActor (TimelineViewportIntent) -> Void = { _ in },
         onZoomSelection: @escaping @MainActor () -> Void = {},
         onResetViewport: @escaping @MainActor () -> Void = {}
     ) {
         self.snapshot = snapshot
+        self.annotations = annotations
         self.selection = selection
         self.selectedEventKey = selectedEventKey
         self.focusRequestID = focusRequestID
@@ -1086,6 +1454,8 @@ public struct TimelineView: NSViewRepresentable {
         self.onSelectEvent = onSelectEvent
         self.onHoverEvent = onHoverEvent
         self.onSelectRange = onSelectRange
+        self.onCreateFlag = onCreateFlag
+        self.onAnnotationCommand = onAnnotationCommand
         self.onViewportIntent = onViewportIntent
         self.onZoomSelection = onZoomSelection
         self.onResetViewport = onResetViewport
@@ -1095,11 +1465,14 @@ public struct TimelineView: NSViewRepresentable {
         let view = TimelineNSView(frame: .zero)
         view.accessibilityLabelText = accessibilityLabelText
         view.snapshot = snapshot
+        view.annotations = annotations
         view.selection = selection
         view.selectedEventKey = selectedEventKey
         view.onSelectEvent = onSelectEvent
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
+        view.onCreateFlag = onCreateFlag
+        view.onAnnotationCommand = onAnnotationCommand
         view.onViewportIntent = onViewportIntent
         view.onZoomSelection = onZoomSelection
         view.onResetViewport = onResetViewport
@@ -1112,11 +1485,14 @@ public struct TimelineView: NSViewRepresentable {
     public func updateNSView(_ view: TimelineNSView, context: Context) {
         view.accessibilityLabelText = accessibilityLabelText
         view.snapshot = snapshot
+        view.annotations = annotations
         view.selection = selection
         view.selectedEventKey = selectedEventKey
         view.onSelectEvent = onSelectEvent
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
+        view.onCreateFlag = onCreateFlag
+        view.onAnnotationCommand = onAnnotationCommand
         view.onViewportIntent = onViewportIntent
         view.onZoomSelection = onZoomSelection
         view.onResetViewport = onResetViewport

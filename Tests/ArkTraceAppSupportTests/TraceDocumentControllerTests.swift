@@ -1,4 +1,6 @@
+import ArkTraceAnalysis
 import ArkTraceCore
+import ArkTraceRendering
 import ArkTraceRuntime
 import Foundation
 import XCTest
@@ -12,6 +14,9 @@ final class TraceDocumentControllerTests: XCTestCase {
         let durationNs: Int64
         let capabilities: TraceCapabilities
         let sliceRows: [TraceSlice]
+        let threadRows: [TraceThread]
+        let cpuRows: [CpuSlice]
+        let counterRows: [CounterSeries]
 
         init(
             identity: String,
@@ -20,12 +25,18 @@ final class TraceDocumentControllerTests: XCTestCase {
                 cpuScheduling: false, threadStates: false, namedSlices: false,
                 cpuCounters: false, processCounters: false
             ),
-            slices: [TraceSlice] = []
+            slices: [TraceSlice] = [],
+            threads: [TraceThread] = [],
+            cpuSlices: [CpuSlice] = [],
+            counters: [CounterSeries] = []
         ) {
             self.identity = identity
             self.durationNs = durationNs
             self.capabilities = capabilities
             sliceRows = slices
+            threadRows = threads
+            cpuRows = cpuSlices
+            counterRows = counters
         }
 
         func metadata() async throws -> TraceMetadata {
@@ -53,7 +64,25 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
 
         func threads(_ query: ThreadQuery) async throws -> BoundedPage<TraceThread> {
-            BoundedPage(items: [], truncated: false)
+            BoundedPage(
+                items: Array(threadRows.prefix(query.limit)),
+                truncated: threadRows.count > query.limit
+            )
+        }
+
+        func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
+            TraceEventPage(
+                items: Array(cpuRows.prefix(query.limit)),
+                truncated: cpuRows.count > query.limit
+            )
+        }
+
+        func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries> {
+            guard !counterRows.isEmpty else { return .unavailable }
+            return TraceEventPage(
+                items: Array(counterRows.prefix(query.limit)),
+                truncated: false
+            )
         }
 
         func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts {
@@ -542,6 +571,498 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertTrue(
             controller.trackGroups.flatMap(\.tracks).contains {
                 $0.source == .namedSlice(nil) && !$0.isCollapsed
+            }
+        )
+        await controller.close()
+    }
+
+    /// Keyboard stepping through search results. The contract that makes it
+    /// usable is the focus one (AT-APP-009): stepping reveals but must not
+    /// move keyboard focus to the timeline, or the second press would land
+    /// somewhere else. Committing is the separate action that does move it.
+    func testSearchResultSteppingRevealsWithoutStealingKeyboardFocus() async throws {
+        let suite = "ArkTraceSearchSteppingTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let slices = try (1...3).map { index in
+            TraceSlice(
+                key: EventKey(table: .callstack, rowID: Int64(index)),
+                range: try TraceTimeRange(
+                    startNs: Int64(index) * 1_000, endNs: Int64(index) * 1_000 + 200
+                ),
+                threadKey: nil, processKey: ProcessKey(ipid: 7), pid: 70, tid: nil,
+                processName: "app", threadName: nil,
+                name: "needle \(index)", category: "work", depth: 0,
+                parentEventKey: nil, isAsync: false, isOpenEnded: false
+            )
+        }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        durationNs: 10_000,
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: false, threadStates: false,
+                            namedSlices: true, cpuCounters: false,
+                            processCounters: false
+                        ),
+                        slices: slices
+                    ),
+                    cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-stepping-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+        controller.search("needle")
+        while controller.isSearching { await Task.yield() }
+        XCTAssertEqual(controller.searchResults.items.count, 3)
+        XCTAssertNil(controller.searchSelectionIndex, "untouched until stepped")
+
+        let focusBefore = controller.timelineFocusRequestID
+        XCTAssertTrue(controller.stepSearchResult(by: 1))
+        XCTAssertEqual(controller.searchSelectionIndex, 0, "the first step lands on the top")
+        XCTAssertTrue(controller.stepSearchResult(by: 1))
+        XCTAssertEqual(controller.searchSelectionIndex, 1)
+        XCTAssertEqual(
+            controller.timelineFocusRequestID, focusBefore,
+            "stepping must leave keyboard focus in the results list"
+        )
+
+        // The ends stop rather than wrap: wrapping a truncated result list
+        // would read as "there is more" when there is not.
+        XCTAssertTrue(controller.stepSearchResult(by: 1))
+        XCTAssertEqual(controller.searchSelectionIndex, 2)
+        XCTAssertFalse(controller.stepSearchResult(by: 1))
+        XCTAssertEqual(controller.searchSelectionIndex, 2)
+        XCTAssertTrue(controller.stepSearchResult(by: -1))
+        XCTAssertEqual(controller.searchSelectionIndex, 1)
+
+        // Committing is the step that hands focus to the timeline.
+        XCTAssertTrue(controller.activateSearchResult())
+        XCTAssertGreaterThan(controller.timelineFocusRequestID, focusBefore)
+
+        // A new result set drops the cursor: the index would otherwise point
+        // at a row from the previous query.
+        controller.search("needle 2")
+        while controller.isSearching { await Task.yield() }
+        XCTAssertNil(controller.searchSelectionIndex)
+        XCTAssertFalse(
+            controller.activateSearchResult(), "nothing is selected to commit"
+        )
+        await controller.close()
+    }
+
+    /// Annotations are session state. Upstream's `m` keeps only the newest
+    /// transient mark while `Shift+m` accumulates, and AT-APP-002 requires a
+    /// replacement document to start clean.
+    func testAnnotationLifecycleAndSessionReplacement() async throws {
+        let suite = "ArkTraceAnnotationTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { source, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: source.lastPathComponent == "a.htrace" ? "a" : "b",
+                        durationNs: 10_000
+                    ),
+                    cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let root = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-annotations-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let first = root.appending(path: "a.htrace")
+        let second = root.appending(path: "b.htrace")
+        FileManager.default.createFile(atPath: first.path, contents: Data())
+        FileManager.default.createFile(atPath: second.path, contents: Data())
+
+        controller.open(first)
+        while controller.phase != .ready { await Task.yield() }
+
+        // Flags: created in any order, always read back in time order.
+        controller.addFlag(atNs: 800)
+        controller.addFlag(atNs: 200)
+        XCTAssertEqual(controller.annotations.orderedFlags.map(\.timestampNs), [200, 800])
+        let firstFlag = try XCTUnwrap(controller.annotations.orderedFlags.first)
+        controller.updateFlag(id: firstFlag.id, label: "hotspot")
+        XCTAssertEqual(controller.annotations.orderedFlags.first?.label, "hotspot")
+        // Consecutive flags take different colours so they stay distinguishable.
+        XCTAssertEqual(
+            Set(controller.annotations.flags.map(\.colorIndex)).count,
+            controller.annotations.flags.count
+        )
+
+        // A flag out of bounds is clamped, not rejected silently at a bad time.
+        controller.addFlag(atNs: 99_999)
+        XCTAssertEqual(controller.annotations.orderedFlags.last?.timestampNs, 10_000)
+
+        // Marks need a selection; without one nothing is created.
+        XCTAssertNil(controller.addMark(isPersistent: true))
+        controller.selectRange(try TraceTimeRange.query(startNs: 100, endNs: 400))
+        XCTAssertNotNil(controller.addMark(isPersistent: false))
+        controller.selectRange(try TraceTimeRange.query(startNs: 500, endNs: 900))
+        XCTAssertNotNil(controller.addMark(isPersistent: false))
+        XCTAssertEqual(
+            controller.annotations.marks.count, 1,
+            "a transient mark replaces the previous transient mark"
+        )
+        controller.addMark(isPersistent: true)
+        controller.selectRange(try TraceTimeRange.query(startNs: 1_000, endNs: 1_400))
+        controller.addMark(isPersistent: true)
+        XCTAssertEqual(
+            controller.annotations.marks.filter(\.isPersistent).count, 2,
+            "kept marks accumulate"
+        )
+
+        let removable = try XCTUnwrap(controller.annotations.marks.first)
+        controller.removeMark(id: removable.id)
+        XCTAssertFalse(controller.annotations.marks.contains { $0.id == removable.id })
+        controller.removeFlag(id: firstFlag.id)
+        XCTAssertFalse(controller.annotations.flags.contains { $0.id == firstFlag.id })
+        XCTAssertFalse(controller.annotations.isEmpty)
+
+        // AT-APP-002: the next document starts with none of them.
+        controller.open(second)
+        while controller.phase != .ready { await Task.yield() }
+        XCTAssertTrue(
+            controller.annotations.isEmpty,
+            "a replacement session must not inherit the previous trace's annotations"
+        )
+        await controller.close()
+    }
+
+    /// Pinning gathers lanes from different processes into one place — the
+    /// thing process grouping alone cannot do, since those lanes live in
+    /// different collapsible nodes.
+    func testPinningGathersLanesFromDifferentProcessesAndKeepsOrder() async throws {
+        let suite = "ArkTracePinTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        var threads: [TraceThread] = []
+        for index in 1...4 {
+            threads.append(
+                Self.makeThread(itid: Int64(index), ipid: Int64(index), name: "t\(index)")
+            )
+        }
+        let frozenThreads = threads
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: false, threadStates: true,
+                            namedSlices: false, cpuCounters: false,
+                            processCounters: false
+                        ),
+                        threads: frozenThreads
+                    ),
+                    cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-pin-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        // Four lanes, one from each process.
+        let ids = (1...4).map { TimelineTrackID(rawValue: "thread-state:\($0)") }
+        for id in ids { controller.toggleFavorite(id) }
+        XCTAssertEqual(controller.favoriteTracks().map(\.id), ids)
+        XCTAssertTrue(ids.allSatisfy(controller.isFavorite))
+        // Pinning a hidden lane also reveals it -- pinning something and then
+        // not seeing it would be a trap.
+        XCTAssertTrue(controller.favoriteTracks().allSatisfy { !$0.isCollapsed })
+
+        // Reorder: move the last to the front.
+        controller.moveFavorite(from: 3, to: 0)
+        XCTAssertEqual(
+            controller.favoriteTracks().map(\.id),
+            [ids[3], ids[0], ids[1], ids[2]]
+        )
+
+        controller.toggleFavorite(ids[0])
+        XCTAssertFalse(controller.isFavorite(ids[0]))
+        XCTAssertEqual(controller.favoriteTracks().count, 3)
+
+        // The pinned area is bounded; past the cap it stops being scannable.
+        for index in 5...(TraceDocumentController.maximumFavoriteTracks + 6) {
+            controller.toggleFavorite(TimelineTrackID(rawValue: "thread-state:\(index)"))
+        }
+        XCTAssertLessThanOrEqual(
+            controller.favoriteTracks().count,
+            TraceDocumentController.maximumFavoriteTracks
+        )
+        await controller.close()
+    }
+
+    private static func makeThread(
+        itid: Int64, ipid: Int64, name: String
+    ) -> TraceThread {
+        TraceThread(
+            key: ThreadKey(itid: itid), processKey: ProcessKey(ipid: ipid),
+            tid: itid * 10, pid: ipid * 100, name: name,
+            processName: "proc\(ipid)",
+            startNs: nil, endNs: nil, isMainThread: nil
+        )
+    }
+
+    private static func makeCPUSlice(rowID: Int64, ipid: Int64) throws -> CpuSlice {
+        CpuSlice(
+            key: EventKey(table: .schedSlice, rowID: rowID),
+            range: try TraceTimeRange(startNs: rowID, endNs: rowID + 1),
+            cpu: 0,
+            threadKey: nil,
+            processKey: ProcessKey(ipid: ipid),
+            tid: nil, pid: nil, threadName: nil, processName: nil,
+            endState: nil, priority: nil, isOpenEnded: false
+        )
+    }
+
+    /// Lanes owned by a thread or a process are grouped by process; CPU lanes
+    /// are not, because a CPU belongs to no process. Processes are ordered by
+    /// scheduled work and only the busiest few start expanded — a real trace
+    /// has 785 processes behind its first 1,000 threads, so expanding all of
+    /// them would bury the ones that matter (AT-APP-003).
+    func testTracksGroupByProcessWithCPULanesLeftCrossProcess() async throws {
+        let suite = "ArkTraceGroupingTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let threads: [TraceThread] = [
+            Self.makeThread(itid: 1, ipid: 1, name: "alpha"),
+            Self.makeThread(itid: 2, ipid: 2, name: "beta"),
+            Self.makeThread(itid: 3, ipid: 2, name: "gamma"),
+        ]
+        // proc2 did three times the scheduled work of proc1, so it sorts first
+        // even though its ipid is higher.
+        var cpuSlices: [CpuSlice] = []
+        for rowID in Int64(1)...Int64(3) {
+            cpuSlices.append(try Self.makeCPUSlice(rowID: rowID, ipid: 2))
+        }
+        cpuSlices.append(try Self.makeCPUSlice(rowID: 4, ipid: 1))
+        let frozenCPUSlices = cpuSlices
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: true,
+                            threadStates: true,
+                            namedSlices: true,
+                            cpuCounters: false,
+                            processCounters: false
+                        ),
+                        threads: threads,
+                        cpuSlices: frozenCPUSlices
+                    ),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-grouping-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        XCTAssertEqual(
+            controller.trackGroups.map(\.id),
+            ["cpu", "cpu-counter", "process:2", "process:1", "unattributed"],
+            "busier process first; CPU groups stay cross-process and come first"
+        )
+        // CPU lanes are not filed under any process.
+        let cpuGroup = try XCTUnwrap(controller.trackGroups.first { $0.id == "cpu" })
+        XCTAssertEqual(cpuGroup.tracks.map(\.source), [.cpu(0)])
+        XCTAssertNil(cpuGroup.processKey)
+
+        // Each thread contributes state then slices, adjacent, and threads of
+        // one process are contiguous.
+        let busiest = try XCTUnwrap(
+            controller.trackGroups.first { $0.id == "process:2" }
+        )
+        XCTAssertEqual(busiest.title, "proc2 [200]")
+        XCTAssertEqual(
+            busiest.tracks.map(\.source),
+            [
+                .threadState(ThreadKey(itid: 2)), .namedSlice(ThreadKey(itid: 2)),
+                .threadState(ThreadKey(itid: 3)), .namedSlice(ThreadKey(itid: 3)),
+            ]
+        )
+        await controller.close()
+    }
+
+    /// Only the busiest processes start expanded; the rest stay collapsed but
+    /// present, so the sidebar is navigable at 785 processes.
+    func testOnlyTheBusiestProcessesStartExpanded() async throws {
+        let suite = "ArkTraceExpansionTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let processCount = TraceDocumentController.defaultExpandedProcessCount + 4
+        var threads: [TraceThread] = []
+        var cpuSlices: [CpuSlice] = []
+        // Earlier processes get more scheduled slices, so ipid order matches
+        // activity order and expansion is easy to assert.
+        for index in 1...processCount {
+            let ipid = Int64(index)
+            threads.append(
+                Self.makeThread(itid: ipid, ipid: ipid, name: "t\(index)")
+            )
+            for offset in 0..<(processCount - index + 1) {
+                let rowID = Int64(index * 1_000 + offset)
+                cpuSlices.append(try Self.makeCPUSlice(rowID: rowID, ipid: ipid))
+            }
+        }
+        let frozenThreads = threads
+        let frozenExpansionSlices = cpuSlices
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: true, threadStates: true,
+                            namedSlices: true, cpuCounters: false,
+                            processCounters: false
+                        ),
+                        threads: frozenThreads,
+                        cpuSlices: frozenExpansionSlices
+                    ),
+                    cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-expansion-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        let processGroups = controller.trackGroups.filter { $0.kind == .process }
+        XCTAssertEqual(processGroups.count, processCount)
+        let expanded = processGroups.filter { group in
+            group.tracks.contains { !$0.isCollapsed }
+        }
+        XCTAssertEqual(
+            expanded.count, TraceDocumentController.defaultExpandedProcessCount
+        )
+        // The expanded ones are the busiest ones, not an arbitrary prefix.
+        XCTAssertEqual(
+            expanded.map(\.id),
+            (1...TraceDocumentController.defaultExpandedProcessCount)
+                .map { "process:\($0)" }
+        )
+        // Collapsed processes are still listed and still carry their lanes.
+        let collapsed = try XCTUnwrap(processGroups.last)
+        XCTAssertFalse(collapsed.tracks.isEmpty)
+        XCTAssertTrue(collapsed.tracks.allSatisfy(\.isCollapsed))
+        await controller.close()
+    }
+
+    /// A row in the slice-name table jumps to that name's first occurrence.
+    /// It goes through the same `reveal(_:)` the search list uses, so track
+    /// admission, expansion and selection behave identically.
+    func testSliceAggregateRowRevealsItsFirstOccurrence() async throws {
+        let suite = "ArkTraceAggregateRevealTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let key = EventKey(table: .callstack, rowID: 41)
+        let threadKey = ThreadKey(itid: 3)
+        let slice = TraceSlice(
+            key: key,
+            range: try TraceTimeRange(startNs: 200, endNs: 260),
+            threadKey: threadKey,
+            processKey: ProcessKey(ipid: 7),
+            pid: 70,
+            tid: 71,
+            processName: "app",
+            threadName: "worker",
+            name: "hot slice",
+            category: "work",
+            depth: 0,
+            parentEventKey: nil,
+            isAsync: false,
+            isOpenEnded: false
+        )
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: false,
+                            threadStates: false,
+                            namedSlices: true,
+                            cpuCounters: false,
+                            processCounters: false
+                        ),
+                        slices: [slice]
+                    ),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-aggregate-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        controller.revealSliceAggregate(
+            TraceSliceNameAggregate(
+                name: "hot slice",
+                totalDurationNs: 60,
+                averageDurationNs: 60,
+                occurrences: 1,
+                firstEventKey: key,
+                firstRange: slice.range,
+                firstThreadKey: threadKey
+            )
+        )
+        var attempts = 0
+        while controller.selectedEvent?.key != key, attempts < 10_000 {
+            attempts += 1
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.selectedEvent?.key, key)
+        XCTAssertEqual(controller.selectedEvent?.name, "hot slice")
+        XCTAssertTrue(
+            controller.trackGroups.flatMap(\.tracks).contains {
+                $0.source == .namedSlice(threadKey) && !$0.isCollapsed
             }
         )
         await controller.close()
