@@ -3,12 +3,14 @@
 Status: Phase 5 production distribution boundary, independently reviewed and
 notarized.  The immutable signed/stapled ZIP, source snapshot, tool/parser
 identities, Apple `Accepted` submission and live-log semantic projection are
-recorded in `Fixtures/release-evidence/phase5-cli-distribution.json`.  That
-artifact was built from source revision `cddcd508757db3ebc0f3c7fcad4458076ed07c57`
-and source-tree SHA-256 `778c5ad63371b89dd4f5454ea5c71db8bff89f8cb74c7dc397d773baaa8b98d4`;
-the status edits made after packaging are a documentation-only delta and do not
-rewrite that historical source snapshot.  The independently reviewed >500 MiB
-Trace remains a separate Phase 3/4 gate and is not implied by this package.
+recorded in `Fixtures/release-evidence/phase5-cli-distribution.json`.  The
+current artifact was built from source revision
+`61d0f2aecb09f63a9633ea50ec8bebc956fe37ac` (the macOS 26 / Swift 6.3 baseline)
+and source-tree SHA-256
+`0f6e59c8e1718206a2f67df1000fbf8aae6d6365d4a25e6e81aed47b99ca787a`; earlier
+pinned artifacts remain recorded in Git history as historical evidence.  The
+independently reviewed >500 MiB Trace remains a separate Phase 3/4 gate and is
+not implied by this package.
 
 ## Closed install layout
 
