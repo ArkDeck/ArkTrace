@@ -662,6 +662,29 @@ Track descriptor 与 event data 分离。Collapse 只影响可见 layout/query�
 
 首版使用 CoreGraphics。只有基准证明 CPU rendering 是真实瓶颈后才考虑 Metal；Renderer protocol 已隔离后端。
 
+### 13.5 Event 配色
+
+配色不是主题，而是与上游对齐的数据编码：SmartPerf Host 不按事件种类上色，而是把事件身份散列进一张固定调色板，因此同一个函数在不同 track、不同 trace、不同 session 里保持同一颜色。ArkTrace 复用被 pin 住的上游 parser，也复用同一张调色板——同一个 slice 在两个工具里颜色相同。
+
+移植自 `source-lock.json` 所 pin 的上游 revision（Apache-2.0）：
+
+| 上游实现 | 用途 |
+|---|---|
+| `ColorUtils.FUNC_COLOR_B`（20 色，同时是 `MD_PALETTE` 与 `FUNC_COLOR`） | 全部 hash 配色的取值域 |
+| `ColorUtils.colorForThread` / `colorForTid` | CPU slice 按所属 process（无 pid 时退回 tid）取色 |
+| `ColorUtils.hashFunc`（去掉数字后再 hash） | named slice 与 counter series 按名称取色 |
+| `Utils.getStateColor` | thread state 的固定状态色 |
+| `ColorUtils.funcTextColor`（0.299/0.587/0.114 灰度，`>= 100` 取黑） | label 前景色 |
+
+hash 必须是逐位一致的移植，其中两处细节决定结果：offset basis 被 `0xfffffff`（7 个 f）截断，且每轮乘法发生在 JavaScript `Number` 域内、之后才截回 Int32——乘积最多 55 位，低位在截断前已被舍入。把它「修正」成标准 32-bit 整数 FNV-1a 会在几乎所有真实 slice 名上偏离上游，因此 `TimelinePaletteTests` 用取自上游实现的向量锁定它。
+
+两处 ArkTrace 自有的扩展，与上游对齐无关，并刻意使用不同的 hash：
+
+- Counter series 按 series 名取色。上游把 counter 画成面积图，没有可对应的 per-sample 填充色，散列 series 名至少让每条 series 有稳定身份。
+- Density band 是 ArkTrace 特有的 LOD，上游没有对应层。聚合 bucket 没有单个事件可取色，因此整条 band 取所属 track 的身份色，强度仍由 alpha 表达。这里改用正确混合的 64-bit FNV-1a：上游 hash 在仅末位不同的短 key 上分布极差（`cpu:0` 与 `cpu:1` 撞色，`thread-state:4`…`thread-state:9` 全部落到同一色），会让相邻 track 无法区分。两个 hash 必须各自保留，合并其中任何一个都会破坏上游一致性或让所有 thread band 同色。
+
+绘制仍按填充色批处理：调色板是封闭集合，一次 snapshot 内的不同填充数受调色板规模约束，而不随事件数增长，因此 20k detail 的 snapshot 不会退化为逐事件一次 fill。语义 style 仍是批次的外层排序键，绘制顺序与 hit-test 优先级保持不变。状态不能只靠颜色表达（AT-APP-011）：state 与名称同时出现在 label、Inspector 与 accessibility value 中。
+
 ## 14. macOS App
 
 ### 14.1 布局
@@ -700,6 +723,7 @@ App 只显示 Core typed error 的本地化表述，不解析 TraceStreamer log 
 - `Tab` / `Shift-Tab` 在主要区域与 controls 间移动；
 - Timeline 获得 focus 后，`Left` / `Right` 移到同一 track 的前一/后一真实 event，`Up` / `Down` 移到相邻可见 track；
 - `Option-Left` / `Option-Right` 平移约一个 viewport 的 10%，`+` / `-` 围绕当前 selection 或 viewport center 缩放；
+- 与 SmartPerf Host 对齐的导航簇：`W` / `S` 以指针位置为锚点放大/缩小，`A` / `D` 平移，`[` / `]` 是上游 zoom-to-selection 的别名（ArkTrace 已绑定在 `F`）。按住不放由 macOS 按键重复驱动连续缩放/平移，而不是自建 60fps 动画——每次 viewport 变化都要经过 bounded snapshot loader，逐帧驱动会与 generation 模型冲突。上游因为监听 `document` 才需要 `flagInputFocus` 守卫；ArkTrace 的绑定属于获得 focus 的 Timeline，因此搜索框里的 `w`、`s` 仍是输入。⌘ 修饰的字母一律交回菜单，`W` 不会吞掉 ⌘W；
 - `Return` 选择 focused event，`F` zoom to selection，`0` reset，`Escape` 清除 transient range/selection；
 - sheet、dialog 或 error disclosure 关闭后，focus 返回触发它的 control；pane 收起时，focus 转移到对应 disclosure control。
 

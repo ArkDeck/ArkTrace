@@ -358,8 +358,12 @@ final class TimelineRenderingTests: XCTestCase {
         XCTAssertEqual(valueChangedCount, 11)
     }
 
+    /// A thousand differently-named events must still collapse into a handful
+    /// of batched fills, and the batch must be built once per snapshot
+    /// generation rather than once per redraw. The palette is closed, so
+    /// per-event colors cannot degrade this into a fill call per event.
     @MainActor
-    func testDetailRenderingUsesClosedStyleBucketsAndStableSnapshotCache() throws {
+    func testDetailRenderingUsesClosedPaletteBucketsAndStableSnapshotCache() throws {
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 0, endNs: 10_000),
             widthPoints: 500,
@@ -369,12 +373,16 @@ final class TimelineRenderingTests: XCTestCase {
         let descriptor = TrackDescriptor(title: "CPU 0", source: .cpu(0))
         let primitives = try (0..<1_000).map { index -> TimelinePrimitive in
             let start = Int64(index * 10)
+            // The names have to differ in letters, not only in digits: upstream
+            // strips digits precisely so that `ipc::41` and `ipc::42` share a
+            // color, and a digits-only fixture would prove nothing here.
+            let suffix = String(UnicodeScalar(UInt8(97 + index % 26)))
             return .detail(
                 TimelineDetailPrimitive(
                     trackID: descriptor.id,
                     eventKey: EventKey(table: .schedSlice, rowID: Int64(index + 1)),
                     range: try TraceTimeRange(startNs: start, endNs: start + 8),
-                    label: nil,
+                    label: "slice-\(suffix) \(index)",
                     category: "unknown-category-\(index)"
                 )
             )
@@ -409,19 +417,124 @@ final class TimelineRenderingTests: XCTestCase {
         view.snapshot = first
         let firstBitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
         view.cacheDisplay(in: view.bounds, to: firstBitmap)
-        XCTAssertEqual(detailBuilds, [1])
+        XCTAssertEqual(detailBuilds.count, 1, "one path build per snapshot generation")
+        let buckets = try XCTUnwrap(detailBuilds.first)
+        XCTAssertGreaterThan(buckets, 1, "differently named events must not share one fill")
+        XCTAssertLessThanOrEqual(
+            buckets,
+            TimelinePalette.funcColors.count,
+            "the palette is closed, so the fills stay bounded by it"
+        )
 
         view.snapshot = first
         view.selectedEventKey = EventKey(table: .schedSlice, rowID: 1)
         let secondBitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
         view.cacheDisplay(in: view.bounds, to: secondBitmap)
-        XCTAssertEqual(detailBuilds, [1])
+        XCTAssertEqual(detailBuilds, [buckets], "a selection redraw must reuse the cache")
 
         view.snapshot = try snapshot(generation: 74)
         let thirdBitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
         view.cacheDisplay(in: view.bounds, to: thirdBitmap)
-        XCTAssertEqual(detailBuilds, [1, 1])
-        XCTAssertLessThanOrEqual(detailBuilds.last ?? .max, 6)
+        XCTAssertEqual(detailBuilds, [buckets, buckets])
+    }
+
+    /// The point of the upstream palette: identity decides the color. Two
+    /// events with the same name match, events with different names generally
+    /// do not, and a redraw never invents a new color for the same event.
+    @MainActor
+    func testEventFillsFollowIdentityAcrossTracks() throws {
+        let names = [
+            "binder transaction", "H:RSMainThread::DoComposition", "ashmem_alloc",
+            "render_service", "Choreographer#doFrame",
+        ]
+        let colors = try names.map { name -> TimelineColor in
+            TimelineDetailPalette.color(
+                for: TimelineDetailPrimitive(
+                    trackID: TimelineTrackID(rawValue: "named-slice:1"),
+                    eventKey: EventKey(table: .callstack, rowID: 1),
+                    range: try TraceTimeRange(startNs: 0, endNs: 10),
+                    label: name,
+                    category: "slice"
+                )
+            )
+        }
+        // The same name on another track, another row and another time still
+        // resolves to the same fill.
+        for (index, name) in names.enumerated() {
+            let elsewhere = TimelineDetailPalette.color(
+                for: TimelineDetailPrimitive(
+                    trackID: TimelineTrackID(rawValue: "named-slice:987"),
+                    eventKey: EventKey(table: .callstack, rowID: 4_242),
+                    range: try TraceTimeRange(startNs: 900_000, endNs: 900_010),
+                    label: name,
+                    category: "other-category"
+                )
+            )
+            XCTAssertEqual(elsewhere, colors[index], "\(name) must keep its color")
+        }
+        XCTAssertGreaterThan(
+            Set(colors).count, 1, "distinct slice names must not collapse to one color"
+        )
+    }
+
+    /// Aggregate density bands take the owning track's identity color, so an
+    /// overview of several tracks is still readable as separate tracks.
+    @MainActor
+    func testDensityBandsAreColoredPerTrack() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 120,
+            generation: 5
+        )
+        let descriptors = (0..<4).map { TrackDescriptor(title: "CPU \($0)", source: .cpu(Int64($0))) }
+        let distinctTrackColors = Set(
+            descriptors.map { TimelinePalette.trackIdentityColor($0.id.rawValue) }
+        )
+        XCTAssertEqual(
+            distinctTrackColors.count, descriptors.count,
+            "four CPU tracks must not share an identity color"
+        )
+        let tracks = try descriptors.enumerated().map { index, descriptor in
+            TimelineTrackSnapshot(
+                descriptor: descriptor,
+                y: Double(index * 28),
+                height: 28,
+                primitives: [
+                    .density(
+                        TimelineDensityPrimitive(
+                            trackID: descriptor.id,
+                            bucket: TraceDensityBucket(
+                                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                                // Same count on every track, so any batch
+                                // separation comes from the color, not intensity.
+                                eventCount: 64,
+                                occupiedNs: nil,
+                                utilization: nil,
+                                dominantThreadKey: nil
+                            )
+                        )
+                    )
+                ]
+            )
+        }
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 100, height: 120))
+        var densityBuckets: [Int] = []
+        view.pathCacheBuildHook = { kind, count in
+            if kind == "density" { densityBuckets.append(count) }
+        }
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport,
+            tracks: tracks,
+            generation: viewport.generation,
+            dataQuality: TraceDataQuality()
+        )
+        let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        XCTAssertEqual(
+            densityBuckets, [descriptors.count],
+            "one fill per track color, and only one build"
+        )
     }
 
     @MainActor

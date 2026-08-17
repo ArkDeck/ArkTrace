@@ -977,7 +977,8 @@ Timeline 的最低键盘 contract：
 - `Left` / `Right` 聚焦同一 track 前一/后一真实 event；
 - `Up` / `Down` 聚焦相邻可见 track；
 - `Option-Left` / `Option-Right` 平移约 viewport 的 10%；
-- `+` / `-` 缩放，`Return` 选择，`F` zoom to selection，`0` reset，`Escape` 清 transient range/selection。
+- `+` / `-` 缩放，`Return` 选择，`F` zoom to selection，`0` reset，`Escape` 清 transient range/selection；
+- SmartPerf Host 导航簇：`W` / `S` 缩放，`A` / `D` 平移，`[` / `]` 等价于 `F`。`W` / `S` 必须以指针位置为锚点（指针不在 Timeline 上时退回 `+` / `-` 的锚点链）。这些绑定只在 Timeline 持有 focus 时生效，不得拦截文本输入；带 Command 修饰的字母必须交回菜单。
 
 sheet/dialog/disclosure 关闭后必须恢复 focus 到触发 control；pane 被折叠且包含当前 focus 时，focus 必须移到对应 disclosure control。
 
@@ -1026,6 +1027,14 @@ Pan/zoom input 不得同步等待 query。可以继续显示上一代 snapshot +
 ### AT-RENDER-007 Backend isolation
 
 Core/Store model 不得包含 CoreGraphics/CALayer/Metal 类型。未来 backend 替换不改变 domain/JSON contract。
+
+### AT-RENDER-008 Event 配色
+
+Detail event 的填充色必须由事件身份决定，且与被 pin 住的上游 SmartPerf Host 一致：CPU slice 取 process（无 pid 时退回 tid）身份色，named slice 取去掉数字后的名称散列色，thread state 取上游固定状态色，取值域为上游 20 色调色板。上游 hash 必须逐位一致移植，并由取自上游实现的向量锁定；Label 前景色必须按填充色灰度选择，不得固定为白色。
+
+配色是附加通道而非唯一通道（见 AT-APP-011）：state 与名称必须同时可从 label、Inspector 或 accessibility value 获得。渲染必须按填充色批处理，一次 snapshot 内的填充批次数由调色板规模约束，不得随事件数增长。
+
+Counter series 与 density band 的取色是 ArkTrace 扩展而非上游对齐项，必须在文档中标明，且不得为此放宽上游 hash 的一致性要求。
 
 ## 16. Cache 规格
 
