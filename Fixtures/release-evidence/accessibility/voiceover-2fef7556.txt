@@ -1,0 +1,16 @@
+ArkTrace accessibility walkthrough v1
+check: voiceOver
+candidateTreeSHA256: 2fef75563fa6ef2db651c10be385760efbcccfb958ab35b621918743b085c10b
+reviewedAt: 2026-08-17T06:42:55Z
+reviewMethod: independent-agent-review
+steps:
+1. Started VoiceOver, raised the exact signed candidate showing zlib.htrace, and activated Reload so the production announcement inputs "Opening trace" and "Trace loaded, 24 visible tracks" were submitted by the candidate's typed announcement path.
+2. Focused Search, entered 2956, confirmed, and observed the real result control "TID 2956, TID 2956 · itid 49" with the "Search found 1 results" announcement input submitted.
+3. Read the Inspector metadata under VoiceOver: Duration 32.211 s, Schema cb34d8b668c2, Cache Hit.
+4. Opened a temporary malformed trace to exercise the real urgent error announcement and semantic error state, then reopened zlib.htrace and verified recovery.
+5. Quit VoiceOver and restored full keyboard navigation to its original off state.
+observations:
+- The malformed trace exposed the urgent title "ArkTrace could not finish" with "trace_streamer exited with a failure status", a Diagnostics disclosure, and the separate "Trace unavailable" semantic state; Open and Reload stayed reachable throughout.
+- Reopening zlib.htrace restored the 24-track Timeline at 0 ns to 32.211 s and the Duration 32.211 s Inspector summary.
+- Announcements are resolved through the string-catalog symbols Xcode generated for this candidate; the same typed switch feeds VoiceOver for counted and error messages, so a missing key is a compile error rather than a silent fallback.
+- This environment cannot capture VoiceOver speech audio or transient caption pixels. The record therefore reports the exact submitted announcement inputs together with the independently observed VoiceOver-enabled focus, value, error, and recovery states; it does not claim an audio transcription.

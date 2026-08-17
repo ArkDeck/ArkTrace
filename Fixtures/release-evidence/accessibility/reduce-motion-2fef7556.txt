@@ -1,0 +1,14 @@
+ArkTrace accessibility walkthrough v1
+check: reduceMotion
+candidateTreeSHA256: 2fef75563fa6ef2db651c10be385760efbcccfb958ab35b621918743b085c10b
+reviewedAt: 2026-08-17T06:42:55Z
+reviewMethod: independent-agent-review
+steps:
+1. Enabled Reduce Motion through the real System Settings toggle (辅助功能 > 动态效果 > 减弱动态效果, 0 to 1) while the signed candidate displayed zlib.htrace, and confirmed NSWorkspace.accessibilityDisplayShouldReduceMotion reported true live.
+2. Invoked Reset Zoom, Zoom In and Zoom Out and read the Timeline accessibility value after each action.
+3. Restored Reduce Motion to its original off state through the same System Settings toggle and confirmed the live API reported false.
+observations:
+- Zoom In completed directly at the requested viewport 8.053 s to 24.158 s and Zoom Out returned directly to 0 ns to 32.211 s; each transition landed in a single step.
+- The Timeline retained 24 visible tracks and its full keyboard/action semantics before and after every viewport change.
+- No flashing, autoplay, motion-only status, or animation-dependent affordance was observed while Reduce Motion was active.
+- A direct defaults write to com.apple.universalaccess is rejected by macOS 26 for this process; the system toggle is the mechanism a user actually exercises and is what this walkthrough used.
