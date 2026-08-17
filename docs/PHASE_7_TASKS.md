@@ -905,7 +905,10 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 **交付**
 
 1. `scripts/test_phase7.sh`：继承 Phase 1（真 parser、锁定 fixture、零 skip）与 Phase 6（离线证据），
-   加 API baseline、CI planner 与许可证契约；**不**继承 Phase 3/4/5 的分发门（签名/公证/large fixture
+   加 API baseline、CI planner、许可证契约与**构建告警检查**（CI 把 `swift build` 的任何 `warning:`
+   当作错误，而在此之前**没有任何本地 gate 检查这一点** —— `swift build` / `swift test` 遇到告警照样
+   退出 0，于是一条告警可以通过全部本地 gate 之后才在 CI 上炸掉。本阶段就这么把一条
+   `#StrictMemorySafety` 告警推上了 main，修复见 `0dac07a` 之后的提交）；**不**继承 Phase 3/4/5 的分发门（签名/公证/large fixture
    与 Phase 7 无关，且验收要求「构建过 parser 的环境上全绿」）。fixture 缺失 fail 不 skip；输出记录
    tool/parser/fixture identity 与 viewport 性能，不含用户绝对路径；
 2. **上游对齐回归**：30 条断言在 gate 里逐条要求「跑过且通过」——**删掉一条测试会让 gate 失败**，

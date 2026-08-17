@@ -49,6 +49,29 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 # ---------------------------------------------------------------------------
+# 0. Build warnings, the way CI treats them.
+#
+# CI fails the SwiftPM lane when `swift build` prints a single `warning:`, and
+# no earlier phase gate checked that -- `swift build` / `swift test` exit 0 on
+# warnings, so a warning reaches CI having passed every local gate. That is
+# exactly how a `#StrictMemorySafety` warning shipped to `main` in this phase.
+# Own scratch path: Phase 1 runs `swift package clean` below.
+# ---------------------------------------------------------------------------
+warning_scratch="$phase7_temporary_directory/scratch"
+cd "$repository_root"
+if ! swift build --scratch-path "$warning_scratch" \
+    >"$phase7_temporary_directory/build.log" 2>&1
+then
+    tail -20 "$phase7_temporary_directory/build.log" >&2
+    fail "swift build failed"
+fi
+if grep -q 'warning:' "$phase7_temporary_directory/build.log"; then
+    grep 'warning:' "$phase7_temporary_directory/build.log" | head -20 >&2
+    fail "swift build emitted warnings; CI treats them as errors"
+fi
+pass "swift build is warning-free (CI parity)"
+
+# ---------------------------------------------------------------------------
 # 1. Inherited gates.
 # ---------------------------------------------------------------------------
 "$script_directory/test_phase1.sh" >/dev/null || fail "Phase 1 gate failed"

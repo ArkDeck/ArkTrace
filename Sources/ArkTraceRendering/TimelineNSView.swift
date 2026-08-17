@@ -868,9 +868,12 @@ public final class TimelineNSView: NSView {
                        max(TimelineGeometry.rulerHeight + 2, bounds.maxY - size.height - 4))
         let frame = CGRect(origin: origin, size: size)
         context.saveGState()
-        let path = CGPath(
-            roundedRect: frame, cornerWidth: 4, cornerHeight: 4, transform: nil
-        )
+        // `CGPath(roundedRect:…:transform:)` takes the transform as an
+        // `UnsafePointer`, which strict memory safety flags. The mutable-path
+        // builder takes it by value and needs no `unsafe` opt-out.
+        let rounded = CGMutablePath()
+        rounded.addRoundedRect(in: frame, cornerWidth: 4, cornerHeight: 4)
+        let path: CGPath = rounded
         context.addPath(path)
         context.setFillColor(NSColor.controlBackgroundColor.withAlphaComponent(0.97).cgColor)
         context.fillPath()
