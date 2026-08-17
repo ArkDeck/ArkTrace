@@ -1,7 +1,7 @@
 import ArkTraceCore
 import Foundation
 
-public enum TraceContextTimeSelection: Hashable, Codable, Sendable {
+package enum TraceContextTimeSelection: Hashable, Codable, Sendable {
     case timestamp(timestampNs: Int64, windowBeforeNs: Int64, windowAfterNs: Int64)
     case range(TraceTimeRange)
 
@@ -65,7 +65,7 @@ public enum TraceContextTimeSelection: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceContextRequest: Sendable {
+package struct TraceContextRequest: Sendable {
     public static let defaultMaximumEvents = 10_000
     public static let defaultMaximumRows = 10_000
     public static let defaultMaximumOutputBytes = 8 * 1_024 * 1_024
@@ -125,7 +125,7 @@ public struct TraceContextRequest: Sendable {
     }
 }
 
-public struct TraceContextSectionStatus: Hashable, Codable, Sendable {
+package struct TraceContextSectionStatus: Hashable, Codable, Sendable {
     public let returnedCount: Int
     public let matchedCount: Int?
     public let truncated: Bool
@@ -143,7 +143,7 @@ public struct TraceContextSectionStatus: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceContextTruncation: Hashable, Codable, Sendable {
+package struct TraceContextTruncation: Hashable, Codable, Sendable {
     public let processes: TraceContextSectionStatus
     public let threads: TraceContextSectionStatus
     public let cpuSlices: TraceContextSectionStatus
@@ -460,7 +460,7 @@ private enum TraceJSONByteCounter {
 
 /// Deterministic, bounded context. It intentionally contains no raw table rows,
 /// SQL, filesystem path, parser log, or dynamic dictionary section.
-public struct TraceContext: Hashable, Codable, Sendable {
+package struct TraceContext: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
     public let filters: TraceAgentQueryFilters
     public let processes: [TraceProcess]
@@ -547,7 +547,7 @@ public struct TraceContext: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceContextBuilder: Sendable {
+package struct TraceContextBuilder: Sendable {
     private enum CandidateKind: Int, Sendable {
         case cpuSlice
         case threadState

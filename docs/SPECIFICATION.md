@@ -23,9 +23,9 @@
 
 ### 2.1 支持平台
 
-- `macOS 14+`
+- `macOS 26+`
 - Apple silicon 为首要发布架构
-- Swift 6 toolchain
+- Swift 6.3 toolchain（Swift language mode 6.0）
 - 原生 macOS App 与 CLI
 
 Core/CLI 的可移植性可以保留，但 Windows、Linux GUI、iOS、visionOS 和 Web 不在 0.1 范围。

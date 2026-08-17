@@ -9,14 +9,37 @@ name: CI
 # check, not a sufficient one -- scripts/test_phase<N>.sh remain the release
 # authority and still have to be run on a machine that has the parser.
 #
-# What it does close is the hole that let a document-type regression reach
-# main: swift test was green while a shell gate that nothing ran was red.
+# Structure:
+#   plan       - cheap Linux job; maps the diff to lanes via scripts/ci_plan.sh
+#                (fail closed: unknown paths, planner/workflow changes, or an
+#                unresolvable base select every lane) and runs the planner's
+#                own unit tests so the gate cannot rot silently.
+#   swiftpm    - build (warnings are failures) + full test suite + skip audit.
+#   app        - unsigned Xcode app build + bundle document-type checks; only
+#                where the pinned parser bytes exist, and any parser found on
+#                the runner is re-verified against the manifest SHA first.
+#   contracts  - offline release gates (licenses, TraceStreamer lock, phase6
+#                evidence, CLI distribution contract, planner tests).
+#   ci-required- the single stable check for branch protection. It fails when
+#                any planned lane failed or was skipped, so skipped jobs can
+#                never drift past protection.
+#   benchmark-slow - nightly/manual only; needs the real parser and the medium
+#                fixture and fails closed when either is absent. Never a merge
+#                gate.
+#
+# Toolchain policy: runners are pinned to macos-26 with Xcode 26.6. If the
+# pinned toolchain is missing the job fails immediately instead of silently
+# building with whatever is newest.
 
 on:
   pull_request:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # Nightly slow lane only; the fast lanes also run, keeping main's cache
+    # warm for the first morning PR.
+    - cron: "17 3 * * *"
 
 permissions:
   contents: read
@@ -25,26 +48,125 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  build-test-gates:
-    name: Build, test and offline gates
-    runs-on: macos-latest
-    timeout-minutes: 45
+env:
+  PINNED_DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
 
+jobs:
+  plan:
+    name: Plan lanes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      lane_swiftpm: ${{ steps.plan.outputs.lane_swiftpm }}
+      lane_app: ${{ steps.plan.outputs.lane_app }}
+      lane_contracts: ${{ steps.plan.outputs.lane_contracts }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Planner self-test
+        run: sh scripts/test_ci_plan.sh
+
+      - name: Compute changed paths and lanes
+        id: plan
+        run: |
+          set -u
+          changed_list="$RUNNER_TEMP/changed.txt"
+          : > "$changed_list"
+          resolved=false
+          case "${{ github.event_name }}" in
+            pull_request)
+              base="${{ github.event.pull_request.base.sha }}"
+              if git merge-base --is-ancestor "$base" HEAD 2>/dev/null \
+                 || git rev-parse --verify --quiet "$base" >/dev/null; then
+                if merge_base=$(git merge-base "$base" HEAD 2>/dev/null); then
+                  git diff --name-only "$merge_base" HEAD > "$changed_list" \
+                    && resolved=true
+                fi
+              fi
+              ;;
+            push)
+              before="${{ github.event.before }}"
+              if [ -n "$before" ] \
+                 && [ "$before" != "0000000000000000000000000000000000000000" ] \
+                 && git rev-parse --verify --quiet "$before" >/dev/null; then
+                git diff --name-only "$before" HEAD > "$changed_list" \
+                  && resolved=true
+              fi
+              ;;
+            *)
+              # workflow_dispatch / schedule: no diff to reason about.
+              resolved=false
+              ;;
+          esac
+          if [ "$resolved" = true ]; then
+            plan=$(sh scripts/ci_plan.sh < "$changed_list")
+          else
+            # Fail closed: an empty input makes the planner select every lane.
+            echo 'base/merge-base unavailable: selecting every lane' >&2
+            plan=$(sh scripts/ci_plan.sh < /dev/null)
+          fi
+          printf '%s\n' "$plan" | tee -a "$GITHUB_OUTPUT"
+          {
+            echo '### Lane plan'
+            echo '```'
+            printf '%s\n' "$plan"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  swiftpm:
+    name: SwiftPM build, test and skip audit
+    needs: plan
+    if: needs.plan.outputs.lane_swiftpm == 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      SPM_SCRATCH: ${{ github.workspace }}/.build
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pin Xcode 26.6 (fail closed)
+        run: |
+          if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
+            echo "::error::pinned toolchain $PINNED_DEVELOPER_DIR is absent on this runner; refusing to substitute another Xcode"
+            ls -d /Applications/Xcode* 2>/dev/null || true
+            exit 1
+          fi
+          echo "DEVELOPER_DIR=$PINNED_DEVELOPER_DIR" >> "$GITHUB_ENV"
+
       - name: Record toolchain
+        id: toolchain
         run: |
           {
             echo '### Toolchain'
             echo '```'
-            swift --version 2>&1
-            xcodebuild -version 2>&1
+            DEVELOPER_DIR="$PINNED_DEVELOPER_DIR" swift --version 2>&1
+            DEVELOPER_DIR="$PINNED_DEVELOPER_DIR" xcodebuild -version 2>&1
             sw_vers 2>&1
-            echo "SDK: $(xcrun --show-sdk-version)"
+            echo "SDK: $(DEVELOPER_DIR=$PINNED_DEVELOPER_DIR xcrun --show-sdk-version)"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "xcode=26.6" >> "$GITHUB_OUTPUT"
+
+      # Restore ladder: exact inputs+commit, then same inputs, then the newest
+      # protected-main cache for this runner/arch/toolchain (only main ever
+      # saves, so every prefix hit is a main-produced cache). A cache failure
+      # must never fail the correctness gate: cold builds continue.
+      #
+      # The pinned TraceStreamer binary is deliberately NOT part of any cache
+      # path: it is gitignored, absent on hosted runners, and a restored copy
+      # would have to re-pass the manifest hash and provenance checks anyway.
+      - name: Restore SwiftPM build cache
+        id: spm-cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.SPM_SCRATCH }}
+          key: spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}-${{ github.sha }}
+          restore-keys: |
+            spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}-
+            spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
 
       # The package builds warning-free today and that is worth holding. If a
       # newer SDK introduces an unavoidable warning, relax this step rather
@@ -52,7 +174,7 @@ jobs:
       - name: Build (warnings are failures)
         run: |
           set -o pipefail
-          swift build 2>&1 | tee build.log
+          swift build --scratch-path "$SPM_SCRATCH" 2>&1 | tee build.log
           if grep -q 'warning:' build.log; then
             echo '::error::swift build emitted warnings'
             grep 'warning:' build.log
@@ -68,7 +190,7 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
-          swift test \
+          swift test --scratch-path "$SPM_SCRATCH" \
             --skip 'ArkTraceAppSupportTests\.AppDistributionTests/testBundled' \
             --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testCLITimeoutDrainsCacheRollbackBeforeReturning' \
             --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testRealFixtureRunsAllEightCommandsInHumanAndMachineModes' \
@@ -77,6 +199,11 @@ jobs:
       # Skips are expected here only because the pinned parser is absent. A
       # skip from any other target means a test started opting out for a
       # reason this environment does not explain, which must not pass quietly.
+      # Compiles the out-of-package consumer that pins the promised public
+      # API; a tightened access level that would break the app fails here.
+      - name: API baseline (out-of-package consumer)
+        run: sh scripts/test_api_baseline.sh
+
       - name: Reject unexpected skips
         run: |
           skipped=$(grep -c "' skipped (" test.log || true)
@@ -97,20 +224,92 @@ jobs:
             exit 1
           fi
 
+      - name: Save SwiftPM build cache (protected main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.SPM_SCRATCH }}
+          key: spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}-${{ github.sha }}
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swiftpm-logs
+          path: |
+            build.log
+            test.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  app:
+    name: App build and bundle checks
+    needs: plan
+    if: needs.plan.outputs.lane_app == 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pin Xcode 26.6 (fail closed)
+        run: |
+          if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
+            echo "::error::pinned toolchain $PINNED_DEVELOPER_DIR is absent on this runner; refusing to substitute another Xcode"
+            exit 1
+          fi
+          echo "DEVELOPER_DIR=$PINNED_DEVELOPER_DIR" >> "$GITHUB_ENV"
+
+      # Never trust a parser binary that appears on the runner (self-hosted
+      # leftovers, restored artifacts): re-verify its bytes against the pinned
+      # manifest before letting the copy phase embed it in the bundle. The
+      # resolver and distribution tests repeat this at runtime; this step just
+      # refuses to build a bundle from drifted bytes at all.
+      - name: Verify any present parser against the pinned manifest
+        id: parser
+        run: |
+          parser=ThirdParty/TraceStreamer/macx/trace_streamer
+          manifest=ThirdParty/TraceStreamer/macx/manifest.json
+          if [ ! -f "$parser" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          expected=$(jq -er '.binarySHA256' "$manifest")
+          actual=$(shasum -a 256 "$parser" | awk '{print $1}')
+          if [ "$actual" != "$expected" ]; then
+            echo '::error::TraceStreamer bytes on this runner do not match the pinned manifest'
+            exit 1
+          fi
+          echo "present=true" >> "$GITHUB_OUTPUT"
+
+      # Restore ladder mirrors the SwiftPM job. OBJROOT holds object files
+      # only; SYMROOT (the assembled bundle, including the copied parser) is
+      # never cached.
+      - name: Restore Xcode object cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/obj
+          key: xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**') }}-${{ github.sha }}
+          restore-keys: |
+            xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**') }}-
+            xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
+
       # The app target lives in the Xcode project, outside the SwiftPM graph,
       # so `swift build` never compiles it. It also has a "Copy Pinned
       # TraceStreamer Bytes" phase that dittos the parser into the bundle, so
-      # it cannot build at all without that binary. These two steps therefore
-      # run only where it is present -- a self-hosted runner, or a hosted one
-      # that restored it. On a stock hosted runner they are skipped, and
-      # test_phase3_batch1.sh remains the place this is enforced.
+      # it cannot build at all without that binary. These steps therefore run
+      # only where it is present -- a self-hosted runner, or a hosted one that
+      # restored it (and re-passed the manifest check above). On a stock
+      # hosted runner they are skipped, and test_phase3_batch1.sh remains the
+      # place this is enforced.
       #
       # AppDistributionTests still binds Info.plist to
       # ArkTraceAppDistribution.supportedTraceExtensions on every run, so the
       # source-level half of the document-type contract is always checked.
       - name: Build app target (unsigned)
         id: app_build
-        if: hashFiles('ThirdParty/TraceStreamer/macx/trace_streamer') != ''
+        if: steps.parser.outputs.present == 'true'
         run: |
           set -o pipefail
           xcodebuild \
@@ -128,7 +327,7 @@ jobs:
         run: scripts/verify_app_document_types.sh "$RUNNER_TEMP/sym/Debug/ArkTrace.app"
 
       - name: Note skipped app checks
-        if: steps.app_build.outcome == 'skipped'
+        if: steps.parser.outputs.present != 'true'
         run: |
           {
             echo '### App bundle checks'
@@ -138,21 +337,113 @@ jobs:
             echo 'has it.'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # These three need no parser binary and no external inputs.
-      - name: Offline release gates
-        run: |
-          scripts/verify_licenses.sh
-          scripts/verify_trace_streamer_lock.sh
-          scripts/test_phase6.sh
+      - name: Save Xcode object cache (protected main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.app_build.outcome == 'success'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/obj
+          key: xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-logs
-          path: |
-            build.log
-            test.log
-            xcodebuild.log
+          name: app-logs
+          path: xcodebuild.log
           if-no-files-found: ignore
           retention-days: 7
+
+  contracts:
+    name: Offline release gates
+    needs: plan
+    if: needs.plan.outputs.lane_contracts == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # These need no parser binary and no external inputs.
+      - name: Offline release gates
+        run: |
+          scripts/verify_licenses.sh
+          scripts/verify_trace_streamer_lock.sh
+          scripts/test_phase6.sh
+          sh scripts/test_ci_plan.sh
+
+  # The single required check for branch protection. It runs always, and it
+  # fails when a planned lane failed, was cancelled, or was skipped despite
+  # the plan asking for it -- so job-level skips can never drift past
+  # protection.
+  ci-required:
+    name: CI required
+    needs: [plan, swiftpm, app, contracts]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate lane results against the plan
+        run: |
+          set -u
+          failures=0
+          check() {
+            lane_name=$1
+            planned=$2
+            result=$3
+            if [ "$planned" = "true" ]; then
+              if [ "$result" != "success" ]; then
+                echo "::error::planned lane '$lane_name' finished '$result'"
+                failures=$((failures + 1))
+              fi
+            else
+              if [ "$result" != "skipped" ] && [ "$result" != "success" ]; then
+                echo "::error::unplanned lane '$lane_name' finished '$result'"
+                failures=$((failures + 1))
+              fi
+            fi
+          }
+          if [ "${{ needs.plan.result }}" != "success" ]; then
+            echo "::error::lane planner failed"
+            failures=$((failures + 1))
+          fi
+          check swiftpm "${{ needs.plan.outputs.lane_swiftpm }}" "${{ needs.swiftpm.result }}"
+          check app "${{ needs.plan.outputs.lane_app }}" "${{ needs.app.result }}"
+          check contracts "${{ needs.plan.outputs.lane_contracts }}" "${{ needs.contracts.result }}"
+          if [ "$failures" -gt 0 ]; then
+            exit 1
+          fi
+          echo 'All planned lanes succeeded.'
+
+  # Real-parser, real-fixture medium benchmark. Nightly or manual only, never
+  # a merge gate. It needs the locally built TraceStreamer and the 265 MB
+  # medium fixture; hosted runners have neither, and this job fails closed --
+  # a missing input is a red run, never a fake green.
+  benchmark-slow:
+    name: Medium benchmark (slow lane)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pin Xcode 26.6 (fail closed)
+        run: |
+          if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
+            echo "::error::pinned toolchain $PINNED_DEVELOPER_DIR is absent on this runner"
+            exit 1
+          fi
+          echo "DEVELOPER_DIR=$PINNED_DEVELOPER_DIR" >> "$GITHUB_ENV"
+
+      - name: Require the pinned parser (fail closed, no fake pass)
+        run: |
+          parser=ThirdParty/TraceStreamer/macx/trace_streamer
+          if [ ! -x "$parser" ]; then
+            echo '::error::benchmark needs the locally built pinned TraceStreamer; it is absent on this runner. This lane must run on a machine that has it (see docs/TRACE_STREAMER.md). Recording success without the real parser is forbidden.'
+            exit 1
+          fi
+          expected=$(jq -er '.binarySHA256' ThirdParty/TraceStreamer/macx/manifest.json)
+          actual=$(shasum -a 256 "$parser" | awk '{print $1}')
+          [ "$actual" = "$expected" ] || { echo '::error::parser bytes drifted from the manifest'; exit 1; }
+
+      - name: Run medium benchmark
+        run: scripts/benchmark.sh phase4 medium

@@ -48,11 +48,13 @@ fi
 #
 # The 2026-08-16 CLI re-pin therefore did not update them on its own — it left
 # this gate attesting a retired binary until the DAYU 200 scenario in
-# docs/PHASE_6_SCENARIO.md was re-run. That re-run has happened: both rounds
-# below were captured on the shipping distribution and reached the same verdict,
-# so tool and parser move together with the evidence here.
-expected_tool=a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa
-expected_parser=66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9
+# docs/PHASE_6_SCENARIO.md was re-run. The same discipline applied to the
+# 2026-08-17 macOS 26 / Swift 6.3 re-pin (source 61d0f2a): the scenario was
+# re-run end to end on that distribution (PHASE_6_SCENARIO.md §10.3), both
+# rounds reached the same verdict, and tool and parser below moved together
+# with the freshly captured evidence.
+expected_tool=cdfc91679211c7537db343693b035e1b7c9752beadd9b60dd9cfad90874829c1
+expected_parser=7c5ed515fc4d74517476fb901e3f7812914cb33b651324f49466d709d4641b35
 expected_revision=447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6
 [ "$(jq -r '.toolIdentity.arkTraceBuildRevision' "$evidence")" = "$expected_tool" ] \
     || fail "ArkTrace build revision drifted from the pinned distribution"

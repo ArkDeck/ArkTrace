@@ -217,7 +217,7 @@ final class TraceSummaryTests: XCTestCase {
         XCTAssertNil(result.counterSeriesCount)
         XCTAssertNil(result.eventCountBySource)
         XCTAssertEqual(result.dataQuality.status, .ok)
-        let encoded = try TraceSummaryJSONEncoder.encode(result)
+        let encoded = try SummaryCanonicalTestEncoder.encode(result)
         let object = try XCTUnwrap(
             JSONSerialization.jsonObject(with: encoded) as? [String: Any]
         )
@@ -233,8 +233,8 @@ final class TraceSummaryTests: XCTestCase {
         let repository = RepositoryStub(metadata: metadata(), facts: facts())
         let engine = TraceSummaryEngine(repository: repository)
         let request = try TraceSummaryRequest()
-        let first = try TraceSummaryJSONEncoder.encode(try await engine.summarize(request))
-        let second = try TraceSummaryJSONEncoder.encode(try await engine.summarize(request))
+        let first = try SummaryCanonicalTestEncoder.encode(try await engine.summarize(request))
+        let second = try SummaryCanonicalTestEncoder.encode(try await engine.summarize(request))
         XCTAssertEqual(first, second)
         XCTAssertNil(String(decoding: first, as: UTF8.self).range(of: "generated"))
     }
@@ -422,5 +422,17 @@ final class TraceSummaryTests: XCTestCase {
             XCTAssertEqual(error.code, .cancelled)
             XCTAssertEqual(error.stage, .analyzing)
         }
+    }
+}
+
+/// Encodes a summary with the same canonical configuration the production
+/// machine envelope uses ([.sortedKeys, .withoutEscapingSlashes]); the
+/// standalone Analysis encoder it replaces asserted bytes no production path
+/// ever emitted.
+private enum SummaryCanonicalTestEncoder {
+    static func encode(_ summary: TraceSummary) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        return try encoder.encode(summary)
     }
 }

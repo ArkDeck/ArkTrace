@@ -3,7 +3,7 @@ import ArkTraceCore
 /// The one Store-owned temporal predicate used by summary counts now and by
 /// Phase 3 detail event queries later. It preserves duration, instant, and
 /// open-ended semantics from AT-TIME-004/005/006.
-public enum TraceEventIntersection {
+package enum TraceEventIntersection {
     /// In-memory reference semantics for reductions and SQL golden tests.
     public static func intersects(
         eventStartNs: Int64,

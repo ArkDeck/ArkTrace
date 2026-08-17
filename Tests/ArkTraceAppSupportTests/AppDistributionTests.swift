@@ -8,9 +8,7 @@ import XCTest
 
 final class AppDistributionTests: XCTestCase {
     func testProductionResolverUsesOnlyBundleLocation() throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-app-bundle-\(UUID().uuidString)", isDirectory: true
-        )
+        let root = FileManager.default.temporaryDirectory.appending(path: "arktrace-app-bundle-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         // Asserted against the resolver's candidate list rather than by pointing
@@ -20,7 +18,7 @@ final class AppDistributionTests: XCTestCase {
         let candidates = resolver.candidateExecutableURLs().map(\.standardizedFileURL.path)
         XCTAssertEqual(
             candidates,
-            [root.appendingPathComponent("Contents/Helpers/trace_streamer")
+            [root.appending(path: "Contents/Helpers/trace_streamer")
                 .standardizedFileURL.path]
         )
         XCTAssertFalse(candidates.contains { $0.hasPrefix("/tmp/fake-parser") })
@@ -40,12 +38,12 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testCanonicalXcodeConfigurationBindsAppPlistAndSwiftProductIdentity() throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let configuration = try String(
-            contentsOf: root.appendingPathComponent("Config/ArkTraceProduct.xcconfig"),
+            contentsOf: root.appending(path: "Config/ArkTraceProduct.xcconfig"),
             encoding: .utf8
         )
         let values = Dictionary(uniqueKeysWithValues: configuration
@@ -65,7 +63,7 @@ final class AppDistributionTests: XCTestCase {
         )
 
         let data = try Data(
-            contentsOf: root.appendingPathComponent("Apps/ArkTraceApp/Info.plist")
+            contentsOf: root.appending(path: "Apps/ArkTraceApp/Info.plist")
         )
         let plist = try XCTUnwrap(
             PropertyListSerialization.propertyList(from: data, format: nil)
@@ -91,15 +89,13 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testEveryErrorTitleKeyHasAStringCatalogEntry() throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let catalog = try JSONSerialization.jsonObject(
             with: try Data(
-                contentsOf: root.appendingPathComponent(
-                    "Apps/ArkTraceApp/Localizable.xcstrings"
-                )
+                contentsOf: root.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
             )
         ) as? [String: Any]
         let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
@@ -136,15 +132,13 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testEveryAccessibilityAnnouncementHasAStringCatalogEntry() throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let catalog = try JSONSerialization.jsonObject(
             with: try Data(
-                contentsOf: root.appendingPathComponent(
-                    "Apps/ArkTraceApp/Localizable.xcstrings"
-                )
+                contentsOf: root.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
             )
         ) as? [String: Any]
         let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
@@ -204,15 +198,13 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testBundledResolverMapsEachMissingRequiredFileToUnavailable() throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let source = root.appendingPathComponent("ThirdParty/TraceStreamer/macx")
+        let source = root.appending(path: "ThirdParty/TraceStreamer/macx")
         for missingName in ["trace_streamer", "manifest.json"] {
-            let bundle = FileManager.default.temporaryDirectory.appendingPathComponent(
-                "ArkTrace-missing-\(UUID().uuidString).app", isDirectory: true
-            )
+            let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-missing-\(UUID().uuidString).app", directoryHint: .isDirectory)
             defer { try? FileManager.default.removeItem(at: bundle) }
             let retainedName = missingName == "trace_streamer"
                 ? "manifest.json" : "trace_streamer"
@@ -221,7 +213,7 @@ final class AppDistributionTests: XCTestCase {
                 at: retained.deletingLastPathComponent(), withIntermediateDirectories: true
             )
             try FileManager.default.copyItem(
-                at: source.appendingPathComponent(retainedName),
+                at: source.appending(path: retainedName),
                 to: retained
             )
 
@@ -236,18 +228,16 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testBundledResolverRejectsNonRegularAndInaccessibleRequiredFiles() throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let source = root.appendingPathComponent("ThirdParty/TraceStreamer/macx")
+        let source = root.appending(path: "ThirdParty/TraceStreamer/macx")
         enum InvalidShape { case directory, symlink, inaccessible }
 
         for targetName in ["trace_streamer", "manifest.json"] {
             for shape in [InvalidShape.directory, .symlink, .inaccessible] {
-                let bundle = FileManager.default.temporaryDirectory.appendingPathComponent(
-                    "ArkTrace-invalid-\(UUID().uuidString).app", isDirectory: true
-                )
+                let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-invalid-\(UUID().uuidString).app", directoryHint: .isDirectory)
                 defer { try? FileManager.default.removeItem(at: bundle) }
                 for name in ["trace_streamer", "manifest.json"] where name != targetName {
                     let retained = Self.bundleFile(named: name, in: bundle)
@@ -255,7 +245,7 @@ final class AppDistributionTests: XCTestCase {
                         at: retained.deletingLastPathComponent(), withIntermediateDirectories: true
                     )
                     try FileManager.default.copyItem(
-                        at: source.appendingPathComponent(name),
+                        at: source.appending(path: name),
                         to: retained
                     )
                 }
@@ -271,11 +261,11 @@ final class AppDistributionTests: XCTestCase {
                 case .symlink:
                     try FileManager.default.createSymbolicLink(
                         at: target,
-                        withDestinationURL: source.appendingPathComponent(targetName)
+                        withDestinationURL: source.appending(path: targetName)
                     )
                 case .inaccessible:
                     try FileManager.default.copyItem(
-                        at: source.appendingPathComponent(targetName), to: target
+                        at: source.appending(path: targetName), to: target
                     )
                     let mode: mode_t = targetName == "trace_streamer" ? 0o600 : 0o000
                     XCTAssertEqual(chmod(target.path, mode), 0)
@@ -294,38 +284,34 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testBundledResolverRejectsSymlinkedRequiredAncestorDirectories() throws {
-        let repository = URL(fileURLWithPath: #filePath)
+        let repository = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let source = repository.appendingPathComponent("ThirdParty/TraceStreamer/macx")
+        let source = repository.appending(path: "ThirdParty/TraceStreamer/macx")
         for ancestor in ["Helpers", "Resources/TraceStreamer"] {
             let root = FileManager.default.temporaryDirectory.resolvingSymlinksInPath()
-                .appendingPathComponent(
-                    "ArkTrace-ancestor-\(UUID().uuidString)", isDirectory: true
-                )
-            let bundle = root.appendingPathComponent("ArkTrace.app", isDirectory: true)
-            let external = root.appendingPathComponent("external", isDirectory: true)
+                .appending(path: "ArkTrace-ancestor-\(UUID().uuidString)", directoryHint: .isDirectory)
+            let bundle = root.appending(path: "ArkTrace.app", directoryHint: .isDirectory)
+            let external = root.appending(path: "external", directoryHint: .isDirectory)
             defer { try? FileManager.default.removeItem(at: root) }
             try FileManager.default.createDirectory(at: bundle, withIntermediateDirectories: true)
             try FileManager.default.createDirectory(at: external, withIntermediateDirectories: true)
 
             if ancestor == "Helpers" {
                 try FileManager.default.copyItem(
-                    at: source.appendingPathComponent("trace_streamer"),
-                    to: external.appendingPathComponent("trace_streamer")
+                    at: source.appending(path: "trace_streamer"),
+                    to: external.appending(path: "trace_streamer")
                 )
-                let resources = bundle.appendingPathComponent(
-                    "Contents/Resources/TraceStreamer", isDirectory: true
-                )
+                let resources = bundle.appending(path: "Contents/Resources/TraceStreamer", directoryHint: .isDirectory)
                 try FileManager.default.createDirectory(
                     at: resources, withIntermediateDirectories: true
                 )
                 try FileManager.default.copyItem(
-                    at: source.appendingPathComponent("manifest.json"),
-                    to: resources.appendingPathComponent("manifest.json")
+                    at: source.appending(path: "manifest.json"),
+                    to: resources.appending(path: "manifest.json")
                 )
-                let helpers = bundle.appendingPathComponent("Contents/Helpers")
+                let helpers = bundle.appending(path: "Contents/Helpers")
                 try FileManager.default.createDirectory(
                     at: helpers.deletingLastPathComponent(), withIntermediateDirectories: true
                 )
@@ -334,19 +320,17 @@ final class AppDistributionTests: XCTestCase {
                 )
             } else {
                 try FileManager.default.copyItem(
-                    at: source.appendingPathComponent("manifest.json"),
-                    to: external.appendingPathComponent("manifest.json")
+                    at: source.appending(path: "manifest.json"),
+                    to: external.appending(path: "manifest.json")
                 )
                 let executable = Self.bundleFile(named: "trace_streamer", in: bundle)
                 try FileManager.default.createDirectory(
                     at: executable.deletingLastPathComponent(), withIntermediateDirectories: true
                 )
                 try FileManager.default.copyItem(
-                    at: source.appendingPathComponent("trace_streamer"), to: executable
+                    at: source.appending(path: "trace_streamer"), to: executable
                 )
-                let traceStreamer = bundle.appendingPathComponent(
-                    "Contents/Resources/TraceStreamer"
-                )
+                let traceStreamer = bundle.appending(path: "Contents/Resources/TraceStreamer")
                 try FileManager.default.createDirectory(
                     at: traceStreamer.deletingLastPathComponent(), withIntermediateDirectories: true
                 )
@@ -364,14 +348,12 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testBundledParserIdentityAndManifestDriftFailClosed() async throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let sourceDirectory = root.appendingPathComponent("ThirdParty/TraceStreamer/macx")
-        let bundle = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "ArkTrace-\(UUID().uuidString).app", isDirectory: true
-        )
+        let sourceDirectory = root.appending(path: "ThirdParty/TraceStreamer/macx")
+        let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-\(UUID().uuidString).app", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: bundle) }
         let executableURL = Self.bundleFile(named: "trace_streamer", in: bundle)
         let manifestURL = Self.bundleFile(named: "manifest.json", in: bundle)
@@ -382,11 +364,11 @@ final class AppDistributionTests: XCTestCase {
             at: manifestURL.deletingLastPathComponent(), withIntermediateDirectories: true
         )
         try FileManager.default.copyItem(
-            at: sourceDirectory.appendingPathComponent("trace_streamer"),
+            at: sourceDirectory.appending(path: "trace_streamer"),
             to: executableURL
         )
         try FileManager.default.copyItem(
-            at: sourceDirectory.appendingPathComponent("manifest.json"),
+            at: sourceDirectory.appending(path: "manifest.json"),
             to: manifestURL
         )
 
@@ -412,14 +394,12 @@ final class AppDistributionTests: XCTestCase {
     }
 
     func testBundledResolverAcceptsManifestBoundDistributionSignedParserBytes() async throws {
-        let root = URL(fileURLWithPath: #filePath)
+        let root = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let sourceDirectory = root.appendingPathComponent("ThirdParty/TraceStreamer/macx")
-        let bundle = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "ArkTrace-signed-helper-\(UUID().uuidString).app", isDirectory: true
-        )
+        let sourceDirectory = root.appending(path: "ThirdParty/TraceStreamer/macx")
+        let bundle = FileManager.default.temporaryDirectory.appending(path: "ArkTrace-signed-helper-\(UUID().uuidString).app", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: bundle) }
         let executable = Self.bundleFile(named: "trace_streamer", in: bundle)
         let manifest = Self.bundleFile(named: "manifest.json", in: bundle)
@@ -430,15 +410,15 @@ final class AppDistributionTests: XCTestCase {
             at: manifest.deletingLastPathComponent(), withIntermediateDirectories: true
         )
         try FileManager.default.copyItem(
-            at: sourceDirectory.appendingPathComponent("trace_streamer"), to: executable
+            at: sourceDirectory.appending(path: "trace_streamer"), to: executable
         )
         try FileManager.default.copyItem(
-            at: sourceDirectory.appendingPathComponent("manifest.json"), to: manifest
+            at: sourceDirectory.appending(path: "manifest.json"), to: manifest
         )
         let unsignedSHA = try Self.sha256(at: executable)
 
         let signer = Process()
-        signer.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        signer.executableURL = URL(filePath: "/usr/bin/codesign")
         signer.arguments = [
             "--force", "--sign", "-", "--identifier",
             "dev.arktrace.trace-streamer.distribution-test", executable.path,
@@ -467,7 +447,7 @@ final class AppDistributionTests: XCTestCase {
 
     private static func sha256(at url: URL) throws -> String {
         let data = try Data(contentsOf: url, options: [.mappedIfSafe])
-        return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        return SHA256.hash(data: data).lowercaseHexString()
     }
 
     private static func bundleFile(named name: String, in bundle: URL) -> URL {

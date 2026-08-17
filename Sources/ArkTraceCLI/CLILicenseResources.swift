@@ -2,24 +2,24 @@ import ArkTraceCore
 import CryptoKit
 import Foundation
 
-public struct CLIVerifiedLicenseFile: Hashable, Sendable {
-    public let owner: String
-    public let licenseExpression: String
-    public let resourcePath: String
-    public let sha256: String
-    public let byteCount: Int
-    public let data: Data
+package struct CLIVerifiedLicenseFile: Hashable, Sendable {
+    package let owner: String
+    package let licenseExpression: String
+    package let resourcePath: String
+    package let sha256: String
+    package let byteCount: Int
+    package let data: Data
 }
 
-public enum CLILicenseResources {
-    public static let componentCount = 14
-    public static let buildToolCount = 2
-    public static let licenseFileCount = 18
+package enum CLILicenseResources {
+    package static let componentCount = 14
+    package static let buildToolCount = 2
+    package static let licenseFileCount = 18
     static let noticeByteCount = 1_517
     static let noticeSHA256 =
         "9e03235bfb104fdeb7a91dfc8321294be0603ecd514729edcf2eace41f5a1a72"
 
-    public static func noticeData() throws -> Data {
+    package static func noticeData() throws -> Data {
         let url = try resourceURL(named: "THIRD_PARTY_NOTICES", extension: "md")
         return try noticeData(resourceURL: url)
     }
@@ -35,7 +35,7 @@ public enum CLILicenseResources {
         return data
     }
 
-    public static func productLicenseData() throws -> Data {
+    package static func productLicenseData() throws -> Data {
         let data = try boundedResource(
             named: "LICENSE", extension: nil, maximumBytes: 32 * 1_024
         )
@@ -47,7 +47,7 @@ public enum CLILicenseResources {
         return data
     }
 
-    public static func inventoryData() throws -> Data {
+    package static func inventoryData() throws -> Data {
         let data = try boundedResource(
             named: "license-inventory", extension: "json", maximumBytes: 128 * 1_024
         )
@@ -61,7 +61,7 @@ public enum CLILicenseResources {
     /// command never treats the inventory as a caller-authored list of paths:
     /// entries are flat LICENSES names and must remain inside the reviewed
     /// executable-relative resource root.
-    public static func verifiedLicenseFiles(
+    package static func verifiedLicenseFiles(
         inventoryData suppliedInventory: Data? = nil,
         licenseDirectoryURL suppliedDirectory: URL? = nil
     ) throws -> [CLIVerifiedLicenseFile] {
@@ -69,9 +69,7 @@ public enum CLILicenseResources {
         guard inventory.count == 6_939,
             sha256(inventory) == "b16397dbbe593a067a0906a496627c8f300b2a4a860eab489181549b35c81e1e",
             let root = suppliedDirectory
-                ?? (try? CLIResourceLocator.productionRoot().appendingPathComponent(
-                    "LICENSES", isDirectory: true
-                ))
+                ?? (try? CLIResourceLocator.productionRoot().appending(path: "LICENSES", directoryHint: .isDirectory))
         else { throw unavailable() }
         return try validateInventory(inventory, licenseDirectoryURL: root)
     }
@@ -172,7 +170,7 @@ public enum CLILicenseResources {
 
         return try records.map { record in
             let fileName = String(record.path.dropFirst("LICENSES/".count))
-            let candidate = root.appendingPathComponent(fileName, isDirectory: false)
+            let candidate = root.appending(path: fileName, directoryHint: .notDirectory)
                 .standardizedFileURL
             guard candidate.deletingLastPathComponent().resolvingSymlinksInPath()
                     .standardizedFileURL.path == root.path,
@@ -246,7 +244,7 @@ public enum CLILicenseResources {
             throw unavailable()
         }
         return try CLIResourceLocator.productionRoot()
-            .appendingPathComponent(fileName, isDirectory: false)
+            .appending(path: fileName, directoryHint: .notDirectory)
     }
 
     private static func boundedResource(at url: URL, maximumBytes: Int) throws -> Data {
@@ -262,7 +260,7 @@ public enum CLILicenseResources {
     }
 
     private static func sha256(_ data: Data) -> String {
-        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        SHA256.hash(data: data).lowercaseHexString()
     }
 
     private static func unavailable() -> ArkTraceError {

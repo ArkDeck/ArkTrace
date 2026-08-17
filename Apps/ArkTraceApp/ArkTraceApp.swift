@@ -26,13 +26,7 @@ struct ArkTraceNativeApp: App {
         }
 
         Settings {
-            TabView {
-                TraceCacheSettingsView(controller: controller)
-                    .tabItem { Label("Cache", systemImage: "internaldrive") }
-                TraceLicensesView()
-                    .tabItem { Label("Licenses", systemImage: "doc.text") }
-            }
-            .frame(width: 640, height: 480)
+            SettingsRootView(controller: controller)
         }
     }
 
@@ -52,11 +46,16 @@ struct ArkTraceNativeApp: App {
     }
 }
 
+/// Layout skeleton only. Every `TraceDocumentController` property is read
+/// inside the narrowest child view that needs it, so Observation invalidates
+/// exactly that child: viewport/snapshot updates never rebuild the sidebar or
+/// Settings, search keystrokes never rebuild timeline chrome, cache inventory
+/// never rebuilds the viewer, and error/accessibility state stays inside its
+/// own overlay. `ObservationBoundaryTests` pins these reads at source level.
 private struct TraceViewerRootView: View {
-    @Bindable var controller: TraceDocumentController
+    var controller: TraceDocumentController
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusRegion: TraceViewerFocusRegion?
-    @State private var searchText = ""
     @State private var showInspector = true
     @State private var showDiagnostics = false
     @State private var inspectorVisibilityGeneration: UInt64 = 0
@@ -66,43 +65,63 @@ private struct TraceViewerRootView: View {
 
     var body: some View {
         NavigationSplitView {
-            sidebar
+            TraceViewerSidebar(controller: controller)
+                .focusSection()
+                .focused($focusRegion, equals: .sidebar)
                 .navigationSplitViewColumnWidth(min: 210, ideal: 270, max: 360)
         } detail: {
             GeometryReader { geometry in
                 ZStack(alignment: .topTrailing) {
                     HSplitView {
-                        timelinePane
-                            .frame(minWidth: 420)
-                            .overlay(alignment: .topLeading) {
-                                if !showInspector {
-                                    InspectorFocusButton(
-                                        title: String(
-                                            localized: "Show Inspector",
-                                            comment: "Button that restores the Inspector pane."
-                                        ),
-                                        showsTitle: true,
-                                        focusRequestID: inspectorDisclosureFocusRequestID,
-                                        onFocusRequestConsumed: { requestID in
-                                            guard inspectorDisclosureFocusRequestID == requestID else { return }
-                                            inspectorDisclosureFocusRequestID = nil
-                                        },
-                                        action: { expandInspector(restoringInspectorFocus: true) }
-                                    )
-                                    .focused($focusRegion, equals: .inspectorDisclosure)
-                                    .frame(
-                                        minWidth: 124,
-                                        minHeight: 32,
-                                        idealHeight: 32,
-                                        maxHeight: 32
-                                    )
-                                    .fixedSize(horizontal: true, vertical: false)
-                                    .padding(8)
-                                }
+                        TraceTimelinePane(
+                            controller: controller,
+                            focusRegion: $focusRegion,
+                            openPanel: presentOpenPanel
+                        )
+                        .frame(minWidth: 420)
+                        .overlay(alignment: .topLeading) {
+                            if !showInspector {
+                                InspectorFocusButton(
+                                    title: String(
+                                        localized: "Show Inspector",
+                                        comment: "Button that restores the Inspector pane."
+                                    ),
+                                    showsTitle: true,
+                                    focusRequestID: inspectorDisclosureFocusRequestID,
+                                    onFocusRequestConsumed: { requestID in
+                                        guard inspectorDisclosureFocusRequestID == requestID else { return }
+                                        inspectorDisclosureFocusRequestID = nil
+                                    },
+                                    action: { expandInspector(restoringInspectorFocus: true) }
+                                )
+                                .focused($focusRegion, equals: .inspectorDisclosure)
+                                .frame(
+                                    minWidth: 124,
+                                    minHeight: 32,
+                                    idealHeight: 32,
+                                    maxHeight: 32
+                                )
+                                .fixedSize(horizontal: true, vertical: false)
+                                .padding(8)
                             }
+                        }
                         if showInspector {
-                            inspector
-                                .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
+                            TraceInspectorPane(
+                                controller: controller,
+                                focusRegion: $focusRegion,
+                                hideFocusRequestID: inspectorHideFocusRequestID,
+                                onHideFocusRequestConsumed: { requestID in
+                                    guard inspectorHideFocusRequestID == requestID else { return }
+                                    inspectorHideFocusRequestID = nil
+                                },
+                                collapse: {
+                                    collapseInspector(
+                                        restoringDisclosureFocus: true,
+                                        initiatedByLayout: false
+                                    )
+                                }
+                            )
+                            .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
                         }
                     }
                 }
@@ -152,18 +171,97 @@ private struct TraceViewerRootView: View {
             return true
         }
         .overlay(alignment: .bottomLeading) {
-            if let error = controller.errorPresentation {
-                errorBanner(error)
-                    .padding(12)
-            }
+            TraceErrorBannerOverlay(
+                controller: controller,
+                focusRegion: $focusRegion,
+                showDiagnostics: $showDiagnostics,
+                openPanel: presentOpenPanel
+            )
         }
-        .onChange(of: controller.accessibilityAnnouncement) { _, announcement in
-            guard let announcement else { return }
-            postAccessibilityAnnouncement(announcement)
+        .background(TraceAnnouncementBridge(controller: controller))
+        .onAppear { controller.markFirstWindowAppeared() }
+    }
+
+    /// Each toolbar entry is its own view so a button's enabling read (for
+    /// example `snapshot != nil`) invalidates that entry alone, keeping
+    /// per-frame snapshot updates away from the rest of the toolbar.
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .primaryAction) {
+            Button(action: presentOpenPanel) {
+                Label("Open", systemImage: "folder")
+            }
+            .primaryToolbarTarget()
+            TraceReloadButton(controller: controller)
+            TraceSearchField(controller: controller, focusRegion: $focusRegion)
+            TraceZoomSelectionButton(controller: controller)
+            TraceZoomInButton(controller: controller)
+            TraceZoomOutButton(controller: controller)
+            TraceResetZoomButton(controller: controller)
         }
     }
 
-    private var sidebar: some View {
+    private func collapseInspector(
+        restoringDisclosureFocus: Bool,
+        initiatedByLayout: Bool
+    ) {
+        inspectorVisibilityGeneration &+= 1
+        let generation = inspectorVisibilityGeneration
+        if !initiatedByLayout { inspectorWasAutoCollapsed = false }
+        inspectorHideFocusRequestID = nil
+        showInspector = false
+        guard restoringDisclosureFocus else { return }
+        Task { @MainActor in
+            await Task.yield()
+            guard inspectorVisibilityGeneration == generation,
+                  !showInspector,
+                  focusRegion == .inspector || focusRegion == nil
+            else { return }
+            focusRegion = TraceViewerFocusPolicy.afterInspectorVisibilityChange(
+                current: .inspector,
+                inspectorVisible: false
+            )
+            inspectorDisclosureFocusRequestID = generation
+        }
+    }
+
+    private func expandInspector(restoringInspectorFocus: Bool) {
+        inspectorVisibilityGeneration &+= 1
+        let generation = inspectorVisibilityGeneration
+        inspectorDisclosureFocusRequestID = nil
+        inspectorHideFocusRequestID = nil
+        inspectorWasAutoCollapsed = false
+        showInspector = true
+        guard restoringInspectorFocus else { return }
+        Task { @MainActor in
+            await Task.yield()
+            guard inspectorVisibilityGeneration == generation, showInspector else { return }
+            focusRegion = .inspector
+            inspectorHideFocusRequestID = generation
+        }
+    }
+
+    @MainActor
+    private func presentOpenPanel() {
+        let panel = NSOpenPanel()
+        panel.title = "Open Trace"
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        // SPEC 2.3: the extension is only a picker/Finder hint; the parser and
+        // schema validation decide whether a file is actually supported.
+        panel.allowedContentTypes = ArkTraceAppDistribution.supportedTraceContentTypes
+        if panel.runModal() == .OK, let url = panel.url { controller.open(url) }
+    }
+}
+
+/// Observation boundary: recent documents, the search echo/results, and the
+/// track tree. Never reads `snapshot`, `phase`, or selection state, so
+/// viewport churn cannot rebuild the sidebar.
+private struct TraceViewerSidebar: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
         List {
             if !controller.recentDocuments.isEmpty {
                 Section("Recent") {
@@ -179,7 +277,7 @@ private struct TraceViewerRootView: View {
                     }
                 }
             }
-            if !searchText.isEmpty || controller.isSearching {
+            if !controller.searchFieldText.isEmpty || controller.isSearching {
                 Section("Search Results") {
                     if controller.isSearching {
                         ProgressView().controlSize(.small)
@@ -249,12 +347,17 @@ private struct TraceViewerRootView: View {
             }
         }
         .listStyle(.sidebar)
-        .focusSection()
-        .focused($focusRegion, equals: .sidebar)
     }
+}
 
-    @ViewBuilder
-    private var timelinePane: some View {
+/// Observation boundary: phase, snapshot, selection and the timeline focus
+/// request. Never reads search state or the cache inventory.
+private struct TraceTimelinePane: View {
+    var controller: TraceDocumentController
+    var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
+    let openPanel: @MainActor () -> Void
+
+    var body: some View {
         switch controller.phase {
         case .idle:
             ContentUnavailableView {
@@ -262,7 +365,7 @@ private struct TraceViewerRootView: View {
             } description: {
                 Text("Open, drop, or choose a recent .htrace/.ftrace/.systrace file.")
             } actions: {
-                Button("Open Trace…", action: presentOpenPanel)
+                Button("Open Trace…", action: openPanel)
                     .buttonStyle(.borderedProminent)
                     .arktraceAccessibleTarget()
             }
@@ -282,7 +385,7 @@ private struct TraceViewerRootView: View {
                             selectedEventKey: controller.selectedEvent?.key,
                             focusRequestID: controller.timelineFocusRequestID,
                             interactionBounds: controller.timelineBounds,
-                            accessibilityLabelText: String(localized: "a11y.timeline.label"),
+                            accessibilityLabelText: String(localized: .a11YTimelineLabel),
                             onSelectEvent: controller.selectEvent,
                             onHoverEvent: controller.hoverEvent,
                             onSelectRange: controller.selectRange,
@@ -290,7 +393,7 @@ private struct TraceViewerRootView: View {
                             onZoomSelection: controller.zoomToSelection,
                             onResetViewport: controller.resetViewport
                         )
-                        .focused($focusRegion, equals: .timeline)
+                        .focused(focusRegion, equals: .timeline)
                         .frame(
                             minWidth: max(420, snapshot.viewport.widthPoints),
                             minHeight: max(
@@ -298,6 +401,7 @@ private struct TraceViewerRootView: View {
                                 (snapshot.tracks.last.map { $0.y + $0.height } ?? 0) + 22
                             )
                         )
+                        .onAppear { controller.markTimelineDisplayed() }
                     }
                 } else {
                     Color.clear
@@ -317,8 +421,18 @@ private struct TraceViewerRootView: View {
             }
         }
     }
+}
 
-    private var inspector: some View {
+/// Observation boundary: selection, hover, metadata and cache-hit facts shown
+/// in the Inspector column.
+private struct TraceInspectorPane: View {
+    var controller: TraceDocumentController
+    var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
+    let hideFocusRequestID: UInt64?
+    let onHideFocusRequestConsumed: @MainActor (UInt64) -> Void
+    let collapse: @MainActor () -> Void
+
+    var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
@@ -330,20 +444,12 @@ private struct TraceViewerRootView: View {
                             comment: "Button that collapses the Inspector pane."
                         ),
                         showsTitle: false,
-                        focusRequestID: inspectorHideFocusRequestID,
-                        onFocusRequestConsumed: { requestID in
-                            guard inspectorHideFocusRequestID == requestID else { return }
-                            inspectorHideFocusRequestID = nil
-                        },
-                        action: {
-                            collapseInspector(
-                                restoringDisclosureFocus: true,
-                                initiatedByLayout: false
-                            )
-                        }
+                        focusRequestID: hideFocusRequestID,
+                        onFocusRequestConsumed: onHideFocusRequestConsumed,
+                        action: collapse
                     )
                     .frame(width: 32, height: 32)
-                    .focused($focusRegion, equals: .inspector)
+                    .focused(focusRegion, equals: .inspector)
                 }
                 Divider()
                 if let event = controller.selectedEvent {
@@ -373,150 +479,79 @@ private struct TraceViewerRootView: View {
         }
         .focusSection()
     }
+}
 
-    @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
-        ToolbarItemGroup(placement: .primaryAction) {
-            Button(action: presentOpenPanel) {
-                Label("Open", systemImage: "folder")
-            }
-            .primaryToolbarTarget()
-            Button { controller.reload() } label: {
-                Label("Reload", systemImage: "arrow.clockwise")
-            }
-            .disabled(controller.sourceURL == nil)
-            .primaryToolbarTarget()
-            TextField("Search PID, TID, process, thread, or slice", text: $searchText)
-                .textFieldStyle(.roundedBorder)
-                .frame(minWidth: 220, idealWidth: 300)
+/// Observation boundary: error presentation only. Error state changes
+/// re-evaluate this overlay and nothing else.
+private struct TraceErrorBannerOverlay: View {
+    var controller: TraceDocumentController
+    var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
+    @Binding var showDiagnostics: Bool
+    let openPanel: @MainActor () -> Void
+
+    var body: some View {
+        if let error = controller.errorPresentation {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(error.titleKey.localizedResource).font(.headline)
+                Text(error.reason).font(.callout)
+                DisclosureGroup("Diagnostics", isExpanded: $showDiagnostics) {
+                    Text(error.diagnostic)
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                }
                 .arktraceAccessibleTarget()
-                .onSubmit { controller.search(searchText) }
-                .onChange(of: searchText) { _, value in
-                    if value.isEmpty { controller.search("") }
+                HStack {
+                    switch error.recoveryAction {
+                    case .retry:
+                        Button("Retry") { controller.reload() }
+                            .arktraceAccessibleTarget()
+                    case .chooseAnotherFile:
+                        Button("Choose Another File…", action: openPanel)
+                            .arktraceAccessibleTarget()
+                    case .openCacheSettings:
+                        SettingsLink { Text("Cache Settings…") }
+                            .arktraceAccessibleTarget()
+                    case .dismiss:
+                        EmptyView()
+                    }
+                    Spacer()
                 }
-                .focused($focusRegion, equals: .search)
-            Button { controller.zoomToSelection() } label: {
-                Label("Zoom Selection", systemImage: "viewfinder")
             }
-            .disabled(controller.selectedRange == nil)
-            .primaryToolbarTarget()
-            Button { controller.zoomIn() } label: {
-                Label("Zoom In", systemImage: "plus.magnifyingglass")
-            }
-            .disabled(controller.snapshot == nil)
-            .primaryToolbarTarget()
-            Button { controller.zoomOut() } label: {
-                Label("Zoom Out", systemImage: "minus.magnifyingglass")
-            }
-            .disabled(controller.snapshot == nil)
-            .primaryToolbarTarget()
-            Button { controller.resetViewport() } label: {
-                Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass")
-            }
-            .primaryToolbarTarget()
+            .padding(12)
+            .frame(maxWidth: 460, alignment: .leading)
+            .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 10))
+            .shadow(radius: 8, y: 3)
+            .focused(focusRegion, equals: .errorRecovery)
+            .padding(12)
         }
     }
+}
 
-    private func errorBanner(_ error: TraceAppErrorPresentation) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(LocalizedStringKey(error.titleKey.rawValue)).font(.headline)
-            Text(error.reason).font(.callout)
-            DisclosureGroup("Diagnostics", isExpanded: $showDiagnostics) {
-                Text(error.diagnostic)
-                    .font(.caption.monospaced())
-                    .textSelection(.enabled)
+/// Observation boundary: VoiceOver announcements. Reads only
+/// `accessibilityAnnouncement`, so announcement churn re-evaluates this
+/// zero-size bridge and nothing else.
+private struct TraceAnnouncementBridge: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .onChange(of: controller.accessibilityAnnouncement) { _, announcement in
+                guard let announcement else { return }
+                postAccessibilityAnnouncement(announcement)
             }
-            .arktraceAccessibleTarget()
-            HStack {
-                switch error.recoveryAction {
-                case .retry:
-                    Button("Retry") { controller.reload() }
-                        .arktraceAccessibleTarget()
-                case .chooseAnotherFile:
-                    Button("Choose Another File…", action: presentOpenPanel)
-                        .arktraceAccessibleTarget()
-                case .openCacheSettings:
-                    SettingsLink { Text("Cache Settings…") }
-                        .arktraceAccessibleTarget()
-                case .dismiss:
-                    EmptyView()
-                }
-                Spacer()
-            }
-        }
-        .padding(12)
-        .frame(maxWidth: 460, alignment: .leading)
-        .background(.thickMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .shadow(radius: 8, y: 3)
-        .focused($focusRegion, equals: .errorRecovery)
     }
 
-    private func collapseInspector(
-        restoringDisclosureFocus: Bool,
-        initiatedByLayout: Bool
-    ) {
-        inspectorVisibilityGeneration &+= 1
-        let generation = inspectorVisibilityGeneration
-        if !initiatedByLayout { inspectorWasAutoCollapsed = false }
-        inspectorHideFocusRequestID = nil
-        showInspector = false
-        guard restoringDisclosureFocus else { return }
-        Task { @MainActor in
-            await Task.yield()
-            guard inspectorVisibilityGeneration == generation,
-                  !showInspector,
-                  focusRegion == .inspector || focusRegion == nil
-            else { return }
-            focusRegion = TraceViewerFocusPolicy.afterInspectorVisibilityChange(
-                current: .inspector,
-                inspectorVisible: false
-            )
-            inspectorDisclosureFocusRequestID = generation
-        }
-    }
-
-    private func expandInspector(restoringInspectorFocus: Bool) {
-        inspectorVisibilityGeneration &+= 1
-        let generation = inspectorVisibilityGeneration
-        inspectorDisclosureFocusRequestID = nil
-        inspectorHideFocusRequestID = nil
-        inspectorWasAutoCollapsed = false
-        showInspector = true
-        guard restoringInspectorFocus else { return }
-        Task { @MainActor in
-            await Task.yield()
-            guard inspectorVisibilityGeneration == generation, showInspector else { return }
-            focusRegion = .inspector
-            inspectorHideFocusRequestID = generation
-        }
-    }
-
-    @MainActor
-    private func presentOpenPanel() {
-        let panel = NSOpenPanel()
-        panel.title = "Open Trace"
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
-        // SPEC 2.3: the extension is only a picker/Finder hint; the parser and
-        // schema validation decide whether a file is actually supported.
-        panel.allowedContentTypes = ArkTraceAppDistribution.supportedTraceContentTypes
-        if panel.runModal() == .OK, let url = panel.url { controller.open(url) }
-    }
-
-    /// AppSupport hands over a key and, for the counted messages, one numeric
-    /// argument. Resolving here keeps the string catalog in the app bundle
-    /// instead of giving a library target a resource bundle.
+    /// AppSupport hands over a typed message and, for the counted messages,
+    /// one numeric argument. Resolving here keeps the string catalog in the
+    /// app bundle instead of giving a library target a resource bundle. The
+    /// typed switch over generated catalog symbols replaces the former
+    /// stringly-keyed lookup and C-varargs formatting pair, so a missing key
+    /// or a drifted argument signature is now a compile error.
     private func localizedAnnouncement(
         _ announcement: TraceAccessibilityAnnouncement
     ) -> String {
-        let format = NSLocalizedString(
-            announcement.kind.localizationKey,
-            value: announcement.message,
-            comment: "VoiceOver announcement"
-        )
-        guard let count = announcement.kind.countArgument else { return format }
-        return String(format: format, count)
+        String(localized: announcement.kind.localizedResource)
     }
 
     private func postAccessibilityAnnouncement(
@@ -533,6 +568,90 @@ private struct TraceViewerRootView: View {
                 ),
             ]
         )
+    }
+}
+
+// MARK: - Toolbar entries
+
+/// Observation boundary: `sourceURL` (reload enabling) only.
+private struct TraceReloadButton: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        Button { controller.reload() } label: {
+            Label("Reload", systemImage: "arrow.clockwise")
+        }
+        .disabled(controller.sourceURL == nil)
+        .primaryToolbarTarget()
+    }
+}
+
+/// Observation boundary: the live search text. Keystrokes re-evaluate this
+/// field and the sidebar's results section, nothing else.
+private struct TraceSearchField: View {
+    @Bindable var controller: TraceDocumentController
+    var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
+
+    var body: some View {
+        TextField("Search PID, TID, process, thread, or slice", text: $controller.searchFieldText)
+            .textFieldStyle(.roundedBorder)
+            .frame(minWidth: 220, idealWidth: 300)
+            .arktraceAccessibleTarget()
+            .onSubmit { controller.search(controller.searchFieldText) }
+            .onChange(of: controller.searchFieldText) { _, value in
+                if value.isEmpty { controller.search("") }
+            }
+            .focused(focusRegion, equals: .search)
+    }
+}
+
+/// Observation boundary: `selectedRange` (zoom-to-selection enabling) only.
+private struct TraceZoomSelectionButton: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        Button { controller.zoomToSelection() } label: {
+            Label("Zoom Selection", systemImage: "viewfinder")
+        }
+        .disabled(controller.selectedRange == nil)
+        .primaryToolbarTarget()
+    }
+}
+
+/// Observation boundary: `snapshot` presence (zoom enabling) only.
+private struct TraceZoomInButton: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        Button { controller.zoomIn() } label: {
+            Label("Zoom In", systemImage: "plus.magnifyingglass")
+        }
+        .disabled(controller.snapshot == nil)
+        .primaryToolbarTarget()
+    }
+}
+
+/// Observation boundary: `snapshot` presence (zoom enabling) only.
+private struct TraceZoomOutButton: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        Button { controller.zoomOut() } label: {
+            Label("Zoom Out", systemImage: "minus.magnifyingglass")
+        }
+        .disabled(controller.snapshot == nil)
+        .primaryToolbarTarget()
+    }
+}
+
+private struct TraceResetZoomButton: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        Button { controller.resetViewport() } label: {
+            Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass")
+        }
+        .primaryToolbarTarget()
     }
 }
 
@@ -703,8 +822,30 @@ private struct RangeInspectorView: View {
     }
 }
 
+// MARK: - Settings
+
+/// Settings scene content. Constructed only when the Settings window opens;
+/// each tab defers its own data (cache inventory, license text) to a `.task`
+/// that runs when that content actually appears, so neither ever blocks the
+/// first document window (AT-PERF-002 discipline).
+private struct SettingsRootView: View {
+    var controller: TraceDocumentController
+
+    var body: some View {
+        TabView {
+            TraceCacheSettingsView(controller: controller)
+                .tabItem { Label("Cache", systemImage: "internaldrive") }
+            TraceLicensesView()
+                .tabItem { Label("Licenses", systemImage: "doc.text") }
+        }
+        .frame(width: 640, height: 480)
+    }
+}
+
+/// Observation boundary: cache inventory only. Inventory refreshes re-evaluate
+/// this Settings tab and never touch the main viewer window.
 private struct TraceCacheSettingsView: View {
-    @Bindable var controller: TraceDocumentController
+    var controller: TraceDocumentController
 
     var body: some View {
         Form {
@@ -744,12 +885,11 @@ private struct TraceCacheSettingsView: View {
 }
 
 private struct TraceLicensesView: View {
-    private let productLicense = Self.loadTextResource(
-        named: "LICENSE", extension: nil, maximumBytes: 32 * 1_024
-    )
-    private let notice = Self.loadTextResource(
-        named: "THIRD_PARTY_NOTICES", extension: "md", maximumBytes: 128 * 1_024
-    )
+    /// Loaded lazily off the main actor when the tab first appears. Reading
+    /// the bundled license text used to happen in property initializers,
+    /// which ran as soon as the Settings `TabView` materialized its tabs.
+    @State private var productLicense: String?
+    @State private var notice: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -760,20 +900,20 @@ private struct TraceLicensesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("ArkTrace — MIT License").font(.headline)
-                    Text(productLicense)
+                    Text(productLicense ?? "Loading license…")
                     Divider()
                     Text("Third-Party Notices").font(.headline)
-                    Text(notice)
+                    Text(notice ?? "Loading notices…")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
                 .font(.body.monospaced())
             }
-            .accessibilityLabel("ArkTrace and third-party license notices")
+            .accessibilityLabel(Text(.arkTraceAndThirdPartyLicenseNotices))
             HStack {
                 Button("Show License Files in Finder") {
                     guard let url = Bundle.main.resourceURL?
-                        .appendingPathComponent("Licenses", isDirectory: true)
+                        .appending(path: "Licenses", directoryHint: .isDirectory)
                     else { return }
                     NSWorkspace.shared.activateFileViewerSelecting([url])
                 }
@@ -784,13 +924,24 @@ private struct TraceLicensesView: View {
             }
         }
         .padding()
+        .task {
+            guard productLicense == nil else { return }
+            async let license = Self.loadTextResource(
+                named: "LICENSE", extension: nil, maximumBytes: 32 * 1_024
+            )
+            async let notices = Self.loadTextResource(
+                named: "THIRD_PARTY_NOTICES", extension: "md", maximumBytes: 128 * 1_024
+            )
+            productLicense = await license
+            notice = await notices
+        }
     }
 
-    private static func loadTextResource(
+    private nonisolated static func loadTextResource(
         named name: String,
         extension fileExtension: String?,
         maximumBytes: Int
-    ) -> String {
+    ) async -> String {
         guard let url = Bundle.main.url(forResource: name, withExtension: fileExtension),
             let data = try? ArkTraceBoundedRegularFile.read(
                 at: url, maximumByteCount: maximumBytes
@@ -800,6 +951,45 @@ private struct TraceLicensesView: View {
             return "License resources are unavailable in this build."
         }
         return text
+    }
+}
+
+/// Typed bridge from AppSupport's closed message enums to the symbols Xcode
+/// generates from `Localizable.xcstrings` (STRING_CATALOG_GENERATE_SYMBOLS).
+/// The `%lld` keys generate `Int`-typed argument functions, so no narrowing
+/// conversion is involved; adding a message case without a catalog entry now
+/// fails to compile here instead of falling back silently at runtime.
+private extension TraceAccessibilityMessage {
+    var localizedResource: LocalizedStringResource {
+        switch self {
+        case .openingTrace: .a11YAnnounceOpeningTrace
+        case .openingCancelled: .a11YAnnounceOpeningCancelled
+        case .traceClosed: .a11YAnnounceTraceClosed
+        case .traceCloseFailed: .a11YAnnounceTraceCloseFailed
+        case .traceOpenFailed: .a11YAnnounceTraceOpenFailed
+        case .operationFailed: .a11YAnnounceOperationFailed
+        case .rangeAnalysisComplete: .a11YAnnounceRangeAnalysisComplete
+        case .traceLoadedWithoutTimedEvents: .a11YAnnounceTraceLoadedWithoutTimedEvents
+        case .traceLoadedWithVisibleTracks(let count):
+            .a11YAnnounceTraceLoadedWithVisibleTracks(count)
+        case .searchFoundResults(let count):
+            .a11YAnnounceSearchFoundResults(count)
+        case .searchFoundAtLeastResults(let count):
+            .a11YAnnounceSearchFoundAtLeastResults(count)
+        case .error(let title): title.localizedResource
+        }
+    }
+}
+
+private extension TraceAppErrorTitle {
+    var localizedResource: LocalizedStringResource {
+        switch self {
+        case .traceCouldNotBeOpened: .errorTitleTraceCouldNotBeOpened
+        case .bundledParserUnavailable: .errorTitleBundledParserUnavailable
+        case .cacheNeedsAttention: .errorTitleCacheNeedsAttention
+        case .openingCancelled: .errorTitleOpeningCancelled
+        case .couldNotFinish: .errorTitleCouldNotFinish
+        }
     }
 }
 

@@ -1,10 +1,25 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.3
 import PackageDescription
+
+// Swift 6.0 language mode on the Swift 6.3 toolchain. Strict memory safety is
+// a per-target opt-in (SE-0458): enabled on every first-party target that owns
+// POSIX/SQLite/process boundaries so unsafe pointer use is visible at the call
+// site.
+//
+// Deprecated-declaration promotion deliberately lives in two other places
+// instead of a `.treatWarning` here: the app target sets
+// SWIFT_WARNINGS_AS_ERRORS_GROUPS = DeprecatedDeclaration, and CI fails the
+// SwiftPM build on any warning at all. Xcode builds package dependencies with
+// `-suppress-warnings`, which hard-conflicts with `-Werror <group>` from a
+// package manifest and breaks the app build outright.
+let firstPartySwiftSettings: [SwiftSetting] = [
+    .strictMemorySafety()
+]
 
 let package = Package(
     name: "ArkTrace",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v26)
     ],
     products: [
         .library(name: "ArkTraceCore", targets: ["ArkTraceCore"]),
@@ -18,22 +33,42 @@ let package = Package(
         .executable(name: "arktrace", targets: ["arktrace"]),
     ],
     targets: [
-        .target(name: "ArkTraceCore"),
-        .target(name: "ArkTraceParser", dependencies: ["ArkTraceCore"]),
-        .target(name: "ArkTraceStore", dependencies: ["ArkTraceCore"]),
-        .target(name: "ArkTraceRuntime", dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"]),
-        .target(name: "ArkTraceAnalysis", dependencies: ["ArkTraceCore"]),
+        .target(name: "ArkTraceCore", swiftSettings: firstPartySwiftSettings),
+        .target(
+            name: "ArkTraceParser",
+            dependencies: ["ArkTraceCore"],
+            swiftSettings: firstPartySwiftSettings
+        ),
+        .target(
+            name: "ArkTraceStore",
+            dependencies: ["ArkTraceCore"],
+            swiftSettings: firstPartySwiftSettings
+        ),
+        .target(
+            name: "ArkTraceRuntime",
+            dependencies: ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore"],
+            swiftSettings: firstPartySwiftSettings
+        ),
+        .target(
+            name: "ArkTraceAnalysis",
+            dependencies: ["ArkTraceCore"],
+            swiftSettings: firstPartySwiftSettings
+        ),
         .target(
             name: "ArkTraceRendering",
-            dependencies: ["ArkTraceCore"]
+            dependencies: ["ArkTraceCore"],
+            swiftSettings: firstPartySwiftSettings
         ),
         .target(
             name: "ArkTraceAppSupport",
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering",
-            ]
+            ],
+            swiftSettings: firstPartySwiftSettings
         ),
+        // C target: Swift settings (strict memory safety, warning groups) do
+        // not apply. The shim stays deliberately tiny and reviewed by hand.
         .target(
             name: "ArkTraceSignalShim",
             publicHeadersPath: "include"
@@ -43,7 +78,8 @@ let package = Package(
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceSignalShim",
-            ]
+            ],
+            swiftSettings: firstPartySwiftSettings
         ),
         // Test-only resource target. Keeping it outside the production CLI
         // dependency graph prevents SwiftPM's generated Bundle.module accessor
@@ -58,7 +94,11 @@ let package = Package(
                 .copy("../../ThirdParty/TraceStreamer/LICENSES"),
             ]
         ),
-        .executableTarget(name: "arktrace", dependencies: ["ArkTraceCLI"]),
+        .executableTarget(
+            name: "arktrace",
+            dependencies: ["ArkTraceCLI"],
+            swiftSettings: firstPartySwiftSettings
+        ),
         .testTarget(name: "ArkTraceCoreTests", dependencies: ["ArkTraceCore"]),
         .testTarget(name: "ArkTraceParserTests", dependencies: ["ArkTraceCore", "ArkTraceParser"]),
         .testTarget(
@@ -92,5 +132,6 @@ let package = Package(
                 "ArkTraceAnalysis", "ArkTraceRendering",
             ]
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v6]
 )

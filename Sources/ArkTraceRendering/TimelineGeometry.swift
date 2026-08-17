@@ -1,7 +1,7 @@
 import AppKit
 import ArkTraceCore
 
-public enum TimelineGeometry {
+package enum TimelineGeometry {
     public static let rulerHeight: CGFloat = 22
     public static let horizontalLabelInset: CGFloat = 3
     public static let minimumLabelWidth: CGFloat = 36

@@ -44,20 +44,20 @@ final class ProductionCommandExecutorTests: XCTestCase {
     }
 
     func testCLITimeoutDrainsCacheRollbackBeforeReturning() async throws {
-        let repositoryRoot = URL(fileURLWithPath: #filePath)
+        let repositoryRoot = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let parserURL = repositoryRoot
-            .appendingPathComponent("ThirdParty/TraceStreamer/macx/trace_streamer")
+            .appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
         let fixtureURL = repositoryRoot
-            .appendingPathComponent("Fixtures/traces/zlib.htrace")
+            .appending(path: "Fixtures/traces/zlib.htrace")
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cli-timeout-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-cli-timeout-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let paths = CLIStoragePaths(
-            stagingDirectory: root.appendingPathComponent("staging", isDirectory: true),
-            cacheDirectory: root.appendingPathComponent("cache", isDirectory: true)
+            stagingDirectory: root.appending(path: "staging", directoryHint: .isDirectory),
+            cacheDirectory: root.appending(path: "cache", directoryHint: .isDirectory)
         )
         let barrier = BlockingCachePromotionBarrier()
         let deadlineClock = ManualCLIDeadlineClock()
@@ -190,14 +190,14 @@ final class ProductionCommandExecutorTests: XCTestCase {
     }
 
     func testRealFixtureRunsAllEightCommandsInHumanAndMachineModes() async throws {
-        let repositoryRoot = URL(fileURLWithPath: #filePath)
+        let repositoryRoot = URL(filePath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let parserURL = repositoryRoot
-            .appendingPathComponent("ThirdParty/TraceStreamer/macx/trace_streamer")
+            .appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
         let fixtureURL = repositoryRoot
-            .appendingPathComponent("Fixtures/traces/zlib.htrace")
+            .appending(path: "Fixtures/traces/zlib.htrace")
         XCTAssertTrue(FileManager.default.isExecutableFile(atPath: parserURL.path))
         XCTAssertTrue(FileManager.default.isReadableFile(atPath: fixtureURL.path))
         let bundledFixtureURL = try CLIResourceLocator.$testingRootPath.withValue(
@@ -208,11 +208,11 @@ final class ProductionCommandExecutorTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: bundledFixtureURL), try Data(contentsOf: fixtureURL))
 
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-real-cli-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-real-cli-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
         let paths = CLIStoragePaths(
-            stagingDirectory: root.appendingPathComponent("staging"),
-            cacheDirectory: root.appendingPathComponent("cache")
+            stagingDirectory: root.appending(path: "staging"),
+            cacheDirectory: root.appending(path: "cache")
         )
         let executor = CLIProductionCommandExecutor(
             sessionOpener: { source, options, storage in
@@ -766,7 +766,7 @@ private final class CommandEnvironment: @unchecked Sendable {
 
     init() throws {
         root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cli-tests-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-cli-tests-\(UUID().uuidString)", directoryHint: .isDirectory)
         registry = try SessionRegistry(snapshot: commandSnapshot(root: root))
     }
 
@@ -781,12 +781,12 @@ private final class CommandEnvironment: @unchecked Sendable {
             toolRevisionProvider: { String(repeating: "a", count: 64) },
             storagePathsProvider: { [root] in
                 CLIStoragePaths(
-                    stagingDirectory: root.appendingPathComponent("staging"),
-                    cacheDirectory: root.appendingPathComponent("cache")
+                    stagingDirectory: root.appending(path: "staging"),
+                    cacheDirectory: root.appending(path: "cache")
                 )
             },
             selfTestFixtureProvider: selfTestFixtureProvider ?? { [root] in
-                root.appendingPathComponent("fixture.htrace")
+                root.appending(path: "fixture.htrace")
             }
         )
     }
@@ -796,10 +796,10 @@ private final class CommandEnvironment: @unchecked Sendable {
             at: root,
             withIntermediateDirectories: true
         )
-        let target = root.appendingPathComponent("cache-target", isDirectory: true)
+        let target = root.appending(path: "cache-target", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: target, withIntermediateDirectories: false)
         try FileManager.default.createSymbolicLink(
-            at: root.appendingPathComponent("cache", isDirectory: true),
+            at: root.appending(path: "cache", directoryHint: .isDirectory),
             withDestinationURL: target
         )
     }
@@ -1125,8 +1125,8 @@ private func commandSnapshot(root: URL) throws -> CLIMachineTraceSnapshot {
         upstreamDatabaseByteCount: 4_096
     )
     let parsed = ParsedTrace(
-        databaseURL: root.appendingPathComponent("trace.sqlite"),
-        metadataSidecarURL: root.appendingPathComponent("metadata.json"),
+        databaseURL: root.appending(path: "trace.sqlite"),
+        metadataSidecarURL: root.appending(path: "metadata.json"),
         parser: commandParserIdentity,
         sourceSHA256: sourceSHA,
         sourceByteCount: 1_024,

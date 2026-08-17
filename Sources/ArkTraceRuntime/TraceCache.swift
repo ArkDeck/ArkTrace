@@ -9,25 +9,22 @@ private func arkTraceFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 
 /// Storage policy shared by App and CLI. Phase 2 deliberately exposes no
 /// cache mutation API; eviction and purge arrive with the Phase 3 App flow.
-public enum TraceSessionStoragePolicy: Sendable {
+package enum TraceSessionStoragePolicy: Sendable {
     case contentAddressed(cacheDirectory: URL)
     case ephemeral
 }
 
-public enum TraceCacheDefaults {
+package enum TraceCacheDefaults {
     public static var rootDirectory: URL {
         let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent(
-            "com.arktrace.ArkTrace/traces",
-            isDirectory: true
-        )
+        return base.appending(path: "com.arktrace.ArkTrace/traces", directoryHint: .isDirectory)
     }
 }
 
 /// Stable AT-CACHE-001 identity. `parserKey` is a length-prefixed SHA-256
 /// encoding, so parser identity fields cannot create path or delimiter
 /// collisions.
-public struct TraceCacheKey: Hashable, Codable, Sendable {
+package struct TraceCacheKey: Hashable, Codable, Sendable {
     public let traceSHA256: String
     public let parserBinarySHA256: String
     public let upstreamRevision: String
@@ -67,10 +64,7 @@ public struct TraceCacheKey: Hashable, Codable, Sendable {
     }
 
     private static func isSHA256(_ value: String) -> Bool {
-        value.utf8.count == 64 && value.utf8.allSatisfy {
-            ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
-                || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
-        }
+        ArkTraceIdentityGrammar.isSHA256(value)
     }
 
     private static func parserKey(
@@ -88,16 +82,16 @@ public struct TraceCacheKey: Hashable, Codable, Sendable {
         ] {
             let bytes = Data(field.utf8)
             var length = UInt64(bytes.count).bigEndian
-            withUnsafeBytes(of: &length) { preimage.append(contentsOf: $0) }
+            unsafe withUnsafeBytes(of: &length) { unsafe preimage.append(contentsOf: $0) }
             preimage.append(bytes)
         }
-        return SHA256.hash(data: preimage).map { String(format: "%02x", $0) }.joined()
+        return SHA256.hash(data: preimage).lowercaseHexString()
     }
 }
 
 /// Path-free metadata stored beside a cached Ready database. Its common
 /// fields intentionally remain decodable as `TraceDatabaseMetadataSidecar`.
-public struct TraceCacheMetadata: Hashable, Codable, Sendable {
+package struct TraceCacheMetadata: Hashable, Codable, Sendable {
     public let formatVersion: Int
     public let cacheKey: TraceCacheKey
     public let parser: TraceParserIdentity
@@ -193,6 +187,13 @@ struct TraceCacheTestHooks: Sendable {
     }
 }
 
+/// `@unchecked Sendable`: guards FD-backed resources (an flock lease and an
+/// owned directory handle) plus a live cleanup `Task` behind one lock — not
+/// pure value state, so `Mutex<State>` does not apply. Invariants: every read
+/// or write of `directoryToRemove`/`cleanupAttempt`/`lease` happens under
+/// `lock`; cleanup work is started under the lock but runs detached so `deinit`
+/// can fire it without suspending; the cleanup contract itself is covered by
+/// `ParserIntegrationTests` (ephemeral close/cancellation cleanup tests).
 final class TraceSessionResourceOwner: @unchecked Sendable {
     private struct CleanupAttempt {
         let id: UUID
@@ -300,14 +301,14 @@ private final class TraceCacheFileLock: @unchecked Sendable {
     ) async throws -> TraceCacheFileLock {
         let task = Task.detached {
             try Task.checkCancellation()
-            let descriptor = url.path.withCString {
-                Darwin.open($0, O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0o600)
+            let descriptor = unsafe url.path.withCString {
+                unsafe Darwin.open($0, O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0o600)
             }
             guard descriptor >= 0 else { throw CacheIO.lockOpen }
             var shouldClose = true
             defer { if shouldClose { _ = Darwin.close(descriptor) } }
             var info = stat()
-            guard Darwin.fstat(descriptor, &info) == 0,
+            guard unsafe Darwin.fstat(descriptor, &info) == 0,
                 (info.st_mode & S_IFMT) == S_IFREG,
                 Darwin.fchmod(descriptor, 0o600) == 0
             else {
@@ -329,7 +330,7 @@ private final class TraceCacheFileLock: @unchecked Sendable {
                 // Suspend between polls: a blocking usleep would pin one
                 // cooperative-pool thread per waiter and can livelock the
                 // pool once same-key waiters reach the core count.
-                try await Task.sleep(nanoseconds: 10_000_000)
+                try await Task.sleep(for: .milliseconds(10))
             }
         }
         return try await withTaskCancellationHandler {
@@ -342,8 +343,8 @@ private final class TraceCacheFileLock: @unchecked Sendable {
     /// Non-blocking acquisition used only by cache maintenance. A live owner
     /// or key holder is skipped rather than delayed or inferred stale.
     static func tryAcquireExisting(at url: URL) throws -> TraceCacheFileLock? {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else {
             if errno == ENOENT { return nil }
@@ -352,7 +353,7 @@ private final class TraceCacheFileLock: @unchecked Sendable {
         var shouldClose = true
         defer { if shouldClose { _ = Darwin.close(descriptor) } }
         var info = stat()
-        guard Darwin.fstat(descriptor, &info) == 0,
+        guard unsafe Darwin.fstat(descriptor, &info) == 0,
             (info.st_mode & S_IFMT) == S_IFREG,
             info.st_size <= 4_096
         else { throw CacheIO.lockOpen }
@@ -365,6 +366,16 @@ private final class TraceCacheFileLock: @unchecked Sendable {
     }
 }
 
+/// `@unchecked Sendable`: this is a live-flock resource wrapper, not value
+/// state. Invariants the annotation relies on:
+/// - `descriptor` is written only in `deinit` (single-threaded by ARC).
+/// - `mode` is mutated only by `upgradeToExclusive`/`downgradeToShared`, and a
+///   lease has exactly one logical owner at a time — `TraceContentAddressedCache`
+///   holds it through open, then hands it to `TraceSessionResourceOwner`, which
+///   only ever nils it out. Concurrent upgrade/downgrade of one lease is a
+///   programming error, not a supported interleaving; the cross-process lease
+///   protocol itself is exercised by `ParserIntegrationTests`
+///   (`testCacheLeaseCovers…`, `testCrossProcessSingleFlight…`).
 final class TraceCacheEntryLease: @unchecked Sendable {
     enum Mode: Sendable {
         case shared
@@ -394,14 +405,14 @@ final class TraceCacheEntryLease: @unchecked Sendable {
     ) async throws -> TraceCacheEntryLease {
         let task = Task.detached {
             try Task.checkCancellation()
-            let descriptor = url.path.withCString {
-                Darwin.open($0, O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0o600)
+            let descriptor = unsafe url.path.withCString {
+                unsafe Darwin.open($0, O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0o600)
             }
             guard descriptor >= 0 else { throw CacheIO.leaseOpen }
             var shouldClose = true
             defer { if shouldClose { _ = Darwin.close(descriptor) } }
             var info = stat()
-            guard Darwin.fstat(descriptor, &info) == 0,
+            guard unsafe Darwin.fstat(descriptor, &info) == 0,
                 (info.st_mode & S_IFMT) == S_IFREG,
                 Darwin.fchmod(descriptor, 0o600) == 0
             else {
@@ -425,8 +436,8 @@ final class TraceCacheEntryLease: @unchecked Sendable {
     static func tryAcquireExclusiveExisting(
         at url: URL
     ) throws -> TraceCacheEntryLease? {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDWR | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else {
             if errno == ENOENT { return nil }
@@ -435,7 +446,7 @@ final class TraceCacheEntryLease: @unchecked Sendable {
         var shouldClose = true
         defer { if shouldClose { _ = Darwin.close(descriptor) } }
         var info = stat()
-        guard Darwin.fstat(descriptor, &info) == 0,
+        guard unsafe Darwin.fstat(descriptor, &info) == 0,
             (info.st_mode & S_IFMT) == S_IFREG
         else { throw CacheIO.leaseOpen }
         guard arkTraceFlock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
@@ -499,7 +510,7 @@ final class TraceCacheEntryLease: @unchecked Sendable {
                 contentionHook?()
             }
             // Suspend between polls (see TraceCacheFileLock.acquire).
-            try await Task.sleep(nanoseconds: 10_000_000)
+            try await Task.sleep(for: .milliseconds(10))
         }
     }
 }
@@ -531,7 +542,7 @@ private struct TraceSourceSnapshot: Sendable {
     let byteCount: Int64
 }
 
-struct TraceOwnedDirectory: @unchecked Sendable {
+struct TraceOwnedDirectory: Sendable {
     let url: URL
     let rootURL: URL
     let recoveryRootURL: URL
@@ -566,12 +577,12 @@ private final class TraceOwnedDirectoryHandle: @unchecked Sendable {
         expectedDevice: UInt64?,
         expectedInode: UInt64?
     ) throws {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else { throw CacheIO.directory }
         var info = stat()
-        guard Darwin.fstat(descriptor, &info) == 0,
+        guard unsafe Darwin.fstat(descriptor, &info) == 0,
             (info.st_mode & S_IFMT) == S_IFDIR,
             expectedDevice.map({ $0 == UInt64(info.st_dev) }) ?? true,
             expectedInode.map({ $0 == UInt64(info.st_ino) }) ?? true
@@ -590,7 +601,7 @@ private final class TraceOwnedDirectoryHandle: @unchecked Sendable {
 
     var isUnlinked: Bool {
         var info = stat()
-        return Darwin.fstat(descriptor, &info) == 0 && info.st_nlink == 0
+        return unsafe Darwin.fstat(descriptor, &info) == 0 && info.st_nlink == 0
     }
 }
 
@@ -620,23 +631,23 @@ private enum OwnedEntryQuarantineOutcome: Equatable {
     case notOwned
 }
 
-private struct CachePromotionFailure: @unchecked Sendable {
+private struct CachePromotionFailure: Sendable {
     let unexpectedEntry: OwnedCacheEntry?
     let relocatedBuild: TraceOwnedDirectory?
     let ownershipUnresolved: Bool
 }
 
-private enum CachePromotionAttempt: @unchecked Sendable {
+private enum CachePromotionAttempt: Sendable {
     case promoted(OwnedCacheEntry)
     case rejected(CachePromotionFailure)
 }
 
-private struct CachePromotionWorkerResult: @unchecked Sendable {
+private struct CachePromotionWorkerResult: Sendable {
     let attempt: CachePromotionAttempt
     let durable: Bool
 }
 
-private struct OwnedDirectoryCleanupFailure: Error, @unchecked Sendable {
+private struct OwnedDirectoryCleanupFailure: Error, Sendable {
     let residual: TraceOwnedDirectory
 }
 
@@ -700,7 +711,7 @@ enum TraceContentAddressedCache {
                 let cacheRoot = try secureDirectory(at: cacheDirectory)
                 for name in [".staging", ".corrupt", ".locks", ".leases"] {
                     _ = try secureDirectory(
-                        at: cacheRoot.appendingPathComponent(name, isDirectory: true)
+                        at: cacheRoot.appending(path: name, directoryHint: .isDirectory)
                     )
                 }
                 return cacheRoot
@@ -867,7 +878,7 @@ enum TraceContentAddressedCache {
                 recoveryRoot: roots
             )
             buildDirectory = build
-            let buildDatabase = build.url.appendingPathComponent(databaseName)
+            let buildDatabase = build.url.appending(path: databaseName)
             let parseProgress: TraceProgressHandler = { stage in
                 switch stage {
                 case .parsing, .validating, .indexing:
@@ -920,9 +931,9 @@ enum TraceContentAddressedCache {
             try await detached {
                 _ = try writeMetadata(
                     cacheMetadata,
-                    to: build.url.appendingPathComponent(metadataName)
+                    to: build.url.appending(path: metadataName)
                 )
-                guard Darwin.unlink(parsed.metadataSidecarURL.path) == 0 else {
+                guard unsafe Darwin.unlink(parsed.metadataSidecarURL.path) == 0 else {
                     throw CacheIO.metadata
                 }
                 try synchronizeFile(at: buildDatabase)
@@ -1158,18 +1169,18 @@ enum TraceContentAddressedCache {
         init(root: URL, key: TraceCacheKey) throws {
             self.root = root
             self.key = key
-            let traceRoot = root.appendingPathComponent(key.traceSHA256, isDirectory: true)
+            let traceRoot = root.appending(path: key.traceSHA256, directoryHint: .isDirectory)
             _ = try secureDirectory(at: traceRoot)
-            entryURL = traceRoot.appendingPathComponent(key.parserKey, isDirectory: true)
-            databaseURL = entryURL.appendingPathComponent(databaseName)
-            metadataURL = entryURL.appendingPathComponent(metadataName)
-            stagingRoot = root.appendingPathComponent(".staging", isDirectory: true)
-            corruptRoot = root.appendingPathComponent(".corrupt", isDirectory: true)
+            entryURL = traceRoot.appending(path: key.parserKey, directoryHint: .isDirectory)
+            databaseURL = entryURL.appending(path: databaseName)
+            metadataURL = entryURL.appending(path: metadataName)
+            stagingRoot = root.appending(path: ".staging", directoryHint: .isDirectory)
+            corruptRoot = root.appending(path: ".corrupt", directoryHint: .isDirectory)
             let lockIdentifier = Self.lockIdentifier(key)
-            lockURL = root.appendingPathComponent(".locks", isDirectory: true)
-                .appendingPathComponent("\(lockIdentifier).lock")
-            leaseURL = root.appendingPathComponent(".leases", isDirectory: true)
-                .appendingPathComponent("\(lockIdentifier).lease")
+            lockURL = root.appending(path: ".locks", directoryHint: .isDirectory)
+                .appending(path: "\(lockIdentifier).lock")
+            leaseURL = root.appending(path: ".leases", directoryHint: .isDirectory)
+                .appending(path: "\(lockIdentifier).lease")
         }
 
         private init(
@@ -1199,8 +1210,8 @@ enum TraceContentAddressedCache {
                 root: root,
                 key: key,
                 entryURL: entryURL,
-                databaseURL: entryURL.appendingPathComponent(databaseName),
-                metadataURL: entryURL.appendingPathComponent(metadataName),
+                databaseURL: entryURL.appending(path: databaseName),
+                metadataURL: entryURL.appending(path: metadataName),
                 stagingRoot: stagingRoot,
                 corruptRoot: corruptRoot,
                 lockURL: lockURL,
@@ -1210,7 +1221,7 @@ enum TraceContentAddressedCache {
 
         private static func lockIdentifier(_ key: TraceCacheKey) -> String {
             SHA256.hash(data: Data("\(key.traceSHA256):\(key.parserKey)".utf8))
-                .map { String(format: "%02x", $0) }.joined()
+                .lowercaseHexString()
         }
     }
 
@@ -1337,33 +1348,6 @@ enum TraceContentAddressedCache {
         )?.data
     }
 
-    /// Delegates to the one reviewed bounded reader in Core, which retries
-    /// EINTR and proves the file did not change between its two `fstat` calls.
-    /// Cancellation is rethrown rather than folded into `nil`: a cancelled
-    /// read says nothing about entry health, and the callers below turn `nil`
-    /// into `CacheIO.metadata`, which quarantines the entry.
-    private static func readBoundedRegularFileSnapshot(
-        at url: URL,
-        maximumByteCount: Int
-    ) throws -> (data: Data, fileIdentity: TraceDatabaseFileIdentity)? {
-        do {
-            let contents = try ArkTraceBoundedRegularFile.readContents(
-                at: url,
-                maximumByteCount: maximumByteCount
-            )
-            return (
-                contents.data,
-                TraceDatabaseFileIdentity(
-                    device: contents.device,
-                    inode: contents.inode
-                )
-            )
-        } catch is CancellationError {
-            throw CancellationError()
-        } catch {
-            return nil
-        }
-    }
 
     private static func writeMetadata(
         _ metadata: TraceCacheMetadata,
@@ -1374,11 +1358,9 @@ enum TraceContentAddressedCache {
         encoder.outputFormatting = [.sortedKeys]
         let data = try encoder.encode(metadata)
         guard data.count <= maximumMetadataByteCount else { throw CacheIO.metadata }
-        let temporary = url.deletingLastPathComponent().appendingPathComponent(
-            ".metadata-\(UUID().uuidString).tmp"
-        )
-        let descriptor = temporary.path.withCString {
-            Darwin.open(
+        let temporary = url.deletingLastPathComponent().appending(path: ".metadata-\(UUID().uuidString).tmp")
+        let descriptor = unsafe temporary.path.withCString {
+            unsafe Darwin.open(
                 $0,
                 O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
                 0o600
@@ -1388,14 +1370,14 @@ enum TraceContentAddressedCache {
         var shouldRemove = true
         defer {
             _ = Darwin.close(descriptor)
-            if shouldRemove { _ = Darwin.unlink(temporary.path) }
+            if shouldRemove { _ = unsafe Darwin.unlink(temporary.path) }
         }
         try writeAll(data, descriptor: descriptor)
         var info = stat()
         guard Darwin.fchmod(descriptor, 0o400) == 0,
             Darwin.fsync(descriptor) == 0,
-            Darwin.rename(temporary.path, url.path) == 0,
-            Darwin.fstat(descriptor, &info) == 0,
+            unsafe Darwin.rename(temporary.path, url.path) == 0,
+            unsafe Darwin.fstat(descriptor, &info) == 0,
             (info.st_mode & S_IFMT) == S_IFREG
         else { throw CacheIO.metadata }
         shouldRemove = false
@@ -1406,11 +1388,11 @@ enum TraceContentAddressedCache {
     }
 
     private static func writeAll(_ data: Data, descriptor: Int32) throws {
-        try data.withUnsafeBytes { rawBuffer in
+        unsafe try data.withUnsafeBytes { rawBuffer in
             guard let base = rawBuffer.baseAddress else { return }
             var offset = 0
             while offset < rawBuffer.count {
-                let count = Darwin.write(
+                let count = unsafe Darwin.write(
                     descriptor,
                     base.advanced(by: offset),
                     rawBuffer.count - offset
@@ -1442,8 +1424,8 @@ enum TraceContentAddressedCache {
     ) throws -> TraceSourceSnapshot {
         try Task.checkCancellation()
         let canonicalSource = source.resolvingSymlinksInPath().standardizedFileURL
-        let input = canonicalSource.path.withCString {
-            Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        let input = unsafe canonicalSource.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard input >= 0 else {
             throw ArkTraceError(
@@ -1456,7 +1438,7 @@ enum TraceContentAddressedCache {
         }
         defer { _ = Darwin.close(input) }
         var sourceInfo = stat()
-        guard Darwin.fstat(input, &sourceInfo) == 0,
+        guard unsafe Darwin.fstat(input, &sourceInfo) == 0,
             (sourceInfo.st_mode & S_IFMT) == S_IFREG,
             sourceInfo.st_size >= 0
         else {
@@ -1470,9 +1452,9 @@ enum TraceContentAddressedCache {
         var destination: URL?
         var output: Int32 = -1
         if let snapshotDirectory {
-            let snapshotURL = snapshotDirectory.appendingPathComponent("source.snapshot")
-            output = snapshotURL.path.withCString {
-                Darwin.open(
+            let snapshotURL = snapshotDirectory.appending(path: "source.snapshot")
+            output = unsafe snapshotURL.path.withCString {
+                unsafe Darwin.open(
                     $0,
                     O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
                     0o600
@@ -1485,7 +1467,7 @@ enum TraceContentAddressedCache {
         defer {
             if let destination {
                 _ = Darwin.close(output)
-                if !keepDestination { _ = Darwin.unlink(destination.path) }
+                if !keepDestination { _ = unsafe Darwin.unlink(destination.path) }
             }
         }
         var hasher = SHA256()
@@ -1499,8 +1481,8 @@ enum TraceContentAddressedCache {
         var buffer = Data(count: 1 << 20)
         while true {
             try Task.checkCancellation()
-            let count = buffer.withUnsafeMutableBytes { rawBuffer in
-                Darwin.read(input, rawBuffer.baseAddress, rawBuffer.count)
+            let count = unsafe buffer.withUnsafeMutableBytes { rawBuffer in
+                unsafe Darwin.read(input, rawBuffer.baseAddress, rawBuffer.count)
             }
             guard count >= 0 else {
                 throw ArkTraceError(
@@ -1534,7 +1516,7 @@ enum TraceContentAddressedCache {
         }
         return TraceSourceSnapshot(
             url: destination ?? canonicalSource,
-            sha256: hasher.finalize().map { String(format: "%02x", $0) }.joined(),
+            sha256: hasher.finalize().lowercaseHexString(),
             byteCount: total
         )
     }
@@ -1542,13 +1524,13 @@ enum TraceContentAddressedCache {
     private static func secureDirectory(at requestedURL: URL) throws -> URL {
         let requested = requestedURL.standardizedFileURL
         var requestedInfo = stat()
-        if requested.path.withCString({ Darwin.lstat($0, &requestedInfo) }) == 0 {
+        if unsafe requested.path.withCString({ unsafe Darwin.lstat($0, &requestedInfo) }) == 0 {
             guard (requestedInfo.st_mode & S_IFMT) == S_IFDIR else {
                 throw CacheIO.directory
             }
             let resolved = requested.resolvingSymlinksInPath().standardizedFileURL
             guard isAllowedCanonicalization(from: requested, to: resolved),
-                Darwin.chmod(resolved.path, 0o700) == 0
+                unsafe Darwin.chmod(resolved.path, 0o700) == 0
             else { throw CacheIO.directory }
             return resolved
         }
@@ -1562,7 +1544,7 @@ enum TraceContentAddressedCache {
             missingComponents.append(ancestor.lastPathComponent)
             ancestor = parent
             var info = stat()
-            if ancestor.path.withCString({ Darwin.lstat($0, &info) }) == 0 {
+            if unsafe ancestor.path.withCString({ unsafe Darwin.lstat($0, &info) }) == 0 {
                 guard (info.st_mode & S_IFMT) == S_IFDIR else {
                     throw CacheIO.directory
                 }
@@ -1577,14 +1559,14 @@ enum TraceContentAddressedCache {
         var current = resolvedAncestor
         for component in missingComponents.reversed() {
             let parent = current
-            current.appendPathComponent(component, isDirectory: true)
-            let result = current.path.withCString { Darwin.mkdir($0, 0o700) }
+            current.append(path: component, directoryHint: .isDirectory)
+            let result = unsafe current.path.withCString { unsafe Darwin.mkdir($0, 0o700) }
             let created = result == 0
             if !created, errno != EEXIST { throw CacheIO.directory }
             var info = stat()
-            guard current.path.withCString({ Darwin.lstat($0, &info) }) == 0,
+            guard unsafe current.path.withCString({ unsafe Darwin.lstat($0, &info) }) == 0,
                 (info.st_mode & S_IFMT) == S_IFDIR,
-                Darwin.chmod(current.path, 0o700) == 0
+                unsafe Darwin.chmod(current.path, 0o700) == 0
             else { throw CacheIO.directory }
             if created {
                 try synchronizeDirectory(at: current)
@@ -1620,16 +1602,16 @@ enum TraceContentAddressedCache {
                 recoveryRoot = root
             }
             let owners = try secureDirectory(
-                at: root.appendingPathComponent(".owners", isDirectory: true)
+                at: root.appending(path: ".owners", directoryHint: .isDirectory)
             )
             let name = "\(prefix)\(UUID().uuidString)"
             return (
                 root,
                 owners,
-                root.appendingPathComponent(name, isDirectory: true),
-                owners.appendingPathComponent("\(name).lock"),
+                root.appending(path: name, directoryHint: .isDirectory),
+                owners.appending(path: "\(name).lock"),
                 recoveryRoot,
-                owners.appendingPathComponent("\(name).json"),
+                owners.appending(path: "\(name).json"),
                 prefix == "entry-"
                     ? TraceOwnerEvidenceState.building
                     : TraceOwnerEvidenceState.session
@@ -1649,7 +1631,7 @@ enum TraceContentAddressedCache {
                     beforeReplace: nil
                 )
                 try beforeDirectoryMkdirHook?(setup.2)
-                guard setup.2.path.withCString({ Darwin.mkdir($0, 0o700) }) == 0 else {
+                guard unsafe setup.2.path.withCString({ unsafe Darwin.mkdir($0, 0o700) }) == 0 else {
                     throw CacheIO.directory
                 }
                 var openedHandle: TraceOwnedDirectoryHandle?
@@ -1846,13 +1828,10 @@ enum TraceContentAddressedCache {
             var quarantineParent: URL?
             for _ in 0..<16 {
                 let parent = current.url.deletingLastPathComponent()
-                let candidate = parent.appendingPathComponent(
-                    ".arktrace-cleanup-\(UUID().uuidString)",
-                    isDirectory: true
-                )
-                let result = current.url.path.withCString { sourcePath in
-                    candidate.path.withCString { destinationPath in
-                        Darwin.renameatx_np(
+                let candidate = parent.appending(path: ".arktrace-cleanup-\(UUID().uuidString)", directoryHint: .isDirectory)
+                let result = unsafe current.url.path.withCString { sourcePath in
+                    unsafe candidate.path.withCString { destinationPath in
+                        unsafe Darwin.renameatx_np(
                             AT_FDCWD,
                             sourcePath,
                             AT_FDCWD,
@@ -1906,9 +1885,9 @@ enum TraceContentAddressedCache {
                 where device == directory.device && inode == directory.inode:
                 break
             case .directory, .nonDirectory:
-                let restored = quarantine.path.withCString { sourcePath in
-                    current.url.path.withCString { destinationPath in
-                        Darwin.renameatx_np(
+                let restored = unsafe quarantine.path.withCString { sourcePath in
+                    unsafe current.url.path.withCString { destinationPath in
+                        unsafe Darwin.renameatx_np(
                             AT_FDCWD,
                             sourcePath,
                             AT_FDCWD,
@@ -1962,7 +1941,7 @@ enum TraceContentAddressedCache {
 
     private static func removeOwnerArtifacts(marker: URL, evidence: URL) throws {
         for url in [evidence, marker] {
-            let result = url.path.withCString { Darwin.unlink($0) }
+            let result = unsafe url.path.withCString { unsafe Darwin.unlink($0) }
             guard result == 0 || errno == ENOENT else { throw CacheIO.cleanup }
         }
     }
@@ -2021,11 +2000,9 @@ enum TraceContentAddressedCache {
         beforeReplace: (@Sendable (URL) throws -> Void)?
     ) throws {
         let parent = evidenceURL.deletingLastPathComponent()
-        let temporary = parent.appendingPathComponent(
-            ".owner-evidence-\(UUID().uuidString).tmp"
-        )
-        let descriptor = temporary.path.withCString {
-            Darwin.open(
+        let temporary = parent.appending(path: ".owner-evidence-\(UUID().uuidString).tmp")
+        let descriptor = unsafe temporary.path.withCString {
+            unsafe Darwin.open(
                 $0,
                 O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
                 0o600
@@ -2036,14 +2013,14 @@ enum TraceContentAddressedCache {
         defer {
             _ = Darwin.close(descriptor)
             if shouldUnlinkTemporary {
-                _ = temporary.path.withCString { Darwin.unlink($0) }
+                _ = unsafe temporary.path.withCString { unsafe Darwin.unlink($0) }
             }
         }
-        try data.withUnsafeBytes { bytes in
+        unsafe try data.withUnsafeBytes { bytes in
             guard let base = bytes.baseAddress else { return }
             var written = 0
             while written < bytes.count {
-                let result = Darwin.write(
+                let result = unsafe Darwin.write(
                     descriptor,
                     base.advanced(by: written),
                     bytes.count - written
@@ -2057,9 +2034,9 @@ enum TraceContentAddressedCache {
             Darwin.fsync(descriptor) == 0
         else { throw CacheIO.cleanup }
         try beforeReplace?(temporary)
-        guard temporary.path.withCString({ source in
-            evidenceURL.path.withCString { destination in
-                Darwin.rename(source, destination)
+        guard unsafe temporary.path.withCString({ source in
+            unsafe evidenceURL.path.withCString { destination in
+                unsafe Darwin.rename(source, destination)
             }
         }) == 0 else { throw CacheIO.cleanup }
         shouldUnlinkTemporary = false
@@ -2081,7 +2058,7 @@ enum TraceContentAddressedCache {
 
     private static func directoryProbe(at url: URL) -> DirectoryProbe {
         var info = stat()
-        let result = url.path.withCString { Darwin.lstat($0, &info) }
+        let result = unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) }
         guard result == 0 else {
             return errno == ENOENT ? .absent : .inaccessible
         }
@@ -2104,7 +2081,7 @@ enum TraceContentAddressedCache {
 
     private static func regularFileByteCount(at url: URL) throws -> Int64 {
         var info = stat()
-        guard url.path.withCString({ Darwin.lstat($0, &info) }) == 0,
+        guard unsafe url.path.withCString({ unsafe Darwin.lstat($0, &info) }) == 0,
             (info.st_mode & S_IFMT) == S_IFREG,
             info.st_size >= 0
         else { throw CacheIO.metadata }
@@ -2113,7 +2090,7 @@ enum TraceContentAddressedCache {
 
     private static func regularFileIdentity(at url: URL) -> TraceDatabaseFileIdentity? {
         var info = stat()
-        guard url.path.withCString({ Darwin.lstat($0, &info) }) == 0,
+        guard unsafe url.path.withCString({ unsafe Darwin.lstat($0, &info) }) == 0,
             (info.st_mode & S_IFMT) == S_IFREG
         else { return nil }
         return TraceDatabaseFileIdentity(
@@ -2149,8 +2126,8 @@ enum TraceContentAddressedCache {
     }
 
     private static func synchronizeFile(at url: URL) throws {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else { throw CacheIO.destination }
         defer { _ = Darwin.close(descriptor) }
@@ -2158,8 +2135,8 @@ enum TraceContentAddressedCache {
     }
 
     private static func synchronizeDirectory(at url: URL) throws {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else { throw CacheIO.directory }
         defer { _ = Darwin.close(descriptor) }
@@ -2172,13 +2149,13 @@ enum TraceContentAddressedCache {
         sourceValidatedHook: (@Sendable (URL) throws -> Void)?,
         destinationRenamedHook: (@Sendable (URL) throws -> Void)?
     ) throws -> CachePromotionAttempt {
-        let descriptor = build.url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = unsafe build.url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else { throw CacheIO.promotion }
         defer { _ = Darwin.close(descriptor) }
         var buildInfo = stat()
-        guard Darwin.fstat(descriptor, &buildInfo) == 0,
+        guard unsafe Darwin.fstat(descriptor, &buildInfo) == 0,
             (buildInfo.st_mode & S_IFMT) == S_IFDIR,
             UInt64(buildInfo.st_dev) == build.device,
             UInt64(buildInfo.st_ino) == build.inode
@@ -2198,8 +2175,8 @@ enum TraceContentAddressedCache {
             for: build,
             descriptor: descriptor
         )
-        let sourceDescriptor = build.url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        let sourceDescriptor = unsafe build.url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard sourceDescriptor >= 0 else {
             return rejectedPromotion(
@@ -2210,7 +2187,7 @@ enum TraceContentAddressedCache {
         }
         defer { _ = Darwin.close(sourceDescriptor) }
         var sourceInfo = stat()
-        guard Darwin.fstat(sourceDescriptor, &sourceInfo) == 0,
+        guard unsafe Darwin.fstat(sourceDescriptor, &sourceInfo) == 0,
             (sourceInfo.st_mode & S_IFMT) == S_IFDIR
         else {
             return rejectedPromotion(
@@ -2233,9 +2210,9 @@ enum TraceContentAddressedCache {
             )
         }
 
-        let result = build.url.path.withCString { buildPath in
-            entry.path.withCString { entryPath in
-                Darwin.renameatx_np(
+        let result = unsafe build.url.path.withCString { buildPath in
+            unsafe entry.path.withCString { entryPath in
+                unsafe Darwin.renameatx_np(
                     AT_FDCWD, buildPath, AT_FDCWD, entryPath, UInt32(RENAME_EXCL)
                 )
             }
@@ -2263,8 +2240,8 @@ enum TraceContentAddressedCache {
             for: build,
             descriptor: descriptor
         )
-        let destinationDescriptor = entry.path.withCString {
-            Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        let destinationDescriptor = unsafe entry.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard destinationDescriptor >= 0 else {
             return rejectedPromotion(
@@ -2275,7 +2252,7 @@ enum TraceContentAddressedCache {
         }
         defer { _ = Darwin.close(destinationDescriptor) }
         var destinationInfo = stat()
-        guard Darwin.fstat(destinationDescriptor, &destinationInfo) == 0,
+        guard unsafe Darwin.fstat(destinationDescriptor, &destinationInfo) == 0,
             (destinationInfo.st_mode & S_IFMT) == S_IFDIR
         else {
             return rejectedPromotion(
@@ -2331,30 +2308,36 @@ enum TraceContentAddressedCache {
     ) -> TraceOwnedDirectory? {
         let capacity = Int(MAXPATHLEN)
         let path = UnsafeMutablePointer<CChar>.allocate(capacity: capacity)
-        path.initialize(repeating: 0, count: capacity)
+        unsafe path.initialize(repeating: 0, count: capacity)
         defer {
-            path.deinitialize(count: capacity)
-            path.deallocate()
+            unsafe path.deinitialize(count: capacity)
+            unsafe path.deallocate()
         }
         // Call through Darwin's variadic-safe overlay: binding the variadic
         // fcntl(2) to a fixed three-argument signature is an ABI mismatch on
         // arm64 (variadic arguments are stack-passed), which made this
         // F_GETPATH call fail with EFAULT unconditionally.
-        let result = Darwin.fcntl(
+        let result = unsafe Darwin.fcntl(
             descriptor,
             F_GETPATH,
             UnsafeMutableRawPointer(path)
         )
         if result == 0 {
             var length = 0
-            while length < capacity, path[length] != 0 { length += 1 }
-            let decodedPath = String(
+            while length < capacity, unsafe path[length] != 0 { length += 1 }
+            let decodedPath = unsafe String(
                 decoding: UnsafeBufferPointer(start: path, count: length)
                     .map { UInt8(bitPattern: $0) },
                 as: UTF8.self
             )
             if !decodedPath.isEmpty {
-                let url = URL(fileURLWithPath: decodedPath).standardizedFileURL
+                // F_GETPATH names a directory we then compare against
+                // directory-hinted layout URLs by exact URL equality; the
+                // explicit hint keeps the trailing-slash form identical (the
+                // legacy fileURLWithPath initializer used to discover it by
+                // statting the path).
+                let url = URL(filePath: decodedPath, directoryHint: .isDirectory)
+                    .standardizedFileURL
                 if (try? relativePath(from: directory.recoveryRootURL, to: url)) != nil,
                     case .directory(let device, let inode) = directoryProbe(at: url),
                     device == directory.device,
@@ -2430,13 +2413,10 @@ enum TraceContentAddressedCache {
         case .directory, .nonDirectory:
             break
         }
-        let quarantine = layout.corruptRoot.appendingPathComponent(
-            "\(layout.key.traceSHA256)-\(layout.key.parserKey)-\(UUID().uuidString)",
-            isDirectory: true
-        )
-        let result = layout.entryURL.path.withCString { entryPath in
-            quarantine.path.withCString { quarantinePath in
-                Darwin.renameatx_np(
+        let quarantine = layout.corruptRoot.appending(path: "\(layout.key.traceSHA256)-\(layout.key.parserKey)-\(UUID().uuidString)", directoryHint: .isDirectory)
+        let result = unsafe layout.entryURL.path.withCString { entryPath in
+            unsafe quarantine.path.withCString { quarantinePath in
+                unsafe Darwin.renameatx_np(
                     AT_FDCWD, entryPath, AT_FDCWD, quarantinePath, UInt32(RENAME_EXCL)
                 )
             }
@@ -2455,7 +2435,7 @@ enum TraceContentAddressedCache {
         initialProbeHook: (@Sendable (URL) throws -> Void)?
     ) throws -> OwnedEntryQuarantineOutcome {
         let canonicalRoot = cacheRoot.standardizedFileURL
-        let corruptRoot = canonicalRoot.appendingPathComponent(".corrupt", isDirectory: true)
+        let corruptRoot = canonicalRoot.appending(path: ".corrupt", directoryHint: .isDirectory)
         _ = try secureDirectory(at: corruptRoot)
         do { try initialProbeHook?(entry.url) }
         catch { throw CacheIO.quarantine }
@@ -2467,12 +2447,10 @@ enum TraceContentAddressedCache {
         case .directory, .nonDirectory:
             break
         }
-        let quarantine = corruptRoot.appendingPathComponent(
-            "cancelled-\(UUID().uuidString)", isDirectory: true
-        )
-        let result = entry.url.path.withCString { entryPath in
-            quarantine.path.withCString { quarantinePath in
-                Darwin.renameatx_np(
+        let quarantine = corruptRoot.appending(path: "cancelled-\(UUID().uuidString)", directoryHint: .isDirectory)
+        let result = unsafe entry.url.path.withCString { entryPath in
+            unsafe quarantine.path.withCString { quarantinePath in
+                unsafe Darwin.renameatx_np(
                     AT_FDCWD, entryPath, AT_FDCWD, quarantinePath, UInt32(RENAME_EXCL)
                 )
             }
@@ -2491,9 +2469,9 @@ enum TraceContentAddressedCache {
             throw CacheIO.quarantine
         }
         if shouldRestore {
-            let restore = quarantine.path.withCString { quarantinePath in
-                entry.url.path.withCString { entryPath in
-                    Darwin.renameatx_np(
+            let restore = unsafe quarantine.path.withCString { quarantinePath in
+                unsafe entry.url.path.withCString { entryPath in
+                    unsafe Darwin.renameatx_np(
                         AT_FDCWD,
                         quarantinePath,
                         AT_FDCWD,
@@ -2571,7 +2549,7 @@ enum TraceContentAddressedCache {
     }
 }
 
-public struct TraceCacheWatermarks: Hashable, Sendable {
+package struct TraceCacheWatermarks: Hashable, Sendable {
     /// AT-CACHE-004 defaults. Built through the private initializer so the
     /// reviewed constants cannot trap at load time.
     public static let standard = TraceCacheWatermarks(
@@ -2615,7 +2593,7 @@ public struct TraceCacheInventory: Hashable, Sendable {
     }
 }
 
-public struct TraceCacheMaintenanceReport: Hashable, Sendable {
+package struct TraceCacheMaintenanceReport: Hashable, Sendable {
     public let before: TraceCacheInventory
     public let after: TraceCacheInventory
     public let recoveredPrivateDirectoryCount: Int
@@ -2645,7 +2623,7 @@ public struct TraceCacheMaintenanceReport: Hashable, Sendable {
 /// purge. Every Ready mutation holds key lock -> exclusive entry lease ->
 /// exact owner lock, while private crash recovery consumes only bound owner
 /// evidence and never infers ownership from PID, age, or a UUID-shaped name.
-public actor TraceCacheMaintenance {
+package actor TraceCacheMaintenance {
     private let cacheDirectory: URL
     private let stagingDirectory: URL
     private let maximumEntries: Int
@@ -2863,7 +2841,7 @@ private extension TraceContentAddressedCache {
         let sessionRoot = try await detached { try secureDirectory(at: stagingDirectory) }
         let cachedBuildRoot = try await detached {
             try secureDirectory(
-                at: cacheRoot.appendingPathComponent(".staging", isDirectory: true)
+                at: cacheRoot.appending(path: ".staging", directoryHint: .isDirectory)
             )
         }
         var recovered = MaintenanceRecovery()
@@ -2965,7 +2943,7 @@ private extension TraceContentAddressedCache {
         }
         let buildRoot = try await detached {
             try secureDirectory(
-                at: root.appendingPathComponent(".staging", isDirectory: true)
+                at: root.appending(path: ".staging", directoryHint: .isDirectory)
             )
         }
         let readyRecords = try await detached {
@@ -3048,7 +3026,7 @@ private extension TraceContentAddressedCache {
             removed += 1
             try await detached {
                 let traceRoot = entry.url.deletingLastPathComponent()
-                _ = traceRoot.path.withCString { Darwin.rmdir($0) }
+                _ = unsafe traceRoot.path.withCString { unsafe Darwin.rmdir($0) }
                 try synchronizeDirectory(at: root)
             }
             _fixLifetime(ownerLock)
@@ -3103,7 +3081,7 @@ private extension TraceContentAddressedCache {
         for traceName in try boundedDirectoryNames(at: root, maximumCount: maximumEntries) {
             if traceName.hasPrefix(".") { continue }
             guard isLowercaseHex(traceName, count: 64) else { continue }
-            let traceRoot = root.appendingPathComponent(traceName, isDirectory: true)
+            let traceRoot = root.appending(path: traceName, directoryHint: .isDirectory)
             guard case .directory = directoryProbe(at: traceRoot),
                 traceRoot.resolvingSymlinksInPath().standardizedFileURL == traceRoot.standardizedFileURL
             else { continue }
@@ -3114,7 +3092,7 @@ private extension TraceContentAddressedCache {
                 maximumCount: remaining
             ) {
                 guard isLowercaseHex(parserName, count: 64) else { continue }
-                let entryURL = traceRoot.appendingPathComponent(parserName, isDirectory: true)
+                let entryURL = traceRoot.appending(path: parserName, directoryHint: .isDirectory)
                 guard case .directory(let device, let inode) = directoryProbe(at: entryURL),
                     entryURL.resolvingSymlinksInPath().standardizedFileURL
                         == entryURL.standardizedFileURL
@@ -3123,8 +3101,8 @@ private extension TraceContentAddressedCache {
                     at: entryURL,
                     maximumFiles: 16
                 )
-                let metadataURL = entryURL.appendingPathComponent(metadataName)
-                let databaseURL = entryURL.appendingPathComponent(databaseName)
+                let metadataURL = entryURL.appending(path: metadataName)
+                let databaseURL = entryURL.appending(path: databaseName)
                 let metadata: TraceCacheMetadata?
                 if let loaded = try? loadMetadata(at: metadataURL),
                     loaded.metadata.cacheKey.traceSHA256 == traceName,
@@ -3158,15 +3136,15 @@ private extension TraceContentAddressedCache {
         maximumEntries: Int
     ) throws -> [MaintenanceOwnerRecord] {
         let owners = try secureDirectory(
-            at: ownerRoot.appendingPathComponent(".owners", isDirectory: true)
+            at: ownerRoot.appending(path: ".owners", directoryHint: .isDirectory)
         )
         var result: [MaintenanceOwnerRecord] = []
         for name in try boundedDirectoryNames(at: owners, maximumCount: maximumEntries * 3) {
             guard name.hasSuffix(".json") else { continue }
             let base = String(name.dropLast(5))
             guard isOwnerName(base) else { throw CacheIO.metadata }
-            let evidenceURL = owners.appendingPathComponent(name)
-            let markerURL = owners.appendingPathComponent("\(base).lock")
+            let evidenceURL = owners.appending(path: name)
+            let markerURL = owners.appending(path: "\(base).lock")
             let evidence = try readOwnerEvidence(at: evidenceURL)
             let targetURL = try ownerTarget(
                 evidence: evidence,
@@ -3228,7 +3206,7 @@ private extension TraceContentAddressedCache {
         else { throw CacheIO.metadata }
         var target = recoveryRoot.standardizedFileURL
         for component in components {
-            target.appendPathComponent(String(component))
+            target.append(path: String(component))
         }
         target = target.standardizedFileURL
         guard try relativePath(from: recoveryRoot, to: target) == evidence.relativePath else {
@@ -3282,7 +3260,7 @@ private extension TraceContentAddressedCache {
         maximumEntries: Int
     ) throws -> Int {
         let owners = try secureDirectory(
-            at: ownerRoot.appendingPathComponent(".owners", isDirectory: true)
+            at: ownerRoot.appending(path: ".owners", directoryHint: .isDirectory)
         )
         let names = try boundedDirectoryNames(at: owners, maximumCount: maximumEntries * 3)
         let evidenceBases = Set(
@@ -3292,11 +3270,11 @@ private extension TraceContentAddressedCache {
         for name in names where name.hasSuffix(".lock") {
             let base = String(name.dropLast(5))
             guard isOwnerName(base), !evidenceBases.contains(base) else { continue }
-            let marker = owners.appendingPathComponent(name)
+            let marker = owners.appending(path: name)
             guard let lock = try TraceCacheFileLock.tryAcquireExisting(at: marker) else {
                 continue
             }
-            guard marker.path.withCString({ Darwin.unlink($0) }) == 0 || errno == ENOENT
+            guard unsafe marker.path.withCString({ unsafe Darwin.unlink($0) }) == 0 || errno == ENOENT
             else {
                 _fixLifetime(lock)
                 throw CacheIO.cleanup
@@ -3313,17 +3291,17 @@ private extension TraceContentAddressedCache {
         maximumCount: Int
     ) throws -> [String] {
         guard maximumCount >= 0 else { throw CacheIO.metadata }
-        guard let directory = url.path.withCString({ Darwin.opendir($0) }) else {
+        guard let directory = unsafe url.path.withCString({ unsafe Darwin.opendir($0) }) else {
             throw CacheIO.directory
         }
-        defer { Darwin.closedir(directory) }
+        defer { unsafe Darwin.closedir(directory) }
         var result: [String] = []
-        while let entry = Darwin.readdir(directory) {
-            let name = withUnsafePointer(to: &entry.pointee.d_name) { pointer in
-                pointer.withMemoryRebound(
+        while let entry = unsafe Darwin.readdir(directory) {
+            let name = unsafe withUnsafePointer(to: &entry.pointee.d_name) { pointer in
+                unsafe pointer.withMemoryRebound(
                     to: CChar.self,
                     capacity: Int(MAXNAMLEN) + 1
-                ) { String(cString: $0) }
+                ) { unsafe String(cString: $0) }
             }
             if name == "." || name == ".." { continue }
             guard result.count < maximumCount else { throw CacheIO.metadata }
@@ -3339,9 +3317,9 @@ private extension TraceContentAddressedCache {
         let names = try boundedDirectoryNames(at: url, maximumCount: maximumFiles)
         var total: Int64 = 0
         for name in names {
-            let child = url.appendingPathComponent(name)
+            let child = url.appending(path: name)
             var info = stat()
-            guard child.path.withCString({ Darwin.lstat($0, &info) }) == 0 else {
+            guard unsafe child.path.withCString({ unsafe Darwin.lstat($0, &info) }) == 0 else {
                 throw CacheIO.metadata
             }
             guard (info.st_mode & S_IFMT) == S_IFREG, info.st_size >= 0 else {
@@ -3355,10 +3333,7 @@ private extension TraceContentAddressedCache {
     }
 
     static func isLowercaseHex(_ value: String, count: Int) -> Bool {
-        value.utf8.count == count && value.utf8.allSatisfy {
-            ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
-                || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
-        }
+        ArkTraceIdentityGrammar.isLowercaseHex(value, count: count)
     }
 
     static func isOwnerName(_ value: String) -> Bool {

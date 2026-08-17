@@ -2,15 +2,15 @@ import ArkTraceAnalysis
 import ArkTraceCore
 import Foundation
 
-public struct CLIArgumentParser: Sendable {
+package struct CLIArgumentParser: Sendable {
     static let maximumArgumentCount = 256
     static let maximumArgumentBytes = 16 * 1_024
 
-    public init() {}
+    package init() {}
 
     /// Safe mode hint used only to choose the error presentation when full
     /// parsing fails. It never reads a trace or resolves a path.
-    public static func requestsJSON(_ arguments: [String]) -> Bool {
+    package static func requestsJSON(_ arguments: [String]) -> Bool {
         machinePresentationHint(arguments).json
     }
 
@@ -61,7 +61,7 @@ public struct CLIArgumentParser: Sendable {
         argument.utf8.prefix(maximumArgumentBytes + 1).count <= maximumArgumentBytes
     }
 
-    public func parse(_ arguments: [String]) throws -> CLIInvocation {
+    package func parse(_ arguments: [String]) throws -> CLIInvocation {
         guard arguments.count <= Self.maximumArgumentCount,
             arguments.allSatisfy(Self.isWithinArgumentByteBudget)
         else {
@@ -132,7 +132,7 @@ public struct CLIArgumentParser: Sendable {
                 else {
                     throw CLIParsing.invalid("--trace-streamer requires an absolute path")
                 }
-                traceStreamerURL = URL(fileURLWithPath: path).standardizedFileURL
+                traceStreamerURL = URL(filePath: path).standardizedFileURL
             default:
                 if remaining.isEmpty, token.hasPrefix("-") {
                     throw CLIParsing.invalid(

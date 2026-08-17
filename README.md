@@ -24,9 +24,9 @@ ArkTrace reuses the pinned OpenHarmony TraceStreamer to parse offline traces (`.
 
 ## Requirements
 
-- Apple silicon Mac running macOS 14 or later
-- Swift 6 toolchain (Xcode for building the app)
-- `jq` — ships with macOS 15+; on earlier versions `brew install jq`
+- Apple silicon Mac running macOS 26 or later
+- Swift 6.3 toolchain / Xcode 26.6 (Xcode for building the app)
+- `jq` — ships with macOS 15+
 - Network access the first time you build the pinned TraceStreamer
 
 ## Quick start
@@ -91,7 +91,7 @@ CI builds, tests and runs the offline gates on every pull request, but hosted ru
 
 Phases 0–6 (57/57 tasks) are complete and **all 10 release gates are closed** as of 2026-08-16. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
 
-Known limitations of the first release: Apple silicon / macOS 14+ only; offline analysis only — no capture, device or network capability.
+Known limitations of the first release: Apple silicon / macOS 26+ only; offline analysis only — no capture, device or network capability. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
 
 ## Documentation
 

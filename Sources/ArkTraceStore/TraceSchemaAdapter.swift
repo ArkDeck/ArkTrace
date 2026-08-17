@@ -969,7 +969,7 @@ enum TraceSchemaAdapter {
             preimage.append(record)
         }
         let digest = SHA256.hash(data: preimage)
-        return digest.map { String(format: "%02x", $0) }.joined()
+        return digest.lowercaseHexString()
     }
 
     private static func appendLengthPrefixedUTF8(_ value: String, to data: inout Data) {

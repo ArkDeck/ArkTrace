@@ -1,36 +1,42 @@
 {
   "accessibilityEvidence": {
-    "path": "Fixtures/release-evidence/accessibility-c00e79ed.json",
-    "sha256": "cbc47f1f9bbc60af06f04c470132a5ab0f92536531030735daac5a0584bdcd7d"
+    "path": "Fixtures/release-evidence/accessibility-2fef7556.json",
+    "sha256": "af557d26ae2f416181a6db45c5494c23a54b0869667bec49a669e0206bff1b65"
   },
   "app": {
     "build": "1",
     "bundleIdentifier": "com.arktrace.ArkTrace",
-    "candidateCodeDirectoryHash": "c3acd968f032c8256b16197b89155fd544dcde78",
-    "candidateTreeSHA256": "c00e79ed569e6198a269e56607ab41e38c1d6b948dc895f0385c58ff229bed54",
+    "candidateCodeDirectoryHash": "552e9201de20b7da21f3fbea3268aaf9a249f794",
+    "candidateTreeSHA256": "2fef75563fa6ef2db651c10be385760efbcccfb958ab35b621918743b085c10b",
     "signingCertificateSHA1": "38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C",
     "signingIdentity": "Developer ID Application: Hanfeng Fu (8AQTYW5FKR)",
     "teamIdentifier": "8AQTYW5FKR",
     "version": "0.1.0"
   },
   "artifact": {
-    "byteCount": 5041314,
-    "fileName": "ArkTrace-20260814T061210Z.zip",
-    "sha256": "1ae5b0a6b2d68b2b19ad5265ef593aa73b1a67f79418a2ddc11fc686ddd161bd"
+    "byteCount": 5087042,
+    "fileName": "ArkTrace-20260817T064446Z.zip",
+    "sha256": "aaaf892cf2acdee718c797be93251c62b54881a73d46aebc65ee82e30e17a607"
   },
-  "evidenceRevision": "8d92603913fc9ade7dc0c2e993a013106a433da9",
+  "artifactReview": {
+    "method": "independent-agent-review",
+    "reviewEndedAt": "2026-08-17T06:51:46Z",
+    "reviewStartedAt": "2026-08-17T06:51:30Z",
+    "reviewer": "Claude Code agent artifact review"
+  },
+  "evidenceRevision": "1dbde018ff86712cc5e2adcda4a85aa1d261891b",
   "formatVersion": 1,
   "notarization": {
     "finalArchiveReverified": true,
     "gatekeeperAssessment": "accepted",
     "nestedAndOuterSignaturesValid": true,
-    "stapledTicketValidated": true,
     "receiptPath": "Fixtures/release-evidence/phase3-notarization-receipt.json",
-    "receiptSHA256": "f7b5cc84e69563d93c0aa51ff203ee9a55f9c1079ef4120c568a99c6fc33e558",
+    "receiptSHA256": "6fa499e51ecc2e0b0416b364690cb47bd0fed92d25e4a334d9218c3c423587f0",
+    "stapledTicketValidated": true,
     "status": "Accepted",
-    "submissionID": "45e9a553-4c3a-492a-be06-cff85ab13b11"
+    "submissionID": "b5f7e978-8554-4086-b405-cfcddc78f580"
   },
-  "packagedAt": "2026-08-14T06:12:10Z",
-  "reviewedAt": "2026-08-14T06:14:07Z",
-  "sourceRevision": "f629b3c9a6557660db5dc7bfa704c2ad2d2a1fe3"
+  "packagedAt": "2026-08-17T06:44:46Z",
+  "reviewedAt": "2026-08-17T06:51:46Z",
+  "sourceRevision": "4ea6d6597ea075c226344816a4e351ae02d8797b"
 }

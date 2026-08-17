@@ -155,7 +155,7 @@ final class RepositoryTests: XCTestCase {
 
     override func setUpWithError() throws {
         databaseURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-test-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-test-\(UUID().uuidString).sqlite")
         let db = try TraceDatabase(url: databaseURL, readOnly: false)
         // Mirrors the shape of a TraceStreamer export: trace range is
         // [1_000, 2_000) absolute, so relative times span [0, 1_000).
@@ -200,7 +200,7 @@ final class RepositoryTests: XCTestCase {
         extraSQL: String = ""
     ) throws -> (SQLiteTraceRepository, URL) {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-summary-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-summary-\(UUID().uuidString).sqlite")
         do {
             let db = try TraceDatabase(url: url, readOnly: false)
             try db.execute(
@@ -278,7 +278,7 @@ final class RepositoryTests: XCTestCase {
 
     private func makeTemporaryDatabase(_ sql: String) throws -> URL {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-test-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-test-\(UUID().uuidString).sqlite")
         let db = try TraceDatabase(url: url, readOnly: false)
         try db.execute(sql)
         return url
@@ -287,7 +287,7 @@ final class RepositoryTests: XCTestCase {
     private func sha256AndSize(at url: URL) throws -> (String, Int64) {
         let data = try Data(contentsOf: url)
         return (
-            SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined(),
+            SHA256.hash(data: data).lowercaseHexString(),
             Int64(data.count)
         )
     }
@@ -1165,7 +1165,7 @@ final class RepositoryTests: XCTestCase {
             expectedPreparation: preparation
         )
         let replacement = databaseURL.deletingLastPathComponent()
-            .appendingPathComponent("arktrace-replacement-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-replacement-\(UUID().uuidString).sqlite")
         defer { try? FileManager.default.removeItem(at: replacement) }
         try FileManager.default.copyItem(at: databaseURL, to: replacement)
         _ = try FileManager.default.replaceItemAt(databaseURL, withItemAt: replacement)
@@ -1341,7 +1341,7 @@ final class RepositoryTests: XCTestCase {
         )
 
         let symlink = databaseURL.deletingLastPathComponent()
-            .appendingPathComponent("arktrace-ready-link-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-ready-link-\(UUID().uuidString).sqlite")
         try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: databaseURL)
         defer { try? FileManager.default.removeItem(at: symlink) }
         XCTAssertThrowsError(try TraceDatabase(url: symlink, readOnly: true)) { error in
@@ -1548,7 +1548,7 @@ final class RepositoryTests: XCTestCase {
 
     func testMissingRequiredTableIsSchemaUnsupported() throws {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-test-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-test-\(UUID().uuidString).sqlite")
         defer { try? FileManager.default.removeItem(at: url) }
         let db = try TraceDatabase(url: url, readOnly: false)
         try db.execute(
@@ -1570,7 +1570,7 @@ final class RepositoryTests: XCTestCase {
 
     func testGarbageFileIsDatabaseInvalid() throws {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-test-\(UUID().uuidString).sqlite")
+            .appending(path: "arktrace-test-\(UUID().uuidString).sqlite")
         defer { try? FileManager.default.removeItem(at: url) }
         try Data(repeating: 0x42, count: 4096).write(to: url)
 

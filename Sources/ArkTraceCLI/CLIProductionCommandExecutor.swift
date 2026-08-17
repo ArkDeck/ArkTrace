@@ -19,7 +19,7 @@ extension TraceSession: CLIManagedTraceSession {
 /// Production implementation for the Phase 2 command surface. Every trace
 /// command opens one `TraceSession`, derives human and machine output from the
 /// same bound result, and closes the session before returning to the writer.
-public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Sendable {
+package struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Sendable {
     typealias SessionOpener = @Sendable (
         URL, CLIGlobalOptions, CLIStoragePaths
     ) async throws -> any CLIManagedTraceSession
@@ -36,7 +36,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
     private let storagePathsProvider: StoragePathsProvider
     private let selfTestFixtureProvider: SelfTestFixtureProvider
 
-    public init() {
+    package init() {
         sessionOpener = Self.openProductionSession
         parserIdentityProvider = { options in
             try await options.resolveParser().identity()
@@ -64,7 +64,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
         self.selfTestFixtureProvider = selfTestFixtureProvider
     }
 
-    public func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
+    package func execute(_ invocation: CLIInvocation) async throws -> CLICommandOutput {
         let operationDeadline = ContinuousClock.now.advanced(
             by: .milliseconds(invocation.options.limits.timeoutMs)
         )
@@ -270,9 +270,12 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
             try Task.checkCancellation()
             let bound = try await session.cliContext(request)
             let payload = try CLIMachineCommandPayload.context(bound: bound)
+            // Unbounded on purpose: this loop measures the full envelope and
+            // enforces `maximumBytes` itself to drive the retention retry.
             let document = try encoder.encode(
                 payload.envelope(for: invocation, tool: tool),
-                pretty: invocation.options.pretty
+                pretty: invocation.options.pretty,
+                maximumBytes: Int.max
             )
             lastRequiredByteCount = document.count
             if document.count <= maximumBytes { return bound }
@@ -462,7 +465,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                     let bound = try await session.cliSummary(request)
                     guard bound.value.schemaFingerprint == bound.snapshot.metadata.schemaFingerprint
                     else {
-                        // Stage must stay within the public contract's
+                        // Stage must stay within the package contract's
                         // allowed set for TRACE_DATABASE_INVALID; .analyzing
                         // would be rewritten to INTERNAL_ERROR at the
                         // boundary, masking this diagnostic (exit 9, not 5).
@@ -531,7 +534,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
         operation: (any CLIManagedTraceSession) async throws -> Value
     ) async throws -> Value {
         let paths = try storagePathsProvider()
-        let source = URL(fileURLWithPath: trace).standardizedFileURL
+        let source = URL(filePath: trace).standardizedFileURL
         // Session opening spans hashing, cache lookup, and the exporter
         // parse; a deadline expiry anywhere in it is attributed to parsing.
         CLIOperationStage.active?.set(.parsing)
@@ -578,13 +581,10 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 details: ["reason": "parentUnavailable"]
             )
         }
-        let productRoot = root.appendingPathComponent(
-            "com.arktrace.ArkTrace",
-            isDirectory: true
-        )
+        let productRoot = root.appending(path: "com.arktrace.ArkTrace", directoryHint: .isDirectory)
         return CLIStoragePaths(
-            stagingDirectory: productRoot.appendingPathComponent("staging", isDirectory: true),
-            cacheDirectory: productRoot.appendingPathComponent("traces", isDirectory: true)
+            stagingDirectory: productRoot.appending(path: "staging", directoryHint: .isDirectory),
+            cacheDirectory: productRoot.appending(path: "traces", directoryHint: .isDirectory)
         )
     }
 
@@ -597,7 +597,7 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
                 details: ["reason": "unavailable"]
             )
         }
-        return root.appendingPathComponent("zlib.htrace", isDirectory: false)
+        return root.appending(path: "zlib.htrace", directoryHint: .notDirectory)
     }
 
     private static func doctorCheck(
@@ -637,14 +637,14 @@ public struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Send
         var candidate = url.standardizedFileURL
         for _ in 0..<16 {
             var info = stat()
-            let probe = candidate.path.withCString { Darwin.lstat($0, &info) }
+            let probe = unsafe candidate.path.withCString { unsafe Darwin.lstat($0, &info) }
             if probe == 0 {
                 let attributes = try? FileManager.default.attributesOfFileSystem(
                     forPath: candidate.path
                 )
                 let freeBytes = (attributes?[.systemFreeSize] as? NSNumber)?.uint64Value
                 guard (info.st_mode & S_IFMT) == S_IFDIR,
-                    Darwin.access(candidate.path, W_OK | X_OK) == 0,
+                    unsafe Darwin.access(candidate.path, W_OK | X_OK) == 0,
                     let freeBytes
                 else { return (false, 0) }
                 return (true, freeBytes)

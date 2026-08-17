@@ -1,0 +1,17 @@
+ArkTrace accessibility walkthrough v1
+check: focusRestoration
+candidateTreeSHA256: 2fef75563fa6ef2db651c10be385760efbcccfb958ab35b621918743b085c10b
+reviewedAt: 2026-08-17T06:42:55Z
+reviewMethod: independent-agent-review
+steps:
+1. Launched the exact Developer ID signed candidate with its real German localization selected (-AppleLanguages (de)) and loaded zlib.htrace.
+2. Resized the real window to its supported minimum; it settled at 640 by 532 points and the Inspector auto-collapsed under the narrow-layout policy.
+3. Accessibility-focused the localized disclosure "Informationsbereich wieder einblenden" and captured the minimum-window artifact with the focus ring visible.
+4. In an English session, put keyboard focus on the Hide Inspector control and activated it, then activated the disclosure with Space, reading the focused element after each transition.
+5. Also activated Hide Inspector while focus was on the Timeline to confirm the no-steal branch of the focus policy.
+observations:
+- With focus on Hide Inspector, collapse moved focus directly to the Show Inspector disclosure; no extra Tab was required.
+- Space on the disclosure rematerialized the pane and returned focus to Hide Inspector.
+- With focus on the Timeline, collapsing via the pointer path left Timeline focus untouched; the disclosure appeared without stealing focus from unrelated controls.
+- At the 640-point minimum the full German title "Informationsbereich wieder einblenden" remained visible, keyboard-focusable and outside toolbar overflow; the toolbar's zoom controls moved into the overflow chevron instead.
+- The German disclosure measured 280 by 24 points inside its 124-plus-point minimum target frame.

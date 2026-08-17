@@ -1,0 +1,17 @@
+ArkTrace accessibility walkthrough v1
+check: keyboardNavigation
+candidateTreeSHA256: 2fef75563fa6ef2db651c10be385760efbcccfb958ab35b621918743b085c10b
+reviewedAt: 2026-08-17T06:42:55Z
+reviewMethod: independent-agent-review
+steps:
+1. Enabled macOS full keyboard navigation (AppleKeyboardUIMode 2), launched the exact signed candidate, and loaded zlib.htrace through the Finder document-type path.
+2. Focused Search, entered 2956, confirmed, and verified the real result "TID 2956 · itid 49" in the sidebar.
+3. Pressed Tab repeatedly from Search and recorded the actual traversal: Zoom In, Zoom Out, Reset Zoom, then Trace Timeline; the disabled Zoom Selection control was skipped.
+4. Pressed Right to focus a real named-slice event and Return to select it, then read the Inspector rows.
+5. Restored full keyboard navigation to its original off state (AppleKeyboardUIMode 0) after the walkthrough.
+observations:
+- The Timeline exposed its complete keyboard instructions as accessibility help: arrow keys between events and tracks, Return to select, Option-Left/Right to pan, plus/minus to zoom, F for selected range, 0 to reset, Escape to clear.
+- After Right the Timeline value read "focused track TID 891, H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::GetBundleInfo(const std::string &, const OHOS::AppExecFwk::BundleFlag, OHOS::AppExecFwk::BundleInfo &, int32_t), start 12.045 s, duration 2.701 ms".
+- Return appended "selected event callstack 863" to the Timeline value, and the Inspector exposed Type namedSlice, Identity callstack:863, Start 12.045 s, Duration 2.701 ms, PID 198, TID 891, Process key 39, Thread key 78.
+- Only enabled controls joined the traversal; the disabled Zoom Selection button never took focus.
+- Search, Timeline, Inspector controls and Sidebar remained reachable in a stable traversal without a pointer.

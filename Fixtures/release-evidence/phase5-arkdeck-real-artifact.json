@@ -1,11 +1,11 @@
 {
   "arkDeck": {
     "catalogDigest": "d76ad7750eeb39423de804fffca2ff262edec39fac41638b487571f2cd9bad9e",
-    "daemonBinarySHA256": "9768a99735025278a7c1712684276bdbb7e0a1eb8d57fdc368ef57abc76785d7",
+    "daemonBinarySHA256": "6c50421d0f9004b14e5c9f9d14d92e21039c0b3a9edb477860bec9fb506e1d0e",
     "descriptor": {
       "byteCount": 289,
-      "manifestSHA256": "a0818b4278d742e7bb84bf09b867357f330547a92bbc2b3b49809523381bec40",
-      "sha256": "1a4f8aa7379157959fed0eb7a3c209c7ccd8381d46f8f834c04eee21448863b0"
+      "manifestSHA256": "49a69405881924e0b8996cfa231653128ebc3fb2291d86bb1a1e2c4c880400d0",
+      "sha256": "40799a2f18efaa6c3cb17bf36af81a99da2e8a48a26c563f7fae37d561dee766"
     },
     "launchAgentIntegrationMerge": "4e478b46f202a139dbeb2c91d79e36d6d7774fac",
     "protectedMainBaseline": "d6b9dd399340182b997e461fcabac835b5b5568e",
@@ -25,7 +25,7 @@
     "maxRows": 1000,
     "parserAdapterVersion": "1",
     "parserBuildRecipeVersion": "e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06",
-    "parserSHA256": "66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9",
+    "parserSHA256": "7c5ed515fc4d74517476fb901e3f7812914cb33b651324f49466d709d4641b35",
     "parserUpstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
     "parserVersion": "4.3.7",
     "schemaAdapterVersion": "2",
@@ -33,44 +33,44 @@
     "sourceByteCount": 1240,
     "sourceSHA256": "a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35",
     "timeoutMs": 30000,
-    "toolSHA256": "a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa"
+    "toolSHA256": "cdfc91679211c7537db343693b035e1b7c9752beadd9b60dd9cfad90874829c1"
   },
   "derivedArtifact": {
-    "artifactID": "ART-bd09e3971266d9fd9584b2dc17117c1b",
+    "artifactID": "ART-44f94d838ec28289c3dcc30e95a6e236",
     "byteCount": 1760,
-    "createdAtUTC": "2026-08-16T13:21:59Z",
-    "jobID": "job-103395125067567883342ceed0bc1b36",
+    "createdAtUTC": "2026-08-17T04:23:29Z",
+    "jobID": "job-ca6c53cb6ba33d326d3073031c2e28f0",
     "mediaType": "application/json",
     "name": "trace-summary.json",
     "privacy": "standard",
     "redactionApplied": false,
-    "sha256": "a76b2df77939caa56bb6f990b3e3e2fece1044ab530fbdca8ce027ffc2fb30de",
+    "sha256": "dd4e68ac880f53c1068b3fb5c3eac06d198b1a1bb8d4d5180477d36c52d24cee",
     "status": "published",
     "targetID": "TGT-958780b2ffb7"
   },
   "execution": {
     "actualEffect": "hostOnly",
     "executionMode": "execute",
-    "finishedAtUTC": "2026-08-16T13:22:00Z",
+    "finishedAtUTC": "2026-08-17T04:23:31Z",
     "guiAutomationUsed": false,
-    "jobID": "job-103395125067567883342ceed0bc1b36",
+    "jobID": "job-ca6c53cb6ba33d326d3073031c2e28f0",
     "manualArkTraceLaunchUsed": false,
     "operation": "analyzer.summarize-trace@1",
     "outcomeUnknown": false,
     "runtimeCapabilityConsumed": false,
-    "startedAtUTC": "2026-08-16T13:21:58Z",
+    "startedAtUTC": "2026-08-17T04:23:29Z",
     "state": "succeeded",
     "targetID": "TGT-958780b2ffb7"
   },
   "formatVersion": 1,
   "largeTraceGateApplied": false,
-  "recordedAtUTC": "2026-08-16T13:24:00Z",
+  "recordedAtUTC": "2026-08-17T04:26:00Z",
   "restartProof": {
     "artifactReadable": true,
     "daemonReady": true,
-    "derivedSHA256AfterRestart": "a76b2df77939caa56bb6f990b3e3e2fece1044ab530fbdca8ce027ffc2fb30de",
+    "derivedSHA256AfterRestart": "dd4e68ac880f53c1068b3fb5c3eac06d198b1a1bb8d4d5180477d36c52d24cee",
     "operationAvailable": true,
-    "restartedAtUTC": "2026-08-16T13:23:31Z"
+    "restartedAtUTC": "2026-08-17T04:24:32Z"
   },
   "sourceArtifact": {
     "artifactID": "ART-fd0a93c85a005703f6edf1cfb47a3daa",

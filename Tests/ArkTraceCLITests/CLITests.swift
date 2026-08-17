@@ -297,7 +297,7 @@ final class CLITests: XCTestCase {
         XCTAssertEqual(notice.count, CLILicenseResources.noticeByteCount)
         let licenseFiles = try CLILicenseResources.verifiedLicenseFiles(
             inventoryData: inventory,
-            licenseDirectoryURL: resourceRoot.appendingPathComponent("LICENSES")
+            licenseDirectoryURL: resourceRoot.appending(path: "LICENSES")
         )
         let productLicense = try CLIResourceLocator.$testingRootPath.withValue(resourceRoot.path) {
             try CLILicenseResources.productLicenseData()
@@ -320,21 +320,15 @@ final class CLITests: XCTestCase {
         XCTAssertEqual(Set(licenseFiles.map(\.resourcePath)).count, licenseFiles.count)
 
         let temporary = FileManager.default.temporaryDirectory.resolvingSymlinksInPath()
-            .appendingPathComponent(
-            "arktrace-license-runtime-\(UUID().uuidString)", isDirectory: true
-        )
+            .appending(path: "arktrace-license-runtime-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: temporary, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: temporary) }
         for file in licenseFiles {
             try file.data.write(
-                to: temporary.appendingPathComponent(
-                    String(file.resourcePath.dropFirst("LICENSES/".count))
-                )
+                to: temporary.appending(path: String(file.resourcePath.dropFirst("LICENSES/".count)))
             )
         }
-        let missing = temporary.appendingPathComponent(
-            String(try XCTUnwrap(licenseFiles.first).resourcePath.dropFirst("LICENSES/".count))
-        )
+        let missing = temporary.appending(path: String(try XCTUnwrap(licenseFiles.first).resourcePath.dropFirst("LICENSES/".count)))
         try FileManager.default.removeItem(at: missing)
         XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
             inventoryData: inventory, licenseDirectoryURL: temporary
@@ -342,45 +336,41 @@ final class CLITests: XCTestCase {
 
         for file in licenseFiles {
             try file.data.write(
-                to: temporary.appendingPathComponent(
-                    String(file.resourcePath.dropFirst("LICENSES/".count))
-                ),
+                to: temporary.appending(path: String(file.resourcePath.dropFirst("LICENSES/".count))),
                 options: .atomic
             )
         }
         try Data("undeclared\n".utf8).write(
-            to: temporary.appendingPathComponent("unexpected.txt")
+            to: temporary.appending(path: "unexpected.txt")
         )
         XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
             inventoryData: inventory, licenseDirectoryURL: temporary
         ))
         try FileManager.default.removeItem(
-            at: temporary.appendingPathComponent("unexpected.txt")
+            at: temporary.appending(path: "unexpected.txt")
         )
 
         let ancestorRoot = temporary.deletingLastPathComponent()
-            .appendingPathComponent("license-ancestor-\(UUID().uuidString)", isDirectory: true)
-        let realParent = ancestorRoot.appendingPathComponent("real", isDirectory: true)
-        let realLicenses = realParent.appendingPathComponent("LICENSES", isDirectory: true)
+            .appending(path: "license-ancestor-\(UUID().uuidString)", directoryHint: .isDirectory)
+        let realParent = ancestorRoot.appending(path: "real", directoryHint: .isDirectory)
+        let realLicenses = realParent.appending(path: "LICENSES", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(
             at: realLicenses, withIntermediateDirectories: true
         )
         defer { try? FileManager.default.removeItem(at: ancestorRoot) }
         for file in licenseFiles {
             try file.data.write(
-                to: realLicenses.appendingPathComponent(
-                    String(file.resourcePath.dropFirst("LICENSES/".count))
-                )
+                to: realLicenses.appending(path: String(file.resourcePath.dropFirst("LICENSES/".count)))
             )
         }
-        let linkedParent = ancestorRoot.appendingPathComponent("linked", isDirectory: true)
+        let linkedParent = ancestorRoot.appending(path: "linked", directoryHint: .isDirectory)
         try FileManager.default.createSymbolicLink(at: linkedParent, withDestinationURL: realParent)
         XCTAssertThrowsError(try CLILicenseResources.verifiedLicenseFiles(
             inventoryData: inventory,
-            licenseDirectoryURL: linkedParent.appendingPathComponent("LICENSES")
+            licenseDirectoryURL: linkedParent.appending(path: "LICENSES")
         ))
 
-        let noticeURL = ancestorRoot.appendingPathComponent("THIRD_PARTY_NOTICES.md")
+        let noticeURL = ancestorRoot.appending(path: "THIRD_PARTY_NOTICES.md")
         try notice.write(to: noticeURL)
         XCTAssertEqual(try CLILicenseResources.noticeData(resourceURL: noticeURL), notice)
         var driftedNotice = notice
@@ -392,30 +382,28 @@ final class CLITests: XCTestCase {
             inventoryData: inventory, licenseDirectoryURL: temporary
         ))
 
-        let installPrefix = ancestorRoot.appendingPathComponent("install", isDirectory: true)
-        let installBin = installPrefix.appendingPathComponent("bin", isDirectory: true)
+        let installPrefix = ancestorRoot.appending(path: "install", directoryHint: .isDirectory)
+        let installBin = installPrefix.appending(path: "bin", directoryHint: .isDirectory)
         let installShare = installPrefix
-            .appendingPathComponent("share", isDirectory: true)
-            .appendingPathComponent("arktrace", isDirectory: true)
+            .appending(path: "share", directoryHint: .isDirectory)
+            .appending(path: "arktrace", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(
             at: installBin, withIntermediateDirectories: true
         )
         try FileManager.default.createDirectory(
             at: installShare, withIntermediateDirectories: true
         )
-        let unavailableBundle = ancestorRoot.appendingPathComponent(
-            "NoApp.app", isDirectory: true
-        )
+        let unavailableBundle = ancestorRoot.appending(path: "NoApp.app", directoryHint: .isDirectory)
         let installedRoot = try CLIResourceLocator.productionRoot(
             bundleURL: unavailableBundle,
-            executableURL: installBin.appendingPathComponent("arktrace")
+            executableURL: installBin.appending(path: "arktrace")
         )
         XCTAssertEqual(installedRoot, installShare.resolvingSymlinksInPath().standardizedFileURL)
-        let rawRelease = installPrefix.appendingPathComponent("release", isDirectory: true)
+        let rawRelease = installPrefix.appending(path: "release", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: rawRelease, withIntermediateDirectories: true)
         XCTAssertThrowsError(try CLIResourceLocator.productionRoot(
             bundleURL: unavailableBundle,
-            executableURL: rawRelease.appendingPathComponent("arktrace")
+            executableURL: rawRelease.appending(path: "arktrace")
         ))
 
         let executor = RecordingExecutor()
@@ -598,10 +586,10 @@ final class CLITests: XCTestCase {
     func testMachineEncodingIsDeterministicAndSeparateFromHumanRendering() throws {
         struct Value: Codable, Equatable { let z: Int; let a: String }
         let value = Value(z: 2, a: "one")
-        let compact = try CLIMachineEncoder().encode(value, pretty: false)
-        XCTAssertEqual(compact, try CLIMachineEncoder().encode(value, pretty: false))
+        let compact = try CLIMachineEncoder().encode(value, pretty: false, maximumBytes: Int.max)
+        XCTAssertEqual(compact, try CLIMachineEncoder().encode(value, pretty: false, maximumBytes: Int.max))
         XCTAssertEqual(String(decoding: compact, as: UTF8.self), #"{"a":"one","z":2}"# + "\n")
-        let pretty = try CLIMachineEncoder().encode(value, pretty: true)
+        let pretty = try CLIMachineEncoder().encode(value, pretty: true, maximumBytes: Int.max)
         XCTAssertTrue(String(decoding: pretty, as: UTF8.self).contains("\n"))
         XCTAssertNotEqual(pretty, CLIHumanRenderer().help())
     }

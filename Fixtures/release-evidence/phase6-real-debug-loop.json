@@ -7,12 +7,12 @@
     "change": "LazyDataSource.reloadData now compares incoming rows against the previous ones by identity signature and emits per-index onDataChange only for rows that really differ, emitting nothing when the payload is identical, and still falling back to onDataReloaded on any structural difference",
     "changedFile": "entry/src/main/ets/datasource/LazyDataSource.ets",
     "facts": [
-      "baseline analyze --kind cpu topProcesses ranked e.waterflowdemo first at runningNs 274133000 over a 10014594000 ns range, shareOfOneCPU 0.027373, sliceCount 243",
-      "baseline topThreads showed the process main thread (tid equal to pid) holding 267574000 ns, which is 97.6 percent of the process total, so the cost is on the UI thread",
+      "baseline analyze --kind cpu topProcesses ranked e.waterflowdemo first at runningNs 269738000 over a 10015152000 ns range, shareOfOneCPU 0.026933",
+      "baseline topThreads showed the process main thread (tid equal to pid) holding 262409000 ns, which is 97.3 percent of the process total, so the cost is on the UI thread",
       "the context result at the hottest interval carried isMainThread true on that same tid, so main-thread identity did not rest on the tid equals pid fallback",
-      "baseline slices at a 1 ms diagnostic threshold attributed 694.4 ms across 260 app slices, dominated by H:UITaskScheduler::FlushTask 95.60 ms over 40 slices, H:FlushLayoutTask 86.45 ms over 40 slices, H:CreateTaskMeasure[ListItem] 36.13 ms over 20 slices and H:CreateTaskMeasure[WaterFlow] 21.82 ms over 20 slices",
+      "baseline slices at a 1 ms diagnostic threshold attributed 685.5 ms across 260 app slices, dominated by H:UITaskScheduler::FlushTask over 40 slices, H:FlushLayoutTask over 40 slices, H:CreateTaskMeasure[ListItem] over 20 slices and H:CreateTaskMeasure[WaterFlow] over 20 slices",
       "the 20 CreateTaskMeasure occurrences match exactly the 20 reload cycles a 500 ms driver produces in a 10 s window",
-      "follow-up attributed 0 app slices at the same 1 ms threshold, and summary namedSliceCount fell from 3348 to 16"
+      "follow-up attributed 0 app slices at the same 1 ms threshold, and summary namedSliceCount fell from 3353 to 20"
     ],
     "guiAutomationUsed": false,
     "humanLogReadForEvidence": false,
@@ -20,8 +20,7 @@
     "inputsWereStructuredArtifactsOnly": true,
     "unknownDueToDataQuality": [
       "summary processCount and threadCount are truncated sections and carry no value in either round",
-      "M4 has no app-attributable slice at the frozen 8 ms threshold in either round, so it carries no signal",
-      "analyzer.analyze-trace@1 kind=context could not be used; see openFindings.contextCounterSampleWindow"
+      "M4 has no app-attributable slice at the frozen 8 ms threshold in either round, so it carries no signal"
     ]
   },
   "analysisRequest": {
@@ -59,19 +58,19 @@
   },
   "comparison": {
     "M1_appProcessShareOfOneCPU": {
-      "baseline": 0.02737335133106744,
-      "followup": 0.0035330826967816626,
-      "relativeDelta": -0.8709298450872626
+      "baseline": 0.02693299113183704,
+      "followup": 0.0033518359309862096,
+      "relativeDelta": -0.8755490649152571
     },
     "M2_appMainThreadShareOfOneCPU": {
-      "baseline": 0.026718407156595663,
-      "followup": 0.0032616834720168727,
-      "relativeDelta": -0.8779237305240445
+      "baseline": 0.02620119994184811,
+      "followup": 0.003111292176286919,
+      "relativeDelta": -0.8812538287104318
     },
     "M3_mainThreadRunningShare": {
-      "baseline": 0.026718407156595663,
-      "followup": 0.0032616834720168727,
-      "relativeDelta": -0.8779237305240445
+      "baseline": 0.02620119994184811,
+      "followup": 0.003111292176286919,
+      "relativeDelta": -0.8812538287104318
     },
     "M4_appLongSlices8ms": {
       "baseline": 0,
@@ -79,11 +78,11 @@
       "signal": "none"
     },
     "M5_top5HotIntervalScore": {
-      "baseline": 2950501540,
-      "followup": 2682148400,
-      "relativeDelta": -0.09095170307892807
+      "baseline": 3228420720,
+      "followup": 2319445000,
+      "relativeDelta": -0.2815542950672179
     },
-    "identityMapping": "process matched across rounds by process name plus pid; the application restarted between rounds so pid changed 26630 to 29198 and ipid changed 16 to 15, and internal keys were deliberately not reused",
+    "identityMapping": "process matched across rounds by process name plus pid; the application restarted between rounds so pid changed 2853 to 2968, and internal keys were deliberately not reused",
     "verdict": "improved",
     "verdictRule": "improved requires M1 relative drop of at least 20 percent with M2 and M4 not rising more than 5 percent"
   },
@@ -116,7 +115,7 @@
     "note": "only the application under test is named; other process and thread names observed in the traces are treated as local sensitive artifacts and are not exported",
     "thirdPartyProcessNamesIncluded": false
   },
-  "recordedAtUTC": "2026-08-16T15:35:00Z",
+  "recordedAtUTC": "2026-08-17T04:55:00Z",
   "resolvedFindings": {
     "contextCounterSampleWindow": {
       "closureEvidence": "phase6-context-closure.json",
@@ -137,123 +136,123 @@
     "baseline": {
       "analyses": {
         "cpu": {
-          "artifactID": "ART-e101fa6051ac2c9114e8928b57533868",
-          "byteCount": 159004,
-          "jobID": "job-777fffff5ad1b98789435a4ce04b34ba",
-          "sha256": "daf832f005b624f27d1df95a4353a13c03e1c4bd3fb33ea68027f03310cb44fa"
+          "artifactID": "ART-3e1ffca1106784bf6873ff857505e2e8",
+          "byteCount": 171943,
+          "jobID": "job-715e95cc497e66fe9dfe26e43936f52d",
+          "sha256": "9547413225bd8803dfff22f77233428459490a24ec09aa13adaed34a418101a7"
         },
         "hot-intervals": {
-          "artifactID": "ART-2c233fa7ccf29b9fb0cbb9a1e4286081",
-          "byteCount": 159024,
-          "jobID": "job-57bfc3ec3b604ef59fedc90dec232017",
-          "sha256": "4ac10ffaa47b7d98f4ed12ae2c6e23f9c4718f57f98f5ea9d64d10dec71649a3"
+          "artifactID": "ART-1f2bb3eb0f9f9d9a4f7c446fd4a5dffa",
+          "byteCount": 171963,
+          "jobID": "job-bed76d5e2aad50baa4da847b86fd097c",
+          "sha256": "34806d7870332c4c8b89ce59106b15cb145694689ff24fa69aac9bebdccbdcca"
         },
         "scheduling": {
-          "artifactID": "ART-06649112b0a64cd37fc3488b2ef7899c",
-          "byteCount": 159018,
-          "jobID": "job-b4f88bcf027a9121002ff4dd45f64719",
-          "sha256": "12cfe279b54332504b20c61816144345837da6c0396f14853f9dfc989b07cba3"
+          "artifactID": "ART-b5252465a737b1f48dd00408db21b19b",
+          "byteCount": 171957,
+          "jobID": "job-21b2062d66116d37fe0d0d90f648db12",
+          "sha256": "9cdd4a4577bfbefd31e619df26c7f6ab8e6a6814fbbed3d13cd5816f3cd1566b"
         },
         "slices": {
-          "artifactID": "ART-0f615d114bbeb5fbd988a0ca4014ab07",
-          "byteCount": 147761,
-          "jobID": "job-3c9498feba46514f56d5405e1328c25c",
-          "sha256": "c60c0cfcf6b2efd46166bee7d47cd842f28546e7eb5929154c1432de6bb27b28"
+          "artifactID": "ART-b4667b2a5014fc52bf6c2d4448451565",
+          "byteCount": 161216,
+          "jobID": "job-ac43a1ce7b836d1f34c862cc424a5d54",
+          "sha256": "edc8355289c29e3440cce0a0a8f1dcb9032619cd357d4a7330f044b481f9cbca"
         },
         "slicesDiagnostic1ms": {
-          "jobID": "job-a5e670bbce99533c6b73e2c405f26b1c",
+          "jobID": "job-8aaf6d037018016f7fd7e70c99f626bb",
           "limit": 1000,
           "thresholdNs": 1000000
         }
       },
       "capture": {
-        "durationNs": 10014594000,
-        "jobID": "job-31019f3f787570605943cb01779d33d3",
+        "durationNs": 10015152000,
+        "jobID": "job-6d7aa2c27870e103852c440057674175",
         "state": "succeeded",
-        "traceArtifactID": "ART-5b17a1a044873e71e6198bf17e97352a",
-        "traceByteCount": 2135494,
-        "traceSHA256": "4b113194937df42bf6268c27d47f17aa418b1a35743938f30b6108429bb4eb74"
+        "traceArtifactID": "ART-5e34c221e4502f3c6eb785097102baca",
+        "traceByteCount": 2272248,
+        "traceSHA256": "9cd9ca331ec9b78401dd975f76dc563cde02f7f0b850d9e3b40aa93252415e78"
       },
       "deploy": {
-        "deployJobID": "job-9f3325ef40185fb889d9b2e3c9cde627",
+        "deployJobID": "job-bcc85f8f72bb8135a43d00abf2895158",
         "deployState": "succeeded",
-        "signJobID": "job-4fa5a7646d6b2e1290ef0159c839f48d",
-        "signedHapArtifactID": "ART-83db3cc3e47bf310709123d95d1ac8af",
-        "signedHapByteCount": 2812138,
-        "signedHapSHA256": "c10a7a0a8c2157b0181e2d16a71d7baaf04e8ef89e876431839ff3255937af57",
-        "unsignedHapArtifactID": "ART-36fd11b73980ebf8326101c3c63634e3",
-        "unsignedHapByteCount": 2751569,
-        "unsignedHapSHA256": "14ea09f8a63fb9f22601c22235a127b9e35e8fdd31e79d13b45a3263000c4bbc"
+        "signJobID": "job-d777468a01936e905f28582359c74d51",
+        "signedHapArtifactID": "ART-6fbcd947fcac8a99f201d0b562270bf7",
+        "signedHapByteCount": 2812137,
+        "signedHapSHA256": "3cc38db366d499bcd7d265698f80f80aaf9f376709ff0c280e44361d8b6265b3",
+        "unsignedHapArtifactID": "ART-3c27f2b410e2bc6f413bf0d2654c87a5",
+        "unsignedHapByteCount": 2751261,
+        "unsignedHapSHA256": "f12d6175bbece504e268a43b144d39b5f03ca2cb6fbbe62062dbaae22afda832"
       },
       "summary": {
-        "artifactID": "ART-8a3df737b2b5ca86fe5f5ffa44c9e9a1",
+        "artifactID": "ART-1420bfa00296c1f9d6ca266c1cfadfc5",
         "byteCount": 3035,
-        "cpuSliceCount": 3409,
-        "jobID": "job-2787ac90cb52977fcf3fc2349c185b8b",
-        "namedSliceCount": 3348,
-        "sha256": "c6518e48d4c23886054c078567c8f2cfe7b739327295c7e4a777f5fd736daf2c",
-        "threadStateCount": 5278
+        "cpuSliceCount": 3806,
+        "jobID": "job-2502b33c490f1fa96d663de3f523fc76",
+        "namedSliceCount": 3353,
+        "sha256": "3b72d8e596343e6de91363e4d952a2faf054c6233e9eb6849b8283a6e9e8312b",
+        "threadStateCount": 5879
       }
     },
     "followup": {
       "analyses": {
         "cpu": {
-          "artifactID": "ART-6ecfad66477aa6e014180adb94f2b881",
-          "byteCount": 152248,
-          "jobID": "job-b08ec2e4d298c7b782c7cd05252f3065",
-          "sha256": "e2349c0d987b79d82b4812e2158fd7ef4765d93f899ba0fc4dad6b9ff8fea9fd"
+          "artifactID": "ART-82d9173c947752752b8e7de532ee5417",
+          "byteCount": 149836,
+          "jobID": "job-405f75211858b5c2dc22c6ac408d2901",
+          "sha256": "bf08c062de40425bdbee610f8754bf303b91892a77ffbe86ad8259a618ab9b91"
         },
         "hot-intervals": {
-          "artifactID": "ART-85bb7eca6aff965d3e9bac71439fa72b",
-          "byteCount": 152268,
-          "jobID": "job-b2ccf75df89f20f5325bddcc2c858e31",
-          "sha256": "db7e0b2ea1748f9d3f628888e876b9df0d7530948c7f6c2586dd78a6f03bf450"
+          "artifactID": "ART-327362f1e6e5350fc81de91866bb268c",
+          "byteCount": 149856,
+          "jobID": "job-7b9479fb1da7247d348ed68d00d14e1a",
+          "sha256": "ad69228e7df038b454a02d9d3d289c6c3a156cb85f555f40f26040765db52f31"
         },
         "scheduling": {
-          "artifactID": "ART-fe312c4aca10fe027138441193809fa2",
-          "byteCount": 152262,
-          "jobID": "job-d29ebfa5cf063d7da751f076334ef3f1",
-          "sha256": "88e8bfd1f78f5c7358c798520ff978e5af27641e66190ed78ee5fe259fe92ea4"
+          "artifactID": "ART-8f80254381ba781a6cbc725ec4ac1f30",
+          "byteCount": 149850,
+          "jobID": "job-ebcde8f29635b5d651a09b28b0a647bb",
+          "sha256": "c201e40514ded7dc7ca33ed61c918b7fb6820cba3284110f6eb96d49e512e3f6"
         },
         "slices": {
-          "artifactID": "ART-b929fb0647a6bd610f73f13d246cb04e",
-          "byteCount": 147193,
-          "jobID": "job-94434aff3e57ff42b7dbd996e3819a48",
-          "sha256": "398cebf5ffb5a6ad1a2751f77cf140f17a05c009ac44e4ef7a0dd76cd64b1a39"
+          "artifactID": "ART-d18b9afef053936bc752d01b84b2a6b6",
+          "byteCount": 143564,
+          "jobID": "job-911755015e12464ee17fd50db97726c3",
+          "sha256": "752344d7993ca79eba06546dc56d1f721fcbc89da62f5d82b5bf107a3f2b183c"
         },
         "slicesDiagnostic1ms": {
-          "jobID": "job-f1364be9eb4e56052297b0ef32851f47",
+          "jobID": "job-1d713b1b226b2a3b11d6183a7ffe602a",
           "limit": 1000,
           "thresholdNs": 1000000
         }
       },
       "capture": {
-        "durationNs": 10014767000,
-        "jobID": "job-2b8b5c88bd2c1ef1cc6e18ce6bd46fe4",
+        "durationNs": 10014810000,
+        "jobID": "job-57820609835a6a53e7b7ee89a754bdb0",
         "state": "succeeded",
-        "traceArtifactID": "ART-5e0feb41341e4b92e86aa90328d00901",
-        "traceByteCount": 1243942,
-        "traceSHA256": "5e1781a94dd11cf7c64855eef7e3cd56c2ff4f08100e6631b682040ebde17f0b"
+        "traceArtifactID": "ART-2eaa52e619d996e62fd1d26266c02dde",
+        "traceByteCount": 1059011,
+        "traceSHA256": "46006e50e8adfe8b119af4f10d152d2ee8009a82f812c3b7e5cc30ef9a778286"
       },
       "deploy": {
-        "deployJobID": "job-8842ed6228cfb49ba27c4b19414fc18f",
+        "deployJobID": "job-d3286608ea9cdb5688f6fee89d0e85d1",
         "deployState": "succeeded",
-        "signJobID": "job-2777b6eba71f710a0025244798f671fe",
-        "signedHapArtifactID": "ART-489c829f894ba8d6fd2c78218de00b6c",
-        "signedHapByteCount": 2812140,
-        "signedHapSHA256": "534bfe214ff175311242d1139f4fa46b43064a5b469e1192d92ac8c7049c9f97",
-        "unsignedHapArtifactID": "ART-6919e1b185e9fa3896e1e326b79f0e47",
-        "unsignedHapByteCount": 2751569,
-        "unsignedHapSHA256": "7bb71123298362413743a60bac1e6cfc548958bbbc1b5a8b032875fc99a866ac"
+        "signJobID": "job-3647b03e968eb047370f0effd372ecd7",
+        "signedHapArtifactID": "ART-67f45d1b0f0b372c5fc1b4ad3cd03598",
+        "signedHapByteCount": 2812137,
+        "signedHapSHA256": "6902e558705e8232216f721da6f775545cab440f7ce036e4f3f7b6572053576d",
+        "unsignedHapArtifactID": "ART-544f0c5bea49842076a72d32ec2374aa",
+        "unsignedHapByteCount": 2751261,
+        "unsignedHapSHA256": "b87677f457e826793885693f571c1ebf369930c10add0326190b0280b53a69f6"
       },
       "summary": {
-        "artifactID": "ART-2ca65910c5e649703fe6c39b7982d995",
+        "artifactID": "ART-ac0ffb14d8bf521e424c7cde32c1770f",
         "byteCount": 2611,
-        "cpuSliceCount": 3153,
-        "jobID": "job-09bed8416f2f69b4ae71a0c29185e834",
-        "namedSliceCount": 16,
-        "sha256": "743902398d3f51dbeed3317d2cb20658735f4fa9dd0dc4788e0ccc3de83c5246",
-        "threadStateCount": 4904
+        "cpuSliceCount": 2712,
+        "jobID": "job-56275265339d44a8fbff39b56b2a11c4",
+        "namedSliceCount": 20,
+        "sha256": "116a14b5e31b23a4a05beff5f41cb915fc78680f8814865d590d8d36da49c716",
+        "threadStateCount": 4107
       }
     }
   },
@@ -263,7 +262,7 @@
     "id": "S1",
     "reference": "docs/PHASE_6_SCENARIO.md",
     "rerunOfFrozenScenario": true,
-    "rerunReason": "the 2026-08-16 CLI re-pin replaced the tool and parser the earlier rounds ran on, so gate 10 was attesting a retired distribution",
+    "rerunReason": "the macOS 26 / Swift 6.3 platform re-pin (source 61d0f2a) replaced the tool and parser the 2026-08-16 rounds ran on, so gate 10 was attesting a retired distribution",
     "workloadDriver": "in-app deterministic feed reload every 500 ms while the Index page is foreground; identical in both rounds; disclosed test scaffolding, not the change under test"
   },
   "subject": {
@@ -276,11 +275,11 @@
     "targetID": "TGT-958780b2ffb7"
   },
   "toolIdentity": {
-    "arkDeckDaemonSHA256": "9768a99735025278a7c1712684276bdbb7e0a1eb8d57fdc368ef57abc76785d7",
-    "arkTraceBuildRevision": "a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa",
+    "arkDeckDaemonSHA256": "6c50421d0f9004b14e5c9f9d14d92e21039c0b3a9edb477860bec9fb506e1d0e",
+    "arkTraceBuildRevision": "cdfc91679211c7537db343693b035e1b7c9752beadd9b60dd9cfad90874829c1",
     "arkTraceName": "arktrace",
     "arkTraceVersion": "0.1.0",
-    "parserBinarySHA256": "66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9",
+    "parserBinarySHA256": "7c5ed515fc4d74517476fb901e3f7812914cb33b651324f49466d709d4641b35",
     "parserName": "trace_streamer",
     "parserUpstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
     "parserVersion": "4.3.7"

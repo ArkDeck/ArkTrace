@@ -2,8 +2,8 @@ import Darwin
 import Foundation
 
 /// Reviewed test-only copy of the CLI resource set.
-public enum ArkTraceCLIResourceFixtures {
-    public static let root: URL = {
+package enum ArkTraceCLIResourceFixtures {
+    package static let root: URL = {
         let bundled = Bundle.module.resourceURL!
         let descriptor = bundled.path.withCString {
             Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
@@ -22,8 +22,6 @@ public enum ArkTraceCLIResourceFixtures {
             decoding: path[..<terminator].map { UInt8(bitPattern: $0) },
             as: UTF8.self
         )
-        return URL(
-            fileURLWithPath: physicalPath, isDirectory: true
-        ).standardizedFileURL
+        return URL(filePath: physicalPath, directoryHint: .isDirectory).standardizedFileURL
     }()
 }

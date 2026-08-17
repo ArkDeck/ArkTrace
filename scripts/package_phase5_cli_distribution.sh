@@ -279,7 +279,7 @@ actual_app_cdhash=$(codesign -dv --verbose=4 "$app" 2>&1 \
     && [ "$(plutil -extract CFBundleExecutable raw -o - "$app/Contents/Info.plist")" = \
         "arktrace" ] \
     && [ "$(plutil -extract LSMinimumSystemVersion raw -o - "$app/Contents/Info.plist")" = \
-        "14.0" ] \
+        "26.0" ] \
     && [ "$(plutil -extract LSBackgroundOnly raw -o - "$app/Contents/Info.plist")" = \
         "true" ] \
     || fail "CLI App Info.plist identity drifted"

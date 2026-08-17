@@ -1,43 +1,37 @@
 {
   "artifact": {
-    "byteCount": 5122912,
-    "fileName": "ArkTraceCLI-0.1.0-20260816T121858Z.zip",
-    "sha256": "f94c2d25640eb07c307e1ecd96ee4d92dbffd0b01302f9b2aaa0bca0d4a00645"
+    "byteCount": 5109270,
+    "fileName": "ArkTraceCLI-0.1.0-20260817T041251Z.zip",
+    "sha256": "04f0468af303a3053a8bf428ed2eccc031a297cbb1f5f8972abcba416437245c"
   },
   "candidate": {
-    "appTreeSHA256": "8b642c50eaab5f8100dfb3a891400ed2fb6b7dd9a689e27785c71c8c7aea9e41",
+    "appTreeSHA256": "b3b46acbe05fa4e47b515c5f82feab845d7ac4982f89addb0f2787f2594aaa65",
     "recordByteCount": 1919,
-    "recordFileName": "ArkTraceCLI-review-candidate-20260816T121806Z.app.json",
-    "recordSHA256": "bee2bb347b8bfe9d909caf26c7bde096acf7465d70717e5468770c0ec92ceca0"
+    "recordFileName": "ArkTraceCLI-review-candidate-20260817T041150Z.app.json",
+    "recordSHA256": "628d6d32bc232dab06cc1d356898dccd43cb70736a9dcfbbf34cf5030e2cbb2e"
   },
-  "evidenceRevision": "6ed197c66b21303bf1ae52ace63c659b9e8db30b",
+  "evidenceRevision": "61d0f2aecb09f63a9633ea50ec8bebc956fe37ac",
   "finalDistribution": {
-    "appTreeSHA256": "52c8e171a3793d37e21da44ac5a04209b0406463b825cd99213a148bd455095e",
-    "manifestSHA256": "a0818b4278d742e7bb84bf09b867357f330547a92bbc2b3b49809523381bec40",
-    "resourceTreeSHA256": "3f79f263bfca14c80407e7d1f9d66a4bed3a5ddf5c6277c6071ba529bc6c9673"
+    "appTreeSHA256": "5f9ff8b3f1ab51073730a330753f28edddb7c6c0c3cfa2b710c227a7bc6e88d4",
+    "manifestSHA256": "49a69405881924e0b8996cfa231653128ebc3fb2291d86bb1a1e2c4c880400d0",
+    "resourceTreeSHA256": "0da2c020b74ac40d64f8e991b08fa7832ec4602bdd733dbdc7d6e3e4f1ceb315"
   },
   "formatVersion": 1,
   "notarization": {
-    "artifactReceiptSHA256": "5730f2c7d3d0b5f454b339077e6a460785ce0e20ca8c090da1947405a4f7cb86",
+    "artifactReceiptSHA256": "5cd1dac80ee793ca693476585b952f0dcbabb5ac5d1cfc50f0eb3cfdc6f8462e",
     "finalArchiveReverified": true,
     "gatekeeperAssessment": "accepted",
-    "liveLogCanonicalCompactSHA256": "42f9c5b545878536fc8e02d24e3e231d6f00d2ee4c5714761eda18554c8054eb",
+    "liveLogCanonicalCompactSHA256": "726c95e357cc8558cb470c77f32967b8c02923746d8401249208a46ad20d1505",
     "liveLogSemanticProjection": {
       "archiveFilename": "ArkTraceCLI-notary-submission.zip",
       "issues": null,
-      "jobId": "4fd2842e-9c8f-49c9-87e4-1df5a6964b17",
+      "jobId": "1e85cbaa-bc85-4741-ba6d-a2b68699c5f7",
       "logFormatVersion": 1,
-      "sha256": "906a759231c4ba442057204260559b201e9319c1a85ee02c141df8206af8ee43",
+      "sha256": "db18b51ef76be3189c3e58e8997400d8f3029a8c3fa86e6aabe553d00881332f",
       "status": "Accepted",
       "statusCode": 0,
       "statusSummary": "Ready for distribution",
       "ticketContents": [
-        {
-          "arch": "arm64",
-          "cdhash": "5ec4ee07d78fa8ee9d6e94659c0e601121d7ee1f",
-          "digestAlgorithm": "SHA-256",
-          "path": "ArkTraceCLI-notary-submission.zip/ArkTraceCLI.app"
-        },
         {
           "arch": "arm64",
           "cdhash": "9b4685ac5e54a930f434f4c5eb0b5536d844dae3",
@@ -46,7 +40,13 @@
         },
         {
           "arch": "arm64",
-          "cdhash": "5ec4ee07d78fa8ee9d6e94659c0e601121d7ee1f",
+          "cdhash": "6bf5f1da8e4a8a404e546a68936e1594e087f812",
+          "digestAlgorithm": "SHA-256",
+          "path": "ArkTraceCLI-notary-submission.zip/ArkTraceCLI.app"
+        },
+        {
+          "arch": "arm64",
+          "cdhash": "6bf5f1da8e4a8a404e546a68936e1594e087f812",
           "digestAlgorithm": "SHA-256",
           "path": "ArkTraceCLI-notary-submission.zip/ArkTraceCLI.app/Contents/MacOS/arktrace"
         },
@@ -61,9 +61,9 @@
     "nestedAndOuterSignaturesValid": true,
     "stapledTicketValidated": true,
     "status": "Accepted",
-    "submissionID": "4fd2842e-9c8f-49c9-87e4-1df5a6964b17"
+    "submissionID": "1e85cbaa-bc85-4741-ba6d-a2b68699c5f7"
   },
-  "packagedAt": "2026-08-16T12:18:58Z",
+  "packagedAt": "2026-08-17T04:12:51Z",
   "product": {
     "architecture": "arm64",
     "build": "1",
@@ -71,7 +71,7 @@
     "jsonContract": "1.0",
     "version": "0.1.0"
   },
-  "recordedAt": "2026-08-16T13:24:00Z",
+  "recordedAt": "2026-08-17T04:20:00Z",
   "signing": {
     "certificateSHA1": "38E3B7650DF0CE1DEC0CC8C403614AA0C38B0B4C",
     "identity": "Developer ID Application: Hanfeng Fu (8AQTYW5FKR)",
@@ -79,24 +79,24 @@
     "teamIdentifier": "8AQTYW5FKR"
   },
   "source": {
-    "revision": "6ed197c66b21303bf1ae52ace63c659b9e8db30b",
-    "treeSHA256": "4585ae7ca8057d91c44d81eab87119bf1c264b9d6abbdd8be087880e4660faae"
+    "revision": "61d0f2aecb09f63a9633ea50ec8bebc956fe37ac",
+    "treeSHA256": "0f6e59c8e1718206a2f67df1000fbf8aae6d6365d4a25e6e81aed47b99ca787a"
   },
   "tool": {
-    "binarySHA256": "a7859d691e5edbe6a15352dbfbc08adb3e95f1e8979e9c59b8b642b752b32efa",
-    "byteCount": 6395968,
-    "codeDirectoryHash": "5ec4ee07d78fa8ee9d6e94659c0e601121d7ee1f"
+    "binarySHA256": "cdfc91679211c7537db343693b035e1b7c9752beadd9b60dd9cfad90874829c1",
+    "byteCount": 6326368,
+    "codeDirectoryHash": "6bf5f1da8e4a8a404e546a68936e1594e087f812"
   },
   "traceStreamer": {
-    "binarySHA256": "66887fae680650e2c56adf518ef76679e896a4d09aba7000e05b3db4918772e9",
+    "binarySHA256": "7c5ed515fc4d74517476fb901e3f7812914cb33b651324f49466d709d4641b35",
     "buildRecipeVersion": "e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06",
     "byteCount": 12975168,
     "codeDirectoryHash": "9b4685ac5e54a930f434f4c5eb0b5536d844dae3",
     "manifestByteCount": 1634,
-    "manifestSHA256": "c1a7389fa613d860bc5d926bc29fd6a9ce9d446f1ead1deeac414887d240d6ad",
+    "manifestSHA256": "7a8d92e1312c750b05d5bd611945f18f09e2aef331317ad0d54d83442d0d38b3",
     "reportedVersion": "4.3.7",
     "signingRecordByteCount": 536,
-    "signingRecordSHA256": "8f1b42de4e77da312084d16ceac655bcff8178c9ec825f21968e650855a6a5a2",
+    "signingRecordSHA256": "3a01ea31af09e021f6f66d522079540639b02ca190e06ecaf5d06ece41ae7a4e",
     "unsignedBinarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf",
     "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
   }

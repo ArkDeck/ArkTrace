@@ -7,9 +7,9 @@ import XCTest
 final class BoundedRegularFileTests: XCTestCase {
     func testDescriptorSnapshotRejectsPathReplacementWithoutReadingReplacement() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-bounded-file-\(UUID().uuidString)")
-        let file = root.appendingPathComponent("resource")
-        let displaced = root.appendingPathComponent("opened")
+            .appending(path: "arktrace-bounded-file-\(UUID().uuidString)")
+        let file = root.appending(path: "resource")
+        let displaced = root.appending(path: "opened")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         let original = Data("reviewed bytes".utf8)
@@ -30,8 +30,8 @@ final class BoundedRegularFileTests: XCTestCase {
 
     func testDescriptorSnapshotRejectsGrowthAfterOpen() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-bounded-growth-\(UUID().uuidString)")
-        let file = root.appendingPathComponent("resource")
+            .appending(path: "arktrace-bounded-growth-\(UUID().uuidString)")
+        let file = root.appending(path: "resource")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         try Data("small".utf8).write(to: file)
@@ -56,9 +56,9 @@ final class BoundedRegularFileTests: XCTestCase {
 
     func testDescriptorSnapshotRejectsFinalSymlink() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-bounded-symlink-\(UUID().uuidString)")
-        let target = root.appendingPathComponent("target")
-        let link = root.appendingPathComponent("resource")
+            .appending(path: "arktrace-bounded-symlink-\(UUID().uuidString)")
+        let target = root.appending(path: "target")
+        let link = root.appending(path: "resource")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         try Data("bytes".utf8).write(to: target)
@@ -70,8 +70,8 @@ final class BoundedRegularFileTests: XCTestCase {
 
     func testMaximumIntLimitDoesNotOverflowBeforeReading() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-bounded-intmax-\(UUID().uuidString)")
-        let file = root.appendingPathComponent("resource")
+            .appending(path: "arktrace-bounded-intmax-\(UUID().uuidString)")
+        let file = root.appending(path: "resource")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         let expected = Data("bounded".utf8)

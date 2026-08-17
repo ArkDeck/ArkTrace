@@ -3,6 +3,7 @@
   "strings": {
     "ArkTrace and third-party license notices": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -42,6 +43,7 @@
     },
     "a11y.announce.openingCancelled": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -59,6 +61,7 @@
     },
     "a11y.announce.openingTrace": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -76,6 +79,7 @@
     },
     "a11y.announce.operationFailed": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -93,6 +97,7 @@
     },
     "a11y.announce.rangeAnalysisComplete": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -110,6 +115,7 @@
     },
     "a11y.announce.searchFoundAtLeastResults": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -127,6 +133,7 @@
     },
     "a11y.announce.searchFoundResults": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -144,6 +151,7 @@
     },
     "a11y.announce.traceCloseFailed": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -161,6 +169,7 @@
     },
     "a11y.announce.traceClosed": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -178,6 +187,7 @@
     },
     "a11y.announce.traceLoadedWithVisibleTracks": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -195,6 +205,7 @@
     },
     "a11y.announce.traceLoadedWithoutTimedEvents": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -212,6 +223,7 @@
     },
     "a11y.announce.traceOpenFailed": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -229,6 +241,7 @@
     },
     "a11y.timeline.label": {
       "comment": "Accessibility string resolved from a typed key supplied by ArkTraceAppSupport.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -246,6 +259,7 @@
     },
     "error.title.bundledParserUnavailable": {
       "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -263,6 +277,7 @@
     },
     "error.title.cacheNeedsAttention": {
       "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -280,6 +295,7 @@
     },
     "error.title.couldNotFinish": {
       "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -297,6 +313,7 @@
     },
     "error.title.openingCancelled": {
       "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -314,6 +331,7 @@
     },
     "error.title.traceCouldNotBeOpened": {
       "comment": "User-facing error banner title, keyed by TraceAppErrorTitle.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {

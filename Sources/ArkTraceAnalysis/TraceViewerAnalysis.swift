@@ -1,7 +1,7 @@
 import ArkTraceCore
 import Foundation
 
-public struct TraceViewerSearchRequest: Sendable {
+package struct TraceViewerSearchRequest: Sendable {
     public let text: String
     public let limit: Int
     public let timeout: Duration
@@ -27,7 +27,7 @@ public struct TraceViewerSearchRequest: Sendable {
     }
 }
 
-public struct TraceViewerSearchEngine: Sendable {
+package struct TraceViewerSearchEngine: Sendable {
     private let repository: any TraceRepositoryProtocol
 
     public init(repository: any TraceRepositoryProtocol) {
@@ -211,7 +211,7 @@ public struct TraceViewerSearchEngine: Sendable {
     }
 }
 
-public struct TraceRangeAnalysisRequest: Sendable {
+package struct TraceRangeAnalysisRequest: Sendable {
     public let range: TraceTimeRange
     public let maximumSlices: Int
     public let topThreadLimit: Int
@@ -319,7 +319,7 @@ public struct TraceRangeAnalysis: Hashable, Codable, Sendable {
     public let dataQuality: TraceDataQuality
 }
 
-public struct TraceRangeAnalysisEngine: Sendable {
+package struct TraceRangeAnalysisEngine: Sendable {
     private struct ThreadAccumulator {
         var tid: Int64?
         var pid: Int64?

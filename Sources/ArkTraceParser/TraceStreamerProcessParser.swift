@@ -9,7 +9,7 @@ import Foundation
 /// (AT-PARSE-003). `-nm` keeps user paths out of the exported database
 /// (AT-PARSE-004). Cancellation terminates the child process and never
 /// promotes partial output (AT-PARSE-009).
-public struct TraceStreamerProcessParser: TraceParser {
+package struct TraceStreamerProcessParser: TraceParser {
     public static let expectedName = "trace_streamer"
     public static let expectedUpstreamRepository =
         "https://gitcode.com/openharmony/developtools_smartperf_host.git"
@@ -345,7 +345,7 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     static func validateProcessOutcome(_ outcome: Outcome, outputURL: URL) throws {
         let statusDiagnostic = Self.boundedFileDiagnostic(
-            at: URL(fileURLWithPath: outputURL.path + ".ohos.ts")
+            at: URL(filePath: outputURL.path + ".ohos.ts")
         )
         if outcome.cancelled {
             throw ArkTraceError(
@@ -688,10 +688,8 @@ public struct TraceStreamerProcessParser: TraceParser {
         guard parentAttributes?[.type] as? FileAttributeType == .typeDirectory else {
             throw destinationUnavailable(reason: "parentUnavailable")
         }
-        let canonicalDestination = destinationParent.appendingPathComponent(destinationName)
-        let destinationMetadata = URL(
-            fileURLWithPath: canonicalDestination.path + ".arktrace.json"
-        )
+        let canonicalDestination = destinationParent.appending(path: destinationName)
+        let destinationMetadata = URL(filePath: canonicalDestination.path + ".arktrace.json")
         guard canonicalDestination != canonicalSource else {
             throw destinationUnavailable(reason: "sameAsSource")
         }
@@ -699,10 +697,7 @@ public struct TraceStreamerProcessParser: TraceParser {
             throw destinationUnavailable(reason: "alreadyExists")
         }
 
-        let claimURL = destinationParent.appendingPathComponent(
-            ".\(destinationName).arktrace-claim",
-            isDirectory: false
-        )
+        let claimURL = destinationParent.appending(path: ".\(destinationName).arktrace-claim", directoryHint: .notDirectory)
         var createdClaim = false
         do {
             try Data().write(to: claimURL, options: .withoutOverwriting)
@@ -729,8 +724,7 @@ public struct TraceStreamerProcessParser: TraceParser {
             guard !pathEntryExists(canonicalDestination) else {
                 throw destinationUnavailable(reason: "alreadyExists")
             }
-            let directory = destinationParent.appendingPathComponent(
-                ".arktrace-parser-\(UUID().uuidString)", isDirectory: true)
+            let directory = destinationParent.appending(path: ".arktrace-parser-\(UUID().uuidString)", directoryHint: .isDirectory)
             try fm.createDirectory(at: directory, withIntermediateDirectories: false)
             try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
             workDirectory = directory
@@ -752,7 +746,7 @@ public struct TraceStreamerProcessParser: TraceParser {
             if sourceIsImmutableSnapshot {
                 sourceSnapshotURL = canonicalSource
             } else {
-                sourceSnapshotURL = directory.appendingPathComponent("source.trace")
+                sourceSnapshotURL = directory.appending(path: "source.trace")
                 try copyRegularFileCancellable(
                     from: canonicalSource,
                     to: sourceSnapshotURL,
@@ -774,10 +768,8 @@ public struct TraceStreamerProcessParser: TraceParser {
                 destinationMetadataURL: destinationMetadata,
                 destinationClaimURL: claimURL,
                 workDirectory: directory,
-                outputURL: directory.appendingPathComponent("output.partial.sqlite"),
-                outputMetadataURL: directory.appendingPathComponent(
-                    "output.partial.sqlite.arktrace.json"
-                ),
+                outputURL: directory.appending(path: "output.partial.sqlite"),
+                outputMetadataURL: directory.appending(path: "output.partial.sqlite.arktrace.json"),
                 sourceSnapshotURL: sourceSnapshotURL,
                 sourceSHA256: sourceIdentity.sha256,
                 sourceByteCount: sourceIdentity.byteCount,
@@ -840,7 +832,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         }
         let manifestURL = (configuredManifestURL
             ?? canonicalExecutable.deletingLastPathComponent()
-                .appendingPathComponent("manifest.json"))
+                .appending(path: "manifest.json"))
             .resolvingSymlinksInPath().standardizedFileURL
         let manifest = try TraceStreamerManifest.load(from: manifestURL)
 
@@ -848,13 +840,12 @@ public struct TraceStreamerProcessParser: TraceParser {
         if useParentDirectory {
             directory = parentDirectory
         } else {
-            directory = parentDirectory.appendingPathComponent(
-                ".arktrace-identity-\(UUID().uuidString)", isDirectory: true)
+            directory = parentDirectory.appending(path: ".arktrace-identity-\(UUID().uuidString)", directoryHint: .isDirectory)
             try fm.createDirectory(at: directory, withIntermediateDirectories: false)
         }
 
         do {
-            let executableSnapshot = directory.appendingPathComponent("trace_streamer")
+            let executableSnapshot = directory.appending(path: "trace_streamer")
             try copyRegularFileCancellable(
                 from: canonicalExecutable,
                 to: executableSnapshot,
@@ -1343,7 +1334,7 @@ public struct TraceStreamerProcessParser: TraceParser {
             total = newTotal
             try Task.checkCancellation()
         }
-        let digest = hasher.finalize().map { String(format: "%02x", $0) }.joined()
+        let digest = hasher.finalize().lowercaseHexString()
         return (digest, total)
     }
 
@@ -1449,17 +1440,9 @@ public struct TraceStreamerProcessParser: TraceParser {
                     || (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "z"))
                     || byte == UInt8(ascii: ".") || byte == UInt8(ascii: "-")
             }),
-            databasePreparation.schemaFingerprint.utf8.count == 64,
-            databasePreparation.schemaFingerprint.utf8.allSatisfy({ byte in
-                (byte >= UInt8(ascii: "0") && byte <= UInt8(ascii: "9"))
-                    || (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "f"))
-            }),
+            ArkTraceIdentityGrammar.isSHA256(databasePreparation.schemaFingerprint),
             databasePreparation.indexVersion > 0,
-            databasePreparation.upstreamDatabaseSHA256.utf8.count == 64,
-            databasePreparation.upstreamDatabaseSHA256.utf8.allSatisfy({ byte in
-                (byte >= UInt8(ascii: "0") && byte <= UInt8(ascii: "9"))
-                    || (byte >= UInt8(ascii: "a") && byte <= UInt8(ascii: "f"))
-            }),
+            ArkTraceIdentityGrammar.isSHA256(databasePreparation.upstreamDatabaseSHA256),
             databasePreparation.upstreamDatabaseByteCount > 0
         else {
             throw ArkTraceError(
@@ -1501,8 +1484,8 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func synchronizeFile(at url: URL) throws {
-        let descriptor = url.path.withCString {
-            Darwin.open($0, O_RDONLY | O_NOFOLLOW)
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW)
         }
         guard descriptor >= 0 else {
             throw stagingFinalizationFailure(reason: "fileSyncOpen")
@@ -1514,7 +1497,7 @@ public struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func synchronizeDirectory(at url: URL) throws {
-        let descriptor = url.path.withCString { Darwin.open($0, O_RDONLY) }
+        let descriptor = unsafe url.path.withCString { unsafe Darwin.open($0, O_RDONLY) }
         guard descriptor >= 0 else {
             throw stagingFinalizationFailure(reason: "directorySyncOpen")
         }
@@ -1533,7 +1516,7 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private static func fileIdentityProbe(at url: URL) -> FileIdentityProbe {
         var info = stat()
-        let result = url.path.withCString { Darwin.lstat($0, &info) }
+        let result = unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) }
         guard result == 0 else {
             return errno == ENOENT ? .absent : .inaccessible
         }
@@ -1563,13 +1546,10 @@ public struct TraceStreamerProcessParser: TraceParser {
         var quarantineURL: URL?
         var renameError: Int32 = 0
         for _ in 0..<8 {
-            let candidate = parent.appendingPathComponent(
-                ".arktrace-rollback-\(UUID().uuidString)",
-                isDirectory: false
-            )
-            let result = file.url.path.withCString { sourcePath in
-                candidate.path.withCString { quarantinePath in
-                    Darwin.renameatx_np(
+            let candidate = parent.appending(path: ".arktrace-rollback-\(UUID().uuidString)", directoryHint: .notDirectory)
+            let result = unsafe file.url.path.withCString { sourcePath in
+                unsafe candidate.path.withCString { quarantinePath in
+                    unsafe Darwin.renameatx_np(
                         AT_FDCWD,
                         sourcePath,
                         AT_FDCWD,
@@ -1606,9 +1586,9 @@ public struct TraceStreamerProcessParser: TraceParser {
             throw cleanupFailure(stage: .parsing, reason: "readyIdentityProbeFailed")
         }
         if shouldRestore {
-            let restoreResult = quarantineURL.path.withCString { quarantinePath in
-                file.url.path.withCString { destinationPath in
-                    Darwin.renameatx_np(
+            let restoreResult = unsafe quarantineURL.path.withCString { quarantinePath in
+                unsafe file.url.path.withCString { destinationPath in
+                    unsafe Darwin.renameatx_np(
                         AT_FDCWD,
                         quarantinePath,
                         AT_FDCWD,
@@ -1628,7 +1608,7 @@ public struct TraceStreamerProcessParser: TraceParser {
         } catch {
             throw cleanupFailure(stage: .parsing, reason: "readyRemovalFailed")
         }
-        let unlinkResult = quarantineURL.path.withCString { Darwin.unlink($0) }
+        let unlinkResult = unsafe quarantineURL.path.withCString { unsafe Darwin.unlink($0) }
         guard unlinkResult == 0 else {
             throw cleanupFailure(stage: .parsing, reason: "readyRemovalFailed")
         }
@@ -1681,7 +1661,7 @@ public struct TraceStreamerProcessParser: TraceParser {
 
     private static func pathEntryStatus(at url: URL) -> PathEntryStatus {
         var info = stat()
-        let result = url.path.withCString { Darwin.lstat($0, &info) }
+        let result = unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) }
         if result == 0 { return .present }
         return errno == ENOENT ? .absent : .inaccessible
     }

@@ -1,6 +1,6 @@
 /// Bounded directory page: repositories never return unbounded lists (AT-DB-007).
 /// Truncation is detected with limit+1 (AT-QUERY-002).
-public struct BoundedPage<Element: Sendable>: Sendable {
+package struct BoundedPage<Element: Sendable>: Sendable {
     public let items: [Element]
     public let truncated: Bool
     /// Row-level anomalies (invalid names, inverted lifecycles) surfaced as
@@ -19,13 +19,13 @@ public struct BoundedPage<Element: Sendable>: Sendable {
     }
 }
 
-public enum TraceDirectoryNameMatch: String, Codable, Sendable {
+package enum TraceDirectoryNameMatch: String, Codable, Sendable {
     case exact
     case prefix
     case contains
 }
 
-public struct ProcessQuery: Sendable {
+package struct ProcessQuery: Sendable {
     public let processKey: ProcessKey?
     public let pid: Int64?
     public let name: String?
@@ -64,7 +64,7 @@ public struct ProcessQuery: Sendable {
     }
 }
 
-public struct ThreadQuery: Sendable {
+package struct ThreadQuery: Sendable {
     public let processKey: ProcessKey?
     public let pid: Int64?
     public let threadKey: ThreadKey?
@@ -112,7 +112,7 @@ public struct ThreadQuery: Sendable {
 /// Deadline- and row-bounded request for deterministic summary facts.
 /// The Store validates the range against trace duration and binds every
 /// boundary/limit into prepared SQL (AT-AN-001, AT-DB-006/008).
-public struct TraceSummaryQuery: Sendable {
+package struct TraceSummaryQuery: Sendable {
     public let range: TraceTimeRange?
     public let maximumRowsPerSection: Int
     public let maximumEventsPerSection: Int
@@ -156,7 +156,7 @@ public struct TraceSummaryQuery: Sendable {
 /// A count may be a deterministic lower bound when the caller's row budget
 /// was reached. Consumers must surface `truncated`; they must not present a
 /// bounded lower bound as an exact count.
-public struct TraceBoundedCount: Hashable, Codable, Sendable {
+package struct TraceBoundedCount: Hashable, Codable, Sendable {
     public let value: Int64
     public let truncated: Bool
 
@@ -166,7 +166,7 @@ public struct TraceBoundedCount: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceEventSourceCount: Hashable, Codable, Sendable {
+package struct TraceEventSourceCount: Hashable, Codable, Sendable {
     public let source: String
     public let count: Int64
 
@@ -176,7 +176,7 @@ public struct TraceEventSourceCount: Hashable, Codable, Sendable {
     }
 }
 
-public struct TraceEventSourceCounts: Hashable, Codable, Sendable {
+package struct TraceEventSourceCounts: Hashable, Codable, Sendable {
     public let items: [TraceEventSourceCount]
     public let truncated: Bool
 
@@ -188,7 +188,7 @@ public struct TraceEventSourceCounts: Hashable, Codable, Sendable {
 
 /// Store-level evidence consumed by ArkTraceAnalysis. Optional event sections
 /// mean unsupported capability, never a guessed zero (AT-JSON-004).
-public struct TraceSummaryFacts: Hashable, Codable, Sendable {
+package struct TraceSummaryFacts: Hashable, Codable, Sendable {
     public let cpuCount: TraceBoundedCount?
     public let processCount: TraceBoundedCount
     public let threadCount: TraceBoundedCount
@@ -230,7 +230,7 @@ public struct TraceSummaryFacts: Hashable, Codable, Sendable {
 
 /// Typed repository boundary shared by App, CLI, and analysis (DESIGN §9.2).
 /// Phase 1 scope: metadata and process/thread directories.
-public protocol TraceRepositoryProtocol: Sendable {
+package protocol TraceRepositoryProtocol: Sendable {
     func metadata() async throws -> TraceMetadata
     func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess>
     func threads(_ query: ThreadQuery) async throws -> BoundedPage<TraceThread>
@@ -249,7 +249,7 @@ public protocol TraceRepositoryProtocol: Sendable {
 /// A bounded group of independent, immutable Ready-database reads. The Store
 /// may execute these reads concurrently, but every result retains the exact
 /// semantics, limit and deadline of its corresponding typed query.
-public struct TraceRepositoryEventBatch: Sendable {
+package struct TraceRepositoryEventBatch: Sendable {
     public static let maximumQueryCount = 32
 
     public let cpuSlices: [CpuSliceQuery]
@@ -257,16 +257,18 @@ public struct TraceRepositoryEventBatch: Sendable {
     public let slices: [TraceSliceQuery]
     public let counters: [CounterQuery]
     public let densities: [TraceDensityQuery]
+    public let threads: [ThreadQuery]
 
     public init(
         cpuSlices: [CpuSliceQuery] = [],
         threadStates: [ThreadStateQuery] = [],
         slices: [TraceSliceQuery] = [],
         counters: [CounterQuery] = [],
-        densities: [TraceDensityQuery] = []
+        densities: [TraceDensityQuery] = [],
+        threads: [ThreadQuery] = []
     ) throws {
         let count = cpuSlices.count + threadStates.count + slices.count
-            + counters.count + densities.count
+            + counters.count + densities.count + threads.count
         guard (1...Self.maximumQueryCount).contains(count) else {
             throw ArkTraceError(
                 code: .invalidArgument,
@@ -279,34 +281,38 @@ public struct TraceRepositoryEventBatch: Sendable {
         self.slices = slices
         self.counters = counters
         self.densities = densities
+        self.threads = threads
     }
 }
 
-public struct TraceRepositoryEventBatchResult: Sendable {
+package struct TraceRepositoryEventBatchResult: Sendable {
     public let cpuSlices: [TraceEventPage<CpuSlice>]
     public let threadStates: [TraceEventPage<ThreadStateInterval>]
     public let slices: [TraceEventPage<TraceSlice>]
     public let counters: [TraceEventPage<CounterSeries>]
     public let densities: [TraceDensityResult]
+    public let threads: [BoundedPage<TraceThread>]
 
     public init(
         cpuSlices: [TraceEventPage<CpuSlice>],
         threadStates: [TraceEventPage<ThreadStateInterval>],
         slices: [TraceEventPage<TraceSlice>],
         counters: [TraceEventPage<CounterSeries>],
-        densities: [TraceDensityResult]
+        densities: [TraceDensityResult],
+        threads: [BoundedPage<TraceThread>] = []
     ) {
         self.cpuSlices = cpuSlices
         self.threadStates = threadStates
         self.slices = slices
         self.counters = counters
         self.densities = densities
+        self.threads = threads
     }
 }
 
 /// Additive event APIs do not force summary-only adapters to manufacture
 /// event data. Production Store overrides every method.
-public extension TraceRepositoryProtocol {
+package extension TraceRepositoryProtocol {
     func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
         .unavailable
     }
@@ -337,17 +343,20 @@ public extension TraceRepositoryProtocol {
         var slices: [TraceEventPage<TraceSlice>] = []
         var counters: [TraceEventPage<CounterSeries>] = []
         var densities: [TraceDensityResult] = []
+        var threads: [BoundedPage<TraceThread>] = []
         for query in batch.cpuSlices { cpu.append(try await cpuSlices(query)) }
         for query in batch.threadStates { states.append(try await threadStates(query)) }
         for query in batch.slices { slices.append(try await self.slices(query)) }
         for query in batch.counters { counters.append(try await self.counters(query)) }
         for query in batch.densities { densities.append(try await density(query)) }
+        for query in batch.threads { threads.append(try await self.threads(query)) }
         return TraceRepositoryEventBatchResult(
             cpuSlices: cpu,
             threadStates: states,
             slices: slices,
             counters: counters,
-            densities: densities
+            densities: densities,
+            threads: threads
         )
     }
 }

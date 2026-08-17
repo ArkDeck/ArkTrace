@@ -10,18 +10,17 @@ final class ExecutableIdentityTests: XCTestCase {
     func testCurrentResolverHashesTheMappedExecutableBytes() throws {
         let revision = try CLIExecutableIdentityResolver.current().resolveBuildRevision()
         let imageName = try XCTUnwrap(_dyld_get_image_name(0))
-        let executableURL = URL(fileURLWithPath: String(cString: imageName))
+        let executableURL = URL(filePath: String(cString: imageName))
         let expected = SHA256.hash(data: try Data(contentsOf: executableURL))
-            .map { String(format: "%02x", $0) }
-            .joined()
+            .lowercaseHexString()
         XCTAssertEqual(revision, expected)
     }
 
     func testBoundDescriptorSurvivesPathReplacementDuringHash() throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
-        let executable = directory.appendingPathComponent("tool", isDirectory: false)
-        let displaced = directory.appendingPathComponent("running", isDirectory: false)
+        let executable = directory.appending(path: "tool", directoryHint: .notDirectory)
+        let displaced = directory.appending(path: "running", directoryHint: .notDirectory)
         let original = Data("original executable bytes".utf8)
         let replacement = Data("replacement executable bytes".utf8)
         try original.write(to: executable, options: .withoutOverwriting)
@@ -37,17 +36,16 @@ final class ExecutableIdentityTests: XCTestCase {
         )
         let revision = try resolver.resolveBuildRevision()
         let expected = SHA256.hash(data: original)
-            .map { String(format: "%02x", $0) }
-            .joined()
+            .lowercaseHexString()
         XCTAssertEqual(revision, expected)
         XCTAssertNotEqual(revision, SHA256.hash(data: replacement)
-            .map { String(format: "%02x", $0) }.joined())
+            .lowercaseHexString())
     }
 
     func testResolverRejectsPathThatIsNotTheMappedExecutable() throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
-        let executable = directory.appendingPathComponent("tool", isDirectory: false)
+        let executable = directory.appending(path: "tool", directoryHint: .notDirectory)
         try Data("replacement".utf8).write(to: executable, options: .withoutOverwriting)
         let actual = try fileIdentity(executable)
         let different = CLIExecutableFileIdentity(
@@ -69,7 +67,7 @@ final class ExecutableIdentityTests: XCTestCase {
     func testResolverRejectsInPlaceMutationAfterDescriptorBinding() throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
-        let executable = directory.appendingPathComponent("tool", isDirectory: false)
+        let executable = directory.appending(path: "tool", directoryHint: .notDirectory)
         try Data("mapped executable".utf8).write(to: executable, options: .withoutOverwriting)
         let identity = try fileIdentity(executable)
         let resolver = CLIExecutableIdentityResolver(
@@ -92,7 +90,7 @@ final class ExecutableIdentityTests: XCTestCase {
     func testResolverRejectsEqualLengthInPlaceMutationWithRestoredModificationTime() throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
-        let executable = directory.appendingPathComponent("tool", isDirectory: false)
+        let executable = directory.appending(path: "tool", directoryHint: .notDirectory)
         let original = Data("mapped executable bytes".utf8)
         let replacement = Data("forged executable bytes".utf8)
         XCTAssertEqual(original.count, replacement.count)
@@ -159,7 +157,7 @@ final class ExecutableIdentityTests: XCTestCase {
     func testResolverFailsTypedWhenExecutableCannotBeRead() throws {
         let directory = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
-        let executable = directory.appendingPathComponent("tool", isDirectory: false)
+        let executable = directory.appending(path: "tool", directoryHint: .notDirectory)
         try Data("execute only".utf8).write(to: executable, options: .withoutOverwriting)
         let identity = try fileIdentity(executable)
         XCTAssertEqual(chmod(executable.path, 0o111), 0)
@@ -199,7 +197,7 @@ final class ExecutableIdentityTests: XCTestCase {
 
     private func makeTemporaryDirectory() throws -> URL {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cli-executable-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-cli-executable-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
         return url
     }

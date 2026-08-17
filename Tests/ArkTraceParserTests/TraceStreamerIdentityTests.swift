@@ -42,22 +42,22 @@ final class TraceStreamerIdentityTests: XCTestCase {
     }
 
     private static var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
+        URL(filePath: #filePath)
             .deletingLastPathComponent()  // TraceStreamerIdentityTests.swift
             .deletingLastPathComponent()  // ArkTraceParserTests
             .deletingLastPathComponent()  // Tests
     }
 
     private static var binaryURL: URL {
-        repoRoot.appendingPathComponent("ThirdParty/TraceStreamer/macx/trace_streamer")
+        repoRoot.appending(path: "ThirdParty/TraceStreamer/macx/trace_streamer")
     }
 
     private static var manifestURL: URL {
-        repoRoot.appendingPathComponent("ThirdParty/TraceStreamer/macx/manifest.json")
+        repoRoot.appending(path: "ThirdParty/TraceStreamer/macx/manifest.json")
     }
 
     private static var fixtureURL: URL {
-        repoRoot.appendingPathComponent("Fixtures/traces/hiprofiler_data_ability.htrace")
+        repoRoot.appending(path: "Fixtures/traces/hiprofiler_data_ability.htrace")
     }
 
     private func requirePinnedFiles() throws {
@@ -72,10 +72,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     private func makeWorkingCopy() throws -> (directory: URL, binary: URL, manifest: URL) {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-identity-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-identity-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let binary = directory.appendingPathComponent("trace_streamer")
-        let manifest = directory.appendingPathComponent("manifest.json")
+        let binary = directory.appending(path: "trace_streamer")
+        let manifest = directory.appending(path: "manifest.json")
         try FileManager.default.copyItem(at: Self.binaryURL, to: binary)
         try FileManager.default.copyItem(at: Self.manifestURL, to: manifest)
         return (directory, binary, manifest)
@@ -114,14 +114,14 @@ final class TraceStreamerIdentityTests: XCTestCase {
     }
 
     private func sha256(_ data: Data) -> String {
-        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        SHA256.hash(data: data).lowercaseHexString()
     }
 
     private func makeExecutableScript(_ body: String) throws -> (directory: URL, script: URL) {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-child-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-child-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
-        let script = directory.appendingPathComponent("fixture.zsh")
+        let script = directory.appending(path: "fixture.zsh")
         try Data(("#!/bin/zsh\n" + body).utf8).write(to: script, options: .withoutOverwriting)
         try FileManager.default.setAttributes(
             [.posixPermissions: 0o700],
@@ -166,11 +166,9 @@ final class TraceStreamerIdentityTests: XCTestCase {
             done
             """)
         defer { try? FileManager.default.removeItem(at: fixture.directory) }
-        let sentinel = fixture.directory.appendingPathComponent("shell-expanded")
-        let source = fixture.directory.appendingPathComponent(
-            "source; touch \(sentinel.path)"
-        )
-        let output = fixture.directory.appendingPathComponent("output.sqlite")
+        let sentinel = fixture.directory.appending(path: "shell-expanded")
+        let source = fixture.directory.appending(path: "source; touch \(sentinel.path)")
+        let output = fixture.directory.appending(path: "output.sqlite")
         let arguments = TraceStreamerProcessParser.invocationArguments(
             source: source,
             output: output
@@ -216,7 +214,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         }
 
         let direct = try await TraceStreamerProcessParser.run(
-            executable: URL(fileURLWithPath: "/usr/bin/env"),
+            executable: URL(filePath: "/usr/bin/env"),
             arguments: []
         )
         let childEnvironment = Dictionary(uniqueKeysWithValues:
@@ -238,9 +236,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         )
         XCTAssertFalse(String(decoding: direct.stderr.data, as: UTF8.self).contains("DYLD"))
 
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "arktrace-environment-\(UUID().uuidString)", isDirectory: true
-        )
+        let directory = FileManager.default.temporaryDirectory.appending(path: "arktrace-environment-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
@@ -249,7 +245,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         let parsed = try await Self.parse(
             parser: parser,
             source: Self.fixtureURL,
-            destination: directory.appendingPathComponent("trace.sqlite")
+            destination: directory.appending(path: "trace.sqlite")
         )
         XCTAssertTrue(FileManager.default.fileExists(atPath: parsed.databaseURL.path))
     }
@@ -283,7 +279,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
             while true; do :; done
             """)
         defer { try? FileManager.default.removeItem(at: fixture.directory) }
-        let pidFile = fixture.directory.appendingPathComponent("pid")
+        let pidFile = fixture.directory.appending(path: "pid")
         let task = Task {
             try await TraceStreamerProcessParser.run(
                 executable: fixture.script,
@@ -308,7 +304,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
             while true; do :; done
             """)
         defer { try? FileManager.default.removeItem(at: fixture.directory) }
-        let pidFile = fixture.directory.appendingPathComponent("pid")
+        let pidFile = fixture.directory.appending(path: "pid")
         let task = Task {
             try await TraceStreamerProcessParser.run(
                 executable: fixture.script,
@@ -328,18 +324,18 @@ final class TraceStreamerIdentityTests: XCTestCase {
 
     func testProcessOutcomeRejectsFailureMissingGarbageAndSymlinkOutput() async throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-output-validation-\(UUID().uuidString)")
+            .appending(path: "arktrace-output-validation-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let failed = try await TraceStreamerProcessParser.run(
-            executable: URL(fileURLWithPath: "/usr/bin/false"),
+            executable: URL(filePath: "/usr/bin/false"),
             arguments: []
         )
         XCTAssertThrowsError(
             try TraceStreamerProcessParser.validateProcessOutcome(
                 failed,
-                outputURL: directory.appendingPathComponent("missing.sqlite")
+                outputURL: directory.appending(path: "missing.sqlite")
             )
         ) { error in
             XCTAssertEqual((error as? ArkTraceError)?.code, .traceParseFailed)
@@ -347,17 +343,17 @@ final class TraceStreamerIdentityTests: XCTestCase {
         }
 
         let succeeded = try await TraceStreamerProcessParser.run(
-            executable: URL(fileURLWithPath: "/usr/bin/true"),
+            executable: URL(filePath: "/usr/bin/true"),
             arguments: []
         )
-        let missing = directory.appendingPathComponent("missing.sqlite")
+        let missing = directory.appending(path: "missing.sqlite")
         XCTAssertThrowsError(
             try TraceStreamerProcessParser.validateProcessOutcome(succeeded, outputURL: missing)
         )
 
-        let garbage = directory.appendingPathComponent("garbage.sqlite")
+        let garbage = directory.appending(path: "garbage.sqlite")
         try Data("not sqlite".utf8).write(to: garbage)
-        let status = URL(fileURLWithPath: garbage.path + ".ohos.ts")
+        let status = URL(filePath: garbage.path + ".ohos.ts")
         try Data(repeating: 0x78, count: 100_000).write(to: status)
         XCTAssertThrowsError(
             try TraceStreamerProcessParser.validateProcessOutcome(succeeded, outputURL: garbage)
@@ -369,9 +365,9 @@ final class TraceStreamerIdentityTests: XCTestCase {
             XCTAssertFalse(error?.details.values.contains { $0.contains(directory.path) } == true)
         }
 
-        let target = directory.appendingPathComponent("target.sqlite")
+        let target = directory.appending(path: "target.sqlite")
         try (Data("SQLite format 3".utf8) + Data([0])).write(to: target)
-        let symlink = directory.appendingPathComponent("symlink.sqlite")
+        let symlink = directory.appending(path: "symlink.sqlite")
         try FileManager.default.createSymbolicLink(at: symlink, withDestinationURL: target)
         XCTAssertThrowsError(
             try TraceStreamerProcessParser.validateProcessOutcome(succeeded, outputURL: symlink)
@@ -385,8 +381,8 @@ final class TraceStreamerIdentityTests: XCTestCase {
                 includingPropertiesForKeys: nil
             )) ?? []
             for child in children where child.lastPathComponent.hasPrefix(".arktrace-parser-") {
-                let executable = child.appendingPathComponent("trace_streamer")
-                let source = child.appendingPathComponent("source.trace")
+                let executable = child.appending(path: "trace_streamer")
+                let source = child.appending(path: "source.trace")
                 let executableMode = (try? FileManager.default.attributesOfItem(
                     atPath: executable.path)[.posixPermissions] as? NSNumber)?.intValue
                 let sourceMode = (try? FileManager.default.attributesOfItem(
@@ -649,10 +645,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testExecutableSymlinkResolvesToCanonicalBinaryAndManifest() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-symlink-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-symlink-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let link = directory.appendingPathComponent("trace_streamer")
+        let link = directory.appending(path: "trace_streamer")
         try FileManager.default.createSymbolicLink(at: link, withDestinationURL: Self.binaryURL)
 
         let identity = try await TraceStreamerProcessParser(executableURL: link).identity()
@@ -662,13 +658,13 @@ final class TraceStreamerIdentityTests: XCTestCase {
 
     func testMachOArchitectureComesFromBinaryHeader() throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-macho-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-macho-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let arm64 = directory.appendingPathComponent("arm64")
+        let arm64 = directory.appending(path: "arm64")
         try Data([0xcf, 0xfa, 0xed, 0xfe, 0x0c, 0x00, 0x00, 0x01]).write(to: arm64)
-        let x86_64 = directory.appendingPathComponent("x86_64")
+        let x86_64 = directory.appending(path: "x86_64")
         try Data([0xcf, 0xfa, 0xed, 0xfe, 0x07, 0x00, 0x00, 0x01]).write(to: x86_64)
 
         XCTAssertEqual(try TraceStreamerBinaryInspector.architecture(at: arm64), "arm64")
@@ -687,7 +683,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         try handle.seekToEnd()
         try handle.write(contentsOf: Data([0]))
         try handle.close()
-        let destination = copy.directory.appendingPathComponent("new.sqlite")
+        let destination = copy.directory.appending(path: "new.sqlite")
 
         await assertIdentityMismatch {
             _ = try await Self.parse(
@@ -702,10 +698,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testSourceCannotBeUsedAsDestinationAndIsNeverDeleted() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-source-destination-\(UUID().uuidString)")
+            .appending(path: "arktrace-source-destination-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let source = directory.appendingPathComponent("source.htrace")
+        let source = directory.appending(path: "source.htrace")
         let original = try Data(contentsOf: Self.fixtureURL)
         try original.write(to: source)
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
@@ -723,15 +719,15 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testSourceSymlinkResolvesOnceToImmutableSnapshotWithoutMutatingTarget() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-source-symlink-\(UUID().uuidString)")
+            .appending(path: "arktrace-source-symlink-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let target = directory.appendingPathComponent("source-target.htrace")
+        let target = directory.appending(path: "source-target.htrace")
         let original = try Data(contentsOf: Self.fixtureURL)
         try original.write(to: target)
-        let sourceLink = directory.appendingPathComponent("source-link.htrace")
+        let sourceLink = directory.appending(path: "source-link.htrace")
         try FileManager.default.createSymbolicLink(at: sourceLink, withDestinationURL: target)
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
 
         let parsed = try await Self.parse(
             parser: try TraceStreamerProcessParser(executableURL: Self.binaryURL),
@@ -747,10 +743,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testExistingDestinationIsNeverOverwrittenOrDeleted() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-existing-destination-\(UUID().uuidString)")
+            .appending(path: "arktrace-existing-destination-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let sentinel = Data("caller-owned".utf8)
         try sentinel.write(to: destination)
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
@@ -772,11 +768,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testExistingReadyMetadataSidecarIsNeverOverwrittenOrDeleted() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-existing-sidecar-\(UUID().uuidString)")
+            .appending(path: "arktrace-existing-sidecar-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
-        let sidecar = URL(fileURLWithPath: destination.path + ".arktrace.json")
+        let destination = directory.appending(path: "trace.sqlite")
+        let sidecar = URL(filePath: destination.path + ".arktrace.json")
         let sentinel = Data("caller-owned-sidecar".utf8)
         try sentinel.write(to: sidecar)
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
@@ -799,10 +795,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testConcurrentParsesCannotClaimTheSameDestination() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-shared-destination-\(UUID().uuidString)")
+            .appending(path: "arktrace-shared-destination-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
 
         async let first = Self.parseOutcome(
@@ -826,10 +822,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testParseUsesPrivateImmutableSourceAndBinarySnapshots() async throws {
         let copy = try makeWorkingCopy()
         defer { try? FileManager.default.removeItem(at: copy.directory) }
-        let source = copy.directory.appendingPathComponent("source.htrace")
+        let source = copy.directory.appending(path: "source.htrace")
         let sourceBytes = try Data(contentsOf: Self.fixtureURL)
         try sourceBytes.write(to: source)
-        let destination = copy.directory.appendingPathComponent("trace.sqlite")
+        let destination = copy.directory.appending(path: "trace.sqlite")
         let parser = try TraceStreamerProcessParser(executableURL: copy.binary)
 
         async let parsing = Self.parse(
@@ -859,11 +855,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testCancellationDuringSourceSnapshotCleansPartialPreparation() async throws {
         let copy = try makeWorkingCopy()
         defer { try? FileManager.default.removeItem(at: copy.directory) }
-        let source = copy.directory.appendingPathComponent("source.htrace")
+        let source = copy.directory.appending(path: "source.htrace")
         let sourceBytes = try Data(contentsOf: Self.fixtureURL)
         try sourceBytes.write(to: source, options: .withoutOverwriting)
         let sourceHash = sha256(sourceBytes)
-        let destination = copy.directory.appendingPathComponent("trace.sqlite")
+        let destination = copy.directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
         let parser = try TraceStreamerProcessParser(
             executableURL: copy.binary,
@@ -908,10 +904,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testCancellationDuringFinalVerificationNeverPromotesDestination() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-finalize-cancel-\(UUID().uuidString)")
+            .appending(path: "arktrace-finalize-cancel-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
 
         let outcome = await withTaskGroup(of: ParseOutcome.self) { group in
@@ -956,10 +952,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testCancellationDuringPostPromotionCleanupRollsBackOwnedReadyFiles() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-post-promote-cancel-\(UUID().uuidString)")
+            .appending(path: "arktrace-post-promote-cancel-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
         let parser = try TraceStreamerProcessParser(
             executableURL: Self.binaryURL,
@@ -1006,10 +1002,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testCancellationAtFinalReturnBoundaryRollsBackOwnedReadyFiles() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-final-boundary-cancel-\(UUID().uuidString)")
+            .appending(path: "arktrace-final-boundary-cancel-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
         let parser = try TraceStreamerProcessParser(
             executableURL: Self.binaryURL,
@@ -1063,10 +1059,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-probe-failure-\(UUID().uuidString)")
+            .appending(path: "arktrace-probe-failure-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
         let parser = try TraceStreamerProcessParser(
             executableURL: Self.binaryURL,
@@ -1117,11 +1113,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
     {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-post-promote-replaced-\(UUID().uuidString)")
+            .appending(path: "arktrace-post-promote-replaced-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
-        let metadata = URL(fileURLWithPath: destination.path + ".arktrace.json")
+        let destination = directory.appending(path: "trace.sqlite")
+        let metadata = URL(filePath: destination.path + ".arktrace.json")
         let databaseReplacement = Data("replacement database owned by another session".utf8)
         let metadataReplacement = Data("replacement metadata owned by another session".utf8)
         let barrier = CancellationBarrier()
@@ -1178,10 +1174,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testCancelledParseReportsStagingCleanupFailureAndRollsBackReady() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-cleanup-failure-\(UUID().uuidString)")
+            .appending(path: "arktrace-cleanup-failure-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
         let parser = try TraceStreamerProcessParser(
             executableURL: Self.binaryURL,
@@ -1232,10 +1228,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-rollback-failure-\(UUID().uuidString)")
+            .appending(path: "arktrace-rollback-failure-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let barrier = CancellationBarrier()
         let parser = try TraceStreamerProcessParser(
             executableURL: Self.binaryURL,
@@ -1282,10 +1278,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testDatabasePreparationFailureNeverPromotesReadyArtifacts() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-preparation-failure-\(UUID().uuidString)")
+            .appending(path: "arktrace-preparation-failure-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let destination = directory.appendingPathComponent("trace.sqlite")
+        let destination = directory.appending(path: "trace.sqlite")
         let parser = try TraceStreamerProcessParser(executableURL: Self.binaryURL)
 
         do {
@@ -1317,7 +1313,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
     func testStagingFoundationErrorIsTypedAndDoesNotLeakAbsolutePath() async throws {
         try requirePinnedFiles()
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-denied-staging-\(UUID().uuidString)")
+            .appending(path: "arktrace-denied-staging-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try FileManager.default.setAttributes(
             [.posixPermissions: 0o500], ofItemAtPath: directory.path)
@@ -1332,7 +1328,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
             _ = try await Self.parse(
                 parser: parser,
                 source: Self.fixtureURL,
-                destination: directory.appendingPathComponent("trace.sqlite")
+                destination: directory.appending(path: "trace.sqlite")
             )
             XCTFail("expected staging error")
         } catch let error as ArkTraceError {
@@ -1363,10 +1359,10 @@ final class TraceStreamerIdentityTests: XCTestCase {
 
     func testResolverIgnoresFakeBinaryOnPATH() throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("arktrace-path-\(UUID().uuidString)", isDirectory: true)
+            .appending(path: "arktrace-path-\(UUID().uuidString)", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let fake = directory.appendingPathComponent("trace_streamer")
+        let fake = directory.appending(path: "trace_streamer")
         try Data("#!/bin/sh\nexit 99\n".utf8).write(to: fake)
         try FileManager.default.setAttributes(
             [.posixPermissions: 0o755], ofItemAtPath: fake.path)
@@ -1377,8 +1373,8 @@ final class TraceStreamerIdentityTests: XCTestCase {
         // the environment is shared, so setenv here races every other test that
         // spawns a subprocess.
         let resolver = TraceStreamerResolver(
-            appBundleURL: directory.appendingPathComponent("Missing.app"),
-            cliExecutableURL: directory.appendingPathComponent("install/bin/arktrace")
+            appBundleURL: directory.appending(path: "Missing.app"),
+            cliExecutableURL: directory.appending(path: "install/bin/arktrace")
         )
         let candidates = resolver.candidateExecutableURLs().map(\.standardizedFileURL.path)
         XCTAssertFalse(candidates.contains(fake.standardizedFileURL.path))
@@ -1389,7 +1385,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
     }
 
     func testResolverUsesOnlyDocumentedFixedLayouts() {
-        let app = URL(fileURLWithPath: "/Applications/ArkTrace.app")
+        let app = URL(filePath: "/Applications/ArkTrace.app")
         XCTAssertEqual(
             TraceStreamerResolver.appBundleExecutableURL(bundleURL: app).path,
             "/Applications/ArkTrace.app/Contents/Helpers/trace_streamer"
@@ -1400,18 +1396,18 @@ final class TraceStreamerIdentityTests: XCTestCase {
         )
         XCTAssertEqual(
             TraceStreamerResolver.cliLibexecURL(
-                cliExecutableURL: URL(fileURLWithPath: "/usr/local/bin/arktrace"))?.path,
+                cliExecutableURL: URL(filePath: "/usr/local/bin/arktrace"))?.path,
             "/usr/local/libexec/arktrace/trace_streamer"
         )
         XCTAssertNil(
             TraceStreamerResolver.cliLibexecURL(
-                cliExecutableURL: URL(fileURLWithPath: "/tmp/arktrace")))
+                cliExecutableURL: URL(filePath: "/tmp/arktrace")))
     }
 
     @MainActor
     func testInitializerDefersAllFilesystemValidationToAsyncIdentity() async throws {
         let missing = FileManager.default.temporaryDirectory
-            .appendingPathComponent("missing-\(UUID().uuidString)/trace_streamer")
+            .appending(path: "missing-\(UUID().uuidString)/trace_streamer")
         let parser = try TraceStreamerProcessParser(executableURL: missing)
 
         do {

@@ -360,8 +360,8 @@ final class TypedMachinePayloadTests: XCTestCase {
 
     func testTraceSnapshotRejectsCrossTraceProvenanceEvenWithSameSchema() throws {
         let otherParsed = ParsedTrace(
-            databaseURL: URL(fileURLWithPath: "/dev/null"),
-            metadataSidecarURL: URL(fileURLWithPath: "/dev/null"),
+            databaseURL: URL(filePath: "/dev/null"),
+            metadataSidecarURL: URL(filePath: "/dev/null"),
             parser: metadata.parser,
             sourceSHA256: String(repeating: "9", count: 64),
             sourceByteCount: metadata.sourceByteCount,
@@ -978,8 +978,8 @@ private func testSnapshot(
 ) throws -> CLIMachineTraceSnapshot {
     try CLIMachineTraceSnapshot(
         parsed: ParsedTrace(
-            databaseURL: URL(fileURLWithPath: "/dev/null"),
-            metadataSidecarURL: URL(fileURLWithPath: "/dev/null"),
+            databaseURL: URL(filePath: "/dev/null"),
+            metadataSidecarURL: URL(filePath: "/dev/null"),
             parser: metadata.parser,
             sourceSHA256: metadata.traceSHA256,
             sourceByteCount: metadata.sourceByteCount,

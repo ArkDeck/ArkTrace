@@ -293,6 +293,31 @@ summary `namedSliceCount` 由 3,348 降到 16。主线程身份这次由 `contex
 跨轮 pid 26630→29198、ipid 16→15，按 process name + pid 显式映射。本轮无被丢弃的采集。
 机器证据与门常量已一并指向该轮，第 6～10 节未改动。
 
+## 10.3 在 macOS 26 基线分发上的重跑（2026-08-17）
+
+macOS 26 / Swift 6.3 平台升级（源 revision `61d0f2a`）重新打包并公证了 CLI 分发
+（tool `cdfc9167…`、signed parser `7c5ed515…`），门 10 因此再次只覆盖已退役的分发。
+按第 5、8 节原样重跑整条闭环，唯一变更仍是 `USE_BLANKET_RELOAD` 由 `true` 翻成 `false`：
+
+| 指标 | baseline | follow-up | 相对变化 |
+|---|---:|---:|---:|
+| M1 App 进程 shareOfOneCPU | 0.026933 | 0.003352 | **−87.55%** |
+| M2 App 主线程 shareOfOneCPU | 0.026201 | 0.003111 | −88.13% |
+| M3 主线程 running 占比 | 0.026201 | 0.003111 | −88.13% |
+| M4 App ≥8 ms long slice | 0 | 0 | 无信号 |
+| M5 top-5 hot interval score | 3,228,420,720 | 2,319,445,000 | −28.16% |
+
+判定仍为 **improved**（M1 −87.55% ≥ 20%，M2 未上升，M4 无信号不构成否决）。
+
+命中的候选仍是 **C1**：1 ms 诊断阈值下 baseline 归属 App 的 slice 685.5 ms / 260 条，
+`CreateTaskMeasure` 20 次对应 10 s 窗口内 20 次 reload；follow-up 同阈值下为 0 条，
+summary `namedSliceCount` 由 3,353 降到 20。主线程身份由 `context` 结果的
+`isMainThread: true` 直接确认，未依赖 `tid == pid` 回退。
+
+跨轮 pid 2853→2968，按 process name + pid 显式映射。本轮无被丢弃的采集
+（屏幕全程唤醒解锁，fixture 处于 `traceWorkload` 模式）。机器证据与门常量已一并
+指向该轮，第 6～10 节未改动。
+
 ## 11. 阻塞状态
 
 ### 11.1 已解除：`analyzer.analyze-trace@1`（2026-08-16）

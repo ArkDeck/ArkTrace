@@ -142,7 +142,7 @@ printf '%s\n' \
     'import ArkTraceAppSupport' \
     'let _ = ArkTraceDeveloperParserResolver()' >"$negative_source"
 if xcrun swiftc -typecheck \
-    -target arm64-apple-macosx14.0 \
+    -target arm64-apple-macosx26.0 \
     -sdk "$(xcrun --sdk macosx --show-sdk-path)" \
     -I "$(dirname "$release_module_directory")" \
     "$negative_source" >"$negative_log" 2>&1
