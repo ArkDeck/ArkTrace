@@ -242,6 +242,87 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertTrue(store.documents().isEmpty)
     }
 
+    func testDeletedRecentStaysListedAsMissingUntilTheUserRemovesIt() throws {
+        let suite = "ArkTraceRecentMissingTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = TraceRecentDocumentStore(defaults: defaults)
+        let root = FileManager.default.temporaryDirectory
+            .appending(
+                path: "arktrace-recent-missing-\(UUID().uuidString)",
+                directoryHint: .isDirectory
+            )
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let kept = root.appending(path: "kept.htrace")
+        let deleted = root.appending(path: "deleted.htrace")
+        for url in [kept, deleted] {
+            FileManager.default.createFile(atPath: url.path, contents: Data())
+        }
+
+        try store.record(deleted)
+        try store.record(kept)
+        try FileManager.default.removeItem(at: deleted)
+
+        // The bookmark no longer resolves, but the entry still names the trace
+        // it was made from, and says that the trace is gone.
+        let listed = store.documents()
+        XCTAssertEqual(listed.map(\.url.lastPathComponent), ["kept.htrace", "deleted.htrace"])
+        XCTAssertEqual(listed.map(\.isMissing), [false, true])
+
+        // Recording another trace must not quietly evict the missing entry.
+        try store.record(kept)
+        XCTAssertEqual(
+            store.documents().map(\.url.lastPathComponent), ["kept.htrace", "deleted.htrace"]
+        )
+
+        store.remove(deleted)
+        XCTAssertEqual(store.documents().map(\.url.lastPathComponent), ["kept.htrace"])
+        XCTAssertEqual(store.documents().map(\.isMissing), [false])
+    }
+
+    func testControllerRemovesAndRefreshesRecentDocuments() async throws {
+        let suite = "ArkTraceRecentControllerTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { source, _ in
+                TraceOpenedDocument(
+                    repository: Repository(identity: source.lastPathComponent),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let root = FileManager.default.temporaryDirectory
+            .appending(
+                path: "arktrace-recent-controller-\(UUID().uuidString)",
+                directoryHint: .isDirectory
+            )
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let trace = root.appending(path: "opened.htrace")
+        FileManager.default.createFile(atPath: trace.path, contents: Data())
+
+        controller.open(trace)
+        while controller.phase != .ready { await Task.yield() }
+        XCTAssertEqual(controller.recentDocuments.map(\.url.lastPathComponent), ["opened.htrace"])
+        XCTAssertEqual(controller.recentDocuments.map(\.isMissing), [false])
+
+        // Deleting behind the app's back only shows up on the next refresh,
+        // which is what returning to the front triggers.
+        try FileManager.default.removeItem(at: trace)
+        controller.refreshRecentDocuments()
+        XCTAssertEqual(controller.recentDocuments.map(\.isMissing), [true])
+
+        let document = try XCTUnwrap(controller.recentDocuments.first)
+        controller.removeRecentDocument(document)
+        XCTAssertTrue(controller.recentDocuments.isEmpty)
+    }
+
     func testCacheMaintenanceRunsAfterOpenRatherThanGatingIt() async throws {
         let suite = "ArkTraceMaintenanceTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

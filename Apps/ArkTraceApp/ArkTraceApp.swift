@@ -270,9 +270,6 @@ private struct TraceViewerRootView: View {
     }
 }
 
-/// Observation boundary: recent documents, the search echo/results, and the
-/// track tree. Never reads `snapshot`, `phase`, or selection state, so
-/// viewport churn cannot rebuild the sidebar.
 /// One lane row: visibility, optional depth control, and the pin toggle.
 /// Shared by the pinned area and the process groups so a lane looks and behaves
 /// the same in both places.
@@ -323,6 +320,104 @@ private struct TrackRow: View {
     }
 }
 
+/// One Recent row.
+///
+/// A trace whose file has since been deleted keeps its row, greyed and inert,
+/// rather than quietly dropping out of the list: the row is how the user finds
+/// out the trace is gone, and the context menu is how they act on it — open
+/// it, drop it from the list, or go and look at where it used to live.
+private struct RecentDocumentRow: View {
+    var controller: TraceDocumentController
+    let document: TraceRecentDocument
+
+    var body: some View {
+        Group {
+            if document.isMissing {
+                // Deliberately not a Button: there is nothing left to press.
+                label.foregroundStyle(.tertiary)
+            } else {
+                Button {
+                    controller.open(document.url)
+                } label: {
+                    label
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .accessibilityLabel(
+            document.isMissing
+                ? Text("\(document.url.lastPathComponent), missing")
+                : Text(document.url.lastPathComponent)
+        )
+        .help(
+            document.isMissing
+                ? "Missing — \(document.url.path)"
+                : document.url.path
+        )
+        .arktraceAccessibleTarget()
+        .contextMenu {
+            Button("Open") { controller.open(document.url) }
+                .disabled(document.isMissing)
+            Button("Remove from Recent") { controller.removeRecentDocument(document) }
+            Button("Show in Finder") { showInFinder() }
+                .disabled(finderTarget == nil)
+        }
+    }
+
+    private var label: some View {
+        Label(
+            document.url.lastPathComponent,
+            systemImage: document.isMissing ? "clock.badge.xmark" : "clock"
+        )
+        .lineLimit(1)
+    }
+
+    /// Finder can only select a file that is there; when it is not, the honest
+    /// next best answer is the folder it was in, and that folder can be gone
+    /// too — a deleted trace is often a deleted capture directory.
+    private var finderTarget: URL? {
+        let manager = FileManager.default
+        if manager.fileExists(atPath: document.url.path) { return document.url }
+        let parent = document.url.deletingLastPathComponent()
+        return manager.fileExists(atPath: parent.path) ? parent : nil
+    }
+
+    private func showInFinder() {
+        guard let target = finderTarget else { return }
+        if target == document.url {
+            NSWorkspace.shared.activateFileViewerSelecting([target])
+        } else {
+            NSWorkspace.shared.open(target)
+        }
+    }
+}
+
+/// Observation boundary: the recent list alone.
+///
+/// Split out of the sidebar because it is the one part that has to re-read
+/// itself when the app is reactivated — a trace deleted in Finder must come
+/// back greyed. Keeping that read here means window activation rebuilds eight
+/// rows instead of the whole track tree.
+private struct RecentDocumentsSection: View {
+    var controller: TraceDocumentController
+    @Environment(\.controlActiveState) private var controlActiveState
+
+    var body: some View {
+        Section("Recent") {
+            ForEach(controller.recentDocuments.prefix(8)) { document in
+                RecentDocumentRow(controller: controller, document: document)
+            }
+        }
+        .onChange(of: controlActiveState) { _, state in
+            guard state != .inactive else { return }
+            controller.refreshRecentDocuments()
+        }
+    }
+}
+
+/// Observation boundary: recent documents, the search echo/results, and the
+/// track tree. Never reads `snapshot`, `phase`, or selection state, so
+/// viewport churn cannot rebuild the sidebar.
 private struct TraceViewerSidebar: View {
     var controller: TraceDocumentController
     @State private var favoritesExpanded = true
@@ -330,18 +425,7 @@ private struct TraceViewerSidebar: View {
     var body: some View {
         List {
             if !controller.recentDocuments.isEmpty {
-                Section("Recent") {
-                    ForEach(controller.recentDocuments.prefix(8)) { document in
-                        Button {
-                            controller.open(document.url)
-                        } label: {
-                            Label(document.url.lastPathComponent, systemImage: "clock")
-                                .lineLimit(1)
-                        }
-                        .buttonStyle(.plain)
-                        .arktraceAccessibleTarget()
-                    }
-                }
+                RecentDocumentsSection(controller: controller)
             }
             if !controller.searchFieldText.isEmpty || controller.isSearching {
                 SearchResultsSection(controller: controller)

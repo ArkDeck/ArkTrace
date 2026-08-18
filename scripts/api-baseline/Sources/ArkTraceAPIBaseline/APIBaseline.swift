@@ -50,6 +50,9 @@ private func pinAppSupportSurface(
     _ = controller.cacheInventory?.entryCount
     _ = controller.cacheInventory?.activeEntryCount
     _ = controller.recentDocuments.map(\.url)
+    _ = controller.recentDocuments.map(\.isMissing)
+    controller.refreshRecentDocuments()
+    controller.recentDocuments.first.map(controller.removeRecentDocument)
     _ = controller.errorPresentation
     _ = controller.cacheHit
     _ = controller.accessibilityAnnouncement

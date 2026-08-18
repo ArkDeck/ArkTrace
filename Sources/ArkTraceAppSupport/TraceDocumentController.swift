@@ -525,6 +525,26 @@ public final class TraceDocumentController {
         }
     }
 
+    /// Re-reads the recent list from its bookmarks.
+    ///
+    /// The list is otherwise only rebuilt when a trace opens, so a file
+    /// deleted in Finder while ArkTrace sat in the background would keep
+    /// showing as openable. The app calls this when it comes back to the
+    /// front.
+    public func refreshRecentDocuments() {
+        let refreshed = recentStore.documents()
+        guard refreshed != recentDocuments else { return }
+        recentDocuments = refreshed
+    }
+
+    /// Drops one entry from the recent list. Nothing on disk is touched: this
+    /// is the user tidying their own shortcut list, most often after the
+    /// trace behind an entry is gone.
+    public func removeRecentDocument(_ document: TraceRecentDocument) {
+        recentStore.remove(document.url)
+        recentDocuments = recentStore.documents()
+    }
+
     public func toggleTrack(_ id: TimelineTrackID) {
         updateTrack(id) { current in
             TrackDescriptor(

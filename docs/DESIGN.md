@@ -892,7 +892,9 @@ Timeline 是刻意保留的二维工作区：横向滚动表示时间，纵向�
 
 ### 14.2 主要交互
 
-- Open、Drag & Drop、Recent、Reload；
+- Open、Drag & Drop、Recent、Reload；Recent 条目在文件被删除后**留在列表里并置灰**，右键菜单是
+  Open / 从 Recent 移除 / 在 Finder 中显示（AT-APP-001）—— 一行悄悄消失既不告诉用户 trace 没了，
+  也不给他任何可做的事；
 - trackpad/mouse pan；
 - cursor-anchored zoom（捏合，或按住 ⌥/⌃ 滚轮 —— 见 §14.2.5）；
 - click event selection；

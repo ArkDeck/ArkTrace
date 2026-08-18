@@ -993,6 +993,10 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 
 必须支持 Open panel、Finder Open With、Drag & Drop、Recent、Reload。Recent 使用 macOS security-scoped bookmark 或等价安全机制，不把路径写入 analysis JSON。
 
+文件被删除（或其所在卷不可达）后，Recent 条目不得静默消失：条目保留、置灰且不可打开，并说明它指向的文件已不在。
+条目只因用户主动移除或被条数上限挤出而离开列表。每个条目提供 Open、从 Recent 移除、在 Finder 中显示
+三个操作；文件不在时前者禁用，后者退化为打开它原来所在的目录。
+
 ### AT-APP-002 Session replacement
 
 打开新 Trace 时旧 session 的 parse/query/analysis 必须取消。旧结果不得出现在新窗口/session。
