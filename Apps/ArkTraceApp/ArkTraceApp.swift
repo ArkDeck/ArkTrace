@@ -535,18 +535,170 @@ private struct TraceTimelinePane: View {
                     Color.clear
                 }
                 if case .loading(let stage) = controller.phase {
-                    HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
-                        Text(stageLabel(stage))
-                    Button("Cancel") { controller.cancel() }
-                        .buttonStyle(.link)
-                        .arktraceAccessibleTarget()
+                    // Two presentations, because there are two situations. With
+                    // a timeline already on screen the open must not cover it,
+                    // so it stays the corner pill it has always been. With
+                    // nothing on screen -- the first open, and every open that
+                    // replaces a document -- the pane is empty anyway, and a
+                    // pill in its top-left corner is the whole feedback a user
+                    // gets for what can be a minute of work on a real capture.
+                    if controller.snapshot == nil {
+                        TraceLoadingPane(
+                            stage: stage,
+                            fileName: controller.sourceURL?.lastPathComponent,
+                            cancel: controller.cancel,
+                            openPanel: openPanel
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        HStack(spacing: 8) {
+                            ProgressView().controlSize(.small)
+                            Text(stageLabel(stage))
+                            Button("Cancel") { controller.cancel() }
+                                .buttonStyle(.link)
+                                .arktraceAccessibleTarget()
+                        }
+                        .padding(10)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                        .padding(12)
                     }
-                    .padding(10)
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-                    .padding(12)
                 }
             }
+        }
+    }
+}
+
+/// The open in progress, when there is no timeline yet to put it beside.
+///
+/// Opening a real capture is seconds to a minute of parsing, indexing and
+/// validating, and the corner pill this replaces said `Opening database…` in
+/// the top-left of an otherwise blank pane: no file, no sense of where in the
+/// pipeline the work was, and nothing to tell a slow stage from a stuck one.
+///
+/// Everything here is a stock control (SPECIFICATION §17 asks for native ones)
+/// and nothing animates on its own except `ProgressView`, whose motion AppKit
+/// already ties to Reduce Motion. State is carried by shape and text, never by
+/// colour alone (AT-APP-011).
+private struct TraceLoadingPane: View {
+    let stage: TraceLoadingStage
+    let fileName: String?
+    let cancel: @MainActor () -> Void
+    let openPanel: @MainActor () -> Void
+
+    /// A cache hit reaches Ready in well under a second. Showing a full pane
+    /// for that is a flash of furniture, so the pane waits before appearing --
+    /// long enough that a fast open never draws it, short enough that a slow
+    /// one still feels answered.
+    private static let appearanceDelay = Duration.milliseconds(220)
+    /// Elapsed time only earns its place once the wait is long enough to
+    /// wonder about; before that it is a counter ticking 0, 1 for no reason.
+    private static let elapsedThresholdSeconds = 2
+
+    @State private var isVisible = false
+    @State private var elapsedSeconds = 0
+
+    var body: some View {
+        // `cancelled` is a loading stage the way `failed` is: the phase
+        // stays `.loading` until something else is opened. Spinning at the
+        // user after they pressed Cancel is worse than saying so and
+        // offering the one thing there is left to do.
+        if stage == .cancelled {
+            ContentUnavailableView {
+                Label("Opening cancelled", systemImage: "xmark.circle")
+            } description: {
+                Text(fileName ?? "")
+            } actions: {
+                Button("Open Trace…", action: openPanel)
+                    .buttonStyle(.borderedProminent)
+                    .arktraceAccessibleTarget()
+            }
+        } else {
+            progress
+        }
+    }
+
+    private var progress: some View {
+        VStack(spacing: 18) {
+            ProgressView()
+                .controlSize(.large)
+                .progressViewStyle(.circular)
+            VStack(spacing: 5) {
+                if let fileName {
+                    Text(fileName)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                Text(statusText)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            TraceLoadingStageTrack(stage: stage)
+            Button("Cancel", action: cancel)
+                .keyboardShortcut(.cancelAction)
+                .arktraceAccessibleTarget()
+        }
+        .padding(30)
+        .frame(maxWidth: 460)
+        .opacity(isVisible ? 1 : 0)
+        .animation(.easeOut(duration: 0.18), value: isVisible)
+        .task {
+            try? await Task.sleep(for: Self.appearanceDelay)
+            isVisible = true
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                elapsedSeconds += 1
+            }
+        }
+    }
+
+    private var statusText: String {
+        guard elapsedSeconds >= Self.elapsedThresholdSeconds else { return stageLabel(stage) }
+        return "\(stageLabel(stage))  ·  \(Self.elapsedText(elapsedSeconds))"
+    }
+
+    /// Composed rather than formatted. The C-variadic `String` formatter is
+    /// both a strict-memory-safety warning and something `LocalizationCatalog
+    /// Tests` forbids the app outright, and a two-field clock needs no
+    /// formatter anyway.
+    static func elapsedText(_ seconds: Int) -> String {
+        guard seconds >= 60 else { return "\(seconds)s" }
+        let remainder = seconds % 60
+        return "\(seconds / 60):\(remainder < 10 ? "0" : "")\(remainder)"
+    }
+}
+
+/// Where in the open pipeline the work has reached. Position, not percentage:
+/// the stages take wildly different times on a real trace -- parsing dominates
+/// -- so a fraction would be a promise the loader cannot keep, while a row of
+/// stages is exactly the fact the user is missing.
+private struct TraceLoadingStageTrack: View {
+    let stage: TraceLoadingStage
+
+    /// The stages an open passes through, in order. `ready`, `failed` and
+    /// `cancelled` are outcomes rather than steps and are deliberately absent:
+    /// reaching one of them means this view is gone.
+    static let pipeline: [TraceLoadingStage] = [
+        .preparing, .hashing, .cacheLookup, .parsing,
+        .validating, .indexing, .openingDatabase,
+    ]
+
+    var body: some View {
+        if let index = Self.pipeline.firstIndex(of: stage) {
+            HStack(spacing: 5) {
+                ForEach(Array(Self.pipeline.enumerated()), id: \.element) { position, _ in
+                    Capsule()
+                        .fill(
+                            position <= index
+                                ? AnyShapeStyle(.tint)
+                                : AnyShapeStyle(.quaternary)
+                        )
+                        .frame(width: position == index ? 26 : 16, height: 4)
+                }
+            }
+            .accessibilityHidden(true)
         }
     }
 }
