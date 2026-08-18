@@ -537,6 +537,112 @@ final class TimelineRenderingTests: XCTestCase {
         )
     }
 
+    /// Scrolling exposes a strip, and a strip must cost a strip. Labels are
+    /// the one thing a frame pays for per primitive -- CoreGraphics throws the
+    /// fills outside the dirty rect away for the price of a path traversal,
+    /// but a string outside it is laid out and rendered in full first -- so a
+    /// zoomed-in trace used to redraw every label it had in order to fill a
+    /// forty-point strip, and scrolling crawled.
+    @MainActor
+    func testAStripRedrawDrawsOnlyTheLabelsInsideIt() throws {
+        let trackCount = 6
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 200,
+            heightPoints: Double(trackCount) * 28 + TimelineGeometry.rulerHeight,
+            generation: 1
+        )
+        let tracks = try (0..<trackCount).map { index in
+            let descriptor = TrackDescriptor(title: "CPU \(index)", source: .cpu(Int64(index)))
+            return TimelineTrackSnapshot(
+                descriptor: descriptor,
+                y: Double(index) * 28,
+                height: 28,
+                primitives: [
+                    .detail(
+                        TimelineDetailPrimitive(
+                            trackID: descriptor.id,
+                            eventKey: EventKey(table: .schedSlice, rowID: Int64(index + 1)),
+                            range: try TraceTimeRange(startNs: 100, endNs: 900),
+                            label: "worker \(index)"
+                        )
+                    )
+                ]
+            )
+        }
+        let view = TimelineNSView(
+            frame: CGRect(x: 0, y: 0, width: 200, height: viewport.heightPoints)
+        )
+        var drawn: [Int] = []
+        view.labelRenderHook = { drawnLabels, _ in drawn.append(drawnLabels) }
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport, tracks: tracks, generation: 1, dataQuality: TraceDataQuality()
+        )
+        let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        XCTAssertEqual(drawn, [trackCount], "a whole-view redraw draws every label")
+
+        drawn.removeAll()
+        let strip = TimelineGeometry.trackFrame(tracks[2])
+        view.cacheDisplay(in: strip, to: bitmap)
+        XCTAssertEqual(
+            drawn, [1],
+            "a strip covering one track draws that track's label and no others"
+        )
+    }
+
+    /// The layout outlives the frame that paid for it, and one name shared by
+    /// many events is laid out once: a trace repeats its function names
+    /// thousands of times, and text layout is what a frame cannot afford.
+    @MainActor
+    func testLabelLayoutIsSharedByNameAndSurvivesTheFrame() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 200,
+            heightPoints: 50,
+            generation: 1
+        )
+        let descriptor = TrackDescriptor(title: "CPU 0", source: .cpu(0))
+        let labels = ["render", "render", "render", "layout"]
+        let primitives = try labels.enumerated().map { index, label in
+            TimelinePrimitive.detail(
+                TimelineDetailPrimitive(
+                    trackID: descriptor.id,
+                    eventKey: EventKey(table: .schedSlice, rowID: Int64(index + 1)),
+                    range: try TraceTimeRange(
+                        startNs: Int64(index) * 250, endNs: Int64(index) * 250 + 249
+                    ),
+                    label: label
+                )
+            )
+        }
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+        var frames: [(drawn: Int, laidOut: Int)] = []
+        view.labelRenderHook = { frames.append((drawn: $0, laidOut: $1)) }
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport,
+            tracks: [
+                TimelineTrackSnapshot(
+                    descriptor: descriptor, y: 0, height: 28, primitives: primitives
+                )
+            ],
+            generation: 1,
+            dataQuality: TraceDataQuality()
+        )
+        let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        XCTAssertEqual(frames.count, 1)
+        XCTAssertEqual(frames.first?.drawn, 4, "every event wide enough carries its label")
+        XCTAssertEqual(
+            frames.first?.laidOut, 2,
+            "one layout per distinct name, not one per event"
+        )
+
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        XCTAssertEqual(frames.last?.drawn, 4)
+        XCTAssertEqual(frames.last?.laidOut, 0, "a second frame lays out nothing")
+    }
+
     @MainActor
     func testAccessibilityActionsExposeOnlyCommandsThatCanChangeState() throws {
         let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 100, height: 80))

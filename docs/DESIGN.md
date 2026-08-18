@@ -10,6 +10,7 @@
 > Phase 1 实现注记（2026-08-12）：Parser/Store vertical slice、真实 schema evidence、staging validation/index/fsync、原子 Ready 与 mandatory zero-skip gate 已完成；验证见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)
 > 审查回写（2026-08-16）：§5.1/§6 补齐 `ArkTraceAppSupport`、`ArkTraceSignalShim` 与真实依赖边；§8.5 改为说明 continuation 的单次 resume 由何保证（此前的"不使用 checked continuation"与实现不符）；§9.4 更新为 index schema version 3 与多前缀命名；§8.2 第 4 条标注为未决（§25 第 12 项）
 > 缺陷回写（2026-08-18）：§14.2.5 滚轮轴向改为**按手势承诺**（原逐事件规则让纵向触控板滑动被自身的横向抖动吃掉，外层 `ScrollView` 收不到事件，滚动慢到不像滚动）
+> 性能回写（2026-08-18）：§13.5 补 label 绘制规则 —— 文字成本按图元计，批处理管不到，故按脏矩形裁剪并缓存排版（滚动帧 42.5 → 0.62 ms）
 
 ## 1. 文档目的
 
@@ -817,6 +818,23 @@ hash 必须是逐位一致的移植，其中两处细节决定结果：offset ba
 - Density band 是 ArkTrace 特有的 LOD，上游没有对应层。聚合 bucket 没有单个事件可取色，因此整条 band 取所属 track 的身份色，强度仍由 alpha 表达。这里改用正确混合的 64-bit FNV-1a：上游 hash 在仅末位不同的短 key 上分布极差（`cpu:0` 与 `cpu:1` 撞色，`thread-state:4`…`thread-state:9` 全部落到同一色），会让相邻 track 无法区分。两个 hash 必须各自保留，合并其中任何一个都会破坏上游一致性或让所有 thread band 同色。
 
 绘制仍按填充色批处理：调色板是封闭集合，一次 snapshot 内的不同填充数受调色板规模约束，而不随事件数增长，因此 20k detail 的 snapshot 不会退化为逐事件一次 fill。语义 style 仍是批次的外层排序键，绘制顺序与 hit-test 优先级保持不变。状态不能只靠颜色表达（AT-APP-011）：state 与名称同时出现在 label、Inspector 与 accessibility value 中。
+
+**批处理管不到文字。** 填充能按颜色收敛成常数条批次，label 不能：一次字符串绘制自带一次排版，成本按
+图元计而非按批次计。CoreGraphics 用一次路径遍历的代价就丢掉脏矩形外的填充，落在脏矩形外的字符串却要
+先排完版、画完，才被丢掉 —— 于是「滚动露出 40 pt 条带」这件事，代价是把整个 snapshot 的 label 重画
+一遍。`W` 放大到 detail LOD 之后 label 最密，实测（40 轨 × 3 深度 × 25 事件 = 3,000 个带名事件、内容
+高 2,902 pt）一次 40 pt 条带重绘 42.5 ms，和整幅重绘 51.0 ms 几乎一样贵，滚动掉到十几帧。
+
+因此 label 走两条填充不需要的规则：
+
+- **按脏矩形手工裁剪** —— 只画与脏矩形相交的 label；
+- **排版结果随 snapshot 缓存，并按「同名同色」共享** —— 一条 trace 会把同一个函数名重复上千次，排一次
+  版就够；缓存是惰性的，屏幕外的 label 一次都不排。绘制因此退化为一次 `CTLineDraw`，字形位置与原先的
+  `NSString` 绘制逐像素一致（基线 = 行框顶 + ascent，同一测点前后 ink box 完全相同）。
+
+同一组测量的前后对比：40 pt 条带 42.5 → 0.62 ms，一屏（800 pt）44.6 → 3.5 ms，换代重建 55.3 →
+14.5 ms，整幅 51.0 → 11.9 ms。缓存的失效条件与填充批次一致（render identity 变化、外观变化），
+所以 hover 仍然不碰它（§14.2.3）。
 
 ## 14. macOS App
 

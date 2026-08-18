@@ -134,12 +134,67 @@ public final class TimelineNSView: NSView {
     }
 
     private struct DetailLabel {
-        let value: String
+        let text: LabelText
         let frame: CGRect
-        /// Resolved from the fill's luminance, because most of the palette is
-        /// too light to carry a white label.
+        /// Baseline origin, in the view's flipped space. Derived from the
+        /// frame at cache time so drawing is a glyph run and nothing else.
+        let origin: CGPoint
+    }
+
+    /// Identity of a laid-out label: the same string in the same colour is
+    /// the same glyph run wherever it appears. A trace repeats its function
+    /// names thousands of times, so sharing one layout across every primitive
+    /// that carries the name is the difference between laying out a snapshot's
+    /// labels and laying out its distinct names.
+    private struct LabelTextKey: Hashable {
+        let value: String
         let color: TimelineColor
     }
+
+    /// One label's laid-out text. Laying a string out is by far the most
+    /// expensive thing a frame does per primitive -- a snapshot's whole set of
+    /// fills costs less than a few hundred string draws -- and the labels of a
+    /// snapshot are immutable, so each is laid out at most once and then
+    /// reused by every frame that shows it. Lazily, because a snapshot holds
+    /// far more labels than any one frame draws: a scroll exposes tens of them
+    /// out of thousands, and the ones off screen must not be paid for at all.
+    @MainActor
+    private final class LabelText {
+        private let value: String
+        /// Resolved from the fill's luminance, because most of the palette is
+        /// too light to carry a white label.
+        private let color: TimelineColor
+        private var line: CTLine?
+
+        init(value: String, color: TimelineColor) {
+            self.value = value
+            self.color = color
+        }
+
+        /// Whether the layout has already been paid for. Only the test seam
+        /// reads it; drawing goes straight to ``prepared()``.
+        var isLaidOut: Bool { line != nil }
+
+        func prepared() -> CTLine {
+            if let line { return line }
+            let attributed = NSAttributedString(
+                string: value,
+                attributes: [
+                    .font: TimelineNSView.labelFont,
+                    .foregroundColor: NSColor(cgColor: color.cgColor) ?? .labelColor,
+                ]
+            )
+            let prepared = CTLineCreateWithAttributedString(attributed)
+            line = prepared
+            return prepared
+        }
+    }
+
+    /// The label face, and the baseline it wants. `NSString` drawing placed a
+    /// label by the top of its line box; CoreText places it by its baseline,
+    /// so the ascent is what keeps the glyphs where they have always been.
+    private static let labelFont = NSFont.systemFont(ofSize: 9)
+    private static let labelAscent = CTFontGetAscent(labelFont)
 
     private struct DetailPaths {
         let backingScale: CGFloat
@@ -152,6 +207,10 @@ public final class TimelineNSView: NSView {
     private var detailPathCache: DetailPaths?
     var accessibilityValueChangedHook: (() -> Void)?
     var pathCacheBuildHook: ((_ kind: String, _ bucketCount: Int) -> Void)?
+    /// Test seam for the two properties that make a zoomed-in trace scrollable:
+    /// a frame draws only the labels its dirty rect exposes, and it lays out
+    /// only the ones no earlier frame has laid out.
+    var labelRenderHook: ((_ drawn: Int, _ laidOut: Int) -> Void)?
 
     private enum DetailVisualStyle: Int, CaseIterable {
         case running
@@ -655,7 +714,9 @@ public final class TimelineNSView: NSView {
             context.fill(CGRect(x: 0, y: trackFrame.minY, width: bounds.width, height: trackFrame.height))
         }
         drawDensityOverlay(snapshot, backingScale: scale, context: context)
-        drawDetailOverlay(snapshot, backingScale: scale, context: context)
+        drawDetailOverlay(
+            snapshot, backingScale: scale, dirtyRect: dirtyRect, context: context
+        )
         for track in snapshot.tracks {
             let trackFrame = TimelineGeometry.trackFrame(track)
             guard trackFrame.maxY >= dirtyRect.minY, trackFrame.minY <= dirtyRect.maxY else { continue }
@@ -741,6 +802,7 @@ public final class TimelineNSView: NSView {
     private func drawDetailOverlay(
         _ snapshot: TimelineSnapshot,
         backingScale: CGFloat,
+        dirtyRect: CGRect,
         context: CGContext
     ) {
         let cached: DetailPaths
@@ -749,6 +811,7 @@ public final class TimelineNSView: NSView {
         } else {
             var mutablePaths: [DetailPaintKey: CGMutablePath] = [:]
             var labels: [DetailLabel] = []
+            var labelTexts: [LabelTextKey: LabelText] = [:]
             var events: [EventKey: (TimelineDetailPrimitive, CGRect)] = [:]
             for track in snapshot.tracks {
                 for primitive in track.primitives {
@@ -770,11 +833,25 @@ public final class TimelineNSView: NSView {
                     if let label = detail.label,
                         frame.width >= TimelineGeometry.minimumLabelWidth
                     {
+                        let textKey = LabelTextKey(
+                            value: label, color: color.preferredLabelColor
+                        )
+                        let text: LabelText
+                        if let existing = labelTexts[textKey] {
+                            text = existing
+                        } else {
+                            text = LabelText(value: label, color: textKey.color)
+                            labelTexts[textKey] = text
+                        }
                         labels.append(
                             DetailLabel(
-                                value: label,
+                                text: text,
                                 frame: frame,
-                                color: color.preferredLabelColor
+                                origin: CGPoint(
+                                    x: frame.minX + TimelineGeometry.horizontalLabelInset,
+                                    y: frame.minY + max(1, (frame.height - 11) / 2)
+                                        + Self.labelAscent
+                                )
                             )
                         )
                     }
@@ -795,22 +872,32 @@ public final class TimelineNSView: NSView {
             context.addPath(path)
             context.fillPath()
         }
-        let labelFont = NSFont.systemFont(ofSize: 9)
-        for label in cached.labels {
+        // Text is the one part of a frame whose cost is per primitive rather
+        // than per batch, so it is the one part that has to be clipped by hand:
+        // CoreGraphics discards the fills outside the dirty rect for the price
+        // of a path traversal, but a string outside it is laid out and rendered
+        // in full before anything discards it. A scroll exposes a strip a few
+        // dozen points tall and would otherwise redraw every label in the
+        // trace to fill it.
+        var drawnLabels = 0
+        var laidOutLabels = 0
+        // The text matrix belongs to the graphics state, and the tooltip draws
+        // its own text through AppKit further down: flip it for the label run
+        // only, and hand the state back the way it was found.
+        context.saveGState()
+        context.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
+        for label in cached.labels where label.frame.intersects(dirtyRect) {
+            drawnLabels += 1
+            if !label.text.isLaidOut { laidOutLabels += 1 }
             context.saveGState()
+            // AT-RENDER-005: a label never draws outside its own primitive.
             context.clip(to: label.frame.insetBy(dx: 1, dy: 1))
-            label.value.draw(
-                at: CGPoint(
-                    x: label.frame.minX + TimelineGeometry.horizontalLabelInset,
-                    y: label.frame.minY + max(1, (label.frame.height - 11) / 2)
-                ),
-                withAttributes: [
-                    .font: labelFont,
-                    .foregroundColor: NSColor(cgColor: label.color.cgColor) ?? .labelColor,
-                ]
-            )
+            context.textPosition = label.origin
+            CTLineDraw(label.text.prepared(), context)
             context.restoreGState()
         }
+        context.restoreGState()
+        labelRenderHook?(drawnLabels, laidOutLabels)
         drawSameNameHoverWash(cached, context: context)
         var outlined = Set<EventKey>()
         for key in [selectedEventKey, focusedEventKey].compactMap({ $0 }) {
