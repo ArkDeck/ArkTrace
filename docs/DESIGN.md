@@ -11,6 +11,7 @@
 > 审查回写（2026-08-16）：§5.1/§6 补齐 `ArkTraceAppSupport`、`ArkTraceSignalShim` 与真实依赖边；§8.5 改为说明 continuation 的单次 resume 由何保证（此前的"不使用 checked continuation"与实现不符）；§9.4 更新为 index schema version 3 与多前缀命名；§8.2 第 4 条标注为未决（§25 第 12 项）
 > 缺陷回写（2026-08-18）：§14.2.5 滚轮轴向改为**按手势承诺**（原逐事件规则让纵向触控板滑动被自身的横向抖动吃掉，外层 `ScrollView` 收不到事件，滚动慢到不像滚动）
 > 性能回写（2026-08-18）：§13.5 补 label 绘制规则 —— 文字成本按图元计，批处理管不到，故按脏矩形裁剪并缓存排版（滚动帧 42.5 → 0.62 ms）
+> 性能回写二（2026-08-18）：§13.4 第 6 条改为「上一代 primitive + 新 viewport」（`W`/`S` 此前要等查询返回才动），并补 viewport 范围裁剪与 `isOpaque` 两条约束
 
 ## 1. 文档目的
 
@@ -792,7 +793,24 @@ capability 为 optional：无 `frame_slice` 的 trace 不生成该泳道、不�
 3. 绘制 density 或 event primitives；
 4. 绘制 hover、selection、range overlay；
 5. 文本只在 primitive 宽度足够时绘制；
-6. 数据缺失时保留上一代 snapshot 并显示 loading overlay，避免 pan/zoom 闪白。
+6. 数据缺失时保留上一代 snapshot 的 primitive，但**用用户刚要的那个 viewport 去画**，并显示 loading
+   overlay，避免 pan/zoom 闪白。
+
+第 6 条的措辞是有代价的。此前取的是「上一代 snapshot」整体 —— 连同它的 viewport，于是从按下 `W`
+到查询返回之间（真机 medium fixture 上 viewport p95 59…77 ms）画面**一动不动**，手感就是缩放很慢。
+loading 这一代携带的本来就是「新 viewport + 上一代 primitive」，画它等于把手里已有的数据按新比例尺
+重画一遍：按键当帧就动（一次 cache 重建，真机 rebuild p95 17 ms），查询回来再换成真数据。代价明写：
+一次缩放因此重建两次 path cache，先按新比例尺一次，数据到了再一次。
+
+配套两条约束：
+
+- **超出 viewport 的 primitive 必须整条丢掉，不能靠 clamp。** `x(for:viewport:)` 是 clamp 的，落在
+  范围外的图元不会消失，而是塌到边上画成一条最小宽度的竖线，并且**能被点中**。新载入的 snapshot 天然
+  全在范围内，只有被带过一代的那份满是范围外图元 —— 所以 draw 与 hit-test 用同一个 `isVisible` 判定，
+  否则就是 AT-RENDER-003 的漂移。
+- **`isOpaque` 必须为真。** view 的第一件事就是用 `windowBackgroundColor` 铺满 bounds；声明这件事
+  之后，clip view 才会保留已经画好的像素、只把滚动露出的那一条交给 view（`copiesOnScroll` 默认开，
+  但对一个自称透明的 document view 不起作用）。否则每个滚动步都要重画整屏，而不是移动的那几十个点。
 
 首版使用 CoreGraphics。只有基准证明 CPU rendering 是真实瓶颈后才考虑 Metal；Renderer protocol 已隔离后端。
 

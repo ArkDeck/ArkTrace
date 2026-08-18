@@ -227,6 +227,14 @@ public final class TimelineNSView: NSView {
     }
 
     public override var isFlipped: Bool { true }
+    /// The view paints every pixel of its bounds -- `draw(_:)` fills them with
+    /// `windowBackgroundColor` before it looks at the snapshot -- and saying so
+    /// is what lets the enclosing clip view keep what is already on screen and
+    /// hand a scroll only the strip it exposed. `NSClipView.copiesOnScroll` is
+    /// on by default but has no effect over a document view that claims to be
+    /// transparent, so without this every scroll step repaints the whole
+    /// visible rectangle instead of the few dozen points that moved.
+    public override var isOpaque: Bool { true }
     public override var acceptsFirstResponder: Bool { true }
     public override var focusRingMaskBounds: NSRect { bounds }
 
@@ -277,7 +285,8 @@ public final class TimelineNSView: NSView {
             for primitive in track.primitives {
                 defer { order += 1 }
                 guard TimelineGeometry.trackFrame(track).contains(point),
-                    case .detail(let detail) = primitive
+                    case .detail(let detail) = primitive,
+                    TimelineGeometry.isVisible(primitive, in: source.viewport)
                 else { continue }
                 let frame = TimelineGeometry.frame(
                     for: primitive, in: track,
@@ -671,8 +680,22 @@ public final class TimelineNSView: NSView {
         trackingAreaReference = area
     }
 
+    /// What a frame draws.
+    ///
+    /// A loading generation carries the viewport the user just asked for and
+    /// the previous generation's primitives, so drawing *it* applies the zoom
+    /// or the pan to the data already in hand: the gesture lands on screen in
+    /// one frame and sharpens when the query returns. Drawing the previous
+    /// generation instead -- which is what this did -- meant `W` and `S` moved
+    /// nothing at all until a viewport query came back, and on a real trace
+    /// that is tens of milliseconds of a keypress doing visibly nothing.
+    ///
+    /// A loading generation with no primitives has nothing to rescale (the
+    /// first viewport of a document), so it falls back to what was on screen.
     private var displayedSnapshot: TimelineSnapshot? {
-        if snapshot?.isLoading == true { return previousSnapshot ?? snapshot }
+        if let snapshot, snapshot.isLoading {
+            return snapshot.tracks.isEmpty ? (previousSnapshot ?? snapshot) : snapshot
+        }
         return snapshot ?? previousSnapshot
     }
 
@@ -754,7 +777,9 @@ public final class TimelineNSView: NSView {
             for track in snapshot.tracks where !track.primitives.isEmpty {
                 let color = Self.trackColor(for: track.descriptor)
                 for primitive in track.primitives {
-                    guard case .density(let density) = primitive else { continue }
+                    guard case .density(let density) = primitive,
+                        TimelineGeometry.isVisible(primitive, in: snapshot.viewport)
+                    else { continue }
                     let intensity = min(7, Int(log2(Double(max(1, density.bucket.eventCount)))))
                     let key = DensityPaintKey(color: color, intensity: intensity)
                     let path = paths[key] ?? CGMutablePath()
@@ -815,7 +840,9 @@ public final class TimelineNSView: NSView {
             var events: [EventKey: (TimelineDetailPrimitive, CGRect)] = [:]
             for track in snapshot.tracks {
                 for primitive in track.primitives {
-                    guard case .detail(let detail) = primitive else { continue }
+                    guard case .detail(let detail) = primitive,
+                        TimelineGeometry.isVisible(primitive, in: snapshot.viewport)
+                    else { continue }
                     let frame = TimelineGeometry.frame(
                         for: primitive,
                         in: track,

@@ -537,6 +537,133 @@ final class TimelineRenderingTests: XCTestCase {
         )
     }
 
+    /// A zoom or a pan must land on screen in the frame it was pressed in.
+    /// The loading generation carries the viewport the user asked for and the
+    /// primitives already in hand, so drawing it rescales what is there;
+    /// drawing the previous generation instead -- which is what this did --
+    /// left `W` and `S` doing visibly nothing until a query came back.
+    @MainActor
+    func testAPendingViewportIsDrawnBeforeItsQueryReturns() throws {
+        let wide = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 200, heightPoints: 80, generation: 1
+        )
+        let descriptor = TrackDescriptor(title: "CPU 0", source: .cpu(0))
+        let key = EventKey(table: .schedSlice, rowID: 7)
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor, y: 0, height: 28,
+            primitives: [
+                .detail(
+                    TimelineDetailPrimitive(
+                        trackID: descriptor.id,
+                        eventKey: key,
+                        range: try TraceTimeRange(startNs: 400, endNs: 600),
+                        label: "worker"
+                    )
+                )
+            ]
+        )
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 200, height: 80))
+        view.snapshot = TimelineSnapshot(
+            viewport: wide, tracks: [track], generation: 1, dataQuality: TraceDataQuality()
+        )
+        let body = TimelineGeometry.rulerHeight + 8
+        // 400…600 ns of 0…1000 is x 80…120, so x 190 is well clear of it.
+        XCTAssertEqual(view.event(at: CGPoint(x: 100, y: body)), key)
+        XCTAssertNil(view.event(at: CGPoint(x: 190, y: body)))
+
+        // `W`: the viewport narrows to the event's own range while the query
+        // for it is still in flight, and the event now spans the whole width.
+        let zoomed = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 400, endNs: 600),
+            widthPoints: 200, heightPoints: 80, generation: 2
+        )
+        view.snapshot = TimelineSnapshot(
+            viewport: zoomed, tracks: [track], generation: 2,
+            dataQuality: TraceDataQuality(), isLoading: true
+        )
+        XCTAssertEqual(
+            view.event(at: CGPoint(x: 190, y: body)), key,
+            "the pending viewport is what the frame draws and hit-tests"
+        )
+    }
+
+    /// The other half of drawing a carried-over generation: its primitives are
+    /// mostly outside the new viewport, and `x(for:viewport:)` clamps rather
+    /// than dropping, so without a range test they would pile up against the
+    /// edges as a wall of minimum-width slivers -- and be hit-testable there.
+    @MainActor
+    func testPrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested() throws {
+        let descriptor = TrackDescriptor(title: "CPU 0", source: .cpu(0))
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor, y: 0, height: 28,
+            primitives: [
+                .detail(
+                    TimelineDetailPrimitive(
+                        trackID: descriptor.id,
+                        eventKey: EventKey(table: .schedSlice, rowID: 7),
+                        range: try TraceTimeRange(startNs: 100, endNs: 300),
+                        label: "worker"
+                    )
+                )
+            ]
+        )
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 200, height: 80))
+        var frames: [Int] = []
+        view.labelRenderHook = { drawn, _ in frames.append(drawn) }
+        view.snapshot = TimelineSnapshot(
+            viewport: try TimelineViewport(
+                range: TraceTimeRange.query(startNs: 800, endNs: 1_000),
+                widthPoints: 200, heightPoints: 80, generation: 2
+            ),
+            tracks: [track],
+            generation: 2,
+            dataQuality: TraceDataQuality(),
+            isLoading: true
+        )
+        let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        XCTAssertEqual(frames, [0], "an event outside the viewport draws no label")
+        let body = TimelineGeometry.rulerHeight + 8
+        XCTAssertNil(
+            view.event(at: CGPoint(x: 0.5, y: body)),
+            "and is not hit-testable against the edge it would have clamped to"
+        )
+    }
+
+    /// The claim `isOpaque` makes, checked rather than asserted: every pixel of
+    /// a redrawn rect is painted by the view. It is what lets the clip view
+    /// copy the screen and redraw only the strip a scroll exposed.
+    @MainActor
+    func testTheViewPaintsEveryPixelItClaimsToOwn() throws {
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 60, height: 40))
+        XCTAssertTrue(view.isOpaque)
+        let bitmap = try XCTUnwrap(
+            NSBitmapImageRep(
+                bitmapDataPlanes: nil, pixelsWide: 60, pixelsHigh: 40,
+                bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+            )
+        )
+        let context = try XCTUnwrap(NSGraphicsContext(bitmapImageRep: bitmap))
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = context
+        // Ink the whole surface with something the view never draws, so any
+        // pixel it leaves alone stands out.
+        context.cgContext.setFillColor(NSColor.magenta.cgColor)
+        context.cgContext.fill(CGRect(x: 0, y: 0, width: 60, height: 40))
+        view.draw(view.bounds)
+        context.cgContext.flush()
+        NSGraphicsContext.restoreGraphicsState()
+        for point in [(0, 0), (59, 0), (0, 39), (59, 39), (30, 20)] {
+            let color = try XCTUnwrap(bitmap.colorAt(x: point.0, y: point.1))
+            XCTAssertLessThan(
+                abs(color.redComponent - color.greenComponent), 0.2,
+                "pixel \(point) was left transparent: magenta shows through"
+            )
+        }
+    }
+
     /// Scrolling exposes a strip, and a strip must cost a strip. Labels are
     /// the one thing a frame pays for per primitive -- CoreGraphics throws the
     /// fills outside the dirty rect away for the price of a path traversal,

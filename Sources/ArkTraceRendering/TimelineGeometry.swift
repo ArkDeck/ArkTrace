@@ -110,6 +110,24 @@ package enum TimelineGeometry {
         )
     }
 
+    /// Whether a primitive falls inside the viewport's range at all.
+    ///
+    /// `x(for:viewport:)` clamps, so a primitive outside the range does not
+    /// vanish on its own -- it collapses onto whichever edge it is past and is
+    /// drawn there as a minimum-width sliver. Nothing in a freshly loaded
+    /// snapshot is out of range, but the generation that carries the previous
+    /// primitives through a new viewport while a zoom or a pan loads is full
+    /// of them, and a wall of slivers along both edges is not what the user
+    /// asked to see.
+    package static func isVisible(
+        _ primitive: TimelinePrimitive,
+        in viewport: TimelineViewport
+    ) -> Bool {
+        let range = primitive.range
+        return range.endNs >= viewport.range.startNs
+            && range.startNs <= viewport.range.endNs
+    }
+
     public static func frame(
         for primitive: TimelinePrimitive,
         in track: TimelineTrackSnapshot,

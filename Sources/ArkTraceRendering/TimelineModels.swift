@@ -498,6 +498,15 @@ public enum TimelinePrimitive: Hashable, Codable, Sendable {
         if case .detail(let primitive) = self { return primitive.eventKey }
         return nil
     }
+
+    /// The trace time this primitive occupies. Drawing and hit-testing both
+    /// need it to decide whether a primitive is inside the viewport at all.
+    package var range: TraceTimeRange {
+        switch self {
+        case .detail(let detail): return detail.range
+        case .density(let density): return density.bucket.range
+        }
+    }
 }
 
 public struct TimelineTrackSnapshot: Hashable, Codable, Sendable {
