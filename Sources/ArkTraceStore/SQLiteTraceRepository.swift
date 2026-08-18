@@ -1883,7 +1883,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                         CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
                     )) AS bucket,
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
-                    0 AS invalid_duration, 0 AS clamped_duration
+                    0 AS invalid_duration, 0 AS clamped_duration,
+                    s.rowid AS identity_row,
+                    \(Self.densityWeightSQL(alias: "s")) AS weight
                 FROM sched_slice AS s
                     INDEXED BY arktrace_v3_sched_slice_cpu_ts_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
@@ -1905,7 +1907,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                         CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
                     )) AS bucket,
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
-                    0 AS invalid_duration, 0 AS clamped_duration
+                    0 AS invalid_duration, 0 AS clamped_duration,
+                    s.rowid AS identity_row,
+                    \(Self.densityWeightSQL(alias: "s")) AS weight
                 FROM thread_state AS s
                     INDEXED BY arktrace_v3_thread_state_itid_ts_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
@@ -1933,7 +1937,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                         CASE WHEN s.ts <= ? THEN 0 ELSE (s.ts - ?) / ? END
                     )) AS bucket,
                     CASE WHEN s.ts < ? OR s.ts > ? THEN 1 ELSE 0 END AS clamped,
-                    0 AS invalid_duration, 0 AS clamped_duration
+                    0 AS invalid_duration, 0 AS clamped_duration,
+                    s.rowid AS identity_row,
+                    \(Self.densityWeightSQL(alias: "s")) AS weight
                 FROM callstack AS s
                     INDEXED BY arktrace_v3_callstack_callid_ts_dur
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "s"))
@@ -1972,7 +1978,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                         CASE WHEN f.ts <= ? THEN 0 ELSE (f.ts - ?) / ? END
                     )) AS bucket,
                     CASE WHEN f.ts < ? OR f.ts > ? THEN 1 ELSE 0 END AS clamped,
-                    0 AS invalid_duration, 0 AS clamped_duration
+                    0 AS invalid_duration, 0 AS clamped_duration,
+                    f.rowid AS identity_row,
+                    \(Self.densityWeightSQL(alias: "f")) AS weight
                 FROM frame_slice AS f
                 WHERE \(TraceEventIntersection.sqlPredicate(alias: "f"))
                     \(processCondition)
@@ -1990,12 +1998,17 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             bindings = source.bindings
         }
 
+        // `MAX(weight)` is what makes the bare identity columns well defined:
+        // with exactly one min/max aggregate in the query, SQLite takes every
+        // bare column from the row that produced the extreme. So each bucket
+        // reports the identity of its longest event -- the one that would own
+        // most of these pixels at detail level -- rather than an arbitrary one.
         let rows = try db.query(
             """
             WITH sampled AS (
                 \(sampleSQL)
             )
-            SELECT bucket, COUNT(*), NULL,
+            SELECT bucket, COUNT(*), identity_row, MAX(weight),
                 SUM(clamped), SUM(invalid_duration), SUM(clamped_duration)
             FROM sampled GROUP BY bucket ORDER BY bucket ASC
             """,
@@ -2003,9 +2016,13 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             observesTaskCancellation: true,
             deadline: query.deadline
         ) { row in
-            (
-                row.int64(0), row.int64(1), row.int64(2),
-                row.int64(3), row.int64(4), row.int64(5)
+            DensityAggregateRow(
+                bucket: row.int64(0),
+                eventCount: row.int64(1),
+                identityRow: row.int64(2),
+                clampedTimestamps: row.int64(4),
+                invalidDurations: row.int64(5),
+                clampedDurations: row.int64(6)
             )
         }
         var buckets: [TraceDensityBucket] = []
@@ -2015,7 +2032,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         buckets.reserveCapacity(rows.count)
         for (index, row) in rows.enumerated() {
             if index.isMultiple(of: 1_024) { try checkQueryBoundary(query.deadline) }
-            guard let bucket = row.0, let count = row.1,
+            guard let bucket = row.bucket, let count = row.eventCount,
                 bucket >= 0, bucket < Int64(query.bucketCount), count >= 0
             else {
                 throw ArkTraceError(
@@ -2035,19 +2052,22 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 )
             }
             let end = endOverflow ? query.range.endNs : min(candidateEnd, query.range.endNs)
-            clampedTimestampCount += row.3 ?? 0
-            invalidCounterDurationCount += row.4 ?? 0
-            clampedCounterDurationCount += row.5 ?? 0
+            clampedTimestampCount += row.clampedTimestamps ?? 0
+            invalidCounterDurationCount += row.invalidDurations ?? 0
+            clampedCounterDurationCount += row.clampedDurations ?? 0
             buckets.append(
                 TraceDensityBucket(
                     range: try TraceTimeRange.query(startNs: start, endNs: end),
                     eventCount: count,
                     occupiedNs: nil,
                     utilization: nil,
-                    dominantThreadKey: Self.threadKey(row.2)
+                    dominant: nil
                 )
             )
         }
+        buckets = try resolvedDensityIdentities(
+            buckets, rows: rows, source: query.source, deadline: query.deadline
+        )
         try checkQueryBoundary(query.deadline)
         var issues = validation.dataQuality.issues
         if clampedTimestampCount > 0 {
@@ -2084,6 +2104,11 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     scope: "timeline.density.occupancy"
                 )
             )
+        }
+        // Reported only when it is true. The scope keeps its original name
+        // because it is part of the pinned machine-payload scope list, even
+        // though a bucket's identity is no longer necessarily a thread.
+        if buckets.contains(where: { $0.dominant == nil }) {
             issues.append(
                 TraceDataQualityIssue(
                     category: .unavailableValue,
@@ -2471,6 +2496,176 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     /// rows `counters()` would page. Each branch repeats the bucket expression,
     /// so bindings are emitted alongside the SQL rather than assembled by the
     /// caller.
+    /// One row of the density aggregation.
+    ///
+    /// A named shape rather than a tuple: `identityRow` only means anything
+    /// together with the source that produced it, and a seven-wide tuple at
+    /// the call site says nothing about which position is which.
+    private struct DensityAggregateRow {
+        let bucket: Int64?
+        let eventCount: Int64?
+        let identityRow: Int64?
+        let clampedTimestamps: Int64?
+        let invalidDurations: Int64?
+        let clampedDurations: Int64?
+    }
+
+    /// How much of its bucket a row occupies, used only to pick the row whose
+    /// identity the band borrows. `dur` is in every density index, so weighing
+    /// by it keeps the scan covering, and it is read raw: a corrupt duration
+    /// can at worst make a different real event of the same bucket the one
+    /// whose colour is borrowed, which is not a correctness claim worth a
+    /// per-row `typeof` guard on a scan this hot.
+    private static func densityWeightSQL(alias: String) -> String {
+        "\(alias).dur"
+    }
+
+    /// Fills in each bucket's dominant identity.
+    ///
+    /// The aggregation deliberately carries only the dominant row's `rowid`,
+    /// never its columns: a rowid rides along in every index entry, so the
+    /// scan stays on the covering density index, while selecting `ipid`,
+    /// `state` or `name` would send SQLite back to the table for every event
+    /// in the viewport. The identities are then read back here, at most one
+    /// per bucket.
+    private func resolvedDensityIdentities(
+        _ buckets: [TraceDensityBucket],
+        rows: [DensityAggregateRow],
+        source: TraceDensitySource,
+        deadline: ContinuousClock.Instant
+    ) throws -> [TraceDensityBucket] {
+        let rowIDs = Set(rows.compactMap(\.identityRow))
+        guard !rowIDs.isEmpty else { return buckets }
+        let identities: [Int64: TraceDensityIdentity]
+        switch source {
+        case .cpu:
+            identities = try cpuDensityIdentities(rowIDs: rowIDs, deadline: deadline)
+        case .threadState:
+            identities = try textDensityIdentities(
+                table: "thread_state", column: "state", maximumBytes: 256,
+                rowIDs: rowIDs, deadline: deadline
+            ) { .threadState($0) }
+        case .namedSlice:
+            identities = try textDensityIdentities(
+                table: "callstack", column: "name", maximumBytes: 4_096,
+                rowIDs: rowIDs, deadline: deadline
+            ) { .name($0) }
+        case .frame:
+            identities = try jankDensityIdentities(rowIDs: rowIDs, deadline: deadline)
+        // Upstream draws counters as an area chart, so a counter sample has no
+        // fill of its own to borrow.
+        case .cpuCounter, .processCounter:
+            return buckets
+        }
+        guard !identities.isEmpty else { return buckets }
+        return zip(buckets, rows).map { bucket, row in
+            guard let rowID = row.identityRow, let identity = identities[rowID]
+            else { return bucket }
+            return TraceDensityBucket(
+                range: bucket.range,
+                eventCount: bucket.eventCount,
+                occupiedNs: bucket.occupiedNs,
+                utilization: bucket.utilization,
+                dominant: identity
+            )
+        }
+    }
+
+    /// Upstream colours a CPU slice by its running process, falling back to the
+    /// thread when the scheduling row has no process (`colorForThread`). Both
+    /// sides of that fallback need the identity tables, which is why this is a
+    /// lookup rather than part of the scan.
+    ///
+    /// The event table is aliased `r`, not `s`, in every identity lookup:
+    /// `TracePerformanceSQLCapture` identifies the viewport scan by its `AS s`
+    /// alias, and a second matching statement would make that capture
+    /// ambiguous.
+    private func cpuDensityIdentities(
+        rowIDs: Set<Int64>, deadline: ContinuousClock.Instant
+    ) throws -> [Int64: TraceDensityIdentity] {
+        let ordered = rowIDs.sorted()
+        let rows = try db.query(
+            """
+            SELECT r.rowid, p.pid, t.tid
+            FROM sched_slice AS r
+            LEFT JOIN process AS p ON p.ipid = r.ipid
+            LEFT JOIN thread AS t ON t.itid = r.itid
+            WHERE r.rowid IN (\(Self.placeholders(ordered.count)))
+            LIMIT \(ordered.count)
+            """,
+            bindings: ordered.map { .int64($0) },
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in (row.int64(0), row.int64(1), row.int64(2)) }
+        var result: [Int64: TraceDensityIdentity] = [:]
+        for (rowID, pid, tid) in rows {
+            guard let rowID else { continue }
+            let identity = (pid ?? 0) > 0 ? (pid ?? 0) : (tid ?? 0)
+            guard identity > 0 else { continue }
+            result[rowID] = .processOrThread(identity)
+        }
+        return result
+    }
+
+    private func textDensityIdentities(
+        table: String,
+        column: String,
+        maximumBytes: Int,
+        rowIDs: Set<Int64>,
+        deadline: ContinuousClock.Instant,
+        identity: (String) -> TraceDensityIdentity
+    ) throws -> [Int64: TraceDensityIdentity] {
+        let ordered = rowIDs.sorted()
+        let rows = try db.query(
+            """
+            SELECT r.rowid,
+                CASE WHEN typeof(r.\(column)) = 'text'
+                    AND length(CAST(r.\(column) AS BLOB)) <= \(maximumBytes)
+                    THEN r.\(column) ELSE NULL END
+            FROM \(table) AS r
+            WHERE r.rowid IN (\(Self.placeholders(ordered.count)))
+            LIMIT \(ordered.count)
+            """,
+            bindings: ordered.map { .int64($0) },
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in (row.int64(0), row.text(1)) }
+        var result: [Int64: TraceDensityIdentity] = [:]
+        for (rowID, text) in rows {
+            guard let rowID, let text, !text.isEmpty else { continue }
+            result[rowID] = identity(text)
+        }
+        return result
+    }
+
+    private func jankDensityIdentities(
+        rowIDs: Set<Int64>, deadline: ContinuousClock.Instant
+    ) throws -> [Int64: TraceDensityIdentity] {
+        let ordered = rowIDs.sorted()
+        let rows = try db.query(
+            """
+            SELECT r.rowid,
+                CASE WHEN typeof(r.flag) = 'integer' THEN r.flag ELSE NULL END
+            FROM frame_slice AS r
+            WHERE r.rowid IN (\(Self.placeholders(ordered.count)))
+            LIMIT \(ordered.count)
+            """,
+            bindings: ordered.map { .int64($0) },
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row in (row.int64(0), row.int64(1)) }
+        var result: [Int64: TraceDensityIdentity] = [:]
+        for (rowID, flag) in rows {
+            guard let rowID, let flag else { continue }
+            result[rowID] = .jank(flag)
+        }
+        return result
+    }
+
+    private static func placeholders(_ count: Int) -> String {
+        Array(repeating: "?", count: count).joined(separator: ", ")
+    }
+
     private func counterDensitySource(
         sampleTables: [CounterSampleTable],
         filterTable: String,
@@ -2515,7 +2710,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     )) AS bucket,
                     CASE WHEN m.ts < ? OR m.ts > ? THEN 1 ELSE 0 END AS clamped,
                     \(invalidDuration) AS invalid_duration,
-                    \(clampedDuration) AS clamped_duration
+                    \(clampedDuration) AS clamped_duration,
+                    NULL AS identity_row, 0 AS weight
                 FROM \(sampleTable.rawValue) AS m
                 INNER JOIN \(filterTable) AS f ON f.id = m.filter_id
                 WHERE typeof(m.ts) = 'integer'

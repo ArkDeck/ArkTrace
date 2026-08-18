@@ -269,6 +269,36 @@ package enum TimelinePalette {
     }
 }
 
+/// Resolves an aggregate density bucket to its fill.
+///
+/// The band borrows the fill of the event that occupies the bucket longest, so
+/// an overview is a low-resolution picture of the same trace rather than a
+/// differently-coloured one: zooming in sharpens the blocks instead of
+/// recolouring them, and a process keeps the colour it has at detail level and
+/// in SmartPerf Host. When the source has no per-event identity — counter
+/// series, whose samples upstream draws as an area chart with no per-sample
+/// fill — the band falls back to the track's own identity colour, which is
+/// what every band used to use.
+package enum TimelineDensityPalette {
+    public static func color(
+        for bucket: TraceDensityBucket,
+        fallback: @autoclosure () -> TimelineColor
+    ) -> TimelineColor {
+        switch bucket.dominant {
+        case .processOrThread(let identity):
+            TimelinePalette.color(forProcessOrThreadID: identity)
+        case .name(let name):
+            TimelinePalette.color(forSliceName: name)
+        case .threadState(let raw):
+            TimelinePalette.stateColor(raw: raw)
+        case .jank(let tag):
+            TimelinePalette.jankColor(tag: tag)
+        case nil:
+            fallback()
+        }
+    }
+}
+
 /// Resolves a snapshot primitive to its fill.
 ///
 /// Kept separate from `TimelineNSView` so the mapping is testable without a

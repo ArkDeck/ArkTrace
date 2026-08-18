@@ -852,7 +852,20 @@ hash 必须是逐位一致的移植，其中两处细节决定结果：offset ba
 两处 ArkTrace 自有的扩展，与上游对齐无关，并刻意使用不同的 hash：
 
 - Counter series 按 series 名取色。上游把 counter 画成面积图，没有可对应的 per-sample 填充色，散列 series 名至少让每条 series 有稳定身份。
-- Density band 是 ArkTrace 特有的 LOD，上游没有对应层。聚合 bucket 没有单个事件可取色，因此整条 band 取所属 track 的身份色，强度仍由 alpha 表达。这里改用正确混合的 64-bit FNV-1a：上游 hash 在仅末位不同的短 key 上分布极差（`cpu:0` 与 `cpu:1` 撞色，`thread-state:4`…`thread-state:9` 全部落到同一色），会让相邻 track 无法区分。两个 hash 必须各自保留，合并其中任何一个都会破坏上游一致性或让所有 thread band 同色。
+- Track 身份色（`trackIdentityColor`）。它只在没有事件身份可借时兜底，并改用正确混合的 64-bit FNV-1a：上游 hash 在仅末位不同的短 key 上分布极差（`cpu:0` 与 `cpu:1` 撞色，`thread-state:4`…`thread-state:9` 全部落到同一色），会让相邻 track 无法区分。两个 hash 必须各自保留，合并其中任何一个都会破坏上游一致性或让所有 thread band 同色。
+
+**Density band 借用事件的颜色**（改于 2026-08-18）。density 是 ArkTrace 特有的 LOD，上游没有对应层，但这不意味着它可以有自己的一套颜色：band 曾经取所属 track 的身份色、用 0.18–0.88 的 alpha 表达强度，于是缩小后整屏都是压在窗口背景上的浅色块——既不是 trace 的颜色，也不是调色板里的颜色，而缩小恰恰是打开一条大 trace 时最先看到的视图。
+
+现在每个 bucket 带上**占它最久的那个事件**的身份（`TraceDensityIdentity`），band 就按 detail 层同一张表取色：CPU 取该 process 的 pid（无 process 时退回 tid，即上游 `colorForThread`），named slice 取名称散列，thread state 取固定状态色，frame 取 `JANK_COLOR`。放大因此只是把同一幅画变清楚，而不是换一幅画。选"最久"而不是"最多"：detail 层占据同一片像素的正是它。
+
+强度改由**条高**表达（`densityHeightFraction`，0.32…1.0 八档），填充恒为不透明。批次仍是封闭集合：调色板（或固定状态表）× 8 档，与 bucket 数无关。
+
+代价控制在两点上：
+
+- 聚合扫描只多带一个 **rowid**。rowid 本来就在每条索引记录里，所以 `arktrace_v3_*` 三条 covering index 仍然 covering；若直接 SELECT `ipid`/`state`/`name`，SQLite 就要为 viewport 内每个事件回表，`testPreparedDatabasePerformanceDiagnosticsAreBoundedAndIndexBacked` 会因为 plan 里少了 `COVERING INDEX` 而失败——这条断言正是这样发现的。
+- 身份在聚合之后按 rowid 回查，一次查询、至多一 bucket 一行。identity 查询里事件表别名固定为 `r` 而非 `s`：`TracePerformanceSQLCapture` 用 `AS s` 认出 viewport 扫描语句，第二条命中会让诊断捕获不再唯一。
+
+没有 per-sample 身份的 source（counter）仍然回退到 track 身份色，并继续用 `timeline.density.dominantThread` 这条 `.unavailableValue` data-quality 声明说明「这里确实没有可借的身份」；scope 字符串保持不变，因为它在 machine payload 的 scope 白名单里。
 
 绘制仍按填充色批处理：调色板是封闭集合，一次 snapshot 内的不同填充数受调色板规模约束，而不随事件数增长，因此 20k detail 的 snapshot 不会退化为逐事件一次 fill。语义 style 仍是批次的外层排序键，绘制顺序与 hit-test 优先级保持不变。状态不能只靠颜色表达（AT-APP-011）：state 与名称同时出现在 label、Inspector 与 accessibility value 中。
 

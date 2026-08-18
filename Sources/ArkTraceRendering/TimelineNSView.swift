@@ -756,13 +756,19 @@ public final class TimelineNSView: NSView {
     /// redraws perform a handful of fills instead of up to eight per track,
     /// while retaining vector-sharp bucket boundaries.
     ///
-    /// An aggregate bucket has no single event to take a color from, so the
-    /// band takes the owning track's identity color and keeps the intensity in
-    /// the alpha ramp. That is ArkTrace's own encoding rather than an upstream
-    /// one — upstream has no density level of detail — and it exists so an
-    /// overview of many tracks is still readable as separate tracks. The batch
-    /// count is therefore bounded by visible tracks × 8 rather than by 8, which
-    /// is still a small constant against the per-primitive fills this avoids.
+    /// A bucket takes the fill of the event that occupies it longest, so an
+    /// overview is the same picture as the detail view at a lower resolution:
+    /// zooming in sharpens the blocks instead of recolouring them, and a
+    /// process or a function keeps the colour it has in SmartPerf Host. Only a
+    /// source with no per-event identity upstream (counter series) falls back
+    /// to the track's own identity colour.
+    ///
+    /// Intensity is carried by the height of the band rather than by its
+    /// alpha. Alpha made every band a pale wash of the window background —
+    /// a colour belonging to neither the trace nor the palette — while height
+    /// keeps every fill at full strength and still shows a busy bucket as a
+    /// taller block. Batches stay bounded by the palette (a closed set) times
+    /// the eight intensity steps, never by the number of buckets.
     private func drawDensityOverlay(
         _ snapshot: TimelineSnapshot,
         backingScale: CGFloat,
@@ -775,11 +781,14 @@ public final class TimelineNSView: NSView {
             var paths: [DensityPaintKey: CGMutablePath] = [:]
             let minimumWidth = 1 / max(1, backingScale)
             for track in snapshot.tracks where !track.primitives.isEmpty {
-                let color = Self.trackColor(for: track.descriptor)
+                let fallback = Self.trackColor(for: track.descriptor)
                 for primitive in track.primitives {
                     guard case .density(let density) = primitive,
                         TimelineGeometry.isVisible(primitive, in: snapshot.viewport)
                     else { continue }
+                    let color = TimelineDensityPalette.color(
+                        for: density.bucket, fallback: fallback
+                    )
                     let intensity = min(7, Int(log2(Double(max(1, density.bucket.eventCount)))))
                     let key = DensityPaintKey(color: color, intensity: intensity)
                     let path = paths[key] ?? CGMutablePath()
@@ -789,12 +798,17 @@ public final class TimelineNSView: NSView {
                     let endX = TimelineGeometry.x(
                         for: density.bucket.range.endNs, viewport: snapshot.viewport
                     )
+                    // Bands sit on the row's baseline so a short one reads as a
+                    // low bar rather than as a floating block.
+                    let available = max(1, CGFloat(track.height) - 6)
+                    let height = max(1, available * Self.densityHeightFraction(intensity))
                     path.addRect(
                         CGRect(
                             x: startX,
-                            y: TimelineGeometry.rulerHeight + CGFloat(track.y) + 3,
+                            y: TimelineGeometry.rulerHeight + CGFloat(track.y) + 3
+                                + (available - height),
                             width: max(minimumWidth, endX - startX),
-                            height: max(1, CGFloat(track.height) - 6)
+                            height: height
                         )
                     )
                     paths[key] = path
@@ -806,11 +820,19 @@ public final class TimelineNSView: NSView {
         }
         for key in cached.paths.keys.sorted() {
             guard let path = cached.paths[key] else { continue }
-            let alpha = min(0.9, 0.18 + Double(key.intensity) * 0.1)
-            context.setFillColor(key.color.cgColor(alpha: alpha))
+            context.setFillColor(key.color.cgColor)
             context.addPath(path)
             context.fillPath()
         }
+    }
+
+    /// How much of a row an aggregate band fills, by intensity step.
+    ///
+    /// The floor is well above zero because the band is also the only thing
+    /// saying "there are events here at all": a bucket with one event has to
+    /// stay visible next to one with two hundred.
+    static func densityHeightFraction(_ intensity: Int) -> CGFloat {
+        0.32 + 0.68 * CGFloat(min(7, max(0, intensity))) / 7
     }
 
     /// Detail event geometry is immutable within a snapshot. Batch its static

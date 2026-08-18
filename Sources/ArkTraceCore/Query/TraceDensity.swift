@@ -39,25 +39,52 @@ package struct TraceDensityQuery: Sendable {
         self.deadline = deadline
     }
 }
+
+/// What a density bucket is mostly made of.
+///
+/// An aggregate bucket has no single event to take a colour from, which used
+/// to mean the band could only be painted in a colour of the viewer's own
+/// invention. Carrying the identity of the event that occupies the bucket
+/// longest lets the band be filled the way that event would have been filled
+/// at detail level, so zooming in changes the resolution of the picture rather
+/// than its colours. The cases are exactly the identities the upstream palette
+/// keys on.
+public enum TraceDensityIdentity: Hashable, Codable, Sendable {
+    /// A CPU slice's running process, or its thread when the scheduling row
+    /// carries no process — upstream's `colorForThread` argument.
+    case processOrThread(Int64)
+    /// A named slice's name, hashed the way upstream hashes function names.
+    case name(String)
+    /// A thread state, kept as the raw upstream state string so it resolves
+    /// through the same table the detail rows use.
+    case threadState(String)
+    /// A frame's `jank_tag`.
+    case jank(Int64)
+}
+
 public struct TraceDensityBucket: Hashable, Codable, Sendable {
     public let range: TraceTimeRange
     public let eventCount: Int64
     public let occupiedNs: Int64?
     public let utilization: Double?
-    public let dominantThreadKey: ThreadKey?
+    /// The identity of the longest event in the bucket, when the source has
+    /// one. Longest rather than most frequent: it is the event that would
+    /// cover most of these pixels at detail level, so it is the one whose
+    /// colour the band should borrow.
+    public let dominant: TraceDensityIdentity?
 
     public init(
         range: TraceTimeRange,
         eventCount: Int64,
         occupiedNs: Int64?,
         utilization: Double?,
-        dominantThreadKey: ThreadKey?
+        dominant: TraceDensityIdentity?
     ) {
         self.range = range
         self.eventCount = eventCount
         self.occupiedNs = occupiedNs
         self.utilization = utilization
-        self.dominantThreadKey = dominantThreadKey
+        self.dominant = dominant
     }
 }
 

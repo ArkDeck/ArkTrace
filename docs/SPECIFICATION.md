@@ -1199,7 +1199,9 @@ Detail event 的填充色必须由事件身份决定，且与被 pin 住的上�
 
 配色是附加通道而非唯一通道（见 AT-APP-011）：state 与名称必须同时可从 label、Inspector 或 accessibility value 获得。渲染必须按填充色批处理，一次 snapshot 内的填充批次数由调色板规模约束，不得随事件数增长。
 
-Counter series 与 density band 的取色是 ArkTrace 扩展而非上游对齐项，必须在文档中标明，且不得为此放宽上游 hash 的一致性要求。
+Density band 虽然是 ArkTrace 特有的 LOD，取色仍必须来自上游调色板：每个 bucket 取占它最久的事件的身份（CPU 取 process/thread、named slice 取名称、thread state 取状态、frame 取 jank flag），并按 detail 层同一条规则解析，使缩放只改变分辨率而不改变颜色。强度不得用透明度表达。带不出事件身份的 source（counter series）才回退到 track 身份色，且必须以 `.unavailableValue` data-quality 声明说明回退原因。
+
+Counter series 与 track 身份色的取色是 ArkTrace 扩展而非上游对齐项，必须在文档中标明，且不得为此放宽上游 hash 的一致性要求。
 
 ## 16. Cache 规格
 

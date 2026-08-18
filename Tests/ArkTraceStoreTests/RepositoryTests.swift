@@ -2385,6 +2385,90 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(page.truncated, "a bounded list must say it is bounded")
     }
 
+    /// A density band is drawn in the colour of the event that owns most of its
+    /// bucket, so the aggregate view has to report which event that is. Longest
+    /// rather than most frequent: at detail level that event covers most of the
+    /// same pixels.
+    func testDensityBucketsCarryTheDominantEventIdentity() async throws {
+        let (repository, url) = try makeSummaryRepository(
+            extraSQL: """
+            -- A second, shorter slice on the same thread; the longer one wins.
+            INSERT INTO callstack VALUES (4, 1600, 50, 2, 'shorter');
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+
+        let named = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .namedSlice(ThreadKey(itid: 2)),
+                bucketCount: 1, deadline: deadline
+            )
+        )
+        XCTAssertEqual(named.buckets.first?.eventCount, 2)
+        XCTAssertEqual(named.buckets.first?.dominant, .name("inside"))
+
+        let states = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .threadState(ThreadKey(itid: 2)),
+                bucketCount: 1, deadline: deadline
+            )
+        )
+        XCTAssertEqual(states.buckets.first?.dominant, .threadState("Running"))
+
+        // CPU 3 only runs ipid 2, and it is that process' pid -- not the
+        // internal directory key -- that upstream hashes a colour from.
+        let cpu = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .cpu(3), bucketCount: 1, deadline: deadline
+            )
+        )
+        XCTAssertEqual(cpu.buckets.first?.dominant, .processOrThread(101))
+
+        // Upstream draws counters as an area chart, so a counter sample has no
+        // fill to borrow. The result says so rather than inventing one.
+        let counters = try await repository.density(
+            TraceDensityQuery(
+                range: range, source: .cpuCounter(filterID: 1, cpu: 0),
+                bucketCount: 1, deadline: deadline
+            )
+        )
+        XCTAssertEqual(counters.buckets.first?.eventCount, 1)
+        XCTAssertNil(counters.buckets.first?.dominant)
+        XCTAssertTrue(counters.dataQuality.issues.contains {
+            $0.category == .unavailableValue
+                && $0.scope == "timeline.density.dominantThread"
+        })
+    }
+
+    /// Frame bands follow `flag`, which is what upstream's `JANK_COLOR` keys
+    /// on, so a zoomed-out frame lane still shows jank where jank happened.
+    func testFrameDensityBucketsCarryTheDominantJankFlag() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE frame_slice (
+                id INTEGER, ts INTEGER, vsync INTEGER, ipid INTEGER, itid INTEGER,
+                dur INTEGER, dst INTEGER, type INTEGER, type_desc TEXT, flag INTEGER
+            );
+            INSERT INTO frame_slice VALUES (1, 1100, 900, 1, 1, 100, NULL, 0, 'actural', 1);
+            INSERT INTO frame_slice VALUES (2, 1400, 902, 1, 1, 60, NULL, 0, 'actural', 2);
+            """
+        )
+        let repository = try makeRepository()
+        let density = try await repository.density(
+            TraceDensityQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                source: .frame(processKey: nil),
+                bucketCount: 1,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(density.buckets.first?.eventCount, 2)
+        XCTAssertEqual(density.buckets.first?.dominant, .jank(1))
+    }
+
     /// `frame_slice.type` is the opposite of what the names suggest and was
     /// verified against the pinned upstream plus real captures: **0 is the
     /// actual frame, 1 the expected one**. Getting this backwards would swap
@@ -3120,7 +3204,7 @@ final class RepositoryTests: XCTestCase {
             )
         )
         XCTAssertEqual(density.buckets.reduce(0) { $0 + $1.eventCount }, 1)
-        XCTAssertNil(density.buckets.first?.dominantThreadKey)
+        XCTAssertNil(density.buckets.first?.dominant)
     }
 
     func testNegativeInternalIdentitiesRemainStableAcrossQueries() async throws {
@@ -3187,10 +3271,12 @@ final class RepositoryTests: XCTestCase {
                 range: range, source: .cpu(9), bucketCount: 8, deadline: deadline
             )
         )
-        XCTAssertNil(density.buckets.first?.dominantThreadKey)
-        XCTAssertTrue(density.dataQuality.issues.contains {
-            $0.category == .unavailableValue
-                && $0.scope == "timeline.density.dominantThread"
+        // A negative ipid is an internal directory key, not a missing one: the
+        // band's identity resolves through it to the real pid, which is what
+        // upstream hashes a CPU slice's colour from.
+        XCTAssertEqual(density.buckets.first?.dominant, .processOrThread(900))
+        XCTAssertFalse(density.dataQuality.issues.contains {
+            $0.scope == "timeline.density.dominantThread"
         })
     }
 
@@ -3851,7 +3937,7 @@ final class RepositoryTests: XCTestCase {
         )
         XCTAssertEqual(result.buckets.first?.range.startNs, 0)
         XCTAssertEqual(result.buckets.first?.eventCount, 1)
-        XCTAssertNil(result.buckets.first?.dominantThreadKey)
+        XCTAssertNil(result.buckets.first?.dominant)
         XCTAssertTrue(result.dataQuality.issues.contains {
             $0.category == .clampedValue && $0.scope == "sched_slice.ts"
                 && $0.count == 1

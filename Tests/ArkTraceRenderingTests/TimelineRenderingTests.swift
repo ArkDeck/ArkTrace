@@ -42,7 +42,7 @@ final class TimelineRenderingTests: XCTestCase {
                     buckets: [
                         TraceDensityBucket(
                             range: query.range, eventCount: eventCount,
-                            occupiedNs: nil, utilization: nil, dominantThreadKey: nil
+                            occupiedNs: nil, utilization: nil, dominant: nil
                         )
                     ]
                 )
@@ -57,7 +57,7 @@ final class TimelineRenderingTests: XCTestCase {
                     eventCount: 1,
                     occupiedNs: nil,
                     utilization: nil,
-                    dominantThreadKey: nil
+                    dominant: nil
                 )
             }
             return TraceDensityResult(buckets: buckets)
@@ -113,7 +113,7 @@ final class TimelineRenderingTests: XCTestCase {
                     eventCount: 10,
                     occupiedNs: nil,
                     utilization: nil,
-                    dominantThreadKey: nil
+                    dominant: nil
                 )
             )
         )
@@ -477,8 +477,10 @@ final class TimelineRenderingTests: XCTestCase {
         )
     }
 
-    /// Aggregate density bands take the owning track's identity color, so an
-    /// overview of several tracks is still readable as separate tracks.
+    /// A source with no per-event identity upstream — a counter series, or any
+    /// bucket whose dominant row could not be read — keeps the old encoding and
+    /// falls back to the owning track's identity color, so an overview of
+    /// several such tracks is still readable as separate tracks.
     @MainActor
     func testDensityBandsAreColoredPerTrack() throws {
         let viewport = try TimelineViewport(
@@ -511,7 +513,7 @@ final class TimelineRenderingTests: XCTestCase {
                                 eventCount: 64,
                                 occupiedNs: nil,
                                 utilization: nil,
-                                dominantThreadKey: nil
+                                dominant: nil
                             )
                         )
                     )
@@ -534,6 +536,106 @@ final class TimelineRenderingTests: XCTestCase {
         XCTAssertEqual(
             densityBuckets, [descriptors.count],
             "one fill per track color, and only one build"
+        )
+    }
+
+    /// An aggregate band and the events inside it resolve to the same fill, so
+    /// zooming in sharpens the picture instead of repainting it — and a process
+    /// or a function keeps the colour it has in SmartPerf Host.
+    @MainActor
+    func testDensityBandsBorrowTheDominantEventsFill() throws {
+        let fallback = TimelinePalette.trackIdentityColor("named-slice:7")
+        func band(_ dominant: TraceDensityIdentity?) throws -> TimelineColor {
+            TimelineDensityPalette.color(
+                for: TraceDensityBucket(
+                    range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                    eventCount: 8,
+                    occupiedNs: nil,
+                    utilization: nil,
+                    dominant: dominant
+                ),
+                fallback: fallback
+            )
+        }
+        let name = "H:RSMainThread::DoComposition"
+        XCTAssertEqual(try band(.name(name)), TimelinePalette.color(forSliceName: name))
+        XCTAssertEqual(
+            try band(.processOrThread(7_437)),
+            TimelinePalette.color(forProcessOrThreadID: 7_437)
+        )
+        XCTAssertEqual(
+            try band(.threadState("Running")), TimelinePalette.stateColor(raw: "Running")
+        )
+        XCTAssertEqual(try band(.jank(1)), TimelinePalette.jankColor(tag: 1))
+        XCTAssertEqual(try band(nil), fallback, "only an unidentified bucket falls back")
+    }
+
+    /// Density is carried by the height of a band, not by its alpha: a busy
+    /// bucket is a taller block in the same colour, where it used to be a
+    /// darker wash of the window background in a colour belonging to neither
+    /// the trace nor the palette.
+    @MainActor
+    func testDensityIntensityChangesHeightAndNotColor() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 5
+        )
+        let descriptor = TrackDescriptor(
+            title: "main", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        func render(eventCount: Int64) throws -> NSBitmapImageRep {
+            let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 100, height: 80))
+            view.snapshot = TimelineSnapshot(
+                viewport: viewport,
+                tracks: [
+                    TimelineTrackSnapshot(
+                        descriptor: descriptor,
+                        y: 0,
+                        height: 28,
+                        primitives: [
+                            .density(
+                                TimelineDensityPrimitive(
+                                    trackID: descriptor.id,
+                                    bucket: TraceDensityBucket(
+                                        range: try TraceTimeRange.query(
+                                            startNs: 0, endNs: 1_000
+                                        ),
+                                        eventCount: eventCount,
+                                        occupiedNs: nil,
+                                        utilization: nil,
+                                        dominant: .name("draw")
+                                    )
+                                )
+                            )
+                        ]
+                    )
+                ],
+                generation: viewport.generation,
+                dataQuality: TraceDataQuality()
+            )
+            let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            return bitmap
+        }
+        // Intensity 1 against intensity 7: the band is bottom-anchored, so the
+        // sparse one covers the lower sample point only.
+        let sparse = try render(eventCount: 2)
+        let busy = try render(eventCount: 1_024)
+        let scale = CGFloat(sparse.pixelsWide) / 100
+        func pixel(_ bitmap: NSBitmapImageRep, y: CGFloat) -> NSColor? {
+            bitmap.colorAt(x: Int(50 * scale), y: Int(y * scale))
+        }
+        let low = TimelineGeometry.rulerHeight + 21
+        let high = TimelineGeometry.rulerHeight + 8
+        XCTAssertEqual(
+            pixel(sparse, y: low), pixel(busy, y: low),
+            "a busier bucket must not change the colour of the band"
+        )
+        XCTAssertNotEqual(
+            pixel(sparse, y: high), pixel(busy, y: high),
+            "it must change how much of the row the band fills"
         )
     }
 

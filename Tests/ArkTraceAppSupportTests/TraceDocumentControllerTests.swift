@@ -116,7 +116,7 @@ final class TraceDocumentControllerTests: XCTestCase {
                         eventCount: Int64(sliceRows.count),
                         occupiedNs: nil,
                         utilization: nil,
-                        dominantThreadKey: nil
+                        dominant: nil
                     )
                 ]
             )
