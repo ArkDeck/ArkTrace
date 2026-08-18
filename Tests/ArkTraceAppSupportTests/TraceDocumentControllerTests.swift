@@ -292,6 +292,62 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertNil(controller.errorPresentation)
     }
 
+    /// `W`/`A`/`S`/`D`, the arrows and the range keys are all first-responder
+    /// keys on the timeline canvas, so a trace that opens without handing the
+    /// canvas the keyboard answers none of them until it has been clicked --
+    /// which reads as the shortcuts being broken. The canvas reports its first
+    /// appearance per document, and that is the moment to hand it over.
+    @MainActor
+    func testOpeningATraceHandsTheKeyboardToTheTimeline() async throws {
+        let suite = "ArkTraceFocusTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(identity: "f"),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let root = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-focus-\(UUID().uuidString)", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let first = root.appending(path: "first.htrace")
+        let second = root.appending(path: "second.htrace")
+        for source in [first, second] {
+            FileManager.default.createFile(atPath: source.path, contents: Data())
+        }
+
+        controller.open(first)
+        while controller.phase != .ready { await Task.yield() }
+        let beforeDisplay = controller.timelineFocusRequestID
+        controller.markTimelineDisplayed()
+        XCTAssertGreaterThan(
+            controller.timelineFocusRequestID, beforeDisplay,
+            "a trace that is on screen must be the one the keyboard is on"
+        )
+
+        // Once per document: the canvas can be laid out again for any number of
+        // reasons, and none of them is a reason to take focus back from
+        // wherever the user has since put it.
+        let afterDisplay = controller.timelineFocusRequestID
+        controller.markTimelineDisplayed()
+        XCTAssertEqual(controller.timelineFocusRequestID, afterDisplay)
+
+        // A different document is a different answer.
+        controller.open(second)
+        while controller.phase != .ready { await Task.yield() }
+        controller.markTimelineDisplayed()
+        XCTAssertGreaterThan(controller.timelineFocusRequestID, afterDisplay)
+        await controller.close()
+    }
+
     func testCloseCleanupFailureRemainsVisibleAndRetryable() async throws {
         let suite = "ArkTraceCloseTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

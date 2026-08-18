@@ -443,12 +443,22 @@ public final class TraceDocumentController {
         TraceAppSignposts.event("FirstWindowAppeared")
     }
 
-    /// Idempotent per-document mark, called when the timeline canvas for the
-    /// current document first appears on screen.
+    /// Idempotent per-document hook, called when the timeline canvas for the
+    /// current document first appears on screen. It records the display
+    /// signpost and hands the keyboard to the canvas.
+    ///
+    /// The second half is not decoration. `W`/`A`/`S`/`D`, the arrows and the
+    /// range keys are all first-responder keys on the timeline, so until
+    /// something makes that view first responder they do nothing at all: a
+    /// freshly opened trace answered no shortcut until it had been clicked
+    /// once, which reads as the shortcuts being broken rather than as focus
+    /// sitting somewhere else. Opening a trace is a request to work on it, and
+    /// the timeline is what one works on.
     public func markTimelineDisplayed() {
         guard !timelineDisplayMarked else { return }
         timelineDisplayMarked = true
         TraceAppSignposts.event("FirstTimelineDisplayed")
+        timelineFocusRequestID &+= 1
     }
 
     deinit {
