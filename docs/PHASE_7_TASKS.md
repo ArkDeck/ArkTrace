@@ -810,8 +810,17 @@ AT-APP-009（Help 键位表同源）。
 三处值得记录的取舍：
 
 1. **滚轮只读纵轴**。带修饰的横向滚动仍是平移 —— 滚轮鼠标只有纵轴，而横向滚动已有既定含义，
-   两者都转缩放会让触控板上的对角滑动变成随机缩放。平移路径一字未改：仍消费原始 `scrollingDeltaX`，
+   两者都转缩放会让触控板上的对角滑动变成随机缩放。平移消费的仍是原始 `scrollingDeltaX`，
    若照缩放路径把 line 单位归一化，既有的滚轮平移会一下子长 16 倍；
+
+   **就地更正（2026-08-18）**：本条当时写的是「平移路径一字未改」，那正是缺陷所在。判轴规则
+   `|deltaX| > 0.01 pt 即平移` 是逐事件的，而触控板的每个事件都带两轴：纵向滑动的横向抖动稳定超过
+   这个死区，于是**纵向滑动被自己的抖动判成平移并被消费掉**，外层 `ScrollView` 只收到横向 delta 恰好
+   为 0 的那几个事件 —— 用户看到的是「加载 trace 后触控板上下滑动特别慢」，同时每个被吃掉的事件都白
+   换一次 viewport generation。现在轴向按手势承诺（累计行程先到 1 pt 的轴赢，整个手势持有到下一次
+   `.began`），设计见 DESIGN §14.2.5，回归见 `TimelinePointerGestureTests` 的
+   `testVerticalTrackpadSwipeIsNotEatenByItsHorizontalWobble` / `…CommitsOnAccumulatedTravel…` /
+   `testPhasedVerticalSwipeNeverReachesTheViewport`；
 2. **端点把手压住选区两边各 24 pt 的事件**。这是「把手要够大」与「事件要能点中」之间的真实冲突，
    本任务选择前者并把代价写明：选区是用户自己拉出来的，按事件本来就会清掉选区，Esc 可直接取消。
    窄于 24 pt 的选区以中点为界、两个把手各自**向外**延展，同时满足 24 pt 与不重叠；

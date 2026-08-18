@@ -70,17 +70,33 @@ final class TimelinePointerGestureTests: XCTestCase {
 
     // MARK: - G14: wheel zoom
 
+    /// One event through a gesture that has just begun. Every assertion below
+    /// that names a single event means "the first event of a swipe".
+    private func resolveOne(
+        deltaX: Double,
+        deltaY: Double,
+        hasPreciseDeltas: Bool,
+        zooms: Bool
+    ) -> TimelineScrollResolution {
+        var gesture = TimelineScrollGesture()
+        return gesture.resolve(
+            deltaX: deltaX, deltaY: deltaY,
+            hasPreciseDeltas: hasPreciseDeltas, zooms: zooms
+        )
+    }
+
+
     /// Unmodified scrolling is untouched: horizontal pans by the raw delta it
     /// always used, vertical falls through to the enclosing scroll view.
     func testUnmodifiedScrollingKeepsPanningAndPassingThrough() {
         XCTAssertEqual(
-            TimelineScrollGesture.resolve(
+            resolveOne(
                 deltaX: -12, deltaY: 0, hasPreciseDeltas: true, zooms: false
             ),
             .pan(points: -12)
         )
         XCTAssertEqual(
-            TimelineScrollGesture.resolve(
+            resolveOne(
                 deltaX: 0, deltaY: 40, hasPreciseDeltas: true, zooms: false
             ),
             .passThrough,
@@ -89,21 +105,104 @@ final class TimelinePointerGestureTests: XCTestCase {
         // A legacy wheel's line units must not be rescaled on the pan path:
         // that would silently make every existing wheel pan much longer.
         XCTAssertEqual(
-            TimelineScrollGesture.resolve(
+            resolveOne(
                 deltaX: 3, deltaY: 0, hasPreciseDeltas: false, zooms: false
             ),
             .pan(points: 3)
         )
     }
 
+    /// The regression this guards. A two-finger swipe is never perfectly
+    /// axis-aligned: a vertical one carries a fraction of a point of
+    /// horizontal wobble on nearly every event. Resolving each event on its
+    /// own turned that wobble into a pan and consumed the event, so the scroll
+    /// view underneath received almost none of the swipe and the trace crawled
+    /// instead of scrolling.
+    func testVerticalTrackpadSwipeIsNotEatenByItsHorizontalWobble() {
+        var gesture = TimelineScrollGesture()
+        // Shaped like a real flick: the wobble is on every sample and changes
+        // sign, the vertical travel is an order of magnitude larger, and the
+        // momentum tail rounds the vertical delta to nothing before the
+        // horizontal residue goes with it.
+        let swipe: [(deltaX: Double, deltaY: Double)] = [
+            (0.12, 0.6), (-0.31, 4.2), (0.24, 11.8), (-0.08, 9.1),
+            (0.19, 3.4), (0.05, 0), (-0.02, 0),
+        ]
+        for sample in swipe {
+            XCTAssertEqual(
+                gesture.resolve(
+                    deltaX: sample.deltaX, deltaY: sample.deltaY,
+                    hasPreciseDeltas: true, zooms: false
+                ),
+                .passThrough,
+                "a vertical swipe belongs to the scroll view for its whole length"
+            )
+        }
+    }
+
+    /// The mirror of it, and the cost of the fix: a horizontal gesture commits
+    /// even when no single sample is large — a deliberate slow pan is exactly
+    /// that — and once committed it stays a pan through samples whose vertical
+    /// component is the larger one.
+    func testHorizontalSwipeCommitsOnAccumulatedTravelAndHoldsTheAxis() {
+        var gesture = TimelineScrollGesture()
+        func resolve(_ deltaX: Double, _ deltaY: Double) -> TimelineScrollResolution {
+            gesture.resolve(
+                deltaX: deltaX, deltaY: deltaY, hasPreciseDeltas: true, zooms: false
+            )
+        }
+        // A slow pan: no sample reaches the commit threshold, the accumulated
+        // travel does. The scroll view keeps the sub-threshold head of the
+        // gesture, which is under a point of scroll.
+        XCTAssertEqual(resolve(0.4, 0.1), .passThrough)
+        XCTAssertEqual(resolve(0.5, 0.2), .passThrough)
+        XCTAssertEqual(resolve(0.6, 0.1), .pan(points: 0.6))
+        // Committed: a sample whose vertical component dominates no longer
+        // flips the axis mid-gesture.
+        XCTAssertEqual(resolve(0.2, 3), .pan(points: 0.2))
+        // ...until the next swipe begins.
+        gesture.begin()
+        XCTAssertEqual(resolve(0.2, 3), .passThrough)
+    }
+
+    /// End to end through `scrollWheel(with:)`: a phased vertical swipe
+    /// produces no viewport intent at all, wobble included, so every event of
+    /// it is left for the enclosing scroll view.
+    @MainActor
+    func testPhasedVerticalSwipeNeverReachesTheViewport() throws {
+        let (view, _) = try makeView()
+        var intents: [TimelineViewportIntent] = []
+        view.onViewportIntent = { intents.append($0) }
+        // kCGScrollPhaseBegan, then kCGScrollPhaseChanged. The last sample is
+        // pure horizontal residue: the axis the swipe committed to must
+        // survive it.
+        let swipe: [(phase: Int64, vertical: Int32, horizontal: Int32)] = [
+            (1, 12, 0), (2, 9, 1), (2, 14, -1), (2, 4, 1), (2, 0, 1),
+        ]
+        for sample in swipe {
+            let cgEvent = try XCTUnwrap(
+                CGEvent(
+                    scrollWheelEvent2Source: nil, units: .pixel,
+                    wheelCount: 2, wheel1: sample.vertical,
+                    wheel2: sample.horizontal, wheel3: 0
+                )
+            )
+            cgEvent.setIntegerValueField(.scrollWheelEventScrollPhase, value: sample.phase)
+            let event = try XCTUnwrap(NSEvent(cgEvent: cgEvent))
+            XCTAssertFalse(event.phase.isEmpty, "the synthesized swipe must carry its phase")
+            view.scrollWheel(with: event)
+        }
+        XCTAssertEqual(intents.count, 0, "a vertical swipe is the scroll view's, not the viewport's")
+    }
+
     /// The gesture upstream binds to `Ctrl + Scroll wheel`.
     func testModifiedVerticalScrollingZoomsInTheUpstreamDirection() throws {
-        guard case .zoom(let inScale) = TimelineScrollGesture.resolve(
+        guard case .zoom(let inScale) = resolveOne(
             deltaX: 0, deltaY: 20, hasPreciseDeltas: true, zooms: true
         ) else { return XCTFail("a modified vertical scroll must zoom") }
         XCTAssertLessThan(inScale, 1, "scrolling up narrows the viewport")
 
-        guard case .zoom(let outScale) = TimelineScrollGesture.resolve(
+        guard case .zoom(let outScale) = resolveOne(
             deltaX: 0, deltaY: -20, hasPreciseDeltas: true, zooms: true
         ) else { return XCTFail("a modified vertical scroll must zoom") }
         XCTAssertGreaterThan(outScale, 1, "scrolling down widens it")
@@ -111,21 +210,21 @@ final class TimelinePointerGestureTests: XCTestCase {
 
         // A wheel detent is one line, not one point: it has to be worth a
         // visible step on its own.
-        guard case .zoom(let detent) = TimelineScrollGesture.resolve(
+        guard case .zoom(let detent) = resolveOne(
             deltaX: 0, deltaY: 1, hasPreciseDeltas: false, zooms: true
         ) else { return XCTFail("a wheel detent must zoom") }
         XCTAssertLessThan(detent, 0.95)
         XCTAssertGreaterThan(detent, 0.7)
 
         // A flung trackpad cannot teleport the viewport.
-        guard case .zoom(let flung) = TimelineScrollGesture.resolve(
+        guard case .zoom(let flung) = resolveOne(
             deltaX: 0, deltaY: 9_000, hasPreciseDeltas: true, zooms: true
         ) else { return XCTFail("a large scroll must still zoom") }
         XCTAssertEqual(flung, exp(-TimelineScrollGesture.maximumZoomExponent), accuracy: 1e-12)
 
         // A modified *horizontal* scroll is still a pan, not an accidental zoom.
         XCTAssertEqual(
-            TimelineScrollGesture.resolve(
+            resolveOne(
                 deltaX: -8, deltaY: 0, hasPreciseDeltas: true, zooms: true
             ),
             .pan(points: -8)

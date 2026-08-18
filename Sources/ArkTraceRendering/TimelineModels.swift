@@ -208,13 +208,30 @@ package enum TimelineScrollResolution: Hashable, Sendable {
     case zoom(scale: Double)
 }
 
+/// Which axis a scroll gesture has committed to.
+package enum TimelineScrollAxis: Hashable, Sendable {
+    case horizontal
+    case vertical
+}
+
 /// Scroll-wheel semantics.
 ///
 /// Upstream binds `Ctrl + Scroll wheel` to zoom (`component/SpKeyboard.html.ts`
 /// Mouse Controls). ArkTrace accepts ⌃ and ⌥ both: ⌃-scroll is taken by the
 /// system's zoom accessibility feature on many machines, and ⌥ is the macOS
 /// convention for "the other axis / the finer gesture".
-package enum TimelineScrollGesture {
+///
+/// One value per gesture, not per event. A trackpad reports *both* axes on
+/// every event of a swipe: a vertical flick carries a fraction of a point of
+/// horizontal wobble on most of its events. Deciding the axis per event
+/// therefore turned that wobble into a pan and — the reason this is a
+/// correctness bug and not a cosmetic one — consumed the event the enclosing
+/// scroll view needed in order to scroll at all, so vertical scrolling
+/// advanced only on the rare event whose horizontal delta was exactly zero.
+/// A gesture instead commits to whichever axis first accumulates
+/// ``axisCommitPoints`` of travel and holds it until the next `.began`, which
+/// is what AppKit's own `usesPredominantAxisScrolling` does for a scroll view.
+package struct TimelineScrollGesture {
     /// Points a legacy wheel detent is worth. AppKit reports non-precise
     /// deltas in lines; this is the same order as the line height AppKit's own
     /// scroll views use, so one detent is a visible but not violent step.
@@ -225,34 +242,81 @@ package enum TimelineScrollGesture {
     /// Ceiling on a single event's exponent, so a flung trackpad cannot
     /// teleport the viewport: at most e× in or out per event.
     static let maximumZoomExponent: Double = 1
+    /// Travel one axis must accumulate before the gesture commits to it. Low
+    /// enough that the first event or two of a real swipe decides it, high
+    /// enough that the orthogonal wobble of a flick never wins the race.
+    static let axisCommitPoints: Double = 1
 
     /// Deltas below this are noise from the orthogonal axis of a gesture.
     static let deadZonePoints: Double = 0.01
 
-    static func resolve(
+    private var axis: TimelineScrollAxis?
+    private var travelX: Double = 0
+    private var travelY: Double = 0
+
+    package init() {}
+
+    /// Begins a fresh gesture, so the next events decide the axis again. The
+    /// view calls it on the `.mayBegin`/`.began` phase of a trackpad swipe;
+    /// a legacy wheel, whose axes are independent and free of wobble, gets a
+    /// fresh gesture for every event instead.
+    package mutating func begin() { self = TimelineScrollGesture() }
+
+    package mutating func resolve(
         deltaX: Double,
         deltaY: Double,
         hasPreciseDeltas: Bool,
         zooms: Bool
     ) -> TimelineScrollResolution {
-        let vertical = hasPreciseDeltas ? deltaY : deltaY * pointsPerLine
-        // Zoom reads the vertical axis only, which is the one a wheel mouse
-        // has. A modified horizontal scroll keeps panning rather than becoming
-        // an accidental zoom.
-        if zooms, abs(vertical) > deadZonePoints {
+        // A legacy wheel reports lines, a trackpad points. Both axes are
+        // normalized to points before they are measured against the commit
+        // threshold: one detent is sixteen points of travel, and a wheel gets
+        // a fresh gesture per event, so an unnormalized line would never reach
+        // it. Panning still consumes the raw horizontal delta it always did --
+        // normalizing it there would silently make every existing wheel pan
+        // sixteen times longer.
+        let scale = hasPreciseDeltas ? 1 : Self.pointsPerLine
+        let vertical = deltaY * scale
+        guard let committed = commitAxis(horizontal: deltaX * scale, vertical: vertical)
+        else {
+            // Too little travel to tell yet. The scroll view gets it: at most
+            // one point of scroll is below the threshold of sight either way,
+            // and handing it over keeps the gesture's `.began` phase intact.
+            return .passThrough
+        }
+        switch committed {
+        case .horizontal:
+            // Zoom reads the vertical axis only, which is the one a wheel
+            // mouse has. A modified horizontal scroll keeps panning rather
+            // than becoming an accidental zoom.
+            return .pan(points: deltaX)
+        case .vertical:
+            guard zooms, abs(vertical) > Self.deadZonePoints else { return .passThrough }
             let exponent = min(
-                maximumZoomExponent,
-                max(-maximumZoomExponent, vertical * zoomExponentPerPoint)
+                Self.maximumZoomExponent,
+                max(-Self.maximumZoomExponent, vertical * Self.zoomExponentPerPoint)
             )
             // Scrolling up (positive delta) zooms in, matching the sign
             // convention `magnify(with:)` uses for a pinch-out.
             return .zoom(scale: exp(-exponent))
         }
-        // Panning keeps consuming the raw horizontal delta it always did:
-        // normalizing it here would silently make every existing wheel pan
-        // sixteen times longer.
-        guard abs(deltaX) > deadZonePoints else { return .passThrough }
-        return .pan(points: deltaX)
+    }
+
+    /// The axis this gesture is on, or `nil` while it is still too small to
+    /// say. Travel accumulates so that a deliberate slow pan commits just as
+    /// surely as a flick -- a per-event comparison would leave a slow gesture
+    /// undecided forever.
+    private mutating func commitAxis(
+        horizontal: Double,
+        vertical: Double
+    ) -> TimelineScrollAxis? {
+        if let axis { return axis }
+        travelX += abs(horizontal)
+        travelY += abs(vertical)
+        guard max(travelX, travelY) >= Self.axisCommitPoints else { return nil }
+        let committed: TimelineScrollAxis = travelX > travelY ? .horizontal : .vertical
+        axis = committed
+        return committed
     }
 }
 

@@ -101,6 +101,9 @@ public final class TimelineNSView: NSView {
     /// pointer is outside. It is the zoom anchor for `W`/`S`, matching
     /// upstream's `centerXPercentage`.
     private var pointerLocation: CGPoint?
+    /// The scroll gesture in flight. It outlives a single event because the
+    /// axis is a property of the whole swipe, not of one of its samples.
+    private var scrollGesture = TimelineScrollGesture()
 
     /// One batched density fill: the owning track's palette color plus the
     /// existing eight-step intensity ramp.
@@ -406,12 +409,29 @@ public final class TimelineNSView: NSView {
 
     public override func scrollWheel(with event: NSEvent) {
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        let resolution = TimelineScrollGesture.resolve(
-            deltaX: Double(event.scrollingDeltaX),
-            deltaY: Double(event.scrollingDeltaY),
-            hasPreciseDeltas: event.hasPreciseScrollingDeltas,
-            zooms: modifiers.contains(.option) || modifiers.contains(.control)
-        )
+        func resolve(_ gesture: inout TimelineScrollGesture) -> TimelineScrollResolution {
+            gesture.resolve(
+                deltaX: Double(event.scrollingDeltaX),
+                deltaY: Double(event.scrollingDeltaY),
+                hasPreciseDeltas: event.hasPreciseScrollingDeltas,
+                zooms: modifiers.contains(.option) || modifiers.contains(.control)
+            )
+        }
+        // A trackpad swipe is one gesture spread over many events, and its
+        // momentum tail carries the phase but not the touch, so the axis has
+        // to be remembered across all of them. A legacy wheel carries no phase
+        // at all: its axes are independent, so each event stands alone rather
+        // than being locked to whatever the last trackpad swipe decided.
+        let resolution: TimelineScrollResolution
+        if event.phase.isEmpty, event.momentumPhase.isEmpty {
+            var wheel = TimelineScrollGesture()
+            resolution = resolve(&wheel)
+        } else {
+            if !event.phase.intersection([.began, .mayBegin]).isEmpty {
+                scrollGesture.begin()
+            }
+            resolution = resolve(&scrollGesture)
+        }
         switch resolution {
         case .passThrough:
             super.scrollWheel(with: event)

@@ -9,6 +9,7 @@
 > 0.1b 修订（2026-08-12，Phase 0）：§2.1 完成 GitCode 重锚定（pin `447a0a49`），发布门 1 关闭；新增 [TRACE_STREAMER.md](./TRACE_STREAMER.md)
 > Phase 1 实现注记（2026-08-12）：Parser/Store vertical slice、真实 schema evidence、staging validation/index/fsync、原子 Ready 与 mandatory zero-skip gate 已完成；验证见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)
 > 审查回写（2026-08-16）：§5.1/§6 补齐 `ArkTraceAppSupport`、`ArkTraceSignalShim` 与真实依赖边；§8.5 改为说明 continuation 的单次 resume 由何保证（此前的"不使用 checked continuation"与实现不符）；§9.4 更新为 index schema version 3 与多前缀命名；§8.2 第 4 条标注为未决（§25 第 12 项）
+> 缺陷回写（2026-08-18）：§14.2.5 滚轮轴向改为**按手势承诺**（原逐事件规则让纵向触控板滑动被自身的横向抖动吃掉，外层 `ScrollView` 收不到事件，滚动慢到不像滚动）
 
 ## 1. 文档目的
 
@@ -937,10 +938,24 @@ hover 是**纯叠加层**，这是硬约束而非风格选择：ArkTrace 的事�
 ArkTrace 此前只有捏合，接滚轮鼠标的用户没有缩放手势。现在带 ⌥ **或** ⌃ 的滚轮转成 zoom intent，锚点与
 `magnify(with:)` 共用同一段计算（同一个 `zoom(at:scale:in:)`），因此捏合与滚轮不可能锚在不同位置。
 两个修饰键都收：⌃+滚轮在很多机器上被系统的「缩放」辅助功能占用，⌥ 是 macOS 上「另一个轴 / 更精细手势」
-的惯例。**只读纵轴**（滚轮鼠标唯一有的轴），所以带修饰的横向滚动仍是平移而不是误触发缩放；**平移路径
-一字未改**，仍消费原始 `scrollingDeltaX`（把 line 单位归一化会让既有的滚轮平移一下子长 16 倍）。
+的惯例。**只读纵轴**（滚轮鼠标唯一有的轴），所以带修饰的横向滚动仍是平移而不是误触发缩放；平移消费的
+仍是**原始** `scrollingDeltaX`（把 line 单位归一化会让既有的滚轮平移一下子长 16 倍）。
 legacy 滚轮的 delta 以 line 计，归一化为 16 pt/line 后一格约 17% 缩放；单次事件的指数被夹在 ±1，
 甩一下触控板不会把 viewport 甩飞。
+
+**轴向按手势承诺，不按事件判。** 触控板的每个 scroll 事件都同时带两个轴：一次纵向滑动的绝大多数采样都
+带着零点几个点的横向抖动。因此「`|deltaX|` 超过死区就当平移」这条逐事件规则会把纵向滑动**整个吃掉**
+—— 事件被 Timeline 消费，外层 `ScrollView` 收不到，画面只在横向 delta 恰好为 0 的那几个事件上挪一下，
+纵向滚动慢到不像滚动；与此同时 viewport 还被抖动横向拖着走，而每个被吃掉的事件都换一次 viewport
+generation、重跑一次 bounded query。现在 `TimelineScrollGesture` 是**一个手势一份状态**：两轴各自累计
+行程，先累到 `axisCommitPoints`（1 pt）的那一轴赢，此后整个手势（含 momentum 尾巴）只走那一轴，直到
+下一次 `.began` 才重新判。这正是 AppKit 自己的 `usesPredominantAxisScrolling` 对 scroll view 做的事。
+
+- **用累计行程而不是单事件比较**：慢速横向平移的每个采样都很小，逐事件比较会让它永远定不下来；
+- **未定阶段（不足 1 pt）交给 scroll view**：至多一个点的滚动看不见，而且这样外层收得到手势的
+  `.began`，phase 序列不会从中间开始；
+- **legacy 滚轮不参与承诺**：它没有 phase，两轴互相独立且没有抖动，因此每个事件都用一份新手势判轴，
+  不会被上一次触控板滑动的承诺锁住。
 
 **框选端点可拖拽。** 上游在 timer shaft 里用 `markAObj`/`markBObj` 保留端点身份
 （`RangeRuler.ts:88-89`、`:332-339`）。ArkTrace 的 ruler 已经归 flag 所有，所以把手放在**选区在轨道区的
