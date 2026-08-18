@@ -2047,6 +2047,123 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(counts, [2, 1])
     }
 
+    /// A process-counter density result must survive the machine-contract
+    /// encoder. The repository names its clamped-timestamp scope after the
+    /// physical sample table, and `TraceDataQualityScope.machineAllowed` is a
+    /// closed set, so a scope the repository can emit but the contract does not
+    /// list turns a real trace into `internalError` at encode time.
+    func testProcessCounterDensityQualityScopeSurvivesTheMachineContract() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            -- Starts before trace_range.start_ts (1000) but overlaps the
+            -- queried range, so it is counted and flagged as clamped.
+            INSERT INTO process_measure VALUES (900, 200, 1, 7);
+            INSERT INTO process_measure VALUES (1100, 0, 2, 7);
+            """
+        )
+        let result = try await makeRepository().density(
+            TraceDensityQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                source: .processCounter(filterID: 7, processKey: ProcessKey(ipid: 1)),
+                bucketCount: 2,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(
+            result.dataQuality.issues.contains {
+                $0.category == .clampedValue && $0.scope == "process_measure.ts"
+            },
+            "the clamp must be attributed to the table the samples came from"
+        )
+        XCTAssertNoThrow(
+            try CLIMachineDataQuality(result.dataQuality),
+            "every scope the repository emits must be machine-contract encodable"
+        )
+    }
+
+    /// Open-time quality probes must cover the table the counter queries
+    /// actually read. On every real capture `measure` is empty and
+    /// `process_measure` holds every process counter sample, so probing only
+    /// `measure` reports a clean bill of health for data nobody looked at.
+    func testProcessMeasureStorageAndTimeAreQualityProbedAtOpen() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            INSERT INTO process_measure VALUES (1100, 10, 1, 7);
+            -- Dynamic storage classes SQLite would silently coerce.
+            INSERT INTO process_measure VALUES (1200, 10, 'not-a-value', 7);
+            INSERT INTO process_measure VALUES (1300, 'not-a-duration', 3, 7);
+            -- Precedes trace_range.start_ts (1000).
+            INSERT INTO process_measure VALUES (900, 10, 4, 7);
+            """
+        )
+        let quality = try await makeRepository().metadata().dataQuality
+        func issue(_ scope: String, _ category: TraceDataQualityIssue.Category) -> Int64? {
+            quality.issues.first { $0.scope == scope && $0.category == category }?.count
+        }
+        XCTAssertEqual(issue("process_measure.value", .droppedValue), 1)
+        XCTAssertEqual(issue("process_measure.dur", .droppedValue), 1)
+        XCTAssertEqual(issue("process_measure.ts", .clampedValue), 1)
+        XCTAssertNoThrow(try CLIMachineDataQuality(quality))
+    }
+
+    /// Query-time counter quality names the physical table the samples came
+    /// from. A database holding process samples in both tables must not report
+    /// a `process_measure` problem as a `measure` one.
+    func testCounterQualityIsAttributedToItsPhysicalSampleTable() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            -- Saturating duration in each table: both clamp, and each clamp
+            -- must be reported against its own table.
+            INSERT INTO process_measure VALUES (1100, 9223372036854775807, 1, 7);
+            INSERT INTO measure VALUES (1200, 9223372036854775807, 2, 7);
+            """
+        )
+        let page = try await makeRepository().counters(
+            CounterQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                processKey: ProcessKey(ipid: 1),
+                limit: 10,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertEqual(page.items.flatMap(\.samples).map(\.key.table).sorted {
+            $0.rawValue < $1.rawValue
+        }, [.measure, .processMeasure])
+        let clamped = page.dataQuality.issues.filter {
+            $0.category == .clampedValue && ($0.scope ?? "").hasSuffix(".dur")
+        }
+        XCTAssertEqual(
+            clamped.compactMap(\.scope).sorted(), ["measure.dur", "process_measure.dur"],
+            "each clamp is reported against the table it came from"
+        )
+        XCTAssertEqual(clamped.map(\.count), [1, 1])
+        XCTAssertNoThrow(try CLIMachineDataQuality(page.dataQuality))
+    }
+
     /// The `args` encoding is upstream's, taken from the `args_view` definition
     /// TraceStreamer writes into every exported database at the pinned
     /// revision. The branch that matters: **only `datatype == 1` dereferences

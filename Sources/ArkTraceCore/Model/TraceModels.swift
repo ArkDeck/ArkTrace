@@ -107,6 +107,12 @@ package enum TraceDataQualityScope {
         "callstack.identity",
         "measure.ts", "measure.filter_id", "measure.value", "measure.dur",
         "measure.optional",
+        // Process counter samples come from `process_measure`, so quality
+        // evidence about them names that table rather than `measure` -- which
+        // on a real capture is empty and would misdirect the reader.
+        "process_measure.ts", "process_measure.filter_id",
+        "process_measure.value", "process_measure.dur",
+        "process_measure.optional",
         "cpu_measure_filter.id", "cpu_measure_filter.name",
         "cpu_measure_filter.cpu", "cpu_measure_filter.unit",
         "process_measure_filter.id", "process_measure_filter.name",

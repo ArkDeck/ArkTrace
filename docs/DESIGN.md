@@ -449,6 +449,11 @@ counter 来源探测超预算只表示**本次没能判定**：该来源按「�
 这条本来罕见的路径变成了常态，结果是**整份 fixture 打不开**。把 ArkTrace 自己的资源上限说成 schema
 不兼容是类别错误；AT-DB-004 的 optional 语义要求降级而不是拒绝。
 
+两张样本表都进入 `qualityEvidence` 的 bounded probe（`process_measure` 的 `ts`/`filter_id`/`value`/`dur`
+与 `measure` 同权），且 counter 的 query-time data-quality scope 按**样本实际所在的物理表**命名。真机库
+里 `measure` 是空表，把 `process_measure` 的 clamp 记成 `measure.ts` 会指向一张没有行的表；`machineAllowed`
+必须同时收录两套 scope，否则 repository 合法产出的 scope 会让 machine 输出在 encode 阶段 fail closed。
+
 ### 9.1.1 schemaAdapterVersion 的处置（P7-T01）
 
 P7-T01 把 process counter 的样本来源表从 `measure` 改为 `process_measure`，**不 bump**

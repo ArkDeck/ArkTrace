@@ -1507,7 +1507,12 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var units: [CounterSeriesKey: String] = [:]
         var pids: [CounterSeriesKey: Int64] = [:]
         var processNames: [CounterSeriesKey: String] = [:]
-        var invalidOptionalValues: Int64 = 0
+        // Counted per physical sample table: attributing a `process_measure`
+        // clamp to `measure` points the reader at a table that is empty on
+        // every real capture.
+        var invalidOptionalValues: [CounterSampleTable: Int64] = [:]
+        var clampedTimestamps: [CounterSampleTable: Int64] = [:]
+        var clampedDurations: [CounterSampleTable: Int64] = [:]
         var missingProcessReferences: Int64 = 0
         var counterQuality = EventQuality()
         var seenSampleKeys: Set<EventKey> = []
@@ -1526,11 +1531,18 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     message: "Counter filter identity produced a duplicate sample"
                 )
             }
-            invalidOptionalValues += row.invalidOptionalValueCount
+            invalidOptionalValues[row.sampleTable, default: 0]
+                += row.invalidOptionalValueCount
             missingProcessReferences += row.missingProcessReferenceCount
+            let clampedTimestampsBefore = counterQuality.clampedTimestamp
+            let clampedDurationsBefore = counterQuality.clampedDuration
             let normalized = try normalizedCounterSample(
                 row, quality: &counterQuality
             )
+            clampedTimestamps[row.sampleTable, default: 0]
+                += counterQuality.clampedTimestamp - clampedTimestampsBefore
+            clampedDurations[row.sampleTable, default: 0]
+                += counterQuality.clampedDuration - clampedDurationsBefore
             grouped[key, default: []].append(
                 CounterSample(
                     key: eventKey,
@@ -1563,32 +1575,24 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
         try checkQueryBoundary(query.deadline)
         var issues = validation.dataQuality.issues
-        if invalidOptionalValues > 0 {
-            issues.append(
-                TraceDataQualityIssue(
-                    category: .droppedValue,
-                    scope: "measure.optional",
-                    count: invalidOptionalValues
+        for (suffix, category, counts) in [
+            (
+                "optional", TraceDataQualityIssue.Category.droppedValue,
+                invalidOptionalValues
+            ),
+            ("ts", .clampedValue, clampedTimestamps),
+            ("dur", .clampedValue, clampedDurations),
+        ] {
+            for table in counts.keys.sorted(by: { $0.rawValue < $1.rawValue }) {
+                guard let count = counts[table], count > 0 else { continue }
+                issues.append(
+                    TraceDataQualityIssue(
+                        category: category,
+                        scope: "\(table.rawValue).\(suffix)",
+                        count: count
+                    )
                 )
-            )
-        }
-        if counterQuality.clampedTimestamp > 0 {
-            issues.append(
-                TraceDataQualityIssue(
-                    category: .clampedValue,
-                    scope: "measure.ts",
-                    count: counterQuality.clampedTimestamp
-                )
-            )
-        }
-        if counterQuality.clampedDuration > 0 {
-            issues.append(
-                TraceDataQualityIssue(
-                    category: .clampedValue,
-                    scope: "measure.dur",
-                    count: counterQuality.clampedDuration
-                )
-            )
+            }
         }
         if missingProcessReferences > 0 {
             issues.append(
@@ -1601,7 +1605,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
         return TraceEventPage(
             items: series,
-            truncated: totalTruncated || invalidOptionalValues > 0
+            truncated: totalTruncated
+                || invalidOptionalValues.values.contains { $0 > 0 }
                 || counterQuality.invalidTime > 0,
             capabilityAvailable: true,
             dataQuality: TraceDataQuality(issues: issues)

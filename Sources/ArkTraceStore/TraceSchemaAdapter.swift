@@ -717,6 +717,7 @@ enum TraceSchemaAdapter {
             TimeColumn(table: "callstack", column: "ts"),
             TimeColumn(table: "callstack", column: "dur"),
             TimeColumn(table: "measure", column: "ts"),
+            TimeColumn(table: "process_measure", column: "ts"),
         ]
         var issues: [TraceDataQualityIssue] = []
         func record(
@@ -811,6 +812,22 @@ enum TraceSchemaAdapter {
             ),
             StorageColumn(
                 table: "measure", column: "dur",
+                expectedType: "integer", allowsNull: true
+            ),
+            // `process_measure` carries every process counter sample on a real
+            // capture, where `measure` is empty. Probing only `measure` would
+            // make open-time quality evidence blind to the table the queries
+            // actually read (AT-DB-005, AT-QUERY-008).
+            StorageColumn(
+                table: "process_measure", column: "filter_id",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "process_measure", column: "value",
+                expectedType: "integer", allowsNull: false
+            ),
+            StorageColumn(
+                table: "process_measure", column: "dur",
                 expectedType: "integer", allowsNull: true
             ),
             StorageColumn(

@@ -260,6 +260,12 @@ process_measure(ts,value,filter_id)      ← process counter 样本（主来源�
 含来源表，去重按 (物理表, row ID)（AT-QUERY-001、AT-ID-003）。filter id 的跨 scope 唯一性只在
 **同一张物理表同时服务两个 scope** 时才要求——来源表不同时两个 id 空间互相独立。
 
+两张样本表都必须进入开库时的 bounded quality probe（AT-DB-005）；只探 `measure` 会让真实采集里唯一
+有数据的那张表无人检查。counter 的 data-quality scope 必须命名**样本实际所在的物理表**
+（`measure.*` / `process_measure.*`），不得把 `process_measure` 的问题记到 `measure` 名下 ——
+后者在真机库里是空表，会把读者引向错误的位置。repository 能产出的每一个 scope 都必须在
+`TraceDataQualityScope.machineAllowed` 里，否则 machine 输出会在 encode 阶段 fail closed。
+
 `frame_slice` 是 **optional** 表，缺失时不得报错、不生成帧泳道：
 
 ```text
