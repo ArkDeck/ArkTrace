@@ -545,6 +545,7 @@ private struct TraceTimelinePane: View {
                     if controller.snapshot == nil {
                         TraceLoadingPane(
                             stage: stage,
+                            fraction: controller.loadingFraction,
                             fileName: controller.sourceURL?.lastPathComponent,
                             cancel: controller.cancel,
                             openPanel: openPanel
@@ -553,7 +554,12 @@ private struct TraceTimelinePane: View {
                     } else {
                         HStack(spacing: 8) {
                             ProgressView().controlSize(.small)
-                            Text(stageLabel(stage))
+                            Text(
+                                controller.loadingFraction.map {
+                                    "\(stageLabel(stage))  ·  \(Int($0 * 100))%"
+                                } ?? stageLabel(stage)
+                            )
+                            .monospacedDigit()
                             Button("Cancel") { controller.cancel() }
                                 .buttonStyle(.link)
                                 .arktraceAccessibleTarget()
@@ -581,6 +587,9 @@ private struct TraceTimelinePane: View {
 /// colour alone (AT-APP-011).
 private struct TraceLoadingPane: View {
     let stage: TraceLoadingStage
+    /// 0…1 within the stage, when the stage can say. Nil is not zero: it means
+    /// this step has no measure of its own extent.
+    let fraction: Double?
     let fileName: String?
     let cancel: @MainActor () -> Void
     let openPanel: @MainActor () -> Void
@@ -619,9 +628,19 @@ private struct TraceLoadingPane: View {
 
     private var progress: some View {
         VStack(spacing: 18) {
-            ProgressView()
-                .controlSize(.large)
-                .progressViewStyle(.circular)
+            // One bar, determinate when the stage reports a fraction and
+            // indeterminate when it cannot, rather than a spinner that becomes
+            // a bar: the geometry stays put as the open moves between stages
+            // that can measure themselves and stages that cannot.
+            Group {
+                if let fraction {
+                    ProgressView(value: fraction)
+                } else {
+                    ProgressView()
+                }
+            }
+            .progressViewStyle(.linear)
+            .frame(width: 260)
             VStack(spacing: 5) {
                 if let fileName {
                     Text(fileName)
@@ -654,9 +673,20 @@ private struct TraceLoadingPane: View {
         }
     }
 
+    /// The cache lookup is two different jobs: consulting metadata on a hit,
+    /// and copying the source into an immutable snapshot on a miss. Only the
+    /// second has bytes to count, so a fraction here is the tell.
+    private var stageText: String {
+        stage == .cacheLookup && fraction != nil ? "Copying trace…" : stageLabel(stage)
+    }
+
     private var statusText: String {
-        guard elapsedSeconds >= Self.elapsedThresholdSeconds else { return stageLabel(stage) }
-        return "\(stageLabel(stage))  ·  \(Self.elapsedText(elapsedSeconds))"
+        var parts = [stageText]
+        if let fraction { parts.append("\(Int(fraction * 100))%") }
+        if elapsedSeconds >= Self.elapsedThresholdSeconds {
+            parts.append(Self.elapsedText(elapsedSeconds))
+        }
+        return parts.joined(separator: "  ·  ")
     }
 
     /// Composed rather than formatted. The C-variadic `String` formatter is

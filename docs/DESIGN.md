@@ -12,6 +12,7 @@
 > 缺陷回写（2026-08-18）：§14.2.5 滚轮轴向改为**按手势承诺**（原逐事件规则让纵向触控板滑动被自身的横向抖动吃掉，外层 `ScrollView` 收不到事件，滚动慢到不像滚动）
 > 性能回写（2026-08-18）：§13.5 补 label 绘制规则 —— 文字成本按图元计，批处理管不到，故按脏矩形裁剪并缓存排版（滚动帧 42.5 → 0.62 ms）
 > 性能回写二（2026-08-18）：§13.4 第 6 条改为「上一代 primitive + 新 viewport」（`W`/`S` 此前要等查询返回才动），并补 viewport 范围裁剪与 `isOpaque` 两条约束
+> 进度回写（2026-08-18）：§13.4 新增加载进度规则 —— hashing/cacheLookup 按字节、indexing 按索引条数报精确进度；parsing 报不了的原因是实测的 stdout 全缓冲
 
 ## 1. 文档目的
 
@@ -811,6 +812,24 @@ loading 这一代携带的本来就是「新 viewport + 上一代 primitive」�
 - **`isOpaque` 必须为真。** view 的第一件事就是用 `windowBackgroundColor` 铺满 bounds；声明这件事
   之后，clip view 才会保留已经画好的像素、只把滚动露出的那一条交给 view（`copiesOnScroll` 默认开，
   但对一个自称透明的 document view 不起作用）。否则每个滚动步都要重画整屏，而不是移动的那几十个点。
+
+**加载进度：能测的报测量值，不能测的不猜。** 一次冷打开在 265 MB 真机 capture 上是 7.3 s，实测分布为
+parsing 2.8 s / indexing 2.6 s / cacheLookup（含把源快照到 staging）0.9 s / hashing 0.17 s / 其余约 0.7 s。
+因此进度是**每个阶段各报自己的**，而不是一个总百分比 —— 阶段之间的权重是 trace、机器与缓存状态的性质，
+不是流水线的性质，把它们加权成一条总进度就是编。
+
+- **hashing / cacheLookup**：同一个 `scanSource` 循环，`fstat` 先给了总字节数，每 1 MiB 报一次，是精确值。
+  cacheLookup 上出现 fraction 就意味着这次是 miss、正在复制源，App 据此把标签换成「Copying trace…」；
+- **indexing**：按索引条数报（n / m）。索引之间成本不同，所以这是「建到第几条」而不是「用掉多少时间」；
+- **parsing 报不了**，这是实测结论不是猜测：pinned trace_streamer 4.3.7 确实会把读取进度写到 stdout
+  （`\rLoadingFile:\t<n> MB\r`；`<n>` 是它正在读的那个流的字节数 —— 未压缩 capture 就等于文件本身，
+  265,032,803 B 的 capture 最后一条正是 265.03 MB；压缩过的 htrace 则是**解压后**的大小，`zlib.htrace`
+  盘上 67,837 B、解压 849,657 B，报的就是 0.85 MB，所以对源文件大小取比值只能是「至少到这里」，
+  `TraceLoadingProgress` 因此做 clamp），
+  但它在 stdout 不是 TTY 时走全缓冲：管道上实测**整个 parse 只在退出时吐出一个 6,066 B 的块**。给它接
+  PTY 确实能拿到增量（实测 2.4 s 的 parse 里约 4 次、每次约 45 MB 粒度），但那要把这条被审查过的子进程
+  启动路径从 pipe 改成 PTY（master/slave fd、EIO 而非 EOF、终端语义），代价与收益不成比例。scanner 保留
+  且有测试：退出时的那一次仍会报到 ~1.0，将来若有能增量刷新的 parser 就自动生效。
 
 首版使用 CoreGraphics。只有基准证明 CPU rendering 是真实瓶颈后才考虑 Metal；Renderer protocol 已隔离后端。
 

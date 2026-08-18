@@ -2,6 +2,7 @@ import ArkTraceCore
 import CryptoKit
 import Darwin
 import Foundation
+import Synchronization
 
 /// Runs a pinned TraceStreamer executable as a child process (DESIGN §8).
 ///
@@ -310,13 +311,36 @@ package struct TraceStreamerProcessParser: TraceParser {
         )
 
         progress?(.parsing)
+        // The child says how far through the source it is; the source's size
+        // is already known, so the parse -- the longest single stage of a cold
+        // open -- reports a real fraction instead of a spinner. The scanner is
+        // fed from the pipe's callback queue, so it lives behind a lock.
+        let scanner = Mutex(TraceStreamerProgressScanner())
+        let sourceByteCount = prepared.sourceByteCount
+        var stdoutObserver: (@Sendable (Data) -> Void)?
+        if let progress {
+            stdoutObserver = { (chunk: Data) in
+                let text = String(decoding: chunk, as: UTF8.self)
+                guard let bytes = scanner.withLock({ scanner in
+                    scanner.consume(text)
+                }) else { return }
+                progress(
+                    TraceLoadingProgress(
+                        stage: .parsing,
+                        completed: bytes,
+                        total: sourceByteCount
+                    )
+                )
+            }
+        }
         let outcome = try await Self.runOffCallerExecutor(
             executable: prepared.parserSnapshot.executableURL,
             arguments: Self.invocationArguments(
                 source: prepared.sourceSnapshotURL,
                 output: prepared.outputURL
             ),
-            processDidLaunchHook: processDidLaunchHook
+            processDidLaunchHook: processDidLaunchHook,
+            stdoutObserver: stdoutObserver
         )
         try Self.validateProcessOutcome(outcome, outputURL: prepared.outputURL)
 
@@ -992,8 +1016,13 @@ package struct TraceStreamerProcessParser: TraceParser {
         private var activeReadabilityCallbacks = 0
         let pipe = Pipe()
 
-        init(capacity: Int = 65_536) {
+        /// Called with every chunk as it arrives, for a caller that wants to
+        /// read the stream live rather than only its bounded tail.
+        private let observer: (@Sendable (Data) -> Void)?
+
+        init(capacity: Int = 65_536, observer: (@Sendable (Data) -> Void)? = nil) {
             self.capacity = capacity
+            self.observer = observer
             pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
                 self?.consumeAvailableData(from: handle)
             }
@@ -1050,6 +1079,11 @@ package struct TraceStreamerProcessParser: TraceParser {
             condition.broadcast()
             condition.unlock()
 
+            // Outside the lock, and only for real bytes: an observer that
+            // reads the stream live must never be able to deadlock the sink
+            // that feeds it.
+            if !chunk.isEmpty { observer?(chunk) }
+
             // Leaving the handler installed at EOF can repeatedly schedule an
             // empty callback until the owner observes process termination.
             if reachedEOF { handle.readabilityHandler = nil }
@@ -1095,7 +1129,8 @@ package struct TraceStreamerProcessParser: TraceParser {
         arguments: [String],
         diagnosticCapacity: Int = 65_536,
         terminationGracePeriod: TimeInterval = 0.5,
-        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil
+        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil,
+        stdoutObserver: (@Sendable (Data) -> Void)? = nil
     ) async throws -> Outcome {
         let process = Process()
         process.executableURL = executable
@@ -1115,7 +1150,9 @@ package struct TraceStreamerProcessParser: TraceParser {
             "PATH": "/usr/bin:/bin",
             "TMPDIR": workingDirectory.path,
         ]
-        let stdoutSink = BoundedPipeSink(capacity: diagnosticCapacity)
+        let stdoutSink = BoundedPipeSink(
+            capacity: diagnosticCapacity, observer: stdoutObserver
+        )
         let stderrSink = BoundedPipeSink(capacity: diagnosticCapacity)
         process.standardOutput = stdoutSink.pipe
         process.standardError = stderrSink.pipe
@@ -1176,13 +1213,15 @@ package struct TraceStreamerProcessParser: TraceParser {
     private static func runOffCallerExecutor(
         executable: URL,
         arguments: [String],
-        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil
+        processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil,
+        stdoutObserver: (@Sendable (Data) -> Void)? = nil
     ) async throws -> Outcome {
         let task = Task.detached {
             try await run(
                 executable: executable,
                 arguments: arguments,
-                processDidLaunchHook: processDidLaunchHook
+                processDidLaunchHook: processDidLaunchHook,
+                stdoutObserver: stdoutObserver
             )
         }
         return try await withTaskCancellationHandler {

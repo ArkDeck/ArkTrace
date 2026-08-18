@@ -730,7 +730,7 @@ enum TraceContentAddressedCache {
             // so copying and fsyncing the whole trace on every warm open was
             // pure waste (validateEntry consumes only hash + byte count).
             let sourceFacts = try await detached {
-                try hashSourceFacts(source: source)
+                try hashSourceFacts(source: source, report: report)
             }
             try Task.checkCancellation()
             let key = try TraceCacheKey(
@@ -860,7 +860,7 @@ enum TraceContentAddressedCache {
             // the keying hash so a source mutated since the hash-only pass
             // cannot be parsed under the old identity.
             let sourceSnapshot = try await detached {
-                try makeSourceSnapshot(source: source, in: session.url)
+                try makeSourceSnapshot(source: source, in: session.url, report: report)
             }
             try Task.checkCancellation()
             guard sourceSnapshot.sha256 == key.traceSHA256,
@@ -879,10 +879,14 @@ enum TraceContentAddressedCache {
             )
             buildDirectory = build
             let buildDatabase = build.url.appending(path: databaseName)
-            let parseProgress: TraceProgressHandler = { stage in
-                switch stage {
+            let parseProgress: TraceProgressHandler = { progress in
+                // Switch on the stage, not on the whole value: a stage that
+                // reports a fraction carries a different value every time, and
+                // matching values here would forward only the fraction-less
+                // first one and silently drop the progress itself.
+                switch progress.stage {
                 case .parsing, .validating, .indexing:
-                    report(stage)
+                    report(progress)
                 default:
                     break
                 }
@@ -1403,10 +1407,21 @@ enum TraceContentAddressedCache {
         }
     }
 
-    private static func makeSourceSnapshot(source: URL, in directory: URL) throws
-        -> TraceSourceSnapshot
-    {
-        try scanSource(source: source, snapshotDirectory: directory)
+    private static func makeSourceSnapshot(
+        source: URL,
+        in directory: URL,
+        report: TraceProgressHandler? = nil
+    ) throws -> TraceSourceSnapshot {
+        // Reported under the stage the pipeline is actually in. The rebuild
+        // path materialises this snapshot while the cache lookup is still the
+        // current stage, and stepping the stage backwards to say so would read
+        // as the open losing ground.
+        try scanSource(
+            source: source,
+            snapshotDirectory: directory,
+            report: report,
+            stage: .cacheLookup
+        )
     }
 
     /// Streaming keying pass: SHA-256 and byte count through the same
@@ -1414,13 +1429,18 @@ enum TraceContentAddressedCache {
     /// copy. The returned `url` is the canonical source path and must never
     /// be handed to the parser; only `makeSourceSnapshot` produces an
     /// immutable input.
-    private static func hashSourceFacts(source: URL) throws -> TraceSourceSnapshot {
-        try scanSource(source: source, snapshotDirectory: nil)
+    private static func hashSourceFacts(
+        source: URL,
+        report: TraceProgressHandler? = nil
+    ) throws -> TraceSourceSnapshot {
+        try scanSource(source: source, snapshotDirectory: nil, report: report, stage: .hashing)
     }
 
     private static func scanSource(
         source: URL,
-        snapshotDirectory: URL?
+        snapshotDirectory: URL?,
+        report: TraceProgressHandler? = nil,
+        stage: TraceLoadingStage = .hashing
     ) throws -> TraceSourceSnapshot {
         try Task.checkCancellation()
         let canonicalSource = source.resolvingSymlinksInPath().standardizedFileURL
@@ -1506,6 +1526,14 @@ enum TraceContentAddressedCache {
                 )
             }
             total = next
+            // The one pass over the source that knows both numbers: `fstat`
+            // gave the size before the first read. Reported per mebibyte, which
+            // is the loop's own granularity.
+            report?(
+                TraceLoadingProgress(
+                    stage: stage, completed: total, total: Int64(sourceInfo.st_size)
+                )
+            )
         }
         try Task.checkCancellation()
         if destination != nil {

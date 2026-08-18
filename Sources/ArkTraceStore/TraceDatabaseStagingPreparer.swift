@@ -347,7 +347,20 @@ package enum TraceDatabaseStagingPreparer {
         let validation = try TraceSchemaAdapter.validate(db)
         try Task.checkCancellation()
         progress?(.indexing)
-        try recreateIndexes(indexes, availableColumns: available, in: db)
+        try recreateIndexes(
+            indexes,
+            availableColumns: available,
+            in: db,
+            report: { created, total in
+                progress?(
+                    TraceLoadingProgress(
+                        stage: .indexing,
+                        completed: Int64(created),
+                        total: Int64(total)
+                    )
+                )
+            }
+        )
         try Task.checkCancellation()
         guard try db.quickCheckIsOK(
             stage: .indexing,
@@ -645,7 +658,8 @@ package enum TraceDatabaseStagingPreparer {
     private static func recreateIndexes(
         _ definitions: [IndexDefinition],
         availableColumns: [String: Set<String>],
-        in db: TraceDatabase
+        in db: TraceDatabase,
+        report: ((_ created: Int, _ total: Int) -> Void)? = nil
     ) throws {
         let applicable = definitions.filter { definition in
             guard let columns = availableColumns[definition.table] else { return false }
@@ -673,7 +687,7 @@ package enum TraceDatabaseStagingPreparer {
             observesTaskCancellation: true
         )
         do {
-            for definition in applicable {
+            for (position, definition) in applicable.enumerated() {
                 try Task.checkCancellation()
                 try db.execute(
                     "DROP INDEX IF EXISTS \(definition.name)",
@@ -686,6 +700,11 @@ package enum TraceDatabaseStagingPreparer {
                     stage: .indexing,
                     observesTaskCancellation: true
                 )
+                // Indexes differ in cost, so this counts indexes rather than
+                // claiming a share of the time. It is the only honest measure
+                // the stage has, and on a cold open of a 265 MB capture that
+                // stage is a third of the wait.
+                report?(position + 1, applicable.count)
             }
             try db.execute(
                 "COMMIT",

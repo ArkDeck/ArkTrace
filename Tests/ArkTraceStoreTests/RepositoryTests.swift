@@ -10,9 +10,12 @@ final class RepositoryTests: XCTestCase {
         private let lock = NSLock()
         private var values: [TraceLoadingStage] = []
 
+        /// Records stage *transitions* only: index creation reports its own
+        /// progress one index at a time, and the order of stages is what the
+        /// tests using this are about.
         func append(_ stage: TraceLoadingStage) {
             lock.lock()
-            values.append(stage)
+            if values.last != stage { values.append(stage) }
             lock.unlock()
         }
 
@@ -931,6 +934,33 @@ final class RepositoryTests: XCTestCase {
         }
     }
 
+    /// Index creation is a third of a cold open on a real capture, and it is
+    /// the one part of that open that can say how far along it is: it knows
+    /// how many indexes there are and how many it has built. Without this the
+    /// bar would sit still through the longest stage that *can* be measured.
+    func testIndexCreationReportsItsOwnProgress() throws {
+        final class Fractions: @unchecked Sendable {
+            private let lock = NSLock()
+            private var values: [Double] = []
+            func add(_ progress: TraceLoadingProgress) {
+                guard progress.stage == .indexing, let fraction = progress.fraction else { return }
+                lock.lock(); values.append(fraction); lock.unlock()
+            }
+            func snapshot() -> [Double] { lock.lock(); defer { lock.unlock() }; return values }
+        }
+        let fractions = Fractions()
+        _ = try TraceDatabaseStagingPreparer.prepare(
+            databaseURL: databaseURL,
+            progress: { fractions.add($0) }
+        )
+        let values = fractions.snapshot()
+        XCTAssertGreaterThan(values.count, 1, "one report per index, and there are many")
+        XCTAssertEqual(values, values.sorted(), "progress never goes backwards")
+        XCTAssertEqual(values.last, 1, "the last index built is the whole set")
+        XCTAssertGreaterThan(try XCTUnwrap(values.first), 0)
+        XCTAssertLessThan(try XCTUnwrap(values.first), 1)
+    }
+
     func testStagingPreparationCreatesVersionedIndexesAndPreservesRows() throws {
         let upstreamIdentity = try sha256AndSize(at: databaseURL)
         let beforeCounts = try TraceDatabase(url: databaseURL, readOnly: true).query(
@@ -947,7 +977,7 @@ final class RepositoryTests: XCTestCase {
         let stages = StageRecorder()
         let preparation = try TraceDatabaseStagingPreparer.prepare(
             databaseURL: databaseURL,
-            progress: { stages.append($0) }
+            progress: { stages.append($0.stage) }
         )
 
         XCTAssertEqual(preparation.indexVersion, TraceDatabaseStagingPreparer.indexVersion)
@@ -1432,7 +1462,7 @@ final class RepositoryTests: XCTestCase {
         let task = Task.detached {
             try TraceDatabaseStagingPreparer.prepare(
                 databaseURL: databaseURL,
-                progress: { barrier.observe($0) }
+                progress: { barrier.observe($0.stage) }
             )
         }
         await barrier.waitUntilReached()

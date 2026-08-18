@@ -226,8 +226,14 @@ final class ParserIntegrationTests: XCTestCase {
         private let lock = NSLock()
         private var stages: [TraceLoadingStage] = []
 
+        /// Records stage *transitions*. A stage that reports its own progress
+        /// now arrives many times over; what these tests assert is the order
+        /// the pipeline moves through, not how often a stage spoke.
         func append(_ stage: TraceLoadingStage) {
-            lock.withLock { stages.append(stage) }
+            lock.withLock {
+                guard stages.last != stage else { return }
+                stages.append(stage)
+            }
         }
 
         func snapshot() -> [TraceLoadingStage] {
@@ -1454,7 +1460,7 @@ final class ParserIntegrationTests: XCTestCase {
             source: fixture,
             parser: try TraceStreamerProcessParser(executableURL: binary),
             stagingDirectory: staging,
-            progress: { recorder.append($0) }
+            progress: { recorder.append($0.stage) }
         )
 
         XCTAssertEqual(recorder.snapshot(), [
@@ -1482,7 +1488,7 @@ final class ParserIntegrationTests: XCTestCase {
             source: fixture,
             parser: try TraceStreamerProcessParser(executableURL: binary),
             stagingDirectory: staging,
-            progress: { recorder.append($0) }
+            progress: { recorder.append($0.stage) }
         )
         let parsed = await session.parsed
         let metadata = try await session.repository.metadata()
@@ -1709,7 +1715,7 @@ final class ParserIntegrationTests: XCTestCase {
             parser: parser,
             stagingDirectory: staging,
             storagePolicy: .contentAddressed(cacheDirectory: cache),
-            progress: { stages.record($0) }
+            progress: { stages.record($0.stage) }
         )
         let coldOpenMs = Self.milliseconds(coldStart.duration(to: .now))
         let coldWasCacheHit = await cold.cacheHit
@@ -1848,7 +1854,7 @@ final class ParserIntegrationTests: XCTestCase {
                 parser: parser,
                 stagingDirectory: staging,
                 storagePolicy: .contentAddressed(cacheDirectory: cache),
-                progress: { hitStages.record($0) }
+                progress: { hitStages.record($0.stage) }
             )
             cacheOpenMs.append(Self.milliseconds(openStart.duration(to: .now)))
             cacheHashMs.append(
@@ -2795,7 +2801,7 @@ final class ParserIntegrationTests: XCTestCase {
             parser: parser,
             stagingDirectory: staging,
             cacheDirectory: cache,
-            progress: { missStages.append($0) },
+            progress: { missStages.append($0.stage) },
             now: { Date(timeIntervalSince1970: 100) }
         )
         let firstParsed = await first.parsed
@@ -2885,7 +2891,7 @@ final class ParserIntegrationTests: XCTestCase {
             parser: parser,
             stagingDirectory: staging,
             cacheDirectory: cache,
-            progress: { hitStages.append($0) },
+            progress: { hitStages.append($0.stage) },
             now: { Date(timeIntervalSince1970: 200) }
         )
         let secondCacheHit = await second.cacheHit

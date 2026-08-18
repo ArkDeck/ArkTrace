@@ -1,7 +1,7 @@
 import Foundation
 
-/// Observable, indeterminate loading stages shared by App/CLI callers.
-/// A stage is emitted only when the corresponding work actually begins.
+/// Observable loading stages shared by App/CLI callers. A stage is emitted
+/// only when the corresponding work actually begins.
 public enum TraceLoadingStage: String, Codable, Sendable, CaseIterable {
     case preparing
     case hashing
@@ -16,7 +16,50 @@ public enum TraceLoadingStage: String, Codable, Sendable, CaseIterable {
     case cancelled
 }
 
-package typealias TraceProgressHandler = @Sendable (TraceLoadingStage) -> Void
+/// A stage, and how far into that stage the work has got when the stage can
+/// honestly say.
+///
+/// The fraction is deliberately **within one stage** rather than across the
+/// open as a whole. An overall percentage would need the relative cost of the
+/// stages, and that ratio is a property of the trace, the machine and the
+/// cache rather than of the pipeline: on one 265 MB capture parsing took 39%
+/// of the open and index creation 36%, and neither number predicts the next
+/// trace. What each stage can report about *itself* is exact.
+public struct TraceLoadingProgress: Hashable, Sendable {
+    public let stage: TraceLoadingStage
+    /// 0…1 within ``stage``, or nil when the stage has no measure of its own
+    /// extent. Clamped on the way in: a source that reports slightly past its
+    /// own total must read as "nearly done", never as a bar past its end.
+    public let fraction: Double?
+
+    public init(stage: TraceLoadingStage, fraction: Double? = nil) {
+        self.stage = stage
+        self.fraction = fraction.map { $0.isFinite ? min(1, max(0, $0)) : 1 }
+    }
+
+    /// Fraction of a known total, for the stages that count bytes or items.
+    public init(stage: TraceLoadingStage, completed: Int64, total: Int64) {
+        self.init(
+            stage: stage,
+            fraction: total > 0 ? Double(completed) / Double(total) : nil
+        )
+    }
+}
+
+public extension TraceLoadingProgress {
+    static let preparing = Self(stage: .preparing)
+    static let hashing = Self(stage: .hashing)
+    static let cacheLookup = Self(stage: .cacheLookup)
+    static let parsing = Self(stage: .parsing)
+    static let validating = Self(stage: .validating)
+    static let indexing = Self(stage: .indexing)
+    static let openingDatabase = Self(stage: .openingDatabase)
+    static let ready = Self(stage: .ready)
+    static let failed = Self(stage: .failed)
+    static let cancelled = Self(stage: .cancelled)
+}
+
+package typealias TraceProgressHandler = @Sendable (TraceLoadingProgress) -> Void
 
 /// Bounded, path-free evidence returned by the Store after it validates and
 /// indexes a private staging database. Parser serializes this into the owned

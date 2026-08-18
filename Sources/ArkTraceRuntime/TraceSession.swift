@@ -14,7 +14,7 @@ import Synchronization
 package actor TraceSession {
     private final class ProgressRelay: Sendable {
         private struct State {
-            var last: TraceLoadingStage?
+            var last: TraceLoadingProgress?
             var terminal = false
         }
 
@@ -25,16 +25,20 @@ package actor TraceSession {
             self.observer = observer
         }
 
-        func emit(_ stage: TraceLoadingStage) {
+        /// Compares the whole value, not just the stage: a stage that reports
+        /// its own progress emits repeatedly, and dropping those as duplicates
+        /// would leave the bar frozen at whatever it read first.
+        func emit(_ progress: TraceLoadingProgress) {
             let shouldEmit = state.withLock { state in
-                guard !state.terminal, state.last != stage else { return false }
-                state.last = stage
+                guard !state.terminal, state.last != progress else { return false }
+                state.last = progress
+                let stage = progress.stage
                 state.terminal = stage == .ready || stage == .failed || stage == .cancelled
                 return true
             }
             // The observer runs outside the lock so a re-entrant progress
             // callback can never deadlock the relay.
-            if shouldEmit { observer?(stage) }
+            if shouldEmit { observer?(progress) }
         }
     }
 

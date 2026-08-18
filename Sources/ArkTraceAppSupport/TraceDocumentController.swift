@@ -316,6 +316,12 @@ typealias TraceDocumentOpener = @Sendable (
 @Observable
 public final class TraceDocumentController {
     public private(set) var phase: TraceDocumentPhase = .idle
+    /// How far into the current loading stage the open has got, when that
+    /// stage can say (parsing counts bytes, index creation counts indexes).
+    /// Kept beside `phase` rather than inside it: the phase is a coarse state
+    /// much of the app switches on, and a number that changes many times a
+    /// second has no business in an enum that drives layout.
+    public private(set) var loadingFraction: Double?
     public private(set) var sourceURL: URL?
     public private(set) var metadata: TraceMetadata?
     public private(set) var trackGroups: [TraceTrackGroup] = []
@@ -482,6 +488,7 @@ public final class TraceDocumentController {
         timelineDisplayMarked = false
         sourceURL = url.standardizedFileURL
         phase = .loading(.preparing)
+        loadingFraction = nil
         errorPresentation = nil
         announce(.openingTrace)
         openTask = Task { [weak self] in
@@ -1047,12 +1054,14 @@ public final class TraceDocumentController {
             document = nil
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            let progress: TraceProgressHandler = { [weak self] stage in
+            let progress: TraceProgressHandler = { [weak self] progress in
                 Task { @MainActor [weak self] in
                     guard let self, self.documentGeneration == generation,
-                        stage != .ready, stage != .failed, stage != .cancelled
+                        progress.stage != .ready, progress.stage != .failed,
+                        progress.stage != .cancelled
                     else { return }
-                    self.phase = .loading(stage)
+                    self.phase = .loading(progress.stage)
+                    self.loadingFraction = progress.fraction
                 }
             }
             opened = try await opener(url, progress)

@@ -292,6 +292,56 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertNil(controller.errorPresentation)
     }
 
+    /// The stages that can measure themselves say so, and the app is what
+    /// shows it. The fraction also has to be cleared when a new open starts: a
+    /// bar left at the previous document's 90% would be a lie told by leftover
+    /// state.
+    @MainActor
+    func testTheLoadingFractionIsPublishedAndResetPerDocument() async throws {
+        let suite = "ArkTraceFractionTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, progress in
+                progress(TraceLoadingProgress(stage: .hashing, completed: 1, total: 4))
+                progress(TraceLoadingProgress(stage: .hashing, completed: 3, total: 4))
+                return TraceOpenedDocument(
+                    repository: Repository(identity: "p"),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let root = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-fraction-\(UUID().uuidString)", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let source = root.appending(path: "trace.htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+        // The reports hop to the main actor behind the open, so the last one
+        // can still be in flight when Ready lands.
+        var attempts = 0
+        while controller.loadingFraction != 0.75, attempts < 1_000 {
+            attempts += 1
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.loadingFraction, 0.75)
+
+        controller.open(source)
+        XCTAssertNil(
+            controller.loadingFraction,
+            "a new open starts with no measurement of its own yet"
+        )
+        while controller.phase != .ready { await Task.yield() }
+        await controller.close()
+    }
+
     /// `W`/`A`/`S`/`D`, the arrows and the range keys are all first-responder
     /// keys on the timeline canvas, so a trace that opens without handing the
     /// canvas the keyboard answers none of them until it has been clicked --
