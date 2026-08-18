@@ -127,10 +127,19 @@ private func pinRenderingSurface(
         annotations: TimelineAnnotations(),
         selection: nil,
         selectedEventKey: inspector.key,
+        selectedEventLocation: TimelineEventLocation(
+            trackID: TimelineTrackID(rawValue: "cpu:0"), range: inspector.range
+        ),
         focusRequestID: 0,
         interactionBounds: nil,
         accessibilityLabelText: "timeline",
         onSelectEvent: { _ in },
+        // A press on a density band is resolved by the App, so both halves of
+        // that exchange -- the hit it receives and the location it hands back
+        // -- are promised outside the package.
+        onSelectDensityBand: { (hit: TimelineDensityHit) in
+            _ = (hit.trackID, hit.bucket, hit.timeNs)
+        },
         onHoverEvent: { _ in },
         onSelectRange: { _ in },
         onCreateFlag: { (_: Int64) in },

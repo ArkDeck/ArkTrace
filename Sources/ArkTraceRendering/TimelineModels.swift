@@ -509,6 +509,46 @@ public enum TimelinePrimitive: Hashable, Codable, Sendable {
     }
 }
 
+/// Where a press landed when the track under it is drawn as density.
+///
+/// A band is an aggregate: it has no event of its own, and AT-LOD-006 lets the
+/// Inspector select only real events, so a bucket may not be dressed up as one.
+/// The canvas reports the press instead -- which track, which bucket, and the
+/// trace time under the pointer -- and the host resolves the real event there
+/// with a bounded query. Upstream's overview stays clickable for the same
+/// reason: its merged rectangle keeps the identity of a real slice.
+public struct TimelineDensityHit: Hashable, Sendable {
+    public let trackID: TimelineTrackID
+    /// The bucket the press fell in. It bounds the search when no event covers
+    /// ``timeNs`` -- a band is drawn across its whole bucket even when the
+    /// events inside occupy a sliver of it.
+    public let bucket: TraceTimeRange
+    /// Trace time under the pointer, inside ``bucket``.
+    public let timeNs: Int64
+
+    public init(trackID: TimelineTrackID, bucket: TraceTimeRange, timeNs: Int64) {
+        self.trackID = trackID
+        self.bucket = bucket
+        self.timeNs = timeNs
+    }
+}
+
+/// Where a selected event lies when the viewport draws no primitive for it.
+///
+/// Selecting through a density band leaves the canvas holding a key it cannot
+/// find: the track is drawn as buckets, so the key matches no primitive and the
+/// selection outline has nowhere to go. The host supplies the event's own track
+/// and range, and the outline is drawn from those.
+public struct TimelineEventLocation: Hashable, Sendable {
+    public let trackID: TimelineTrackID
+    public let range: TraceTimeRange
+
+    public init(trackID: TimelineTrackID, range: TraceTimeRange) {
+        self.trackID = trackID
+        self.range = range
+    }
+}
+
 public struct TimelineTrackSnapshot: Hashable, Codable, Sendable {
     public let descriptor: TrackDescriptor
     public let y: Double

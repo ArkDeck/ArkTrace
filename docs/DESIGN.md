@@ -13,6 +13,7 @@
 > 性能回写（2026-08-18）：§13.5 补 label 绘制规则 —— 文字成本按图元计，批处理管不到，故按脏矩形裁剪并缓存排版（滚动帧 42.5 → 0.62 ms）
 > 性能回写二（2026-08-18）：§13.4 第 6 条改为「上一代 primitive + 新 viewport」（`W`/`S` 此前要等查询返回才动），并补 viewport 范围裁剪与 `isOpaque` 两条约束
 > 进度回写（2026-08-18）：§13.4 新增加载进度规则 —— hashing/cacheLookup 按字节、indexing 按索引条数报精确进度；parsing 报不了的原因是实测的 stdout 全缓冲
+> 缺陷回写二（2026-08-18）：§13.5 新增 density band 点击规则 —— band 不带 event，点击以至多两次有界 query 解析出真实事件（AT-LOD-006），命中区为整条 track row，按下仍归 range drag
 
 ## 1. 文档目的
 
@@ -711,7 +712,7 @@ Track 类型（`TimelineTrackSource` 的全部 case）：
 
 **这里没有 "Process" 一项**，见下。
 
-Track descriptor 与 event data 分离。Collapse 只影响可见 layout/query，不丢弃 session 数据。Density LOD 是统计图层，不能伪装成原始事件供 Inspector 选择。
+Track descriptor 与 event data 分离。Collapse 只影响可见 layout/query，不丢弃 session 数据。Density LOD 是统计图层，不能伪装成原始事件供 Inspector 选择——但它必须可被点击，见 §13.5。
 
 **"Process" 是 track 的分组维度，不是 track source**（P7-T06 消除了此前的文档漂移）。进程不画自己的
 泳道；它是一个可折叠节点，把属于它的线程与 counter 泳道收在一起。组织方式是**混合**的：
@@ -866,6 +867,17 @@ hash 必须是逐位一致的移植，其中两处细节决定结果：offset ba
 - 身份在聚合之后按 rowid 回查，一次查询、至多一 bucket 一行。identity 查询里事件表别名固定为 `r` 而非 `s`：`TracePerformanceSQLCapture` 用 `AS s` 认出 viewport 扫描语句，第二条命中会让诊断捕获不再唯一。
 
 没有 per-sample 身份的 source（counter）仍然回退到 track 身份色，并继续用 `timeline.density.dominantThread` 这条 `.unavailableValue` data-quality 声明说明「这里确实没有可借的身份」；scope 字符串保持不变，因为它在 machine payload 的 scope 白名单里。
+
+**Density band 可点击**（改于 2026-08-18）。band 借来了事件的颜色之后，剩下的问题是它仍然点不中：`event(at:)` 只认 detail primitive，于是在一条真实 trace 最常见的视图里——几十条 track 同时可见、每条都远超 detail 预算——点击整屏任何地方都选不出东西，Inspector 一直是空的。上游 SmartPerf Host 的 overview 可以点，因为它合并出的矩形本身就带着一个真实 slice 的 id。
+
+ArkTrace 不把 id 塞进 bucket（AT-LOD-006 不允许 bucket 冒充 event，且 bucket 宽达 16 逻辑点，用「整桶最久的那个」回答桶右端的点击是错的），而是把这次点击**解析**掉：画布报告 `TimelineDensityHit`（track、bucket、指针所在时刻），host 用至多两次有界 query 取回真实事件——先查指针所在的那一纳秒（事件 query 按 range 相交，覆盖该时刻的事件自然在内），没有覆盖再查整个 bucket 取最近者。第二次查询不是可选的：安静的 track 上 band 画满整个 bucket，而其中只有一条短事件，落在空隙上的点击若不作答，这些 track 与改动前一样点不中。
+
+两个约束决定了手势与命中区：
+
+- **按下不选中，抬起才选中。** 密集视图里画布几乎全是 band，若按下即选中，range 拖选将无处可起。移动即成为 range drag，未移动即为一次点击。
+- **命中区是整条 track row。** 强度由条高表达，安静的 bucket 只有两三点高；只让画出来的像素可点，等于让内容最少的 track 最难查看，也没有任何目标能满足 AT-APP-011 的 24 点下限。
+
+被选中的事件此时在画布上没有对应 primitive，因此 host 连同 `TimelineEventLocation`（track + range）一起回传，画布按 band 的同一个矩形描边——否则点击只会填满 Inspector，时间轴上却看不出选中了哪一桶。
 
 绘制仍按填充色批处理：调色板是封闭集合，一次 snapshot 内的不同填充数受调色板规模约束，而不随事件数增长，因此 20k detail 的 snapshot 不会退化为逐事件一次 fill。语义 style 仍是批次的外层排序键，绘制顺序与 hit-test 优先级保持不变。状态不能只靠颜色表达（AT-APP-011）：state 与名称同时出现在 label、Inspector 与 accessibility value 中。
 

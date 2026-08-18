@@ -57,7 +57,20 @@ public final class TimelineNSView: NSView {
             needsDisplay = true
         }
     }
+    /// Where the selected event is, when the current LOD draws no primitive
+    /// for it. Supplied by the host after it resolves a press on a density
+    /// band; nil whenever the selection is one the canvas drew itself.
+    public var selectedEventLocation: TimelineEventLocation? {
+        didSet {
+            guard selectedEventLocation != oldValue else { return }
+            needsDisplay = true
+        }
+    }
     public var onSelectEvent: (@MainActor (EventKey?) -> Void)?
+    /// A press on a density band, once the gesture has ended without becoming
+    /// a range drag. The band names no event, so the host resolves the real
+    /// one at that time and selects it (AT-LOD-006).
+    public var onSelectDensityBand: (@MainActor (TimelineDensityHit) -> Void)?
     public var onHoverEvent: (@MainActor (EventKey?) -> Void)?
     public var onSelectRange: (@MainActor (TraceTimeRange?) -> Void)?
     /// Ruler click: create a flag at that instant.
@@ -93,6 +106,9 @@ public final class TimelineNSView: NSView {
     private var previousSnapshot: TimelineSnapshot?
     private(set) var dragMode: DragMode?
     private var dragInitialSelection: TraceTimeRange?
+    /// The band this press would select, kept until the gesture proves itself
+    /// a range drag instead.
+    private(set) var pendingDensityHit: TimelineDensityHit?
     /// Pointer-driven, overlay-only, like ``hoveredEventKey``.
     private(set) var hoveredSelectionEndpoint: TimelineSelectionEndpoint?
     private var suppressAccessibilityNotifications = false
@@ -304,8 +320,39 @@ public final class TimelineNSView: NSView {
         return candidate?.key
     }
 
+    /// The density band under `point`, when the track there is drawn as
+    /// buckets rather than as events.
+    ///
+    /// The target is the whole track row, not the band's drawn rectangle. A
+    /// band's height carries how busy its bucket is, so a quiet one is a
+    /// couple of points tall and a press aimed at it would miss almost every
+    /// time -- and AT-APP-011 puts the floor at 24 points anyway. Horizontally
+    /// the bucket is exactly as wide as it is drawn, so the band the pointer
+    /// is over is the band that answers.
+    public func densityBand(at point: CGPoint) -> TimelineDensityHit? {
+        guard let source = displayedSnapshot else { return nil }
+        for track in source.tracks {
+            guard TimelineGeometry.trackFrame(track).contains(point) else { continue }
+            let time = TimelineGeometry.time(forX: point.x, viewport: source.viewport)
+            for primitive in track.primitives {
+                guard case .density(let density) = primitive,
+                    TimelineGeometry.isVisible(primitive, in: source.viewport),
+                    density.bucket.range.startNs <= time,
+                    time <= density.bucket.range.endNs
+                else { continue }
+                return TimelineDensityHit(
+                    trackID: density.trackID,
+                    bucket: density.bucket.range,
+                    timeNs: time
+                )
+            }
+        }
+        return nil
+    }
+
     public override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
+        pendingDensityHit = nil
         // Upstream places a flag by clicking the ruler; the ruler carries no
         // events, so the gesture is unambiguous.
         if point.y < TimelineGeometry.rulerHeight, let source = displayedSnapshot {
@@ -341,6 +388,14 @@ public final class TimelineNSView: NSView {
         } else {
             guard let source = displayedSnapshot else { return }
             onSelectEvent?(nil)
+            // A band is not selected on the press, the way an event is. The
+            // press has to stay available as the start of a range drag: at a
+            // zoom where whole tracks are drawn as density there is barely any
+            // empty canvas left to sweep a range out of. So the gesture
+            // decides -- movement makes it a range, and a release without
+            // movement makes it a click, which is the interaction upstream
+            // has on its overview.
+            pendingDensityHit = densityBand(at: point)
             dragMode = .newRange(
                 anchorNs: TimelineGeometry.time(forX: point.x, viewport: source.viewport)
             )
@@ -366,6 +421,7 @@ public final class TimelineNSView: NSView {
             }
             return
         }
+        pendingDensityHit = nil
         let range = try? TraceTimeRange.query(
             startNs: min(anchor, moved),
             endNs: max(anchor, moved)
@@ -379,6 +435,10 @@ public final class TimelineNSView: NSView {
         if dragMode != nil { commitRangeSelectionAccessibilityChange(from: dragInitialSelection) }
         dragMode = nil
         dragInitialSelection = nil
+        if let hit = pendingDensityHit {
+            pendingDensityHit = nil
+            onSelectDensityBand?(hit)
+        }
     }
 
     /// Range drags update the visible selection synchronously, but expose only
@@ -740,6 +800,7 @@ public final class TimelineNSView: NSView {
         drawDetailOverlay(
             snapshot, backingScale: scale, dirtyRect: dirtyRect, context: context
         )
+        drawResolvedSelectionOutline(snapshot, backingScale: scale, context: context)
         for track in snapshot.tracks {
             let trackFrame = TimelineGeometry.trackFrame(track)
             guard trackFrame.maxY >= dirtyRect.minY, trackFrame.minY <= dirtyRect.maxY else { continue }
@@ -751,10 +812,11 @@ public final class TimelineNSView: NSView {
         }
     }
 
-    /// Density primitives are non-selectable and carry only intensity, so they
-    /// are merged into snapshot-wide alpha paths: hover, focus and selection
-    /// redraws perform a handful of fills instead of up to eight per track,
-    /// while retaining vector-sharp bucket boundaries.
+    /// Density primitives carry no event of their own -- a press on one is
+    /// resolved against the store, not against the path -- so they are merged
+    /// into snapshot-wide alpha paths: hover, focus and selection redraws
+    /// perform a handful of fills instead of up to eight per track, while
+    /// retaining vector-sharp bucket boundaries.
     ///
     /// A bucket takes the fill of the event that occupies it longest, so an
     /// overview is the same picture as the detail view at a lower resolution:
@@ -1186,6 +1248,52 @@ public final class TimelineNSView: NSView {
         context.restoreGState()
     }
 
+    /// Marks a selection the current LOD drew no primitive for.
+    ///
+    /// Selecting through a density band otherwise leaves the canvas looking
+    /// untouched: the Inspector fills, but the press itself has no visible
+    /// result, and among a few hundred buckets the reader cannot tell which
+    /// one answered. The mark is the stroke a selected slice gets, over the
+    /// event's own range and across the track body -- the same rectangle the
+    /// event would be outlined in once the track is zoomed into detail.
+    private func drawResolvedSelectionOutline(
+        _ snapshot: TimelineSnapshot,
+        backingScale: CGFloat,
+        context: CGContext
+    ) {
+        guard let location = selectedEventLocation, let selectedEventKey,
+            // The detail LOD draws its own outline; two would double-stroke.
+            detailPathCache?.events[selectedEventKey] == nil,
+            location.range.endNs >= snapshot.viewport.range.startNs,
+            location.range.startNs <= snapshot.viewport.range.endNs,
+            let track = snapshot.tracks.first(where: {
+                $0.descriptor.id == location.trackID
+            })
+        else { return }
+        let frame = TimelineGeometry.bandFrame(
+            for: location.range, in: track,
+            viewport: snapshot.viewport, backingScale: backingScale
+        )
+        // At a density zoom the selected event is usually a fraction of a
+        // point wide, and a stroke inset into a rectangle that thin collapses
+        // to nothing at all. Widening it about its own centre keeps the mark
+        // on the instant it belongs to and keeps it visible.
+        let minimumWidth = Self.resolvedSelectionMinimumWidth
+        let outline = frame.width >= minimumWidth
+            ? frame
+            : CGRect(
+                x: frame.midX - minimumWidth / 2, y: frame.minY,
+                width: minimumWidth, height: frame.height
+            )
+        context.saveGState()
+        context.setStrokeColor(NSColor.selectedControlTextColor.cgColor)
+        context.setLineWidth(3)
+        context.stroke(outline.insetBy(dx: 1, dy: 1))
+        context.restoreGState()
+    }
+
+    static let resolvedSelectionMinimumWidth: CGFloat = 6
+
     private struct FocusLocation {
         let trackIndex: Int
         let detail: TimelineDetailPrimitive
@@ -1572,8 +1680,12 @@ public struct TimelineView: NSViewRepresentable {
     public let annotations: TimelineAnnotations
     public let selection: TraceTimeRange?
     public let selectedEventKey: EventKey?
+    /// Where that event is, when the snapshot holds no primitive for it. See
+    /// ``TimelineNSView/selectedEventLocation``.
+    public let selectedEventLocation: TimelineEventLocation?
     public let focusRequestID: UInt64
     public let onSelectEvent: @MainActor (EventKey?) -> Void
+    public let onSelectDensityBand: @MainActor (TimelineDensityHit) -> Void
     public let onHoverEvent: @MainActor (EventKey?) -> Void
     public let onSelectRange: @MainActor (TraceTimeRange?) -> Void
     public let onCreateFlag: @MainActor (Int64) -> Void
@@ -1590,10 +1702,12 @@ public struct TimelineView: NSViewRepresentable {
         annotations: TimelineAnnotations = TimelineAnnotations(),
         selection: TraceTimeRange? = nil,
         selectedEventKey: EventKey? = nil,
+        selectedEventLocation: TimelineEventLocation? = nil,
         focusRequestID: UInt64 = 0,
         interactionBounds: TraceTimeRange? = nil,
         accessibilityLabelText: String = "Trace Timeline",
         onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
+        onSelectDensityBand: @escaping @MainActor (TimelineDensityHit) -> Void = { _ in },
         onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
         onCreateFlag: @escaping @MainActor (Int64) -> Void = { _ in },
@@ -1607,10 +1721,12 @@ public struct TimelineView: NSViewRepresentable {
         self.annotations = annotations
         self.selection = selection
         self.selectedEventKey = selectedEventKey
+        self.selectedEventLocation = selectedEventLocation
         self.focusRequestID = focusRequestID
         self.interactionBounds = interactionBounds
         self.accessibilityLabelText = accessibilityLabelText
         self.onSelectEvent = onSelectEvent
+        self.onSelectDensityBand = onSelectDensityBand
         self.onHoverEvent = onHoverEvent
         self.onSelectRange = onSelectRange
         self.onCreateFlag = onCreateFlag
@@ -1627,7 +1743,9 @@ public struct TimelineView: NSViewRepresentable {
         view.annotations = annotations
         view.selection = selection
         view.selectedEventKey = selectedEventKey
+        view.selectedEventLocation = selectedEventLocation
         view.onSelectEvent = onSelectEvent
+        view.onSelectDensityBand = onSelectDensityBand
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onCreateFlag = onCreateFlag
@@ -1647,7 +1765,9 @@ public struct TimelineView: NSViewRepresentable {
         view.annotations = annotations
         view.selection = selection
         view.selectedEventKey = selectedEventKey
+        view.selectedEventLocation = selectedEventLocation
         view.onSelectEvent = onSelectEvent
+        view.onSelectDensityBand = onSelectDensityBand
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onCreateFlag = onCreateFlag

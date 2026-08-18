@@ -134,38 +134,56 @@ package enum TimelineGeometry {
         viewport: TimelineViewport,
         backingScale: CGFloat
     ) -> CGRect {
-        let range: TraceTimeRange
-        let depth: Int
+        let detail: TimelineDetailPrimitive
         switch primitive {
-        case .detail(let detail):
-            range = detail.range
-            depth = detail.depth
+        case .detail(let value):
+            detail = value
         case .density(let density):
-            range = density.bucket.range
             // A density bucket summarizes the whole track, so it spans every
             // reserved row rather than sitting in one.
-            depth = 0
+            return bandFrame(
+                for: density.bucket.range, in: track,
+                viewport: viewport, backingScale: backingScale
+            )
         }
-        let startX = x(for: range.startNs, viewport: viewport)
-        let endX = x(for: range.endNs, viewport: viewport)
+        let startX = x(for: detail.range.startNs, viewport: viewport)
+        let endX = x(for: detail.range.endNs, viewport: viewport)
         let minimumWidth = 1 / max(1, backingScale)
         let width = max(minimumWidth, endX - startX)
         let span = rowSpan(in: track)
         // Clamp to the rows the track actually reserved: a primitive deeper
         // than the track was sized for is drawn on the last row instead of
         // outside the track's bounds, where it could never be hit-tested.
-        let row = CGFloat(min(max(0, depth), max(0, track.depthRowCount - 1)))
-        let height: CGFloat
-        switch primitive {
-        case .detail: height = span
-        case .density:
-            height = max(1, CGFloat(track.height) - 2 * trackVerticalInset)
-        }
+        let row = CGFloat(min(max(0, detail.depth), max(0, track.depthRowCount - 1)))
         return CGRect(
             x: startX,
             y: rulerHeight + CGFloat(track.y) + trackVerticalInset + row * span,
             width: width,
-            height: max(1, height)
+            height: max(1, span)
+        )
+    }
+
+    /// The rectangle a time range occupies across a whole track body.
+    ///
+    /// A density bucket summarizes every depth at once, so it spans all the
+    /// reserved rows rather than sitting in one; so does the outline of a
+    /// selection the current LOD draws no primitive for. Both come from here,
+    /// which is what keeps the band a press lands on and the mark that press
+    /// leaves behind in the same place.
+    package static func bandFrame(
+        for range: TraceTimeRange,
+        in track: TimelineTrackSnapshot,
+        viewport: TimelineViewport,
+        backingScale: CGFloat
+    ) -> CGRect {
+        let startX = x(for: range.startNs, viewport: viewport)
+        let endX = x(for: range.endNs, viewport: viewport)
+        let minimumWidth = 1 / max(1, backingScale)
+        return CGRect(
+            x: startX,
+            y: rulerHeight + CGFloat(track.y) + trackVerticalInset,
+            width: max(minimumWidth, endX - startX),
+            height: max(1, CGFloat(track.height) - 2 * trackVerticalInset)
         )
     }
 }

@@ -124,6 +124,113 @@ package actor TimelineSnapshotLoader {
         latestGeneration = max(latestGeneration, generation)
     }
 
+    /// The real event a press on a density band means.
+    ///
+    /// A bucket is an aggregate, and AT-LOD-006 lets the Inspector select only
+    /// real events, so the press is answered by the store rather than by
+    /// dressing the bucket up as an event of its own. Two bounded queries at
+    /// most, and only for a press:
+    ///
+    /// 1. The instant under the pointer. Event queries intersect their range,
+    ///    so a one-nanosecond window still returns the events *covering* that
+    ///    instant however long ago they started -- which is the whole answer
+    ///    whenever the pointer is over something. Bounding the query this
+    ///    tightly is what keeps it exact: querying the bucket instead and
+    ///    taking the first page of it would answer a press on the right-hand
+    ///    edge of a busy band with an event from its left-hand edge.
+    /// 2. The bucket, when nothing covers that instant. A band is drawn across
+    ///    its whole bucket even when the events inside occupy a sliver of it,
+    ///    so on a quiet track most of what is on screen to be pressed is gap,
+    ///    and answering a press there with nothing at all would leave those
+    ///    tracks as unclickable as they are now.
+    ///
+    /// Data-quality issues from these queries are dropped rather than merged
+    /// into a snapshot: this resolves one event for the Inspector and leaves
+    /// the viewport it was pressed in exactly as it was.
+    package func resolveEvent(
+        _ hit: TimelineDensityHit,
+        track: TrackDescriptor,
+        deadline: ContinuousClock.Instant,
+        repository: any TraceRepositoryProtocol
+    ) async throws -> TraceEventInspector? {
+        var discarded: [TraceDataQualityIssue] = []
+        let (end, overflow) = hit.timeNs.addingReportingOverflow(1)
+        if !overflow, let instant = try? TraceTimeRange.query(
+            startNs: hit.timeNs, endNs: end
+        ) {
+            let covering = try await detailPrimitives(
+                for: track, range: instant, limit: Self.instantResolutionLimit,
+                deadline: deadline, focusedEventKey: nil, repository: repository,
+                qualityIssues: &discarded
+            )
+            if let detail = Self.resolution(at: hit.timeNs, among: covering) {
+                return detail.inspector
+            }
+        }
+        let inBucket = try await detailPrimitives(
+            for: track, range: hit.bucket, limit: Self.bucketResolutionLimit,
+            deadline: deadline, focusedEventKey: nil, repository: repository,
+            qualityIssues: &discarded
+        )
+        return Self.resolution(at: hit.timeNs, among: inBucket)?.inspector
+    }
+
+    /// Deep enough for any real call stack; a press resolves against one
+    /// instant, so the page is the events nested at it and nothing else.
+    static let instantResolutionLimit = 64
+    /// The fallback page, over a whole bucket. Large enough that a quiet
+    /// track's events are all in it, small enough to stay a press-sized query.
+    static let bucketResolutionLimit = 512
+
+    /// Which of these events a press at `timeNs` selects.
+    ///
+    /// Nearest first -- anything covering the instant is at distance zero --
+    /// then longest, then lowest row. Longest is what settles a stack: the
+    /// outer frame is the one whose colour the band borrowed, so the press
+    /// selects the slice the reader was looking at rather than whichever leaf
+    /// happens to be under the pointer at a zoom where the leaf is invisible.
+    static func resolution(
+        at timeNs: Int64, among primitives: [TimelinePrimitive]
+    ) -> TimelineDetailPrimitive? {
+        var best: TimelineDetailPrimitive?
+        var bestRank: (distance: Int64, duration: Int64, rowID: Int64)?
+        for primitive in primitives {
+            guard case .detail(let detail) = primitive else { continue }
+            let rank = (
+                distance: Self.distance(from: timeNs, to: detail.range),
+                duration: detail.range.durationNs,
+                rowID: detail.eventKey.rowID
+            )
+            guard let current = bestRank else {
+                best = detail
+                bestRank = rank
+                continue
+            }
+            let wins: Bool
+            if rank.distance != current.distance {
+                wins = rank.distance < current.distance
+            } else if rank.duration != current.duration {
+                wins = rank.duration > current.duration
+            } else {
+                wins = rank.rowID < current.rowID
+            }
+            if wins {
+                best = detail
+                bestRank = rank
+            }
+        }
+        return best
+    }
+
+    /// How far `timeNs` is from `range`, and zero inside it.
+    private static func distance(from timeNs: Int64, to range: TraceTimeRange) -> Int64 {
+        if range.startNs <= timeNs, timeNs <= range.endNs { return 0 }
+        let (delta, overflow) = timeNs < range.startNs
+            ? range.startNs.subtractingReportingOverflow(timeNs)
+            : timeNs.subtractingReportingOverflow(range.endNs)
+        return overflow ? .max : delta
+    }
+
     private func primitives(
         for track: TrackDescriptor,
         request: ViewportRequest,
@@ -137,9 +244,10 @@ package actor TimelineSnapshotLoader {
         // for the real buckets, doubling full-viewport work per visible track.
         // One bucket per sixteen logical points keeps an eight-track overview
         // bounded to roughly half the horizontal point count in aggregate.
-        // The buckets
-        // are deliberately non-selectable and rendering may expand one across
-        // several pixels; exact domain ranges and event counts stay intact.
+        // A bucket carries no event of its own and rendering may expand one
+        // across several pixels; exact domain ranges and event counts stay
+        // intact, and a press on a band is resolved back to a real event by
+        // ``resolveEvent(_:track:deadline:repository:)``.
         let bucketLimit = max(1, min(max(1, request.pixelWidth / 16), budget))
         // An explicit detail request needs no estimate. `detailPrimitives`
         // already reports an unavailable capability as an empty track and

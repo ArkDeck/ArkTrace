@@ -1254,4 +1254,103 @@ final class TraceDocumentControllerTests: XCTestCase {
         )
         await controller.close()
     }
+
+    /// A press on a density band, all the way through: the band names no
+    /// event, so the Inspector stays empty until the press is resolved against
+    /// the store. This is what makes the busy part of a capture inspectable --
+    /// where every track is over the detail budget and drawn as bands, a press
+    /// used to select nothing at all.
+    func testADensityBandPressSelectsTheRealEventUnderIt() async throws {
+        let suite = "ArkTraceDensityPressTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let threadKey = ThreadKey(itid: 1)
+        let key = EventKey(table: .callstack, rowID: 42)
+        let slice = TraceSlice(
+            key: key,
+            range: try TraceTimeRange(startNs: 200, endNs: 260),
+            threadKey: threadKey,
+            processKey: ProcessKey(ipid: 1),
+            pid: 100,
+            tid: 10,
+            processName: "proc1",
+            threadName: "alpha",
+            name: "buried slice",
+            category: "work",
+            depth: 0,
+            parentEventKey: nil,
+            isAsync: false,
+            isOpenEnded: false
+        )
+        let threads = [Self.makeThread(itid: 1, ipid: 1, name: "alpha")]
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: false, threadStates: false,
+                            namedSlices: true, cpuCounters: false,
+                            processCounters: false
+                        ),
+                        slices: [slice],
+                        threads: threads
+                    ),
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-density-press-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        let track = try XCTUnwrap(
+            controller.trackGroups.flatMap(\.tracks).first {
+                $0.source == .namedSlice(threadKey)
+            }
+        )
+        controller.selectDensityBand(
+            TimelineDensityHit(
+                trackID: track.id,
+                bucket: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                timeNs: 220
+            )
+        )
+        var attempts = 0
+        while controller.selectedEvent?.key != key, attempts < 10_000 {
+            attempts += 1
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.selectedEvent?.key, key)
+        XCTAssertEqual(controller.selectedEvent?.name, "buried slice")
+        // The canvas draws no primitive for this event, so it is told where the
+        // event is; without that the press would leave no mark on the timeline.
+        XCTAssertEqual(controller.selectedEventLocation?.trackID, track.id)
+        XCTAssertEqual(controller.selectedEventLocation?.range, slice.range)
+
+        // A selection the canvas made itself needs no location, and leaving the
+        // old one behind would mark an event that is no longer selected.
+        controller.selectEvent(nil)
+        XCTAssertNil(controller.selectedEventLocation)
+        XCTAssertNil(controller.selectedEvent)
+
+        // A press on a track that is not in this document resolves nothing.
+        controller.selectDensityBand(
+            TimelineDensityHit(
+                trackID: TimelineTrackID(rawValue: "named-slice:999"),
+                bucket: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                timeNs: 220
+            )
+        )
+        await Task.yield()
+        XCTAssertNil(controller.selectedEvent)
+        await controller.close()
+    }
 }

@@ -327,6 +327,11 @@ public final class TraceDocumentController {
     public private(set) var trackGroups: [TraceTrackGroup] = []
     public private(set) var snapshot: TimelineSnapshot?
     public private(set) var selectedEvent: TraceEventInspector?
+    /// Where the selected event is, when it was resolved from a density band
+    /// and so is not among the primitives the viewport drew. The canvas needs
+    /// it to mark the selection; a selection made on a drawn event leaves it
+    /// nil, because the canvas already knows where that one is.
+    public private(set) var selectedEventLocation: TimelineEventLocation?
     /// Arguments of the selected slice, fetched on selection rather than with
     /// the snapshot: a viewport holds tens of thousands of slices and one
     /// query each would defeat the bounded-page design.
@@ -390,6 +395,7 @@ public final class TraceDocumentController {
     /// a session produces are reproducible in tests.
     @ObservationIgnored private var nextAnnotationID = 1
     @ObservationIgnored private var argumentsTask: Task<Void, Never>?
+    @ObservationIgnored private var densityResolutionTask: Task<Void, Never>?
     @ObservationIgnored private var announcementRevision: UInt64 = 0
     @ObservationIgnored private var firstWindowMarked = false
     @ObservationIgnored private var timelineDisplayMarked = false
@@ -474,6 +480,7 @@ public final class TraceDocumentController {
         searchTask?.cancel()
         analysisTask?.cancel()
         maintenanceTask?.cancel()
+        densityResolutionTask?.cancel()
         if let closing {
             Task { try? await closing.close() }
         }
@@ -588,10 +595,59 @@ public final class TraceDocumentController {
     }
 
     public func selectEvent(_ key: EventKey?) {
+        densityResolutionTask?.cancel()
         pendingSelectionKey = nil
+        selectedEventLocation = nil
         selectedEvent = key.flatMap { inspector(for: $0) }
         if key != nil { selectRange(nil) }
         loadArguments(for: key)
+    }
+
+    /// Selects the real event under a press on a density band.
+    ///
+    /// A band summarizes a bucket and names no event, so there is nothing for
+    /// ``selectEvent(_:)`` to look up in the snapshot: the press has to be
+    /// resolved against the store first. That is one bounded query away from
+    /// the press (see ``TimelineSnapshotLoader/resolveEvent(_:track:deadline:repository:)``),
+    /// which is what makes the dense part of a capture -- the part where every
+    /// track is drawn as bands -- inspectable at all, instead of only after
+    /// zooming in far enough for detail primitives to appear.
+    ///
+    /// The result is dropped if the document or the viewport moved on while it
+    /// was in flight, on the same generation rule every other query here
+    /// follows (AT-LOD-005).
+    public func selectDensityBand(_ hit: TimelineDensityHit) {
+        densityResolutionTask?.cancel()
+        guard let repository = document?.repository,
+            let track = trackGroups.flatMap(\.tracks).first(where: {
+                $0.id == hit.trackID
+            })
+        else { return }
+        let documentGeneration = documentGeneration
+        let viewportGeneration = viewportGeneration
+        let loader = loader
+        densityResolutionTask = Task { [weak self] in
+            let resolved = try? await loader.resolveEvent(
+                hit,
+                track: track,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5)),
+                repository: repository
+            )
+            guard let resolved, !Task.isCancelled else { return }
+            await MainActor.run {
+                guard let self,
+                    self.documentGeneration == documentGeneration,
+                    self.viewportGeneration == viewportGeneration
+                else { return }
+                self.pendingSelectionKey = nil
+                self.selectedEvent = resolved
+                self.selectedEventLocation = TimelineEventLocation(
+                    trackID: hit.trackID, range: resolved.range
+                )
+                self.selectRange(nil)
+                self.loadArguments(for: resolved.key)
+            }
+        }
     }
 
     /// Looks up the selected slice's arguments. A trace without an `args` table
@@ -1310,6 +1366,8 @@ public final class TraceDocumentController {
         viewportTask?.cancel()
         searchTask?.cancel()
         analysisTask?.cancel()
+        densityResolutionTask?.cancel()
+        densityResolutionTask = nil
         openTask = nil
         viewportTask = nil
         searchTask = nil
@@ -1323,6 +1381,7 @@ public final class TraceDocumentController {
         trackGroups = []
         snapshot = nil
         selectedEvent = nil
+        selectedEventLocation = nil
         selectedEventArguments = []
         selectedEventArgumentsTruncated = false
         hoveredEvent = nil
@@ -1339,6 +1398,7 @@ public final class TraceDocumentController {
         trackGroups = []
         snapshot = nil
         selectedEvent = nil
+        selectedEventLocation = nil
         hoveredEvent = nil
         selectedRange = nil
         // Annotations belong to the trace that was open, so a replacement

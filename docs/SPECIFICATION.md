@@ -559,6 +559,8 @@ Query completion 的 generation 与当前 viewport 不同，结果必须丢弃�
 
 一个数据库 event 不保证对应一个绘制矩形；density、coalescing 和 hidden narrow events 都是合法表现，但 Inspector 只能选择真实 event。
 
+Density band 必须可被点击：band 自身不携带 event，因此点击必须以有界 query 把该 track、该时刻的**真实 event** 取回来再交给 Inspector，不得由 bucket 伪造一个。点击顺序为「先取指针所在时刻（事件 query 按 range 相交，故一纳秒窗口即可取回覆盖该时刻的事件），无覆盖时再取整个 bucket 取最近者」；band 覆盖整个 bucket 而其中事件可能只占其一小段，所以落在空隙上的点击也必须给出该 band 所代表的事件。命中目标是整条 track row（band 高度表达强度，可低至数点，见 AT-APP-011）。按下并拖动仍是 range selection：density 视图下画布几乎全被 band 占满，若按下即选中会使 range 手势无处可起。
+
 ## 10. Analysis 规格
 
 ### 10.1 通用 AnalysisResult

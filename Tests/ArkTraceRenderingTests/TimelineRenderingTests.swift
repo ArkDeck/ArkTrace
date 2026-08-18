@@ -88,7 +88,7 @@ final class TimelineRenderingTests: XCTestCase {
     }
 
     @MainActor
-    func testGeometryAndHitTestingUseSameFrameAndDensityIsNotSelectable() throws {
+    func testGeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey() throws {
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 1_000, endNs: 2_000),
             widthPoints: 100,
@@ -138,7 +138,11 @@ final class TimelineRenderingTests: XCTestCase {
         let densityFrame = TimelineGeometry.frame(
             for: density, in: track, viewport: viewport, backingScale: 2
         )
-        XCTAssertNil(view.event(at: CGPoint(x: densityFrame.midX, y: densityFrame.midY)))
+        let densityPoint = CGPoint(x: densityFrame.midX, y: densityFrame.midY)
+        XCTAssertNil(view.event(at: densityPoint))
+        // A bucket names no event, so the press is reported for the host to
+        // resolve instead of answered from the snapshot.
+        XCTAssertEqual(view.densityBand(at: densityPoint)?.bucket.startNs, 1_500)
         XCTAssertEqual(TimelineGeometry.time(forX: 25, viewport: viewport), 1_250)
         XCTAssertEqual(TimelineGeometry.x(for: 1_250, viewport: viewport), 25, accuracy: 0.001)
     }
