@@ -434,6 +434,13 @@ struct TraceSchemaCapabilities {
 
 Schema fingerprint 是排序后的完整 table/column/type/PK 描述的 SHA-256；v2 preimage 使用固定域标记、版本、record count，并对每条 record 及其中每个 UTF-8 字段使用 64-bit length prefix，合法标识符或 declared type 中的 `|`、换行等字节不能造成序列化碰撞。来自 `sqlite_master` 的标识符统一按 SQLite 规则转义，带空格、连字符或引号的合法表/列不能被跳过；schema 最多允许 4,096 张表，枚举只读取 `LIMIT 4097`，超限返回 `TRACE_SCHEMA_UNSUPPORTED`。新增无关列是兼容变化；required 列缺失、SQLite declared affinity 与字段语义不兼容、或关键 join 不成立是 `TRACE_SCHEMA_UNSUPPORTED`。`trace_range` 唯一性只读取 `LIMIT 2`。required relationship source 最多采样 1,024 行，目标表不截断，整个 join 受 250,000 SQLite VM-step progress budget 约束；超预算 fail closed。事件 capability 只有在所需列 affinity 兼容且事件表非空时成立；optional counter capability 还必须在有界样本内存在 `<样本表>.filter_id → <filter 表>.id` 的真实 join，空表或互不相交的 filter ID 不能宣称完整能力。
 
+Counter 有两条互补的查询路径，界的单位不同：`counters(_:)` 按**样本**定界，用来画某条 series 在
+viewport 内的取值；`counterSeries(_:)` 按 **series** 定界，回答「这个 trace 有哪些 counter series」。
+Sidebar 建泳道走后者 —— 用样本页反推 series 会让高频 series 把其余 series 挤出这一页：真机 trace 的前
+2 000 条 process 样本只覆盖 66 条 series 中的 13 条，另外 53 条静默地拿不到泳道。目录查询从 filter 表
+出发、对每条 filter 用 `EXISTS` 判定它在区间内有没有样本，因此成本由 filter 表行数（几十行）而不是样本
+表行数（数万行）决定，真机库实测 55 ms；它与 catalog 其余查询同处一个 event batch，共享同一 deadline。
+
 Counter 的样本表按 scope 探测：CPU scope 只探 `measure`，process scope 依次探 `process_measure` 与
 `measure`（§2.1）。一个 scope 可用 = 其候选表中至少一张成立；成立的表构成该 scope 的读取顺序，query
 层只读这个集合，capability 与查询因此不会出现「说有、查不到」的分歧。探测查询让**样本表驱动 join**

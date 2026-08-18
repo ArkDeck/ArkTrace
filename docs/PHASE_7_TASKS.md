@@ -160,11 +160,19 @@ ArkTrace 从 `measure` 读。四个真机库 `measure` 全为 0 行、`process_m
   ```
   实测 `arktrace-dayu200-20260815-480s.sqlite`：`measure` 版返回空、`process_measure` 版返回 `1`。
 - [x] `arktrace --json inspect <真机 trace>` 的 `capabilities.processCounters` 为 `true`；
-- [x] **在 App 里实测**：打开 `arktrace-dayu200-20260815-480s.htrace`，Sidebar "Process Counters" 组
-      展开后列出 series（不再是 "Not available in this trace"），`H:VSync-app`、`H:FrameBuffer`、
-      `H:PreferredFrameRate` 均可见；`counterSeriesCount` = 66，与
+- [x] **在 App 里实测**：打开 `arktrace-dayu200-20260815-480s.htrace`，counter 泳道出现在所属进程节点下
+      （不再是 "Not available in this trace"），`H:VSync-app`、`H:FrameBuffer`、`H:PreferredFrameRate`
+      均可见；`counterSeriesCount` = 66，与
       `SELECT COUNT(DISTINCT f.id) FROM process_measure m JOIN process_measure_filter f ON f.id=m.filter_id`
       相等。**注意**：这一步同时暴露了上面记录的 event batch 上限阻塞，先修好才看得到；
+
+      **2026-08-18 复核修正**：`counterSeriesCount = 66` 是 `summary` 的独立计数，**不等于 Sidebar 真的
+      列了 66 条泳道**。复核时用 App 自己的 catalog 构建器跑真机库，实际只有 **13** 条 process counter
+      泳道 —— catalog 当时用 `CounterQuery(limit: 2_000)` 取**样本**再反推 series，而全 trace 头 2 000 条
+      样本（按 ts 排序）只覆盖 13 条 series（`H:VSync-app` 一条就有 16 343 个样本）。其余 53 条 series
+      静默无泳道。已改为按 series 定界的 `counterSeries` 目录查询，同一真机库复核为 **66** 条泳道；
+      回归见 `testCounterSeriesDirectoryFindsSeriesASamplePageWouldMiss` 与
+      `testEveryCounterSeriesGetsALaneRegardlessOfSampleVolume`（均已进 Phase 7 gate 的对齐清单）。
 - [x] series 样本数与 `sqlite3 <db> "SELECT f.name, COUNT(*) FROM process_measure m JOIN process_measure_filter f ON f.id=m.filter_id GROUP BY f.id ORDER BY 2 DESC LIMIT 8;"` 对得上
       （`H:VSync-app` = 16 343，`arktrace query --view counters --name H:VSync-app` 返回 16 343 行且 `truncated: false`）；
 - [x] cpu counter 路径行为不变：`capabilities.cpuCounters` 仍为 `false`（真库 `cpu_measure_filter` 0 行），

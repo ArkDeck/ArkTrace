@@ -1006,6 +1006,11 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 同一线程的 thread state 与 named slice 泳道相邻。理由与实测依据见 DESIGN §13.3 —— 纯进程树会在真机 trace 上造出
 约 749 个单子节点，反而损害 AT-APP-003 要求的可扫描性。
 
+**泳道集合必须由「有哪些 series / 线程」这个问题决定，不得从一页事件样本反推。** counter 泳道尤其如此：
+样本页的界是**样本数**，一条高频 series 会把其余 series 挤出这一页 —— 真机 DAYU 200 trace 的前 2 000 条
+process counter 样本只覆盖 66 条 series 中的 13 条，另外 53 条会无声地拿不到泳道。因此建泳道必须走按
+**series** 定界的目录查询（`counterSeries`），其截断同样要按 series 报告（AT-DB-007、AT-QUERY-008）。
+
 泳道必须可**置顶（pin）**：置顶集合以用户排定的顺序显示在 Sidebar 顶部，可折叠，且折叠控件与置顶操作
 都必须可键盘触达（AT-APP-009）。置顶集合的条数必须有界，且不得产生非必要横向滚动。置顶一条隐藏泳道
 必须同时使其可见。置顶集合与时间轴标注共享同一生命周期与持久化语义（AT-APP-004）。

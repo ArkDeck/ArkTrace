@@ -193,6 +193,28 @@ package struct TraceSliceQuery: Sendable {
     }
 }
 
+/// Enumerates the counter series a trace contains, bounded like every other
+/// directory query (AT-DB-007). Separate from `CounterQuery` because it is
+/// bounded by *series*, not by samples: one series with a million samples must
+/// not be able to hide the others.
+package struct CounterSeriesQuery: Sendable {
+    public let range: TraceTimeRange
+    public let limit: Int
+    public let deadline: ContinuousClock.Instant
+
+    public init(
+        range: TraceTimeRange,
+        limit: Int = 1_000,
+        deadline: ContinuousClock.Instant
+    ) throws {
+        try TraceEventQueryValidation.range(range)
+        try TraceEventQueryValidation.limit(limit)
+        self.range = range
+        self.limit = limit
+        self.deadline = deadline
+    }
+}
+
 package struct CounterQuery: Sendable {
     public let range: TraceTimeRange
     public let filterID: Int64?

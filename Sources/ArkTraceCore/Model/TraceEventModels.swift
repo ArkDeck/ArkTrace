@@ -385,6 +385,44 @@ package struct CounterSample: Hashable, Codable, Sendable {
     private enum CodingKeys: String, CodingKey { case key, timestampNs, value, durationNs }
 }
 
+/// A counter series' identity and display metadata, without its samples.
+///
+/// The timeline needs one lane per series, which is a question about the
+/// counter *filter* tables. Deriving that from a bounded page of samples
+/// answers a different question — "which series appear in the first N samples"
+/// — and silently drops every series whose samples sort later, so lane
+/// construction reads the directory instead (AT-APP-003).
+package struct CounterSeriesDescriptor: Hashable, Codable, Sendable {
+    public let filterID: Int64
+    public let name: String
+    public let scope: CounterScope
+    public let cpu: Int64?
+    public let processKey: ProcessKey?
+    public let pid: Int64?
+    public let processName: String?
+    public let unit: String?
+
+    public init(
+        filterID: Int64,
+        name: String,
+        scope: CounterScope,
+        cpu: Int64?,
+        processKey: ProcessKey?,
+        pid: Int64? = nil,
+        processName: String? = nil,
+        unit: String?
+    ) {
+        self.filterID = filterID
+        self.name = name
+        self.scope = scope
+        self.cpu = cpu
+        self.processKey = processKey
+        self.pid = pid
+        self.processName = processName
+        self.unit = unit
+    }
+}
+
 package struct CounterSeries: Hashable, Codable, Sendable {
     public let filterID: Int64
     public let name: String

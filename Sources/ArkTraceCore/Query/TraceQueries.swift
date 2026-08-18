@@ -245,6 +245,9 @@ package protocol TraceRepositoryProtocol: Sendable {
     ) async throws -> TraceEventPage<TraceEventArgument>
     func frames(_ query: TraceFrameQuery) async throws -> TraceEventPage<TraceFrame>
     func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries>
+    func counterSeries(
+        _ query: CounterSeriesQuery
+    ) async throws -> TraceEventPage<CounterSeriesDescriptor>
     func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult
     func eventBatch(_ batch: TraceRepositoryEventBatch) async throws
         -> TraceRepositoryEventBatchResult
@@ -260,6 +263,7 @@ package struct TraceRepositoryEventBatch: Sendable {
     public let threadStates: [ThreadStateQuery]
     public let slices: [TraceSliceQuery]
     public let counters: [CounterQuery]
+    public let counterSeries: [CounterSeriesQuery]
     public let densities: [TraceDensityQuery]
     public let threads: [ThreadQuery]
 
@@ -268,11 +272,12 @@ package struct TraceRepositoryEventBatch: Sendable {
         threadStates: [ThreadStateQuery] = [],
         slices: [TraceSliceQuery] = [],
         counters: [CounterQuery] = [],
+        counterSeries: [CounterSeriesQuery] = [],
         densities: [TraceDensityQuery] = [],
         threads: [ThreadQuery] = []
     ) throws {
         let count = cpuSlices.count + threadStates.count + slices.count
-            + counters.count + densities.count + threads.count
+            + counters.count + counterSeries.count + densities.count + threads.count
         guard (1...Self.maximumQueryCount).contains(count) else {
             throw ArkTraceError(
                 code: .invalidArgument,
@@ -284,6 +289,7 @@ package struct TraceRepositoryEventBatch: Sendable {
         self.threadStates = threadStates
         self.slices = slices
         self.counters = counters
+        self.counterSeries = counterSeries
         self.densities = densities
         self.threads = threads
     }
@@ -294,6 +300,7 @@ package struct TraceRepositoryEventBatchResult: Sendable {
     public let threadStates: [TraceEventPage<ThreadStateInterval>]
     public let slices: [TraceEventPage<TraceSlice>]
     public let counters: [TraceEventPage<CounterSeries>]
+    public let counterSeries: [TraceEventPage<CounterSeriesDescriptor>]
     public let densities: [TraceDensityResult]
     public let threads: [BoundedPage<TraceThread>]
 
@@ -302,6 +309,7 @@ package struct TraceRepositoryEventBatchResult: Sendable {
         threadStates: [TraceEventPage<ThreadStateInterval>],
         slices: [TraceEventPage<TraceSlice>],
         counters: [TraceEventPage<CounterSeries>],
+        counterSeries: [TraceEventPage<CounterSeriesDescriptor>] = [],
         densities: [TraceDensityResult],
         threads: [BoundedPage<TraceThread>] = []
     ) {
@@ -309,6 +317,7 @@ package struct TraceRepositoryEventBatchResult: Sendable {
         self.threadStates = threadStates
         self.slices = slices
         self.counters = counters
+        self.counterSeries = counterSeries
         self.densities = densities
         self.threads = threads
     }
@@ -345,6 +354,12 @@ package extension TraceRepositoryProtocol {
         .unavailable
     }
 
+    func counterSeries(
+        _ query: CounterSeriesQuery
+    ) async throws -> TraceEventPage<CounterSeriesDescriptor> {
+        .unavailable
+    }
+
     func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
         .unavailable
     }
@@ -356,12 +371,16 @@ package extension TraceRepositoryProtocol {
         var states: [TraceEventPage<ThreadStateInterval>] = []
         var slices: [TraceEventPage<TraceSlice>] = []
         var counters: [TraceEventPage<CounterSeries>] = []
+        var counterSeriesPages: [TraceEventPage<CounterSeriesDescriptor>] = []
         var densities: [TraceDensityResult] = []
         var threads: [BoundedPage<TraceThread>] = []
         for query in batch.cpuSlices { cpu.append(try await cpuSlices(query)) }
         for query in batch.threadStates { states.append(try await threadStates(query)) }
         for query in batch.slices { slices.append(try await self.slices(query)) }
         for query in batch.counters { counters.append(try await self.counters(query)) }
+        for query in batch.counterSeries {
+            counterSeriesPages.append(try await counterSeries(query))
+        }
         for query in batch.densities { densities.append(try await density(query)) }
         for query in batch.threads { threads.append(try await self.threads(query)) }
         return TraceRepositoryEventBatchResult(
@@ -369,6 +388,7 @@ package extension TraceRepositoryProtocol {
             threadStates: states,
             slices: slices,
             counters: counters,
+            counterSeries: counterSeriesPages,
             densities: densities,
             threads: threads
         )

@@ -1512,8 +1512,8 @@ public final class TraceDocumentController {
         let batch = try TraceRepositoryEventBatch(
             cpuSlices: wantsCpuSlices
                 ? [CpuSliceQuery(range: range, limit: 20_000, deadline: deadline)] : [],
-            counters: wantsCounters
-                ? [CounterQuery(range: range, limit: 2_000, deadline: deadline)] : [],
+            counterSeries: wantsCounters
+                ? [CounterSeriesQuery(range: range, limit: 2_000, deadline: deadline)] : [],
             threads: [ThreadQuery(limit: 1_000, deadline: deadline)]
         )
         let batchResult = try await repository.eventBatch(batch)
@@ -1527,8 +1527,11 @@ public final class TraceDocumentController {
         let cpuPage = wantsCpuSlices
             ? (batchResult.cpuSlices.first ?? .unavailable)
             : .unavailable
-        let counterPage = wantsCounters
-            ? (batchResult.counters.first ?? .unavailable)
+        // Lanes come from the series directory, not from a page of samples: a
+        // sample page is bounded by samples, so one busy series hides the rest
+        // (a real capture puts 13 of its 66 series in the first 2,000 samples).
+        let counterPage: TraceEventPage<CounterSeriesDescriptor> = wantsCounters
+            ? (batchResult.counterSeries.first ?? .unavailable)
             : .unavailable
         let cpus = Array(Set(cpuPage.items.map(\.cpu))).sorted()
         let cpuTracks = cpus.enumerated().map {
@@ -1617,7 +1620,7 @@ public final class TraceDocumentController {
         threads: [TraceThread],
         threadsTruncated: Bool,
         cpuSlices: [CpuSlice],
-        counters: [CounterSeries],
+        counters: [CounterSeriesDescriptor],
         counterTruncated: Bool,
         frameProcessKeys: Set<ProcessKey> = []
     ) -> [TraceTrackGroup] {
@@ -1638,8 +1641,8 @@ public final class TraceDocumentController {
                 unattributedThreads.append(thread)
             }
         }
-        var countersByProcess: [ProcessKey: [CounterSeries]] = [:]
-        var unattributedCounters: [CounterSeries] = []
+        var countersByProcess: [ProcessKey: [CounterSeriesDescriptor]] = [:]
+        var unattributedCounters: [CounterSeriesDescriptor] = []
         for series in counters {
             if let key = series.processKey {
                 countersByProcess[key, default: []].append(series)
@@ -1801,7 +1804,7 @@ public final class TraceDocumentController {
     }
 
     private static func uniqueCounterTracks(
-        _ series: [CounterSeries],
+        _ series: [CounterSeriesDescriptor],
         isCollapsed: Bool? = nil
     ) -> [TrackDescriptor] {
         var seen: Set<String> = []

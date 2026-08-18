@@ -2164,6 +2164,104 @@ final class RepositoryTests: XCTestCase {
         XCTAssertNoThrow(try CLIMachineDataQuality(page.dataQuality))
     }
 
+    /// A sample page is bounded by samples, so a busy series crowds the others
+    /// out of it. Timeline lanes must not be derived that way: on the DAYU 200
+    /// capture the first 2,000 process samples span 13 of the trace's 66
+    /// series, which silently cost the other 53 their lane.
+    func testCounterSeriesDirectoryFindsSeriesASamplePageWouldMiss() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'H:VSync-app', 1);
+            INSERT INTO process_measure_filter VALUES (8, 'H:FrameBuffer', 1);
+            -- The busy series owns every early timestamp.
+            WITH RECURSIVE n(x) AS (
+                SELECT 1 UNION ALL SELECT x + 1 FROM n WHERE x < 40
+            )
+            INSERT INTO process_measure SELECT 1000 + x, 0, x, 7 FROM n;
+            -- The quiet series only appears afterwards.
+            INSERT INTO process_measure VALUES (1900, 0, 1, 8);
+            """
+        )
+        let repository = try makeRepository()
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+
+        let samplePage = try await repository.counters(
+            CounterQuery(range: range, limit: 5, deadline: deadline)
+        )
+        XCTAssertEqual(
+            samplePage.items.map(\.filterID), [7],
+            "a bounded sample page can only see the series that sorts first"
+        )
+
+        let directory = try await repository.counterSeries(
+            CounterSeriesQuery(range: range, limit: 100, deadline: deadline)
+        )
+        XCTAssertTrue(directory.capabilityAvailable)
+        XCTAssertFalse(directory.truncated)
+        XCTAssertEqual(directory.items.map(\.filterID), [7, 8])
+        XCTAssertEqual(directory.items.map(\.name), ["H:VSync-app", "H:FrameBuffer"])
+        XCTAssertEqual(directory.items.map(\.scope), [.process, .process])
+        XCTAssertEqual(directory.items.map(\.processKey), [
+            ProcessKey(ipid: 1), ProcessKey(ipid: 1),
+        ])
+        XCTAssertEqual(directory.items.map(\.pid), [100, 100])
+        XCTAssertNoThrow(try CLIMachineDataQuality(directory.dataQuality))
+    }
+
+    /// The directory is bounded by series and reports it, and a series with no
+    /// sample inside the range is not a lane.
+    func testCounterSeriesDirectoryIsRangeScopedAndBoundedBySeries() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE measure (ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER);
+            CREATE TABLE process_measure (
+                ts INTEGER, dur INTEGER, value INTEGER, filter_id INTEGER
+            );
+            CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER);
+            CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER);
+            INSERT INTO process_measure_filter VALUES (7, 'inside', 1);
+            INSERT INTO process_measure_filter VALUES (8, 'also inside', 1);
+            INSERT INTO process_measure_filter VALUES (9, 'outside the range', 1);
+            INSERT INTO process_measure VALUES (1100, 0, 1, 7);
+            INSERT INTO process_measure VALUES (1200, 0, 2, 8);
+            INSERT INTO process_measure VALUES (1900, 0, 3, 9);
+            """
+        )
+        let repository = try makeRepository()
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+
+        let scoped = try await repository.counterSeries(
+            CounterSeriesQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 500),
+                limit: 100,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(
+            scoped.items.map(\.filterID), [7, 8],
+            "a series with no sample in the range has nothing to draw"
+        )
+
+        let bounded = try await repository.counterSeries(
+            CounterSeriesQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                limit: 1,
+                deadline: deadline
+            )
+        )
+        XCTAssertEqual(bounded.items.count, 1)
+        XCTAssertTrue(bounded.truncated, "the series bound must be reported, not silent")
+    }
+
     /// The `args` encoding is upstream's, taken from the `args_view` definition
     /// TraceStreamer writes into every exported database at the pinned
     /// revision. The branch that matters: **only `datatype == 1` dereferences

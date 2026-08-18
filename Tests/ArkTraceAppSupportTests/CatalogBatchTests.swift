@@ -14,14 +14,19 @@ import XCTest
 final class CatalogBatchTests: XCTestCase {
     private actor BatchRecordingRepository: TraceRepositoryProtocol {
         let capabilities: TraceCapabilities
+        var counterSeriesPage: [CounterSeriesDescriptor] = []
         private(set) var recordedBatches: [TraceRepositoryEventBatch] = []
         private(set) var directCallNames: [String] = []
         var batchGate: CheckedContinuation<Void, Never>?
         private var gateWaiters: [CheckedContinuation<Void, Never>] = []
         private var gateOpen = true
 
-        init(capabilities: TraceCapabilities) {
+        init(
+            capabilities: TraceCapabilities,
+            counterSeriesPage: [CounterSeriesDescriptor] = []
+        ) {
             self.capabilities = capabilities
+            self.counterSeriesPage = counterSeriesPage
         }
 
         func closeGate() { gateOpen = false }
@@ -102,6 +107,9 @@ final class CatalogBatchTests: XCTestCase {
                 counters: batch.counters.map { _ in
                     TraceEventPage(items: [], truncated: false)
                 },
+                counterSeries: batch.counterSeries.map { [counterSeriesPage] _ in
+                    TraceEventPage(items: counterSeriesPage, truncated: false)
+                },
                 densities: batch.densities.map { _ in .unavailable },
                 threads: batch.threads.map { _ in
                     BoundedPage(
@@ -147,6 +155,46 @@ final class CatalogBatchTests: XCTestCase {
         return (controller, source, cleanup)
     }
 
+    /// The sidebar must get one lane per series in the trace. Deriving lanes
+    /// from a page of samples made that untrue in a way nothing reported: on
+    /// the DAYU 200 capture the sidebar showed 13 of 66 process counter lanes,
+    /// because a single series owns the first 2,000 samples.
+    func testEveryCounterSeriesGetsALaneRegardlessOfSampleVolume() async throws {
+        let series = (0..<40).map { index in
+            CounterSeriesDescriptor(
+                filterID: Int64(index),
+                name: "H:series-\(index)",
+                scope: .process,
+                cpu: nil,
+                processKey: ProcessKey(ipid: 3),
+                pid: 30,
+                processName: "app",
+                unit: nil
+            )
+        }
+        let repository = BatchRecordingRepository(
+            capabilities: TraceCapabilities(
+                cpuScheduling: true, threadStates: true, namedSlices: true,
+                cpuCounters: false, processCounters: true
+            ),
+            counterSeriesPage: series
+        )
+        let (controller, source, cleanup) = try makeController(repository: repository)
+        defer { cleanup() }
+
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        let counterLanes = controller.trackGroups
+            .flatMap(\.tracks)
+            .filter { if case .processCounter = $0.source { return true } else { return false } }
+        XCTAssertEqual(counterLanes.count, series.count)
+        XCTAssertEqual(
+            Set(counterLanes.map(\.title)), Set(series.map(\.name)),
+            "every series in the directory must reach the sidebar"
+        )
+    }
+
     func testCatalogIssuesSingleBatchWithSharedDeadlineAndPerQueryLimits() async throws {
         let repository = BatchRecordingRepository(
             capabilities: TraceCapabilities(
@@ -168,7 +216,10 @@ final class CatalogBatchTests: XCTestCase {
         let batch = try XCTUnwrap(catalogBatches.first)
         XCTAssertEqual(batch.threads.map(\.limit), [1_000])
         XCTAssertEqual(batch.cpuSlices.map(\.limit), [20_000])
-        XCTAssertEqual(batch.counters.map(\.limit), [2_000])
+        // Lanes are bounded by series, not by samples: a sample page lets one
+        // busy series crowd every other out of the sidebar.
+        XCTAssertTrue(batch.counters.isEmpty)
+        XCTAssertEqual(batch.counterSeries.map(\.limit), [2_000])
         XCTAssertTrue(batch.threadStates.isEmpty)
         XCTAssertTrue(batch.slices.isEmpty)
         XCTAssertTrue(batch.densities.isEmpty)
@@ -177,6 +228,7 @@ final class CatalogBatchTests: XCTestCase {
         let deadlines: [ContinuousClock.Instant?] = batch.threads.map(\.deadline)
             + batch.cpuSlices.map { Optional($0.deadline) }
             + batch.counters.map { Optional($0.deadline) }
+            + batch.counterSeries.map { Optional($0.deadline) }
         XCTAssertEqual(Set(deadlines).count, 1, "catalog queries must share one deadline")
 
         // The catalog never falls back to the serial per-query path.

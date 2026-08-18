@@ -126,6 +126,7 @@ private enum RepositoryEventBatchItem: Sendable {
     case state(Int, TraceEventPage<ThreadStateInterval>)
     case slice(Int, TraceEventPage<TraceSlice>)
     case counter(Int, TraceEventPage<CounterSeries>)
+    case counterSeries(Int, TraceEventPage<CounterSeriesDescriptor>)
     case density(Int, TraceDensityResult)
     case threadDirectory(Int, BoundedPage<TraceThread>)
 }
@@ -343,6 +344,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var counters = Array<TraceEventPage<CounterSeries>?>(
             repeating: nil, count: batch.counters.count
         )
+        var counterSeriesPages = Array<TraceEventPage<CounterSeriesDescriptor>?>(
+            repeating: nil, count: batch.counterSeries.count
+        )
         var densities = Array<TraceDensityResult?>(
             repeating: nil, count: batch.densities.count
         )
@@ -387,6 +391,11 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     .counter(index, try await clone().counters(query))
                 }
             }
+            for (index, query) in batch.counterSeries.enumerated() {
+                group.addTask {
+                    .counterSeries(index, try await clone().counterSeries(query))
+                }
+            }
             for (index, query) in batch.densities.enumerated() {
                 group.addTask {
                     .density(index, try await clone().density(query))
@@ -403,6 +412,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 case .state(let index, let page): states[index] = page
                 case .slice(let index, let page): slices[index] = page
                 case .counter(let index, let page): counters[index] = page
+                case .counterSeries(let index, let page): counterSeriesPages[index] = page
                 case .density(let index, let result): densities[index] = result
                 case .threadDirectory(let index, let page): threadDirectories[index] = page
                 }
@@ -410,6 +420,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
         guard cpu.allSatisfy({ $0 != nil }), states.allSatisfy({ $0 != nil }),
             slices.allSatisfy({ $0 != nil }), counters.allSatisfy({ $0 != nil }),
+            counterSeriesPages.allSatisfy({ $0 != nil }),
             densities.allSatisfy({ $0 != nil }),
             threadDirectories.allSatisfy({ $0 != nil })
         else {
@@ -424,6 +435,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             threadStates: states.map { $0! },
             slices: slices.map { $0! },
             counters: counters.map { $0! },
+            counterSeries: counterSeriesPages.map { $0! },
             densities: densities.map { $0! },
             threads: threadDirectories.map { $0! }
         )
@@ -436,12 +448,16 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var states: [TraceEventPage<ThreadStateInterval>] = []
         var slices: [TraceEventPage<TraceSlice>] = []
         var counters: [TraceEventPage<CounterSeries>] = []
+        var counterSeriesPages: [TraceEventPage<CounterSeriesDescriptor>] = []
         var densities: [TraceDensityResult] = []
         var threadDirectories: [BoundedPage<TraceThread>] = []
         for query in batch.cpuSlices { cpu.append(try await cpuSlices(query)) }
         for query in batch.threadStates { states.append(try await threadStates(query)) }
         for query in batch.slices { slices.append(try await self.slices(query)) }
         for query in batch.counters { counters.append(try await self.counters(query)) }
+        for query in batch.counterSeries {
+            counterSeriesPages.append(try await counterSeries(query))
+        }
         for query in batch.densities { densities.append(try await density(query)) }
         for query in batch.threads { threadDirectories.append(try await threads(query)) }
         return TraceRepositoryEventBatchResult(
@@ -449,6 +465,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             threadStates: states,
             slices: slices,
             counters: counters,
+            counterSeries: counterSeriesPages,
             densities: densities,
             threads: threadDirectories
         )
@@ -1610,6 +1627,219 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 || counterQuality.invalidTime > 0,
             capabilityAvailable: true,
             dataQuality: TraceDataQuality(issues: issues)
+        )
+    }
+
+    /// Enumerates counter series from the filter tables rather than from a
+    /// page of samples. A sample page is bounded by samples, so a series with
+    /// many samples crowds out the rest: on a real capture the first 2,000
+    /// process samples span 13 of 66 series. Timeline lane construction needs
+    /// every series, so it asks this instead (AT-APP-003, AT-DB-007).
+    public func counterSeries(
+        _ query: CounterSeriesQuery
+    ) async throws -> TraceEventPage<CounterSeriesDescriptor> {
+        let cpuAvailable = validation.capabilities.cpuCounters
+        let processAvailable = validation.capabilities.processCounters
+        guard cpuAvailable || processAvailable else { return .unavailable }
+        let range = try validatedAbsoluteRange(query.range)
+        var items: [CounterSeriesDescriptor] = []
+        var truncated = false
+        var invalidOptionalValues: Int64 = 0
+        var missingProcessReferences: Int64 = 0
+        if cpuAvailable {
+            let result = try counterSeriesRows(
+                scope: .cpu,
+                filterTable: "cpu_measure_filter",
+                scopeColumn: "cpu",
+                sampleTables: validation.cpuCounterSampleTables,
+                hasUnit: cpuFilterHasUnit,
+                range: range,
+                limit: query.limit,
+                deadline: query.deadline
+            )
+            items.append(contentsOf: result.rows)
+            truncated = truncated || result.truncated
+            invalidOptionalValues += result.invalidOptionalValueCount
+        }
+        if processAvailable {
+            let result = try counterSeriesRows(
+                scope: .process,
+                filterTable: "process_measure_filter",
+                scopeColumn: "ipid",
+                sampleTables: validation.processCounterSampleTables,
+                hasUnit: processFilterHasUnit,
+                range: range,
+                limit: query.limit,
+                deadline: query.deadline
+            )
+            items.append(contentsOf: result.rows)
+            truncated = truncated || result.truncated
+            invalidOptionalValues += result.invalidOptionalValueCount
+            missingProcessReferences += result.missingProcessReferenceCount
+        }
+        // CPU series first, then process, each by filter id: the same order the
+        // sample-based path groups its series in (AT-QUERY-001).
+        items.sort {
+            if $0.scope != $1.scope { return $0.scope == .cpu }
+            return $0.filterID < $1.filterID
+        }
+        try checkQueryBoundary(query.deadline)
+        var issues = validation.dataQuality.issues
+        if invalidOptionalValues > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .droppedValue,
+                    scope: "timeline.counter",
+                    count: invalidOptionalValues
+                )
+            )
+        }
+        if missingProcessReferences > 0 {
+            issues.append(
+                TraceDataQualityIssue(
+                    category: .referentialIntegrity,
+                    scope: "process_measure_filter.ipid",
+                    count: missingProcessReferences
+                )
+            )
+        }
+        return TraceEventPage(
+            items: Array(items.prefix(query.limit)),
+            truncated: truncated || items.count > query.limit,
+            capabilityAvailable: true,
+            dataQuality: TraceDataQuality(issues: issues)
+        )
+    }
+
+    private func counterSeriesRows(
+        scope: CounterScope,
+        filterTable: String,
+        scopeColumn: String,
+        sampleTables: [CounterSampleTable],
+        hasUnit: Bool,
+        range: (start: Int64, end: Int64),
+        limit: Int,
+        deadline: ContinuousClock.Instant
+    ) throws -> (
+        rows: [CounterSeriesDescriptor],
+        truncated: Bool,
+        invalidOptionalValueCount: Int64,
+        missingProcessReferenceCount: Int64
+    ) {
+        guard !sampleTables.isEmpty else { return ([], false, 0, 0) }
+        // A series counts as present when any of its scope's sample tables holds
+        // a sample of it inside the range. `EXISTS` stops at the first match, so
+        // the cost is bounded by the filter table (tens of rows), not by the
+        // sample table.
+        var bindings: [TraceDatabase.Binding] = []
+        var existsClauses: [String] = []
+        for sampleTable in sampleTables {
+            let timeFilter = counterTimeFilter(
+                range: range, hasDuration: hasDuration(sampleTable)
+            )
+            existsClauses.append(
+                """
+                EXISTS (
+                    SELECT 1 FROM \(sampleTable.rawValue) AS m
+                    WHERE m.filter_id = f.id
+                        AND typeof(m.filter_id) = 'integer'
+                        AND typeof(m.ts) = 'integer'
+                        AND typeof(m.value) = 'integer'
+                        AND \(timeFilter.predicate)
+                )
+                """
+            )
+            bindings.append(contentsOf: timeFilter.bindings)
+        }
+        let isProcessScope = scope == .process
+        let processJoin = isProcessScope
+            ? "LEFT JOIN process AS p ON p.ipid = f.ipid" : ""
+        let pidSelection = isProcessScope
+            ? "CASE WHEN typeof(p.pid) = 'integer' THEN p.pid ELSE NULL END" : "NULL"
+        let processNameSelection = isProcessScope
+            ? "CASE WHEN typeof(p.name) = 'text' "
+                + "AND length(CAST(p.name AS BLOB)) <= 4096 THEN p.name ELSE NULL END"
+            : "NULL"
+        let missingProcessSelection = isProcessScope
+            ? "CASE WHEN f.ipid <> 0 AND p.ipid IS NULL THEN 1 ELSE 0 END"
+            : "0"
+        let unitSelection = hasUnit
+            ? "CASE WHEN typeof(f.unit) = 'text' "
+                + "AND length(CAST(f.unit AS BLOB)) <= 256 THEN f.unit ELSE NULL END"
+            : "NULL"
+        var invalidValueTerms: [String] = []
+        if hasUnit {
+            invalidValueTerms.append(
+                "CASE WHEN f.unit IS NOT NULL AND (typeof(f.unit) <> 'text' "
+                    + "OR length(CAST(f.unit AS BLOB)) > 256) THEN 1 ELSE 0 END"
+            )
+        }
+        if isProcessScope {
+            invalidValueTerms.append(
+                "CASE WHEN p.pid IS NOT NULL AND typeof(p.pid) <> 'integer' THEN 1 ELSE 0 END"
+            )
+            invalidValueTerms.append(
+                "CASE WHEN p.name IS NOT NULL AND (typeof(p.name) <> 'text' "
+                    + "OR length(CAST(p.name AS BLOB)) > 4096) THEN 1 ELSE 0 END"
+            )
+        }
+        let invalidSelection = invalidValueTerms.isEmpty
+            ? "0" : invalidValueTerms.joined(separator: " + ")
+        bindings.append(.int64(Int64(limit) + 1))
+        let rows = try db.query(
+            """
+            SELECT f.id, f.name, f.\(scopeColumn), \(unitSelection),
+                \(pidSelection), \(processNameSelection),
+                \(missingProcessSelection), \(invalidSelection)
+            FROM \(filterTable) AS f
+            \(processJoin)
+            WHERE typeof(f.id) = 'integer'
+                AND typeof(f.\(scopeColumn)) = 'integer'
+                AND typeof(f.name) = 'text'
+                AND length(CAST(f.name AS BLOB)) <= 256
+                AND (\(existsClauses.joined(separator: " OR ")))
+            ORDER BY f.id ASC LIMIT ?
+            """,
+            bindings: bindings,
+            observesTaskCancellation: true,
+            deadline: deadline
+        ) { row -> (CounterSeriesDescriptor, Int64, Int64) in
+            guard let filterID = row.int64(0), let name = row.text(1),
+                let scopeID = row.int64(2)
+            else {
+                throw ArkTraceError(
+                    code: .queryFailed,
+                    stage: .querying,
+                    message: "Counter series has incompatible storage"
+                )
+            }
+            return (
+                CounterSeriesDescriptor(
+                    filterID: filterID,
+                    name: name,
+                    scope: scope,
+                    cpu: isProcessScope ? nil : scopeID,
+                    processKey: isProcessScope ? Self.processKey(scopeID) : nil,
+                    pid: row.int64(4),
+                    processName: row.text(5),
+                    unit: row.text(3)
+                ),
+                row.int64(6) ?? 0,
+                row.int64(7) ?? 0
+            )
+        }
+        var descriptors: [CounterSeriesDescriptor] = []
+        var missingProcessReferences: Int64 = 0
+        var invalidOptionalValues: Int64 = 0
+        for (index, row) in rows.prefix(limit).enumerated() {
+            if index.isMultiple(of: 1_024) { try checkQueryBoundary(deadline) }
+            descriptors.append(row.0)
+            missingProcessReferences += row.1
+            invalidOptionalValues += row.2
+        }
+        return (
+            descriptors, rows.count > limit, invalidOptionalValues,
+            missingProcessReferences
         )
     }
 
