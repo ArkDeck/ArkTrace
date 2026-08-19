@@ -14,6 +14,7 @@
 > 性能回写二（2026-08-18）：§13.4 第 6 条改为「上一代 primitive + 新 viewport」（`W`/`S` 此前要等查询返回才动），并补 viewport 范围裁剪与 `isOpaque` 两条约束
 > 进度回写（2026-08-18）：§13.4 新增加载进度规则 —— hashing/cacheLookup 按字节、indexing 按索引条数报精确进度；parsing 报不了的原因是实测的 stdout 全缓冲
 > 缺陷回写二（2026-08-18）：§13.5 新增 density band 点击规则 —— band 不带 event，点击以至多两次有界 query 解析出真实事件（AT-LOD-006），命中区为整条 track row，按下仍归 range drag
+> 性能回写三（2026-08-18）：§13.4 新增「一帧滚动的代价按露出的那条计」—— 路径缓存按 256pt 横带分桶、focus ring 移出画布（不得加回 `.default`）、tracking area 只建一次、同一代 snapshot 不重绘
 
 ## 1. 文档目的
 
@@ -814,6 +815,33 @@ loading 这一代携带的本来就是「新 viewport + 上一代 primitive」�
   之后，clip view 才会保留已经画好的像素、只把滚动露出的那一条交给 view（`copiesOnScroll` 默认开，
   但对一个自称透明的 document view 不起作用）。否则每个滚动步都要重画整屏，而不是移动的那几十个点。
 
+**一帧滚动的代价必须等于它露出的那条**（改于 2026-08-18）。整个 track stack 是滚动视图里的一个高
+document view，所以每帧滚动到达 `draw(_:)` 的只是一条几十点高的脏矩形。但此前几乎每项开销都按**整个
+文档**计，于是 trace 越长滚动越卡：
+
+- **路径缓存按横带分桶。** 每个 paint key 一条贯穿全文档的 `CGPath`，意味着填一条 40 pt 的带子也要让
+  CoreGraphics 走一遍整条 trace 的矩形。缓存改为每 256 pt 一带（`pathBandHeight`）分桶，跨带的矩形在
+  两带各存一份（填充恒为不透明，重复填充是同色覆盖），绘制只取脏矩形覆盖的那几带——像素一模一样，代价
+  从「文档多高」变成「这一帧露出多少」。合成的 300 行文档上，一次滚动从 0.73 核降到 0.18 核。带高是折中：
+  小到一条滚动带只碰一两带，大到整窗重绘时每个 paint key 仍只有个位数次 fill。
+- **canvas 不要 focus ring。** document view 在每帧滚动里都相对窗口移动，于是 AppKit 每个显示周期重算
+  一次焦点环：把窗口大小的位图模糊、膨胀、再矢量化成区域上传——纵向滚动一条大 capture 时约占主线程 60%，
+  比时间轴自己的绘制还贵。焦点指示改由外层 SwiftUI pane 描边（它不随内容滚动），`focusRingType` 恒为
+  `.none`，`draw(_:)` 也不读 first-responder 状态，因此获得或失去焦点在画布上不重绘任何东西。
+  **不要把 `.default` 加回来**：§14「focus ring 清晰可见」由 pane 的边框满足（真机验过：点搜索框边框消失、
+  点画布边框回来），加回去只是把那 60% 还回来。
+- **tracking area 只建一次。** AppKit 在每次几何变化时调 `updateTrackingAreas()`，在滚动视图里就是每帧
+  一次；原实现每次 remove 再 add，使窗口的 tracking region 长期失效，代价是每个显示周期一次
+  `updateTrackingAreasWithInvalidCursorRects:` 对整棵视图树的递归遍历——侧栏挂着几百个进程行时，这是
+  滚动期间最贵的一件事。`.inVisibleRect` 本来就让区域自己跟随可见矩形、忽略传入的 rect，所以只建一次
+  才是它的正确用法。
+- **同一代 snapshot 不重绘。** SwiftUI 在窗口里任何状态变化时都会重新写入每个存储属性，同一份 snapshot
+  因此反复到达画布；generation 就是一帧的身份，未变即画出同样的像素，于是连重绘都不请求。
+
+同一轮还有两处「按文档计」改为「按需计」：同名 hover wash 的矩形在建缓存时就按名字分好（否则指针每停在
+一个 slice 上，滚动的每条带都要为每个图元做一次字符串比较，而滚动时它几乎总停在某个 slice 上），以及
+`event(at:)` 先用 track frame 判包含再进图元循环（一次指针采样不必走遍整份 snapshot）。
+
 **加载进度：能测的报测量值，不能测的不猜。** 一次冷打开在 265 MB 真机 capture 上是 7.3 s，实测分布为
 parsing 2.8 s / indexing 2.6 s / cacheLookup（含把源快照到 staging）0.9 s / hashing 0.17 s / 其余约 0.7 s。
 因此进度是**每个阶段各报自己的**，而不是一个总百分比 —— 阶段之间的权重是 trace、机器与缓存状态的性质，
@@ -1076,7 +1104,7 @@ README 的三张表由它生成，`ShortcutCatalogTests` 双向断言（每张�
 
 Canvas 不为数十万事件创建 accessibility element。它向 VoiceOver 暴露 focused track 摘要、当前 focused/selected event、当前 viewport/range 和可用键盘动作；Inspector 提供完整、可复制的语义详情，Search 提供到任意可查事件的替代导航路径。Selection、loading、结果计数、完成和错误变化通过原生 accessibility notification 宣告，但高频 pan/hover 不逐帧播报。
 
-所有 icon-only control 都有可本地化的 accessible name；focus ring 清晰可见；状态不能只靠颜色表达。默认密度下主要 toolbar target 尽量达到 40×40 pt，任何可交互目标不得小于 24×24 pt，且相邻 hit area 不重叠。动效遵循系统 Reduce Motion：loading 不依赖自动播放动画表达进度，pane/event transition 可被禁用或替换为无位移变化。
+所有 icon-only control 都有可本地化的 accessible name；focus ring 清晰可见（时间轴那一处由外层 pane 的边框承担，画布本身不画环，原因见 §13.4）；状态不能只靠颜色表达。默认密度下主要 toolbar target 尽量达到 40×40 pt，任何可交互目标不得小于 24×24 pt，且相邻 hit area 不重叠。动效遵循系统 Reduce Motion：loading 不依赖自动播放动画表达进度，pane/event transition 可被禁用或替换为无位移变化。
 
 ## 15. CLI 与 Machine Contract
 

@@ -18,12 +18,15 @@ public final class TimelineNSView: NSView {
             } else if let snapshot, !snapshot.isLoading {
                 previousSnapshot = snapshot
             }
-            if previousRenderedIdentity != Self.renderIdentity(
+            // SwiftUI re-applies every stored property on any state change in
+            // the window, so the same snapshot arrives here again and again.
+            // Repainting for one is pure waste: a generation is the identity of
+            // a rendered frame, so an unchanged one draws the same pixels.
+            guard previousRenderedIdentity != Self.renderIdentity(
                 current: snapshot, previous: previousSnapshot
-            ) {
-                densityPathCache = nil
-                detailPathCache = nil
-            }
+            ) else { return }
+            densityPathCache = nil
+            detailPathCache = nil
             needsDisplay = true
         }
     }
@@ -132,9 +135,21 @@ public final class TimelineNSView: NSView {
         }
     }
 
+    /// Cached fills, bucketed into horizontal bands.
+    ///
+    /// A scroll exposes a strip a few dozen points tall, but one path per
+    /// paint key spanning the whole track stack makes CoreGraphics walk every
+    /// rect in the trace to fill that strip — so the cost of a scroll frame
+    /// grew with the height of the document rather than with what the frame
+    /// actually shows. Measured on a synthetic 300-row document, banding took
+    /// a scroll from 73% of a core to 18%. Bands are keyed by
+    /// ``TimelineNSView/band(for:)`` and a rect that straddles a boundary is
+    /// filed under both, so drawing exactly the bands a dirty rect touches
+    /// paints the same pixels it always did.
     private struct DensityPaths {
         let backingScale: CGFloat
-        let paths: [DensityPaintKey: CGPath]
+        let bands: [Int: [DensityPaintKey: CGPath]]
+        let fillCount: Int
     }
 
     /// One batched detail fill. The semantic style stays the outer sort key so
@@ -214,10 +229,22 @@ public final class TimelineNSView: NSView {
 
     private struct DetailPaths {
         let backingScale: CGFloat
-        let paths: [DetailPaintKey: CGPath]
-        let labels: [DetailLabel]
+        let bands: [Int: [DetailPaintKey: CGPath]]
+        let fillCount: Int
+        let labelBands: [Int: [DetailLabel]]
         let events: [EventKey: (TimelineDetailPrimitive, CGRect)]
+        /// Frames grouped by hover name at build time, so the same-name wash
+        /// is a dictionary lookup per draw. Resolving the family by scanning
+        /// every event made each scroll strip pay a string comparison per
+        /// primitive whenever the pointer happened to rest on a slice — and
+        /// during a scroll it almost always does.
+        let washFramesByName: [String: [CGRect]]
     }
+
+    /// Test seam: how many fill batches one draw issued, per overlay. The
+    /// number a scroll strip issues is the shape of the guarantee — it must
+    /// follow what the strip shows, not how tall the document is.
+    package var fillBatchHook: ((String, Int) -> Void)?
 
     private var densityPathCache: DensityPaths?
     private var detailPathCache: DetailPaths?
@@ -252,20 +279,18 @@ public final class TimelineNSView: NSView {
     /// visible rectangle instead of the few dozen points that moved.
     public override var isOpaque: Bool { true }
     public override var acceptsFirstResponder: Bool { true }
-    public override var focusRingMaskBounds: NSRect { bounds }
 
-    public override func drawFocusRingMask() {
-        bounds.fill()
-    }
-
+    /// No automatic focus ring, ever. The document view is the whole track
+    /// stack and moves relative to its window on every frame of a scroll, so
+    /// AppKit re-rendered the ring each display cycle: blur and dilate a
+    /// window-sized bitmap, vectorize it back into a region, upload it — about
+    /// 60% of the main thread during a vertical scroll of a large capture,
+    /// dwarfing the timeline's own drawing. The visible focus indicator lives
+    /// on the enclosing SwiftUI pane instead, which does not move when the
+    /// content scrolls. Nothing in `draw(_:)` reads first-responder state, so
+    /// gaining or losing focus repaints nothing here either.
     public override func becomeFirstResponder() -> Bool {
-        needsDisplay = true
         unsafe NSAccessibility.post(element: self, notification: .focusedUIElementChanged)
-        return true
-    }
-
-    public override func resignFirstResponder() -> Bool {
-        needsDisplay = true
         return true
     }
 
@@ -298,10 +323,14 @@ public final class TimelineNSView: NSView {
         var candidate: (style: Int, order: Int, key: EventKey)?
         var order = 0
         for track in source.tracks {
+            // Tracks partition the body vertically, so containment is a track
+            // property, not a primitive one. Deciding it out here skips the
+            // other tracks' primitives entirely; every pointer sample used to
+            // walk the whole snapshot to hit-test one row.
+            guard TimelineGeometry.trackFrame(track).contains(point) else { continue }
             for primitive in track.primitives {
                 defer { order += 1 }
-                guard TimelineGeometry.trackFrame(track).contains(point),
-                    case .detail(let detail) = primitive,
+                guard case .detail(let detail) = primitive,
                     TimelineGeometry.isVisible(primitive, in: source.viewport)
                 else { continue }
                 let frame = TimelineGeometry.frame(
@@ -725,9 +754,20 @@ public final class TimelineNSView: NSView {
         }
     }
 
+    /// The hover tracking area is built once and then left alone.
+    ///
+    /// `.inVisibleRect` is what makes that correct: the area follows the
+    /// view's visible rect by itself and ignores the rect it was given. AppKit
+    /// calls this method on every geometry change, which inside a scroll view
+    /// means every frame of every scroll, and removing and re-adding the area
+    /// each time left the window's tracking regions permanently invalid --
+    /// paid for by a recursive `updateTrackingAreasWithInvalidCursorRects:`
+    /// walk of the entire window's view tree on each display cycle. On a trace
+    /// whose sidebar holds hundreds of process rows that walk is the most
+    /// expensive thing happening during a scroll.
     public override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        if let trackingAreaReference { removeTrackingArea(trackingAreaReference) }
+        guard trackingAreaReference == nil else { return }
         let area = NSTrackingArea(
             rect: bounds,
             options: [
@@ -796,7 +836,9 @@ public final class TimelineNSView: NSView {
             )
             context.fill(CGRect(x: 0, y: trackFrame.minY, width: bounds.width, height: trackFrame.height))
         }
-        drawDensityOverlay(snapshot, backingScale: scale, context: context)
+        drawDensityOverlay(
+            snapshot, backingScale: scale, dirtyRect: dirtyRect, context: context
+        )
         drawDetailOverlay(
             snapshot, backingScale: scale, dirtyRect: dirtyRect, context: context
         )
@@ -834,13 +876,15 @@ public final class TimelineNSView: NSView {
     private func drawDensityOverlay(
         _ snapshot: TimelineSnapshot,
         backingScale: CGFloat,
+        dirtyRect: CGRect,
         context: CGContext
     ) {
         let cached: DensityPaths
         if let densityPathCache, densityPathCache.backingScale == backingScale {
             cached = densityPathCache
         } else {
-            var paths: [DensityPaintKey: CGMutablePath] = [:]
+            var bands: [Int: [DensityPaintKey: CGMutablePath]] = [:]
+            var keys: Set<DensityPaintKey> = []
             let minimumWidth = 1 / max(1, backingScale)
             for track in snapshot.tracks where !track.primitives.isEmpty {
                 let fallback = Self.trackColor(for: track.descriptor)
@@ -853,7 +897,6 @@ public final class TimelineNSView: NSView {
                     )
                     let intensity = min(7, Int(log2(Double(max(1, density.bucket.eventCount)))))
                     let key = DensityPaintKey(color: color, intensity: intensity)
-                    let path = paths[key] ?? CGMutablePath()
                     let startX = TimelineGeometry.x(
                         for: density.bucket.range.startNs, viewport: snapshot.viewport
                     )
@@ -864,28 +907,57 @@ public final class TimelineNSView: NSView {
                     // low bar rather than as a floating block.
                     let available = max(1, CGFloat(track.height) - 6)
                     let height = max(1, available * Self.densityHeightFraction(intensity))
-                    path.addRect(
-                        CGRect(
-                            x: startX,
-                            y: TimelineGeometry.rulerHeight + CGFloat(track.y) + 3
-                                + (available - height),
-                            width: max(minimumWidth, endX - startX),
-                            height: height
-                        )
+                    let frame = CGRect(
+                        x: startX,
+                        y: TimelineGeometry.rulerHeight + CGFloat(track.y) + 3
+                            + (available - height),
+                        width: max(minimumWidth, endX - startX),
+                        height: height
                     )
-                    paths[key] = path
+                    keys.insert(key)
+                    for band in Self.bands(covering: frame) {
+                        let path = bands[band]?[key] ?? CGMutablePath()
+                        path.addRect(frame)
+                        bands[band, default: [:]][key] = path
+                    }
                 }
             }
-            cached = DensityPaths(backingScale: backingScale, paths: paths)
+            cached = DensityPaths(
+                backingScale: backingScale, bands: bands, fillCount: keys.count
+            )
             densityPathCache = cached
-            pathCacheBuildHook?("density", paths.count)
+            pathCacheBuildHook?("density", keys.count)
         }
-        for key in cached.paths.keys.sorted() {
-            guard let path = cached.paths[key] else { continue }
-            context.setFillColor(key.color.cgColor)
-            context.addPath(path)
-            context.fillPath()
+        var fills = 0
+        for band in Self.bands(covering: dirtyRect) {
+            guard let paths = cached.bands[band] else { continue }
+            for key in paths.keys.sorted() {
+                guard let path = paths[key] else { continue }
+                context.setFillColor(key.color.cgColor)
+                context.addPath(path)
+                context.fillPath()
+                fills += 1
+            }
         }
+        fillBatchHook?("density", fills)
+    }
+
+    /// Height of one cache band. Small enough that a scroll strip touches one
+    /// or two of them, large enough that a full-window redraw stays a handful
+    /// of fills per paint key rather than dozens.
+    static let pathBandHeight: CGFloat = 256
+
+    /// The bands a rectangle belongs to. A rect that straddles a boundary is
+    /// filed under every band it touches, so drawing the bands a dirty rect
+    /// covers never drops a fill that starts above the strip.
+    static func bands(covering rect: CGRect) -> ClosedRange<Int> {
+        let first = band(for: min(rect.minY, rect.maxY))
+        let last = band(for: max(rect.minY, rect.maxY))
+        return first...max(first, last)
+    }
+
+    static func band(for y: CGFloat) -> Int {
+        Int((max(0, y) / pathBandHeight).rounded(.down))
     }
 
     /// How much of a row an aggregate band fills, by intensity step.
@@ -918,10 +990,12 @@ public final class TimelineNSView: NSView {
         if let detailPathCache, detailPathCache.backingScale == backingScale {
             cached = detailPathCache
         } else {
-            var mutablePaths: [DetailPaintKey: CGMutablePath] = [:]
-            var labels: [DetailLabel] = []
+            var bands: [Int: [DetailPaintKey: CGMutablePath]] = [:]
+            var keys: Set<DetailPaintKey> = []
+            var labelBands: [Int: [DetailLabel]] = [:]
             var labelTexts: [LabelTextKey: LabelText] = [:]
             var events: [EventKey: (TimelineDetailPrimitive, CGRect)] = [:]
+            var washFramesByName: [String: [CGRect]] = [:]
             for track in snapshot.tracks {
                 for primitive in track.primitives {
                     guard case .detail(let detail) = primitive,
@@ -937,10 +1011,16 @@ public final class TimelineNSView: NSView {
                     let key = DetailPaintKey(
                         style: Self.visualStyle(for: detail.category), color: color
                     )
-                    let path = mutablePaths[key] ?? CGMutablePath()
-                    path.addRect(frame)
-                    mutablePaths[key] = path
+                    keys.insert(key)
+                    for band in Self.bands(covering: frame) {
+                        let path = bands[band]?[key] ?? CGMutablePath()
+                        path.addRect(frame)
+                        bands[band, default: [:]][key] = path
+                    }
                     events[detail.eventKey] = (detail, frame)
+                    if let name = Self.hoverName(of: detail) {
+                        washFramesByName[name, default: []].append(frame)
+                    }
                     if let label = detail.label,
                         frame.width >= TimelineGeometry.minimumLabelWidth
                     {
@@ -954,35 +1034,44 @@ public final class TimelineNSView: NSView {
                             text = LabelText(value: label, color: textKey.color)
                             labelTexts[textKey] = text
                         }
-                        labels.append(
-                            DetailLabel(
-                                text: text,
-                                frame: frame,
-                                origin: CGPoint(
-                                    x: frame.minX + TimelineGeometry.horizontalLabelInset,
-                                    y: frame.minY + max(1, (frame.height - 11) / 2)
-                                        + Self.labelAscent
-                                )
+                        let label = DetailLabel(
+                            text: text,
+                            frame: frame,
+                            origin: CGPoint(
+                                x: frame.minX + TimelineGeometry.horizontalLabelInset,
+                                y: frame.minY + max(1, (frame.height - 11) / 2)
+                                    + Self.labelAscent
                             )
                         )
+                        for band in Self.bands(covering: frame) {
+                            labelBands[band, default: []].append(label)
+                        }
                     }
                 }
             }
             cached = DetailPaths(
                 backingScale: backingScale,
-                paths: mutablePaths,
-                labels: labels,
-                events: events
+                bands: bands,
+                fillCount: keys.count,
+                labelBands: labelBands,
+                events: events,
+                washFramesByName: washFramesByName
             )
             detailPathCache = cached
-            pathCacheBuildHook?("detail", mutablePaths.count)
+            pathCacheBuildHook?("detail", keys.count)
         }
-        for key in cached.paths.keys.sorted() {
-            guard let path = cached.paths[key] else { continue }
-            context.setFillColor(key.color.cgColor)
-            context.addPath(path)
-            context.fillPath()
+        var fills = 0
+        for band in Self.bands(covering: dirtyRect) {
+            guard let paths = cached.bands[band] else { continue }
+            for key in paths.keys.sorted() {
+                guard let path = paths[key] else { continue }
+                context.setFillColor(key.color.cgColor)
+                context.addPath(path)
+                context.fillPath()
+                fills += 1
+            }
         }
+        fillBatchHook?("detail", fills)
         // Text is the one part of a frame whose cost is per primitive rather
         // than per batch, so it is the one part that has to be clipped by hand:
         // CoreGraphics discards the fills outside the dirty rect for the price
@@ -997,7 +1086,10 @@ public final class TimelineNSView: NSView {
         // only, and hand the state back the way it was found.
         context.saveGState()
         context.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
-        for label in cached.labels where label.frame.intersects(dirtyRect) {
+        let visibleLabels = Self.bands(covering: dirtyRect)
+            .compactMap { cached.labelBands[$0] }
+            .joined()
+        for label in visibleLabels where label.frame.intersects(dirtyRect) {
             drawnLabels += 1
             if !label.text.isLaidOut { laidOutLabels += 1 }
             context.saveGState()
@@ -1033,15 +1125,15 @@ public final class TimelineNSView: NSView {
     private func drawSameNameHoverWash(_ cached: DetailPaths, context: CGContext) {
         guard let hoveredEventKey,
             let (hovered, _) = cached.events[hoveredEventKey],
-            let name = Self.hoverName(of: hovered)
+            let name = Self.hoverName(of: hovered),
+            let frames = cached.washFramesByName[name]
         else { return }
         context.saveGState()
         context.setFillColor(
             NSColor.windowBackgroundColor.withAlphaComponent(0.42).cgColor
         )
-        for (_, entry) in cached.events
-        where Self.hoverName(of: entry.0) == name {
-            context.fill(entry.1)
+        for frame in frames {
+            context.fill(frame)
         }
         context.restoreGState()
     }
@@ -1755,7 +1847,9 @@ public struct TimelineView: NSViewRepresentable {
         view.onResetViewport = onResetViewport
         view.interactionBounds = interactionBounds
         view.setAccessibilityIdentifier("arktrace.timeline")
-        view.focusRingType = .default
+        // The focus indicator is the host pane's border; see
+        // `becomeFirstResponder` for why the ring must not be on this view.
+        view.focusRingType = .none
         return view
     }
 

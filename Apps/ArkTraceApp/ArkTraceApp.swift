@@ -617,6 +617,22 @@ private struct TraceTimelinePane: View {
                         )
                         .onAppear { controller.markTimelineDisplayed() }
                     }
+                    // The keyboard focus indicator for the timeline (DESIGN
+                    // §"focus ring 清晰可见"). It borders the pane, which stays
+                    // put while the document scrolls beneath it — AppKit's
+                    // automatic ring sat on the scrolling document view and
+                    // was re-blurred and re-uploaded on every frame of a
+                    // scroll, which is why the canvas opts out of it.
+                    .overlay {
+                        if focusRegion.wrappedValue == .timeline {
+                            Rectangle()
+                                .strokeBorder(
+                                    Color(nsColor: .keyboardFocusIndicatorColor),
+                                    lineWidth: 3
+                                )
+                                .allowsHitTesting(false)
+                        }
+                    }
                 } else {
                     Color.clear
                 }

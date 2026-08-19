@@ -643,6 +643,258 @@ final class TimelineRenderingTests: XCTestCase {
         )
     }
 
+    /// Scrolling a long trace must cost what the strip shows, not what the
+    /// document holds.
+    ///
+    /// The whole track stack is one tall view inside a scroll view, so every
+    /// scroll frame arrives as a small dirty rect. One path per paint key
+    /// spanning every track made CoreGraphics walk the entire trace to fill
+    /// that strip, and the cost of a scroll frame grew with the number of
+    /// visible lanes — on a real capture with a few hundred lanes that is the
+    /// difference between a smooth scroll and a stuttering one.
+    @MainActor
+    func testScrollStripDrawsFarFewerFillsThanTheWholeDocument() throws {
+        let trackCount = 120
+        let rowHeight = 28.0
+        let width = 600.0
+        let documentHeight = Double(trackCount) * rowHeight + TimelineGeometry.rulerHeight
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 120_000),
+            widthPoints: width,
+            heightPoints: 800,
+            generation: 9
+        )
+        let tracks = try (0..<trackCount).map { index in
+            let descriptor = TrackDescriptor(
+                title: "thread \(index)", source: .namedSlice(ThreadKey(itid: Int64(index)))
+            )
+            let primitives = try (0..<12).map { slot in
+                TimelinePrimitive.detail(
+                    TimelineDetailPrimitive(
+                        trackID: descriptor.id,
+                        eventKey: EventKey(table: .callstack, rowID: Int64(index * 12 + slot)),
+                        range: try TraceTimeRange(
+                            startNs: Int64(slot) * 10_000, endNs: Int64(slot) * 10_000 + 6_000
+                        ),
+                        label: "slice \(slot)",
+                        category: "slice"
+                    )
+                )
+            }
+            return TimelineTrackSnapshot(
+                descriptor: descriptor,
+                y: Double(index) * rowHeight,
+                height: rowHeight,
+                primitives: primitives
+            )
+        }
+        let view = TimelineNSView(
+            frame: CGRect(x: 0, y: 0, width: width, height: documentHeight)
+        )
+        var fills: [String: Int] = [:]
+        view.fillBatchHook = { kind, count in fills[kind] = count }
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport, tracks: tracks,
+            generation: viewport.generation, dataQuality: TraceDataQuality()
+        )
+        guard let bitmap = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: Int(width), pixelsHigh: Int(documentHeight),
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        ), let context = NSGraphicsContext(bitmapImageRep: bitmap) else {
+            return XCTFail("no drawing context")
+        }
+        func draw(_ rect: CGRect) -> Int {
+            fills.removeAll()
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = context
+            context.cgContext.saveGState()
+            context.cgContext.clip(to: rect)
+            view.draw(rect)
+            context.cgContext.restoreGState()
+            NSGraphicsContext.restoreGraphicsState()
+            return fills["detail"] ?? 0
+        }
+        let whole = draw(view.bounds)
+        let strip = draw(CGRect(x: 0, y: 900, width: width, height: 40))
+        XCTAssertGreaterThan(strip, 0, "a strip over populated tracks still fills")
+        XCTAssertLessThan(
+            strip * 3, whole,
+            "a scroll strip must not pay for the whole document (strip=\(strip), whole=\(whole))"
+        )
+        // The bands a strip touches are the bands its own rows live in.
+        XCTAssertEqual(
+            TimelineNSView.bands(covering: CGRect(x: 0, y: 900, width: width, height: 40)),
+            TimelineNSView.band(for: 900)...TimelineNSView.band(for: 940)
+        )
+    }
+
+    /// A row that straddles a band boundary must be painted from either side of
+    /// it. Banding is an internal bookkeeping detail; it may never turn into a
+    /// seam the user can see while scrolling.
+    @MainActor
+    func testRowsCrossingABandBoundaryAreDrawnFromBothSides() throws {
+        let boundary = TimelineNSView.pathBandHeight
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 200,
+            heightPoints: 400,
+            generation: 4
+        )
+        let descriptor = TrackDescriptor(
+            title: "straddler", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        // A tall row centred on the boundary, so its fill starts in one band
+        // and ends in the next.
+        let track = TimelineTrackSnapshot(
+            descriptor: descriptor,
+            y: Double(boundary - TimelineGeometry.rulerHeight - 40),
+            height: 80,
+            primitives: [
+                .detail(
+                    TimelineDetailPrimitive(
+                        trackID: descriptor.id,
+                        eventKey: EventKey(table: .callstack, rowID: 1),
+                        range: try TraceTimeRange(startNs: 0, endNs: 1_000),
+                        label: nil,
+                        category: "slice"
+                    )
+                )
+            ]
+        )
+        let view = TimelineNSView(
+            frame: CGRect(x: 0, y: 0, width: 200, height: Double(boundary) + 200)
+        )
+        var fills: [String: Int] = [:]
+        view.fillBatchHook = { kind, count in fills[kind] = count }
+        view.snapshot = TimelineSnapshot(
+            viewport: viewport, tracks: [track],
+            generation: viewport.generation, dataQuality: TraceDataQuality()
+        )
+        guard let bitmap = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: 200, pixelsHigh: Int(boundary) + 200,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        ), let context = NSGraphicsContext(bitmapImageRep: bitmap) else {
+            return XCTFail("no drawing context")
+        }
+        func fillCount(in rect: CGRect) -> Int {
+            fills.removeAll()
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = context
+            context.cgContext.saveGState()
+            context.cgContext.clip(to: rect)
+            view.draw(rect)
+            context.cgContext.restoreGState()
+            NSGraphicsContext.restoreGraphicsState()
+            return fills["detail"] ?? 0
+        }
+        XCTAssertGreaterThan(
+            fillCount(in: CGRect(x: 0, y: boundary - 20, width: 200, height: 10)), 0,
+            "the half above the boundary still paints"
+        )
+        XCTAssertGreaterThan(
+            fillCount(in: CGRect(x: 0, y: boundary + 10, width: 200, height: 10)), 0,
+            "and so does the half below it"
+        )
+    }
+
+    /// The hover tracking area is built once and then left alone.
+    ///
+    /// AppKit calls `updateTrackingAreas()` on every geometry change, which
+    /// inside a scroll view means every frame of every scroll. Removing and
+    /// re-adding the area each time left the window's tracking regions
+    /// permanently invalid, paid for by a recursive walk of the whole window's
+    /// view tree per display cycle. Building it once is only correct because
+    /// `.inVisibleRect` makes the area follow the visible rect on its own and
+    /// ignore the rect it was given, so both halves are asserted together.
+    @MainActor
+    func testTheHoverTrackingAreaIsBuiltOnceAndFollowsTheVisibleRect() throws {
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 200, height: 80))
+        view.updateTrackingAreas()
+        let area = try XCTUnwrap(view.trackingAreas.first)
+        XCTAssertEqual(view.trackingAreas.count, 1)
+        XCTAssertTrue(
+            area.options.contains(.inVisibleRect),
+            "an area that did not follow the visible rect would have to be rebuilt"
+        )
+        // What a scroll does: change the geometry, over and over.
+        view.setFrameSize(NSSize(width: 200, height: 4_000))
+        view.updateTrackingAreas()
+        view.updateTrackingAreas()
+        XCTAssertEqual(view.trackingAreas.count, 1)
+        XCTAssertIdentical(view.trackingAreas.first, area, "the very same area")
+    }
+
+    /// SwiftUI re-applies every stored property on any state change in the
+    /// window, so the same snapshot arrives at the canvas again and again --
+    /// during a scroll, many times a second. A generation is the identity of a
+    /// rendered frame, so an unchanged one would draw the same pixels: it must
+    /// not ask for a redraw at all.
+    ///
+    /// The view is hosted in a window because that is where AppKit records the
+    /// request, and `display()` is how the test consumes one: off-screen it
+    /// clears the flag without painting, which is all this needs. The last
+    /// third is the control -- a new generation still asks -- so the guard
+    /// cannot pass by making the canvas inert.
+    @MainActor
+    func testReapplyingTheSameSnapshotAsksForNoRedraw() throws {
+        func snapshot(generation: UInt64) throws -> TimelineSnapshot {
+            let viewport = try TimelineViewport(
+                range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                widthPoints: 200,
+                heightPoints: 80,
+                generation: generation
+            )
+            let descriptor = TrackDescriptor(
+                title: "main", source: .namedSlice(ThreadKey(itid: 1))
+            )
+            return TimelineSnapshot(
+                viewport: viewport,
+                tracks: [
+                    TimelineTrackSnapshot(
+                        descriptor: descriptor, y: 0, height: 28,
+                        primitives: [
+                            .detail(
+                                TimelineDetailPrimitive(
+                                    trackID: descriptor.id,
+                                    eventKey: EventKey(table: .callstack, rowID: 1),
+                                    range: try TraceTimeRange(startNs: 100, endNs: 900),
+                                    label: "work",
+                                    category: "slice"
+                                )
+                            )
+                        ]
+                    )
+                ],
+                generation: generation,
+                dataQuality: TraceDataQuality()
+            )
+        }
+        let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 200, height: 80))
+        let window = NSWindow(
+            contentRect: CGRect(x: 0, y: 0, width: 200, height: 80),
+            styleMask: [.titled], backing: .buffered, defer: false
+        )
+        window.contentView?.addSubview(view)
+
+        let first = try snapshot(generation: 1)
+        view.snapshot = first
+        XCTAssertTrue(view.needsDisplay, "the first snapshot is a frame to draw")
+        view.display()
+        XCTAssertFalse(view.needsDisplay, "the request was consumed")
+
+        // What SwiftUI does on any state change in the window: the same value,
+        // assigned again.
+        view.snapshot = first
+        XCTAssertFalse(
+            view.needsDisplay, "an unchanged generation draws the same pixels"
+        )
+
+        view.snapshot = try snapshot(generation: 2)
+        XCTAssertTrue(view.needsDisplay, "a new generation is a new frame")
+    }
+
     /// A zoom or a pan must land on screen in the frame it was pressed in.
     /// The loading generation carries the viewport the user asked for and the
     /// primitives already in hand, so drawing it rescales what is there;
