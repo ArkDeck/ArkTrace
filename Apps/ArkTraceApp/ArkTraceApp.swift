@@ -68,14 +68,38 @@ struct ArkTraceNativeApp: App {
 /// never rebuilds the viewer, and error/accessibility state stays inside its
 /// own overlay. `ObservationBoundaryTests` pins these reads at source level.
 private struct TraceViewerRootView: View {
+    /// Where the Inspector's persisted visibility lives. Named here because
+    /// two properties reach for it: the stored preference writes it, and the
+    /// window seeds its live state from it before `@AppStorage` is available.
+    private static let inspectorVisibleKey = "inspectorVisible"
+
     var controller: TraceDocumentController
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focusRegion: TraceViewerFocusRegion?
-    @State private var showInspector = true
+    /// Whether *this window* shows the Inspector right now. Deliberately not
+    /// the stored preference itself: auto-collapse is a property of one
+    /// window's size, and a shared value would let a narrow window hide the
+    /// pane in a wide one -- and then the wide one's own layout pass would put
+    /// it back, hiding it again in the narrow one, forever.
+    @State private var showInspector: Bool
     @State private var showDiagnostics = false
     /// Which edge the Inspector is docked to. A preference of the viewer, not
     /// of the trace, so it lives in defaults and outlives the document.
     @AppStorage("inspectorDock") private var inspectorDock = TraceInspectorDock.trailing
+    /// The user's own last answer to "should the Inspector be showing?", kept
+    /// across launches. Only an explicit collapse or expand writes it; an
+    /// automatic one says something about a window size, not about what the
+    /// user wants, and carrying it into the next launch would hide a pane
+    /// nobody asked to hide.
+    @AppStorage(TraceViewerRootView.inspectorVisibleKey) private var inspectorVisiblePreference = true
+
+    init(controller: TraceDocumentController) {
+        self.controller = controller
+        _showInspector = State(
+            initialValue: UserDefaults.standard.object(forKey: Self.inspectorVisibleKey)
+                as? Bool ?? true
+        )
+    }
     @State private var inspectorVisibilityGeneration: UInt64 = 0
     @State private var inspectorDisclosureFocusRequestID: UInt64?
     @State private var inspectorHideFocusRequestID: UInt64?
@@ -147,7 +171,8 @@ private struct TraceViewerRootView: View {
                     case .expandAutomatically:
                         inspectorWasAutoCollapsed = false
                         expandInspector(
-                            restoringInspectorFocus: focusRegion == .inspectorDisclosure
+                            restoringInspectorFocus: focusRegion == .inspectorDisclosure,
+                            initiatedByLayout: true
                         )
                     }
                 }
@@ -269,7 +294,10 @@ private struct TraceViewerRootView: View {
     ) {
         inspectorVisibilityGeneration &+= 1
         let generation = inspectorVisibilityGeneration
-        if !initiatedByLayout { inspectorWasAutoCollapsed = false }
+        if !initiatedByLayout {
+            inspectorWasAutoCollapsed = false
+            inspectorVisiblePreference = false
+        }
         inspectorHideFocusRequestID = nil
         showInspector = false
         guard restoringDisclosureFocus else { return }
@@ -287,12 +315,18 @@ private struct TraceViewerRootView: View {
         }
     }
 
-    private func expandInspector(restoringInspectorFocus: Bool) {
+    private func expandInspector(
+        restoringInspectorFocus: Bool,
+        initiatedByLayout: Bool = false
+    ) {
         inspectorVisibilityGeneration &+= 1
         let generation = inspectorVisibilityGeneration
         inspectorDisclosureFocusRequestID = nil
         inspectorHideFocusRequestID = nil
         inspectorWasAutoCollapsed = false
+        // An automatic expand is the layout giving back what it took, and the
+        // preference it is restoring already says "showing".
+        if !initiatedByLayout { inspectorVisiblePreference = true }
         showInspector = true
         guard restoringInspectorFocus else { return }
         Task { @MainActor in

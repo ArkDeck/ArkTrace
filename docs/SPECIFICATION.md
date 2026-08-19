@@ -1015,7 +1015,9 @@ dock 控件）。两种停靠都必须保持 Sidebar → Timeline → Inspector 
 自动折叠沿**停靠轴**判定：trailing 看可用宽度，bottom 看可用高度，阈值是两个 pane 各自最小尺寸之和而不是
 一个凭空的整数（trailing 760 = canvas 420 + pane 250 + 分隔与窗口边距；bottom 400 = canvas 240 + pane 160），
 因此同一个窗口放不下右侧 Inspector 时仍可能放得下底部 Inspector。停靠选择是 viewer 偏好而非 per-trace
-view state：它跨文档、跨启动保持，且不写入任何 trace sidecar。
+view state：它跨文档、跨启动保持，且不写入任何 trace sidecar。折叠状态同样跨启动保持，但**只记录用户显式的
+折叠/展开**：自动折叠是当前窗口尺寸的属性，不得写入偏好，否则一个窄窗口会把 pane 从下一次启动里带走；
+同理，每个窗口的实际显隐必须是该窗口自己的状态，不能由共享偏好直接驱动。
 
 **Track Sidebar 的组织维度是混合的**：跨进程的泳道（CPU、CPU counter）按种类分组；由线程或进程拥有的
 泳道（thread state、named slice、process counter、frame）按**进程**分组，每个进程一个可折叠节点，
