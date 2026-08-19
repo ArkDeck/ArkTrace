@@ -1130,6 +1130,32 @@ final class TraceDocumentControllerTests: XCTestCase {
     /// view: a collapsed group draws nothing, so its lanes have no y until they
     /// have been laid out. The scroll target therefore waits for the snapshot
     /// that contains them rather than guessing an offset.
+    /// Both Find items ask through the controller, and each ask is a new
+    /// number: pressing ⌘F twice must focus twice, so the request cannot be a
+    /// flag that the view has to remember to put back down.
+    func testFocusRequestsAreDistinctAndRepeatable() async throws {
+        let suite = "ArkTraceFocusRequestTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in throw ArkTraceError(code: .cancelled, stage: .request, message: "unused") }
+        )
+
+        let filterStart = controller.processFilterFocusRequestID
+        let searchStart = controller.searchFocusRequestID
+        controller.focusProcessFilter()
+        controller.focusProcessFilter()
+        XCTAssertEqual(controller.processFilterFocusRequestID, filterStart &+ 2)
+        XCTAssertEqual(
+            controller.searchFocusRequestID, searchStart,
+            "the two fields must not answer each other's shortcut"
+        )
+        controller.focusTraceSearch()
+        XCTAssertEqual(controller.searchFocusRequestID, searchStart &+ 1)
+    }
+
     /// The sidebar's filter, which is a different question from the toolbar
     /// search: it narrows the lane tree to processes and answers from the two
     /// things a process row shows -- its name and its PID.

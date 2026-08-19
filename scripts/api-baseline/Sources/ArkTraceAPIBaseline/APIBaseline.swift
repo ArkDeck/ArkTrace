@@ -52,6 +52,11 @@ private func pinAppSupportSurface(
     _ = controller.filteredTrackGroups().map(\.id)
     _ = controller.trackListTruncated
     controller.announceProcessFilterResults()
+    // ⌘F / ⇧⌘F: the menu asks, the fields answer.
+    controller.focusProcessFilter()
+    controller.focusTraceSearch()
+    _ = controller.processFilterFocusRequestID
+    _ = controller.searchFocusRequestID
     _ = controller.cacheInventory?.totalByteCount
     _ = controller.cacheInventory?.entryCount
     _ = controller.cacheInventory?.activeEntryCount

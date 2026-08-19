@@ -24,6 +24,18 @@ struct ArkTraceNativeApp: App {
                     .keyboardShortcut("r")
                     .disabled(controller.sourceURL == nil)
             }
+            // Two searches, so two Find items rather than one ⌘F that has to
+            // guess which one was meant. The sidebar's filter takes plain ⌘F:
+            // it is the one that starts a session ("go to that process"),
+            // while searching for an event is the deeper step.
+            CommandGroup(after: .textEditing) {
+                Button("Filter Processes") { controller.focusProcessFilter() }
+                    .keyboardShortcut("f")
+                    .disabled(controller.trackGroups.isEmpty)
+                Button("Search Trace") { controller.focusTraceSearch() }
+                    .keyboardShortcut("f", modifiers: [.command, .shift])
+                    .disabled(controller.metadata == nil)
+            }
             // Upstream lists its bindings behind `/`; on macOS this belongs on
             // the Help menu, and `/` stays free for a future search entry
             // point on the timeline. The default Help item is replaced rather
@@ -505,6 +517,96 @@ private struct RecentDocumentsSection: View {
     }
 }
 
+/// A text field that can be told to take the keyboard, and that never draws a
+/// focus ring.
+///
+/// Both halves are why it is AppKit rather than a SwiftUI `TextField`.
+/// `@FocusState` does not survive a menu command here — ⌘F runs the action and
+/// the state flips, but the key window hands first responder straight back to
+/// the canvas, so the field opens empty-handed (verified on a real capture,
+/// with the field already open and with it closed). `makeFirstResponder` on the
+/// next runloop pass is the same request AppKit actually honours, and it is the
+/// shape ``TimelineView`` and ``InspectorFocusButton`` already use for "focus
+/// this on request". `focusRingType` then answers the other half: the blue ring
+/// around a focused field says what the caret says, louder.
+private struct FocusableTextField: NSViewRepresentable {
+    @Binding var text: String
+    let placeholder: String
+    let accessibilityLabel: String
+    /// Bumped by whoever wants the keyboard here. Each new value focuses once.
+    let focusRequestID: UInt64
+    let onSubmit: @MainActor () -> Void
+    let onCancel: @MainActor () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeNSView(context: Context) -> NSTextField {
+        let field = NSTextField(string: text)
+        field.placeholderString = placeholder
+        field.setAccessibilityLabel(accessibilityLabel)
+        field.isBezeled = true
+        field.bezelStyle = .roundedBezel
+        field.focusRingType = .none
+        field.isEditable = true
+        field.isSelectable = true
+        field.usesSingleLineMode = true
+        field.cell?.wraps = false
+        field.cell?.isScrollable = true
+        field.delegate = context.coordinator
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return field
+    }
+
+    func updateNSView(_ field: NSTextField, context: Context) {
+        context.coordinator.parent = self
+        if field.stringValue != text { field.stringValue = text }
+        context.coordinator.focusIfAsked(field, id: focusRequestID)
+    }
+
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        var parent: FocusableTextField
+        private var lastFocusRequestID: UInt64?
+
+        init(_ parent: FocusableTextField) {
+            self.parent = parent
+        }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let field = notification.object as? NSTextField else { return }
+            parent.text = field.stringValue
+        }
+
+        func control(
+            _ control: NSControl, textView: NSTextView, doCommandBy selector: Selector
+        ) -> Bool {
+            switch selector {
+            case #selector(NSResponder.insertNewline(_:)):
+                parent.onSubmit()
+                return true
+            case #selector(NSResponder.cancelOperation(_:)):
+                parent.onCancel()
+                return true
+            default:
+                return false
+            }
+        }
+
+        func focusIfAsked(_ field: NSTextField, id: UInt64) {
+            guard lastFocusRequestID != id else { return }
+            lastFocusRequestID = id
+            // 0 is "nobody has asked yet". Without this the toolbar's field
+            // would take the keyboard the moment the window is built, and a
+            // trace would open with the caret in the search box instead of on
+            // the timeline (AT-APP-009).
+            guard id != 0 else { return }
+            DispatchQueue.main.async { [weak field] in
+                guard let field, let window = field.window else { return }
+                window.makeFirstResponder(field)
+            }
+        }
+    }
+}
+
 /// Observation boundary: the sidebar's process filter text alone.
 ///
 /// A button until it is used. The sidebar is already a list of processes and
@@ -516,19 +618,19 @@ private struct RecentDocumentsSection: View {
 private struct ProcessFilterBar: View {
     @Bindable var controller: TraceDocumentController
     @State private var isOpen = false
-    @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack(spacing: 4) {
             if isOpen {
-                TextField(
-                    "Filter by process name or PID",
-                    text: $controller.processFilterText
+                FocusableTextField(
+                    text: $controller.processFilterText,
+                    placeholder: "Filter by process name or PID",
+                    accessibilityLabel: "Filter processes by name or PID",
+                    focusRequestID: controller.processFilterFocusRequestID,
+                    onSubmit: { controller.announceProcessFilterResults() },
+                    onCancel: close
                 )
-                .textFieldStyle(.roundedBorder)
-                .focused($isFocused)
-                .onSubmit { controller.announceProcessFilterResults() }
-                .onExitCommand(perform: close)
+                .frame(height: 22)
                 .arktraceAccessibleTarget()
                 Button(action: close) {
                     Image(systemName: "xmark.circle.fill")
@@ -541,8 +643,9 @@ private struct ProcessFilterBar: View {
                 .arktraceAccessibleTarget()
             } else {
                 Button {
-                    isOpen = true
-                    isFocused = true
+                    // Same request the menu makes, so opening by hand and
+                    // opening by ⌘F cannot drift apart.
+                    controller.focusProcessFilter()
                 } label: {
                     Image(systemName: "magnifyingglass")
                         .imageScale(.medium)
@@ -554,14 +657,19 @@ private struct ProcessFilterBar: View {
                 Spacer(minLength: 0)
             }
         }
+        // ⌘F opens the field; the field itself takes the keyboard from the
+        // same request id, so asking twice is not a special case.
+        .onChange(of: controller.processFilterFocusRequestID) { _, _ in
+            isOpen = true
+        }
     }
 
     private func close() {
         controller.processFilterText = ""
         isOpen = false
-        isFocused = false
     }
 }
+
 
 /// Observation boundary: recent documents, the search echo/results, and the
 /// track tree. Never reads `snapshot`, `phase`, or selection state, so
@@ -1281,15 +1389,21 @@ private struct TraceSearchField: View {
     var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
 
     var body: some View {
-        TextField("Search TID, thread, or slice", text: $controller.searchFieldText)
-            .textFieldStyle(.roundedBorder)
-            .frame(minWidth: 220, idealWidth: 300)
-            .arktraceAccessibleTarget()
-            .onSubmit { controller.search(controller.searchFieldText) }
-            .onChange(of: controller.searchFieldText) { _, value in
-                if value.isEmpty { controller.search("") }
-            }
-            .focused(focusRegion, equals: .search)
+        FocusableTextField(
+            text: $controller.searchFieldText,
+            placeholder: "Search TID, thread, or slice",
+            accessibilityLabel: "Search TID, thread, or slice",
+            focusRequestID: controller.searchFocusRequestID,
+            onSubmit: { controller.search(controller.searchFieldText) },
+            onCancel: {}
+        )
+        .frame(minWidth: 220, idealWidth: 300, maxWidth: 420)
+        .frame(height: 22)
+        .arktraceAccessibleTarget()
+        .onChange(of: controller.searchFieldText) { _, value in
+            if value.isEmpty { controller.search("") }
+        }
+        .focused(focusRegion, equals: .search)
     }
 }
 

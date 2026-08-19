@@ -450,6 +450,13 @@ public final class TraceDocumentController {
     public private(set) var cacheHit = false
     public private(set) var accessibilityAnnouncement: TraceAccessibilityAnnouncement?
     public private(set) var timelineFocusRequestID: UInt64 = 0
+    /// Bumped when the menu asks for the sidebar's process filter. A counter
+    /// rather than a `Bool`: the answer to "focus it" is the same the second
+    /// time it is asked, and a flag that has to be put back down invites the
+    /// state where nobody put it back down.
+    public private(set) var processFilterFocusRequestID: UInt64 = 0
+    /// Bumped when the menu asks for the toolbar's search field.
+    public private(set) var searchFocusRequestID: UInt64 = 0
     /// Where the timeline should scroll to next, or nil when nothing has been
     /// asked for. See ``revealTrackGroup(_:)``.
     public private(set) var timelineScrollRequest: TimelineScrollRequest?
@@ -888,6 +895,16 @@ public final class TraceDocumentController {
     /// see everything must not look like it can.
     public var trackListTruncated: Bool {
         trackGroups.contains { $0.truncated }
+    }
+
+    /// Opens the sidebar's process filter and puts the keyboard in it.
+    public func focusProcessFilter() {
+        processFilterFocusRequestID &+= 1
+    }
+
+    /// Puts the keyboard in the toolbar's search field.
+    public func focusTraceSearch() {
+        searchFocusRequestID &+= 1
     }
 
     /// Announces how many processes the filter is showing.
