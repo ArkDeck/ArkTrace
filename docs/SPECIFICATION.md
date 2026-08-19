@@ -1011,8 +1011,10 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 dock 控件）。两种停靠都必须保持 Sidebar → Timeline → Inspector 的阅读与 focus 顺序——底部停靠时最后一步
 是「向下」而非「向右」——Timeline 仍是主区域，折叠后的 disclosure control 仍必须可见且可键盘触达。
 该控件位于 **toolbar 的 trailing 端**，两种停靠共用同一个位置：可见必须意味着找得到，而一个随停靠边移动、
-又压在 trace 上的浮动按钮两头不讨好。控件与 pane 自身的折叠按钮都使用**与当前停靠边一致的图标**，
-并以文字（tooltip / accessible name）说明这一下是展开还是折叠。
+又压在 trace 上的浮动按钮两头不讨好。该控件使用**与当前停靠边一致的图标**（pane 占据那条边的形状），并以文字
+（tooltip / accessible name）说明这一下是展开还是折叠；pane 自身的关闭按钮用 close box，不与相邻的停靠
+菜单撞图标。此外，**画布不得与 sidebar 的毛玻璃边缘相接**：两者之间留出间距，否则 trace 的起点会透过玻璃
+被糊掉，看上去像被 sidebar 盖住了。
 无 trace 打开时，Inspector 不显示 dock 与折叠控件（没有可检视、可移动的东西），空状态在可用区域内居中。
 自动折叠沿**停靠轴**判定：trailing 看可用宽度，bottom 看可用高度，阈值是两个 pane 各自最小尺寸之和而不是
 一个凭空的整数（trailing 760 = canvas 420 + pane 250 + 分隔与窗口边距；bottom 400 = canvas 240 + pane 160），

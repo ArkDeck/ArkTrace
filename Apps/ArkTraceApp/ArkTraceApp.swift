@@ -72,6 +72,8 @@ private struct TraceViewerRootView: View {
     /// two properties reach for it: the stored preference writes it, and the
     /// window seeds its live state from it before `@AppStorage` is available.
     private static let inspectorVisibleKey = "inspectorVisible"
+    /// Clearance between the sidebar's glass edge and the detail content.
+    private static let canvasGutter: CGFloat = 10
 
     var controller: TraceDocumentController
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -139,6 +141,13 @@ private struct TraceViewerRootView: View {
                         }
                     }
                 }
+                // A gutter between the sidebar and the canvas. The sidebar is
+                // a translucent panel and the detail area begins exactly at
+                // its edge, so the leftmost slices -- the start of the trace --
+                // were blurred through the glass and read as being tucked
+                // under it. The margin is the whole fix: nothing of the trace
+                // touches the glass any more.
+                .safeAreaPadding(.leading, Self.canvasGutter)
                 .task(id: LayoutProbe(size: geometry.size, dock: inspectorDock)) {
                     let initialVisibilityGeneration = inspectorVisibilityGeneration
                     do {
@@ -918,7 +927,11 @@ private struct TraceInspectorPane: View {
                                 localized: "Hide Inspector",
                                 comment: "Button that collapses the Inspector pane."
                             ),
-                            systemImage: dock.paneSymbolName,
+                            // A close box, not another pane glyph: the dock
+                            // menu beside it already wears the pane, and two
+                            // identical icons doing different things is worse
+                            // than either of them.
+                            systemImage: "xmark",
                             showsTitle: false,
                             focusRequestID: hideFocusRequestID,
                             onFocusRequestConsumed: onHideFocusRequestConsumed,
@@ -1175,7 +1188,7 @@ private struct InspectorToolbarToggle: View {
 
     var body: some View {
         Button(action: toggle) {
-            Label(title, systemImage: dock.paneSymbolName)
+            Label(title, systemImage: dock.symbolName)
         }
         .help(title)
         .accessibilityLabel(title)
@@ -1232,17 +1245,6 @@ private extension TraceInspectorDock {
         }
     }
 
-    /// What the show/hide controls wear. The platform's own pair -- a trailing
-    /// sidebar and a bottom area, the two Xcode uses for exactly these two
-    /// panes -- so the icon says which edge is about to open or close. A
-    /// trailing-sidebar glyph on a pane docked along the bottom said the wrong
-    /// thing, which is how this was noticed.
-    var paneSymbolName: String {
-        switch self {
-        case .trailing: "sidebar.trailing"
-        case .bottom: "square.bottomthird.inset.filled"
-        }
-    }
 }
 
 private struct InspectorFocusButton: NSViewRepresentable {
