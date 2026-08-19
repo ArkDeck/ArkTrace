@@ -1250,8 +1250,11 @@ private extension TraceInspectorDock {
     /// would occupy -- so the control reads without a legend.
     var symbolName: String {
         switch self {
-        case .trailing: "rectangle.trailingthird.inset.filled"
-        case .bottom: "rectangle.bottomthird.inset.filled"
+        // `sidebar.trailing` rather than `sidebar.right`: the same glyph, but
+        // the direction-aware name, so a right-to-left interface mirrors it
+        // along with everything else (DESIGN 14.1).
+        case .trailing: "sidebar.trailing"
+        case .bottom: "dock.rectangle"
         }
     }
 

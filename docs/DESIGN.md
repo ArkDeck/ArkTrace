@@ -995,9 +995,11 @@ viewer，不属于某一条 trace，也不应该因为打开另一条 trace 就�
 trace 上，而且位置会变。现在它是 toolbar trailing 端的一个按钮：两种停靠共用同一个位置，画布还给 trace，
 这也是 macOS 放这个控件的地方（Xcode 的 inspector 与 debug area 开关都在那里）。
 
-图标只有一套：`rectangle.trailingthird.inset.filled` / `rectangle.bottomthird.inset.filled`——「pane 占据那条边」
-的形状，toolbar 开关与 pane header 里的停靠菜单共用。此前 hide 按钮无论停在哪都画一个右侧 sidebar，停在
-底部时就是在说错话；中途换过的 `square.bottomthird.inset.filled` 又不像 Inspector。pane 自己的那个按钮改成
+图标只有一套：`sidebar.trailing` / `dock.rectangle`——macOS 自己给这两块面板用的一对，toolbar 开关与
+pane header 里的停靠菜单共用。名字取方向语义的 `sidebar.trailing` 而不是 `sidebar.right`，同一枚字形，但
+右到左的界面会跟着镜像。此前 hide 按钮无论停在哪都画一个右侧 sidebar，停在底部时就是在说错话；中途换过
+`square.bottomthird.inset.filled` 与 `rectangle.bottomthird.inset.filled`，前者不像 Inspector，后者与前者
+只差长宽比——看上去等于没换，这是选图标时值得记住的一课：换字形要换到*另一族*去，不是换个同族的名字。pane 自己的那个按钮改成
 close box（`xmark`）：它紧挨着停靠菜单，两个相同图标做不同的事，比任何一个单独存在都糟。状态写在文字里
 （tooltip 与 accessible name 在「Show/Hide Inspector」之间切换），不靠外观区分（AT-APP-011）。
 
