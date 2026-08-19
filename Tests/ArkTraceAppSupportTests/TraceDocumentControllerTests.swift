@@ -1124,6 +1124,97 @@ final class TraceDocumentControllerTests: XCTestCase {
 
     /// Only the busiest processes start expanded; the rest stay collapsed but
     /// present, so the sidebar is navigable at 785 processes.
+    /// Pressing a process in the sidebar takes you to its lanes.
+    ///
+    /// Two halves, and the second is why this is not just a scroll call in the
+    /// view: a collapsed group draws nothing, so its lanes have no y until they
+    /// have been laid out. The scroll target therefore waits for the snapshot
+    /// that contains them rather than guessing an offset.
+    func testRevealingATrackGroupShowsItsLanesAndScrollsToThem() async throws {
+        let suite = "ArkTraceRevealGroupTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let processCount = TraceDocumentController.defaultExpandedProcessCount + 2
+        var threads: [TraceThread] = []
+        var cpuSlices: [CpuSlice] = []
+        for index in 1...processCount {
+            let ipid = Int64(index)
+            threads.append(Self.makeThread(itid: ipid, ipid: ipid, name: "t\(index)"))
+            for offset in 0..<(processCount - index + 1) {
+                cpuSlices.append(
+                    try Self.makeCPUSlice(rowID: Int64(index * 1_000 + offset), ipid: ipid)
+                )
+            }
+        }
+        let frozenThreads = threads
+        let frozenSlices = cpuSlices
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: true, threadStates: true,
+                            namedSlices: true, cpuCounters: false,
+                            processCounters: false
+                        ),
+                        threads: frozenThreads,
+                        cpuSlices: frozenSlices
+                    ),
+                    cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-reveal-group-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        // The quietest process starts collapsed, which is the case worth
+        // testing: nothing of it is on the canvas to scroll to yet.
+        let hidden = try XCTUnwrap(
+            controller.trackGroups.last { group in
+                group.kind == .process && group.tracks.allSatisfy(\.isCollapsed)
+            }
+        )
+        XCTAssertNil(controller.timelineScrollRequest)
+
+        controller.revealTrackGroup(hidden.id)
+        var attempts = 0
+        while controller.timelineScrollRequest == nil, attempts < 10_000 {
+            attempts += 1
+            await Task.yield()
+        }
+        let request = try XCTUnwrap(controller.timelineScrollRequest)
+
+        let revealed = try XCTUnwrap(
+            controller.trackGroups.first { $0.id == hidden.id }
+        )
+        XCTAssertTrue(
+            revealed.tracks.allSatisfy { !$0.isCollapsed },
+            "jumping to lanes that are not drawn is not a jump"
+        )
+        let ids = Set(revealed.tracks.map(\.id))
+        let lane = try XCTUnwrap(
+            controller.snapshot?.tracks.first { ids.contains($0.descriptor.id) }
+        )
+        XCTAssertEqual(request.y, Double(TimelineGeometry.rulerHeight) + lane.y)
+        XCTAssertGreaterThan(request.y, 0, "the group sits below the tracks above it")
+
+        // Asking again from a group that is already showing scrolls again --
+        // the id moves even though the offset may not.
+        controller.revealTrackGroup(hidden.id)
+        let second = try XCTUnwrap(controller.timelineScrollRequest)
+        XCTAssertEqual(second.y, request.y)
+        XCTAssertGreaterThan(second.id, request.id)
+        await controller.close()
+    }
+
     func testOnlyTheBusiestProcessesStartExpanded() async throws {
         let suite = "ArkTraceExpansionTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

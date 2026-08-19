@@ -549,13 +549,25 @@ private struct TraceViewerSidebar: View {
                             }
                         }
                     } label: {
-                        HStack {
-                            Text(group.title)
-                            if group.truncated {
-                                Image(systemName: "ellipsis.circle")
-                                    .foregroundStyle(.secondary)
+                        // The name jumps to the lanes; the triangle beside it
+                        // still opens the list. Pressing the name of a process
+                        // to go and look at that process is the obvious
+                        // gesture, and it used to do nothing.
+                        Button {
+                            controller.revealTrackGroup(group.id)
+                        } label: {
+                            HStack {
+                                Text(group.title)
+                                if group.truncated {
+                                    Image(systemName: "ellipsis.circle")
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 0)
                             }
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
+                        .help("Show these lanes in the timeline")
                     }
                     .arktraceAccessibleTarget()
                 }
@@ -647,10 +659,13 @@ private struct TraceTimelinePane: View {
     var controller: TraceDocumentController
     var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
     let openPanel: @MainActor () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Whether the canvas is advertising keyboard focus right now.
     @State private var keyboardFocusIsVisible = false
     /// The flag whose tag is being written, and where its pennant is.
     @State private var editingFlag: TimelineFlagHit?
+    /// The canvas' scroll offset, so the sidebar can send it somewhere.
+    @State private var scrollPosition = ScrollPosition()
 
     var body: some View {
         switch controller.phase {
@@ -779,6 +794,16 @@ private struct TraceTimelinePane: View {
                                     lineWidth: 3
                                 )
                                 .allowsHitTesting(false)
+                        }
+                    }
+                    .scrollPosition($scrollPosition)
+                    // Pressing a process in the sidebar scrolls its lanes into
+                    // view. The controller sends a y rather than a track id
+                    // because the canvas is one view, not a row per lane.
+                    .onChange(of: controller.timelineScrollRequest) { _, request in
+                        guard let request else { return }
+                        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+                            scrollPosition.scrollTo(y: request.y)
                         }
                     }
                 } else {

@@ -128,6 +128,24 @@ public struct TraceAccessibilityAnnouncement: Hashable, Codable, Sendable {
     }
 }
 
+/// A request to bring part of the timeline into view vertically.
+///
+/// The canvas is one tall document inside a scroll view, so "jump to these
+/// lanes" is a scroll offset, and only the App can perform it. The controller
+/// works out where the lanes are -- it is the side that knows both the track
+/// list and the laid-out snapshot -- and hands over the y.
+public struct TimelineScrollRequest: Hashable, Sendable {
+    /// Monotonic, so asking twice for the same place still scrolls.
+    public let id: UInt64
+    /// Canvas y of the first lane, ruler included.
+    public let y: Double
+
+    public init(id: UInt64, y: Double) {
+        self.id = id
+        self.y = y
+    }
+}
+
 public enum TraceViewerFocusRegion: String, Hashable, Sendable {
     case sidebar
     case search
@@ -423,6 +441,9 @@ public final class TraceDocumentController {
     public private(set) var cacheHit = false
     public private(set) var accessibilityAnnouncement: TraceAccessibilityAnnouncement?
     public private(set) var timelineFocusRequestID: UInt64 = 0
+    /// Where the timeline should scroll to next, or nil when nothing has been
+    /// asked for. See ``revealTrackGroup(_:)``.
+    public private(set) var timelineScrollRequest: TimelineScrollRequest?
 
     @ObservationIgnored private let opener: TraceDocumentOpener
     @ObservationIgnored private let maintenance: TraceCacheMaintenance?
@@ -444,6 +465,10 @@ public final class TraceDocumentController {
     @ObservationIgnored private var nextAnnotationID = 1
     @ObservationIgnored private var argumentsTask: Task<Void, Never>?
     @ObservationIgnored private var densityResolutionTask: Task<Void, Never>?
+    @ObservationIgnored private var scrollRequestGeneration: UInt64 = 0
+    /// A group whose lanes were just made visible; its y is only knowable once
+    /// the snapshot that contains them has been laid out.
+    @ObservationIgnored private var pendingScrollGroupID: String?
     @ObservationIgnored private var announcementRevision: UInt64 = 0
     @ObservationIgnored private var firstWindowMarked = false
     @ObservationIgnored private var timelineDisplayMarked = false
@@ -598,6 +623,49 @@ public final class TraceDocumentController {
     public func removeRecentDocument(_ document: TraceRecentDocument) {
         recentStore.remove(document.url)
         recentDocuments = recentStore.documents()
+    }
+
+    /// Brings a sidebar group's lanes into view: the name of a process is the
+    /// obvious thing to press when you want to look at that process, and until
+    /// now it only opened a list.
+    ///
+    /// Lanes that are hidden are shown first -- jumping to something that is
+    /// not drawn is not a jump -- and because their y exists only once they are
+    /// in a laid-out snapshot, the scroll waits for that snapshot rather than
+    /// guessing an offset.
+    public func revealTrackGroup(_ groupID: String) {
+        guard let index = trackGroups.firstIndex(where: { $0.id == groupID }),
+            !trackGroups[index].tracks.isEmpty
+        else { return }
+        guard trackGroups[index].tracks.allSatisfy(\.isCollapsed) else {
+            publishScrollTarget(for: groupID)
+            return
+        }
+        for trackIndex in trackGroups[index].tracks.indices {
+            let track = trackGroups[index].tracks[trackIndex]
+            // Revealing a hidden lane must not silently re-expand a call stack
+            // the user chose to flatten.
+            trackGroups[index].tracks[trackIndex] = TrackDescriptor(
+                title: track.title, source: track.source, isCollapsed: false,
+                showsNestedDepth: track.showsNestedDepth
+            )
+        }
+        pendingScrollGroupID = groupID
+        scheduleSnapshot(preference: .automatic)
+    }
+
+    private func publishScrollTarget(for groupID: String) {
+        guard let group = trackGroups.first(where: { $0.id == groupID }),
+            let snapshot
+        else { return }
+        let ids = Set(group.tracks.map(\.id))
+        guard let lane = snapshot.tracks.first(where: { ids.contains($0.descriptor.id) })
+        else { return }
+        scrollRequestGeneration &+= 1
+        timelineScrollRequest = TimelineScrollRequest(
+            id: scrollRequestGeneration,
+            y: Double(TimelineGeometry.rulerHeight) + lane.y
+        )
     }
 
     public func toggleTrack(_ id: TimelineTrackID) {
@@ -1343,6 +1411,10 @@ public final class TraceDocumentController {
                         self.viewportGeneration == viewportGeneration
                     else { return }
                     self.snapshot = loaded
+                    if let pending = self.pendingScrollGroupID {
+                        self.pendingScrollGroupID = nil
+                        self.publishScrollTarget(for: pending)
+                    }
                     if let key = self.pendingSelectionKey,
                         let inspector = self.inspector(for: key)
                     {
@@ -1428,6 +1500,8 @@ public final class TraceDocumentController {
         metadata = nil
         trackGroups = []
         snapshot = nil
+        timelineScrollRequest = nil
+        pendingScrollGroupID = nil
         selectedEvent = nil
         selectedEventLocation = nil
         selectedEventArguments = []
@@ -1445,6 +1519,8 @@ public final class TraceDocumentController {
         metadata = nil
         trackGroups = []
         snapshot = nil
+        timelineScrollRequest = nil
+        pendingScrollGroupID = nil
         selectedEvent = nil
         selectedEventLocation = nil
         hoveredEvent = nil

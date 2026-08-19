@@ -59,6 +59,10 @@ private func pinAppSupportSurface(
     _ = controller.timelineFocusRequestID
     _ = controller.timelineBounds
     controller.toggleTrack(trackID)
+    // Pressing a process in the sidebar jumps to its lanes: the App calls this
+    // and reads the offset it publishes.
+    controller.revealTrackGroup("process:1")
+    _ = controller.timelineScrollRequest.map { ($0.id, $0.y) }
     controller.selectEvent(nil)
     controller.hoverEvent(nil)
     controller.selectRange(nil)
