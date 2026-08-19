@@ -148,6 +148,9 @@ private func pinRenderingSurface(
         onSelectDensityBand: { (hit: TimelineDensityHit) in
             _ = (hit.trackID, hit.bucket, hit.timeNs)
         },
+        // The App draws the timeline's focus indicator itself, so it needs to
+        // hear when the canvas starts and stops advertising keyboard focus.
+        onKeyboardFocusVisibleChange: { (_: Bool) in },
         onHoverEvent: { _ in },
         onSelectRange: { _ in },
         onCreateFlag: { (_: Int64) in },

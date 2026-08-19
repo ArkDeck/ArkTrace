@@ -995,11 +995,20 @@ viewer，不属于某一条 trace，也不应该因为打开另一条 trace 就�
 trace 上，而且位置会变。现在它是 toolbar trailing 端的一个按钮：两种停靠共用同一个位置，画布还给 trace，
 这也是 macOS 放这个控件的地方（Xcode 的 inspector 与 debug area 开关都在那里）。
 
-图标只有一套：`rectangle.trailinghalf.inset.filled` / `rectangle.bottomhalf.inset.filled`——「pane 占据那条边」
+图标只有一套：`rectangle.trailingthird.inset.filled` / `rectangle.bottomthird.inset.filled`——「pane 占据那条边」
 的形状，toolbar 开关与 pane header 里的停靠菜单共用。此前 hide 按钮无论停在哪都画一个右侧 sidebar，停在
 底部时就是在说错话；中途换过的 `square.bottomthird.inset.filled` 又不像 Inspector。pane 自己的那个按钮改成
 close box（`xmark`）：它紧挨着停靠菜单，两个相同图标做不同的事，比任何一个单独存在都糟。状态写在文字里
 （tooltip 与 accessible name 在「Show/Hide Inspector」之间切换），不靠外观区分（AT-APP-011）。
+
+**Timeline 的 focus 指示按输入方式出现**（改于 2026-08-19）。焦点环从画布挪到 pane 边框之后，规则一直是
+「focusRegion == .timeline 就画」。但打开一条 trace 就会把键盘交给画布（AT-APP-009），于是每条 trace 一打开
+四周就套着一圈 3pt 的蓝框——第一反应是「怎么全选了」，而不是「键盘在这里」。
+
+现在它跟着输入走，就是 web 平台 `:focus-visible` 的那条规则：`TimelineNSView.keyboardFocusIsVisible` 由一次
+按键置真、由一次指针按下置假，画布把变化回调给 host，host 据此决定画不画边框。开启 Full Keyboard Access 的
+读者是唯一例外——他们靠 Tab 移动焦点、可能从不按时间轴的键，所以 `becomeFirstResponder` 在该设置下直接置真。
+AT-APP-011 要的「focus 有清晰可见的指示」仍然成立，只是不再对没在用键盘的人喊。
 
 **画布与 sidebar 之间留 10pt**（改于 2026-08-19）。macOS 26 的 sidebar 是一块半透明面板，而 detail 区正好
 从它的边缘开始，于是 trace 最开头的那几片 slice 透过玻璃被糊成一条，读者的感受是「sidebar 盖住了一部分

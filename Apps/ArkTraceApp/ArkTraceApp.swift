@@ -647,6 +647,8 @@ private struct TraceTimelinePane: View {
     var controller: TraceDocumentController
     var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
     let openPanel: @MainActor () -> Void
+    /// Whether the canvas is advertising keyboard focus right now.
+    @State private var keyboardFocusIsVisible = false
 
     var body: some View {
         switch controller.phase {
@@ -687,6 +689,7 @@ private struct TraceTimelinePane: View {
                             accessibilityLabelText: String(localized: .a11YTimelineLabel),
                             onSelectEvent: controller.selectEvent,
                             onSelectDensityBand: controller.selectDensityBand,
+                            onKeyboardFocusVisibleChange: { keyboardFocusIsVisible = $0 },
                             onHoverEvent: controller.hoverEvent,
                             onSelectRange: controller.selectRange,
                             onCreateFlag: { controller.addFlag(atNs: $0) },
@@ -711,8 +714,15 @@ private struct TraceTimelinePane: View {
                     // automatic ring sat on the scrolling document view and
                     // was re-blurred and re-uploaded on every frame of a
                     // scroll, which is why the canvas opts out of it.
+                    //
+                    // Focus alone does not draw it. A trace opens with the
+                    // keyboard already on the canvas, so a focus-only rule
+                    // framed every trace on sight and the border read as "all
+                    // of this is selected". It follows keyboard use instead;
+                    // see `TimelineNSView.keyboardFocusIsVisible`.
                     .overlay {
-                        if focusRegion.wrappedValue == .timeline {
+                        if focusRegion.wrappedValue == .timeline,
+                            keyboardFocusIsVisible {
                             Rectangle()
                                 .strokeBorder(
                                     Color(nsColor: .keyboardFocusIndicatorColor),
@@ -1240,8 +1250,8 @@ private extension TraceInspectorDock {
     /// would occupy -- so the control reads without a legend.
     var symbolName: String {
         switch self {
-        case .trailing: "rectangle.trailinghalf.inset.filled"
-        case .bottom: "rectangle.bottomhalf.inset.filled"
+        case .trailing: "rectangle.trailingthird.inset.filled"
+        case .bottom: "rectangle.bottomthird.inset.filled"
         }
     }
 

@@ -56,6 +56,44 @@ final class TimelineNavigationKeyTests: XCTestCase {
         )
     }
 
+    /// The focus indicator follows the input, not the focus.
+    ///
+    /// A trace opens with the keyboard already on the canvas, so a rule of
+    /// "focused, therefore ringed" framed every trace the moment it appeared,
+    /// and a border around the whole timeline reads as "all of this is
+    /// selected". Keyboard use turns it on and the pointer turns it off, the
+    /// way `:focus-visible` behaves on the web.
+    @MainActor
+    func testTheFocusIndicatorFollowsKeyboardUseRatherThanFocus() throws {
+        let (view, _) = try makeView()
+        var announced: [Bool] = []
+        view.onKeyboardFocusVisibleChange = { announced.append($0) }
+        XCTAssertFalse(
+            view.keyboardFocusIsVisible,
+            "a canvas nobody has typed on advertises nothing"
+        )
+
+        view.keyDown(with: try keyDown("d"))
+        XCTAssertTrue(view.keyboardFocusIsVisible)
+        XCTAssertEqual(announced, [true])
+
+        let press = try XCTUnwrap(
+            NSEvent.mouseEvent(
+                with: .leftMouseDown,
+                location: CGPoint(x: 50, y: 20),
+                modifierFlags: [], timestamp: 0, windowNumber: 0, context: nil,
+                eventNumber: 0, clickCount: 1, pressure: 1
+            )
+        )
+        view.mouseDown(with: press)
+        XCTAssertFalse(view.keyboardFocusIsVisible, "the pointer takes it back")
+        XCTAssertEqual(announced, [true, false])
+
+        // Only changes are announced: the host redraws a border on each one.
+        view.mouseDown(with: press)
+        XCTAssertEqual(announced, [true, false])
+    }
+
     @MainActor
     func testWasdKeysProduceBoundedZoomAndPanIntents() throws {
         let (view, viewport) = try makeView()

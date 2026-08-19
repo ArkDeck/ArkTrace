@@ -69,6 +69,24 @@ public final class TimelineNSView: NSView {
             needsDisplay = true
         }
     }
+    /// Whether the canvas should advertise that the keyboard is on it.
+    ///
+    /// Being first responder is not enough to earn a ring around the whole
+    /// timeline. The App hands the canvas the keyboard as soon as a trace
+    /// opens, so a focus-only rule frames every trace the moment it appears,
+    /// and a border around everything reads as "all of this is selected"
+    /// rather than "the keyboard is here". This follows the input instead, the
+    /// way the web platform's `:focus-visible` does: a key press turns it on,
+    /// a press of the pointer turns it off. Full Keyboard Access is the one
+    /// case where arriving by Tab counts on its own -- those are the readers
+    /// who move focus without ever pressing a timeline key.
+    public private(set) var keyboardFocusIsVisible = false {
+        didSet {
+            guard keyboardFocusIsVisible != oldValue else { return }
+            onKeyboardFocusVisibleChange?(keyboardFocusIsVisible)
+        }
+    }
+    public var onKeyboardFocusVisibleChange: (@MainActor (Bool) -> Void)?
     public var onSelectEvent: (@MainActor (EventKey?) -> Void)?
     /// A press on a density band, once the gesture has ended without becoming
     /// a range drag. The band names no event, so the host resolves the real
@@ -290,6 +308,12 @@ public final class TimelineNSView: NSView {
     /// content scrolls. Nothing in `draw(_:)` reads first-responder state, so
     /// gaining or losing focus repaints nothing here either.
     public override func becomeFirstResponder() -> Bool {
+        // With Full Keyboard Access on, focus arrives here by Tab and may
+        // never be followed by a timeline key; those readers need the
+        // indicator from the moment they land.
+        if NSApplication.shared.isFullKeyboardAccessEnabled {
+            keyboardFocusIsVisible = true
+        }
         unsafe NSAccessibility.post(element: self, notification: .focusedUIElementChanged)
         return true
     }
@@ -380,6 +404,7 @@ public final class TimelineNSView: NSView {
     }
 
     public override func mouseDown(with event: NSEvent) {
+        keyboardFocusIsVisible = false
         let point = convert(event.locationInWindow, from: nil)
         pendingDensityHit = nil
         // Upstream places a flag by clicking the ruler; the ruler carries no
@@ -619,6 +644,7 @@ public final class TimelineNSView: NSView {
     }
 
     public override func keyDown(with event: NSEvent) {
+        keyboardFocusIsVisible = true
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         let option = modifiers.contains(.option)
         switch event.keyCode {
@@ -1778,6 +1804,9 @@ public struct TimelineView: NSViewRepresentable {
     public let focusRequestID: UInt64
     public let onSelectEvent: @MainActor (EventKey?) -> Void
     public let onSelectDensityBand: @MainActor (TimelineDensityHit) -> Void
+    /// Fires when the canvas starts or stops advertising keyboard focus. See
+    /// ``TimelineNSView/keyboardFocusIsVisible``.
+    public let onKeyboardFocusVisibleChange: @MainActor (Bool) -> Void
     public let onHoverEvent: @MainActor (EventKey?) -> Void
     public let onSelectRange: @MainActor (TraceTimeRange?) -> Void
     public let onCreateFlag: @MainActor (Int64) -> Void
@@ -1800,6 +1829,7 @@ public struct TimelineView: NSViewRepresentable {
         accessibilityLabelText: String = "Trace Timeline",
         onSelectEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectDensityBand: @escaping @MainActor (TimelineDensityHit) -> Void = { _ in },
+        onKeyboardFocusVisibleChange: @escaping @MainActor (Bool) -> Void = { _ in },
         onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
         onCreateFlag: @escaping @MainActor (Int64) -> Void = { _ in },
@@ -1819,6 +1849,7 @@ public struct TimelineView: NSViewRepresentable {
         self.accessibilityLabelText = accessibilityLabelText
         self.onSelectEvent = onSelectEvent
         self.onSelectDensityBand = onSelectDensityBand
+        self.onKeyboardFocusVisibleChange = onKeyboardFocusVisibleChange
         self.onHoverEvent = onHoverEvent
         self.onSelectRange = onSelectRange
         self.onCreateFlag = onCreateFlag
@@ -1838,6 +1869,7 @@ public struct TimelineView: NSViewRepresentable {
         view.selectedEventLocation = selectedEventLocation
         view.onSelectEvent = onSelectEvent
         view.onSelectDensityBand = onSelectDensityBand
+        view.onKeyboardFocusVisibleChange = onKeyboardFocusVisibleChange
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onCreateFlag = onCreateFlag
@@ -1862,6 +1894,7 @@ public struct TimelineView: NSViewRepresentable {
         view.selectedEventLocation = selectedEventLocation
         view.onSelectEvent = onSelectEvent
         view.onSelectDensityBand = onSelectDensityBand
+        view.onKeyboardFocusVisibleChange = onKeyboardFocusVisibleChange
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onCreateFlag = onCreateFlag

@@ -1130,7 +1130,7 @@ Return 这一步显式的动作。当前所在条目必须以**文字**表达位
 
 ### AT-APP-009 Accessibility
 
-优先使用原生 SwiftUI/AppKit controls。Toolbar、Sidebar、Search、Timeline、Inspector、loading/cancel controls 必须可键盘访问；focus order 必须与主要任务和阅读顺序一致。Icon-only control 必须有本地化 accessible name，focus 必须有清晰可见的 indication，任何状态不得只靠颜色表达。
+优先使用原生 SwiftUI/AppKit controls。Toolbar、Sidebar、Search、Timeline、Inspector、loading/cancel controls 必须可键盘访问；focus order 必须与主要任务和阅读顺序一致。Icon-only control 必须有本地化 accessible name，focus 必须有清晰可见的 indication，任何状态不得只靠颜色表达。Timeline 这类整块可聚焦区域的 focus 指示按**输入方式**出现——键盘操作后显示、指针按下后隐藏（Full Keyboard Access 开启时，靠 Tab 落到该区域即显示）：打开 trace 就会把键盘交给画布，「有焦点就画框」会让每条 trace 一打开就被框住，读起来像全选而不是「键盘在这里」。
 
 Timeline 的最低键盘 contract：
 
@@ -1141,7 +1141,7 @@ Timeline 的最低键盘 contract：
 - `+` / `-` 缩放，`Return` 选择，`F` zoom to selection，`0` reset，`Escape` 清 transient range/selection；
 - SmartPerf Host 导航簇：`W` / `S` 缩放，`A` / `D` 平移，`[` / `]` 等价于 `F`。`W` / `S` 必须以指针位置为锚点（指针不在 Timeline 上时退回 `+` / `-` 的锚点链）。这些绑定只在 Timeline 持有 focus 时生效，不得拦截文本输入；带 Command 修饰的字母必须交回菜单。
 
-sheet/dialog/disclosure 关闭后必须恢复 focus 到触发 control；pane 被折叠且包含当前 focus 时，focus 必须移到对应 disclosure control。
+sheet/dialog/disclosure 关闭后必须恢复 focus 到触发 control；pane 被折叠且包含当前 focus 时，focus 必须移到一个确定且可预测的区域——Inspector 折叠时交给 Timeline，因为把它带回来的控件在 toolbar 上，而 toolbar item 不是可被 focus 策略命名的区域。
 
 键位表必须在 App 内可查，按 macOS 惯例挂在 Help 菜单（`W`/`A`/`S`/`D`、`[`/`]`、`0`、`F` 都不是 macOS 惯例，
 不打开 README 无从发现）。App 内的键位表与 README 的键位表**必须同源**，由同一份数据生成，并有断言在
