@@ -363,12 +363,20 @@ private struct TrackRow: View {
     var body: some View {
         HStack(spacing: 6) {
             Toggle(
-                track.title,
                 isOn: Binding(
                     get: { !track.isCollapsed },
                     set: { _ in controller.toggleTrack(track.id) }
                 )
-            )
+            ) {
+                // Wrapped, never truncated: what tells two lanes apart is the
+                // tail of `process · thread`, so a tail ellipsis leaves a name
+                // that names nothing — `kworker/2:2 · kwor…` is every one of
+                // that process's lanes.
+                Text(track.title)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.leading)
+            }
             .toggleStyle(.checkbox)
             .arktraceAccessibleTarget()
             // Only named slices nest, so only they can be flattened.
@@ -558,6 +566,9 @@ private struct TraceViewerSidebar: View {
                         } label: {
                             HStack {
                                 Text(group.title)
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.leading)
                                 if group.truncated {
                                     Image(systemName: "ellipsis.circle")
                                         .foregroundStyle(.secondary)
