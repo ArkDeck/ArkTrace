@@ -85,13 +85,21 @@ private func pinViewerPolicies(
         current: TraceViewerFocusRegion.inspector,
         inspectorVisible: false
     )
-    switch TraceViewerLayoutPolicy.inspectorAction(
-        detailWidth: 800,
-        inspectorVisible: true,
-        inspectorWasAutoCollapsed: false
-    ) {
-    case .none, .collapseAutomatically, .expandAutomatically:
-        break
+    // The App chooses the dock and asks the policy about the axis that dock
+    // spends, so both halves are promised outside the package.
+    for dock in TraceInspectorDock.allCases {
+        _ = dock.rawValue
+        _ = TraceViewerLayoutPolicy.minimumDetailExtent(for: dock)
+        switch TraceViewerLayoutPolicy.inspectorAction(
+            detailWidth: 800,
+            detailHeight: 600,
+            dock: dock,
+            inspectorVisible: true,
+            inspectorWasAutoCollapsed: false
+        ) {
+        case .none, .collapseAutomatically, .expandAutomatically:
+            break
+        }
     }
 
     _ = announcement.revision

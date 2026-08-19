@@ -73,6 +73,9 @@ private struct TraceViewerRootView: View {
     @FocusState private var focusRegion: TraceViewerFocusRegion?
     @State private var showInspector = true
     @State private var showDiagnostics = false
+    /// Which edge the Inspector is docked to. A preference of the viewer, not
+    /// of the trace, so it lives in defaults and outlives the document.
+    @AppStorage("inspectorDock") private var inspectorDock = TraceInspectorDock.trailing
     @State private var inspectorVisibilityGeneration: UInt64 = 0
     @State private var inspectorDisclosureFocusRequestID: UInt64?
     @State private var inspectorHideFocusRequestID: UInt64?
@@ -87,60 +90,33 @@ private struct TraceViewerRootView: View {
         } detail: {
             GeometryReader { geometry in
                 ZStack(alignment: .topTrailing) {
-                    HSplitView {
-                        TraceTimelinePane(
-                            controller: controller,
-                            focusRegion: $focusRegion,
-                            openPanel: presentOpenPanel
-                        )
-                        .frame(minWidth: 420)
-                        .overlay(alignment: .topLeading) {
-                            if !showInspector {
-                                InspectorFocusButton(
-                                    title: String(
-                                        localized: "Show Inspector",
-                                        comment: "Button that restores the Inspector pane."
-                                    ),
-                                    showsTitle: true,
-                                    focusRequestID: inspectorDisclosureFocusRequestID,
-                                    onFocusRequestConsumed: { requestID in
-                                        guard inspectorDisclosureFocusRequestID == requestID else { return }
-                                        inspectorDisclosureFocusRequestID = nil
-                                    },
-                                    action: { expandInspector(restoringInspectorFocus: true) }
-                                )
-                                .focused($focusRegion, equals: .inspectorDisclosure)
-                                .frame(
-                                    minWidth: 124,
-                                    minHeight: 32,
-                                    idealHeight: 32,
-                                    maxHeight: 32
-                                )
-                                .fixedSize(horizontal: true, vertical: false)
-                                .padding(8)
+                    // One canvas, one pane, two arrangements. The reading and
+                    // focus order is the same either way -- Timeline then
+                    // Inspector -- so only the axis changes (AT-APP-003).
+                    switch inspectorDock {
+                    case .trailing:
+                        HSplitView {
+                            timelinePane.frame(minWidth: 420)
+                            if showInspector {
+                                inspectorPane
+                                    .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
                             }
                         }
-                        if showInspector {
-                            TraceInspectorPane(
-                                controller: controller,
-                                focusRegion: $focusRegion,
-                                hideFocusRequestID: inspectorHideFocusRequestID,
-                                onHideFocusRequestConsumed: { requestID in
-                                    guard inspectorHideFocusRequestID == requestID else { return }
-                                    inspectorHideFocusRequestID = nil
-                                },
-                                collapse: {
-                                    collapseInspector(
-                                        restoringDisclosureFocus: true,
-                                        initiatedByLayout: false
-                                    )
-                                }
-                            )
-                            .frame(minWidth: 250, idealWidth: 310, maxWidth: 430)
+                    case .bottom:
+                        VSplitView {
+                            // The canvas keeps the priority it has in the other
+                            // dock: the pane under it is a drawer, so slack
+                            // goes to the timeline until the user drags the
+                            // divider.
+                            timelinePane.frame(minHeight: 240).layoutPriority(1)
+                            if showInspector {
+                                inspectorPane
+                                    .frame(minHeight: 160, idealHeight: 220, maxHeight: 320)
+                            }
                         }
                     }
                 }
-                .task(id: geometry.size.width) {
+                .task(id: LayoutProbe(size: geometry.size, dock: inspectorDock)) {
                     let initialVisibilityGeneration = inspectorVisibilityGeneration
                     do {
                         // Persisted window frames and live resize publish transient widths.
@@ -155,6 +131,8 @@ private struct TraceViewerRootView: View {
                     }
                     switch TraceViewerLayoutPolicy.inspectorAction(
                         detailWidth: Double(geometry.size.width),
+                        detailHeight: Double(geometry.size.height),
+                        dock: inspectorDock,
                         inspectorVisible: showInspector,
                         inspectorWasAutoCollapsed: inspectorWasAutoCollapsed
                     ) {
@@ -195,6 +173,70 @@ private struct TraceViewerRootView: View {
         }
         .background(TraceAnnouncementBridge(controller: controller))
         .onAppear { controller.markFirstWindowAppeared() }
+    }
+
+    /// The canvas. Identical in both docks -- only the axis it is laid out on
+    /// changes -- so it is built once here rather than twice in the switch.
+    @ViewBuilder private var timelinePane: some View {
+        TraceTimelinePane(
+            controller: controller,
+            focusRegion: $focusRegion,
+            openPanel: presentOpenPanel
+        )
+        .overlay(alignment: .topLeading) {
+            if !showInspector {
+                InspectorFocusButton(
+                    title: String(
+                        localized: "Show Inspector",
+                        comment: "Button that restores the Inspector pane."
+                    ),
+                    showsTitle: true,
+                    focusRequestID: inspectorDisclosureFocusRequestID,
+                    onFocusRequestConsumed: { requestID in
+                        guard inspectorDisclosureFocusRequestID == requestID else { return }
+                        inspectorDisclosureFocusRequestID = nil
+                    },
+                    action: { expandInspector(restoringInspectorFocus: true) }
+                )
+                .focused($focusRegion, equals: .inspectorDisclosure)
+                .frame(
+                    minWidth: 124,
+                    minHeight: 32,
+                    idealHeight: 32,
+                    maxHeight: 32
+                )
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(8)
+            }
+        }
+    }
+
+    @ViewBuilder private var inspectorPane: some View {
+        TraceInspectorPane(
+            controller: controller,
+            focusRegion: $focusRegion,
+            dock: $inspectorDock,
+            hideFocusRequestID: inspectorHideFocusRequestID,
+            onHideFocusRequestConsumed: { requestID in
+                guard inspectorHideFocusRequestID == requestID else { return }
+                inspectorHideFocusRequestID = nil
+            },
+            collapse: {
+                collapseInspector(
+                    restoringDisclosureFocus: true,
+                    initiatedByLayout: false
+                )
+            }
+        )
+    }
+
+    /// What the auto-collapse task watches. The dock is part of it because the
+    /// extent that decides the answer changes with it: moving the pane to the
+    /// bottom of a window too narrow to hold it beside the canvas has to bring
+    /// it back.
+    private struct LayoutProbe: Equatable {
+        let size: CGSize
+        let dock: TraceInspectorDock
     }
 
     /// Each toolbar entry is its own view so a button's enabling read (for
@@ -840,6 +882,7 @@ private struct TraceLoadingStageTrack: View {
 private struct TraceInspectorPane: View {
     var controller: TraceDocumentController
     var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
+    @Binding var dock: TraceInspectorDock
     let hideFocusRequestID: UInt64?
     let onHideFocusRequestConsumed: @MainActor (UInt64) -> Void
     let collapse: @MainActor () -> Void
@@ -850,6 +893,7 @@ private struct TraceInspectorPane: View {
                 HStack {
                     Text("Inspector").font(.headline)
                     Spacer()
+                    InspectorDockMenu(dock: $dock)
                     InspectorFocusButton(
                         title: String(
                             localized: "Hide Inspector",
@@ -1073,6 +1117,56 @@ private struct TraceResetZoomButton: View {
             Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass")
         }
         .primaryToolbarTarget()
+    }
+}
+
+/// Which edge the Inspector is docked to, chosen the way Chrome DevTools lets
+/// it be chosen: a small control in the pane's own header, not a setting in a
+/// window the user has to go find.
+///
+/// A menu rather than a toggle because the two arrangements are named
+/// destinations, not two states of one thing -- and because a menu says which
+/// one is current without the reader having to know what the icon means.
+private struct InspectorDockMenu: View {
+    @Binding var dock: TraceInspectorDock
+
+    private static let title = String(
+        localized: "Dock Inspector",
+        comment: "Menu that chooses which edge the Inspector is docked to."
+    )
+
+    var body: some View {
+        Menu {
+            Picker(selection: $dock) {
+                Label("Dock to Right", systemImage: TraceInspectorDock.trailing.symbolName)
+                    .tag(TraceInspectorDock.trailing)
+                Label("Dock to Bottom", systemImage: TraceInspectorDock.bottom.symbolName)
+                    .tag(TraceInspectorDock.bottom)
+            } label: {
+                Text(Self.title)
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Label(Self.title, systemImage: dock.symbolName)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .labelStyle(.iconOnly)
+        .help(Self.title)
+        .accessibilityLabel(Self.title)
+        .frame(width: 32, height: 32)
+        .arktraceAccessibleTarget()
+    }
+}
+
+private extension TraceInspectorDock {
+    /// The icon is the arrangement itself -- a pane filled in on the edge it
+    /// would occupy -- so the control reads without a legend.
+    var symbolName: String {
+        switch self {
+        case .trailing: "rectangle.trailinghalf.inset.filled"
+        case .bottom: "rectangle.bottomhalf.inset.filled"
+        }
     }
 }
 

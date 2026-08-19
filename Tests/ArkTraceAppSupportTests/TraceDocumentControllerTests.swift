@@ -569,37 +569,52 @@ final class TraceDocumentControllerTests: XCTestCase {
     }
 
     func testInspectorLayoutAndCollapseFocusPolicy() {
-        XCTAssertEqual(
+        func action(
+            width: Double,
+            height: Double = 900,
+            dock: TraceInspectorDock = .trailing,
+            visible: Bool,
+            autoCollapsed: Bool = false
+        ) -> TraceViewerInspectorLayoutAction {
             TraceViewerLayoutPolicy.inspectorAction(
-                detailWidth: 0,
-                inspectorVisible: true,
-                inspectorWasAutoCollapsed: false
-            ),
-            .none
+                detailWidth: width,
+                detailHeight: height,
+                dock: dock,
+                inspectorVisible: visible,
+                inspectorWasAutoCollapsed: autoCollapsed
+            )
+        }
+        // A transient or degenerate geometry moves nothing, on either axis.
+        XCTAssertEqual(action(width: 0, visible: true), .none)
+        XCTAssertEqual(action(width: 1_200, height: 0, visible: true), .none)
+        XCTAssertEqual(action(width: .nan, visible: true), .none)
+        XCTAssertEqual(action(width: 759.999, visible: true), .collapseAutomatically)
+        XCTAssertEqual(
+            action(width: 760, visible: false, autoCollapsed: true), .expandAutomatically
         )
+        XCTAssertEqual(action(width: 1_200, visible: false), .none)
+
+        // Docked at the bottom the pane spends height, not width, so the same
+        // window that could not hold it beside the canvas can hold it under
+        // one -- which is the point of the arrangement.
         XCTAssertEqual(
-            TraceViewerLayoutPolicy.inspectorAction(
-                detailWidth: 759.999,
-                inspectorVisible: true,
-                inspectorWasAutoCollapsed: false
-            ),
+            TraceViewerLayoutPolicy.minimumDetailExtent(for: .trailing), 760
+        )
+        XCTAssertEqual(TraceViewerLayoutPolicy.minimumDetailExtent(for: .bottom), 400)
+        XCTAssertEqual(action(width: 500, dock: .bottom, visible: true), .none)
+        XCTAssertEqual(
+            action(width: 500, height: 399.999, dock: .bottom, visible: true),
             .collapseAutomatically
         )
         XCTAssertEqual(
-            TraceViewerLayoutPolicy.inspectorAction(
-                detailWidth: 760,
-                inspectorVisible: false,
-                inspectorWasAutoCollapsed: true
+            action(
+                width: 500, height: 400, dock: .bottom, visible: false, autoCollapsed: true
             ),
             .expandAutomatically
         )
+        // A pane the user hid by hand stays hidden, however much room appears.
         XCTAssertEqual(
-            TraceViewerLayoutPolicy.inspectorAction(
-                detailWidth: 1_200,
-                inspectorVisible: false,
-                inspectorWasAutoCollapsed: false
-            ),
-            .none
+            action(width: 2_000, height: 1_400, dock: .bottom, visible: false), .none
         )
 
         XCTAssertEqual(

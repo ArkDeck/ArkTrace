@@ -15,6 +15,7 @@
 > 进度回写（2026-08-18）：§13.4 新增加载进度规则 —— hashing/cacheLookup 按字节、indexing 按索引条数报精确进度；parsing 报不了的原因是实测的 stdout 全缓冲
 > 缺陷回写二（2026-08-18）：§13.5 新增 density band 点击规则 —— band 不带 event，点击以至多两次有界 query 解析出真实事件（AT-LOD-006），命中区为整条 track row，按下仍归 range drag
 > 性能回写三（2026-08-18）：§13.4 新增「一帧滚动的代价按露出的那条计」—— 路径缓存按 256pt 横带分桶、focus ring 移出画布（不得加回 `.default`）、tracking area 只建一次、同一代 snapshot 不重绘
+> 功能回写（2026-08-19）：§14.1 Inspector 可停靠在右侧或底部（AT-APP-003）—— 控件在 pane 自己的 header，偏好存 `UserDefaults`，自动折叠改为按停靠轴判定
 
 ## 1. 文档目的
 
@@ -940,6 +941,26 @@ Toolbar
 使用 `NavigationSplitView` 构建 shell，Timeline 是 AppKit bridge。
 
 布局遵循 macOS 的 leading-to-trailing 阅读顺序：Sidebar 用于定位对象，Timeline 承载主要分析任务，Inspector 展示当前选择的细节。Timeline 始终是视觉与空间主区域；窗口变窄时先收起 Inspector，再允许 Sidebar 进入 compact 状态，并为两个 pane 保留可见、可键盘触达的 disclosure control。不能仅因实现方便给文字 pane 设置不可适应字体、语言或窗口缩放的固定宽高。
+
+**Inspector 可停靠在右侧或底部**（改于 2026-08-19）。Timeline 宽而浅：一条 trace 的信息沿时间轴横向展开，
+而 track 数量决定的纵向尺寸在缩放后往往有富余。右侧 Inspector 因此吃掉的是分析最想要的那一维——在 1280 点
+宽的窗口上它拿走约四分之一的时间跨度——而底部 Inspector 吃掉的是通常更充裕的高度。哪一种更合适取决于
+显示器和当下的问题，所以这是用户的选择，不是布局的定论；上游 Chrome DevTools 的 dock 控件是同一个判断。
+
+控件放在 Inspector 自己的 header 里（紧邻 Hide），而不是塞进设置窗口：它是对当前这块 pane 的操作，就该在
+这块 pane 上。用 menu 而非 toggle，因为两种停靠是两个具名去处而不是一个开关的两态，menu 还能直接显示
+当前是哪一种，读者不必先认得图标。
+
+三条约束：
+
+- **阅读与 focus 顺序不变**（AT-APP-003）：Sidebar → Timeline → Inspector，底部停靠时最后一步是向下。
+- **自动折叠改为按停靠轴判定**。阈值是两个 pane 各自最小尺寸之和：trailing 760（canvas 420 + pane 250 +
+  分隔与边距），bottom 400（canvas 240 + pane 160）。这两个数不是凑的整数，而是「再窄/再矮就装不下」的
+  那一点；底部停靠因此能在右侧停靠早已折叠的窗口尺寸下继续工作，这正是它存在的主要理由。
+- **底部停靠时 canvas 拿 `layoutPriority`**：抽屉不该抢主区域，多出来的高度归时间轴，直到用户自己拖分隔条。
+
+停靠选择存在 `UserDefaults`（`inspectorDock`）而不是 trace 的 view-state sidecar：它属于这台机器上的这个
+viewer，不属于某一条 trace，也不应该因为打开另一条 trace 就变回去。
 
 Timeline 是刻意保留的二维工作区：横向滚动表示时间，纵向滚动表示 track。其他工具栏、表单与 Inspector 不得产生无意的横向滚动。分组间距大于组内间距，track label、数值列与 controls 保持稳定对齐；所有 leading/trailing 关系使用语义方向，避免把界面锁死在 left/right 假设上。
 

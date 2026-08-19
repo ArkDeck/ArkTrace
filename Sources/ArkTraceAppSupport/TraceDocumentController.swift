@@ -153,14 +153,54 @@ public enum TraceViewerInspectorLayoutAction: Hashable, Sendable {
     case expandAutomatically
 }
 
+/// Which edge of the detail area the Inspector is docked to.
+///
+/// The same choice Chrome DevTools offers, and for the same reason: a timeline
+/// is wide and shallow, so beside the canvas the Inspector spends width the
+/// analysis wants, while under it the Inspector spends height a stack of a few
+/// dozen tracks can spare. Which of the two is right depends on the display and
+/// on the question being asked, and neither belongs to the trace -- so this is
+/// a preference of the viewer, not per-trace view state.
+///
+/// The reading and focus order (AT-APP-003) is unchanged by it: Sidebar,
+/// Timeline, then Inspector, whether that last step is to the trailing side or
+/// downwards.
+public enum TraceInspectorDock: String, Hashable, Codable, Sendable, CaseIterable {
+    case trailing
+    case bottom
+}
+
 public enum TraceViewerLayoutPolicy {
+    /// Below this, the canvas and the Inspector cannot both hold their minimum
+    /// along the docked axis, and AT-APP-003 says which one gives way.
+    ///
+    /// Each number is that sum, not a round figure: trailing is the canvas'
+    /// 420 points plus the pane's 250 plus the divider and window chrome
+    /// between them; bottom is the canvas' 240 plus the pane's 160. The bottom
+    /// dock therefore survives a much smaller window, which is most of why it
+    /// exists.
+    public static func minimumDetailExtent(for dock: TraceInspectorDock) -> Double {
+        switch dock {
+        case .trailing: 760
+        case .bottom: 400
+        }
+    }
+
     public static func inspectorAction(
         detailWidth: Double,
+        detailHeight: Double,
+        dock: TraceInspectorDock,
         inspectorVisible: Bool,
         inspectorWasAutoCollapsed: Bool
     ) -> TraceViewerInspectorLayoutAction {
-        guard detailWidth.isFinite, detailWidth > 0 else { return .none }
-        if detailWidth < 760 {
+        // Both extents are checked, not just the docked one: a transient or
+        // degenerate geometry -- a restoring window frame, a live resize --
+        // must not move a pane the user did not ask to move.
+        guard detailWidth.isFinite, detailHeight.isFinite,
+            detailWidth > 0, detailHeight > 0
+        else { return .none }
+        let extent = dock == .trailing ? detailWidth : detailHeight
+        if extent < minimumDetailExtent(for: dock) {
             return inspectorVisible ? .collapseAutomatically : .none
         }
         return !inspectorVisible && inspectorWasAutoCollapsed ? .expandAutomatically : .none

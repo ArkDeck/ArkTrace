@@ -19,6 +19,39 @@
         }
       }
     },
+    "Dock Inspector": {
+      "comment": "Menu that chooses which edge the Inspector is docked to.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informationsbereich andocken"
+          }
+        }
+      }
+    },
+    "Dock to Bottom": {
+      "comment": "Menu item that docks the Inspector under the timeline.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unten andocken"
+          }
+        }
+      }
+    },
+    "Dock to Right": {
+      "comment": "Menu item that docks the Inspector beside the timeline.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechts andocken"
+          }
+        }
+      }
+    },
     "Hide Inspector": {
       "comment": "Button that collapses the Inspector pane.",
       "localizations": {

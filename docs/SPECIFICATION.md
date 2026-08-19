@@ -1007,6 +1007,14 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 
 主界面至少包含 Toolbar、Track Sidebar、Timeline、Inspector，并按 leading-to-trailing 的 Sidebar → Timeline → Inspector 阅读/操作顺序组织。Timeline 必须保持主区域。窗口或文字空间不足时先折叠 Inspector，再允许 Sidebar compact；每个折叠 pane 必须有可见且可键盘触达的 disclosure control。文字 pane 不得依赖不能适应本地化、字体或窗口缩放的固定宽高。除刻意二维滚动的 Timeline 外，不得出现非必要横向滚动。
 
+**Inspector 的停靠边由用户选择**：可停在 Timeline 的 trailing 侧，也可停在其下方（同 Chrome DevTools 的
+dock 控件）。两种停靠都必须保持 Sidebar → Timeline → Inspector 的阅读与 focus 顺序——底部停靠时最后一步
+是「向下」而非「向右」——Timeline 仍是主区域，折叠后的 disclosure control 仍必须可见且可键盘触达。
+自动折叠沿**停靠轴**判定：trailing 看可用宽度，bottom 看可用高度，阈值是两个 pane 各自最小尺寸之和而不是
+一个凭空的整数（trailing 760 = canvas 420 + pane 250 + 分隔与窗口边距；bottom 400 = canvas 240 + pane 160），
+因此同一个窗口放不下右侧 Inspector 时仍可能放得下底部 Inspector。停靠选择是 viewer 偏好而非 per-trace
+view state：它跨文档、跨启动保持，且不写入任何 trace sidecar。
+
 **Track Sidebar 的组织维度是混合的**：跨进程的泳道（CPU、CPU counter）按种类分组；由线程或进程拥有的
 泳道（thread state、named slice、process counter、frame）按**进程**分组，每个进程一个可折叠节点，
 同一线程的 thread state 与 named slice 泳道相邻。理由与实测依据见 DESIGN §13.3 —— 纯进程树会在真机 trace 上造出
