@@ -1,8 +1,10 @@
-// Portions of this file are a Swift port of the timeline color logic in
+// The colour *assignment* here is a Swift port of the timeline color logic in
 // openharmony/developtools_smartperf_host, taken at the revision pinned in
 // ThirdParty/TraceStreamer/source-lock.json and licensed under Apache-2.0:
 // ide/src/trace/component/trace/base/ColorUtils.ts and Utils.getStateColor.
-// See THIRD_PARTY_NOTICES.md and docs/DESIGN.md §13.5.
+// The twenty-entry fill table is not: it is ArkTrace's own, for the reasons
+// recorded on `funcColorLiterals` and in docs/DESIGN.md §13.5.
+// See THIRD_PARTY_NOTICES.md.
 
 import ArkTraceCore
 import CoreGraphics
@@ -82,13 +84,13 @@ package struct TimelineColor: Hashable, Sendable, Comparable {
     }
 }
 
-/// Upstream-aligned trace palette.
+/// Trace palette: upstream's assignment, ArkTrace's colours.
 ///
 /// SmartPerf Host does not color a slice by its kind; it hashes the slice's
 /// identity into a fixed twenty-entry palette, so the same function keeps the
-/// same color across rows, traces and sessions. ArkTrace reuses the pinned
-/// upstream parser, so it reuses the pinned upstream palette too: a slice gets
-/// the same color in either tool.
+/// same color across rows, traces and sessions. ArkTrace keeps that mechanism
+/// exactly -- same hash, same identities, same slots -- and replaces only the
+/// twenty values it indexes into.
 ///
 /// Ported from `ide/src/trace/component/trace/base/ColorUtils.ts` at the
 /// revision pinned in `ThirdParty/TraceStreamer/source-lock.json`
@@ -100,16 +102,38 @@ package struct TimelineColor: Hashable, Sendable, Comparable {
 /// upstream function each entry point corresponds to and which two colorings
 /// are ArkTrace extensions rather than parity items.
 package enum TimelinePalette {
-    /// Upstream `ColorUtils.FUNC_COLOR_B`, which the pinned revision aliases
-    /// as both `MD_PALETTE` (CPU slices, by process) and `FUNC_COLOR` (named
-    /// slices, by name). Kept as hex literals so the table can be diffed
-    /// against upstream character for character; `TimelinePaletteTests` locks
-    /// both the count and the parsed components.
+    /// The twenty fills an identity hashes into. It fills the slot upstream's
+    /// `FUNC_COLOR_B` fills -- CPU slices by process, named slices by name --
+    /// but the values are ArkTrace's own, and that is a deliberate departure
+    /// from parity.
+    ///
+    /// Upstream's table was measured rather than judged: twelve of its twenty
+    /// entries sit below the chroma floor and read as grey, two fall outside
+    /// the lightness band, the closest adjacent pair is ΔE 8.5 to normal
+    /// vision and 2.6 under deuteranopia, and half of it lands under 3:1
+    /// against the canvas. On a real capture that is the muddy olive-and-sage
+    /// wash the overview used to be.
+    ///
+    /// These twenty are a constant-chroma ring in OKLCH: each hue takes the
+    /// lightness where it can carry the most colour, which puts yellows light
+    /// and blues dark on its own, and the slots are ordered by a stride of
+    /// nine around that ring so consecutive entries land on opposite sides of
+    /// the wheel. Measured the same way: every entry inside the lightness
+    /// band, every entry above the chroma floor, worst adjacent pair ΔE 30 to
+    /// normal vision and 15.6 under deuteranopia. Nine entries stay under 3:1
+    /// against the canvas, which AT-APP-011 allows precisely because colour is
+    /// never the only channel here -- the slice carries its label and the
+    /// Inspector carries its name.
+    ///
+    /// What did *not* change is which slot an identity lands in: the hash, the
+    /// digit stripping and the depth-zero rule below are still upstream's, so
+    /// two slices that share a colour in SmartPerf Host still share one here.
+    /// `TimelinePaletteTests` locks the table and the assignment.
     public static let funcColorLiterals: [String] = [
-        "#23b0e7", "#aa4fba", "#4ca694", "#8d9171", "#ebc247",
-        "#8a8a8b", "#78aec2", "#FF0066", "#a16a40", "#e05b52",
-        "#7a9160", "#9fafc4", "#9bb87a", "#8091D0", "#c2cc66",
-        "#a94eb9", "#8983B5", "#B9A683", "#40b3e7", "#789876",
+        "#2b4fb0", "#e78f01", "#07b9f1", "#9e2414", "#07c3c1",
+        "#96225c", "#04b36d", "#7c318f", "#87a303", "#5044ac",
+        "#d4a004", "#0288dd", "#c95c03", "#04c0d8", "#9d1f3e",
+        "#05c5a4", "#8c2978", "#2a7a02", "#693aa1", "#bcac03",
     ]
 
     public static let funcColors: [TimelineColor] = funcColorLiterals.compactMap {

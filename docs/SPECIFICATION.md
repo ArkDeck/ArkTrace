@@ -1213,11 +1213,13 @@ Core/Store model 不得包含 CoreGraphics/CALayer/Metal 类型。未来 backend
 
 ### AT-RENDER-008 Event 配色
 
-Detail event 的填充色必须由事件身份决定，且与被 pin 住的上游 SmartPerf Host 一致：CPU slice 取 process（无 pid 时退回 tid）身份色，named slice 取去掉数字后的名称散列色，thread state 取上游固定状态色，取值域为上游 20 色调色板。上游 hash 必须逐位一致移植，并由取自上游实现的向量锁定；Label 前景色必须按填充色灰度选择，不得固定为白色。
+Detail event 的填充色必须由事件身份决定，**分配规则与被 pin 住的上游 SmartPerf Host 一致**：CPU slice 取 process（无 pid 时退回 tid）身份色，named slice 取去掉数字后的名称散列色，thread state 取上游固定状态色，落入 20 个 slot。上游 hash 必须逐位一致移植，并由取自上游实现的向量锁定——**两个在上游同色的事件，在这里也必须同色**。
+
+**20 个 slot 里放什么颜色则由 ArkTrace 自己定，并且必须是可度量的**（改于 2026-08-19）：上游那张表实测有 12/20 低于 chroma 下限（读起来是灰的）、2 项落在亮度带外、相邻最近一对对正常视觉只有 ΔE 8.5、对红绿色盲 2.6，半数对画布对比度不足 3:1。现表为 OKLCH 等色相环，每个色相取它能承载最多彩度的亮度（黄自然偏亮、蓝自然偏暗），slot 顺序按环上跨步排列使相邻项落在色轮两侧；实测：亮度带与 chroma 下限全过，相邻最近一对正常视觉 ΔE 30、红绿色盲 15.6。仍有 9 项对画布低于 3:1，这被允许**只因为**颜色从不是唯一通道（AT-APP-011）——slice 自带 label，Inspector 自带名称。Label 前景色必须按填充色灰度选择，不得固定为白色。
 
 配色是附加通道而非唯一通道（见 AT-APP-011）：state 与名称必须同时可从 label、Inspector 或 accessibility value 获得。渲染必须按填充色批处理，一次 snapshot 内的填充批次数由调色板规模约束，不得随事件数增长。
 
-Density band 虽然是 ArkTrace 特有的 LOD，取色仍必须来自上游调色板：每个 bucket 取占它最久的事件的身份（CPU 取 process/thread、named slice 取名称、thread state 取状态、frame 取 jank flag），并按 detail 层同一条规则解析，使缩放只改变分辨率而不改变颜色。强度不得用透明度表达。带不出事件身份的 source（counter series）才回退到 track 身份色，且必须以 `.unavailableValue` data-quality 声明说明回退原因。
+Density band 虽然是 ArkTrace 特有的 LOD，取色仍必须来自同一张调色板：每个 bucket 取占它最久的事件的身份（CPU 取 process/thread、named slice 取名称、thread state 取状态、frame 取 jank flag），并按 detail 层同一条规则解析，使缩放只改变分辨率而不改变颜色。强度不得用透明度表达。带不出事件身份的 source（counter series）才回退到 track 身份色，且必须以 `.unavailableValue` data-quality 声明说明回退原因。
 
 Counter series 与 track 身份色的取色是 ArkTrace 扩展而非上游对齐项，必须在文档中标明，且不得为此放宽上游 hash 的一致性要求。
 

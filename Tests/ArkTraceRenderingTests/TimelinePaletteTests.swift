@@ -14,14 +14,15 @@ import XCTest
 /// "cleanup" of the hash to integer math fails here instead of silently
 /// recoloring every trace.
 final class TimelinePaletteTests: XCTestCase {
-    /// The upstream palette in upstream order. `funcColorLiterals` is the
-    /// diffable table; this locks the parsed result so a typo in a literal
-    /// cannot pass as a color.
+    /// ArkTrace's own twenty fills, in slot order. Upstream's table was
+    /// replaced (see `TimelinePalette.funcColorLiterals` for the measurements
+    /// that decided it); the slot an identity lands in did not change, which
+    /// is what the vectors below still pin.
     private static let palette: [String] = [
-        "#23b0e7", "#aa4fba", "#4ca694", "#8d9171", "#ebc247",
-        "#8a8a8b", "#78aec2", "#FF0066", "#a16a40", "#e05b52",
-        "#7a9160", "#9fafc4", "#9bb87a", "#8091D0", "#c2cc66",
-        "#a94eb9", "#8983B5", "#B9A683", "#40b3e7", "#789876",
+        "#2b4fb0", "#e78f01", "#07b9f1", "#9e2414", "#07c3c1",
+        "#96225c", "#04b36d", "#7c318f", "#87a303", "#5044ac",
+        "#d4a004", "#0288dd", "#c95c03", "#04c0d8", "#9d1f3e",
+        "#05c5a4", "#8c2978", "#2a7a02", "#693aa1", "#bcac03",
     ]
 
     /// `(name, ColorUtils.hash(name, 20), ColorUtils.hashFunc(name, 0, 20))`.
@@ -54,7 +55,7 @@ final class TimelinePaletteTests: XCTestCase {
         ),
     ]
 
-    func testPaletteMatchesUpstreamTable() {
+    func testPaletteMatchesTheShippedTable() {
         XCTAssertEqual(TimelinePalette.funcColorLiterals, Self.palette)
         XCTAssertEqual(TimelinePalette.funcColors.count, Self.palette.count)
         for (index, literal) in Self.palette.enumerated() {
@@ -152,35 +153,41 @@ final class TimelinePaletteTests: XCTestCase {
     }
 
     /// `ColorUtils.colorForTid` over the decimal identity.
-    func testProcessIdentityColorsMatchUpstream() {
-        let vectors: [(Int64, String)] = [
-            (0, "#8a8a8b"),
-            (1, "#ebc247"),
-            (2, "#FF0066"),
-            (7, "#4ca694"),
-            (42, "#ebc247"),
-            (100, "#8983B5"),
-            (999, "#9bb87a"),
-            (1234, "#23b0e7"),
-            (32768, "#9bb87a"),
-            (65535, "#a16a40"),
-            (2_147_483_647, "#9bb87a"),
+    ///
+    /// Pinned as **slots**, not as colours: the slot is the upstream-parity
+    /// fact -- two identities that share a colour in SmartPerf Host share one
+    /// here -- while which colour sits in that slot is ArkTrace's own choice
+    /// and is locked separately by `testPaletteMatchesTheShippedTable`.
+    func testProcessIdentitySlotsMatchUpstream() {
+        let vectors: [(Int64, Int)] = [
+            (0, 5),
+            (1, 4),
+            (2, 7),
+            (7, 2),
+            (42, 4),
+            (100, 16),
+            (999, 12),
+            (1234, 0),
+            (32768, 12),
+            (65535, 8),
+            (2_147_483_647, 12),
         ]
-        for (identity, hex) in vectors {
+        for (identity, slot) in vectors {
             XCTAssertEqual(
                 TimelinePalette.color(forProcessOrThreadID: identity),
-                TimelineColor(hex: hex),
-                "colorForTid(\(identity))"
+                TimelinePalette.funcColors[slot],
+                "colorForTid(\(identity)) should land in slot \(slot)"
             )
         }
     }
 
-    /// `ColorUtils.funcTextColor` over the palette. Only `#FF0066` is dark
-    /// enough for a white label, which is exactly why the renderer can no
-    /// longer hardcode white.
+    /// `ColorUtils.funcTextColor` over the palette. Nine of the twenty are dark
+    /// enough for a white label -- under upstream's table it was one -- which
+    /// is exactly why the renderer cannot hardcode either colour.
     func testLabelColorMatchesUpstreamLuminanceRule() {
+        let takesWhiteLabel: Set<Int> = [0, 3, 5, 7, 9, 14, 16, 17, 18]
         for (index, literal) in Self.palette.enumerated() {
-            let expected: TimelineColor = literal == "#FF0066" ? .white : .black
+            let expected: TimelineColor = takesWhiteLabel.contains(index) ? .white : .black
             XCTAssertEqual(
                 TimelineColor(hex: literal)?.preferredLabelColor,
                 expected,
