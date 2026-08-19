@@ -2,11 +2,38 @@ import ArkTraceCore
 import Foundation
 
 package struct TraceViewerSearchRequest: Sendable {
+    /// Which directories a query is allowed to answer from.
+    ///
+    /// The viewer asks two different questions with two different fields, and
+    /// they must not answer each other: the sidebar's filter finds a process
+    /// and stays in the sidebar, so the toolbar field searches what happens
+    /// *inside* the trace — threads and slices. Keeping the domain in the
+    /// request rather than filtering results afterwards also keeps the cost
+    /// down: an excluded domain is a query that is never issued.
+    public struct Domains: OptionSet, Sendable, Hashable {
+        public let rawValue: Int
+        public init(rawValue: Int) { self.rawValue = rawValue }
+
+        /// Process name, PID, and `ipid:` identity.
+        public static let process = Domains(rawValue: 1 << 0)
+        /// Thread name, TID, and `itid:` identity.
+        public static let thread = Domains(rawValue: 1 << 1)
+        /// Slice name.
+        public static let slice = Domains(rawValue: 1 << 2)
+        public static let all: Domains = [.process, .thread, .slice]
+    }
+
     public let text: String
     public let limit: Int
     public let timeout: Duration
+    public let domains: Domains
 
-    public init(text: String, limit: Int = 100, timeout: Duration = .seconds(5)) throws {
+    public init(
+        text: String,
+        limit: Int = 100,
+        timeout: Duration = .seconds(5),
+        domains: Domains = .all
+    ) throws {
         guard !text.isEmpty, text.utf8.count <= 256 else {
             throw ArkTraceError(
                 code: .invalidArgument,
@@ -21,9 +48,17 @@ package struct TraceViewerSearchRequest: Sendable {
                 message: "Search limit or timeout is invalid"
             )
         }
+        guard !domains.isEmpty else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .request,
+                message: "Search must cover at least one domain"
+            )
+        }
         self.text = text
         self.limit = limit
         self.timeout = timeout
+        self.domains = domains
     }
 }
 
@@ -42,33 +77,45 @@ package struct TraceViewerSearchEngine: Sendable {
         try Self.check(deadline)
         let perKindLimit = min(1_001, request.limit + 1)
         let normalized = request.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let explicitProcessKey = Self.prefixedIdentity(normalized, prefix: "ipid:")
-        let explicitThreadKey = Self.prefixedIdentity(normalized, prefix: "itid:")
-        var processes = try await repository.processes(
-            ProcessQuery(
-                name: request.text,
-                nameMatch: .contains,
-                limit: perKindLimit,
-                deadline: deadline
+        let wantsProcesses = request.domains.contains(.process)
+        let wantsThreads = request.domains.contains(.thread)
+        let explicitProcessKey = wantsProcesses
+            ? Self.prefixedIdentity(normalized, prefix: "ipid:") : nil
+        let explicitThreadKey = wantsThreads
+            ? Self.prefixedIdentity(normalized, prefix: "itid:") : nil
+        var processes = wantsProcesses
+            ? try await repository.processes(
+                ProcessQuery(
+                    name: request.text,
+                    nameMatch: .contains,
+                    limit: perKindLimit,
+                    deadline: deadline
+                )
             )
-        )
-        var threads = try await repository.threads(
-            ThreadQuery(
-                name: request.text,
-                nameMatch: .contains,
-                limit: perKindLimit,
-                deadline: deadline
+            : BoundedPage(items: [], truncated: false)
+        var threads = wantsThreads
+            ? try await repository.threads(
+                ThreadQuery(
+                    name: request.text,
+                    nameMatch: .contains,
+                    limit: perKindLimit,
+                    deadline: deadline
+                )
             )
-        )
+            : BoundedPage(items: [], truncated: false)
         if let numeric = Int64(request.text) {
-            let pidMatches = try await repository.processes(
-                ProcessQuery(pid: numeric, limit: perKindLimit, deadline: deadline)
-            )
-            processes = Self.merged(processes, pidMatches, key: { $0.key })
-            let tidMatches = try await repository.threads(
-                ThreadQuery(tid: numeric, limit: perKindLimit, deadline: deadline)
-            )
-            threads = Self.merged(threads, tidMatches, key: { $0.key })
+            if wantsProcesses {
+                let pidMatches = try await repository.processes(
+                    ProcessQuery(pid: numeric, limit: perKindLimit, deadline: deadline)
+                )
+                processes = Self.merged(processes, pidMatches, key: { $0.key })
+            }
+            if wantsThreads {
+                let tidMatches = try await repository.threads(
+                    ThreadQuery(tid: numeric, limit: perKindLimit, deadline: deadline)
+                )
+                threads = Self.merged(threads, tidMatches, key: { $0.key })
+            }
         }
         if let explicitProcessKey {
             let matches = try await repository.processes(
@@ -91,14 +138,16 @@ package struct TraceViewerSearchEngine: Sendable {
             threads = Self.merged(threads, matches, key: { $0.key })
         }
         let fullRange = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
-        let slices = try await repository.slices(
-            TraceSliceQuery(
-                range: fullRange,
-                name: .contains(request.text),
-                limit: perKindLimit,
-                deadline: deadline
+        let slices = request.domains.contains(.slice)
+            ? try await repository.slices(
+                TraceSliceQuery(
+                    range: fullRange,
+                    name: .contains(request.text),
+                    limit: perKindLimit,
+                    deadline: deadline
+                )
             )
-        )
+            : TraceEventPage<TraceSlice>(items: [], truncated: false)
         try Self.check(deadline)
 
         var results: [TraceSearchResult] = []

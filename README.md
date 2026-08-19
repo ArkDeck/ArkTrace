@@ -73,7 +73,7 @@ Full command reference, Machine JSON contract, limits, signal handling and priva
 
 Open `ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
 
-The sidebar toggles tracks; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; search locates events by PID / TID / process / thread / slice name; the inspector shows event details or range analysis.
+The sidebar toggles tracks and filters them to one process by name or PID; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; the toolbar search locates events by TID / thread / slice name; the inspector shows event details or range analysis.
 
 Keyboard, following SmartPerf Host where it has a binding:
 

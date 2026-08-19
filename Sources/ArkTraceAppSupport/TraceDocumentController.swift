@@ -432,6 +432,15 @@ public final class TraceDocumentController {
     /// and the sidebar's results section — re-evaluate per keystroke, while
     /// the root layout and timeline chrome stay untouched.
     public var searchFieldText = ""
+    /// Live text of the sidebar's process filter.
+    ///
+    /// A second search surface, deliberately: "which process is this" and
+    /// "where does this happen" are different questions, and answering both
+    /// from one field made the toolbar results a wall of processes whenever a
+    /// name was also a slice name. This one narrows the lane tree and never
+    /// leaves the sidebar; the toolbar field no longer matches processes at
+    /// all (see ``search(_:)``).
+    public var processFilterText = ""
     public private(set) var cacheInventory: TraceCacheInventory?
     /// The app never displays the raw report; it is observable state for the
     /// package (tests assert maintenance ran), so it stays off the public API.
@@ -858,6 +867,38 @@ public final class TraceDocumentController {
         }
     }
 
+    /// The lane tree as the sidebar shows it: every group while the filter is
+    /// empty, otherwise the groups whose title contains the filter text.
+    ///
+    /// Matching the title is matching what the reader is looking at. A process
+    /// group is titled `name [pid]`, so one case-insensitive contains-match
+    /// covers the two things the filter promises -- the process name and its
+    /// PID -- and nothing can quietly join in behind them.
+    public func filteredTrackGroups() -> [TraceTrackGroup] {
+        let needle = processFilterText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !needle.isEmpty else { return trackGroups }
+        return trackGroups.filter {
+            $0.title.range(of: needle, options: [.caseInsensitive]) != nil
+        }
+    }
+
+    /// True when the lane tree is a bounded view of the trace: the thread or
+    /// series directory it was built from hit its limit, so some lanes are not
+    /// listed at all. The sidebar has to say so once -- a filter that cannot
+    /// see everything must not look like it can.
+    public var trackListTruncated: Bool {
+        trackGroups.contains { $0.truncated }
+    }
+
+    /// Announces how many processes the filter is showing.
+    ///
+    /// Called when the field is submitted rather than per keystroke: an
+    /// announcement on every character interrupts the typing it is describing,
+    /// and AT-APP-011 asks for merged notifications, not a running commentary.
+    public func announceProcessFilterResults() {
+        announce(.searchFoundResults(filteredTrackGroups().count))
+    }
+
     public func search(_ text: String) {
         searchTask?.cancel()
         searchGeneration &+= 1
@@ -872,7 +913,10 @@ public final class TraceDocumentController {
         searchTask = Task { [weak self] in
             do {
                 let result = try await TraceViewerSearchEngine(repository: repository).search(
-                    TraceViewerSearchRequest(text: text)
+                    // Processes belong to the sidebar's filter now. Leaving
+                    // them here too would put the same process in two lists
+                    // and crowd out the events this field exists to find.
+                    TraceViewerSearchRequest(text: text, domains: [.thread, .slice])
                 )
                 guard !Task.isCancelled else { return }
                 await MainActor.run {
@@ -1510,6 +1554,7 @@ public final class TraceDocumentController {
         selectedRange = nil
         rangeAnalysis = nil
         searchResults = TraceSearchResults(items: [], truncated: false)
+        processFilterText = ""
         cacheHit = false
         errorPresentation = nil
         catalogThreads = []
@@ -1532,6 +1577,7 @@ public final class TraceDocumentController {
         nextAnnotationID = 1
         rangeAnalysis = nil
         searchResults = TraceSearchResults(items: [], truncated: false)
+        processFilterText = ""
         isSearching = false
         cacheHit = false
         catalogThreads = []

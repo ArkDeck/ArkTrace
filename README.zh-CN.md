@@ -73,7 +73,7 @@ PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
 
 用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过 **File → Open**、Finder「打开方式」、拖放或 Recents 打开 `.htrace` / `.ftrace` / `.systrace`；**Reload** 会从原始文件重新打开当前 Trace。
 
-Sidebar 控制轨道显隐；Timeline 支持鼠标/触控板 pan 与 zoom、range selection 与真实 event selection；Search 可按 PID / TID / process / thread / slice 名称定位；Inspector 展示 event 详情或 range analysis。
+Sidebar 控制轨道显隐，并可按进程名或 PID 过滤出某个进程；Timeline 支持鼠标/触控板 pan 与 zoom、range selection 与真实 event selection；工具栏的 Search 按 TID / thread / slice 名称定位 event；Inspector 展示 event 详情或 range analysis。
 
 键盘快捷键，凡 SmartPerf Host 有对应绑定的都保持一致：
 

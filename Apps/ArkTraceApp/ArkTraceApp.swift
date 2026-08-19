@@ -505,6 +505,64 @@ private struct RecentDocumentsSection: View {
     }
 }
 
+/// Observation boundary: the sidebar's process filter text alone.
+///
+/// A button until it is used. The sidebar is already a list of processes and
+/// most sessions never filter it, so the field is not worth a permanent row of
+/// that list — pressing the magnifier opens it and puts the keyboard in it,
+/// Esc or the clear button closes it and brings the whole tree back. Closing
+/// always clears the text: a filter that is hiding processes while its field
+/// is out of sight is a bug report waiting to happen.
+private struct ProcessFilterBar: View {
+    @Bindable var controller: TraceDocumentController
+    @State private var isOpen = false
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if isOpen {
+                TextField(
+                    "Filter by process name or PID",
+                    text: $controller.processFilterText
+                )
+                .textFieldStyle(.roundedBorder)
+                .focused($isFocused)
+                .onSubmit { controller.announceProcessFilterResults() }
+                .onExitCommand(perform: close)
+                .arktraceAccessibleTarget()
+                Button(action: close) {
+                    Image(systemName: "xmark.circle.fill")
+                        .imageScale(.medium)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+                .help("Stop filtering")
+                .accessibilityLabel("Stop filtering processes")
+                .arktraceAccessibleTarget()
+            } else {
+                Button {
+                    isOpen = true
+                    isFocused = true
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .imageScale(.medium)
+                }
+                .buttonStyle(.borderless)
+                .help("Filter processes by name or PID")
+                .accessibilityLabel("Filter processes")
+                .arktraceAccessibleTarget()
+                Spacer(minLength: 0)
+            }
+        }
+    }
+
+    private func close() {
+        controller.processFilterText = ""
+        isOpen = false
+        isFocused = false
+    }
+}
+
 /// Observation boundary: recent documents, the search echo/results, and the
 /// track tree. Never reads `snapshot`, `phase`, or selection state, so
 /// viewport churn cannot rebuild the sidebar.
@@ -512,7 +570,25 @@ private struct TraceViewerSidebar: View {
     var controller: TraceDocumentController
     @State private var favoritesExpanded = true
 
+    /// The tree the filter leaves standing. Read through the controller so the
+    /// rule — process name or PID, nothing else — has one home and one test.
+    private var groups: [TraceTrackGroup] { controller.filteredTrackGroups() }
+
     var body: some View {
+        VStack(spacing: 0) {
+            // No trace, nothing to filter: an empty window must not offer a
+            // control that cannot do anything (AT-APP-003).
+            if !controller.trackGroups.isEmpty {
+                ProcessFilterBar(controller: controller)
+                    .padding(.horizontal, 10)
+                    .padding(.top, 6)
+                    .padding(.bottom, 2)
+            }
+            list
+        }
+    }
+
+    private var list: some View {
         List {
             if !controller.recentDocuments.isEmpty {
                 RecentDocumentsSection(controller: controller)
@@ -540,7 +616,12 @@ private struct TraceViewerSidebar: View {
                     .arktraceAccessibleTarget()
                 }
             }
-            ForEach(controller.trackGroups) { group in
+            if groups.isEmpty, !controller.trackGroups.isEmpty {
+                Text("No process matches the filter")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(groups) { group in
                 Section {
                     DisclosureGroup {
                         if !group.capabilityAvailable {
@@ -569,10 +650,6 @@ private struct TraceViewerSidebar: View {
                                     .lineLimit(nil)
                                     .fixedSize(horizontal: false, vertical: true)
                                     .multilineTextAlignment(.leading)
-                                if group.truncated {
-                                    Image(systemName: "ellipsis.circle")
-                                        .foregroundStyle(.secondary)
-                                }
                                 Spacer(minLength: 0)
                             }
                             .contentShape(Rectangle())
@@ -582,6 +659,21 @@ private struct TraceViewerSidebar: View {
                     }
                     .arktraceAccessibleTarget()
                 }
+            }
+            // Said once, at the end of the tree, instead of a dot beside every
+            // process: the bound is on the thread directory the whole tree was
+            // built from, so per-process marks repeat one fact hundreds of
+            // times and none of them is about that process.
+            if controller.trackListTruncated {
+                Label(
+                    "Some lanes are not listed: this trace has more threads or"
+                        + " counter series than the list holds",
+                    systemImage: "ellipsis.circle"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
         .listStyle(.sidebar)
@@ -1189,7 +1281,7 @@ private struct TraceSearchField: View {
     var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
 
     var body: some View {
-        TextField("Search PID, TID, process, thread, or slice", text: $controller.searchFieldText)
+        TextField("Search TID, thread, or slice", text: $controller.searchFieldText)
             .textFieldStyle(.roundedBorder)
             .frame(minWidth: 220, idealWidth: 300)
             .arktraceAccessibleTarget()

@@ -134,6 +134,8 @@ final class TraceViewerAnalysisTests: XCTestCase {
             (processQueries.map(\.nameMatch), threadQueries.map(\.nameMatch))
         }
 
+        func capturedProcessQueryCount() -> Int { processQueries.count }
+
         private static func matches(
             _ candidate: String?,
             _ filter: String?,
@@ -188,6 +190,61 @@ final class TraceViewerAnalysisTests: XCTestCase {
             repository: repository
         ).search(TraceViewerSearchRequest(text: "itid:3"))
         XCTAssertEqual(byInternalIdentity.items.map(\.threadKey?.itid), [3])
+    }
+
+    /// The viewer asks two questions from two fields: the sidebar filter finds
+    /// a process, the toolbar field finds what happened. A domain the request
+    /// excludes must not come back in the results -- and must not be queried
+    /// at all, since the excluded query is the expensive half of a search that
+    /// is not going to show it.
+    func testSearchDomainsExcludeWholeDirectories() async throws {
+        let repository = Repository(
+            processes: [
+                TraceProcess(
+                    key: ProcessKey(ipid: 2), pid: 42, name: "worker 42",
+                    startNs: 0, endNs: 900, threadCount: 1
+                ),
+            ],
+            threads: [
+                TraceThread(
+                    key: ThreadKey(itid: 3), processKey: ProcessKey(ipid: 2),
+                    tid: 42, pid: 42, name: "io-42", processName: "worker 42",
+                    startNs: 10, endNs: 800, isMainThread: false
+                ),
+            ],
+            slices: [
+                TraceSlice(
+                    key: EventKey(table: .callstack, rowID: 9),
+                    range: try TraceTimeRange(startNs: 100, endNs: 200),
+                    threadKey: ThreadKey(itid: 3), processKey: ProcessKey(ipid: 2),
+                    name: "decode 42", category: "work", depth: 0,
+                    parentEventKey: nil, isAsync: false, isOpenEnded: false
+                ),
+            ]
+        )
+        let engine = TraceViewerSearchEngine(repository: repository)
+
+        let withoutProcesses = try await engine.search(
+            TraceViewerSearchRequest(text: "42", domains: [.thread, .slice])
+        )
+        XCTAssertEqual(withoutProcesses.items.map(\.kind), [.thread, .slice])
+        let processQueries = await repository.capturedProcessQueryCount()
+        XCTAssertEqual(processQueries, 0, "an excluded domain must not be queried")
+
+        // `ipid:` is a process question, so it stops being answered too.
+        let byProcessIdentity = try await engine.search(
+            TraceViewerSearchRequest(text: "ipid:2", domains: [.thread, .slice])
+        )
+        XCTAssertTrue(byProcessIdentity.items.isEmpty)
+
+        let onlyProcesses = try await engine.search(
+            TraceViewerSearchRequest(text: "42", domains: [.process])
+        )
+        XCTAssertEqual(onlyProcesses.items.map(\.kind), [.process])
+
+        XCTAssertThrowsError(
+            try TraceViewerSearchRequest(text: "42", domains: [])
+        )
     }
 
     /// DESIGN §4.3 invariant 3: the App's range analysis and the CLI's

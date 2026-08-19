@@ -1130,6 +1130,92 @@ final class TraceDocumentControllerTests: XCTestCase {
     /// view: a collapsed group draws nothing, so its lanes have no y until they
     /// have been laid out. The scroll target therefore waits for the snapshot
     /// that contains them rather than guessing an offset.
+    /// The sidebar's filter, which is a different question from the toolbar
+    /// search: it narrows the lane tree to processes and answers from the two
+    /// things a process row shows -- its name and its PID.
+    func testProcessFilterMatchesNameAndPIDAndNothingElse() async throws {
+        let suite = "ArkTraceProcessFilterTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        var threads: [TraceThread] = []
+        var cpuSlices: [CpuSlice] = []
+        for index in 1...3 {
+            let ipid = Int64(index)
+            threads.append(Self.makeThread(itid: ipid, ipid: ipid, name: "t\(index)"))
+            cpuSlices.append(try Self.makeCPUSlice(rowID: ipid, ipid: ipid))
+        }
+        let frozenThreads = threads
+        let frozenSlices = cpuSlices
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: Repository(
+                        identity: "r",
+                        capabilities: TraceCapabilities(
+                            cpuScheduling: true, threadStates: true,
+                            namedSlices: true, cpuCounters: false,
+                            processCounters: false
+                        ),
+                        threads: frozenThreads,
+                        cpuSlices: frozenSlices
+                    ),
+                    cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-process-filter-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        // Threads are named proc1 [100], proc2 [200], proc3 [300].
+        XCTAssertEqual(
+            controller.filteredTrackGroups().map(\.id),
+            controller.trackGroups.map(\.id),
+            "an empty filter is not a filter"
+        )
+
+        controller.processFilterText = "proc2"
+        XCTAssertEqual(controller.filteredTrackGroups().map(\.id), ["process:2"])
+
+        controller.processFilterText = "PROC2"
+        XCTAssertEqual(
+            controller.filteredTrackGroups().map(\.id), ["process:2"],
+            "typing a process name is not a spelling test"
+        )
+
+        controller.processFilterText = "  200  "
+        XCTAssertEqual(
+            controller.filteredTrackGroups().map(\.id), ["process:2"],
+            "the PID is half of what a process row shows"
+        )
+
+        controller.processFilterText = "proc"
+        XCTAssertEqual(
+            controller.filteredTrackGroups().map(\.id),
+            ["process:1", "process:2", "process:3"],
+            "cross-process groups are not processes and must drop out"
+        )
+
+        controller.processFilterText = "t2"
+        XCTAssertTrue(
+            controller.filteredTrackGroups().isEmpty,
+            "thread names belong to the toolbar search, not this filter"
+        )
+
+        controller.processFilterText = "proc2"
+        await controller.close()
+        XCTAssertEqual(
+            controller.processFilterText, "",
+            "a filter must not outlive the trace it was filtering"
+        )
+    }
+
     func testRevealingATrackGroupShowsItsLanesAndScrollsToThem() async throws {
         let suite = "ArkTraceRevealGroupTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

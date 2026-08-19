@@ -46,6 +46,12 @@ private func pinAppSupportSurface(
     _ = controller.stepSearchResult(by: 1)
     _ = controller.activateSearchResult()
     controller.searchFieldText = "query"
+    // The sidebar's own filter: its text, the tree it leaves standing, whether
+    // that tree is bounded, and the count it announces.
+    controller.processFilterText = "proc"
+    _ = controller.filteredTrackGroups().map(\.id)
+    _ = controller.trackListTruncated
+    controller.announceProcessFilterResults()
     _ = controller.cacheInventory?.totalByteCount
     _ = controller.cacheInventory?.entryCount
     _ = controller.cacheInventory?.activeEntryCount
