@@ -183,7 +183,12 @@ private struct TraceViewerRootView: View {
             focusRegion: $focusRegion,
             openPanel: presentOpenPanel
         )
-        .overlay(alignment: .topLeading) {
+        // On the edge the pane will come back to. A control in the canvas'
+        // top-left corner is where nobody looks for a pane that docks along
+        // the bottom, and a hidden pane whose only way back cannot be found is
+        // a hidden pane with no way back (AT-APP-003 asks for a disclosure
+        // control that is visible, which has to mean findable).
+        .overlay(alignment: inspectorDock == .bottom ? .bottomLeading : .topLeading) {
             if !showInspector {
                 InspectorFocusButton(
                     title: String(
@@ -611,6 +616,10 @@ private struct TraceTimelinePane: View {
     var body: some View {
         switch controller.phase {
         case .idle:
+            // Filling the pane is what centres it. Nothing in an empty state
+            // has a width of its own, so a split view sizes both panes to
+            // their ideal content instead and the placeholder ends up in the
+            // top-left corner of a mostly empty window.
             ContentUnavailableView {
                 Label("Open a trace", systemImage: "waveform.path.ecg")
             } description: {
@@ -620,12 +629,14 @@ private struct TraceTimelinePane: View {
                     .buttonStyle(.borderedProminent)
                     .arktraceAccessibleTarget()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed where controller.snapshot == nil:
             ContentUnavailableView(
                 "Trace unavailable",
                 systemImage: "exclamationmark.triangle",
                 description: Text(controller.errorPresentation?.reason ?? "The trace could not be opened.")
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         default:
             ZStack(alignment: .topLeading) {
                 if let snapshot = controller.snapshot {
@@ -869,19 +880,26 @@ private struct TraceInspectorPane: View {
                 HStack {
                     Text("Inspector").font(.headline)
                     Spacer()
-                    InspectorDockMenu(dock: $dock)
-                    InspectorFocusButton(
-                        title: String(
-                            localized: "Hide Inspector",
-                            comment: "Button that collapses the Inspector pane."
-                        ),
-                        showsTitle: false,
-                        focusRequestID: hideFocusRequestID,
-                        onFocusRequestConsumed: onHideFocusRequestConsumed,
-                        action: collapse
-                    )
-                    .frame(width: 32, height: 32)
-                    .focused(focusRegion, equals: .inspector)
+                    // Docking and hiding are operations on a pane that is
+                    // showing something. With no trace open there is nothing
+                    // to inspect, nothing to move and no reason to offer the
+                    // two controls -- `metadata` is the fact that says so, and
+                    // this view already reads it below.
+                    if controller.metadata != nil {
+                        InspectorDockMenu(dock: $dock)
+                        InspectorFocusButton(
+                            title: String(
+                                localized: "Hide Inspector",
+                                comment: "Button that collapses the Inspector pane."
+                            ),
+                            showsTitle: false,
+                            focusRequestID: hideFocusRequestID,
+                            onFocusRequestConsumed: onHideFocusRequestConsumed,
+                            action: collapse
+                        )
+                        .frame(width: 32, height: 32)
+                        .focused(focusRegion, equals: .inspector)
+                    }
                 }
                 Divider()
                 if let event = controller.selectedEvent {
@@ -917,6 +935,7 @@ private struct TraceInspectorPane: View {
                 }
             }
             .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .focusSection()
     }

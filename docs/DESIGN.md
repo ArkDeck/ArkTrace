@@ -978,6 +978,16 @@ Toolbar
 停靠选择存在 `UserDefaults`（`inspectorDock`）而不是 trace 的 view-state sidecar：它属于这台机器上的这个
 viewer，不属于某一条 trace，也不应该因为打开另一条 trace 就变回去。
 
+**折叠后的 disclosure 跟着停靠边走**（改于 2026-08-19）。「Show Inspector」原先固定在画布左上角。对右侧
+停靠尚可，对底部停靠则是把唯一的返回入口放在了没人会看的一角——用户的原话是「折叠之后就没有办法显示
+了」，控件其实在，只是找不到。AT-APP-003 要求 disclosure「可见」，而可见必须意味着找得到，所以它现在
+出现在 pane 将要回来的那条边：底部停靠在左下角，右侧停靠维持左上角。
+
+**空状态**（无 trace）另有两条：Inspector 不显示 dock 与折叠控件（没有可检视的东西，也就没有可移动、
+可折叠的东西；判据是 `metadata == nil`，该 view 本来就读它），以及「Open a trace」占位在可用区域内居中。
+后者原先偏在左上角，原因是空状态里两块 pane 都没有自己的宽度，split view 于是按内容 ideal size 收缩——
+让占位与 Inspector 内容各自 `maxWidth: .infinity` 撑满，居中就自然成立。
+
 Timeline 是刻意保留的二维工作区：横向滚动表示时间，纵向滚动表示 track。其他工具栏、表单与 Inspector 不得产生无意的横向滚动。分组间距大于组内间距，track label、数值列与 controls 保持稳定对齐；所有 leading/trailing 关系使用语义方向，避免把界面锁死在 left/right 假设上。
 
 ### 14.2 主要交互
