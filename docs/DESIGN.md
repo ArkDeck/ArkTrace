@@ -1003,6 +1003,21 @@ pane header 里的停靠菜单共用。名字取方向语义的 `sidebar.trailin
 close box（`xmark`）：它紧挨着停靠菜单，两个相同图标做不同的事，比任何一个单独存在都糟。状态写在文字里
 （tooltip 与 accessible name 在「Show/Hide Inspector」之间切换），不靠外观区分（AT-APP-011）。
 
+**在 flag 上写它的名字**（改于 2026-08-19）。ruler 上的 flag 原先只能在 Inspector 的标注列表里改名，而按下
+ruler 一律新建一个 flag——于是点已有的那根线，得到的是叠在它上面的第二根。上游是点击 flag 就地写 tag，这
+条改成一样：画布把这次按下报成 `TimelineFlagHit`（flag id + pennant 矩形），host 在那面旗子下面开一个编辑器。
+
+三个细节是踩出来的：
+
+- **报在抬起而不是按下**，且这一下**不夺取 first responder**。按下就报会让紧随其后的抬起把刚开的编辑器关掉；
+  而画布若把键盘拿走，编辑器里的输入框就再也拿不到焦点，敲进去的字会变成时间轴的快捷键。
+- **不是 popover，是画布上的面板**。SwiftUI 的 `.popover` 挂在 `NSViewRepresentable` 的 overlay 上、又位于
+  scroll view 内时不会呈现——状态翻转了，屏幕上什么都没有（实测，`isPresented` 为真、内容非空仍不出现）。
+  面板挂在画布自身的 overlay 上，随内容一起滚动，这也正是上游的样子。
+- **命中区是 24 点见方**，pennant 只有 7×8 pt（AT-APP-011）。
+
+名字同时画在 ruler 上 pennant 旁边，用该 flag 的颜色。写完看不见的名字没有意义，这是这条功能的全部目的。
+
 **Timeline 的 focus 指示按输入方式出现**（改于 2026-08-19）。焦点环从画布挪到 pane 边框之后，规则一直是
 「focusRegion == .timeline 就画」。但打开一条 trace 就会把键盘交给画布（AT-APP-009），于是每条 trace 一打开
 四周就套着一圈 3pt 的蓝框——第一反应是「怎么全选了」，而不是「键盘在这里」。

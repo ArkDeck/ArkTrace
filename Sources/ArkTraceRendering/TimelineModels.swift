@@ -533,6 +533,24 @@ public struct TimelineDensityHit: Hashable, Sendable {
     }
 }
 
+/// A press that landed on a flag already standing on the ruler.
+///
+/// Upstream lets a flag be named where it stands rather than only in a list
+/// elsewhere, which is the difference between "a mark at 305 s" and "the frame
+/// that dropped". The canvas reports which flag was pressed and where its
+/// pennant is, so the host can put an editor against it; the label itself is
+/// host state, so the canvas never edits anything.
+public struct TimelineFlagHit: Hashable, Sendable {
+    public let id: Int
+    /// The pennant's rectangle in the canvas' own coordinates.
+    public let marker: CGRect
+
+    public init(id: Int, marker: CGRect) {
+        self.id = id
+        self.marker = marker
+    }
+}
+
 /// Where a selected event lies when the viewport draws no primitive for it.
 ///
 /// Selecting through a density band leaves the canvas holding a key it cannot

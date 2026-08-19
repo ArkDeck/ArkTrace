@@ -1063,7 +1063,7 @@ process counter 样本只覆盖 66 条 series 中的 13 条，另外 53 条会�
 
 标注是 session 状态，**不得进入 `TimelineSnapshot`**（AT-RENDER-002 要求 snapshot 是 immutable 的
 bounded 查询结果）。flag 由 ruler 点击创建；mark 由当前选区创建，并区分临时（被下一个临时 mark 取代）
-与保留（累积）两种。标注必须可改名、换色、删除，并在打开新 trace 时清除（AT-APP-002）。
+与保留（累积）两种。标注必须可改名、换色、删除，并在打开新 trace 时清除（AT-APP-002）。**改名必须能在标注本身上完成**：点击 ruler 上已有的 flag 打开该 flag 的编辑器（而不是在它上面再叠一个 flag），flag 的名字同时画在 ruler 上它旁边——一条穿过整幅 trace 的竖线值得有个名字，而看不见的名字等于没有。命中目标不小于 24×24 pt（AT-APP-011），pennant 本身只有 7×8 pt。
 
 标注键位必须遵守既有作用域约定：只在 Timeline 持有 focus 时生效，不拦截文本输入，**⌘ 修饰的字母一律
 交回菜单**。因此标注跳转使用 Control 修饰，且不得夺走裸 `[` / `]` 既有的 zoom-to-selection 含义。

@@ -154,6 +154,9 @@ private func pinRenderingSurface(
         onHoverEvent: { _ in },
         onSelectRange: { _ in },
         onCreateFlag: { (_: Int64) in },
+        // Naming a flag happens in the App, so the press it answers is part of
+        // the promised surface.
+        onSelectFlag: { (hit: TimelineFlagHit) in _ = (hit.id, hit.marker) },
         onAnnotationCommand: { (_: TimelineAnnotationCommand) in },
         onViewportIntent: { (_: TimelineViewportIntent) in },
         onZoomSelection: {},

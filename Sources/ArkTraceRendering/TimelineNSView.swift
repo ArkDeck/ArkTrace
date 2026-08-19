@@ -96,6 +96,9 @@ public final class TimelineNSView: NSView {
     public var onSelectRange: (@MainActor (TraceTimeRange?) -> Void)?
     /// Ruler click: create a flag at that instant.
     public var onCreateFlag: (@MainActor (Int64) -> Void)?
+    /// Ruler click on a flag already there: name that one. The label is host
+    /// state, so the canvas reports the press and edits nothing.
+    public var onSelectFlag: (@MainActor (TimelineFlagHit) -> Void)?
     public var onAnnotationCommand: (@MainActor (TimelineAnnotationCommand) -> Void)?
     public var onViewportIntent: (@MainActor (TimelineViewportIntent) -> Void)?
     public var onZoomSelection: (@MainActor () -> Void)?
@@ -130,6 +133,8 @@ public final class TimelineNSView: NSView {
     /// The band this press would select, kept until the gesture proves itself
     /// a range drag instead.
     private(set) var pendingDensityHit: TimelineDensityHit?
+    /// The flag this press would name, held until the release.
+    private(set) var pendingFlagHit: TimelineFlagHit?
     /// Pointer-driven, overlay-only, like ``hoveredEventKey``.
     private(set) var hoveredSelectionEndpoint: TimelineSelectionEndpoint?
     private var suppressAccessibilityNotifications = false
@@ -407,13 +412,25 @@ public final class TimelineNSView: NSView {
         keyboardFocusIsVisible = false
         let point = convert(event.locationInWindow, from: nil)
         pendingDensityHit = nil
+        pendingFlagHit = nil
         // Upstream places a flag by clicking the ruler; the ruler carries no
-        // events, so the gesture is unambiguous.
+        // events, so the gesture is unambiguous. A press on a flag already
+        // standing there names that one instead -- which is also the only way
+        // it could work: stacking a second flag on top of the first is not
+        // something anybody aims for.
         if point.y < TimelineGeometry.rulerHeight, let source = displayedSnapshot {
-            unsafe window?.makeFirstResponder(self)
-            onCreateFlag?(
-                TimelineGeometry.time(forX: point.x, viewport: source.viewport)
-            )
+            if let hit = flag(at: point) {
+                // Reported on the release, not on the press, and without
+                // taking first responder: the host answers this by opening an
+                // editor over the flag, and the keyboard belongs in that
+                // editor rather than back on the canvas.
+                pendingFlagHit = hit
+            } else {
+                unsafe window?.makeFirstResponder(self)
+                onCreateFlag?(
+                    TimelineGeometry.time(forX: point.x, viewport: source.viewport)
+                )
+            }
             return
         }
         // An existing selection's edges outrank the events beneath them. The
@@ -492,6 +509,10 @@ public final class TimelineNSView: NSView {
         if let hit = pendingDensityHit {
             pendingDensityHit = nil
             onSelectDensityBand?(hit)
+        }
+        if let hit = pendingFlagHit {
+            pendingFlagHit = nil
+            onSelectFlag?(hit)
         }
     }
 
@@ -1273,8 +1294,59 @@ public final class TimelineNSView: NSView {
             // A pennant in the ruler, so a flag outside the visible tracks is
             // still findable without scrolling vertically.
             context.setFillColor(color.cgColor)
-            context.fill(CGRect(x: x, y: 2, width: 7, height: 8))
+            let pennant = Self.pennantFrame(atX: x)
+            context.fill(pennant)
+            // And its tag beside it: a line through the trace is worth naming,
+            // and a name nobody can see without opening something is not one.
+            guard !flag.label.isEmpty else { continue }
+            let text = NSAttributedString(
+                string: flag.label,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 9, weight: .medium),
+                    .foregroundColor: NSColor(cgColor: color.cgColor) ?? .labelColor,
+                ]
+            )
+            text.draw(
+                with: CGRect(
+                    x: pennant.maxX + 3, y: 1,
+                    width: min(160, max(0, bounds.width - pennant.maxX - 6)),
+                    height: TimelineGeometry.rulerHeight - 2
+                ),
+                options: [.truncatesLastVisibleLine, .usesLineFragmentOrigin]
+            )
         }
+    }
+
+    /// The pennant drawn for a flag at `x`. Shared by the drawing and the hit
+    /// test so a press lands on what the reader aimed at.
+    static func pennantFrame(atX x: CGFloat) -> CGRect {
+        CGRect(x: x, y: 2, width: 7, height: 8)
+    }
+
+    /// The flag whose pennant is under `point`.
+    ///
+    /// The pennant is 7 by 8 points -- far below AT-APP-011's 24 point floor
+    /// -- so the target is the full height of the ruler and 24 points across,
+    /// centred on it. Flags are searched in reverse drawing order, so when two
+    /// stand close together the press takes the one drawn on top.
+    public func flag(at point: CGPoint) -> TimelineFlagHit? {
+        guard let source = displayedSnapshot, point.y < TimelineGeometry.rulerHeight
+        else { return nil }
+        let reach = TimelineAccessibilityLayout.minimumTargetPoints / 2
+        for flag in annotations.orderedFlags.reversed() {
+            guard flag.timestampNs >= source.viewport.range.startNs,
+                flag.timestampNs <= source.viewport.range.endNs
+            else { continue }
+            let x = TimelineGeometry.x(for: flag.timestampNs, viewport: source.viewport)
+            let pennant = Self.pennantFrame(atX: x)
+            let target = CGRect(
+                x: pennant.midX - reach, y: 0,
+                width: 2 * reach, height: TimelineGeometry.rulerHeight
+            )
+            guard target.contains(point) else { continue }
+            return TimelineFlagHit(id: flag.id, marker: pennant)
+        }
+        return nil
     }
 
     private func drawSelection(_ snapshot: TimelineSnapshot, context: CGContext) {
@@ -1810,6 +1882,7 @@ public struct TimelineView: NSViewRepresentable {
     public let onHoverEvent: @MainActor (EventKey?) -> Void
     public let onSelectRange: @MainActor (TraceTimeRange?) -> Void
     public let onCreateFlag: @MainActor (Int64) -> Void
+    public let onSelectFlag: @MainActor (TimelineFlagHit) -> Void
     public let onAnnotationCommand: @MainActor (TimelineAnnotationCommand) -> Void
     public let onViewportIntent: @MainActor (TimelineViewportIntent) -> Void
     public let onZoomSelection: @MainActor () -> Void
@@ -1833,6 +1906,7 @@ public struct TimelineView: NSViewRepresentable {
         onHoverEvent: @escaping @MainActor (EventKey?) -> Void = { _ in },
         onSelectRange: @escaping @MainActor (TraceTimeRange?) -> Void = { _ in },
         onCreateFlag: @escaping @MainActor (Int64) -> Void = { _ in },
+        onSelectFlag: @escaping @MainActor (TimelineFlagHit) -> Void = { _ in },
         onAnnotationCommand: @escaping @MainActor (TimelineAnnotationCommand) -> Void
             = { _ in },
         onViewportIntent: @escaping @MainActor (TimelineViewportIntent) -> Void = { _ in },
@@ -1853,6 +1927,7 @@ public struct TimelineView: NSViewRepresentable {
         self.onHoverEvent = onHoverEvent
         self.onSelectRange = onSelectRange
         self.onCreateFlag = onCreateFlag
+        self.onSelectFlag = onSelectFlag
         self.onAnnotationCommand = onAnnotationCommand
         self.onViewportIntent = onViewportIntent
         self.onZoomSelection = onZoomSelection
@@ -1873,6 +1948,7 @@ public struct TimelineView: NSViewRepresentable {
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onCreateFlag = onCreateFlag
+        view.onSelectFlag = onSelectFlag
         view.onAnnotationCommand = onAnnotationCommand
         view.onViewportIntent = onViewportIntent
         view.onZoomSelection = onZoomSelection
@@ -1898,6 +1974,7 @@ public struct TimelineView: NSViewRepresentable {
         view.onHoverEvent = onHoverEvent
         view.onSelectRange = onSelectRange
         view.onCreateFlag = onCreateFlag
+        view.onSelectFlag = onSelectFlag
         view.onAnnotationCommand = onAnnotationCommand
         view.onViewportIntent = onViewportIntent
         view.onZoomSelection = onZoomSelection

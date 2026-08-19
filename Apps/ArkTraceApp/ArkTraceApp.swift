@@ -649,6 +649,8 @@ private struct TraceTimelinePane: View {
     let openPanel: @MainActor () -> Void
     /// Whether the canvas is advertising keyboard focus right now.
     @State private var keyboardFocusIsVisible = false
+    /// The flag whose tag is being written, and where its pennant is.
+    @State private var editingFlag: TimelineFlagHit?
 
     var body: some View {
         switch controller.phase {
@@ -687,12 +689,19 @@ private struct TraceTimelinePane: View {
                             focusRequestID: controller.timelineFocusRequestID,
                             interactionBounds: controller.timelineBounds,
                             accessibilityLabelText: String(localized: .a11YTimelineLabel),
-                            onSelectEvent: controller.selectEvent,
+                            onSelectEvent: { key in
+                                editingFlag = nil
+                                controller.selectEvent(key)
+                            },
                             onSelectDensityBand: controller.selectDensityBand,
                             onKeyboardFocusVisibleChange: { keyboardFocusIsVisible = $0 },
                             onHoverEvent: controller.hoverEvent,
                             onSelectRange: controller.selectRange,
-                            onCreateFlag: { controller.addFlag(atNs: $0) },
+                            onCreateFlag: {
+                                editingFlag = nil
+                                controller.addFlag(atNs: $0)
+                            },
+                            onSelectFlag: { editingFlag = $0 },
                             onAnnotationCommand: controller.handleAnnotationCommand,
                             onViewportIntent: controller.handleViewportIntent,
                             onZoomSelection: controller.zoomToSelection,
@@ -707,6 +716,47 @@ private struct TraceTimelinePane: View {
                             )
                         )
                         .onAppear { controller.markTimelineDisplayed() }
+                        // Anchored to the canvas, not to the pane: the canvas
+                        // is what scrolls, so the editor stays on its flag.
+                        // The anchor is always in the hierarchy and only moves
+                        // -- a popover attached to a view created in the same
+                        // update as the presentation simply does not appear --
+                        // and it is `position`, not `offset`, because a popover
+                        // anchors to the layout frame and `offset` does not
+                        // move that.
+                        // The editor rides on the canvas so it stays with its
+                        // flag while the content scrolls. A panel rather than a
+                        // popover: SwiftUI will not present a popover anchored
+                        // into an `NSViewRepresentable`'s overlay inside a
+                        // scroll view -- the state flips and nothing appears --
+                        // and a panel is what upstream shows anyway.
+                        .overlay(alignment: .topLeading) {
+                            if let hit = editingFlag,
+                                let flag = controller.annotations.flags.first(
+                                    where: { $0.id == hit.id }
+                                )
+                            {
+                                FlagTagEditor(
+                                    flag: flag,
+                                    rename: { controller.updateFlag(id: flag.id, label: $0) },
+                                    cycleColor: {
+                                        controller.updateFlag(
+                                            id: flag.id, colorIndex: flag.colorIndex + 1
+                                        )
+                                    },
+                                    remove: {
+                                        controller.removeFlag(id: flag.id)
+                                        editingFlag = nil
+                                    },
+                                    dismiss: { editingFlag = nil }
+                                )
+                                .fixedSize()
+                                .offset(
+                                    x: max(4, hit.marker.midX - 140),
+                                    y: hit.marker.maxY + 4
+                                )
+                            }
+                        }
                     }
                     // The keyboard focus indicator for the timeline (DESIGN
                     // §"focus ring 清晰可见"). It borders the pane, which stays
@@ -1162,6 +1212,74 @@ private struct TraceResetZoomButton: View {
             Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass")
         }
         .primaryToolbarTarget()
+    }
+}
+
+/// What a flag is for, written where the flag stands.
+///
+/// The Annotations list in the Inspector can already rename one, but a list of
+/// timestamps is not where anybody looks after pressing a marker: upstream
+/// names a flag at the flag, and so does this. The field commits on Return and
+/// on dismissal rather than on every keystroke -- each commit writes the
+/// trace's annotation sidecar, and a file per character typed is not what that
+/// persistence is for.
+private struct FlagTagEditor: View {
+    let flag: TimelineFlag
+    let rename: @MainActor (String) -> Void
+    let cycleColor: @MainActor () -> Void
+    let remove: @MainActor () -> Void
+    let dismiss: @MainActor () -> Void
+
+    @State private var text = ""
+    @FocusState private var fieldIsFocused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            TextField("Tag", text: $text)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 240)
+                .focused($fieldIsFocused)
+                .onSubmit {
+                    rename(text)
+                    dismiss()
+                }
+            HStack(spacing: 10) {
+                Button(action: cycleColor) {
+                    Label("Change Colour", systemImage: "circle.fill")
+                        .foregroundStyle(
+                            Color(cgColor: TimelineAnnotationColor.cgColor(at: flag.colorIndex))
+                        )
+                }
+                .buttonStyle(.borderless)
+                .labelStyle(.iconOnly)
+                .help("Change Colour")
+                .arktraceAccessibleTarget()
+                Text(time(flag.timestampNs))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                Spacer()
+                Button("Remove", role: .destructive, action: remove)
+                    .arktraceAccessibleTarget()
+            }
+        }
+        .padding(12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1)
+        )
+        .shadow(radius: 10, y: 3)
+        .onExitCommand(perform: dismiss)
+        .onAppear {
+            text = flag.label
+            // A hop, because the field is asking for focus in the same pass
+            // that builds it; AppKit hands it over on the next one.
+            DispatchQueue.main.async { fieldIsFocused = true }
+        }
+        // Whatever was typed is the tag, whether it was committed with Return
+        // or the editor was simply put away.
+        .onDisappear { rename(text) }
     }
 }
 
