@@ -729,6 +729,16 @@ private struct TraceTimelinePane: View {
 /// and nothing animates on its own except `ProgressView`, whose motion AppKit
 /// already ties to Reduce Motion. State is carried by shape and text, never by
 /// colour alone (AT-APP-011).
+///
+/// There is deliberately no row of pipeline dots under the status line. It was
+/// here and it was removed: a cache hit goes preparing, hashing, cacheLookup,
+/// openingDatabase and never parses, validates or indexes at all, so the row
+/// lit three steps that had not happened; by the last stage -- which is the
+/// screen a slow open sits on longest -- every dot was lit and the row said
+/// nothing; and seven equal dots implied seven equal steps when parsing and
+/// indexing take fifteen times what hashing does. A step counter would inherit
+/// the same lie in its denominator, so nothing replaced it. What is left is
+/// what the open can actually measure.
 private struct TraceLoadingPane: View {
     let stage: TraceLoadingStage
     /// 0…1 within the stage, when the stage can say. Nil is not zero: it means
@@ -797,7 +807,6 @@ private struct TraceLoadingPane: View {
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
-            TraceLoadingStageTrack(stage: stage)
             Button("Cancel", action: cancel)
                 .keyboardShortcut(.cancelAction)
                 .arktraceAccessibleTarget()
@@ -841,39 +850,6 @@ private struct TraceLoadingPane: View {
         guard seconds >= 60 else { return "\(seconds)s" }
         let remainder = seconds % 60
         return "\(seconds / 60):\(remainder < 10 ? "0" : "")\(remainder)"
-    }
-}
-
-/// Where in the open pipeline the work has reached. Position, not percentage:
-/// the stages take wildly different times on a real trace -- parsing dominates
-/// -- so a fraction would be a promise the loader cannot keep, while a row of
-/// stages is exactly the fact the user is missing.
-private struct TraceLoadingStageTrack: View {
-    let stage: TraceLoadingStage
-
-    /// The stages an open passes through, in order. `ready`, `failed` and
-    /// `cancelled` are outcomes rather than steps and are deliberately absent:
-    /// reaching one of them means this view is gone.
-    static let pipeline: [TraceLoadingStage] = [
-        .preparing, .hashing, .cacheLookup, .parsing,
-        .validating, .indexing, .openingDatabase,
-    ]
-
-    var body: some View {
-        if let index = Self.pipeline.firstIndex(of: stage) {
-            HStack(spacing: 5) {
-                ForEach(Array(Self.pipeline.enumerated()), id: \.element) { position, _ in
-                    Capsule()
-                        .fill(
-                            position <= index
-                                ? AnyShapeStyle(.tint)
-                                : AnyShapeStyle(.quaternary)
-                        )
-                        .frame(width: position == index ? 26 : 16, height: 4)
-                }
-            }
-            .accessibilityHidden(true)
-        }
     }
 }
 

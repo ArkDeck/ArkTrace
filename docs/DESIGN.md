@@ -16,6 +16,7 @@
 > 缺陷回写二（2026-08-18）：§13.5 新增 density band 点击规则 —— band 不带 event，点击以至多两次有界 query 解析出真实事件（AT-LOD-006），命中区为整条 track row，按下仍归 range drag
 > 性能回写三（2026-08-18）：§13.4 新增「一帧滚动的代价按露出的那条计」—— 路径缓存按 256pt 横带分桶、focus ring 移出画布（不得加回 `.default`）、tracking area 只建一次、同一代 snapshot 不重绘
 > 功能回写（2026-08-19）：§14.1 Inspector 可停靠在右侧或底部（AT-APP-003）—— 控件在 pane 自己的 header，偏好存 `UserDefaults`，自动折叠改为按停靠轴判定
+> 缺陷回写三（2026-08-19）：§13.4 加载面板去掉阶段进度点 —— 缓存命中时它会点亮从未发生的三步，末阶段又全亮，且七个等宽点暗示七步等重
 
 ## 1. 文档目的
 
@@ -860,6 +861,21 @@ parsing 2.8 s / indexing 2.6 s / cacheLookup（含把源快照到 staging）0.9 
   PTY 确实能拿到增量（实测 2.4 s 的 parse 里约 4 次、每次约 45 MB 粒度），但那要把这条被审查过的子进程
   启动路径从 pipe 改成 PTY（master/slave fd、EIO 而非 EOF、终端语义），代价与收益不成比例。scanner 保留
   且有测试：退出时的那一次仍会报到 ~1.0，将来若有能增量刷新的 parser 就自动生效。
+
+**加载面板不画阶段进度点**（改于 2026-08-19）。状态行下面曾有一排小胶囊，表示「走到流水线的第几步」。
+删掉了，四条理由每一条都足够：
+
+- **缓存命中时它点亮从未发生的步骤。** 命中的路径是 preparing → hashing → cacheLookup → openingDatabase，
+  parsing / validating / indexing 根本不执行，而那排点按下标填充，于是把这三步一起点亮；
+- **停留最久的那一屏上它什么都不说。** 打开一条大 trace 时用户看得最多的是最后一个阶段
+  （`openingDatabase`），此时七个点全亮，信息量为零——用户正是拿着这一屏来问它有什么用的；
+- **七个等宽的点暗示七步等重**，而实测 parsing 2.8 s、indexing 2.6 s、hashing 0.17 s 相差一个数量级。
+  这就是本节拒绝报总百分比的同一个理由换了个形状；
+- 它还是 `accessibilityHidden(true)`：对 VoiceOver 从来不存在。
+
+**没有做等价替换**，包括「第 n 步 / 共 7 步」这种文本形式：分母同样取决于是否命中缓存，写死 7 是同一类
+谎话。面板剩下的都是这次打开真能测到的东西——文件名、阶段名、报得出时的百分比、超过 2 s 后开始显示的
+已用时间，以及 Cancel。
 
 首版使用 CoreGraphics。只有基准证明 CPU rendering 是真实瓶颈后才考虑 Metal；Renderer protocol 已隔离后端。
 
