@@ -989,10 +989,26 @@ viewer，不属于某一条 trace，也不应该因为打开另一条 trace 就�
 顺带记一个不会触发的分支：App 最小窗口是 640×480，底部停靠的阈值是 400，最小窗口的 detail 高度约 480，
 所以底部停靠实际上永远不会自动折叠——这是「两块 pane 在最小窗口下也都放得下」的结果，不是漏了判断。
 
-**折叠后的 disclosure 跟着停靠边走**（改于 2026-08-19）。「Show Inspector」原先固定在画布左上角。对右侧
-停靠尚可，对底部停靠则是把唯一的返回入口放在了没人会看的一角——用户的原话是「折叠之后就没有办法显示
-了」，控件其实在，只是找不到。AT-APP-003 要求 disclosure「可见」，而可见必须意味着找得到，所以它现在
-出现在 pane 将要回来的那条边：底部停靠在左下角，右侧停靠维持左上角。
+**折叠/展开的控件在 toolbar 上**（改于 2026-08-19）。「Show Inspector」原先是一个浮在画布上的按钮，固定
+在左上角。对右侧停靠尚可，对底部停靠则是把唯一的返回入口放在没人会看的一角——用户的原话是「折叠之后
+就没有办法显示了」，控件其实在，只是找不到。第一版改法是让它跟着停靠边走（底部→左下角），但它仍然压在
+trace 上，而且位置会变。现在它是 toolbar trailing 端的一个按钮：两种停靠共用同一个位置，画布还给 trace，
+这也是 macOS 放这个控件的地方（Xcode 的 inspector 与 debug area 开关都在那里）。
+
+图标按停靠边取：trailing 用 `sidebar.trailing`，bottom 用 `square.bottomthird.inset.filled`（Xcode 用于这两块
+pane 的同一对符号）。此前 hide 按钮无论停在哪都画一个右侧 sidebar，停在底部时就是在说错话——这正是它被
+发现的方式。状态写在文字里（tooltip 与 accessible name 在「Show/Hide Inspector」之间切换），不靠外观区分
+（AT-APP-011）。
+
+焦点随之改路：`afterInspectorVisibilityChange` 在 pane 被折叠时把键盘交给 **timeline** 而不是原先的
+disclosure 控件——toolbar item 不是这条策略能命名的 focus region，而 timeline 正是读者刚才所在、也是
+Inspector 所描述的区域。`TraceViewerFocusRegion.inspectorDisclosure` 随之删除：留着一个没有对应控件的
+focus region，只会招来后面写错的代码。
+
+一个实现上的坑记下来：这个按钮曾写成 `Toggle(isOn: Binding(get:set:))`，而 setter 是一个 `@MainActor
+(Bool) -> Void`。在本仓库的 `-default-isolation=MainActor` + `NonisolatedNonsendingByDefault` 设置下，
+Swift 6.3 frontend 为这个 binding 生成 reabstraction thunk 时直接崩溃（IRGen，`SbScA_pSg...TR`）。改成
+`Button` + 无参 action 即可。
 
 **空状态**（无 trace）另有两条：Inspector 不显示 dock 与折叠控件（没有可检视的东西，也就没有可移动、
 可折叠的东西；判据是 `metadata == nil`，该 view 本来就读它），以及「Open a trace」占位在可用区域内居中。

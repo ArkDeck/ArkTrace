@@ -617,11 +617,14 @@ final class TraceDocumentControllerTests: XCTestCase {
             action(width: 2_000, height: 1_400, dock: .bottom, visible: false), .none
         )
 
+        // Hiding the pane the keyboard was in hands it to the timeline: the
+        // control that brings the pane back is a toolbar item now, which is
+        // not a region this policy can name.
         XCTAssertEqual(
             TraceViewerFocusPolicy.afterInspectorVisibilityChange(
                 current: .inspector, inspectorVisible: false
             ),
-            .inspectorDisclosure
+            .timeline
         )
         XCTAssertEqual(
             TraceViewerFocusPolicy.afterInspectorVisibilityChange(

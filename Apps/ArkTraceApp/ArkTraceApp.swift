@@ -101,7 +101,6 @@ private struct TraceViewerRootView: View {
         )
     }
     @State private var inspectorVisibilityGeneration: UInt64 = 0
-    @State private var inspectorDisclosureFocusRequestID: UInt64?
     @State private var inspectorHideFocusRequestID: UInt64?
     @State private var inspectorWasAutoCollapsed = false
 
@@ -165,13 +164,16 @@ private struct TraceViewerRootView: View {
                     case .collapseAutomatically:
                         inspectorWasAutoCollapsed = true
                         collapseInspector(
-                            restoringDisclosureFocus: focusRegion == .inspector,
+                            movesFocusOut: focusRegion == .inspector,
                             initiatedByLayout: true
                         )
                     case .expandAutomatically:
                         inspectorWasAutoCollapsed = false
                         expandInspector(
-                            restoringInspectorFocus: focusRegion == .inspectorDisclosure,
+                            // The layout is giving the pane back, not asking
+                            // for attention: whatever the reader is typing in
+                            // keeps the keyboard.
+                            restoringInspectorFocus: false,
                             initiatedByLayout: true
                         )
                     }
@@ -208,37 +210,6 @@ private struct TraceViewerRootView: View {
             focusRegion: $focusRegion,
             openPanel: presentOpenPanel
         )
-        // On the edge the pane will come back to. A control in the canvas'
-        // top-left corner is where nobody looks for a pane that docks along
-        // the bottom, and a hidden pane whose only way back cannot be found is
-        // a hidden pane with no way back (AT-APP-003 asks for a disclosure
-        // control that is visible, which has to mean findable).
-        .overlay(alignment: inspectorDock == .bottom ? .bottomLeading : .topLeading) {
-            if !showInspector {
-                InspectorFocusButton(
-                    title: String(
-                        localized: "Show Inspector",
-                        comment: "Button that restores the Inspector pane."
-                    ),
-                    showsTitle: true,
-                    focusRequestID: inspectorDisclosureFocusRequestID,
-                    onFocusRequestConsumed: { requestID in
-                        guard inspectorDisclosureFocusRequestID == requestID else { return }
-                        inspectorDisclosureFocusRequestID = nil
-                    },
-                    action: { expandInspector(restoringInspectorFocus: true) }
-                )
-                .focused($focusRegion, equals: .inspectorDisclosure)
-                .frame(
-                    minWidth: 124,
-                    minHeight: 32,
-                    idealHeight: 32,
-                    maxHeight: 32
-                )
-                .fixedSize(horizontal: true, vertical: false)
-                .padding(8)
-            }
-        }
     }
 
     @ViewBuilder private var inspectorPane: some View {
@@ -253,7 +224,7 @@ private struct TraceViewerRootView: View {
             },
             collapse: {
                 collapseInspector(
-                    restoringDisclosureFocus: true,
+                    movesFocusOut: true,
                     initiatedByLayout: false
                 )
             }
@@ -286,10 +257,33 @@ private struct TraceViewerRootView: View {
             TraceZoomOutButton(controller: controller)
             TraceResetZoomButton(controller: controller)
         }
+        // Its own item rather than another member of the group above: the
+        // group's generic content type is already large enough that adding one
+        // more member crashed the Swift 6.3 frontend in IRGen.
+        ToolbarItem(placement: .primaryAction) {
+            InspectorToolbarToggle(
+                isShowing: showInspector,
+                dock: inspectorDock,
+                toggle: toggleInspector
+            )
+        }
+    }
+
+    /// The toolbar toggle's one action, named so the toolbar itself stays a
+    /// list of controls.
+    private func toggleInspector() {
+        if !showInspector {
+            expandInspector(restoringInspectorFocus: false)
+        } else {
+            collapseInspector(
+                movesFocusOut: focusRegion == .inspector,
+                initiatedByLayout: false
+            )
+        }
     }
 
     private func collapseInspector(
-        restoringDisclosureFocus: Bool,
+        movesFocusOut: Bool,
         initiatedByLayout: Bool
     ) {
         inspectorVisibilityGeneration &+= 1
@@ -300,7 +294,7 @@ private struct TraceViewerRootView: View {
         }
         inspectorHideFocusRequestID = nil
         showInspector = false
-        guard restoringDisclosureFocus else { return }
+        guard movesFocusOut else { return }
         Task { @MainActor in
             await Task.yield()
             guard inspectorVisibilityGeneration == generation,
@@ -311,7 +305,6 @@ private struct TraceViewerRootView: View {
                 current: .inspector,
                 inspectorVisible: false
             )
-            inspectorDisclosureFocusRequestID = generation
         }
     }
 
@@ -321,7 +314,6 @@ private struct TraceViewerRootView: View {
     ) {
         inspectorVisibilityGeneration &+= 1
         let generation = inspectorVisibilityGeneration
-        inspectorDisclosureFocusRequestID = nil
         inspectorHideFocusRequestID = nil
         inspectorWasAutoCollapsed = false
         // An automatic expand is the layout giving back what it took, and the
@@ -926,6 +918,7 @@ private struct TraceInspectorPane: View {
                                 localized: "Hide Inspector",
                                 comment: "Button that collapses the Inspector pane."
                             ),
+                            systemImage: dock.paneSymbolName,
                             showsTitle: false,
                             focusRequestID: hideFocusRequestID,
                             onFocusRequestConsumed: onHideFocusRequestConsumed,
@@ -1149,6 +1142,47 @@ private struct TraceResetZoomButton: View {
     }
 }
 
+/// Show or hide the Inspector, from the window's trailing toolbar edge.
+///
+/// It replaced a button floating over the canvas. That button had to move with
+/// the dock to be findable at all -- top-left for a trailing pane, bottom-left
+/// for a bottom one -- and it still sat on top of the trace. A toolbar item is
+/// in the same place whichever edge the pane docks to, which is where macOS
+/// keeps this control (Xcode's inspector and debug-area toggles both live
+/// there), and it leaves the canvas to the trace.
+///
+/// The state is in the words, not in the glyph: the icon is the edge the pane
+/// occupies, and the tooltip and accessibility label say which way the press
+/// goes (AT-APP-011 rules out state carried by appearance alone). A `Button`
+/// rather than a `Toggle` for a duller reason -- a `Binding` whose setter is an
+/// isolated `(Bool) -> Void` crashes the Swift 6.3 frontend in IRGen while
+/// emitting the reabstraction thunk for it.
+private struct InspectorToolbarToggle: View {
+    let isShowing: Bool
+    let dock: TraceInspectorDock
+    let toggle: @MainActor () -> Void
+
+    private static let show = String(
+        localized: "Show Inspector",
+        comment: "Button that restores the Inspector pane."
+    )
+    private static let hide = String(
+        localized: "Hide Inspector",
+        comment: "Button that collapses the Inspector pane."
+    )
+
+    private var title: String { isShowing ? Self.hide : Self.show }
+
+    var body: some View {
+        Button(action: toggle) {
+            Label(title, systemImage: dock.paneSymbolName)
+        }
+        .help(title)
+        .accessibilityLabel(title)
+        .primaryToolbarTarget()
+    }
+}
+
 /// Which edge the Inspector is docked to, chosen the way Chrome DevTools lets
 /// it be chosen: a small control in the pane's own header, not a setting in a
 /// window the user has to go find.
@@ -1197,10 +1231,23 @@ private extension TraceInspectorDock {
         case .bottom: "rectangle.bottomhalf.inset.filled"
         }
     }
+
+    /// What the show/hide controls wear. The platform's own pair -- a trailing
+    /// sidebar and a bottom area, the two Xcode uses for exactly these two
+    /// panes -- so the icon says which edge is about to open or close. A
+    /// trailing-sidebar glyph on a pane docked along the bottom said the wrong
+    /// thing, which is how this was noticed.
+    var paneSymbolName: String {
+        switch self {
+        case .trailing: "sidebar.trailing"
+        case .bottom: "square.bottomthird.inset.filled"
+        }
+    }
 }
 
 private struct InspectorFocusButton: NSViewRepresentable {
     let title: String
+    let systemImage: String
     let showsTitle: Bool
     let focusRequestID: UInt64?
     let onFocusRequestConsumed: @MainActor (UInt64) -> Void
@@ -1217,7 +1264,7 @@ private struct InspectorFocusButton: NSViewRepresentable {
         let button = NSButton()
         button.bezelStyle = .rounded
         button.image = NSImage(
-            systemSymbolName: "sidebar.trailing",
+            systemSymbolName: systemImage,
             accessibilityDescription: title
         )
         button.imagePosition = showsTitle ? .imageLeading : .imageOnly

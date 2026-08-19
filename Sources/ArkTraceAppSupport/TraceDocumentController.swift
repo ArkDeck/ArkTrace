@@ -133,17 +133,25 @@ public enum TraceViewerFocusRegion: String, Hashable, Sendable {
     case search
     case timeline
     case inspector
-    case inspectorDisclosure
     case errorRecovery
 }
 
 public enum TraceViewerFocusPolicy {
+    /// Where the keyboard goes when the Inspector stops being on screen under
+    /// it.
+    ///
+    /// The timeline, because that is the region the reader was working in and
+    /// the one the Inspector describes. It used to be a disclosure control
+    /// floating on the canvas; the control that brings the pane back now lives
+    /// in the toolbar, where it is in the same place whichever edge the pane
+    /// docks to -- and a toolbar item is not a focus region this policy can
+    /// name.
     public static func afterInspectorVisibilityChange(
         current: TraceViewerFocusRegion?,
         inspectorVisible: Bool
     ) -> TraceViewerFocusRegion? {
         guard !inspectorVisible, current == .inspector else { return current }
-        return .inspectorDisclosure
+        return .timeline
     }
 }
 

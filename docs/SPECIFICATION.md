@@ -1009,8 +1009,10 @@ success 与 `OUTPUT_LIMIT`/resource failure 中一种 typed error，并由独立
 
 **Inspector 的停靠边由用户选择**：可停在 Timeline 的 trailing 侧，也可停在其下方（同 Chrome DevTools 的
 dock 控件）。两种停靠都必须保持 Sidebar → Timeline → Inspector 的阅读与 focus 顺序——底部停靠时最后一步
-是「向下」而非「向右」——Timeline 仍是主区域，折叠后的 disclosure control 仍必须可见且可键盘触达，
-并且**位于该 pane 停靠的那条边**：可见必须意味着找得到，画布左上角的按钮对一块停在底部的 pane 不算数。
+是「向下」而非「向右」——Timeline 仍是主区域，折叠后的 disclosure control 仍必须可见且可键盘触达。
+该控件位于 **toolbar 的 trailing 端**，两种停靠共用同一个位置：可见必须意味着找得到，而一个随停靠边移动、
+又压在 trace 上的浮动按钮两头不讨好。控件与 pane 自身的折叠按钮都使用**与当前停靠边一致的图标**，
+并以文字（tooltip / accessible name）说明这一下是展开还是折叠。
 无 trace 打开时，Inspector 不显示 dock 与折叠控件（没有可检视、可移动的东西），空状态在可用区域内居中。
 自动折叠沿**停靠轴**判定：trailing 看可用宽度，bottom 看可用高度，阈值是两个 pane 各自最小尺寸之和而不是
 一个凭空的整数（trailing 760 = canvas 420 + pane 250 + 分隔与窗口边距；bottom 400 = canvas 240 + pane 160），
