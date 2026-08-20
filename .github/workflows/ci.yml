@@ -3,11 +3,12 @@ name: CI
 # What this gate is and is not.
 #
 # The pinned TraceStreamer binary is a locally built artifact excluded by
-# .gitignore, and rebuilding it needs network access to the upstream third
-# party sources. A hosted runner therefore cannot execute the parser
-# integration tests: they XCTSkip themselves. This workflow is a necessary
-# check, not a sufficient one -- scripts/test_phase<N>.sh remain the release
-# authority and still have to be run on a machine that has the parser.
+# .gitignore. The fast hosted jobs deliberately do not spend CI time rebuilding
+# it, so their parser integration tests XCTSkip themselves. The nightly/manual
+# slow lane is the exception: it restores or rebuilds the exact locked bytes,
+# verifies them against the committed manifest, and runs the real benchmark.
+# The fast workflow is therefore still a necessary check, not a sufficient one
+# -- scripts/test_phase<N>.sh remain the release authority.
 #
 # Structure:
 #   plan       - cheap Linux job; maps the diff to lanes via scripts/ci_plan.sh
@@ -23,9 +24,9 @@ name: CI
 #   ci-required- the single stable check for branch protection. It fails when
 #                any planned lane failed or was skipped, so skipped jobs can
 #                never drift past protection.
-#   benchmark-slow - nightly/manual only; needs the real parser and the medium
-#                fixture and fails closed when either is absent. Never a merge
-#                gate.
+#   benchmark-slow - nightly/manual only; restores or reproducibly builds the
+#                real parser, fetches the locked medium fixture, and fails
+#                closed on any identity drift. Never a merge gate.
 #
 # Toolchain policy: runners are pinned to macos-26 with Xcode 26.6. If the
 # pinned toolchain is missing the job fails immediately instead of silently
@@ -415,14 +416,17 @@ jobs:
           echo 'All planned lanes succeeded.'
 
   # Real-parser, real-fixture medium benchmark. Nightly or manual only, never
-  # a merge gate. It needs the locally built TraceStreamer and the 265 MB
-  # medium fixture; hosted runners have neither, and this job fails closed --
-  # a missing input is a red run, never a fake green.
+  # a merge gate. Hosted runners start with neither the gitignored parser nor
+  # the 265 MB fixture, so this lane restores exact-key caches or materializes
+  # both from their locked sources. Every restored or rebuilt input is verified
+  # before use; a missing or drifted input remains a red run, never a fake green.
   benchmark-slow:
     name: Medium benchmark (slow lane)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: macos-26
-    timeout-minutes: 120
+    # A warm run restores both inputs; a cold run also compiles the complete
+    # locked C++ parser graph on the standard three-core hosted runner.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -434,16 +438,78 @@ jobs:
           fi
           echo "DEVELOPER_DIR=$PINNED_DEVELOPER_DIR" >> "$GITHUB_ENV"
 
+      # This cache is scoped to the complete committed provenance manifest and
+      # every recipe input. It is used only by the slow lane; the fast jobs keep
+      # proving their parser-absent behavior. A restored binary still has to
+      # pass the manifest SHA check below before it can execute.
+      - name: Restore pinned parser cache
+        id: parser-cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ThirdParty/TraceStreamer/macx/trace_streamer
+          key: trace-streamer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ThirdParty/TraceStreamer/macx/manifest.json', 'ThirdParty/TraceStreamer/source-lock.json', 'ThirdParty/TraceStreamer/patches/**', 'scripts/build_trace_streamer.sh', 'scripts/phase3_shell_safety.sh') }}
+
+      - name: Reproducibly build a missing pinned parser
+        if: steps.parser-cache.outputs.cache-hit != 'true'
+        run: |
+          stage="$PWD/.build/ci-trace-streamer-stage"
+          ARKTRACE_TS_STAGE_DIR="$stage" scripts/build_trace_streamer.sh
+
+          # The timestamp is expected to change. Every identity, recipe,
+          # architecture and toolchain field must otherwise reproduce exactly.
+          jq -e --slurp '
+            (.[0] | del(.builtAt)) == (.[1] | del(.builtAt))
+          ' ThirdParty/TraceStreamer/macx/manifest.json "$stage/manifest.json" \
+            >/dev/null || {
+              echo '::error::rebuilt TraceStreamer provenance differs from the committed manifest'
+              exit 1
+            }
+          cp "$stage/trace_streamer" ThirdParty/TraceStreamer/macx/trace_streamer
+
       - name: Require the pinned parser (fail closed, no fake pass)
         run: |
           parser=ThirdParty/TraceStreamer/macx/trace_streamer
           if [ ! -x "$parser" ]; then
-            echo '::error::benchmark needs the locally built pinned TraceStreamer; it is absent on this runner. This lane must run on a machine that has it (see docs/TRACE_STREAMER.md). Recording success without the real parser is forbidden.'
+            echo '::error::parser cache restore/build did not produce an executable pinned TraceStreamer; refusing to record a benchmark without the real parser'
             exit 1
           fi
           expected=$(jq -er '.binarySHA256' ThirdParty/TraceStreamer/macx/manifest.json)
           actual=$(shasum -a 256 "$parser" | awk '{print $1}')
           [ "$actual" = "$expected" ] || { echo '::error::parser bytes drifted from the manifest'; exit 1; }
+
+      - name: Save pinned parser cache
+        if: steps.parser-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ThirdParty/TraceStreamer/macx/trace_streamer
+          key: ${{ steps.parser-cache.outputs.cache-primary-key }}
+
+      # Cache only the verified fixture and its ownership marker, not the
+      # temporary upstream checkout used to acquire it on a cold runner.
+      - name: Restore locked medium fixture cache
+        id: fixture-cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
+            .build/phase3-fixtures/pbreader.htrace
+          key: phase3-medium-fixture-${{ hashFiles('Fixtures/phase3-performance-fixtures.json') }}
+
+      - name: Fetch and verify locked medium fixture
+        run: scripts/fetch_phase3_fixtures.sh
+
+      - name: Save locked medium fixture cache
+        if: steps.fixture-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
+            .build/phase3-fixtures/pbreader.htrace
+          key: ${{ steps.fixture-cache.outputs.cache-primary-key }}
 
       - name: Run medium benchmark
         run: scripts/benchmark.sh phase4 medium
