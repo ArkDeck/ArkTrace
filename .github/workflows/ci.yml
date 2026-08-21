@@ -5,8 +5,9 @@ name: CI
 # The pinned TraceStreamer binary is a locally built artifact excluded by
 # .gitignore. The fast hosted jobs deliberately do not spend CI time rebuilding
 # it, so their parser integration tests XCTSkip themselves. The nightly/manual
-# slow lane is the exception: it restores or rebuilds the exact locked bytes,
-# verifies them against the committed manifest, and runs the real benchmark.
+# slow lane is the exception: it restores or downloads the exact approved
+# release asset, verifies it against the committed manifest, and runs the real
+# benchmark.
 # The fast workflow is therefore still a necessary check, not a sufficient one
 # -- scripts/test_phase<N>.sh remain the release authority.
 #
@@ -24,8 +25,8 @@ name: CI
 #   ci-required- the single stable check for branch protection. It fails when
 #                any planned lane failed or was skipped, so skipped jobs can
 #                never drift past protection.
-#   benchmark-slow - nightly/manual only; restores or reproducibly builds the
-#                real parser, fetches the locked medium fixture, and fails
+#   benchmark-slow - nightly/manual only; restores or downloads the approved
+#                parser asset, fetches the locked medium fixture, and fails
 #                closed on any identity drift. Never a merge gate.
 #
 # Toolchain policy: runners are pinned to macos-26 with Xcode 26.6. If the
@@ -51,6 +52,7 @@ concurrency:
 
 env:
   PINNED_DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+  TRACE_STREAMER_RELEASE_TAG: trace-streamer-4.3.7-e0167fbb13bf
 
 jobs:
   plan:
@@ -417,16 +419,14 @@ jobs:
 
   # Real-parser, real-fixture medium benchmark. Nightly or manual only, never
   # a merge gate. Hosted runners start with neither the gitignored parser nor
-  # the 265 MB fixture, so this lane restores exact-key caches or materializes
-  # both from their locked sources. Every restored or rebuilt input is verified
-  # before use; a missing or drifted input remains a red run, never a fake green.
+  # the 265 MB fixture, so this lane restores exact-key caches or downloads
+  # both approved inputs. Every restored or downloaded input is verified before
+  # use; a missing or drifted input remains a red run, never a fake green.
   benchmark-slow:
     name: Medium benchmark (slow lane)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: macos-26
-    # A warm run restores both inputs; a cold run also compiles the complete
-    # locked C++ parser graph on the standard three-core hosted runner.
-    timeout-minutes: 180
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
@@ -450,28 +450,31 @@ jobs:
           path: ThirdParty/TraceStreamer/macx/trace_streamer
           key: trace-streamer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ThirdParty/TraceStreamer/macx/manifest.json', 'ThirdParty/TraceStreamer/source-lock.json', 'ThirdParty/TraceStreamer/patches/**', 'scripts/build_trace_streamer.sh', 'scripts/phase3_shell_safety.sh') }}
 
-      - name: Reproducibly build a missing pinned parser
+      - name: Download a missing approved parser
         if: steps.parser-cache.outputs.cache-hit != 'true'
         run: |
-          stage="$PWD/.build/ci-trace-streamer-stage"
-          ARKTRACE_TS_STAGE_DIR="$stage" scripts/build_trace_streamer.sh
-
-          # The timestamp is expected to change. Every identity, recipe,
-          # architecture and toolchain field must otherwise reproduce exactly.
-          jq -e --slurp '
-            (.[0] | del(.builtAt)) == (.[1] | del(.builtAt))
-          ' ThirdParty/TraceStreamer/macx/manifest.json "$stage/manifest.json" \
-            >/dev/null || {
-              echo '::error::rebuilt TraceStreamer provenance differs from the committed manifest'
-              exit 1
-            }
-          cp "$stage/trace_streamer" ThirdParty/TraceStreamer/macx/trace_streamer
+          parser=ThirdParty/TraceStreamer/macx/trace_streamer
+          partial=$(mktemp "$RUNNER_TEMP/trace-streamer.XXXXXX")
+          trap 'rm -f -- "$partial"' EXIT HUP INT TERM
+          asset="https://github.com/ArkDeck/ArkTrace/releases/download/$TRACE_STREAMER_RELEASE_TAG/trace_streamer-macos-arm64"
+          curl --proto '=https' --tlsv1.2 --location --fail --silent \
+            --show-error --retry 3 --retry-all-errors \
+            --output "$partial" "$asset"
+          expected=$(jq -er '.binarySHA256' ThirdParty/TraceStreamer/macx/manifest.json)
+          actual=$(shasum -a 256 "$partial" | awk '{print $1}')
+          [ "$actual" = "$expected" ] || {
+            echo '::error::downloaded TraceStreamer asset differs from the committed manifest'
+            exit 1
+          }
+          chmod 755 "$partial"
+          mv -f "$partial" "$parser"
+          trap - EXIT HUP INT TERM
 
       - name: Require the pinned parser (fail closed, no fake pass)
         run: |
           parser=ThirdParty/TraceStreamer/macx/trace_streamer
           if [ ! -x "$parser" ]; then
-            echo '::error::parser cache restore/build did not produce an executable pinned TraceStreamer; refusing to record a benchmark without the real parser'
+            echo '::error::parser cache restore/download did not produce an executable pinned TraceStreamer; refusing to record a benchmark without the real parser'
             exit 1
           fi
           expected=$(jq -er '.binarySHA256' ThirdParty/TraceStreamer/macx/manifest.json)
