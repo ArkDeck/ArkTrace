@@ -64,7 +64,7 @@ jobs:
       lane_app: ${{ steps.plan.outputs.lane_app }}
       lane_contracts: ${{ steps.plan.outputs.lane_contracts }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -125,7 +125,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Pin Xcode 26.6 (fail closed)
         run: |
@@ -161,7 +161,7 @@ jobs:
       - name: Restore SwiftPM build cache
         id: spm-cache
         continue-on-error: true
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             ${{ runner.temp }}/arktrace-swiftpm/workspace
@@ -238,7 +238,7 @@ jobs:
       - name: Save SwiftPM build cache (protected main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         continue-on-error: true
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             ${{ runner.temp }}/arktrace-swiftpm/workspace
@@ -251,7 +251,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: swiftpm-logs
           path: |
@@ -267,7 +267,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Pin Xcode 26.6 (fail closed)
         run: |
@@ -305,7 +305,7 @@ jobs:
       # ignored parser is also excluded from source-mirror archives.
       - name: Restore Xcode object cache
         continue-on-error: true
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             ${{ runner.temp }}/arktrace-xcode/workspace
@@ -363,7 +363,7 @@ jobs:
       - name: Save Xcode object cache (protected main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.app_build.outcome == 'success'
         continue-on-error: true
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             ${{ runner.temp }}/arktrace-xcode/workspace
@@ -380,7 +380,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-logs
           path: xcodebuild.log
@@ -394,7 +394,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # These need no parser binary and no external inputs.
       - name: Offline release gates
@@ -460,7 +460,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Pin Xcode 26.6 (fail closed)
         run: |
@@ -477,7 +477,7 @@ jobs:
       - name: Restore pinned parser cache
         id: parser-cache
         continue-on-error: true
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ThirdParty/TraceStreamer/macx/trace_streamer
           key: trace-streamer-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ThirdParty/TraceStreamer/macx/manifest.json', 'ThirdParty/TraceStreamer/source-lock.json', 'ThirdParty/TraceStreamer/patches/**', 'scripts/build_trace_streamer.sh', 'scripts/phase3_shell_safety.sh') }}
@@ -516,7 +516,7 @@ jobs:
       - name: Save pinned parser cache
         if: steps.parser-cache.outputs.cache-hit != 'true'
         continue-on-error: true
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: ThirdParty/TraceStreamer/macx/trace_streamer
           key: ${{ steps.parser-cache.outputs.cache-primary-key }}
@@ -526,7 +526,7 @@ jobs:
       - name: Restore locked medium fixture cache
         id: fixture-cache
         continue-on-error: true
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
@@ -539,7 +539,7 @@ jobs:
       - name: Save locked medium fixture cache
         if: steps.fixture-cache.outputs.cache-hit != 'true'
         continue-on-error: true
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             .build/phase3-fixtures/.arktrace-phase3-fixtures-v1
