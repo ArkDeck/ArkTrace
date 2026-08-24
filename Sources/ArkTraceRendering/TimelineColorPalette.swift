@@ -2,8 +2,10 @@
 // openharmony/developtools_smartperf_host, taken at the revision pinned in
 // ThirdParty/TraceStreamer/source-lock.json and licensed under Apache-2.0:
 // ide/src/trace/component/trace/base/ColorUtils.ts and Utils.getStateColor.
-// The twenty-entry fill table is not: it is ArkTrace's own, for the reasons
-// recorded on `funcColorLiterals` and in docs/DESIGN.md §13.5.
+// Neither fill table is: the twenty-entry identity palette and the thread
+// state table are both ArkTrace's own values sitting in upstream's structure,
+// for the reasons recorded on `funcColorLiterals`, on `stateColors`, and in
+// docs/DESIGN.md §13.5. `scripts/verify_palette.py` measures both.
 // See THIRD_PARTY_NOTICES.md.
 
 import ArkTraceCore
@@ -14,9 +16,10 @@ import CoreGraphics
 /// Deliberately a value type rather than an `NSColor`: the renderer batches
 /// every primitive that shares a fill into one path, so a fill has to be a
 /// well-behaved `Hashable` key, and the palette stays unit-testable without
-/// AppKit. The components are the exact bytes of the upstream hex literal, so
-/// a fill is appearance-independent — the palette is a data encoding, not a
-/// theme.
+/// AppKit. A fill is appearance-independent, and stays so: every entry in
+/// both tables clears 3:1 against `#FFFFFF` and against `#1E1E1E`, which is
+/// what lets one set of values serve both appearances instead of becoming a
+/// theme with two of everything.
 package struct TimelineColor: Hashable, Sendable, Comparable {
     public let red: UInt8
     public let green: UInt8
@@ -86,6 +89,9 @@ package struct TimelineColor: Hashable, Sendable, Comparable {
 
 /// Trace palette: upstream's assignment, ArkTrace's colours.
 ///
+/// Both of the two tables below follow the same split -- upstream decides
+/// *which* fill an event gets, ArkTrace decides what that fill is.
+///
 /// SmartPerf Host does not color a slice by its kind; it hashes the slice's
 /// identity into a fixed twenty-entry palette, so the same function keeps the
 /// same color across rows, traces and sessions. ArkTrace keeps that mechanism
@@ -107,42 +113,131 @@ package enum TimelinePalette {
     /// but the values are ArkTrace's own, and that is a deliberate departure
     /// from parity.
     ///
-    /// Upstream's table was measured rather than judged: twelve of its twenty
-    /// entries sit below the chroma floor and read as grey, two fall outside
-    /// the lightness band, the closest adjacent pair is ΔE 8.5 to normal
-    /// vision and 2.6 under deuteranopia, and half of it lands under 3:1
-    /// against the canvas. On a real capture that is the muddy olive-and-sage
-    /// wash the overview used to be.
+    /// **The table is designed around how often each slot is actually
+    /// reached**, because the reach is wildly uneven and that is what decides
+    /// how the canvas looks. ``hash(_:modulus:)`` reproduces upstream's
+    /// JavaScript arithmetic, where each round multiplies in the `Double`
+    /// domain before truncating to `Int32`; the product needs up to 55 bits, a
+    /// `Double` carries 53, so the low two bits are rounded away *before* the
+    /// truncation. The magnitude is a multiple of four roughly three quarters
+    /// of the time, and 20 = 4 x 5, so `magnitude % 20` collapses onto
+    /// {0, 4, 8, 12, 16}. Measured over 20,000 synthetic slice names plus
+    /// every pid from 1 to 19,999 (`scripts/verify_palette.py`, deterministic
+    /// corpus):
     ///
-    /// These twenty are a constant-chroma ring in OKLCH: each hue takes the
-    /// lightness where it can carry the most colour, which puts yellows light
-    /// and blues dark on its own, and the slots are ordered by a stride of
-    /// nine around that ring so consecutive entries land on opposite sides of
-    /// the wheel. Measured the same way: every entry inside the lightness
-    /// band, every entry above the chroma floor, worst adjacent pair ΔE 30 to
-    /// normal vision and 15.6 under deuteranopia. Nine entries stay under 3:1
-    /// against the canvas, which AT-APP-011 allows precisely because colour is
-    /// never the only channel here -- the slice carries its label and the
-    /// Inspector carries its name.
+    /// - slots 0, 4, 8, 12, 16 -- ~14.9% each, **74.3% together**;
+    /// - slots 2, 6, 10, 14, 18 -- ~2.6% each, 12.9% together;
+    /// - the ten odd slots -- ~1.3% each, 12.8% together.
+    ///
+    /// So five entries are the timeline's colour scheme and the other fifteen
+    /// are trim. The table is built in those tiers:
+    ///
+    /// - **Tier A** (0/4/8/12/16) is one harmonious family: OKLCH lightness
+    ///   spread 0.038, chroma 0.088, hues walking a controlled blue -> teal ->
+    ///   sage -> bronze -> clay sweep. Three quarters of the pixels have to
+    ///   read as one surface, not as five warning lights.
+    /// - **Tier B** (2/6/10/14/18) sits between A and C. It is *not* "the same
+    ///   hues one step darker" -- the whole table lives in one narrow
+    ///   luminance band (below), so there is no darker step to take; B is a
+    ///   second pass around the hue circle at slightly higher chroma.
+    /// - **Tier C** (the odd slots) is where the remaining hues go. "Rare"
+    ///   holds for *named slices* pooled over a large corpus; it does not hold
+    ///   per-lane, because a trace has 6-30 processes rather than 20,000, so a
+    ///   full-width CPU lane lands in Tier C often. Its chroma is therefore
+    ///   capped near Tier A's (measured 0.086 vs 0.088) rather than left to
+    ///   drift loud.
+    /// - **Slot 5 is neutral on purpose.** `hash("0", modulus: 20) == 5`, and
+    ///   ``TimelineDetailPalette`` resolves `pid ?? 0` / `tid ?? 0`, so every
+    ///   CPU slice with no identity at all lands there. A grey says "nobody
+    ///   knows whose this is"; the saturated wine that sat here between
+    ///   2026-08-19 and 2026-08-24 said the opposite.
+    ///
+    /// What this replaced: a constant-chroma OKLCH ring that took, for each
+    /// hue, the lightness carrying the most chroma. That rule maximises
+    /// saturation and, because the sRGB cusp moves with hue, maximises
+    /// lightness variance as a side effect -- Tier A came out at chroma 0.153
+    /// with a lightness spread of 0.279, i.e. five maximum-chroma hues 72
+    /// degrees apart strobing between L 0.46 and L 0.74. It also reported its
+    /// own win on the wrong pairs: "worst adjacent pair" is *slot* adjacency,
+    /// and the assignment hash scatters identities, so any two slots can abut
+    /// on screen. Over all 190 pairs it measured 3.8, not 30.
+    ///
+    /// **There are four canvases, not two.** `windowBackgroundColor`,
+    /// `controlBackgroundColor` and `textBackgroundColor` all resolve to
+    /// `#FFFFFF` in Aqua and `#1E1E1E` in DarkAqua -- but `drawTracks` stripes
+    /// alternate rows with `NSColor.alternatingContentBackgroundColors`, which
+    /// adds `#F4F5F5` and `#292929`. Which row a track lands on is an accident
+    /// of ordering, so every fill has to clear 3:1 against all four. This is
+    /// not hypothetical: the striping fix and the first cut of this table
+    /// shipped together, and that cut put six fills between 2.78:1 and 2.96:1
+    /// against `#F4F5F5` -- including the two most common thread states --
+    /// while the gate reported 0/20 because it only knew about `#FFFFFF`.
+    ///
+    /// | | 2026-08-19 | now |
+    /// |---|---|---|
+    /// | occupancy-weighted chroma | 0.154 | 0.088 |
+    /// | min ΔE over all 190 pairs | 3.8 | 5.4 |
+    /// | Tier A lightness spread | 0.279 | 0.038 |
+    /// | label-ink flips across the table | 13/19 | 0/19 |
+    /// | entries under 3:1 vs any of the four canvases | 17/20 | 0/20 |
+    /// | worst label contrast | 5.02:1 | 4.60:1 |
+    ///
+    /// One table serves both appearances, and one label ink serves the whole
+    /// table, because four requirements intersect in a single luminance band:
+    /// 3:1 against `#F4F5F5` needs Y <= 0.270, 3:1 against `#292929` needs
+    /// Y >= 0.167, 4.5:1 for a **black** label needs Y >= 0.175, and the other
+    /// two canvases are looser than those. Every fill in both tables sits in
+    /// Y ∈ [0.180, 0.265]. A white label would need Y <= 0.183 instead -- a
+    /// nearly disjoint band -- so mixing the two inks is precisely what made
+    /// the 2026-08-19 table's ink flip on 13 of 19 steps. Choosing one band
+    /// removes the flip as a consequence, not as a tweak.
+    ///
+    /// That band is also the cost, and it is worth naming: 28 fills packed
+    /// into one narrow luminance slice have only hue and chroma left to
+    /// separate them. Free packing in the same band tops out near ΔE 6.6 for
+    /// 28 colours; 5.4 is what remains after Tier A has to be a family, the
+    /// states have to keep their semantics, and slot 5 has to be grey. Nothing
+    /// here is close to unambiguous, which is the point of the next paragraph.
+    ///
+    /// Twenty identity colours cannot be made colour-blind-distinct at any
+    /// chroma. Measured deuteranope minima over all 190 pairs: this table
+    /// 0.97, the 2026-08-19 ring 0.42, upstream's 0.33 -- so this is a 2-3x
+    /// improvement on a scale where nothing usable begins until ~15, not a
+    /// fix. That is why AT-APP-011 requires colour never to be the only
+    /// channel, and why the answer for identity precision is the label, the
+    /// Inspector and search, not more saturation.
+    ///
+    /// `scripts/verify_palette.py` re-derives the *current* figures above from
+    /// this file and fails CI on drift. It cannot check the 2026-08-19 column
+    /// -- that table no longer exists in any source it reads -- so those are
+    /// history rather than invariants. `scripts/test_palette_verifier.py`
+    /// mutation-tests the gate itself.
     ///
     /// What did *not* change is which slot an identity lands in: the hash, the
     /// digit stripping and the depth-zero rule below are still upstream's, so
     /// two slices that share a colour in SmartPerf Host still share one here.
     /// `TimelinePaletteTests` locks the table and the assignment.
     public static let funcColorLiterals: [String] = [
-        "#2b4fb0", "#e78f01", "#07b9f1", "#9e2414", "#07c3c1",
-        "#96225c", "#04b36d", "#7c318f", "#87a303", "#5044ac",
-        "#d4a004", "#0288dd", "#c95c03", "#04c0d8", "#9d1f3e",
-        "#05c5a4", "#8c2978", "#2a7a02", "#693aa1", "#bcac03",
+        "#377ea7", "#a5698f", "#7388cc", "#419a83", "#22858c",
+        "#817e76", "#4893c5", "#83739f", "#6e8b62", "#6276b8",
+        "#829446", "#4692a1", "#9c7735", "#488268", "#b58255",
+        "#957bbc", "#aa6168", "#6985aa", "#ab7fa4", "#af6943",
     ]
 
     public static let funcColors: [TimelineColor] = funcColorLiterals.compactMap {
         TimelineColor(hex: $0)
     }
 
-    /// Upstream `ColorUtils.GREY_COLOR`, used where upstream has no identity
-    /// to hash.
-    public static let greyColor = TimelineColor(red: 0xF0, green: 0xF0, blue: 0xF0)
+    /// The fill for an event with no identity to hash at all -- upstream's
+    /// `ColorUtils.GREY_COLOR` slot, ArkTrace's value.
+    ///
+    /// Deliberately the same neutral as slot 5. Both mean the same thing --
+    /// slot 5 is where `hash("0")` sends a CPU slice with neither pid nor tid,
+    /// this is where a named row with no name ends up -- and one "nobody knows
+    /// whose this is" colour is easier to read than two. Upstream's `#F0F0F0`
+    /// measured 1.14:1 against `#FFFFFF`: an event the renderer could not
+    /// identify was also an event the reader could not see.
+    public static let greyColor = TimelineColor(red: 0x81, green: 0x7E, blue: 0x76)
 
     /// Upstream `ColorUtils.hash`.
     ///
@@ -229,53 +324,114 @@ package enum TimelinePalette {
         return funcColors[Int(hash % UInt64(funcColors.count))]
     }
 
-    /// Upstream `Utils.getStateColor` over the exact raw state string, with an
-    /// ArkTrace fallback through the normalized state.
+    /// Upstream `Utils.getStateColor`'s chain over the exact raw state string,
+    /// with an ArkTrace fallback through the normalized state.
     ///
-    /// The raw chain is upstream's, verbatim. The fallback exists because
-    /// ArkTrace's normalizer also accepts spellings upstream never sees
-    /// (`RUNNABLE`, `READY`, `SLEEPING`, `BLOCKED`, `UNINTERRUPTIBLE`); those
-    /// are the same states, and dropping them into upstream's catch-all would
-    /// paint a sleeping thread the same color as a genuinely unknown one.
+    /// The chain -- which spellings exist, which of them share a fill, and
+    /// which fall through to the catch-all -- is upstream's, verbatim, and
+    /// `TimelinePaletteTests` pins it. The values are not; see ``stateColors``.
+    ///
+    /// The fallback exists because ArkTrace's normalizer also accepts
+    /// spellings upstream never sees (`RUNNABLE`, `READY`, `SLEEPING`,
+    /// `BLOCKED`, `UNINTERRUPTIBLE`); those are the same states, and dropping
+    /// them into upstream's catch-all would paint a sleeping thread the same
+    /// color as a genuinely unknown one.
     public static func stateColor(
         raw: String?,
         normalized: TraceThreadState? = nil
     ) -> TimelineColor {
-        if let raw, let exact = upstreamStateColors[raw] { return exact }
+        if let raw, let exact = stateColors[raw] { return exact }
         switch normalized {
-        case .running: return unknownStateFallback(hex: "#467b3b")
-        case .runnable: return unknownStateFallback(hex: "#a0b84d")
-        case .sleeping: return unknownStateFallback(hex: "#e0e0e0")
-        case .blocked: return unknownStateFallback(hex: "#f19b38")
+        case .running: return stateColors["Running"] ?? unknownStateColor
+        case .runnable: return stateColors["R"] ?? unknownStateColor
+        case .sleeping: return stateColors["S"] ?? unknownStateColor
+        case .blocked: return stateColors["D"] ?? unknownStateColor
         // Upstream has no branch for `T`; it lands in the catch-all, and so
         // does ArkTrace's `stopped`.
         case .stopped, .none: return unknownStateColor
         }
     }
 
-    /// Upstream `Utils.getStateColor`'s catch-all.
-    public static let unknownStateColor = TimelineColor(red: 0xFF, green: 0x6E, blue: 0x40)
+    /// The fill for a state upstream's chain does not name.
+    ///
+    /// The only entry in either table that is allowed to be loud: an
+    /// unrecognised scheduler state is a data problem, and a data problem
+    /// should not blend into the wall. OKLCH chroma 0.155 -- the highest
+    /// anywhere in either table -- ΔE 16.0 from `S`, so "asleep" and "no idea"
+    /// can never be confused, and ΔE 8.6 from its nearest neighbour of any
+    /// kind. That second number is the one that matters, and the one the first
+    /// cut got wrong at 5.7: checking the alarm only against `S` pins the pair
+    /// that was never going to collide, while the alarm actually sits in the
+    /// crowded warm arc alongside a dozen identity fills.
+    /// `verify_palette.py` now requires >= 7.0 against everything.
+    public static let unknownStateColor = TimelineColor(red: 0xD8, green: 0x5D, blue: 0x72)
 
-    private static func unknownStateFallback(hex: String) -> TimelineColor {
-        TimelineColor(hex: hex) ?? unknownStateColor
-    }
-
-    /// The upstream chain, flattened. Keys are the exact strings upstream
-    /// compares against, so this table is directly checkable against
-    /// `Utils.getStateColor`.
-    private static let upstreamStateColors: [String: TimelineColor] = [
-        "D-NIO": TimelineColor(red: 0x79, green: 0x55, blue: 0x48),
-        "DK-NIO": TimelineColor(red: 0x79, green: 0x55, blue: 0x48),
-        "D-IO": TimelineColor(red: 0xF1, green: 0x9B, blue: 0x38),
-        "DK-IO": TimelineColor(red: 0xF1, green: 0x9B, blue: 0x38),
-        "D": TimelineColor(red: 0xF1, green: 0x9B, blue: 0x38),
-        "DK": TimelineColor(red: 0xF1, green: 0x9B, blue: 0x38),
-        "R": TimelineColor(red: 0xA0, green: 0xB8, blue: 0x4D),
-        "R+": TimelineColor(red: 0xA0, green: 0xB8, blue: 0x4D),
-        "R-B": TimelineColor(red: 0x87, green: 0xCE, blue: 0xFA),
-        "I": TimelineColor(red: 0x67, green: 0x3A, blue: 0xB7),
-        "Running": TimelineColor(red: 0x46, green: 0x7B, blue: 0x3B),
-        "S": TimelineColor(red: 0xE0, green: 0xE0, blue: 0xE0),
+    /// Thread-state fills: upstream's chain, ArkTrace's colours.
+    ///
+    /// Keys are the exact strings upstream compares against, in upstream's
+    /// grouping, so the *mapping* stays directly checkable against
+    /// `Utils.getStateColor`. The values were Material-2 palette entries taken
+    /// from upstream until this change, and they were the actual subject of
+    /// the complaint that produced the 2026-08-19 palette rework: `R` was
+    /// `#a0b84d` (olive) and `I` was `#673ab7` (grey-purple) -- 「橄榄绿与灰紫」
+    /// -- and neither was touched then, because the rework only replaced
+    /// ``funcColorLiterals``. Half of all rows are thread-state lanes
+    /// (`TraceDocumentController` appends one per thread alongside its named
+    /// slices), so this table covers as much canvas as the identity palette
+    /// and was doing it in a different visual language.
+    ///
+    /// Two things were wrong beyond the language mismatch, both measured
+    /// against the canvas AppKit resolves (`#FFFFFF` / `#1E1E1E`):
+    ///
+    /// - **The tiers were inverted.** The loud entries were the rare ones and
+    ///   the common ones were invisible: `S` (sleeping, the most common state
+    ///   in any capture) sat at 1.32:1 against `#FFFFFF`, `R` at 2.22:1,
+    ///   `R-B` at 1.72:1, while `I` -- rare -- was at 7.33:1.
+    /// - **Nothing cleared 3:1 in both appearances.** `#e0e0e0` is invisible
+    ///   on white; `#673ab7` is invisible on near-black.
+    ///
+    /// The restatement keeps upstream's grouping and gives the ramp a
+    /// semantic shape instead of a palette-swatch one. Quiet where the state
+    /// is the common, uninteresting one; chromatic where it is the thing being
+    /// looked for:
+    ///
+    /// | state | fill | role |
+    /// |---|---|---|
+    /// | `S` sleeping | `#898d94` | most common; near-neutral, recedes |
+    /// | `I` idle | `#627987` | quieter still, faintly cooler |
+    /// | `R` / `R+` runnable | `#7b7849` | wants CPU and is not getting it |
+    /// | `R-B` runnable-blocked | `#948c63` | the `R` family, lighter |
+    /// | `Running` | `#489252` | the state a reader scans for |
+    /// | `D*` io wait | `#bd7211` | warm signal |
+    /// | `D-NIO` / `DK-NIO` | `#a47c74` | the muted member of the `D` family |
+    /// | catch-all | `#d85d72` | see ``unknownStateColor`` |
+    ///
+    /// Measured: every entry sits in the same Y band as ``funcColorLiterals``,
+    /// so it clears 3:1 against all four canvases and gives its black label
+    /// 4.5:1. Minimum ΔE within this table 6.2; minimum ΔE between this table
+    /// and ``funcColorLiterals`` **5.4**. The two tables are optimised
+    /// together for that reason -- they alternate row by row, so treating them
+    /// as separate problems is what let the first cut land a state fill ΔE 4.9
+    /// from a slice fill. 5.4 makes a state lane distinguishable from a slice
+    /// lane on inspection; it does not make them two visual languages, and
+    /// nothing packed into one narrow luminance band could.
+    /// `scripts/verify_palette.py` re-checks all of it, including that
+    /// upstream's chain still resolves to exactly seven distinct fills --
+    /// merging two states would otherwise vanish from every ΔE measurement
+    /// instead of failing one.
+    private static let stateColors: [String: TimelineColor] = [
+        "D-NIO": TimelineColor(red: 0xA4, green: 0x7C, blue: 0x74),
+        "DK-NIO": TimelineColor(red: 0xA4, green: 0x7C, blue: 0x74),
+        "D-IO": TimelineColor(red: 0xBD, green: 0x72, blue: 0x11),
+        "DK-IO": TimelineColor(red: 0xBD, green: 0x72, blue: 0x11),
+        "D": TimelineColor(red: 0xBD, green: 0x72, blue: 0x11),
+        "DK": TimelineColor(red: 0xBD, green: 0x72, blue: 0x11),
+        "R": TimelineColor(red: 0x7B, green: 0x78, blue: 0x49),
+        "R+": TimelineColor(red: 0x7B, green: 0x78, blue: 0x49),
+        "R-B": TimelineColor(red: 0x94, green: 0x8C, blue: 0x63),
+        "I": TimelineColor(red: 0x62, green: 0x79, blue: 0x87),
+        "Running": TimelineColor(red: 0x48, green: 0x92, blue: 0x52),
+        "S": TimelineColor(red: 0x89, green: 0x8D, blue: 0x94),
     ]
 
     /// The shared inner loop of `hash` and `hashFunc`.
@@ -298,8 +454,10 @@ package enum TimelinePalette {
 /// The band borrows the fill of the event that occupies the bucket longest, so
 /// an overview is a low-resolution picture of the same trace rather than a
 /// differently-coloured one: zooming in sharpens the blocks instead of
-/// recolouring them, and a process keeps the colour it has at detail level and
-/// in SmartPerf Host. When the source has no per-event identity — counter
+/// recolouring them, and a process keeps the colour it has at detail level.
+/// (Not the colour it has in SmartPerf Host: the values have been ArkTrace's
+/// since 2026-08-19 and only the *slot* an identity lands in is shared.) When
+/// the source has no per-event identity — counter
 /// series, whose samples upstream draws as an area chart with no per-sample
 /// fill — the band falls back to the track's own identity colour, which is
 /// what every band used to use.

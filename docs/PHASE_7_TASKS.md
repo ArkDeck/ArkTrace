@@ -946,7 +946,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 **验收记录**
 
 - [x] `scripts/test_phase7.sh` 在构建过 parser 的环境上全绿 —— `alignment=30`，evidence 见 gate 输出；
-- [x] 上游对齐回归全部存在且会因故意引入偏差而失败 —— 逐条实测 6 类代表性断言（上游调色板向量、
+- [x] 上游对齐回归全部存在且会因故意引入偏差而失败 —— 逐条实测 6 类代表性断言（上游 hash 向量、
       jank 色表、process counter 来源表、App/CLI state 分布等价、counter 探针降级语义、depth 行
       draw/hit-test 同源），全部「破坏 → 失败」。**其中一条实测发现断言不够敏感**：state 分布等价性
       在 fake repository 忽略 range 时，即使把 App 侧查询范围整体挪 1 ns 仍然通过；已让 double 按
@@ -997,8 +997,10 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 以下已在 [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md) §6/§7 论证，**实现者不得因为
 「上游有」而补上**：
 
-1. **用户自定义配色**（上游 `CustomThemeColor.ts`）—— 会摧毁「同一 slice 两工具同色」这个移植调色板的
-   唯一目的，并使锁定上游向量的测试失去意义；
+1. **用户自定义配色**（上游 `CustomThemeColor.ts`）—— 仍不做，但**理由已于 2026-08-24 更换**，以
+   UPSTREAM_ALIGNMENT_AUDIT §6 为准：色值本就是 ArkTrace 的设计产物并由 `scripts/verify_palette.py`
+   按阈值把关，用户覆盖会绕过校验。（原理由「会摧毁同一 slice 两工具同色这个移植调色板的唯一目的」
+   在 2026-08-19 换掉 20 色表时就已失效，锁定的向量钉的是 slot 而非色值。）
 2. **event 多选 / shift 扩展选择** —— pin 版上游并不存在该能力，种子清单这条是误判；
 3. **框选区内的 20 段调用栈计数直方图**（上游 `SportRuler.ts:267-300`）—— 与 density band +
    Range Inspector 精确聚合语义重叠；

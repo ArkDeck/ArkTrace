@@ -1246,7 +1246,7 @@ Hover 反馈（tooltip 与同名联动高亮）必须是**叠加层**：不得�
 不得发起查询；且不得触发 accessibility 播报（AT-APP-010）。
 
 **深度不得进入 event 填充色**：上游在 pin 版对 func slice 的颜色 hash 传字面 `0`，所以同名 slice
-在任意深度必须同色（AT-RENDER-008 与移植调色板的目的一致）。
+在任意深度必须同色（AT-RENDER-008 与移植分配规则的目的一致）。
 
 ### AT-RENDER-003 Coordinate consistency
 
@@ -1275,9 +1275,17 @@ Core/Store model 不得包含 CoreGraphics/CALayer/Metal 类型。未来 backend
 
 ### AT-RENDER-008 Event 配色
 
-Detail event 的填充色必须由事件身份决定，**分配规则与被 pin 住的上游 SmartPerf Host 一致**：CPU slice 取 process（无 pid 时退回 tid）身份色，named slice 取去掉数字后的名称散列色，thread state 取上游固定状态色，落入 20 个 slot。上游 hash 必须逐位一致移植，并由取自上游实现的向量锁定——**两个在上游同色的事件，在这里也必须同色**。
+Detail event 的填充色必须由事件身份决定，**分配规则与被 pin 住的上游 SmartPerf Host 一致**：CPU slice 取 process（无 pid 时退回 tid）身份色，named slice 取去掉数字后的名称散列色落入 20 个 slot，thread state 走上游 `getStateColor` 的链。对齐的是**分配**——哪个事件拿哪个填充；两张表里的**色值**都是 ArkTrace 自己的（20 色表改于 2026-08-19，state 表改于 2026-08-24）。上游 hash 必须逐位一致移植，并由取自上游实现的向量锁定——**两个在上游同色的事件，在这里也必须同色**。
 
-**20 个 slot 里放什么颜色则由 ArkTrace 自己定，并且必须是可度量的**（改于 2026-08-19）：上游那张表实测有 12/20 低于 chroma 下限（读起来是灰的）、2 项落在亮度带外、相邻最近一对对正常视觉只有 ΔE 8.5、对红绿色盲 2.6，半数对画布对比度不足 3:1。现表为 OKLCH 等色相环，每个色相取它能承载最多彩度的亮度（黄自然偏亮、蓝自然偏暗），slot 顺序按环上跨步排列使相邻项落在色轮两侧；实测：亮度带与 chroma 下限全过，相邻最近一对正常视觉 ΔE 30、红绿色盲 15.6。仍有 9 项对画布低于 3:1，这被允许**只因为**颜色从不是唯一通道（AT-APP-011）——slice 自带 label，Inspector 自带名称。Label 前景色必须按填充色灰度选择，不得固定为白色。
+**20 个 slot 里放什么颜色则由 ArkTrace 自己定，必须可度量，并且度量必须在 CI 里可复现**（改于 2026-08-24）。度量脚本是 `scripts/verify_palette.py`，它从 `TimelineColorPalette.swift` 直接读表、重算下列每一项、任一项退化即 fail；本节引用的所有数字都由它产出，不得只写在注释里。
+
+**表必须按 slot 实际命中率分层。** 上游 hash 在 `Double` 域内做乘法、之后才截回 Int32，乘积需要 55 位而 double 只有 53 位，低两位在截断前即被舍去，因此 `|hash|` 约 74% 是 4 的倍数；20 = 4×5，故 `% 20` 塌缩到 {0,4,8,12,16}。实测（`scripts/verify_palette.py` 的确定性语料：2 万个合成 slice 名 + pid 1..19999）：这五个 slot 各约 14.9%、合计 **74.3%**；{2,6,10,14,18} 各约 2.6%、合计 12.9%；十个奇数 slot 各约 1.3%、合计 12.8%。**这五项就是整条时间线的配色**，必须构成一个和谐族（Tier A：亮度带宽 ≤ 0.06、平均 chroma ≤ 0.105、label 前景色一致）；其余按命中率递减放宽。`hash("0") == 5` 是「既无 pid 又无 tid」的落点，slot 5 与 `greyColor` 必须是同一个中性色（chroma ≤ 0.02）。
+
+**必须逐项满足的阈值。** 画布有**四个**而不是两个：`windowBackgroundColor`／`controlBackgroundColor`／`textBackgroundColor` 在 Aqua 下同为 `#FFFFFF`、DarkAqua 下同为 `#1E1E1E`，但 track row 用 `alternatingContentBackgroundColors` 铺奇偶行，另有 `#F4F5F5` 与 `#292929`；一条 track 落在哪一行是排序的偶然，因此每个填充必须对四个都过 3:1。其余阈值：全部 190 对的最小 ΔE ≥ 5.0；每一项对自己的 label 前景色 ≥ 4.5:1；label 前景色在表内翻转不超过 4 次；catch-all 状态色必须是两张表里彩度最高的一项，且与任何其它填充相距 ≥ ΔE 7；任一 45° 色相扇区内的有彩填充不超过 7 个。这些约束一起把每一项钉进相对亮度 Y ∈ [0.175, 0.270]，**一张表因此同时服务两种外观**，不需要按外观分表。Label 前景色仍必须按填充色灰度选择，不得固定为白色。
+
+**「相邻最近一对」不是有效指标。** 2026-08-19 那版据此报出 ΔE 30 / 色盲 15.6，但 slot 相邻不是屏幕相邻——分配 hash 打散身份，任意两 slot 都可能贴在一起。按全部 190 对重测，同一张表是 3.8 / deutan 0.42，与它所取代的上游表（0.3 / 0.33）几乎无差。**20 个身份色在任何彩度下都做不到色盲可分**（现表 deutan 0.97，仍远低于可用所需的 ~15），这正是 AT-APP-011 要求颜色永不作为唯一通道的原因；身份精度由 label、Inspector 与搜索承担，不得靠提高彩度补偿。
+
+**thread state 表受同一组约束**，并额外要求保留上游 `getStateColor` 的分组：哪些拼写共用一个填充、哪些落 catch-all 不得改变，且该链必须恰好解析出 7 个不同填充（合并两个状态会在去重后从所有 ΔE 测量中消失而不是 fail）。两张表逐行交替出现，因此必须**联合**满足最小 ΔE，而不是各自满足。
 
 配色是附加通道而非唯一通道（见 AT-APP-011）：state 与名称必须同时可从 label、Inspector 或 accessibility value 获得。渲染必须按填充色批处理，一次 snapshot 内的填充批次数由调色板规模约束，不得随事件数增长。
 

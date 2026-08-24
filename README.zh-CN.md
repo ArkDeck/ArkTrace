@@ -24,7 +24,7 @@ ArkTrace 可从用户明确选择的 OpenHarmony 设备采集 Trace，也可打�
 - **本地运行、保护隐私。** 一切都在你的 Mac 上完成。解析结果存于 content-addressed 本地缓存；`--no-cache` 切换为 session-owned 临时数据库。
 - **可复现的 parser。** 捆绑的 TraceStreamer 锁定到确切的上游 revision，构建配方逐字节可复现，license 清单完整可追溯。
 - **证据驱动的发布。** 每个阶段都由 fail-closed 验证门把守，并以真机（DAYU 200）证据而非口头声明关闭。
-- **按 SmartPerf Host 的方式读 trace。** slice 配色、调用深度嵌套、jank 标记与导航键位都跟随 pin 版上游，同一个 slice 在两个工具里看起来、读起来都一样 —— 而且每一条都是 `scripts/test_phase7.sh` 里的断言，不是口头承诺。
+- **按 SmartPerf Host 的方式读 trace。** 哪个 slice 拿哪个颜色、调用深度嵌套、jank 标记与导航键位都跟随 pin 版上游，在上游同色的两个 slice 在这里也同色 —— 而且每一条都是 `scripts/test_phase7.sh` 里的断言，不是口头承诺。颜色本身是 ArkTrace 自己的，由 CI 里的 `scripts/verify_palette.py` 实测把关。
 
 ## 环境要求
 
@@ -126,7 +126,9 @@ Sidebar 控制轨道显隐，并可按进程名或 PID 过滤出某个进程；T
 
 按住不放即可连续缩放或平移，由 macOS 的按键重复驱动。与 Web 版不同，这些快捷键只作用于获得 focus 的 Timeline，因此在搜索框里输入 `w`、`s`、`m` 仍然是输入文字，带 ⌘ 的组合键始终交回菜单。
 
-Slice 配色与 SmartPerf Host 一致：CPU slice 取所属进程的颜色，named slice 用自身名称（去掉数字后）散列到上游的二十色调色板，因此 `ipc::41` 与 `ipc::42` 同色；thread state 使用上游固定的状态色。同一个 slice 在两个工具里颜色相同。所移植的具体函数见 [docs/DESIGN.md](docs/DESIGN.md) §13.5。
+Slice 的**配色分配**与 SmartPerf Host 一致：CPU slice 取所属进程身份，named slice 用自身名称（去掉数字后）散列进一张二十槽的表，因此 `ipc::41` 与 `ipc::42` 同色；thread state 走上游的状态链。在上游同色的两个 slice 在这里也同色。
+
+二十个槽里的色值、以及状态色，是 ArkTrace 自己的。设计依据是「上游 hash 有 74% 的概率只落在其中五个槽」这一实测事实，每一项都由 `scripts/verify_palette.py` 按阈值把关——两两 ΔE、对浅色与深色画布均 ≥ 3:1、对自己的 label ≥ 4.5:1——该脚本在 CI 中运行。细节见 [docs/DESIGN.md](docs/DESIGN.md) §13.5。
 
 ## 测试与发布门
 

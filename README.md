@@ -24,7 +24,7 @@ ArkTrace captures traces from an explicitly selected OpenHarmony device or opens
 - **Local and private.** Everything runs on your Mac. Parsed traces live in a content-addressed local cache; `--no-cache` switches to a session-owned ephemeral database.
 - **Reproducible parser.** The bundled TraceStreamer is pinned to an exact upstream revision with a byte-reproducible build recipe and a fully tracked license inventory.
 - **Evidence-driven releases.** Every phase ships behind fail-closed verification gates, closed with real-device (DAYU 200) evidence rather than claims.
-- **Reads a trace the way SmartPerf Host does.** Slice colours, call-depth nesting, jank tagging and the navigation keys follow the pinned upstream, so the same slice looks and reads the same in either tool — and each of those claims is an assertion in `scripts/test_phase7.sh`, not a promise.
+- **Reads a trace the way SmartPerf Host does.** Which slice gets which colour, call-depth nesting, jank tagging and the navigation keys follow the pinned upstream, so two slices that share a colour there share one here — and each of those claims is an assertion in `scripts/test_phase7.sh`, not a promise. The colours themselves are ArkTrace's own, measured by `scripts/verify_palette.py` in CI.
 
 ## Requirements
 
@@ -127,7 +127,9 @@ All three tables are also in the app under **Help → Keyboard Shortcuts**, gene
 
 Hold a key to keep zooming or panning — macOS key repeat drives it. Unlike the web UI, the shortcuts are scoped to the focused timeline, so typing `w`, `s` or `m` in the search field stays typing, and ⌘-modified keys always reach the menu.
 
-Slices are colored the way SmartPerf Host colors them: a CPU slice takes its running process's color, a named slice hashes its own name into upstream's twenty-entry palette (digits stripped, so `ipc::41` and `ipc::42` match), and thread states use upstream's fixed state colors. The same slice therefore has the same color in either tool. Details and the exact ported functions: [docs/DESIGN.md](docs/DESIGN.md) §13.5.
+Slices are *assigned* colours the way SmartPerf Host assigns them: a CPU slice takes its running process's identity, a named slice hashes its own name (digits stripped, so `ipc::41` and `ipc::42` match) into a twenty-slot table, and thread states go through upstream's state chain. Two slices that share a colour upstream share one here.
+
+The twenty values in those slots, and the state colours, are ArkTrace's own. They are designed around the fact that upstream's hash reaches five of the twenty slots 74% of the time, and every entry is held to measured thresholds — pairwise ΔE, 3:1 against both the light and dark canvas, 4.5:1 for its label — by `scripts/verify_palette.py`, which runs in CI. Details: [docs/DESIGN.md](docs/DESIGN.md) §13.5.
 
 ## Testing and release gates
 

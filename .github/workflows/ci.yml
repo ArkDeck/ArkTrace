@@ -20,8 +20,9 @@ name: CI
 #   app        - unsigned Xcode app build + bundle document-type checks; only
 #                where the pinned parser bytes exist, and any parser found on
 #                the runner is re-verified against the manifest SHA first.
-#   contracts  - offline release gates (licenses, TraceStreamer lock, phase6
-#                evidence, CLI distribution contract, planner tests).
+#   contracts  - offline release gates (licenses, TraceStreamer lock, palette
+#                measurements, phase6 evidence, CLI distribution contract,
+#                planner tests).
 #   ci-required- the single stable check for branch protection. It fails when
 #                any planned lane failed or was skipped, so skipped jobs can
 #                never drift past protection.
@@ -401,6 +402,8 @@ jobs:
         run: |
           scripts/verify_licenses.sh
           scripts/verify_trace_streamer_lock.sh
+          scripts/verify_palette.py --report
+          python3 scripts/test_palette_verifier.py
           scripts/test_phase6.sh
           sh scripts/test_ci_plan.sh
           python3 scripts/test_run_swiftpm.py

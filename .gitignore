@@ -21,3 +21,7 @@ ThirdParty/TraceStreamer/macx/trace_streamer
 
 # API baseline consumer build products
 scripts/api-baseline/.build/
+
+# Python bytecode from the scripts/ verifiers
+__pycache__/
+*.pyc

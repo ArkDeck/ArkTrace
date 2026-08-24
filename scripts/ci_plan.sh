@@ -41,6 +41,15 @@ while IFS= read -r path; do
             swiftpm=true
             app=true
             ;;
+        Sources/ArkTraceRendering/TimelineColorPalette.swift)
+            # The palette tables are also an offline contract:
+            # scripts/verify_palette.py reads this file and re-measures every
+            # figure AT-RENDER-008 quotes, so an edit here has to run the
+            # contract lane as well as both compile lanes.
+            swiftpm=true
+            app=true
+            contracts=true
+            ;;
         Sources/ArkTraceCore/*|Sources/ArkTraceParser/*|Sources/ArkTraceStore/*|Sources/ArkTraceRuntime/*|Sources/ArkTraceAnalysis/*|Sources/ArkTraceRendering/*|Sources/ArkTraceAppSupport/*|Sources/ArkTraceCapture/*)
             # These modules are linked directly or transitively by ArkTraceApp.
             swiftpm=true

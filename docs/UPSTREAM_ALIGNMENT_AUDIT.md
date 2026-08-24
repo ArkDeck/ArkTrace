@@ -209,11 +209,11 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 
 | 项 | 上游 | ArkTrace | 核对方式 |
 |---|---|---|---|
-| Event 填充配色 | `ProcedureWorkerFunc.ts:254`、`cpu/ProcedureWorkerCPU.ts:271`、`ProcedureWorkerThread.ts:120` | `Sources/ArkTraceRendering/TimelineColorPalette.swift:275-299` | **上游在 pin 处对 func slice 传的第二参是字面 `0` 而非真实 depth**，故 ArkTrace 用默认 depth 0 是逐位一致的。`TimelinePaletteTests` 的上游向量已锁定 |
+| Event 填充**分配**（不含色值） | `ProcedureWorkerFunc.ts:254`、`cpu/ProcedureWorkerCPU.ts:271`、`ProcedureWorkerThread.ts:120` | `Sources/ArkTraceRendering/TimelineColorPalette.swift` `hash` / `hashFunc` / `color(for*)` | **上游在 pin 处对 func slice 传的第二参是字面 `0` 而非真实 depth**，故 ArkTrace 用默认 depth 0 是逐位一致的。`TimelinePaletteTests` 的上游向量已锁定 |
 | `F` / `[` / `]` zoom to selection | `RangeRuler.ts:770-772` | `TimelineNSView.swift:316` | 三键应产生同一 viewport |
 | 单击选中 / 拖拽框选 | `SpKeyboard.html.ts` Mouse Controls | `TimelineNSView.swift:202-232` | — |
 | Time ruler | `TimeRuler.ts`、`SportRuler.ts:203` | `TimelineNSView.swift:417` | — |
-| thread state 文字与状态色 | `ProcedureWorkerThread.ts:119-128` | `TimelineColorPalette.swift:283-287` | — |
+| thread state 文字与状态**链** | `ProcedureWorkerThread.ts:119-128` | `TimelineColorPalette.swift` `stateColors` | 对齐的是分组（哪些拼写共用一个填充、哪些落 catch-all），色值自 2026-08-24 起是 ArkTrace 自己的，见 §13.5 |
 | CPU counter 来源表 | `Cpu.sql.ts:127-134`（`measure` + `cpu_measure_filter`） | `SQLiteTraceRepository.swift:1256-1264` | 表选对；真库 `cpu_measure_filter` = 0 是采集未开事件，非差距 |
 | 搜索 reveal 展开目标行 | `SpSystemTrace.ts:2569-2640` `scrollToActFunc` | `TraceDocumentController.swift:534-553` | — |
 
@@ -231,7 +231,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 | 任意 SQL 查询页（`component/SpQuerySQL.ts`） | DESIGN §4.3 不变量 4、AT-DB-006/007 |
 | `Ctrl+B` 隐藏菜单与搜索框（`SpSystemTrace.event.ts:899-941` 直改 DOM 样式） | Web 特有 DOM 耦合，DESIGN §2.1「不复用」；macOS 原生 sidebar 折叠 + AT-APP-003 已覆盖 |
 | `v` 键 VSync 叠加（`component/chart/VSync.ts:133-134`） | 是 G01 的下游装饰 —— counter 泳道拿不到数据前没有数据源。先修 G01 |
-| 用户自定义配色（`component/trace/base/CustomThemeColor.ts:24/79-86/115-117`，localStorage 覆盖 20 色板，light/dark 各一套） | **明确不做**：会摧毁「同一 slice 两工具同色」这个移植调色板的唯一目的（DESIGN §13.5、AT-RENDER-008），并使锁定上游向量的测试失去意义。若为色盲适配，应做成明示脱离上游对齐的独立模式 |
+| 用户自定义配色（`component/trace/base/CustomThemeColor.ts:24/79-86/115-117`，localStorage 覆盖 20 色板，light/dark 各一套） | **仍不做，但理由已换**（改于 2026-08-24）。原理由是「会摧毁同一 slice 两工具同色」——那个目的在 2026-08-19 换掉 20 色表时就已经不存在了。现在的理由是：色值本就是 ArkTrace 的设计产物并由 `scripts/verify_palette.py` 按阈值把关，用户覆盖会绕过校验；而上游做 light/dark 两套所要解决的问题，这里由「每一项对两种画布都 ≥ 3:1」的单表约束解决，不需要第二套。锁定上游向量的测试钉的是 slot 而非色值，不受影响 |
 | 插件来源的泳道族（`database/ui-worker/` 60+ 个 `ProcedureWorker*.ts`、`TraceRow.ts:53-175` 约 120 个 `ROW_TYPE_*`、`component/trace/sheet/` 155 个 `TabPane*.ts`）：hiperf / native-memory / xpower / smaps / ark-ts / gpu / network / energy / ability-monitor / vmtracker / hisysevent / ebpf / bpftrace / dma-fence / heap / sdk / userPlugin | 数据源缺失。真库抽样 14 张表全为 0 行：`perf_sample` `native_hook` `hisys_all_event` `gpu_slice` `cpu_usage` `sys_mem_measure` `smaps` `task_pool` `app_startup` `static_initalize` `animation` `dynamic_frame` `hidump` `clock_event_filter`。上游在同一份 trace 上也画不出这些泳道 |
 
 **另一条误判纠正**：种子清单里的「多选 / shift 扩展选择」在 pin 版上游**不存在为 event 多选能力** ——

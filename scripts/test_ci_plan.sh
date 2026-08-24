@@ -85,6 +85,18 @@ lane_app=false
 lane_contracts=true' \
     'scripts/verify_licenses.sh'
 
+expect "the palette table selects the contract lane too (verify_palette.py reads it)" \
+    'lane_swiftpm=true
+lane_app=true
+lane_contracts=true' \
+    'Sources/ArkTraceRendering/TimelineColorPalette.swift'
+
+expect "another rendering source keeps the compile lanes only" \
+    'lane_swiftpm=true
+lane_app=true
+lane_contracts=false' \
+    'Sources/ArkTraceRendering/TimelineNSView.swift'
+
 expect "API baseline change selects the SwiftPM lane" \
     'lane_swiftpm=true
 lane_app=false

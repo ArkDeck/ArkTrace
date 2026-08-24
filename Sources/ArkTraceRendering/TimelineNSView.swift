@@ -906,11 +906,26 @@ public final class TimelineNSView: NSView {
         for (index, track) in snapshot.tracks.enumerated() {
             let trackFrame = TimelineGeometry.trackFrame(track)
             guard trackFrame.maxY >= dirtyRect.minY, trackFrame.minY <= dirtyRect.maxY else { continue }
-            context.setFillColor(
-                (index.isMultiple(of: 2)
-                    ? NSColor.textBackgroundColor
-                    : NSColor.controlBackgroundColor.withAlphaComponent(0.45)).cgColor
-            )
+            // `alternatingContentBackgroundColors` rather than a pair of
+            // semantic colours: on this platform `windowBackgroundColor`,
+            // `controlBackgroundColor` and `textBackgroundColor` all resolve to
+            // the same value (#FFFFFF in Aqua, #1E1E1E in DarkAqua), so the
+            // previous `textBackgroundColor` / `controlBackgroundColor @ 0.45`
+            // pair composited to zero pixels of difference in either
+            // appearance -- the striping that gives the canvas its horizontal
+            // structure was not being drawn at all, which left the fills as
+            // the only thing organising the view. AppKit's alternating pair is
+            // the API for exactly this and does differ (#FFFFFF / #F4F5F5,
+            // #1E1E1E / white at 4.7%). Index 1 is translucent in DarkAqua, so
+            // it relies on the window background already painted in `draw`.
+            // `index % max(1, count)` would still subscript an empty array;
+            // AppKit has always returned two colours here, but a crash is not
+            // the right way to find out otherwise.
+            let backgrounds = NSColor.alternatingContentBackgroundColors
+            let background = backgrounds.isEmpty
+                ? NSColor.windowBackgroundColor
+                : backgrounds[index % backgrounds.count]
+            context.setFillColor(background.cgColor)
             context.fill(CGRect(x: 0, y: trackFrame.minY, width: bounds.width, height: trackFrame.height))
         }
         drawDensityOverlay(
@@ -940,7 +955,9 @@ public final class TimelineNSView: NSView {
     /// A bucket takes the fill of the event that occupies it longest, so an
     /// overview is the same picture as the detail view at a lower resolution:
     /// zooming in sharpens the blocks instead of recolouring them, and a
-    /// process or a function keeps the colour it has in SmartPerf Host. Only a
+    /// process or a function keeps the colour it has at detail level -- not
+    /// the colour it has in SmartPerf Host, which has only ever been the same
+    /// *slot* since the values became ArkTrace's own. Only a
     /// source with no per-event identity upstream (counter series) falls back
     /// to the track's own identity colour.
     ///

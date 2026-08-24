@@ -18,11 +18,16 @@ final class TimelinePaletteTests: XCTestCase {
     /// replaced (see `TimelinePalette.funcColorLiterals` for the measurements
     /// that decided it); the slot an identity lands in did not change, which
     /// is what the vectors below still pin.
+    ///
+    /// The perceptual properties of these values -- tiering by slot
+    /// occupancy, chroma, lightness spread, pairwise ΔE and contrast against
+    /// both canvases -- are measured by `scripts/verify_palette.py`, not here.
+    /// This assertion only stops the table drifting silently.
     private static let palette: [String] = [
-        "#2b4fb0", "#e78f01", "#07b9f1", "#9e2414", "#07c3c1",
-        "#96225c", "#04b36d", "#7c318f", "#87a303", "#5044ac",
-        "#d4a004", "#0288dd", "#c95c03", "#04c0d8", "#9d1f3e",
-        "#05c5a4", "#8c2978", "#2a7a02", "#693aa1", "#bcac03",
+        "#377ea7", "#a5698f", "#7388cc", "#419a83", "#22858c",
+        "#817e76", "#4893c5", "#83739f", "#6e8b62", "#6276b8",
+        "#829446", "#4692a1", "#9c7735", "#488268", "#b58255",
+        "#957bbc", "#aa6168", "#6985aa", "#ab7fa4", "#af6943",
     ]
 
     /// `(name, ColorUtils.hash(name, 20), ColorUtils.hashFunc(name, 0, 20))`.
@@ -181,11 +186,21 @@ final class TimelinePaletteTests: XCTestCase {
         }
     }
 
-    /// `ColorUtils.funcTextColor` over the palette. Nine of the twenty are dark
-    /// enough for a white label -- under upstream's table it was one -- which
-    /// is exactly why the renderer cannot hardcode either colour.
+    /// `ColorUtils.funcTextColor` over the palette.
+    ///
+    /// None of the twenty is dark enough for a white label, and that is a
+    /// design target rather than an accident. Label ink flipping between black
+    /// and white as the eye crosses a row is its own kind of noise; the
+    /// previous table flipped on 13 of 19 slot steps. It is also forced: a
+    /// black label needs the fill at relative luminance >= 0.175 and a white
+    /// one needs <= 0.183, so a table that also clears 3:1 against both
+    /// canvases (Y in [0.139, 0.300]) can hold one ink or strobe between two.
+    ///
+    /// The rule itself still has to exist and still has to be a rule --
+    /// AT-RENDER-008 forbids hardcoding white, and any future entry outside
+    /// the band goes through it -- so both branches stay asserted below.
     func testLabelColorMatchesUpstreamLuminanceRule() {
-        let takesWhiteLabel: Set<Int> = [0, 3, 5, 7, 9, 14, 16, 17, 18]
+        let takesWhiteLabel: Set<Int> = []
         for (index, literal) in Self.palette.enumerated() {
             let expected: TimelineColor = takesWhiteLabel.contains(index) ? .white : .black
             XCTAssertEqual(
@@ -198,25 +213,34 @@ final class TimelinePaletteTests: XCTestCase {
         XCTAssertEqual(TimelineColor(hex: "#ffffff")?.preferredLabelColor, .black)
     }
 
+    /// Upstream's chain with ArkTrace's values.
+    ///
+    /// What is pinned here is upstream's *grouping*: which spellings exist,
+    /// which of them share one fill (`D-IO`/`DK-IO`/`D`/`DK` are one colour,
+    /// `R`/`R+` are one colour, `D-NIO`/`DK-NIO` are one colour) and which
+    /// fall through to the catch-all. Break the grouping and this fails.
+    /// The values are ArkTrace's, restated for the reasons on
+    /// `TimelinePalette.stateColors`, and their perceptual properties are
+    /// measured by `scripts/verify_palette.py`.
     func testStateColorsMatchUpstreamChain() {
         let vectors: [(String, String)] = [
-            ("D-NIO", "#795548"),
-            ("DK-NIO", "#795548"),
-            ("D-IO", "#f19b38"),
-            ("DK-IO", "#f19b38"),
-            ("D", "#f19b38"),
-            ("DK", "#f19b38"),
-            ("R", "#a0b84d"),
-            ("R+", "#a0b84d"),
-            ("R-B", "#87CEFA"),
-            ("I", "#673ab7"),
-            ("Running", "#467b3b"),
-            ("S", "#e0e0e0"),
+            ("D-NIO", "#a47c74"),
+            ("DK-NIO", "#a47c74"),
+            ("D-IO", "#bd7211"),
+            ("DK-IO", "#bd7211"),
+            ("D", "#bd7211"),
+            ("DK", "#bd7211"),
+            ("R", "#7b7849"),
+            ("R+", "#7b7849"),
+            ("R-B", "#948c63"),
+            ("I", "#627987"),
+            ("Running", "#489252"),
+            ("S", "#898d94"),
             // Upstream's catch-all.
-            ("T", "#ff6e40"),
-            ("X", "#ff6e40"),
-            ("", "#ff6e40"),
-            ("unknown-state", "#ff6e40"),
+            ("T", "#d85d72"),
+            ("X", "#d85d72"),
+            ("", "#d85d72"),
+            ("unknown-state", "#d85d72"),
         ]
         for (state, hex) in vectors {
             XCTAssertEqual(
@@ -255,7 +279,7 @@ final class TimelinePaletteTests: XCTestCase {
         // An exact upstream spelling always wins over the normalized fallback.
         XCTAssertEqual(
             TimelinePalette.stateColor(raw: "R-B", normalized: .runnable),
-            TimelineColor(hex: "#87CEFA")
+            TimelineColor(hex: "#948c63")
         )
     }
 
@@ -366,7 +390,7 @@ final class TimelinePaletteTests: XCTestCase {
         XCTAssertEqual(
             TimelineDetailPalette.color(for: try Self.detail(category: nil, label: nil)),
             TimelinePalette.greyColor,
-            "an event with no identity at all takes upstream's grey"
+            "an event with no identity at all takes the neutral"
         )
     }
 

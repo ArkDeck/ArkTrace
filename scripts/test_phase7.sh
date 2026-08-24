@@ -94,7 +94,7 @@ pass "license inventory verified"
 # assertion here.
 # ---------------------------------------------------------------------------
 alignment_tests="
-testPaletteMatchesUpstreamTable
+testPaletteMatchesTheShippedTable
 testHashMatchesUpstreamVectors
 testHashFuncIgnoresEmbeddedDigits
 testStateColorsMatchUpstreamChain
