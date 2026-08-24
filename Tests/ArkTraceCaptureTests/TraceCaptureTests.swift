@@ -52,6 +52,38 @@ final class TraceCaptureConfigurationTests: XCTestCase {
         )
     }
 
+    func testDurationUnitsExposeBoundedInputAndRequestedQuickValues() {
+        XCTAssertEqual(TraceCaptureDurationUnit.seconds.inputRange, 5...300)
+        XCTAssertEqual(TraceCaptureDurationUnit.seconds.quickValues, [15, 30, 45, 60])
+        XCTAssertEqual(TraceCaptureDurationUnit.minutes.inputRange, 1...5)
+        XCTAssertEqual(TraceCaptureDurationUnit.minutes.quickValues, [1, 2, 3])
+
+        XCTAssertEqual(TraceCaptureDurationUnit.seconds.durationSeconds(for: 45), 45)
+        XCTAssertEqual(TraceCaptureDurationUnit.minutes.durationSeconds(for: 3), 180)
+        XCTAssertNil(TraceCaptureDurationUnit.seconds.durationSeconds(for: 4))
+        XCTAssertNil(TraceCaptureDurationUnit.minutes.durationSeconds(for: 6))
+        XCTAssertNil(TraceCaptureDurationUnit.minutes.durationSeconds(for: .max))
+    }
+
+    func testSwitchingToMinutesRoundsUpInsteadOfShorteningTheCapture() {
+        XCTAssertEqual(
+            TraceCaptureDurationUnit.minutes.inputValue(forDurationSeconds: 15),
+            1
+        )
+        XCTAssertEqual(
+            TraceCaptureDurationUnit.minutes.inputValue(forDurationSeconds: 61),
+            2
+        )
+        XCTAssertEqual(
+            TraceCaptureDurationUnit.minutes.inputValue(forDurationSeconds: 300),
+            5
+        )
+        XCTAssertEqual(
+            TraceCaptureDurationUnit.seconds.inputValue(forDurationSeconds: 180),
+            180
+        )
+    }
+
     func testDeviceParserIsBoundedToUniqueTargetKeys() {
         let devices = HDCTraceCaptureClient.parseDevices(
             """
@@ -77,6 +109,15 @@ final class TraceCaptureConfigurationTests: XCTestCase {
         XCTAssertEqual(candidates[1].path, "/sdk/toolchains/hdc")
         XCTAssertEqual(candidates[2].path, "/first/bin/hdc")
         XCTAssertEqual(candidates[3].path, "/second/bin/hdc")
+    }
+
+    func testVersionParserAcceptsOnlyBoundedExplicitVersionTokens() {
+        XCTAssertEqual(HDCTraceCaptureClient.parseVersion("Ver: 3.2.0f\n"), "3.2.0f")
+        XCTAssertEqual(HDCTraceCaptureClient.parseVersion("HDC version v1.3.0f"), "1.3.0f")
+        XCTAssertEqual(HDCTraceCaptureClient.parseVersion("v2.0.0-beta+1"), "2.0.0-beta+1")
+        XCTAssertNil(HDCTraceCaptureClient.parseVersion("server at 127.0.0.1"))
+        XCTAssertNil(HDCTraceCaptureClient.parseVersion("Ver: not-a-version"))
+        XCTAssertNil(HDCTraceCaptureClient.parseVersion("Ver: \(String(repeating: "1", count: 40)).0"))
     }
 }
 
@@ -105,6 +146,24 @@ final class HDCTraceCaptureClientTests: XCTestCase {
         }
 
         func values() -> ([[String]], String?) { (invocations, configuration) }
+    }
+
+    func testVersionUsesVersionArgumentAndParsesStandardError() async {
+        let invocations = Mutex<[[String]]>([])
+        let client = HDCTraceCaptureClient { _, arguments in
+            invocations.withLock { $0.append(arguments) }
+            return HDCProcessOutcome(
+                exitStatus: 0,
+                stdout: Data(),
+                stderr: Data("Ver: 3.2.0f\n".utf8),
+                outputWasTruncated: false
+            )
+        }
+
+        let version = await client.version(executableURL: URL(filePath: "/sdk/hdc"))
+
+        XCTAssertEqual(version, "3.2.0f")
+        XCTAssertEqual(invocations.withLock { $0 }, [["-v"]])
     }
 
     func testCaptureUsesArgumentArraysTransfersThenAtomicallyPromotes() async throws {
@@ -253,5 +312,55 @@ final class TraceCaptureControllerTests: XCTestCase {
         controller.cancelCapture()
         while controller.phase == .cancelling { await Task.yield() }
         XCTAssertEqual(controller.phase, .cancelled)
+    }
+
+    func testTypedDurationUnitsQuickValuesAndValidationReachCanStart() async throws {
+        let controller = TraceCaptureController(
+            executableURL: URL(filePath: "/sdk/hdc"),
+            discover: { _ in [TraceCaptureDevice(id: "one-device")] },
+            capture: { _, request, _ in request.destinationURL }
+        )
+        controller.refreshDevices()
+        while controller.phase == .discovering { await Task.yield() }
+
+        controller.durationSeconds = 45
+        XCTAssertEqual(controller.durationUnit, .seconds)
+        XCTAssertEqual(controller.durationInputValue, 45)
+        XCTAssertEqual(controller.durationSeconds, 45)
+        XCTAssertTrue(controller.canStart)
+
+        controller.setDurationUnit(.minutes)
+        XCTAssertEqual(controller.durationInputValue, 1)
+        XCTAssertEqual(controller.durationSeconds, 60)
+
+        controller.selectQuickDuration(3)
+        XCTAssertEqual(controller.durationInputValue, 3)
+        XCTAssertEqual(controller.durationSeconds, 180)
+
+        controller.durationInputValue = 6
+        XCTAssertFalse(controller.isDurationValid)
+        XCTAssertFalse(controller.canStart)
+
+        controller.setDurationUnit(.seconds)
+        XCTAssertEqual(controller.durationInputValue, 15)
+        XCTAssertEqual(controller.durationSeconds, 15)
+        XCTAssertTrue(controller.canStart)
+    }
+
+    func testDiscoveryPublishesHDCVersionWithoutChangingDeviceReadiness() async throws {
+        let controller = TraceCaptureController(
+            executableURL: URL(filePath: "/sdk/hdc"),
+            discover: { _ in [TraceCaptureDevice(id: "one-device")] },
+            versionLookup: { _ in "3.2.0f" },
+            capture: { _, request, _ in request.destinationURL }
+        )
+
+        XCTAssertNil(controller.hdcVersion)
+        controller.refreshDevices()
+        while controller.phase == .discovering { await Task.yield() }
+
+        XCTAssertEqual(controller.phase, .ready)
+        XCTAssertEqual(controller.hdcVersion, "3.2.0f")
+        XCTAssertTrue(controller.canStart)
     }
 }

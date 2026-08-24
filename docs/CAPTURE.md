@@ -54,7 +54,7 @@ ready → preparing → recording → transferring → completed
 - `recording` 显示秒数与确定进度，传输阶段使用不确定进度；
 - 完成、取消、错误都以图标与文字表达，不依赖颜色；
 - 阶段变化通过 VoiceOver announcement 合并播报，不逐秒打断用户；
-- 所有操作使用原生 Button、Picker、Stepper、Open/Save panel，支持键盘和系统焦点行为；
+- 所有操作使用原生 Button、Picker、TextField、Open/Save panel，支持键盘和系统焦点行为；
 - Reduce Motion 开启时不引入额外位移动画。
 
 ## 4. 采集预设
@@ -65,7 +65,7 @@ ready → preparing → recording → transferring → completed
 | CPU scheduling | scheduling/wakeup + CPU frequency/idle | 调度竞争、CPU 忙碌、频率变化 |
 | System overview | 上述两组 + distributed、memory、system category | 尚不确定根因的宽采集 |
 
-时长限制为 5–300 秒；buffer 可选 16/32/64/128/256 MB。两者都是硬边界，避免 UI 或 API 产生无界采集。配置使用 OpenHarmony 官方 `hiprofiler_cmd` protobuf text 形状：`session_config`、`ftrace-plugin`、`sample_duration`、`buffer_size_kb`、`ftrace_events` 与 `hitrace_categories`。
+时长可直接输入，并可在秒与分钟之间切换；秒模式提供 15s/30s/45s/60s，分钟模式提供 1/2/3 min 快捷选择。切换到分钟时向上取整，避免单位切换无意缩短采集。底层时长仍统一换算为秒并硬限制为 5–300 秒；buffer 可选 16/32/64/128/256 MB。两者都是硬边界，避免 UI 或 API 产生无界采集。配置使用 OpenHarmony 官方 `hiprofiler_cmd` protobuf text 形状：`session_config`、`ftrace-plugin`、`sample_duration`、`buffer_size_kb`、`ftrace_events` 与 `hitrace_categories`。
 
 ## 5. HDC 发现与调用
 
@@ -78,7 +78,7 @@ HDC 解析顺序：
 5. Homebrew 常见位置；
 6. 若仍未找到，由用户通过 Open panel 选择。
 
-解析结果必须是可读、可执行的 regular file。所有执行都使用 `Process.executableURL` 与 `arguments[]`；不调用宿主 shell，不拼接命令字符串，也不解释设备 ID。设备端只允许固定的 `hiprofiler_cmd` 与 session-owned `rm` 子命令，不提供通用 remote shell。`DYLD_*` 不传给子进程，HDC 端口等 SDK 环境保留。
+解析结果必须是可读、可执行的 regular file。App 使用同一个有界子进程执行器调用 `hdc -v`，解析短小的显式版本 token，并在文件名后显示如 `hdc v3.2.0f`；版本查询或解析失败不阻塞设备发现。所有执行都使用 `Process.executableURL` 与 `arguments[]`；不调用宿主 shell，不拼接命令字符串，也不解释设备 ID。设备端只允许固定的 `hiprofiler_cmd` 与 session-owned `rm` 子命令，不提供通用 remote shell。`DYLD_*` 不传给子进程，HDC 端口等 SDK 环境保留。
 
 每次采集使用 UUID 生成设备端文件名，并按以下步骤执行：
 

@@ -94,4 +94,33 @@ final class AppCommandTests: XCTestCase {
             "the no-document state must offer capture without requiring the menu"
         )
     }
+
+    func testCaptureDurationUsesNativeEntryUnitAndQuickControls() throws {
+        let source = try source()
+        XCTAssertTrue(
+            source.contains(#"TextField("#)
+                && source.contains(#"value: $capture.durationInputValue"#),
+            "capture duration must be directly editable"
+        )
+        XCTAssertTrue(
+            source.contains(#"Picker("#)
+                && source.contains("\"Duration unit\"")
+                && source.contains(#".pickerStyle(.segmented)"#),
+            "seconds and minutes must use a native segmented picker"
+        )
+        XCTAssertTrue(
+            source.contains(#"ForEach(capture.durationUnit.quickValues"#)
+                && source.contains(#".toggleStyle(.button)"#),
+            "the selected unit must expose native quick-duration toggles"
+        )
+    }
+
+    func testCaptureShowsTheResolvedHDCVersionBesideItsName() throws {
+        let source = try source()
+        XCTAssertTrue(
+            source.contains(#"Text(verbatim: hdcDisplayName(url))"#)
+                && source.contains(#"return "\(url.lastPathComponent) v\(version)""#),
+            "the selected HDC name must include its asynchronously resolved version"
+        )
+    }
 }

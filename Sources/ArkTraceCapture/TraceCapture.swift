@@ -55,7 +55,7 @@ public struct TraceCaptureRequest: Hashable, Sendable {
         }
         guard Self.durationRange.contains(durationSeconds) else {
             throw TraceCaptureIssue.invalidConfiguration(
-                "Choose a duration from 5 to 300 seconds."
+                "Enter a duration from 5 to 300 seconds."
             )
         }
         guard Self.allowedBufferSizesMB.contains(bufferSizeMB) else {
@@ -73,6 +73,58 @@ public struct TraceCaptureRequest: Hashable, Sendable {
         self.durationSeconds = durationSeconds
         self.bufferSizeMB = bufferSizeMB
         self.destinationURL = destinationURL.standardizedFileURL
+    }
+}
+
+/// The two native entry units exposed by the App. Capture requests continue to
+/// carry seconds so the device protocol has one unambiguous bounded unit.
+public enum TraceCaptureDurationUnit: String, CaseIterable, Hashable, Sendable, Identifiable {
+    case seconds
+    case minutes
+
+    public var id: Self { self }
+
+    public var inputRange: ClosedRange<Int> {
+        switch self {
+        case .seconds:
+            TraceCaptureRequest.durationRange
+        case .minutes:
+            1...(TraceCaptureRequest.durationRange.upperBound / 60)
+        }
+    }
+
+    public var quickValues: [Int] {
+        switch self {
+        case .seconds: [15, 30, 45, 60]
+        case .minutes: [1, 2, 3]
+        }
+    }
+
+    /// Converts a typed value to the request's canonical seconds while
+    /// rejecting both out-of-range input and integer overflow.
+    public func durationSeconds(for inputValue: Int) -> Int? {
+        guard inputRange.contains(inputValue) else { return nil }
+        let multiplier = self == .seconds ? 1 : 60
+        let (seconds, overflow) = inputValue.multipliedReportingOverflow(by: multiplier)
+        guard !overflow, TraceCaptureRequest.durationRange.contains(seconds) else {
+            return nil
+        }
+        return seconds
+    }
+
+    /// Switching from seconds to minutes rounds up so changing the display
+    /// unit never silently shortens the requested capture.
+    public func inputValue(forDurationSeconds durationSeconds: Int) -> Int {
+        let bounded = min(
+            TraceCaptureRequest.durationRange.upperBound,
+            max(TraceCaptureRequest.durationRange.lowerBound, durationSeconds)
+        )
+        switch self {
+        case .seconds:
+            return bounded
+        case .minutes:
+            return (bounded + 59) / 60
+        }
     }
 }
 
@@ -535,6 +587,59 @@ struct HDCTraceCaptureClient: Sendable {
         self.runner = runner
     }
 
+    func version(executableURL: URL) async -> String? {
+        let outcome: HDCProcessOutcome
+        do {
+            outcome = try await runner(executableURL, ["-v"])
+        } catch {
+            return nil
+        }
+        guard outcome.succeeded, !outcome.outputWasTruncated else { return nil }
+        return Self.parseVersion(
+            String(decoding: outcome.stdout + outcome.stderr, as: UTF8.self)
+        )
+    }
+
+    static func parseVersion(_ output: String) -> String? {
+        let tokens = output.prefix(4_096).split(whereSeparator: \.isWhitespace)
+        var followsVersionLabel = false
+        for rawToken in tokens {
+            let raw = String(rawToken)
+            let marker = raw.trimmingCharacters(
+                in: CharacterSet(charactersIn: ":,;()[]{}")
+            ).lowercased()
+            if marker == "ver" || marker == "version" {
+                followsVersionLabel = true
+                continue
+            }
+
+            var candidate = raw.trimmingCharacters(
+                in: CharacterSet(charactersIn: ":,;()[]{}")
+            )
+            let hasVersionPrefix = candidate.first?.lowercased() == "v"
+            if hasVersionPrefix { candidate.removeFirst() }
+            let canBeVersion = followsVersionLabel || hasVersionPrefix || tokens.count == 1
+            followsVersionLabel = false
+            guard canBeVersion, candidate.utf8.count <= 32, candidate.contains(".") else {
+                continue
+            }
+            let scalars = candidate.unicodeScalars
+            guard let first = scalars.first, (48...57).contains(first.value) else {
+                continue
+            }
+            let isSafe = scalars.allSatisfy { scalar in
+                switch scalar.value {
+                case 43, 45, 46, 48...57, 65...90, 95, 97...122:
+                    true
+                default:
+                    false
+                }
+            }
+            if isSafe { return candidate }
+        }
+        return nil
+    }
+
     func discoverDevices(executableURL: URL) async throws -> [TraceCaptureDevice] {
         let outcome: HDCProcessOutcome
         do {
@@ -748,6 +853,7 @@ struct HDCTraceCaptureClient: Sendable {
 // MARK: - UI state
 
 typealias TraceCaptureDeviceDiscovery = @Sendable (URL) async throws -> [TraceCaptureDevice]
+typealias HDCVersionLookup = @Sendable (URL) async -> String?
 typealias TraceCaptureOperation = @Sendable (
     URL,
     TraceCaptureRequest,
@@ -758,10 +864,12 @@ typealias TraceCaptureOperation = @Sendable (
 @Observable
 public final class TraceCaptureController {
     public private(set) var hdcExecutableURL: URL?
+    public private(set) var hdcVersion: String?
     public private(set) var devices: [TraceCaptureDevice] = []
     public var selectedDeviceID: String?
     public var profile: TraceCaptureProfile = .appResponsiveness
-    public var durationSeconds = 15
+    public var durationInputValue = 15
+    public private(set) var durationUnit: TraceCaptureDurationUnit = .seconds
     public var bufferSizeMB = 64
     public private(set) var phase: TraceCapturePhase = .idle
     public private(set) var elapsedSeconds = 0
@@ -773,6 +881,20 @@ public final class TraceCaptureController {
             return false
         }
         return devices.contains(where: { $0.id == selectedDeviceID })
+            && isDurationValid
+            && TraceCaptureRequest.allowedBufferSizesMB.contains(bufferSizeMB)
+    }
+
+    public var durationSeconds: Int {
+        get { durationUnit.durationSeconds(for: durationInputValue) ?? 0 }
+        set {
+            durationUnit = .seconds
+            durationInputValue = newValue
+        }
+    }
+
+    public var isDurationValid: Bool {
+        durationUnit.durationSeconds(for: durationInputValue) != nil
     }
 
     public var progressFraction: Double? {
@@ -781,6 +903,7 @@ public final class TraceCaptureController {
     }
 
     @ObservationIgnored private let discover: TraceCaptureDeviceDiscovery
+    @ObservationIgnored private let versionLookup: HDCVersionLookup
     @ObservationIgnored private let capture: TraceCaptureOperation
     @ObservationIgnored private let persistExecutable: @MainActor (URL?) -> Void
     @ObservationIgnored private var discoveryTask: Task<Void, Never>?
@@ -796,6 +919,7 @@ public final class TraceCaptureController {
         self.init(
             executableURL: executable,
             discover: { try await client.discoverDevices(executableURL: $0) },
+            versionLookup: { await client.version(executableURL: $0) },
             capture: { executableURL, request, progress in
                 try await client.capture(
                     executableURL: executableURL,
@@ -812,11 +936,13 @@ public final class TraceCaptureController {
     init(
         executableURL: URL?,
         discover: @escaping TraceCaptureDeviceDiscovery,
+        versionLookup: @escaping HDCVersionLookup = { _ in nil },
         capture: @escaping TraceCaptureOperation,
         persistExecutable: @escaping @MainActor (URL?) -> Void = { _ in }
     ) {
         self.hdcExecutableURL = executableURL
         self.discover = discover
+        self.versionLookup = versionLookup
         self.capture = capture
         self.persistExecutable = persistExecutable
     }
@@ -842,6 +968,7 @@ public final class TraceCaptureController {
         discoveryTask?.cancel()
         generation &+= 1
         hdcExecutableURL = url
+        hdcVersion = nil
         persistExecutable(url)
         devices = []
         selectedDeviceID = nil
@@ -849,6 +976,20 @@ public final class TraceCaptureController {
         completedURL = nil
         phase = .idle
         refreshDevices()
+    }
+
+    public func setDurationUnit(_ unit: TraceCaptureDurationUnit) {
+        guard !phase.isCapturing, unit != durationUnit else { return }
+        let currentSeconds = durationUnit.durationSeconds(for: durationInputValue) ?? 15
+        durationUnit = unit
+        durationInputValue = unit.inputValue(forDurationSeconds: currentSeconds)
+    }
+
+    public func selectQuickDuration(_ inputValue: Int) {
+        guard !phase.isCapturing, durationUnit.quickValues.contains(inputValue) else {
+            return
+        }
+        durationInputValue = inputValue
     }
 
     public func refreshDevices() {
@@ -870,12 +1011,16 @@ public final class TraceCaptureController {
         issue = nil
         phase = .discovering
         let discover = discover
+        let versionLookup = versionLookup
         discoveryTask = Task { [weak self] in
+            async let version = versionLookup(executableURL)
             do {
                 let devices = try await discover(executableURL)
+                let hdcVersion = await version
                 try Task.checkCancellation()
                 guard let self, self.generation == generation else { return }
                 self.devices = devices
+                self.hdcVersion = hdcVersion
                 if !devices.contains(where: { $0.id == self.selectedDeviceID }) {
                     self.selectedDeviceID = devices.count == 1 ? devices[0].id : nil
                 }

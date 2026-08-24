@@ -2302,7 +2302,7 @@ private struct TraceCaptureWindow: View {
                 HStack(spacing: 10) {
                     if let url = capture.hdcExecutableURL {
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(url.lastPathComponent)
+                            Text(verbatim: hdcDisplayName(url))
                             Text(url.deletingLastPathComponent().path)
                                 .font(.caption.monospaced())
                                 .foregroundStyle(.secondary)
@@ -2383,17 +2383,7 @@ private struct TraceCaptureWindow: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Stepper(
-                value: $capture.durationSeconds,
-                in: TraceCaptureRequest.durationRange,
-                step: 5
-            ) {
-                LabeledContent(
-                    "Duration",
-                    value: "\(capture.durationSeconds) seconds"
-                )
-            }
-            .disabled(capture.phase.isCapturing)
+            durationControl
 
             Picker("Trace buffer", selection: $capture.bufferSizeMB) {
                 ForEach(TraceCaptureRequest.allowedBufferSizesMB, id: \.self) { size in
@@ -2410,6 +2400,77 @@ private struct TraceCaptureWindow: View {
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private var durationControl: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LabeledContent("Duration") {
+                HStack(spacing: 8) {
+                    TextField(
+                        "Duration value",
+                        value: $capture.durationInputValue,
+                        format: .number
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .labelsHidden()
+                    .multilineTextAlignment(.trailing)
+                    .monospacedDigit()
+                    .frame(width: 72)
+                    .accessibilityLabel("Duration")
+
+                    Picker(
+                        "Duration unit",
+                        selection: Binding(
+                            get: { capture.durationUnit },
+                            set: { capture.setDurationUnit($0) }
+                        )
+                    ) {
+                        ForEach(TraceCaptureDurationUnit.allCases) { unit in
+                            Text(durationUnitTitle(unit)).tag(unit)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityLabel("Duration unit")
+                }
+            }
+
+            LabeledContent("Quick duration") {
+                HStack(spacing: 8) {
+                    ForEach(capture.durationUnit.quickValues, id: \.self) { value in
+                        quickDurationToggle(value)
+                    }
+                }
+            }
+
+            if !capture.isDurationValid {
+                Label(durationValidationMessage, systemImage: "exclamationmark.circle")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel("Duration: \(durationValidationMessage)")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .disabled(capture.phase.isCapturing)
+    }
+
+    private func quickDurationToggle(_ value: Int) -> some View {
+        Toggle(
+            isOn: Binding(
+                get: { capture.durationInputValue == value },
+                set: { selected in
+                    if selected { capture.selectQuickDuration(value) }
+                }
+            )
+        ) {
+            Text(quickDurationTitle(value))
+                .monospacedDigit()
+        }
+        .toggleStyle(.button)
+        .help(quickDurationAccessibilityLabel(value))
+        .accessibilityLabel(quickDurationAccessibilityLabel(value))
+        .arktraceAccessibleTarget()
     }
 
     private func issueSection(_ issue: TraceCaptureIssue) -> some View {
@@ -2572,6 +2633,11 @@ private struct TraceCaptureWindow: View {
         return "\(device.id) · \(transport)"
     }
 
+    private func hdcDisplayName(_ url: URL) -> String {
+        guard let version = capture.hdcVersion else { return url.lastPathComponent }
+        return "\(url.lastPathComponent) v\(version)"
+    }
+
     private func profileTitle(_ profile: TraceCaptureProfile) -> LocalizedStringResource {
         switch profile {
         case .appResponsiveness: "App responsiveness"
@@ -2590,6 +2656,50 @@ private struct TraceCaptureWindow: View {
             "Scheduling, wakeups, CPU frequency and idle events. Best for contention and CPU investigations."
         case .systemOverview:
             "The app and CPU profiles together, plus distributed, memory and system categories. Produces the largest trace."
+        }
+    }
+
+    private func durationUnitTitle(
+        _ unit: TraceCaptureDurationUnit
+    ) -> LocalizedStringResource {
+        switch unit {
+        case .seconds: "Seconds"
+        case .minutes: "Minutes"
+        }
+    }
+
+    private var durationValidationMessage: String {
+        switch capture.durationUnit {
+        case .seconds: "Enter 5 to 300 seconds."
+        case .minutes: "Enter 1 to 5 minutes."
+        }
+    }
+
+    private func quickDurationTitle(_ value: Int) -> LocalizedStringResource {
+        switch (capture.durationUnit, value) {
+        case (.seconds, 15): "15s"
+        case (.seconds, 30): "30s"
+        case (.seconds, 45): "45s"
+        case (.seconds, 60): "60s"
+        case (.minutes, 1): "1 min"
+        case (.minutes, 2): "2 min"
+        case (.minutes, 3): "3 min"
+        default: "Custom"
+        }
+    }
+
+    private func quickDurationAccessibilityLabel(
+        _ value: Int
+    ) -> String {
+        switch (capture.durationUnit, value) {
+        case (.seconds, 15): "Set duration to 15 seconds"
+        case (.seconds, 30): "Set duration to 30 seconds"
+        case (.seconds, 45): "Set duration to 45 seconds"
+        case (.seconds, 60): "Set duration to 60 seconds"
+        case (.minutes, 1): "Set duration to 1 minute"
+        case (.minutes, 2): "Set duration to 2 minutes"
+        case (.minutes, 3): "Set duration to 3 minutes"
+        default: "Set a custom duration"
         }
     }
 

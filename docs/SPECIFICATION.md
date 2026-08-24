@@ -1207,11 +1207,11 @@ App 必须从 File menu、主 toolbar 和无文档 empty state 提供 **Capture 
 
 ### AT-APP-015 Capture bounds and presets
 
-采集时长硬限制为 5–300 秒；buffer 只能从 16/32/64/128/256 MB 选择。必须提供 App responsiveness、CPU scheduling、System overview 三种 closed preset；不得把任意 protobuf 文本或 shell command 作为此 UI 的输入。
+采集时长必须可直接输入、可在秒/分钟之间切换，并在秒模式提供 15s/30s/45s/60s、分钟模式提供 1/2/3 min 快捷选择；切换到分钟必须向上取整，不得无意缩短 capture。最终换算后的时长硬限制为 5–300 秒，无效输入必须就地说明且禁止开始；buffer 只能从 16/32/64/128/256 MB 选择。必须提供 App responsiveness、CPU scheduling、System overview 三种 closed preset；不得把任意 protobuf 文本或 shell command 作为此 UI 的输入。
 
 ### AT-APP-016 Capture process safety
 
-HDC 必须解析为可读、可执行 regular file，并通过 `Process.executableURL + arguments[]` 直接调用。禁止调用宿主 shell、拼接命令字符串、把 device ID 当命令解释或暴露通用 remote shell；设备端 `hdc shell` 只允许固定的 `hiprofiler_cmd` 与 session-owned `rm` 参数数组。stdout/stderr 必须 bounded。HDC 可来自上次用户选择、明确 SDK 环境、App 的 PATH 或 reviewed 默认 SDK 位置；最终解析路径必须在 UI 中可见并可由用户替换。该规则只适用于 HDC，AT-SEC-005 对 pinned parser/analyzer 的禁止 PATH 选择不变。
+HDC 必须解析为可读、可执行 regular file，并通过 `Process.executableURL + arguments[]` 直接调用。App 必须以同一 bounded runner 执行 `hdc -v`，只接受有界的显式版本 token，并在 HDC 文件名后显示规范化的 `v<version>`；版本查询失败不得阻塞设备发现或采集。禁止调用宿主 shell、拼接命令字符串、把 device ID 当命令解释或暴露通用 remote shell；设备端 `hdc shell` 只允许固定的 `hiprofiler_cmd` 与 session-owned `rm` 参数数组。stdout/stderr 必须 bounded。HDC 可来自上次用户选择、明确 SDK 环境、App 的 PATH 或 reviewed 默认 SDK 位置；最终解析路径必须在 UI 中可见并可由用户替换。该规则只适用于 HDC，AT-SEC-005 对 pinned parser/analyzer 的禁止 PATH 选择不变。
 
 ### AT-APP-017 Capture promotion and cleanup
 
