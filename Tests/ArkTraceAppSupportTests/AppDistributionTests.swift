@@ -7,6 +7,107 @@ import Foundation
 import XCTest
 
 final class AppDistributionTests: XCTestCase {
+    func testStandaloneProductConfigurationOwnsProductSpecificValues() {
+        let bundle = URL(filePath: "/Applications/ArkTrace.app")
+        let configuration = TraceProductConfiguration.arkTrace(bundleURL: bundle)
+
+        XCTAssertEqual(configuration.bundleURL, bundle)
+        XCTAssertEqual(configuration.cacheDirectory.lastPathComponent, "traces")
+        XCTAssertEqual(configuration.stagingDirectory.lastPathComponent, "staging")
+        XCTAssertEqual(
+            configuration.cacheDirectory.deletingLastPathComponent(),
+            configuration.stagingDirectory.deletingLastPathComponent()
+        )
+        XCTAssertEqual(
+            configuration.recentDocumentsKey,
+            "ArkTrace.RecentTraceBookmarks.v1"
+        )
+        XCTAssertEqual(
+            configuration.signpostSubsystem,
+            ArkTraceAppDistribution.bundleIdentifier
+        )
+        XCTAssertEqual(
+            configuration.bundledParser.executableRelativePath,
+            "Contents/Helpers/trace_streamer"
+        )
+        XCTAssertEqual(
+            configuration.bundledParserExecutionPolicy,
+            .immutableSnapshot
+        )
+    }
+
+    @MainActor
+    func testExternalProductCanConfigureSharedDocumentEngineWithoutArkTracePaths() throws {
+        let root = FileManager.default.temporaryDirectory.appending(
+            path: "trace-consumer-\(UUID().uuidString)", directoryHint: .isDirectory
+        )
+        let parser = try TraceBundledParserLocation(
+            executableRelativePath: "Contents/MacOS/trace_streamer",
+            manifestRelativePath: "Contents/Resources/Trace/manifest.json"
+        )
+        let configuration = try TraceProductConfiguration(
+            bundleURL: root.appending(path: "Consumer.app"),
+            cacheDirectory: root.appending(path: "cache/traces"),
+            stagingDirectory: root.appending(path: "cache/staging"),
+            recentDocumentsKey: "Consumer.Trace.Recent.v1",
+            signpostSubsystem: "com.example.consumer.trace",
+            bundledParser: parser,
+            bundledParserExecutionPolicy: .signedBundleInPlace
+        )
+
+        XCTAssertEqual(
+            TraceBundledParserResolver(configuration: configuration)
+                .candidateExecutableURLs(),
+            [configuration.bundleURL.appending(path: "Contents/MacOS/trace_streamer")]
+        )
+        XCTAssertEqual(
+            configuration.bundledParserExecutionPolicy,
+            .signedBundleInPlace
+        )
+        _ = TraceDocumentController(configuration: configuration)
+    }
+
+    func testProductConfigurationRejectsTraversalAndAmbiguousStorage() throws {
+        XCTAssertThrowsError(
+            try TraceBundledParserLocation(
+                executableRelativePath: "Contents/../trace_streamer",
+                manifestRelativePath: "Contents/Resources/manifest.json"
+            )
+        ) {
+            XCTAssertEqual(($0 as? ArkTraceError)?.code, .invalidArgument)
+        }
+
+        let parser = try TraceBundledParserLocation(
+            executableRelativePath: "Contents/MacOS/trace_streamer",
+            manifestRelativePath: "Contents/Resources/manifest.json"
+        )
+        XCTAssertThrowsError(
+            try TraceProductConfiguration(
+                bundleURL: URL(filePath: "/Applications/Consumer.app"),
+                cacheDirectory: URL(filePath: "/tmp/consumer/cache"),
+                stagingDirectory: URL(filePath: "/tmp/consumer/staging"),
+                recentDocumentsKey: "Consumer.Trace.Recent.v1",
+                signpostSubsystem: "com.example.consumer.trace",
+                bundledParser: parser
+            )
+        ) {
+            XCTAssertEqual(($0 as? ArkTraceError)?.code, .invalidArgument)
+        }
+
+        XCTAssertThrowsError(
+            try TraceProductConfiguration(
+                bundleURL: URL(filePath: "/Applications/Consumer.app"),
+                cacheDirectory: URL(filePath: "/traces"),
+                stagingDirectory: URL(filePath: "/staging"),
+                recentDocumentsKey: "Consumer.Trace.Recent.v1",
+                signpostSubsystem: "com.example.consumer.trace",
+                bundledParser: parser
+            )
+        ) {
+            XCTAssertEqual(($0 as? ArkTraceError)?.code, .invalidArgument)
+        }
+    }
+
     func testProductionResolverUsesOnlyBundleLocation() throws {
         let root = FileManager.default.temporaryDirectory.appending(path: "arktrace-app-bundle-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -14,7 +115,7 @@ final class AppDistributionTests: XCTestCase {
         // Asserted against the resolver's candidate list rather than by pointing
         // the process-global PATH at a fake parser: PATH is shared by the whole
         // test process, so writing it races anything that spawns a subprocess.
-        let resolver = ArkTraceBundledParserResolver(bundleURL: root)
+        let resolver = TraceBundledParserResolver(bundleURL: root)
         let candidates = resolver.candidateExecutableURLs().map(\.standardizedFileURL.path)
         XCTAssertEqual(
             candidates,
@@ -218,7 +319,7 @@ final class AppDistributionTests: XCTestCase {
             )
 
             XCTAssertThrowsError(
-                try ArkTraceBundledParserResolver(bundleURL: bundle).resolve()
+                try TraceBundledParserResolver(bundleURL: bundle).resolve()
             ) { error in
                 let error = error as? ArkTraceError
                 XCTAssertEqual(error?.code, .traceStreamerUnavailable)
@@ -272,7 +373,7 @@ final class AppDistributionTests: XCTestCase {
                 }
 
                 XCTAssertThrowsError(
-                    try ArkTraceBundledParserResolver(bundleURL: bundle).resolve(),
+                    try TraceBundledParserResolver(bundleURL: bundle).resolve(),
                     "\(targetName) \(shape)"
                 ) { error in
                     let error = error as? ArkTraceError
@@ -340,7 +441,7 @@ final class AppDistributionTests: XCTestCase {
             }
 
             XCTAssertThrowsError(
-                try ArkTraceBundledParserResolver(bundleURL: bundle).resolve()
+                try TraceBundledParserResolver(bundleURL: bundle).resolve()
             ) { error in
                 XCTAssertEqual((error as? ArkTraceError)?.code, .traceStreamerUnavailable)
             }
@@ -372,7 +473,7 @@ final class AppDistributionTests: XCTestCase {
             to: manifestURL
         )
 
-        let parser = try ArkTraceBundledParserResolver(bundleURL: bundle).resolve()
+        let parser = try TraceBundledParserResolver(bundleURL: bundle).resolve()
         let identity = try await parser.identity()
         XCTAssertEqual(identity.reportedVersion, "4.3.7")
         XCTAssertEqual(identity.binarySHA256.count, 64)
@@ -385,7 +486,7 @@ final class AppDistributionTests: XCTestCase {
         try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
             .write(to: manifestURL)
         do {
-            _ = try await ArkTraceBundledParserResolver(bundleURL: bundle)
+            _ = try await TraceBundledParserResolver(bundleURL: bundle)
                 .resolve().identity()
             XCTFail("expected identity drift")
         } catch let error as ArkTraceError {
@@ -439,7 +540,7 @@ final class AppDistributionTests: XCTestCase {
         try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
             .write(to: manifest, options: .atomic)
 
-        let identity = try await ArkTraceBundledParserResolver(bundleURL: bundle)
+        let identity = try await TraceBundledParserResolver(bundleURL: bundle)
             .resolve().identity()
         XCTAssertEqual(identity.binarySHA256, signedSHA)
         XCTAssertEqual(identity.buildRecipeVersion, object["buildRecipeVersion"] as? String)

@@ -1,6 +1,3 @@
-import ArkTraceCore
-import ArkTraceParser
-import Darwin
 import Foundation
 import UniformTypeIdentifiers
 
@@ -35,81 +32,29 @@ public enum ArkTraceAppDistribution {
     }
 }
 
-/// Production resolver is bundle-only. There is intentionally no PATH or
-/// environment fallback: a missing or drifted bundle is a typed unavailable/
-/// identity failure, never a launch of an ambient executable.
-package struct ArkTraceBundledParserResolver: Sendable {
-    public let bundleURL: URL
-
-    public init(bundleURL: URL = Bundle.main.bundleURL) {
-        self.bundleURL = bundleURL
-    }
-
-    /// Every location this resolver will ever consider.
-    ///
-    /// The bundled resolver has exactly one: the helper inside the app bundle.
-    /// Exposing it lets a test assert that a planted binary elsewhere is never
-    /// a candidate, without mutating the process-global `PATH` to say so.
-    public func candidateExecutableURLs() -> [URL] {
-        [TraceStreamerResolver.appBundleExecutableURL(bundleURL: bundleURL)]
-    }
-
-    public func resolve() throws -> TraceStreamerProcessParser {
-        let executableURL = TraceStreamerResolver.appBundleExecutableURL(
-            bundleURL: bundleURL
+public extension TraceProductConfiguration {
+    /// The standalone ArkTrace product profile. Other consumers construct
+    /// their own fixed profile and keep product-specific values out of the
+    /// shared trace modules.
+    static func arkTrace(bundleURL: URL = Bundle.main.bundleURL) -> Self {
+        let productRoot = FileManager.default.urls(
+            for: .cachesDirectory, in: .userDomainMask
+        )[0].appending(
+            path: ArkTraceAppDistribution.bundleIdentifier,
+            directoryHint: .isDirectory
         )
-        let manifestURL = TraceStreamerResolver.appBundleManifestURL(
-            bundleURL: bundleURL
-        )
-        guard Self.isRegularReadableFile(
-                executableURL, inside: bundleURL, executable: true
+        return TraceProductConfiguration(
+            reviewedBundleURL: bundleURL,
+            reviewedCacheDirectory: productRoot.appending(
+                path: "traces", directoryHint: .isDirectory
             ),
-            Self.isRegularReadableFile(
-                manifestURL, inside: bundleURL, executable: false
-            )
-        else {
-            throw ArkTraceError(
-                code: .traceStreamerUnavailable,
-                stage: .preparing,
-                message: "Bundled TraceStreamer executable or manifest is unavailable",
-                retryable: true
-            )
-        }
-        return try TraceStreamerProcessParser(
-            executableURL: executableURL,
-            manifestURL: manifestURL
+            reviewedStagingDirectory: productRoot.appending(
+                path: "staging", directoryHint: .isDirectory
+            ),
+            reviewedRecentDocumentsKey: "ArkTrace.RecentTraceBookmarks.v1",
+            reviewedSignpostSubsystem: ArkTraceAppDistribution.bundleIdentifier,
+            reviewedBundledParser: .arkTrace,
+            reviewedBundledParserExecutionPolicy: .immutableSnapshot
         )
-    }
-
-    private static func isRegularReadableFile(
-        _ url: URL,
-        inside bundleURL: URL,
-        executable: Bool
-    ) -> Bool {
-        let root = bundleURL.standardizedFileURL
-        let candidate = url.standardizedFileURL
-        let prefix = root.path.hasSuffix("/") ? root.path : root.path + "/"
-        guard candidate.path.hasPrefix(prefix),
-            Self.hasMode(root, expected: S_IFDIR)
-        else { return false }
-        let relative = candidate.path.dropFirst(prefix.count)
-        let components = relative.split(separator: "/", omittingEmptySubsequences: false)
-        guard !components.isEmpty,
-            components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." })
-        else { return false }
-        var current = root
-        for (index, component) in components.enumerated() {
-            current.append(path: String(component), directoryHint: .notDirectory)
-            let expected = index == components.count - 1 ? S_IFREG : S_IFDIR
-            guard Self.hasMode(current, expected: expected) else { return false }
-        }
-        let mode = executable ? (R_OK | X_OK) : R_OK
-        return unsafe candidate.path.withCString { unsafe Darwin.access($0, mode) } == 0
-    }
-
-    private static func hasMode(_ url: URL, expected: mode_t) -> Bool {
-        var info = stat()
-        return unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) } == 0
-            && (info.st_mode & S_IFMT) == expected
     }
 }

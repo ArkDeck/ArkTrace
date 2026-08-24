@@ -147,10 +147,45 @@ final class TraceDatabase {
     let fileIdentity: TraceDatabaseFileIdentity?
     let fileSnapshot: TraceDatabaseFileSnapshot?
 
+    /// App Sandbox denies reopening an already-owned file through `/dev/fd`
+    /// even though the descriptor is valid. Cache databases are copied into
+    /// the product's private storage first, so sandboxed apps open that path
+    /// with SQLite NOFOLLOW and verify its complete identity after open.
+    /// CLI and non-sandboxed processes keep the stronger descriptor-bound open.
+    private static func sandboxedPrivateReadOnlyOpen(
+        for url: URL,
+        sandboxedApplicationOverride: Bool?
+    ) throws -> Bool {
+        let isSandboxed = sandboxedApplicationOverride
+            ?? (ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil)
+        guard isSandboxed else {
+            return false
+        }
+        let fileManager = FileManager.default
+        let roots = [
+            fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first,
+            fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
+            fileManager.temporaryDirectory,
+        ].compactMap { $0?.standardizedFileURL }
+        let path = url.standardizedFileURL.path
+        guard roots.contains(where: { root in
+            path == root.path || path.hasPrefix(root.path + "/")
+        }) else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .openingDatabase,
+                message: "Sandboxed Trace database is outside private storage",
+                details: ["reason": "sandboxDatabaseOutsidePrivateStorage"]
+            )
+        }
+        return true
+    }
+
     init(
         url: URL,
         readOnly: Bool,
         createIfMissing: Bool = true,
+        sandboxedApplicationOverride: Bool? = nil,
         queryObserver: (@Sendable (String, Int) -> Void)? = nil
     ) throws {
         var db: OpaquePointer?
@@ -170,6 +205,12 @@ final class TraceDatabase {
         let sqliteOpenPath: String
         let fileIdentity: TraceDatabaseFileIdentity?
         let fileSnapshot: TraceDatabaseFileSnapshot?
+        let sandboxedPrivateOpen = readOnly
+            ? try Self.sandboxedPrivateReadOnlyOpen(
+                for: openURL,
+                sandboxedApplicationOverride: sandboxedApplicationOverride
+            )
+            : false
         if readOnly {
             let descriptor = unsafe openURL.path.withCString {
                 unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
@@ -193,7 +234,7 @@ final class TraceDatabase {
                 )
             }
             bindingDescriptor = descriptor
-            sqliteOpenPath = "/dev/fd/\(descriptor)"
+            sqliteOpenPath = sandboxedPrivateOpen ? openURL.path : "/dev/fd/\(descriptor)"
             fileIdentity = TraceDatabaseFileIdentity(
                 device: UInt64(info.st_dev),
                 inode: UInt64(info.st_ino)
@@ -232,6 +273,32 @@ final class TraceDatabase {
                 message: "Cannot open SQLite database",
                 details: ["sqliteCode": String(rc)]
             )
+        }
+        if sandboxedPrivateOpen {
+            var reopened = stat()
+            let stable = unsafe openURL.path.withCString {
+                unsafe Darwin.lstat($0, &reopened)
+            } == 0
+                && (reopened.st_mode & S_IFMT) == S_IFREG
+                && fileSnapshot == TraceDatabaseFileSnapshot(
+                    device: UInt64(reopened.st_dev),
+                    inode: UInt64(reopened.st_ino),
+                    byteCount: Int64(reopened.st_size),
+                    modificationSeconds: Int64(reopened.st_mtimespec.tv_sec),
+                    modificationNanoseconds: Int64(reopened.st_mtimespec.tv_nsec),
+                    statusChangeSeconds: Int64(reopened.st_ctimespec.tv_sec),
+                    statusChangeNanoseconds: Int64(reopened.st_ctimespec.tv_nsec)
+                )
+            guard stable else {
+                unsafe sqlite3_close_v2(db)
+                if let bindingDescriptor { _ = Darwin.close(bindingDescriptor) }
+                throw ArkTraceError(
+                    code: .traceDatabaseInvalid,
+                    stage: .openingDatabase,
+                    message: "Trace database changed while it was opened",
+                    details: ["reason": "databaseIdentityChangedDuringOpen"]
+                )
+            }
         }
         unsafe self.handle = db
         self.bindingDescriptor = bindingDescriptor

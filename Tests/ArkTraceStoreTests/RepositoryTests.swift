@@ -212,6 +212,41 @@ final class RepositoryTests: XCTestCase {
         )
     }
 
+    func testSandboxedReadOnlyOpenUsesPrivatePathAndPreservesQueries() throws {
+        let db = try TraceDatabase(
+            url: databaseURL,
+            readOnly: true,
+            sandboxedApplicationOverride: true
+        )
+        let values = try db.query("SELECT COUNT(*) FROM process") { row in
+            row.int64(0)
+        }
+        XCTAssertEqual(values, [3])
+    }
+
+    func testSandboxedReadOnlyOpenRejectsDatabaseOutsidePrivateStorage() throws {
+        let outsideURL = URL(filePath: "/private/tmp")
+            .appending(path: "arktrace-outside-\(UUID().uuidString).sqlite")
+        defer { try? FileManager.default.removeItem(at: outsideURL) }
+        let writer = try TraceDatabase(url: outsideURL, readOnly: false)
+        try writer.execute("CREATE TABLE sample (value INTEGER);")
+
+        XCTAssertThrowsError(
+            try TraceDatabase(
+                url: outsideURL,
+                readOnly: true,
+                sandboxedApplicationOverride: true
+            )
+        ) { error in
+            let typed = error as? ArkTraceError
+            XCTAssertEqual(typed?.code, .traceDatabaseInvalid)
+            XCTAssertEqual(
+                typed?.details["reason"],
+                "sandboxDatabaseOutsidePrivateStorage"
+            )
+        }
+    }
+
     private func makeSummaryRepository(
         extraSQL: String = ""
     ) throws -> (SQLiteTraceRepository, URL) {

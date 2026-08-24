@@ -89,6 +89,25 @@ private func pinAppSupportSurface(
     await controller.close()
 
     _ = TraceDocumentController(bundleURL: URL(filePath: "/dev/null"))
+    let parserLocation = try! TraceBundledParserLocation(
+        executableRelativePath: "Contents/MacOS/trace_streamer",
+        manifestRelativePath: "Contents/Resources/Trace/manifest.json"
+    )
+    let productConfiguration = try! TraceProductConfiguration(
+        bundleURL: URL(filePath: "/Applications/Consumer.app"),
+        cacheDirectory: URL(filePath: "/tmp/consumer/traces"),
+        stagingDirectory: URL(filePath: "/tmp/consumer/staging"),
+        recentDocumentsKey: "Consumer.Trace.Recent.v1",
+        signpostSubsystem: "com.example.consumer.trace",
+        bundledParser: parserLocation,
+        bundledParserExecutionPolicy: .signedBundleInPlace
+    )
+    _ = parserLocation.executableURL(in: productConfiguration.bundleURL)
+    _ = parserLocation.manifestURL(in: productConfiguration.bundleURL)
+    _ = productConfiguration.cacheDirectory
+    _ = productConfiguration.stagingDirectory
+    _ = productConfiguration.bundledParserExecutionPolicy.rawValue
+    _ = TraceDocumentController(configuration: productConfiguration)
 }
 
 @MainActor

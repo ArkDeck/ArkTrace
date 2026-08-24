@@ -9,6 +9,11 @@
 > 0.1b 修订（2026-08-12，Phase 0）：§2.1 完成 GitCode 重锚定（pin `447a0a49`），发布门 1 关闭；新增 [TRACE_STREAMER.md](./TRACE_STREAMER.md)
 > Phase 1 实现注记（2026-08-12）：Parser/Store vertical slice、真实 schema evidence、staging validation/index/fsync、原子 Ready 与 mandatory zero-skip gate 已完成；验证见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)
 > 审查回写（2026-08-16）：§5.1/§6 补齐 `ArkTraceAppSupport`、`ArkTraceSignalShim` 与真实依赖边；§8.5 改为说明 continuation 的单次 resume 由何保证（此前的"不使用 checked continuation"与实现不符）；§9.4 更新为 index schema version 3 与多前缀命名；§8.2 第 4 条标注为未决（§25 第 12 项）
+>
+> 复用边界回写（2026-08-24）：`TraceProductConfiguration` 接管消费产品的 bundle、
+> cache/staging、最近文档 key、signpost subsystem 与固定 parser 位置；共享 Runtime、Store
+> 和 document state machine 不再硬编码 ArkTrace 产品路径。默认 profile 保持 standalone
+> ArkTrace 行为，外部产品使用独立的编译期 profile。
 > 缺陷回写（2026-08-18）：§14.2.5 滚轮轴向改为**按手势承诺**（原逐事件规则让纵向触控板滑动被自身的横向抖动吃掉，外层 `ScrollView` 收不到事件，滚动慢到不像滚动）
 > 性能回写（2026-08-18）：§13.5 补 label 绘制规则 —— 文字成本按图元计，批处理管不到，故按脏矩形裁剪并缓存排版（滚动帧 42.5 → 0.62 ms）
 > 性能回写二（2026-08-18）：§13.4 第 6 条改为「上一代 primitive + 新 viewport」（`W`/`S` 此前要等查询返回才动），并补 viewport 范围裁剪与 `isOpaque` 两条约束
@@ -233,6 +238,13 @@ ArkTraceApp        → Core + Analysis + Rendering + AppSupport + Capture
 需要报告 parser identity 与 SQLite runtime 事实，`--no-cache` 需要选择 storage
 policy；这些都不经过 `Runtime` 的 session 编排。
 
+`ArkTraceAppSupport` 本身不拥有产品身份。组合根必须用 `TraceProductConfiguration`
+一次性固定 bundle URL、cache/staging 兄弟目录、最近文档 preferences key、signpost
+subsystem 与 bundle 内 parser/manifest 的相对位置。`TraceDocumentController()` 只是
+standalone ArkTrace profile 的兼容便利入口；ArkDeck 等外部消费者使用显式 profile。
+这些值只能在 controller 构造时注入，打开 Trace 的请求不能覆盖它们，也不能引入
+PATH fallback。产品差异因此停在组合边界，不再通过复制 Runtime/Store/AppSupport 源码表达。
+
 `ArkTraceRuntime` 是必要的两用编排层：App 与 CLI 都要共享 session、cache、parse、schema validation 和 cancellation。如果把这些职责放入 App 或 CLI，会产生两套生命周期；如果放入 Core，会反向引入 Process/SQLite 依赖。
 
 `ArkTraceCapture` 反向保持独立：它只把设备侧结果安全地物化为 Host regular file，不理解 Trace domain，也不调用 Parser。只有 App 链接它；CLI 与 ArkDeck analyzer 的依赖闭包不含该 target。完整 lifecycle、预设与失败安全见 [CAPTURE.md](./CAPTURE.md)。
@@ -378,9 +390,10 @@ protocol TraceParser: Sendable {
 2. ArkTrace.app bundle 中的固定资源路径；
 3. CLI 安装布局中的固定 `libexec` 路径。
 
-App 与 ArkDeck 都不经过第 1 条：App 用 bundle-only 的
-`ArkTraceBundledParserResolver`，ArkDeck 用固定 argv 的 closed profile，两者都不
-暴露该 flag。
+App 与 ArkDeck 都不经过第 1 条：AppSupport 用 bundle-only 的
+`TraceBundledParserResolver`，其唯一 executable/manifest 位置来自消费产品编译期固定的
+`TraceProductConfiguration`；ArkDeck analyzer 的 CLI 路径仍用固定 argv 的 closed profile。
+两者都不向一次 trace 请求暴露该 flag 或 parser 位置。
 
 > **已决（2026-08-16，见 §25 第 12 项）**：早期草稿写的"仅 Debug 构建允许开发者
 > override"从未成立，且不能成立——`scripts/test_phase2.sh` 与

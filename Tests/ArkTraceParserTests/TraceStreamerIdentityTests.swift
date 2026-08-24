@@ -81,6 +81,57 @@ final class TraceStreamerIdentityTests: XCTestCase {
         return (directory, binary, manifest)
     }
 
+    func testSignedBundleModeExecutesReviewedNestedHelperInPlace() async throws {
+        try requirePinnedFiles()
+        let bundle = FileManager.default.temporaryDirectory
+            .appending(path: "ArkDeck-\(UUID().uuidString).app", directoryHint: .isDirectory)
+        let executable = bundle.appending(path: "Contents/MacOS/trace_streamer")
+        let manifest = bundle.appending(
+            path: "Contents/Resources/TraceStreamer/manifest.json"
+        )
+        defer { try? FileManager.default.removeItem(at: bundle) }
+        try FileManager.default.createDirectory(
+            at: executable.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: manifest.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.copyItem(at: Self.binaryURL, to: executable)
+        try FileManager.default.copyItem(at: Self.manifestURL, to: manifest)
+
+        let parser = try TraceStreamerProcessParser(
+            executableURL: executable,
+            manifestURL: manifest,
+            executionMode: .signedBundleInPlace
+        )
+        let identity = try await parser.cacheIdentity()
+        XCTAssertEqual(
+            identity.binarySHA256,
+            try TraceStreamerManifest.load(from: Self.manifestURL).binarySHA256
+        )
+        XCTAssertTrue(FileManager.default.fileExists(atPath: executable.path))
+    }
+
+    func testSignedBundleModeRejectsUnreviewedLayout() async throws {
+        let copy = try makeWorkingCopy()
+        defer { try? FileManager.default.removeItem(at: copy.directory) }
+        let parser = try TraceStreamerProcessParser(
+            executableURL: copy.binary,
+            manifestURL: copy.manifest,
+            executionMode: .signedBundleInPlace
+        )
+
+        do {
+            _ = try await parser.cacheIdentity()
+            XCTFail("expected signed bundle layout rejection")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.code, .traceStreamerUnavailable)
+            XCTAssertEqual(error.details["reason"], "invalidSignedBundleLayout")
+        }
+    }
+
     private func updateManifest(
         at url: URL,
         _ update: (inout [String: Any]) -> Void

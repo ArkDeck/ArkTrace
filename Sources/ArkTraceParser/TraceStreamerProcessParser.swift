@@ -4,6 +4,15 @@ import Darwin
 import Foundation
 import Synchronization
 
+/// The CLI snapshots an ambient deployment into a private work directory
+/// before execution. A sandboxed signed app must instead execute its sealed
+/// nested helper in place; macOS rejects copied executable code from the
+/// app's writable data container even when the bytes remain signed.
+package enum TraceStreamerExecutionMode: Sendable {
+    case immutableSnapshot
+    case signedBundleInPlace
+}
+
 /// Runs a pinned TraceStreamer executable as a child process (DESIGN §8).
 ///
 /// Invocation is `Process.executableURL + arguments[]`, never a shell
@@ -23,6 +32,7 @@ package struct TraceStreamerProcessParser: TraceParser {
 
     private let configuredExecutableURL: URL
     private let configuredManifestURL: URL?
+    private let executionMode: TraceStreamerExecutionMode
     private let identitySnapshotParentDirectory: URL?
     private let identityVerificationHook: (@Sendable () -> Void)?
     private let identityCleanupHook: (@Sendable () -> Void)?
@@ -38,10 +48,15 @@ package struct TraceStreamerProcessParser: TraceParser {
     /// Construction records configuration only. All filesystem access,
     /// manifest decoding, hashing, and Mach-O inspection happens from the
     /// async methods so a resolver can be used safely by MainActor code.
-    public init(executableURL: URL, manifestURL: URL? = nil) throws {
+    public init(
+        executableURL: URL,
+        manifestURL: URL? = nil,
+        executionMode: TraceStreamerExecutionMode = .immutableSnapshot
+    ) throws {
         try self.init(
             executableURL: executableURL,
             manifestURL: manifestURL,
+            executionMode: executionMode,
             identitySnapshotParentDirectory: nil,
             identityVerificationHook: nil,
             identityCleanupHook: nil,
@@ -60,6 +75,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     init(
         executableURL: URL,
         manifestURL: URL? = nil,
+        executionMode: TraceStreamerExecutionMode = .immutableSnapshot,
         identitySnapshotParentDirectory: URL? = nil,
         identityVerificationHook: (@Sendable () -> Void)? = nil,
         identityCleanupHook: (@Sendable () -> Void)? = nil,
@@ -80,6 +96,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         }
         self.configuredExecutableURL = executableURL.standardizedFileURL
         self.configuredManifestURL = manifestURL?.standardizedFileURL
+        self.executionMode = executionMode
         self.identitySnapshotParentDirectory = identitySnapshotParentDirectory?.standardizedFileURL
         self.identityVerificationHook = identityVerificationHook
         self.identityCleanupHook = identityCleanupHook
@@ -110,6 +127,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     ) async throws -> TraceParserIdentity {
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
+        let executionMode = executionMode
         let snapshotParentDirectory = identitySnapshotParentDirectory
             ?? FileManager.default.temporaryDirectory
         let identityVerificationHook = identityVerificationHook
@@ -119,6 +137,7 @@ package struct TraceStreamerProcessParser: TraceParser {
             try Self.makeParserSnapshot(
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
+                executionMode: executionMode,
                 parentDirectory: snapshotParentDirectory,
                 cleanupRemovalHook: cleanupRemovalHook
             )
@@ -142,7 +161,9 @@ package struct TraceStreamerProcessParser: TraceParser {
             let version: String
             if launchesVersionProbe {
                 version = try await Self.reportedVersionOffCallerExecutor(
-                    executableURL: snapshot.executableURL)
+                    executableURL: snapshot.executableURL,
+                    workingDirectoryURL: snapshot.directory
+                )
                 try Self.validateReportedVersion(version, manifest: snapshot.manifest)
             } else {
                 version = snapshot.manifest.reportedVersion
@@ -239,6 +260,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         progress?(.preparing)
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
+        let executionMode = executionMode
         let preparationChunkHook = preparationChunkHook
         let parseCleanupHook = parseCleanupHook
         let parseFinalBoundaryHook = parseFinalBoundaryHook
@@ -255,6 +277,7 @@ package struct TraceStreamerProcessParser: TraceParser {
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
+                executionMode: executionMode,
                 preparationChunkHook: preparationChunkHook,
                 cleanupRemovalHook: cleanupRemovalHook
             )
@@ -353,7 +376,9 @@ package struct TraceStreamerProcessParser: TraceParser {
         prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ExecutedParse {
         let version = try await Self.reportedVersionOffCallerExecutor(
-            executableURL: prepared.parserSnapshot.executableURL)
+            executableURL: prepared.parserSnapshot.executableURL,
+            workingDirectoryURL: prepared.parserSnapshot.directory
+        )
         try Self.validateReportedVersion(version, manifest: prepared.parserSnapshot.manifest)
         let parserIdentity = Self.identity(
             manifest: prepared.parserSnapshot.manifest,
@@ -389,6 +414,7 @@ package struct TraceStreamerProcessParser: TraceParser {
                 source: prepared.sourceSnapshotURL,
                 output: prepared.outputURL
             ),
+            workingDirectoryURL: prepared.parserSnapshot.directory,
             processDidLaunchHook: processDidLaunchHook,
             stdoutObserver: stdoutObserver
         )
@@ -715,6 +741,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         destination: URL,
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
+        executionMode: TraceStreamerExecutionMode,
         preparationChunkHook: (@Sendable () -> Void)?,
         cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
     ) throws -> PreparedParse {
@@ -726,6 +753,7 @@ package struct TraceStreamerProcessParser: TraceParser {
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
+                executionMode: executionMode,
                 preparationChunkHook: preparationChunkHook,
                 cleanupRemovalHook: cleanupRemovalHook
             )
@@ -745,6 +773,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         destination: URL,
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
+        executionMode: TraceStreamerExecutionMode,
         preparationChunkHook: (@Sendable () -> Void)?,
         cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
     ) throws -> PreparedParse {
@@ -829,6 +858,7 @@ package struct TraceStreamerProcessParser: TraceParser {
             let parserSnapshot = try makeParserSnapshot(
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
+                executionMode: executionMode,
                 parentDirectory: directory,
                 useParentDirectory: true,
                 cleanupRemovalHook: cleanupRemovalHook
@@ -903,6 +933,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     private static func makeParserSnapshot(
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
+        executionMode: TraceStreamerExecutionMode,
         parentDirectory: URL,
         useParentDirectory: Bool = false,
         cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
@@ -911,6 +942,7 @@ package struct TraceStreamerProcessParser: TraceParser {
             return try makeParserSnapshotUnchecked(
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
+                executionMode: executionMode,
                 parentDirectory: parentDirectory,
                 useParentDirectory: useParentDirectory,
                 cleanupRemovalHook: cleanupRemovalHook
@@ -927,6 +959,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     private static func makeParserSnapshotUnchecked(
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
+        executionMode: TraceStreamerExecutionMode,
         parentDirectory: URL,
         useParentDirectory: Bool,
         cleanupRemovalHook: (@Sendable (URL) throws -> Void)?
@@ -957,13 +990,25 @@ package struct TraceStreamerProcessParser: TraceParser {
         }
 
         do {
-            let executableSnapshot = directory.appending(path: "trace_streamer")
-            try copyRegularFileCancellable(
-                from: canonicalExecutable,
-                to: executableSnapshot,
-                permissions: 0o500,
-                cleanupRemovalHook: cleanupRemovalHook
-            )
+            let executableSnapshot: URL
+            switch executionMode {
+            case .immutableSnapshot:
+                executableSnapshot = directory.appending(path: "trace_streamer")
+                try copyRegularFileCancellable(
+                    from: canonicalExecutable,
+                    to: executableSnapshot,
+                    permissions: 0o500,
+                    cleanupRemovalHook: cleanupRemovalHook
+                )
+            case .signedBundleInPlace:
+                guard isSignedBundleLayout(
+                    executableURL: canonicalExecutable,
+                    manifestURL: manifestURL
+                ) else {
+                    throw unavailable(reason: "invalidSignedBundleLayout")
+                }
+                executableSnapshot = canonicalExecutable
+            }
             try validate(manifest: manifest, executableURL: executableSnapshot)
             return ParserSnapshot(
                 directory: directory,
@@ -983,6 +1028,24 @@ package struct TraceStreamerProcessParser: TraceParser {
             }
             throw error
         }
+    }
+
+    private static func isSignedBundleLayout(
+        executableURL: URL,
+        manifestURL: URL
+    ) -> Bool {
+        let macOSDirectory = executableURL.deletingLastPathComponent()
+        let contentsDirectory = macOSDirectory.deletingLastPathComponent()
+        let bundleURL = contentsDirectory.deletingLastPathComponent()
+        guard executableURL.lastPathComponent == "trace_streamer",
+            macOSDirectory.lastPathComponent == "MacOS",
+            contentsDirectory.lastPathComponent == "Contents",
+            bundleURL.pathExtension == "app"
+        else { return false }
+        return manifestURL.standardizedFileURL
+            == bundleURL
+                .appending(path: "Contents/Resources/TraceStreamer/manifest.json")
+                .standardizedFileURL
     }
 
     // MARK: - Process execution
@@ -1215,6 +1278,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     static func run(
         executable: URL,
         arguments: [String],
+        workingDirectoryURL: URL? = nil,
         diagnosticCapacity: Int = 65_536,
         terminationGracePeriod: TimeInterval = 0.5,
         processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil,
@@ -1226,11 +1290,12 @@ package struct TraceStreamerProcessParser: TraceParser {
         // The pinned parser is a local pure transformation. Never let an App,
         // shell, test runner, or injected DYLD_* variable influence child
         // loading or executable selection. The executable is always an
-        // immutable private snapshot, so its parent is a trusted writable
-        // per-invocation current/TMP directory. Never derive cwd from an
-        // arbitrary source argument: literal filenames may contain separators
-        // and the parser must not resolve ambient paths through cwd.
-        let workingDirectory = executable.deletingLastPathComponent()
+        // immutable private snapshot. A sandboxed app executes signed bundle
+        // code in place, but still supplies its private per-invocation
+        // current/TMP directory. Never derive cwd from an arbitrary source
+        // argument: literal filenames may contain separators.
+        let workingDirectory = workingDirectoryURL
+            ?? executable.deletingLastPathComponent()
         process.currentDirectoryURL = workingDirectory
         process.environment = [
             "LANG": "C",
@@ -1301,6 +1366,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     private static func runOffCallerExecutor(
         executable: URL,
         arguments: [String],
+        workingDirectoryURL: URL? = nil,
         processDidLaunchHook: (@Sendable (pid_t) -> Void)? = nil,
         stdoutObserver: (@Sendable (Data) -> Void)? = nil
     ) async throws -> Outcome {
@@ -1308,6 +1374,7 @@ package struct TraceStreamerProcessParser: TraceParser {
             try await run(
                 executable: executable,
                 arguments: arguments,
+                workingDirectoryURL: workingDirectoryURL,
                 processDidLaunchHook: processDidLaunchHook,
                 stdoutObserver: stdoutObserver
             )
@@ -1319,12 +1386,16 @@ package struct TraceStreamerProcessParser: TraceParser {
         }
     }
 
-    private static func reportedVersion(executableURL: URL) async throws -> String {
+    private static func reportedVersion(
+        executableURL: URL,
+        workingDirectoryURL: URL
+    ) async throws -> String {
         let outcome: Outcome
         do {
             outcome = try await run(
                 executable: executableURL,
                 arguments: ["--version"],
+                workingDirectoryURL: workingDirectoryURL,
                 diagnosticCapacity: 4_096
             )
         } catch let error as ArkTraceError where error.code == .cancelled {
@@ -1351,10 +1422,14 @@ package struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func reportedVersionOffCallerExecutor(
-        executableURL: URL
+        executableURL: URL,
+        workingDirectoryURL: URL
     ) async throws -> String {
         let task = Task.detached {
-            try await reportedVersion(executableURL: executableURL)
+            try await reportedVersion(
+                executableURL: executableURL,
+                workingDirectoryURL: workingDirectoryURL
+            )
         }
         return try await withTaskCancellationHandler {
             try await task.value

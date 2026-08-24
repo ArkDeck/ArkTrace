@@ -4,6 +4,24 @@ ArkDeck consumes ArkTrace only through reviewed, typed analyzer operations. The 
 integration does not accept an executable path, argv array, shell fragment, raw SQL, GUI
 automation, HDC route, or RuntimeCapability from the caller.
 
+## Shared-source direction
+
+ArkTrace is the source owner for Core, Parser, Store, Runtime, Analysis, Rendering and the
+product-neutral document engine. ArkDeck should consume a pinned ArkTrace package revision and
+keep only its Artifact/Runtime bridge and product UI locally; it should not maintain renamed
+copies of those shared modules.
+
+`TraceProductConfiguration` is the composition boundary for legitimate product differences. It
+fixes the consumer bundle, cache/staging roots, recent-document preference key, signpost subsystem
+and bundle-relative parser/manifest locations before any trace is opened. The default factory is
+the standalone ArkTrace profile. ArkDeck must construct its own reviewed profile at its app
+composition root; request inputs cannot select or widen any of these values.
+
+This source-dependency migration is incremental. Until ArkDeck deletes its migrated copies, a
+dependency bump is not proof of parity by itself; the downstream change must still run ArkTrace
+contract fixtures and ArkDeck's complete Trace/App lanes. Once the copies are removed, ArkDeck
+updates should change only the pinned ArkTrace revision plus intentional adapter/UI code.
+
 ## Production profile
 
 The signed ArkTrace CLI distribution is selected by an owner-only descriptor. ArkDeck installs

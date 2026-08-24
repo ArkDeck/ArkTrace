@@ -15,13 +15,6 @@ package enum TraceSessionStoragePolicy: Sendable {
     case ephemeral
 }
 
-package enum TraceCacheDefaults {
-    public static var rootDirectory: URL {
-        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        return base.appending(path: "com.arktrace.ArkTrace/traces", directoryHint: .isDirectory)
-    }
-}
-
 /// Stable AT-CACHE-001 identity. `parserKey` is a length-prefixed SHA-256
 /// encoding, so parser identity fields cannot create path or delimiter
 /// collisions.

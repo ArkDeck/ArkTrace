@@ -58,7 +58,7 @@ ArkTrace 必须是与 ArkDeck 平级的独立仓库，不得嵌入 `ArkDeck/ArkT
 
 ### AT-SYS-002 共享实现
 
-App、CLI 与 ArkDeck adapter 必须共享 ArkTrace Core/Runtime/Store/Analysis。禁止任一产品面重新实现 parser、SQL 语义或 analysis formula。
+App、CLI 与 ArkDeck adapter 必须共享 ArkTrace Core/Runtime/Store/Analysis。禁止任一产品面重新实现 parser、SQL 语义或 analysis formula。共享模块不得硬编码消费产品的 bundle identity、cache/staging root、preferences key、signpost subsystem 或 bundle 内 parser 位置；这些值必须由产品组合根通过固定配置注入，且不得由一次 trace 请求覆盖。
 
 ### AT-SYS-003 设备能力隔离
 

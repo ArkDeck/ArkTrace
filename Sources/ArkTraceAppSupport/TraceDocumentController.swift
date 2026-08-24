@@ -10,13 +10,17 @@ import OSLog
 /// Points-of-interest signposts for the app's cold-start and open chain.
 /// Signposting writes to the in-memory os_log buffer only; it must never add
 /// file or database I/O of its own (AT-PERF gate).
-package enum TraceAppSignposts {
-    public static let poster = OSSignposter(
-        subsystem: "com.arktrace.ArkTrace",
-        category: .pointsOfInterest
-    )
+package struct TraceAppSignposts: Sendable {
+    private let poster: OSSignposter
 
-    public static func event(_ name: StaticString) {
+    public init(subsystem: String) {
+        poster = OSSignposter(
+            subsystem: subsystem,
+            category: .pointsOfInterest
+        )
+    }
+
+    public func event(_ name: StaticString) {
         poster.emitEvent(name)
     }
 }
@@ -464,6 +468,7 @@ public final class TraceDocumentController {
     @ObservationIgnored private let opener: TraceDocumentOpener
     @ObservationIgnored private let maintenance: TraceCacheMaintenance?
     @ObservationIgnored private let recentStore: TraceRecentDocumentStore
+    @ObservationIgnored private let signposts: TraceAppSignposts
     @ObservationIgnored private let loader = TimelineSnapshotLoader()
     @ObservationIgnored private var document: TraceOpenedDocument?
     @ObservationIgnored private var openTask: Task<Void, Never>?
@@ -501,8 +506,28 @@ public final class TraceDocumentController {
         bundleURL: URL = Bundle.main.bundleURL,
         recentStore: TraceRecentDocumentStore = TraceRecentDocumentStore()
     ) {
-        let cache = TraceCacheDefaults.rootDirectory
-        let staging = cache.deletingLastPathComponent().appending(path: "staging", directoryHint: .isDirectory)
+        self.init(
+            configuration: .arkTrace(bundleURL: bundleURL),
+            recentStore: recentStore
+        )
+    }
+
+    /// Builds the shared document engine from a product-owned, fixed profile.
+    /// Trace-open requests cannot change its parser, storage or preference
+    /// namespace.
+    public convenience init(configuration: TraceProductConfiguration) {
+        self.init(
+            configuration: configuration,
+            recentStore: TraceRecentDocumentStore(key: configuration.recentDocumentsKey)
+        )
+    }
+
+    public convenience init(
+        configuration: TraceProductConfiguration,
+        recentStore: TraceRecentDocumentStore
+    ) {
+        let cache = configuration.cacheDirectory
+        let staging = configuration.stagingDirectory
         let maintenance = try? TraceCacheMaintenance(
             cacheDirectory: cache,
             stagingDirectory: staging
@@ -510,8 +535,11 @@ public final class TraceDocumentController {
         self.init(
             recentStore: recentStore,
             maintenance: maintenance,
+            signposts: TraceAppSignposts(subsystem: configuration.signpostSubsystem),
             opener: { source, progress in
-                let parser = try ArkTraceBundledParserResolver(bundleURL: bundleURL).resolve()
+                let parser = try TraceBundledParserResolver(
+                    configuration: configuration
+                ).resolve()
                 let session = try await TraceSession.open(
                     source: source,
                     parser: parser,
@@ -536,20 +564,24 @@ public final class TraceDocumentController {
     init(
         recentStore: TraceRecentDocumentStore,
         maintenance: TraceCacheMaintenance?,
+        signposts: TraceAppSignposts = TraceAppSignposts(
+            subsystem: ArkTraceAppDistribution.bundleIdentifier
+        ),
         opener: @escaping TraceDocumentOpener
     ) {
         self.recentStore = recentStore
         self.maintenance = maintenance
+        self.signposts = signposts
         self.opener = opener
         recentDocuments = recentStore.documents()
-        TraceAppSignposts.event("AppModelReady")
+        signposts.event("AppModelReady")
     }
 
     /// Idempotent first-window mark, called from the root view's `onAppear`.
     public func markFirstWindowAppeared() {
         guard !firstWindowMarked else { return }
         firstWindowMarked = true
-        TraceAppSignposts.event("FirstWindowAppeared")
+        signposts.event("FirstWindowAppeared")
     }
 
     /// Idempotent per-document hook, called when the timeline canvas for the
@@ -566,7 +598,7 @@ public final class TraceDocumentController {
     public func markTimelineDisplayed() {
         guard !timelineDisplayMarked else { return }
         timelineDisplayMarked = true
-        TraceAppSignposts.event("FirstTimelineDisplayed")
+        signposts.event("FirstTimelineDisplayed")
         timelineFocusRequestID &+= 1
     }
 
@@ -584,7 +616,7 @@ public final class TraceDocumentController {
     }
 
     public func open(_ url: URL) {
-        TraceAppSignposts.event("OpenRequested")
+        signposts.event("OpenRequested")
         cancelOutstandingWork()
         documentGeneration &+= 1
         let generation = documentGeneration
@@ -1361,14 +1393,14 @@ public final class TraceDocumentController {
                 }
             }
             opened = try await opener(url, progress)
-            TraceAppSignposts.event("CacheParserReady")
+            signposts.event("CacheParserReady")
             guard generation == documentGeneration, !Task.isCancelled else {
                 if let opened { try? await opened.close() }
                 return
             }
             guard let opened else { return }
             let catalog = try await Self.loadCatalog(repository: opened.repository)
-            TraceAppSignposts.event("CatalogReady")
+            signposts.event("CatalogReady")
             guard generation == documentGeneration, !Task.isCancelled else {
                 try? await opened.close()
                 return
