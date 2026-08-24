@@ -124,6 +124,79 @@ final class TimelineDensitySelectionTests: XCTestCase {
         XCTAssertEqual(ranges.last??.startNs, 550)
     }
 
+    /// A real click is never perfectly still.
+    ///
+    /// `mouseDragged` decides "did this move?" by comparing the anchor and the
+    /// pointer in *nanoseconds*, and the whole viewport maps onto a few hundred
+    /// points, so a fraction of a point is already a different nanosecond. On
+    /// a real capture zoomed to density one point is tens of microseconds, and
+    /// the hand tremor in an ordinary click is a point or two -- which nils the
+    /// pending hit and leaves a hairline range behind instead of a selection.
+    @MainActor
+    func testAClickWithOrdinaryHandTremorIsStillAClick() throws {
+        for jitter in [CGFloat(0.25), 0.5, 1, 2] {
+            let (view, track) = try makeView()
+            var hits: [TimelineDensityHit] = []
+            view.onSelectDensityBand = { hits.append($0) }
+            let press = CGPoint(x: 110, y: TimelineGeometry.trackFrame(track).midY)
+            let release = CGPoint(x: press.x + jitter, y: press.y)
+            view.mouseDown(with: try mouse(.leftMouseDown, viewPoint: press))
+            view.mouseDragged(with: try mouse(.leftMouseDragged, viewPoint: release))
+            view.mouseUp(with: try mouse(.leftMouseUp, viewPoint: release))
+            XCTAssertEqual(
+                hits.count, 1,
+                "a \(jitter) point wobble must not turn a click into a range drag"
+            )
+            XCTAssertNil(
+                view.selection,
+                "a \(jitter) point wobble must not leave a range behind"
+            )
+        }
+    }
+
+    /// The mark a resolved press leaves has to land on the block that was
+    /// pressed.
+    ///
+    /// DESIGN §13.5: 「画布按 band 的同一个矩形描边——否则点击只会填满 Inspector，
+    /// 时间轴上却看不出选中了哪一桶」. The first implementation outlined the
+    /// resolved *event's* range instead, then widened it to a 6 point minimum
+    /// about its own centre -- so a press on a 50 point bucket left a 6 point
+    /// box floating inside it, aligned with nothing.
+    @MainActor
+    func testTheResolvedSelectionIsMarkedOnTheBucketNotTheEvent() throws {
+        let (view, track) = try makeView()
+        let snapshot = try XCTUnwrap(view.snapshot)
+        // An event 10 ns long (2 points) inside the 500…750 ns bucket, which
+        // spans x 100…150.
+        view.selectedEventKey = EventKey(table: .callstack, rowID: 7)
+        view.selectedEventLocation = TimelineEventLocation(
+            trackID: track.descriptor.id,
+            range: try TraceTimeRange.query(startNs: 560, endNs: 570)
+        )
+        let outline = try XCTUnwrap(
+            view.resolvedSelectionOutline(in: snapshot, backingScale: 2)
+        )
+        let bucket = TimelineGeometry.bandFrame(
+            for: try TraceTimeRange.query(startNs: 500, endNs: 750),
+            in: track, viewport: snapshot.viewport, backingScale: 2
+        )
+        XCTAssertEqual(outline, bucket, "the mark belongs on the bucket that answered")
+        XCTAssertEqual(outline.minX, 100, accuracy: 0.01)
+        XCTAssertEqual(outline.width, 50, accuracy: 0.01)
+
+        // An event spanning two buckets is marked across both, so the mark
+        // still covers exactly the blocks it came out of.
+        view.selectedEventLocation = TimelineEventLocation(
+            trackID: track.descriptor.id,
+            range: try TraceTimeRange.query(startNs: 600, endNs: 800)
+        )
+        let wide = try XCTUnwrap(
+            view.resolvedSelectionOutline(in: snapshot, backingScale: 2)
+        )
+        XCTAssertEqual(wide.minX, 100, accuracy: 0.01)
+        XCTAssertEqual(wide.width, 100, accuracy: 0.01, "500…1000 ns is two buckets")
+    }
+
     /// A press on a track drawn in detail is answered by the snapshot, so it
     /// must not also ask the host to resolve one.
     @MainActor

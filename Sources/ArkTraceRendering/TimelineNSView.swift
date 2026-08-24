@@ -131,11 +131,34 @@ public final class TimelineNSView: NSView {
         case endpoint(TimelineSelectionEndpoint, anchorNs: Int64)
     }
 
+    /// How far the pointer must travel before a press becomes a range drag.
+    ///
+    /// The test used to be `anchor != moved` compared in **nanoseconds**. A
+    /// viewport is a few hundred points wide, so a fraction of a point is
+    /// already a different nanosecond -- at a density zoom one point is tens
+    /// of microseconds. The tremor in an ordinary click is a point or two, so
+    /// nearly every press on a band nilled ``pendingDensityHit`` and left a
+    /// hairline range behind instead of selecting anything. Measured on the
+    /// unit harness (5 ns per point), a **0.25 point** wobble was enough.
+    ///
+    /// Three points is the distance AppKit itself treats as the start of a
+    /// drag. The latch matters as much as the threshold: once a gesture has
+    /// committed to being a range it stays one, so wandering back toward the
+    /// press point does not turn it into a click on release.
+    ///
+    /// Only `.newRange` uses it. An `.endpoint` press landed on a handle the
+    /// user aimed at, so its intent is already unambiguous.
+    static let rangeDragSlop: CGFloat = 3
+
     private var previousSnapshot: TimelineSnapshot?
     private var lastReportedVisibleRegion: (offset: Double, height: Double)?
     private var visibleRegionReportScheduled = false
     private(set) var dragMode: DragMode?
     private var dragInitialSelection: TraceTimeRange?
+    /// Where a `.newRange` press landed, and whether the pointer has since
+    /// travelled far enough to commit to a range drag. See ``rangeDragSlop``.
+    private var newRangeOrigin: CGPoint?
+    private var newRangeCommitted = false
     /// The band this press would select, kept until the gesture proves itself
     /// a range drag instead.
     private(set) var pendingDensityHit: TimelineDensityHit?
@@ -500,6 +523,8 @@ public final class TimelineNSView: NSView {
             dragMode = .newRange(
                 anchorNs: TimelineGeometry.time(forX: point.x, viewport: source.viewport)
             )
+            newRangeOrigin = point
+            newRangeCommitted = false
             dragInitialSelection = selection
         }
     }
@@ -511,6 +536,14 @@ public final class TimelineNSView: NSView {
         case .newRange(let anchorNs), .endpoint(_, let anchorNs): anchor = anchorNs
         }
         let pointerX = convert(event.locationInWindow, from: nil).x
+        if case .newRange = dragMode, !newRangeCommitted {
+            // Below the slop this is still a click being held, not a range
+            // being swept: leave the pending band hit alone and draw nothing.
+            guard let origin = newRangeOrigin,
+                abs(pointerX - origin.x) >= Self.rangeDragSlop
+            else { return }
+            newRangeCommitted = true
+        }
         let moved = TimelineGeometry.time(forX: pointerX, viewport: source.viewport)
         guard anchor != moved else {
             // A zero-width range is not a range. Sweeping one out yields no
@@ -536,6 +569,8 @@ public final class TimelineNSView: NSView {
         if dragMode != nil { commitRangeSelectionAccessibilityChange(from: dragInitialSelection) }
         dragMode = nil
         dragInitialSelection = nil
+        newRangeOrigin = nil
+        newRangeCommitted = false
         if let hit = pendingDensityHit {
             pendingDensityHit = nil
             onSelectDensityBand?(hit)
@@ -1490,43 +1525,88 @@ public final class TimelineNSView: NSView {
     /// Selecting through a density band otherwise leaves the canvas looking
     /// untouched: the Inspector fills, but the press itself has no visible
     /// result, and among a few hundred buckets the reader cannot tell which
-    /// one answered. The mark is the stroke a selected slice gets, over the
-    /// event's own range and across the track body -- the same rectangle the
-    /// event would be outlined in once the track is zoomed into detail.
+    /// one answered.
+    ///
+    /// The mark goes on the **bucket**, not on the event's own range, which is
+    /// what DESIGN §13.5 asks for and what the first implementation of this
+    /// got wrong. At a density zoom the resolved event is routinely a fraction
+    /// of a point wide inside a bucket that is up to sixteen points wide, so
+    /// outlining the event drew a small box floating somewhere inside the
+    /// block the user pressed -- lined up with nothing, and, once widened to
+    /// ``resolvedSelectionMinimumWidth`` about its own centre, not even the
+    /// event any more. The bucket is the thing that was drawn and the thing
+    /// that was clicked, so it is the thing that gets outlined.
+    ///
+    /// An event wide enough to span several buckets outlines all of them, so
+    /// the mark still covers exactly the blocks it came out of.
     private func drawResolvedSelectionOutline(
         _ snapshot: TimelineSnapshot,
         backingScale: CGFloat,
         context: CGContext
     ) {
-        guard let location = selectedEventLocation, let selectedEventKey,
-            // The detail LOD draws its own outline; two would double-stroke.
-            detailPathCache?.events[selectedEventKey] == nil,
-            location.range.endNs >= snapshot.viewport.range.startNs,
-            location.range.startNs <= snapshot.viewport.range.endNs,
-            let track = snapshot.tracks.first(where: {
-                $0.descriptor.id == location.trackID
-            })
+        guard
+            let outline = resolvedSelectionOutline(in: snapshot, backingScale: backingScale)
         else { return }
-        let frame = TimelineGeometry.bandFrame(
-            for: location.range, in: track,
-            viewport: snapshot.viewport, backingScale: backingScale
-        )
-        // At a density zoom the selected event is usually a fraction of a
-        // point wide, and a stroke inset into a rectangle that thin collapses
-        // to nothing at all. Widening it about its own centre keeps the mark
-        // on the instant it belongs to and keeps it visible.
-        let minimumWidth = Self.resolvedSelectionMinimumWidth
-        let outline = frame.width >= minimumWidth
-            ? frame
-            : CGRect(
-                x: frame.midX - minimumWidth / 2, y: frame.minY,
-                width: minimumWidth, height: frame.height
-            )
         context.saveGState()
         context.setStrokeColor(NSColor.selectedControlTextColor.cgColor)
         context.setLineWidth(3)
         context.stroke(outline.insetBy(dx: 1, dy: 1))
         context.restoreGState()
+    }
+
+    /// The rectangle ``drawResolvedSelectionOutline`` marks, or nil when the
+    /// current LOD already draws the selection itself.
+    package func resolvedSelectionOutline(
+        in snapshot: TimelineSnapshot,
+        backingScale: CGFloat
+    ) -> CGRect? {
+        guard let location = selectedEventLocation, selectedEventKey != nil,
+            // The detail LOD draws its own outline; two would double-stroke.
+            detailPathCache?.events[selectedEventKey!] == nil,
+            location.range.endNs >= snapshot.viewport.range.startNs,
+            location.range.startNs <= snapshot.viewport.range.endNs,
+            let track = snapshot.tracks.first(where: {
+                $0.descriptor.id == location.trackID
+            })
+        else { return nil }
+        // Every bucket the event overlaps, unioned. Half-open on the right so
+        // an event starting exactly on a boundary belongs to one bucket, not
+        // two.
+        var bucketStart: Int64?
+        var bucketEnd: Int64?
+        for primitive in track.primitives {
+            guard case .density(let density) = primitive else { continue }
+            let bucket = density.bucket.range
+            guard bucket.startNs <= location.range.endNs,
+                location.range.startNs < bucket.endNs
+                    || location.range.startNs == location.range.endNs
+                    && location.range.startNs == bucket.startNs
+            else { continue }
+            bucketStart = min(bucketStart ?? bucket.startNs, bucket.startNs)
+            bucketEnd = max(bucketEnd ?? bucket.endNs, bucket.endNs)
+        }
+        let marked: TraceTimeRange
+        if let bucketStart, let bucketEnd,
+            let union = try? TraceTimeRange.query(startNs: bucketStart, endNs: bucketEnd)
+        {
+            marked = union
+        } else {
+            marked = location.range
+        }
+        let frame = TimelineGeometry.bandFrame(
+            for: marked, in: track,
+            viewport: snapshot.viewport, backingScale: backingScale
+        )
+        // Only reachable when no bucket claimed the event -- a track between
+        // LODs, or a snapshot with no density primitives at all. A stroke
+        // inset into a rectangle a fraction of a point wide collapses to
+        // nothing, so widen it about its own centre.
+        let minimumWidth = Self.resolvedSelectionMinimumWidth
+        guard frame.width < minimumWidth else { return frame }
+        return CGRect(
+            x: frame.midX - minimumWidth / 2, y: frame.minY,
+            width: minimumWidth, height: frame.height
+        )
     }
 
     static let resolvedSelectionMinimumWidth: CGFloat = 6
