@@ -1,5 +1,6 @@
 import ArkTraceCore
 import Foundation
+import Synchronization
 
 package enum TraceContextTimeSelection: Hashable, Codable, Sendable {
     case timestamp(timestampNs: Int64, windowBeforeNs: Int64, windowAfterNs: Int64)
@@ -215,14 +216,14 @@ private enum TraceJSONByteCounter {
 
     private static func stringBytes(_ value: String) -> Int {
         var count = 2
-        for scalar in value.unicodeScalars {
-            switch scalar.value {
+        for byte in value.utf8 {
+            switch byte {
             case 0x08, 0x09, 0x0A, 0x0C, 0x0D, 0x22, 0x5C:
                 count += 2
             case 0x00...0x1F:
                 count += 6
             default:
-                count += String(scalar).utf8.count
+                count += 1
             }
         }
         return count
@@ -230,20 +231,26 @@ private enum TraceJSONByteCounter {
 
     private static func checkedStringBytes(_ value: String, box: Box) throws -> Int {
         var count = 2
-        for (index, scalar) in value.unicodeScalars.enumerated() {
-            if index.isMultiple(of: 1_024) { try box.check(force: true) }
-            switch scalar.value {
+        for (index, byte) in value.utf8.enumerated() {
+            if index.isMultiple(of: 1_024) {
+                try box.check(force: true)
+                if let maximumBytes = box.maximumBytes,
+                    box.count > maximumBytes - min(maximumBytes, count) {
+                    throw LimitReached.maximumBytes
+                }
+            }
+            switch byte {
             case 0x08, 0x09, 0x0A, 0x0C, 0x0D, 0x22, 0x5C:
                 count += 2
             case 0x00...0x1F:
                 count += 6
             default:
-                count += String(scalar).utf8.count
+                count += 1
             }
-            if let maximumBytes = box.maximumBytes,
-                box.count > maximumBytes - min(maximumBytes, count) {
-                throw LimitReached.maximumBytes
-            }
+        }
+        if let maximumBytes = box.maximumBytes,
+            box.count > maximumBytes - min(maximumBytes, count) {
+            throw LimitReached.maximumBytes
         }
         return count
     }
@@ -502,36 +509,10 @@ package struct TraceContext: Hashable, Codable, Sendable {
     /// Exact second-stage byte enforcement (AT-CTX-005). The builder performs
     /// the same check before returning, and callers can recheck after wrapping.
     public func encoded(maximumBytes: Int) throws -> Data {
-        let exactByteCount: Int
-        do {
-            exactByteCount = try TraceJSONByteCounter.count(
-                self, maximumBytes: maximumBytes
-            )
-        } catch TraceJSONByteCounter.LimitReached.maximumBytes {
-            throw ArkTraceError(
-                code: .outputLimitExceeded,
-                stage: .encoding,
-                message: "Trace context exceeded its output byte budget",
-                retryable: true,
-                details: ["maximumBytes": String(maximumBytes)]
-            )
-        }
-        guard exactByteCount <= maximumBytes else {
-            throw ArkTraceError(
-                code: .outputLimitExceeded,
-                stage: .encoding,
-                message: "Trace context exceeded its output byte budget",
-                retryable: true,
-                details: [
-                    "maximumBytes": String(maximumBytes),
-                    "requiredBytes": String(exactByteCount),
-                ]
-            )
-        }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         let data = try encoder.encode(self)
-        guard data.count == exactByteCount, data.count <= maximumBytes else {
+        guard data.count <= maximumBytes else {
             throw ArkTraceError(
                 code: .outputLimitExceeded,
                 stage: .encoding,
@@ -546,6 +527,67 @@ package struct TraceContext: Hashable, Codable, Sendable {
         return data
     }
 }
+
+private struct TraceContextCacheKey: Hashable, Sendable {
+    let repository: TraceRepositoryContentIdentity
+    let time: TraceContextTimeSelection
+    let filters: TraceAgentQueryFilters
+    let maximumEvents: Int
+    let maximumRows: Int
+    let maximumOutputBytes: Int
+}
+
+/// Exact Context results are immutable for one Ready database snapshot. The
+/// byte bound is deliberately tighter than the public 64 MiB output limit so
+/// a handful of oversized Agent requests cannot become process-lifetime RAM.
+private final class TraceContextResultCache: Sendable {
+    static let maximumEntryBytes = 8 * 1_024 * 1_024
+
+    private struct Entry: Sendable {
+        let context: TraceContext
+        let byteCount: Int
+    }
+
+    private struct State {
+        var values: [TraceContextCacheKey: Entry] = [:]
+        var order: [TraceContextCacheKey] = []
+        var totalBytes = 0
+    }
+
+    private let state = Mutex(State())
+    private let maximumEntries = 16
+    private let maximumBytes = 32 * 1_024 * 1_024
+
+    func value(for key: TraceContextCacheKey) -> TraceContext? {
+        state.withLock { state in
+            guard let entry = state.values[key] else { return nil }
+            state.order.removeAll { $0 == key }
+            state.order.append(key)
+            return entry.context
+        }
+    }
+
+    func insert(_ context: TraceContext, byteCount: Int, for key: TraceContextCacheKey) {
+        guard byteCount <= Self.maximumEntryBytes else { return }
+        state.withLock { state in
+            if let previous = state.values[key] {
+                state.totalBytes -= previous.byteCount
+            }
+            state.values[key] = Entry(context: context, byteCount: byteCount)
+            state.totalBytes += byteCount
+            state.order.removeAll { $0 == key }
+            state.order.append(key)
+            while state.order.count > maximumEntries || state.totalBytes > maximumBytes {
+                let evicted = state.order.removeFirst()
+                if let removed = state.values.removeValue(forKey: evicted) {
+                    state.totalBytes -= removed.byteCount
+                }
+            }
+        }
+    }
+}
+
+private let traceContextResultCache = TraceContextResultCache()
 
 package struct TraceContextBuilder: Sendable {
     private enum CandidateKind: Int, Sendable {
@@ -613,10 +655,15 @@ package struct TraceContextBuilder: Sendable {
 
     private let repository: any TraceRepositoryProtocol
     private let byteCountHook: (@Sendable () -> Void)?
+    private let performanceObserver: TracePerformanceObserver?
 
-    public init(repository: any TraceRepositoryProtocol) {
+    public init(
+        repository: any TraceRepositoryProtocol,
+        performanceObserver: TracePerformanceObserver? = nil
+    ) {
         self.repository = repository
         byteCountHook = nil
+        self.performanceObserver = performanceObserver
     }
 
     init(
@@ -625,16 +672,83 @@ package struct TraceContextBuilder: Sendable {
     ) {
         self.repository = repository
         self.byteCountHook = byteCountHook
+        performanceObserver = nil
     }
 
     public func build(_ request: TraceContextRequest) async throws -> TraceContext {
+        let startedAt = ContinuousClock.now
+        defer {
+            TracePerformanceMetrics.record(
+                scope: "traceContext",
+                operation: "build.total",
+                startedAt: startedAt,
+                workUnits: Int64(request.maximumEvents),
+                workUnit: "eventBudget",
+                observer: performanceObserver
+            )
+        }
         do {
             return try await TraceAnalysisOperationDeadline.run(
                 timeout: request.timeout,
                 stage: .analyzing,
                 timeoutMessage: "Trace context deadline was reached"
             ) { deadline in
-                try await build(request, deadline: deadline)
+                let cacheKey = repository.immutableContentIdentity.map {
+                    TraceContextCacheKey(
+                        repository: $0,
+                        time: request.time,
+                        filters: request.filters,
+                        maximumEvents: request.maximumEvents,
+                        maximumRows: request.maximumRows,
+                        maximumOutputBytes: request.maximumOutputBytes
+                    )
+                }
+                let lookupStartedAt = ContinuousClock.now
+                if let cacheKey, let cached = traceContextResultCache.value(for: cacheKey) {
+                    try Self.check(deadline)
+                    TracePerformanceMetrics.record(
+                        scope: "traceContext",
+                        operation: "cache.hit",
+                        startedAt: lookupStartedAt,
+                        workUnits: Int64(
+                            cached.cpuSlices.count + cached.threadStates.count
+                                + cached.slices.count
+                                + cached.counters.reduce(0) { $0 + $1.samples.count }
+                        ),
+                        workUnit: "events",
+                        observer: performanceObserver
+                    )
+                    return cached
+                }
+                TracePerformanceMetrics.record(
+                    scope: "traceContext",
+                    operation: "cache.miss",
+                    startedAt: lookupStartedAt,
+                    workUnits: 1,
+                    workUnit: "requests",
+                    observer: performanceObserver
+                )
+                let result = try await build(request, deadline: deadline)
+                if let cacheKey,
+                    let byteCount = try? TraceJSONByteCounter.count(
+                        result,
+                        maximumBytes: TraceContextResultCache.maximumEntryBytes,
+                        deadline: deadline
+                    ) {
+                    let insertionStartedAt = ContinuousClock.now
+                    traceContextResultCache.insert(
+                        result, byteCount: byteCount, for: cacheKey
+                    )
+                    TracePerformanceMetrics.record(
+                        scope: "traceContext",
+                        operation: "cache.store",
+                        startedAt: insertionStartedAt,
+                        workUnits: Int64(byteCount),
+                        workUnit: "bytes",
+                        observer: performanceObserver
+                    )
+                }
+                return result
             }
         } catch {
             if (error as? ArkTraceError)?.code == .outputLimitExceeded { throw error }
@@ -654,13 +768,43 @@ package struct TraceContextBuilder: Sendable {
         _ request: TraceContextRequest,
         deadline: ContinuousClock.Instant
     ) async throws -> TraceContext {
+            let loadStartedAt = ContinuousClock.now
             var loaded = try await load(request, deadline: deadline)
+            TracePerformanceMetrics.record(
+                scope: "traceContext",
+                operation: "load.total",
+                startedAt: loadStartedAt,
+                workUnits: Int64(loaded.candidates.count),
+                workUnit: "candidates",
+                observer: performanceObserver
+            )
+            let referencesStartedAt = ContinuousClock.now
             try await loadReferencedDirectories(
                 &loaded,
                 maximumReferences: request.maximumRows,
                 deadline: deadline
             )
+            TracePerformanceMetrics.record(
+                scope: "traceContext",
+                operation: "references.total",
+                startedAt: referencesStartedAt,
+                workUnits: Int64(loaded.processByKey.count + loaded.threadByKey.count),
+                workUnit: "directoryRows",
+                observer: performanceObserver
+            )
             try Self.check(deadline)
+
+            let retentionStartedAt = ContinuousClock.now
+            defer {
+                TracePerformanceMetrics.record(
+                    scope: "traceContext",
+                    operation: "retentionAndEncoding.total",
+                    startedAt: retentionStartedAt,
+                    workUnits: Int64(loaded.candidates.count),
+                    workUnit: "candidates",
+                    observer: performanceObserver
+                )
+            }
 
             let fullCount = min(request.maximumEvents, loaded.candidates.count)
             let full = try assemble(
@@ -676,11 +820,7 @@ package struct TraceContextBuilder: Sendable {
                 deadline: deadline
             ) {
                 try Self.check(deadline)
-                return try Self.exactlyValidated(
-                    full.context,
-                    maximumBytes: request.maximumOutputBytes,
-                    deadline: deadline
-                )
+                return full.context
             }
 
             // Drop unrelated directory rows before removing retained events and
@@ -743,11 +883,7 @@ package struct TraceContextBuilder: Sendable {
                     minimum, deadline: deadline
                 )
                 if minimumByteCount <= request.maximumOutputBytes {
-                    return try Self.exactlyValidated(
-                        minimum,
-                        maximumBytes: request.maximumOutputBytes,
-                        deadline: deadline
-                    )
+                    return minimum
                 }
                 throw ArkTraceError(
                     code: .outputLimitExceeded,
@@ -774,7 +910,14 @@ package struct TraceContextBuilder: Sendable {
         deadline: ContinuousClock.Instant
     ) async throws -> Loaded {
         try Self.check(deadline)
+        let metadataStartedAt = ContinuousClock.now
         let metadata = try await repository.metadata()
+        TracePerformanceMetrics.record(
+            scope: "traceContext",
+            operation: "load.metadata",
+            startedAt: metadataStartedAt,
+            observer: performanceObserver
+        )
         let normalized = try Self.normalized(request.time, durationNs: metadata.durationNs)
         let queryEngine = TraceAgentQueryEngine(repository: repository)
         let eventLimit = request.maximumEvents
@@ -835,35 +978,59 @@ package struct TraceContextBuilder: Sendable {
                 )
             )
         }
-        async let eventResults = queryEngine.queryBatch(
-            range: normalized.range, entries: batchEntries, deadline: deadline
-        )
-        async let processResult = repository.processes(
-            ProcessQuery(
-                processKey: request.filters.processKey,
-                pid: request.filters.pid,
-                limit: request.maximumRows,
-                deadline: deadline
+        async let eventResults = measured(
+            "load.events",
+            workUnits: Int64(eventLimit),
+            workUnit: "eventBudget"
+        ) {
+            try await queryEngine.queryBatch(
+                range: normalized.range, entries: batchEntries, deadline: deadline
             )
-        )
-        async let threadResult = repository.threads(
-            ThreadQuery(
-                processKey: request.filters.processKey,
-                pid: request.filters.pid,
-                threadKey: request.filters.threadKey,
-                tid: request.filters.tid,
-                limit: request.maximumRows,
-                deadline: deadline
+        }
+        async let processResult = measured(
+            "load.processDirectory",
+            workUnits: Int64(request.maximumRows),
+            workUnit: "rowBudget"
+        ) {
+            try await repository.processes(
+                ProcessQuery(
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    limit: request.maximumRows,
+                    deadline: deadline
+                )
             )
-        )
-        async let summaryResult = TraceSummaryEngine(repository: repository).summarize(
-            try TraceSummaryRequest(
-                range: normalized.range,
-                maximumRowsPerSection: request.maximumRows,
-                maximumEventsPerSection: request.maximumEvents,
-                timeout: remaining()
+        }
+        async let threadResult = measured(
+            "load.threadDirectory",
+            workUnits: Int64(request.maximumRows),
+            workUnit: "rowBudget"
+        ) {
+            try await repository.threads(
+                ThreadQuery(
+                    processKey: request.filters.processKey,
+                    pid: request.filters.pid,
+                    threadKey: request.filters.threadKey,
+                    tid: request.filters.tid,
+                    limit: request.maximumRows,
+                    deadline: deadline
+                )
             )
-        )
+        }
+        async let summaryResult = measured(
+            "load.summary",
+            workUnits: Int64(request.maximumEvents),
+            workUnit: "eventBudget"
+        ) {
+            try await TraceSummaryEngine(repository: repository).summarize(
+                try TraceSummaryRequest(
+                    range: normalized.range,
+                    maximumRowsPerSection: request.maximumRows,
+                    maximumEventsPerSection: request.maximumEvents,
+                    timeout: remaining()
+                )
+            )
+        }
         let (events, processPage, threadPage, summary) = try await (
             eventResults, processResult, threadResult, summaryResult
         )
@@ -922,6 +1089,26 @@ package struct TraceContextBuilder: Sendable {
             )
         )
         return loaded
+    }
+
+    private func measured<T>(
+        _ operation: String,
+        workUnits: Int64? = nil,
+        workUnit: String? = nil,
+        _ body: () async throws -> T
+    ) async throws -> T {
+        let startedAt = ContinuousClock.now
+        defer {
+            TracePerformanceMetrics.record(
+                scope: "traceContext",
+                operation: operation,
+                startedAt: startedAt,
+                workUnits: workUnits,
+                workUnit: workUnit,
+                observer: performanceObserver
+            )
+        }
+        return try await body()
     }
 
     private static func uniqueDirectoryMap<Key: Hashable, Value>(
@@ -1086,9 +1273,7 @@ package struct TraceContextBuilder: Sendable {
             }
         }
         try Self.check(deadline)
-        return try Self.exactlyValidated(
-            best, maximumBytes: request.maximumOutputBytes, deadline: deadline
-        )
+        return best
     }
 
     private func assemble(
@@ -1496,20 +1681,6 @@ package struct TraceContextBuilder: Sendable {
         return TraceDataQuality(issues: issues)
     }
 
-    private static func encodedData(_ value: TraceContext) throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
-        do {
-            return try encoder.encode(value)
-        } catch {
-            throw ArkTraceError(
-                code: .internalError,
-                stage: .encoding,
-                message: "Trace context encoding failed"
-            )
-        }
-    }
-
     private func fits(
         _ value: TraceContext,
         maximumBytes: Int,
@@ -1523,42 +1694,6 @@ package struct TraceContextBuilder: Sendable {
         } catch TraceJSONByteCounter.LimitReached.maximumBytes {
             return false
         }
-    }
-
-    private static func exactlyValidated(
-        _ value: TraceContext,
-        maximumBytes: Int,
-        deadline: ContinuousClock.Instant
-    ) throws -> TraceContext {
-        try check(deadline)
-        let exactByteCount = try TraceJSONByteCounter.count(value, deadline: deadline)
-        guard exactByteCount <= maximumBytes else {
-            throw ArkTraceError(
-                code: .outputLimitExceeded,
-                stage: .encoding,
-                message: "Trace context exceeded its output byte budget",
-                retryable: true,
-                details: [
-                    "maximumBytes": String(maximumBytes),
-                    "requiredBytes": String(exactByteCount),
-                ]
-            )
-        }
-        let data = try encodedData(value)
-        try check(deadline)
-        guard data.count == exactByteCount, data.count <= maximumBytes else {
-            throw ArkTraceError(
-                code: .outputLimitExceeded,
-                stage: .encoding,
-                message: "Trace context exceeded its output byte budget",
-                retryable: true,
-                details: [
-                    "maximumBytes": String(maximumBytes),
-                    "requiredBytes": String(data.count),
-                ]
-            )
-        }
-        return value
     }
 
     private static func check(_ deadline: ContinuousClock.Instant) throws {

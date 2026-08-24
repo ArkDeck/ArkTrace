@@ -489,6 +489,14 @@ public final class TraceDocumentController {
     @ObservationIgnored private var firstWindowMarked = false
     @ObservationIgnored private var timelineDisplayMarked = false
 
+    /// A viewport gesture arrives as a burst of wheel/trackpad samples. The
+    /// canvas already transforms the previous immutable snapshot immediately,
+    /// so starting a SQLite aggregate for every sample only creates work that
+    /// the next sample cancels. One display-frame delay coalesces the burst while
+    /// preserving the direct-manipulation frame already on screen.
+    package static let viewportQueryCoalescingDelay: Duration = .milliseconds(16)
+    package static let initialTimelineViewportHeight = 640.0
+
     public convenience init(
         bundleURL: URL = Bundle.main.bundleURL,
         recentStore: TraceRecentDocumentStore = TraceRecentDocumentStore()
@@ -1225,6 +1233,41 @@ public final class TraceDocumentController {
         }
     }
 
+    /// Updates only the vertical data window. AppKit performs the actual
+    /// scroll immediately; this schedules a coalesced snapshot so repository
+    /// work follows the lanes in the clip view instead of every expanded lane.
+    public func updateTimelineVisibleRegion(
+        verticalOffsetPoints: Double,
+        heightPoints: Double
+    ) {
+        guard verticalOffsetPoints.isFinite, heightPoints.isFinite,
+            verticalOffsetPoints >= 0, heightPoints > 0,
+            let old = snapshot?.viewport
+        else { return }
+        guard abs(old.verticalOffsetPoints - verticalOffsetPoints) >= 1
+            || abs(old.heightPoints - heightPoints) >= 1
+        else { return }
+        do {
+            let viewport = try TimelineViewport(
+                range: old.range,
+                widthPoints: old.widthPoints,
+                heightPoints: heightPoints,
+                verticalOffsetPoints: verticalOffsetPoints,
+                generation: nextViewportGeneration()
+            )
+            snapshot = TimelineSnapshot(
+                viewport: viewport,
+                tracks: snapshot?.tracks ?? [],
+                generation: viewport.generation,
+                dataQuality: snapshot?.dataQuality ?? TraceDataQuality(),
+                isLoading: true
+            )
+            scheduleSnapshot(preference: .automatic)
+        } catch {
+            presentNonfatal(error, generation: documentGeneration)
+        }
+    }
+
     public func zoomToSelection() {
         guard let selectedRange else { return }
         setViewport(selectedRange)
@@ -1330,6 +1373,7 @@ public final class TraceDocumentController {
                 try? await opened.close()
                 return
             }
+            await loader.resetLayoutCache()
             let loaded: TimelineSnapshot?
             if catalog.metadata.durationNs == 0 {
                 loaded = nil
@@ -1340,10 +1384,7 @@ public final class TraceDocumentController {
                         startNs: 0, endNs: catalog.metadata.durationNs
                     ),
                     widthPoints: 1_200,
-                    heightPoints: max(
-                        400,
-                        Double(catalog.groups.flatMap(\.tracks).count) * 28 + 22
-                    ),
+                    heightPoints: Self.initialTimelineViewportHeight,
                     generation: viewportGeneration
                 )
                 let request = try ViewportRequest(
@@ -1454,6 +1495,10 @@ public final class TraceDocumentController {
         let focusedEventKey = pendingSelectionKey
         viewportTask = Task { [weak self] in
             do {
+                if preference == .automatic {
+                    try await Task.sleep(for: Self.viewportQueryCoalescingDelay)
+                    try Task.checkCancellation()
+                }
                 let request = try ViewportRequest(
                     viewport: viewport,
                     tracks: tracks,

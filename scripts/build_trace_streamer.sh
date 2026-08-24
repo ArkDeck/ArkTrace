@@ -9,7 +9,8 @@ SAFETY_HELPER="$REPO_ROOT/scripts/phase3_shell_safety.sh"
 # shellcheck source=phase3_shell_safety.sh
 . "$SAFETY_HELPER"
 SOURCE_LOCK="$REPO_ROOT/ThirdParty/TraceStreamer/source-lock.json"
-LOCAL_PATCH="$REPO_ROOT/ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch"
+FAULTLOGGERD_PATCH="$REPO_ROOT/ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch"
+PROTO_READER_PATCH="$REPO_ROOT/ThirdParty/TraceStreamer/patches/proto-reader-sparse-validity.patch"
 REQUESTED_WORK_ROOT="${ARKTRACE_TS_WORK_DIR:-$REPO_ROOT/.build/trace-streamer-workspaces/default}"
 REQUESTED_STAGE_DIR="${ARKTRACE_TS_STAGE_DIR:-$REPO_ROOT/ThirdParty/TraceStreamer/macx}"
 SAFE_WORK_PARENT="$REPO_ROOT/.build/trace-streamer-workspaces"
@@ -27,7 +28,9 @@ for command_name in git jq curl shasum stat tar patch perl lipo otool clang; do
     }
 done
 [ -r "$SOURCE_LOCK" ] || { echo "ERROR: source lock is missing" >&2; exit 1; }
-[ -r "$LOCAL_PATCH" ] || { echo "ERROR: local patch is missing" >&2; exit 1; }
+for local_patch in "$FAULTLOGGERD_PATCH" "$PROTO_READER_PATCH"; do
+    [ -r "$local_patch" ] || { echo "ERROR: local patch is missing" >&2; exit 1; }
+done
 
 fail() {
     printf 'ERROR: %s\n' "$1" >&2
@@ -106,10 +109,12 @@ UPSTREAM_REVISION=$(jq -er '.upstream.revision' "$SOURCE_LOCK")
 BUILD_SCRIPT_SHA=$(shasum -a 256 "${BASH_SOURCE[0]}" | awk '{print $1}')
 SAFETY_HELPER_SHA=$(shasum -a 256 "$SAFETY_HELPER" | awk '{print $1}')
 SOURCE_LOCK_SHA=$(shasum -a 256 "$SOURCE_LOCK" | awk '{print $1}')
-LOCAL_PATCH_SHA=$(shasum -a 256 "$LOCAL_PATCH" | awk '{print $1}')
+FAULTLOGGERD_PATCH_SHA=$(shasum -a 256 "$FAULTLOGGERD_PATCH" | awk '{print $1}')
+PROTO_READER_PATCH_SHA=$(shasum -a 256 "$PROTO_READER_PATCH" | awk '{print $1}')
 BUILD_RECIPE_VERSION=$(
-    printf 'build-script:%s\nsafety-helper:%s\nsource-lock:%s\nlocal-patch:%s\n' \
-        "$BUILD_SCRIPT_SHA" "$SAFETY_HELPER_SHA" "$SOURCE_LOCK_SHA" "$LOCAL_PATCH_SHA" \
+    printf 'build-script:%s\nsafety-helper:%s\nsource-lock:%s\nfaultloggerd-patch:%s\nproto-reader-patch:%s\n' \
+        "$BUILD_SCRIPT_SHA" "$SAFETY_HELPER_SHA" "$SOURCE_LOCK_SHA" \
+        "$FAULTLOGGERD_PATCH_SHA" "$PROTO_READER_PATCH_SHA" \
         | shasum -a 256 | awk '{print $1}'
 )
 
@@ -222,7 +227,7 @@ perl -pi -e 's/\r$//' \
     >/dev/null 2>&1
 patch -d "$TP_DIR/hiviewdfx/faultloggerd" -p1 \
     < "$TS_DIR/prebuilts/patch_hiperf/hiviewdfx_faultloggerd_smo.patch" >/dev/null 2>&1
-patch -d "$TP_DIR/hiviewdfx/faultloggerd" -p1 < "$LOCAL_PATCH" >/dev/null 2>&1
+patch -d "$TP_DIR/hiviewdfx/faultloggerd" -p1 < "$FAULTLOGGERD_PATCH" >/dev/null 2>&1
 patch -d "$TP_DIR/hiperf" -p1 < "$TS_DIR/prebuilts/patch_hiperf/hiperf.patch" \
     >/dev/null 2>&1
 patch -d "$TP_DIR/hiperf" -p1 < "$TS_DIR/prebuilts/patch_hiperf/hiperf_smo.patch" \
@@ -231,6 +236,7 @@ patch -d "$TP_DIR/llvm-project" -p1 < "$TS_DIR/prebuilts/patch_llvm/llvm.patch" 
     >/dev/null 2>&1
 rm -f "$TS_DIR/llvm"
 ln -s "$TP_DIR/llvm-project/llvm" "$TS_DIR/llvm"
+patch -d "$UPSTREAM_DIR" -p1 < "$PROTO_READER_PATCH" >/dev/null 2>&1
 
 echo "==> Install SHA-locked GN/Ninja archives"
 rm -rf -- "$TS_DIR/prebuilts/macx"
@@ -317,7 +323,10 @@ jq -n \
       adapterVersion: $adapterVersion,
       buildRecipeVersion: $buildRecipeVersion,
       plugins: $plugins,
-      localPatches: ["patches/faultloggerd-apple-clang.patch"],
+      localPatches: [
+        "patches/faultloggerd-apple-clang.patch",
+        "patches/proto-reader-sparse-validity.patch"
+      ],
       thirdPartySources: $thirdPartySources,
       thirdPartyRevisions: $thirdPartyRevisions,
       hostToolchain: $hostToolchain,

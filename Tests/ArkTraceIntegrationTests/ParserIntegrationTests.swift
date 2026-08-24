@@ -20,6 +20,62 @@ private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 /// default `ThirdParty/TraceStreamer/macx` layout. A custom binary must carry
 /// its sibling pinned `manifest.json`.
 final class ParserIntegrationTests: XCTestCase {
+    private final class PerformanceMetricRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var metrics: [TracePerformanceMetric] = []
+
+        func record(_ metric: TracePerformanceMetric) {
+            lock.withLock { metrics.append(metric) }
+        }
+
+        func snapshot() -> [TracePerformanceMetric] {
+            lock.withLock { metrics }
+        }
+    }
+
+    private struct PerformanceMetricAggregate: Encodable {
+        let scope: String
+        let operation: String
+        let sampleCount: Int
+        let p50Ms: Double
+        let p95Ms: Double
+        let maximumMs: Double
+        let totalWorkUnits: Int64?
+        let workUnit: String?
+
+        private enum CodingKeys: String, CodingKey {
+            case scope, operation, sampleCount, p50Ms, p95Ms, maximumMs
+            case totalWorkUnits, workUnit
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var values = encoder.container(keyedBy: CodingKeys.self)
+            try values.encode(scope, forKey: .scope)
+            try values.encode(operation, forKey: .operation)
+            try values.encode(sampleCount, forKey: .sampleCount)
+            try values.encode(p50Ms, forKey: .p50Ms)
+            try values.encode(p95Ms, forKey: .p95Ms)
+            try values.encode(maximumMs, forKey: .maximumMs)
+            if let totalWorkUnits {
+                try values.encode(totalWorkUnits, forKey: .totalWorkUnits)
+            } else {
+                try values.encodeNil(forKey: .totalWorkUnits)
+            }
+            if let workUnit {
+                try values.encode(workUnit, forKey: .workUnit)
+            } else {
+                try values.encodeNil(forKey: .workUnit)
+            }
+        }
+    }
+
+    private struct PerformanceBottleneck: Encodable {
+        let rank: Int
+        let scope: String
+        let operation: String
+        let p95Ms: Double
+    }
+
     private final class PerformanceStageRecorder: @unchecked Sendable {
         private let lock = NSLock()
         private var instants: [TraceLoadingStage: ContinuousClock.Instant] = [:]
@@ -39,6 +95,83 @@ final class ParserIntegrationTests: XCTestCase {
                 return ParserIntegrationTests.milliseconds(start.duration(to: end))
             }
         }
+    }
+
+    /// Adds a stable, path-free operation label to performance-gate failures.
+    /// The outer shell deliberately withholds the full XCTest log, so an
+    /// unlabelled thrown query timeout otherwise cannot distinguish a probe,
+    /// measured query family, or automatic viewport load.
+    private func phase3BenchmarkOperation<T>(
+        _ name: String,
+        _ operation: () async throws -> T
+    ) async throws -> T {
+        let startedAt = ContinuousClock.now
+        do {
+            return try await operation()
+        } catch {
+            let elapsed = Self.milliseconds(startedAt.duration(to: .now))
+            if let typed = error as? ArkTraceError {
+                XCTFail(
+                    "phase3 operation \(name) failed code=\(typed.code.rawValue) "
+                        + "stage=\(typed.stage.rawValue) elapsedMs=\(elapsed)"
+                )
+            } else {
+                XCTFail(
+                    "phase3 operation \(name) failed type=\(String(reflecting: type(of: error))) "
+                        + "elapsedMs=\(elapsed)"
+                )
+            }
+            throw error
+        }
+    }
+
+    private static func aggregatePerformanceMetrics(
+        _ metrics: [TracePerformanceMetric]
+    ) -> [PerformanceMetricAggregate] {
+        Dictionary(grouping: metrics) { "\($0.scope)\u{1F}\($0.operation)" }
+            .values
+            .compactMap { samples in
+                guard let first = samples.first else { return nil }
+                let elapsed = samples.map(\.elapsedMilliseconds)
+                let workUnits = samples.compactMap(\.workUnits)
+                let units = Set(samples.compactMap(\.workUnit))
+                return PerformanceMetricAggregate(
+                    scope: first.scope,
+                    operation: first.operation,
+                    sampleCount: samples.count,
+                    p50Ms: percentile(elapsed, fraction: 0.50),
+                    p95Ms: percentile(elapsed, fraction: 0.95),
+                    maximumMs: elapsed.max() ?? 0,
+                    totalWorkUnits: workUnits.count == samples.count
+                        ? workUnits.reduce(0, +) : nil,
+                    workUnit: units.count == 1 ? units.first : nil
+                )
+            }
+            .sorted {
+                ($0.scope, $0.operation) < ($1.scope, $1.operation)
+            }
+    }
+
+    private static func performanceBottlenecks(
+        _ metrics: [PerformanceMetricAggregate],
+        limit: Int = 8
+    ) -> [PerformanceBottleneck] {
+        metrics
+            .filter { $0.operation != "build.total" }
+            .sorted {
+                if $0.p95Ms != $1.p95Ms { return $0.p95Ms > $1.p95Ms }
+                return ($0.scope, $0.operation) < ($1.scope, $1.operation)
+            }
+            .prefix(limit)
+            .enumerated()
+            .map { index, metric in
+                PerformanceBottleneck(
+                    rank: index + 1,
+                    scope: metric.scope,
+                    operation: metric.operation,
+                    p95Ms: metric.p95Ms
+                )
+            }
     }
     private struct SchemaEvidence: Decodable {
         struct Upstream: Decodable {
@@ -225,12 +358,14 @@ final class ParserIntegrationTests: XCTestCase {
     private final class StageRecorder: @unchecked Sendable {
         private let lock = NSLock()
         private var stages: [TraceLoadingStage] = []
+        private var observationCounts: [TraceLoadingStage: Int] = [:]
 
         /// Records stage *transitions*. A stage that reports its own progress
         /// now arrives many times over; what these tests assert is the order
         /// the pipeline moves through, not how often a stage spoke.
         func append(_ stage: TraceLoadingStage) {
             lock.withLock {
+                observationCounts[stage, default: 0] += 1
                 guard stages.last != stage else { return }
                 stages.append(stage)
             }
@@ -238,6 +373,10 @@ final class ParserIntegrationTests: XCTestCase {
 
         func snapshot() -> [TraceLoadingStage] {
             lock.withLock { stages }
+        }
+
+        func observationCount(for stage: TraceLoadingStage) -> Int {
+            lock.withLock { observationCounts[stage, default: 0] }
         }
     }
 
@@ -1675,6 +1814,82 @@ final class ParserIntegrationTests: XCTestCase {
         try data.write(to: outputURL, options: .atomic)
     }
 
+    func testPhase3CachedContextDiagnosticWhenRequested() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["ARKTRACE_PHASE3_CONTEXT_DIAGNOSTIC"] == "1" else { return }
+        let source = URL(filePath: try XCTUnwrap(environment["ARKTRACE_PHASE3_TRACE"]))
+        let parserURL = URL(filePath: try XCTUnwrap(
+            environment["ARKTRACE_TRACE_STREAMER"]
+        ))
+        let root = URL(filePath: try XCTUnwrap(
+            environment["ARKTRACE_PHASE3_DIAGNOSTIC_ROOT"]
+        ))
+        let output = URL(filePath: try XCTUnwrap(
+            environment["ARKTRACE_PHASE3_CONTEXT_DIAGNOSTIC_OUTPUT"]
+        ))
+        let iterations = Int(environment["ARKTRACE_PHASE3_CONTEXT_ITERATIONS"] ?? "5")
+            .flatMap { (1...20).contains($0) ? $0 : nil } ?? 5
+        let session = try await TraceSession.open(
+            source: source,
+            parser: try TraceStreamerProcessParser(executableURL: parserURL),
+            stagingDirectory: root.appending(
+                path: "context-diagnostic-staging", directoryHint: .isDirectory
+            ),
+            storagePolicy: .contentAddressed(
+                cacheDirectory: root.appending(path: "cache", directoryHint: .isDirectory)
+            )
+        )
+        let cacheHit = await session.cacheHit
+        XCTAssertTrue(cacheHit, "diagnostic mode must not rebuild the retained Ready database")
+        let metadata = try await session.repository.metadata()
+        let request = try TraceContextRequest(
+            time: .timestamp(
+                timestampNs: 10_200_000_000,
+                windowBeforeNs: 50_000_000,
+                windowAfterNs: 50_000_000
+            )
+        )
+        let recorder = PerformanceMetricRecorder()
+        var elapsed: [Double] = []
+        var outputBytes = 0
+        for _ in 0..<iterations {
+            let startedAt = ContinuousClock.now
+            let context = try await TraceContextBuilder(
+                repository: session.repository,
+                performanceObserver: { recorder.record($0) }
+            ).build(request)
+            outputBytes = try context.encoded(
+                maximumBytes: request.maximumOutputBytes
+            ).count
+            elapsed.append(Self.milliseconds(startedAt.duration(to: .now)))
+        }
+        try await session.close()
+        struct DiagnosticEvidence: Encodable {
+            let formatVersion: Int
+            let traceSHA256: String
+            let iterations: Int
+            let contextP50Ms: Double
+            let contextP95Ms: Double
+            let outputBytes: Int
+            let performanceMetrics: [PerformanceMetricAggregate]
+            let bottlenecks: [PerformanceBottleneck]
+        }
+        let aggregates = Self.aggregatePerformanceMetrics(recorder.snapshot())
+        let evidence = DiagnosticEvidence(
+            formatVersion: 1,
+            traceSHA256: metadata.traceSHA256,
+            iterations: iterations,
+            contextP50Ms: Self.percentile(elapsed, fraction: 0.50),
+            contextP95Ms: Self.percentile(elapsed, fraction: 0.95),
+            outputBytes: outputBytes,
+            performanceMetrics: aggregates,
+            bottlenecks: Self.performanceBottlenecks(aggregates)
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        try encoder.encode(evidence).write(to: output, options: .atomic)
+    }
+
     func testPhase3GateWritesViewportPerformanceEvidenceWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
         guard environment["ARKTRACE_PHASE3_GATE"] == "1" else { return }
@@ -1701,21 +1916,30 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertLessThanOrEqual(fixtureBytes, 500 * 1_024 * 1_024)
         }
 
-        let root = FileManager.default.temporaryDirectory
+        let retainedDiagnosticRoot = environment["ARKTRACE_PHASE3_DIAGNOSTIC_ROOT"].map {
+            URL(filePath: $0, directoryHint: .isDirectory)
+        }
+        let root = retainedDiagnosticRoot ?? FileManager.default.temporaryDirectory
             .appending(path: "arktrace-phase3-benchmark-\(UUID().uuidString)")
         let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         let cache = root.appending(path: "cache", directoryHint: .isDirectory)
-        defer { try? FileManager.default.removeItem(at: root) }
+        defer {
+            if retainedDiagnosticRoot == nil {
+                try? FileManager.default.removeItem(at: root)
+            }
+        }
+        let performanceMetrics = PerformanceMetricRecorder()
         let parser = try TraceStreamerProcessParser(executableURL: parserURL)
         let parserIdentity = try await parser.identity()
         let stages = PerformanceStageRecorder()
         let coldStart = ContinuousClock.now
-        let cold = try await TraceSession.open(
+        let cold = try await TraceSession.openCached(
             source: fixture,
             parser: parser,
             stagingDirectory: staging,
-            storagePolicy: .contentAddressed(cacheDirectory: cache),
-            progress: { stages.record($0.stage) }
+            cacheDirectory: cache,
+            progress: { stages.record($0.stage) },
+            performanceObserver: { performanceMetrics.record($0) }
         )
         let coldOpenMs = Self.milliseconds(coldStart.duration(to: .now))
         let coldWasCacheHit = await cold.cacheHit
@@ -1732,37 +1956,49 @@ final class ParserIntegrationTests: XCTestCase {
         // Give each the reviewed per-query bound so an earlier full-range probe
         // cannot consume a later probe's complete deadline on a real large DB.
         let probeDeadline = { ContinuousClock.now.advanced(by: .seconds(30)) }
-        let cpuProbe = try await cold.repository.cpuSlices(
-            try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline())
-        )
-        let stateProbe = try await cold.repository.threadStates(
-            try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline())
-        )
-        let sliceProbe = try await cold.repository.slices(
-            try TraceSliceQuery(range: fullRange, limit: 1_024, deadline: probeDeadline())
-        )
+        let cpuProbe = try await phase3BenchmarkOperation("probe.cpuDetail") {
+            try await cold.repository.cpuSlices(
+                try CpuSliceQuery(range: fullRange, limit: 1, deadline: probeDeadline())
+            )
+        }
+        let stateProbe = try await phase3BenchmarkOperation("probe.threadStateDetail") {
+            try await cold.repository.threadStates(
+                try ThreadStateQuery(range: fullRange, limit: 1, deadline: probeDeadline())
+            )
+        }
+        let sliceProbe = try await phase3BenchmarkOperation("probe.namedSliceDetail") {
+            try await cold.repository.slices(
+                try TraceSliceQuery(range: fullRange, limit: 1_024, deadline: probeDeadline())
+            )
+        }
         let firstCPU = try XCTUnwrap(cpuProbe.items.first)
         let firstState = try XCTUnwrap(stateProbe.items.first)
         let firstSlice = try XCTUnwrap(sliceProbe.items.first { $0.threadKey != nil })
         let densityProbes = [
-            try await cold.repository.density(
+            try await phase3BenchmarkOperation("probe.cpuDensity") {
+                try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 64,
                     deadline: probeDeadline()
                 )
-            ),
-            try await cold.repository.density(
+                )
+            },
+            try await phase3BenchmarkOperation("probe.threadStateDensity") {
+                try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .threadState(firstState.threadKey),
                     bucketCount: 64, deadline: probeDeadline()
                 )
-            ),
-            try await cold.repository.density(
+                )
+            },
+            try await phase3BenchmarkOperation("probe.namedSliceDensity") {
+                try await cold.repository.density(
                 try TraceDensityQuery(
                     range: fullRange, source: .namedSlice(firstSlice.threadKey),
                     bucketCount: 64, deadline: probeDeadline()
                 )
-            ),
+                )
+            },
         ]
         XCTAssertTrue(densityProbes.allSatisfy {
             $0.capabilityAvailable && $0.buckets.reduce(0) { $0 + $1.eventCount } > 0
@@ -1849,13 +2085,16 @@ final class ParserIntegrationTests: XCTestCase {
         for iteration in 0..<iterations {
             let hitStages = PerformanceStageRecorder()
             let openStart = ContinuousClock.now
-            let session = try await TraceSession.open(
-                source: fixture,
-                parser: parser,
-                stagingDirectory: staging,
-                storagePolicy: .contentAddressed(cacheDirectory: cache),
-                progress: { hitStages.record($0.stage) }
-            )
+            let session = try await phase3BenchmarkOperation("iteration.cacheOpen") {
+                try await TraceSession.openCached(
+                    source: fixture,
+                    parser: parser,
+                    stagingDirectory: staging,
+                    cacheDirectory: cache,
+                    progress: { hitStages.record($0.stage) },
+                    performanceObserver: { performanceMetrics.record($0) }
+                )
+            }
             cacheOpenMs.append(Self.milliseconds(openStart.duration(to: .now)))
             cacheHashMs.append(
                 hitStages.milliseconds(from: .hashing, to: .cacheLookup) ?? -1
@@ -1867,30 +2106,48 @@ final class ParserIntegrationTests: XCTestCase {
             XCTAssertTrue(wasCacheHit)
 
             let directoryStart = ContinuousClock.now
-            let processPage = try await session.repository.processes(
-                try ProcessQuery(
-                    limit: 1_024,
-                    deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            let processPage = try await phase3BenchmarkOperation("iteration.processDirectory") {
+                try await session.repository.processes(
+                    try ProcessQuery(
+                        limit: 1_024,
+                        deadline: ContinuousClock.now.advanced(by: .seconds(5))
+                    )
                 )
-            )
-            let threadPage = try await session.repository.threads(
-                try ThreadQuery(
-                    limit: 1_024,
-                    deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            }
+            let threadPage = try await phase3BenchmarkOperation("iteration.threadDirectory") {
+                try await session.repository.threads(
+                    try ThreadQuery(
+                        limit: 1_024,
+                        deadline: ContinuousClock.now.advanced(by: .seconds(5))
+                    )
                 )
-            )
+            }
             directoryMs.append(Self.milliseconds(directoryStart.duration(to: .now)))
             XCTAssertFalse(processPage.items.isEmpty)
             XCTAssertFalse(threadPage.items.isEmpty)
 
             let contextStartTime = ContinuousClock.now
-            let context = try await TraceContextBuilder(
-                repository: session.repository
-            ).build(contextRequest)
+            let context = try await phase3BenchmarkOperation("iteration.context") {
+                try await TraceContextBuilder(
+                    repository: session.repository,
+                    performanceObserver: { performanceMetrics.record($0) }
+                ).build(contextRequest)
+            }
             XCTAssertEqual(context.range, contextRange)
-            let contextBytes = try context.encoded(
-                maximumBytes: 8 * 1_024 * 1_024
-            ).count
+            let contextBytes = try {
+                let startedAt = ContinuousClock.now
+                defer {
+                    TracePerformanceMetrics.record(
+                        scope: "traceContext",
+                        operation: "output.encode",
+                        startedAt: startedAt,
+                        observer: { performanceMetrics.record($0) }
+                    )
+                }
+                return try context.encoded(
+                    maximumBytes: 8 * 1_024 * 1_024
+                ).count
+            }()
             let contextEvents = context.cpuSlices.count
                 + context.threadStates.count
                 + context.slices.count
@@ -1900,9 +2157,11 @@ final class ParserIntegrationTests: XCTestCase {
             contextMs.append(Self.milliseconds(contextStartTime.duration(to: .now)))
 
             let analysisStart = ContinuousClock.now
-            let analysis = try await TraceDeterministicAnalysisEngine(
-                repository: session.repository
-            ).analyze(analysisRequest).retainingRows(maximumRows: analysisMaximumRows)
+            let analysis = try await phase3BenchmarkOperation("iteration.analysis") {
+                try await TraceDeterministicAnalysisEngine(
+                    repository: session.repository
+                ).analyze(analysisRequest).retainingRows(maximumRows: analysisMaximumRows)
+            }
             analysisParameters = analysis.parameters
             analysisMs.append(Self.milliseconds(analysisStart.duration(to: .now)))
             XCTAssertFalse(analysis.cpuUtilization.isEmpty)
@@ -1931,62 +2190,74 @@ final class ParserIntegrationTests: XCTestCase {
             )
             let viewportDeadline = ContinuousClock.now.advanced(by: .seconds(10))
             var queryStart = ContinuousClock.now
-            let detailCPU = try await session.repository.cpuSlices(
-                try CpuSliceQuery(
-                    range: fullRange, cpu: firstCPU.cpu, limit: 2_000,
-                    deadline: viewportDeadline
+            let detailCPU = try await phase3BenchmarkOperation("iteration.cpuDetail") {
+                try await session.repository.cpuSlices(
+                    try CpuSliceQuery(
+                        range: fullRange, cpu: firstCPU.cpu, limit: 2_000,
+                        deadline: viewportDeadline
+                    )
                 )
-            )
+            }
             viewportMeasurements["cpuDetail", default: []].append(
                 Self.milliseconds(queryStart.duration(to: .now))
             )
             queryStart = ContinuousClock.now
-            let detailState = try await session.repository.threadStates(
-                try ThreadStateQuery(
-                    range: fullRange, threadKey: firstState.threadKey, limit: 2_000,
-                    deadline: viewportDeadline
+            let detailState = try await phase3BenchmarkOperation("iteration.threadStateDetail") {
+                try await session.repository.threadStates(
+                    try ThreadStateQuery(
+                        range: fullRange, threadKey: firstState.threadKey, limit: 2_000,
+                        deadline: viewportDeadline
+                    )
                 )
-            )
+            }
             viewportMeasurements["threadStateDetail", default: []].append(
                 Self.milliseconds(queryStart.duration(to: .now))
             )
             queryStart = ContinuousClock.now
-            let detailSlice = try await session.repository.slices(
-                try TraceSliceQuery(
-                    range: fullRange, threadKey: firstSlice.threadKey, limit: 2_000,
-                    deadline: viewportDeadline
+            let detailSlice = try await phase3BenchmarkOperation("iteration.namedSliceDetail") {
+                try await session.repository.slices(
+                    try TraceSliceQuery(
+                        range: fullRange, threadKey: firstSlice.threadKey, limit: 2_000,
+                        deadline: viewportDeadline
+                    )
                 )
-            )
+            }
             viewportMeasurements["namedSliceDetail", default: []].append(
                 Self.milliseconds(queryStart.duration(to: .now))
             )
             queryStart = ContinuousClock.now
-            let densityCPU = try await session.repository.density(
-                try TraceDensityQuery(
-                    range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 2_000,
-                    deadline: viewportDeadline
+            let densityCPU = try await phase3BenchmarkOperation("iteration.cpuDensity") {
+                try await session.repository.density(
+                    try TraceDensityQuery(
+                        range: fullRange, source: .cpu(firstCPU.cpu), bucketCount: 2_000,
+                        deadline: viewportDeadline
+                    )
                 )
-            )
+            }
             viewportMeasurements["cpuDensity", default: []].append(
                 Self.milliseconds(queryStart.duration(to: .now))
             )
             queryStart = ContinuousClock.now
-            let densityState = try await session.repository.density(
-                try TraceDensityQuery(
-                    range: fullRange, source: .threadState(firstState.threadKey),
-                    bucketCount: 2_000, deadline: viewportDeadline
+            let densityState = try await phase3BenchmarkOperation("iteration.threadStateDensity") {
+                try await session.repository.density(
+                    try TraceDensityQuery(
+                        range: fullRange, source: .threadState(firstState.threadKey),
+                        bucketCount: 2_000, deadline: viewportDeadline
+                    )
                 )
-            )
+            }
             viewportMeasurements["threadStateDensity", default: []].append(
                 Self.milliseconds(queryStart.duration(to: .now))
             )
             queryStart = ContinuousClock.now
-            let densitySlice = try await session.repository.density(
-                try TraceDensityQuery(
-                    range: fullRange, source: .namedSlice(firstSlice.threadKey),
-                    bucketCount: 2_000, deadline: viewportDeadline
+            let densitySlice = try await phase3BenchmarkOperation("iteration.namedSliceDensity") {
+                try await session.repository.density(
+                    try TraceDensityQuery(
+                        range: fullRange, source: .namedSlice(firstSlice.threadKey),
+                        bucketCount: 2_000, deadline: viewportDeadline
+                    )
                 )
-            )
+            }
             viewportMeasurements["namedSliceDensity", default: []].append(
                 Self.milliseconds(queryStart.duration(to: .now))
             )
@@ -2009,7 +2280,13 @@ final class ParserIntegrationTests: XCTestCase {
                 "deterministicAnalysisRows": Int64(analysisRows),
             ]
             let loaderStart = ContinuousClock.now
-            let snapshot = try await loader.load(request, repository: session.repository)
+            let snapshot = try await phase3BenchmarkOperation("iteration.automaticLoader") {
+                try await loader.load(
+                    request,
+                    repository: session.repository,
+                    performanceObserver: { performanceMetrics.record($0) }
+                )
+            }
             viewportMeasurements["automaticLoader", default: []].append(
                 Self.milliseconds(loaderStart.duration(to: .now))
             )
@@ -2050,9 +2327,15 @@ final class ParserIntegrationTests: XCTestCase {
                     generation: interactionViewport.generation,
                     deadline: ContinuousClock.now.advanced(by: .seconds(5))
                 )
-                let interactionResult = try await loader.load(
-                    interactionRequest, repository: session.repository
-                )
+                let interactionResult = try await phase3BenchmarkOperation(
+                    "iteration.interactionLoader"
+                ) {
+                    try await loader.load(
+                        interactionRequest,
+                        repository: session.repository,
+                        performanceObserver: { performanceMetrics.record($0) }
+                    )
+                }
                 let interaction = try XCTUnwrap(interactionResult)
                 XCTAssertFalse(
                     interaction.tracks.flatMap(\.primitives)
@@ -2115,6 +2398,13 @@ final class ParserIntegrationTests: XCTestCase {
         let rebuildFrameP95 = Self.percentile(rebuildFrameMs, fraction: 0.95)
         let contextP95 = Self.percentile(contextMs, fraction: 0.95)
         let analysisP95 = Self.percentile(analysisMs, fraction: 0.95)
+        let performanceMetricAggregates = Self.aggregatePerformanceMetrics(
+            performanceMetrics.snapshot()
+        )
+        let bottlenecks = Self.performanceBottlenecks(performanceMetricAggregates)
+        let bottleneckSummary = bottlenecks.map {
+            "\($0.scope).\($0.operation)=\($0.p95Ms)"
+        }.joined(separator: ",")
         let warmupOnly = environment["ARKTRACE_PHASE3_WARMUP_ONLY"] == "1"
         var usage = rusage()
         _ = getrusage(RUSAGE_SELF, &usage)
@@ -2136,7 +2426,11 @@ final class ParserIntegrationTests: XCTestCase {
                     "\($0)=\(viewportLatency[$0]?.p95Ms ?? -1)"
                 }.joined(separator: ",")
             )
-            XCTAssertLessThanOrEqual(contextP95, fixtureClass == "large" ? 2_000 : 1_000)
+            XCTAssertLessThanOrEqual(
+                contextP95,
+                fixtureClass == "large" ? 2_000 : 1_000,
+                "performanceBottlenecks=\(bottleneckSummary)"
+            )
             XCTAssertLessThanOrEqual(analysisP95, fixtureClass == "large" ? 5_000 : 3_000)
             XCTAssertLessThanOrEqual(
                 frameP95, 16.7,
@@ -2260,9 +2554,11 @@ final class ParserIntegrationTests: XCTestCase {
             let capabilities: TraceCapabilities
             let measuredRows: [String: Int64]
             let diagnostics: TraceDatabasePerformanceDiagnostics
+            let performanceMetrics: [PerformanceMetricAggregate]
+            let bottlenecks: [PerformanceBottleneck]
         }
         let evidence = Phase3Evidence(
-            formatVersion: 4,
+            formatVersion: 5,
             arkTraceVersion: ArkTraceProduct.version,
             arkTraceBaseRevision: environment["ARKTRACE_BASE_REVISION"] ?? "unknown",
             arkTraceSourceTreeSHA256: try XCTUnwrap(
@@ -2355,7 +2651,9 @@ final class ParserIntegrationTests: XCTestCase {
             maximumPrimitives: 20_000,
             capabilities: metadata.capabilities,
             measuredRows: measuredRows,
-            diagnostics: diagnostics
+            diagnostics: diagnostics,
+            performanceMetrics: performanceMetricAggregates,
+            bottlenecks: bottlenecks
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
@@ -2788,8 +3086,13 @@ final class ParserIntegrationTests: XCTestCase {
         let (binary, fixture) = try requireCacheEnvironment()
         let root = FileManager.default.temporaryDirectory
             .appending(path: "arktrace-cache-hit-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(
+            at: root, withIntermediateDirectories: false
+        )
         let staging = root.appending(path: "staging", directoryHint: .isDirectory)
         let cache = root.appending(path: "cache", directoryHint: .isDirectory)
+        let source = root.appending(path: "source.htrace")
+        try FileManager.default.copyItem(at: fixture, to: source)
         defer { try? FileManager.default.removeItem(at: root) }
         let parser = CountingParser(
             base: try TraceStreamerProcessParser(executableURL: binary)
@@ -2797,7 +3100,7 @@ final class ParserIntegrationTests: XCTestCase {
         let missStages = StageRecorder()
 
         let first = try await TraceSession.openCached(
-            source: fixture,
+            source: source,
             parser: parser,
             stagingDirectory: staging,
             cacheDirectory: cache,
@@ -2816,6 +3119,10 @@ final class ParserIntegrationTests: XCTestCase {
             .preparing, .hashing, .cacheLookup, .parsing, .validating,
             .indexing, .openingDatabase, .ready,
         ])
+        XCTAssertGreaterThan(
+            missStages.observationCount(for: .hashing), 1,
+            "the first open must stream the unique source into SHA-256"
+        )
         XCTAssertEqual(firstParsed.databaseURL.lastPathComponent, "database.sqlite")
         XCTAssertEqual(firstParsed.metadataSidecarURL.lastPathComponent, "metadata.json")
         XCTAssertEqual(firstMetadata.sourceSHA256, firstParsed.sourceSHA256)
@@ -2849,7 +3156,7 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(firstMetadata.lastAccessedAt, Date(timeIntervalSince1970: 100))
 
         let metadataBytes = try Data(contentsOf: firstParsed.metadataSidecarURL)
-        XCTAssertNil(metadataBytes.range(of: Data(fixture.path.utf8)))
+        XCTAssertNil(metadataBytes.range(of: Data(source.path.utf8)))
         XCTAssertNil(metadataBytes.range(of: Data(staging.path.utf8)))
         XCTAssertNil(metadataBytes.range(of: Data(cache.path.utf8)))
         let compatibleSidecar = try JSONDecoder().decode(
@@ -2887,7 +3194,7 @@ final class ParserIntegrationTests: XCTestCase {
 
         let hitStages = StageRecorder()
         let second = try await TraceSession.openCached(
-            source: fixture,
+            source: source,
             parser: parser,
             stagingDirectory: staging,
             cacheDirectory: cache,
@@ -2902,6 +3209,10 @@ final class ParserIntegrationTests: XCTestCase {
         XCTAssertEqual(hitStages.snapshot(), [
             .preparing, .hashing, .cacheLookup, .openingDatabase, .ready,
         ])
+        XCTAssertEqual(
+            hitStages.observationCount(for: .hashing), 1,
+            "an unchanged source snapshot must reuse its process-local hash"
+        )
         let secondParsed = await second.parsed
         XCTAssertEqual(secondParsed.databaseURL, firstParsed.databaseURL)
         let secondMetadataValue = await second.cacheMetadata
@@ -2913,6 +3224,27 @@ final class ParserIntegrationTests: XCTestCase {
             "source snapshots must not survive a successful cached open"
         )
         try await second.close()
+
+        let replacement = root.appending(path: "replacement.htrace")
+        try FileManager.default.copyItem(at: fixture, to: replacement)
+        _ = try FileManager.default.replaceItemAt(source, withItemAt: replacement)
+        let replacedStages = StageRecorder()
+        let replaced = try await TraceSession.openCached(
+            source: source,
+            parser: parser,
+            stagingDirectory: staging,
+            cacheDirectory: cache,
+            progress: { replacedStages.append($0.stage) },
+            now: { Date(timeIntervalSince1970: 300) }
+        )
+        let replacedCacheHit = await replaced.cacheHit
+        XCTAssertTrue(replacedCacheHit)
+        XCTAssertEqual(parser.count(), 1, "same replacement bytes reuse the cache entry")
+        XCTAssertGreaterThan(
+            replacedStages.observationCount(for: .hashing), 1,
+            "a replacement inode must never reuse the previous source hash memo"
+        )
+        try await replaced.close()
     }
 
     func testConcurrentCachedOpenIsSingleFlight() async throws {
@@ -4221,7 +4553,7 @@ final class ParserIntegrationTests: XCTestCase {
         } catch {}
         let target = try XCTUnwrap(foreign.snapshot())
         XCTAssertEqual(
-            try String(contentsOf: target.appending(path: "marker")),
+            try String(contentsOf: target.appending(path: "marker"), encoding: .utf8),
             "foreign"
         )
         XCTAssertTrue(

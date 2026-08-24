@@ -6,6 +6,19 @@ import XCTest
 @testable import ArkTraceStore
 
 final class RepositoryTests: XCTestCase {
+    private final class PerformanceMetricRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var values: [TracePerformanceMetric] = []
+
+        func record(_ metric: TracePerformanceMetric) {
+            lock.withLock { values.append(metric) }
+        }
+
+        func snapshot() -> [TracePerformanceMetric] {
+            lock.withLock { values }
+        }
+    }
+
     private final class StageRecorder: @unchecked Sendable {
         private let lock = NSLock()
         private var values: [TraceLoadingStage] = []
@@ -961,6 +974,204 @@ final class RepositoryTests: XCTestCase {
         XCTAssertLessThan(try XCTUnwrap(values.first), 1)
     }
 
+    func testStagingPreparationReportsPathFreePerOperationMetrics() throws {
+        let recorder = PerformanceMetricRecorder()
+        _ = try TraceDatabaseStagingPreparer.prepare(
+            databaseURL: databaseURL,
+            performanceObserver: { recorder.record($0) },
+            quickCheckProgressHook: nil
+        )
+
+        let metrics = recorder.snapshot()
+        let operations = Set(metrics.map(\.operation))
+        XCTAssertTrue(operations.contains("database.hash"))
+        XCTAssertTrue(operations.contains("quickCheck.beforeIndexes"))
+        XCTAssertTrue(operations.contains("schema.semanticValidation"))
+        XCTAssertTrue(operations.contains("indexes.bootstrap.total"))
+        XCTAssertTrue(operations.contains("indexes.configure"))
+        XCTAssertTrue(operations.contains("indexes.ready.total"))
+        XCTAssertTrue(operations.contains("indexes.restore"))
+        XCTAssertTrue(operations.contains("quickCheck.afterIndexes"))
+        XCTAssertTrue(operations.contains("database.flush"))
+        XCTAssertTrue(metrics.allSatisfy {
+            $0.scope == "databasePreparation" && $0.elapsedMilliseconds >= 0
+        })
+        XCTAssertFalse(metrics.contains { $0.operation.contains(databaseURL.path) })
+
+        let readyIndexes = metrics.filter { $0.operation.hasPrefix("index.ready.") }
+        let bootstrapIndexes = metrics.filter {
+            $0.operation.hasPrefix("index.bootstrap.")
+        }
+        XCTAssertEqual(
+            readyIndexes.count + bootstrapIndexes.count,
+            try TraceDatabaseStagingPreparer.applicableIndexNames(
+                databaseURL: databaseURL
+            ).count,
+            "an applicable index is built in exactly one preparation phase"
+        )
+        XCTAssertTrue(
+            Set(readyIndexes.map {
+                $0.operation.replacingOccurrences(of: "index.ready.", with: "")
+            }).isDisjoint(
+                with: Set(bootstrapIndexes.map {
+                    $0.operation.replacingOccurrences(
+                        of: "index.bootstrap.", with: ""
+                    )
+                })
+            )
+        )
+        let readyTotal = try XCTUnwrap(metrics.first {
+            $0.operation == "indexes.ready.total"
+        })
+        XCTAssertEqual(readyTotal.workUnits, Int64(readyIndexes.count))
+        XCTAssertEqual(readyTotal.workUnit, "indexes")
+    }
+
+    func testDensityReportsElapsedTimeAndSQLiteVMInstructions() async throws {
+        let seed = try TraceDatabase(url: databaseURL, readOnly: false)
+        try seed.execute("INSERT INTO sched_slice VALUES (1, 1100, 20, 0, 1, 1)")
+        let preparation = try TraceDatabaseStagingPreparer.prepare(
+            databaseURL: databaseURL
+        )
+        let recorder = PerformanceMetricRecorder()
+        let repository = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation,
+            diagnosticQueryObserver: nil,
+            performanceObserver: { recorder.record($0) }
+        )
+
+        _ = try await repository.density(
+            TraceDensityQuery(
+                range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                source: .cpu(0),
+                bucketCount: 16,
+                deadline: ContinuousClock.now.advanced(by: .seconds(1))
+            )
+        )
+
+        let metric = try XCTUnwrap(recorder.snapshot().last)
+        XCTAssertEqual(metric.scope, "sqliteQuery")
+        XCTAssertEqual(metric.operation, "density.cpu")
+        XCTAssertGreaterThanOrEqual(metric.elapsedMilliseconds, 0)
+        XCTAssertGreaterThan(metric.workUnits ?? 0, 0)
+        XCTAssertEqual(metric.workUnit, "vmInstructions")
+    }
+
+    func testDensityCacheIsExactAndSharedAcrossRepositoryReopenings() async throws {
+        let seed = try TraceDatabase(url: databaseURL, readOnly: false)
+        try seed.execute("INSERT INTO sched_slice VALUES (1, 1100, 20, 0, 1, 1)")
+        let preparation = try TraceDatabaseStagingPreparer.prepare(
+            databaseURL: databaseURL
+        )
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        let query = try TraceDensityQuery(
+            range: range,
+            source: .cpu(0),
+            bucketCount: 16,
+            deadline: ContinuousClock.now.advanced(by: .seconds(1))
+        )
+        let firstMetrics = PerformanceMetricRecorder()
+        let first = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation,
+            diagnosticQueryObserver: nil,
+            performanceObserver: { firstMetrics.record($0) }
+        )
+        let firstResult = try await first.density(query)
+        XCTAssertEqual(firstMetrics.snapshot().last?.operation, "density.cpu")
+
+        let reopenedMetrics = PerformanceMetricRecorder()
+        let reopened = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation,
+            diagnosticQueryObserver: nil,
+            performanceObserver: { reopenedMetrics.record($0) }
+        )
+        let cachedResult = try await reopened.density(
+            TraceDensityQuery(
+                range: range,
+                source: .cpu(0),
+                bucketCount: 16,
+                deadline: ContinuousClock.now.advanced(by: .seconds(1))
+            )
+        )
+        XCTAssertEqual(cachedResult.buckets, firstResult.buckets)
+        XCTAssertEqual(cachedResult.dataQuality, firstResult.dataQuality)
+        XCTAssertEqual(reopenedMetrics.snapshot().last?.operation, "densityCache.hit.cpu")
+        XCTAssertEqual(reopenedMetrics.snapshot().last?.workUnit, "buckets")
+
+        _ = try await reopened.density(
+            TraceDensityQuery(
+                range: range,
+                source: .cpu(0),
+                bucketCount: 8,
+                deadline: ContinuousClock.now.advanced(by: .seconds(1))
+            )
+        )
+        XCTAssertEqual(
+            reopenedMetrics.snapshot().last?.operation,
+            "density.cpu",
+            "a different bucket count must not reuse an exact density result"
+        )
+    }
+
+    func testDensityCacheMissesAfterReadyDatabaseReplacement() async throws {
+        let seed = try TraceDatabase(url: databaseURL, readOnly: false)
+        try seed.execute("INSERT INTO sched_slice VALUES (1, 1100, 20, 0, 1, 1)")
+        let preparation = try TraceDatabaseStagingPreparer.prepare(
+            databaseURL: databaseURL
+        )
+        let query = try TraceDensityQuery(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            source: .cpu(0),
+            bucketCount: 16,
+            deadline: ContinuousClock.now.advanced(by: .seconds(1))
+        )
+        let original = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation
+        )
+        _ = try await original.density(query)
+
+        let replacement = databaseURL.deletingLastPathComponent()
+            .appending(path: "arktrace-density-replacement-\(UUID().uuidString).sqlite")
+        defer { try? FileManager.default.removeItem(at: replacement) }
+        try FileManager.default.copyItem(at: databaseURL, to: replacement)
+        _ = try FileManager.default.replaceItemAt(databaseURL, withItemAt: replacement)
+
+        let metrics = PerformanceMetricRecorder()
+        let reopened = try SQLiteTraceRepository(
+            databaseURL: databaseURL,
+            parser: Self.dummyParser,
+            source: Self.dummySource,
+            expectedPreparation: preparation,
+            diagnosticQueryObserver: nil,
+            performanceObserver: { metrics.record($0) }
+        )
+        _ = try await reopened.density(
+            TraceDensityQuery(
+                range: query.range,
+                source: query.source,
+                bucketCount: query.bucketCount,
+                deadline: ContinuousClock.now.advanced(by: .seconds(1))
+            )
+        )
+        XCTAssertEqual(
+            metrics.snapshot().last?.operation,
+            "density.cpu",
+            "a new database inode must never inherit cached query results"
+        )
+    }
+
     func testStagingPreparationCreatesVersionedIndexesAndPreservesRows() throws {
         let upstreamIdentity = try sha256AndSize(at: databaseURL)
         let beforeCounts = try TraceDatabase(url: databaseURL, readOnly: true).query(
@@ -988,6 +1199,8 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(stages.snapshot(), [.validating, .indexing])
 
         let db = try TraceDatabase(url: databaseURL, readOnly: true)
+        let journalMode = try db.query("PRAGMA journal_mode") { $0.text(0) }
+        XCTAssertEqual(journalMode.first ?? nil, "delete")
         let indexNames = Set(try db.query(
             "SELECT name FROM sqlite_master WHERE type = 'index' AND name GLOB 'arktrace_v*'"
         ) { $0.text(0) }.compactMap { $0 })
@@ -1100,6 +1313,19 @@ final class RepositoryTests: XCTestCase {
             let text = try XCTUnwrap(diagnostics.queryPlans[name]).joined(separator: " ")
             XCTAssertTrue(text.contains("arktrace_v2_process_ipid_pid_name"), text)
             XCTAssertTrue(text.contains("arktrace_v2_thread_itid_tid_name_ipid"), text)
+        }
+        for name in [
+            "viewport.cpu.detail", "viewport.cpu.density",
+            "viewport.threadState.detail", "viewport.threadState.density",
+            "viewport.namedSlice.detail", "viewport.namedSlice.density",
+        ] {
+            let eventSearch = try XCTUnwrap(
+                diagnostics.queryPlans[name]?.first { $0.contains("SEARCH s ") }
+            )
+            XCTAssertTrue(
+                eventSearch.contains("ts<?"),
+                "\(name) must constrain the indexed timestamp upper bound: \(eventSearch)"
+            )
         }
     }
 

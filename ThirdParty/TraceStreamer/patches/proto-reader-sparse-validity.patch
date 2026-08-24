@@ -1,0 +1,147 @@
+diff --git a/smartperf_host/trace_streamer/src/proto_reader/include/proto_reader.h b/smartperf_host/trace_streamer/src/proto_reader/include/proto_reader.h
+index 600b9044..58fd081f 100644
+--- a/smartperf_host/trace_streamer/src/proto_reader/include/proto_reader.h
++++ b/smartperf_host/trace_streamer/src/proto_reader/include/proto_reader.h
+@@ -30,6 +30,7 @@ namespace ProtoReader {
+ constexpr uint8_t DATA_AREA_TYPE_BITS = 3;
+ constexpr uint8_t DATA_AREA_TYPE_VALUE = 7;
+ constexpr uint32_t INVALID_DATA_AREA_ID = 0;
++constexpr uint32_t DATA_AREA_VALIDITY_BITS = 64;
+ constexpr uint8_t BYTE_HIGHEST_BIT_MARK = 0x80;
+ const std::map<ProtoWireType, uint32_t> fixedTypeToSizeMap_ = {{ProtoWireType::kFixed32, sizeof(uint32_t)},
+                                                                {ProtoWireType::kFixed64, sizeof(uint64_t)}};
+@@ -188,7 +189,11 @@ struct ParseDataAreaResult {
+ class ProtoReaderBase {
+ public:
+     ProtoReaderBase() : startAddr_(0), endAddr_(0), dataAreas_(nullptr), dataAreasCount_(0), size_(0), volume_(0) {}
+-    ProtoReaderBase(DataArea *storage, uint32_t dataAreasCount, const uint8_t *buffer, size_t length);
++    ProtoReaderBase(DataArea *storage,
++                    uint64_t *validityStorage,
++                    uint32_t dataAreasCount,
++                    const uint8_t *buffer,
++                    size_t length);
+     const uint8_t *GetStartAddr() const
+     {
+         return startAddr_;
+@@ -221,7 +226,7 @@ public:
+     DataArea FindDataArea(uint32_t dataAreaId);
+     const DataArea &Get(uint32_t id) const
+     {
+-        if (id < dataAreasCount_) {
++        if (DataAreaPresent(id)) {
+             return dataAreas_[id];
+         }
+         return dataAreas_[0];
+@@ -230,8 +235,9 @@ public:
+     template <typename T>
+     RepeatedDataAreaIterator<T> GetRepeated(uint32_t dataAreaId) const
+     {
++        const DataArea &lastDataArea = Get(dataAreaId);
+         return RepeatedDataAreaIterator<T>(dataAreaId, &dataAreas_[dataAreasCount_], &dataAreas_[size_],
+-                                           &dataAreas_[dataAreaId]);
++                                           &lastDataArea);
+     }
+ 
+     template <ProtoWireType wireType, typename cppType>
+@@ -253,6 +259,18 @@ protected:
+     void ParseAllDataAreas();
+     void MoveToLargerHeapStorage();
+ 
++    bool DataAreaPresent(uint32_t id) const
++    {
++        return id < dataAreasCount_ &&
++               (validityWords_[id / DATA_AREA_VALIDITY_BITS] &
++                (uint64_t{1} << (id % DATA_AREA_VALIDITY_BITS)));
++    }
++    void MarkDataAreaPresent(uint32_t id)
++    {
++        validityWords_[id / DATA_AREA_VALIDITY_BITS] |=
++            uint64_t{1} << (id % DATA_AREA_VALIDITY_BITS);
++    }
++
+     const uint8_t *const startAddr_;
+     const uint8_t *const endAddr_;
+     const uint8_t *currentReadAddr_ = nullptr;
+@@ -261,6 +279,7 @@ protected:
+     uint32_t dataAreasCount_;
+     uint32_t size_;
+     uint32_t volume_;
++    uint64_t *validityWords_ = nullptr;
+ 
+ private:
+     const uint8_t *GetNextProtoTag(const uint8_t *const startAddr, const uint8_t *const endAddr, uint64_t *dataAreaTag);
+@@ -276,12 +295,15 @@ template <int32_t MAX_DATA_AREA_ID>
+ class TypedProtoReader : public ProtoReaderBase {
+ public:
+     TypedProtoReader(const uint8_t *buffer, size_t length)
+-        : ProtoReaderBase(defaultStorage_, MAX_DATA_AREA_ID + 1, buffer, length)
++        : ProtoReaderBase(defaultStorage_, validityStorage_, MAX_DATA_AREA_ID + 1, buffer, length)
+     {
+         ProtoReaderBase::ParseAllDataAreas();
+     }
+     TypedProtoReader(TypedProtoReader &&other) noexcept : ProtoReaderBase(std::move(other))
+     {
++        (void)memcpy_s(validityStorage_, sizeof(validityStorage_), other.validityStorage_,
++                       sizeof(other.validityStorage_));
++        ProtoReaderBase::validityWords_ = validityStorage_;
+         if (dataAreas_ == other.defaultStorage_) {
+             dataAreas_ = defaultStorage_;
+             memcpy_s(defaultStorage_, sizeof(defaultStorage_), other.defaultStorage_, sizeof(defaultStorage_));
+@@ -290,10 +312,12 @@ public:
+     template <uint32_t DATA_AREA_ID>
+     const DataArea &at() const
+     {
+-        return dataAreas_[DATA_AREA_ID];
++        return Get(DATA_AREA_ID);
+     }
+ 
+ private:
++    uint64_t validityStorage_[(MAX_DATA_AREA_ID + DATA_AREA_VALIDITY_BITS) /
++                              DATA_AREA_VALIDITY_BITS];
+     DataArea defaultStorage_[MAX_DATA_AREA_ID + 1];
+ };
+ } // namespace ProtoReader
+diff --git a/smartperf_host/trace_streamer/src/proto_reader/proto_reader.cpp b/smartperf_host/trace_streamer/src/proto_reader/proto_reader.cpp
+index 2fb12cba..0c3492b5 100644
+--- a/smartperf_host/trace_streamer/src/proto_reader/proto_reader.cpp
++++ b/smartperf_host/trace_streamer/src/proto_reader/proto_reader.cpp
+@@ -25,17 +25,24 @@ std::map<ProtoWireType, ProtoReaderBase::ParseDataAreaValueByType> ProtoReaderBa
+     {ProtoWireType::kFixed32, ProtoReaderBase::ParseFixed32Value},
+     {ProtoWireType::kFixed64, ProtoReaderBase::ParseFixed64Value},
+ };
+-ProtoReaderBase::ProtoReaderBase(DataArea *storage, uint32_t dataAreasCount, const uint8_t *buffer, size_t length)
++ProtoReaderBase::ProtoReaderBase(DataArea *storage,
++                                 uint64_t *validityStorage,
++                                 uint32_t dataAreasCount,
++                                 const uint8_t *buffer,
++                                 size_t length)
+     : startAddr_(buffer),
+       endAddr_(startAddr_ + length),
+       currentReadAddr_(startAddr_),
+       dataAreas_(storage),
+       dataAreasCount_(dataAreasCount),
+       size_(dataAreasCount),
+-      volume_(dataAreasCount)
++      volume_(dataAreasCount),
++      validityWords_(validityStorage)
+ {
+-    auto dataAreasSize = sizeof(DataArea) * dataAreasCount_;
+-    (void)memset_s(dataAreas_, dataAreasSize, 0, dataAreasSize);
++    dataAreas_[0] = DataArea{};
++    auto validitySize = sizeof(uint64_t) * ((dataAreasCount_ + DATA_AREA_VALIDITY_BITS - 1) /
++                                            DATA_AREA_VALIDITY_BITS);
++    (void)memset_s(validityWords_, validitySize, 0, validitySize);
+ }
+ 
+ // return next parse addr and dataAreaTag. if failed returns nullptr
+@@ -206,8 +213,9 @@ void ProtoReaderBase::ParseAllDataAreas()
+         }
+ 
+         DataArea *dataArea = &dataAreas_[dataAreaId];
+-        if (!dataArea->DataAreaValid()) {
++        if (!DataAreaPresent(dataAreaId)) {
+             *dataArea = std::move(result.dataArea);
++            MarkDataAreaPresent(dataAreaId);
+         } else {
+             if (size_ >= volume_) {
+                 MoveToLargerHeapStorage();

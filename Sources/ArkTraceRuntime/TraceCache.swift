@@ -3,6 +3,7 @@ import ArkTraceStore
 import CryptoKit
 import Darwin
 import Foundation
+import Synchronization
 
 @_silgen_name("flock")
 private func arkTraceFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
@@ -542,6 +543,68 @@ private struct TraceSourceSnapshot: Sendable {
     let byteCount: Int64
 }
 
+private struct TraceSourceFileSnapshot: Hashable, Sendable {
+    let device: UInt64
+    let inode: UInt64
+    let byteCount: Int64
+    let modificationSeconds: Int64
+    let modificationNanoseconds: Int64
+    let statusChangeSeconds: Int64
+    let statusChangeNanoseconds: Int64
+
+    init(_ info: stat) {
+        device = UInt64(info.st_dev)
+        inode = UInt64(info.st_ino)
+        byteCount = Int64(info.st_size)
+        modificationSeconds = Int64(info.st_mtimespec.tv_sec)
+        modificationNanoseconds = Int64(info.st_mtimespec.tv_nsec)
+        statusChangeSeconds = Int64(info.st_ctimespec.tv_sec)
+        statusChangeNanoseconds = Int64(info.st_ctimespec.tv_nsec)
+    }
+}
+
+private struct TraceSourceHashFacts: Sendable {
+    let sha256: String
+    let byteCount: Int64
+}
+
+/// A warm cache open still has to prove which source bytes name the entry, but
+/// rescanning an unchanged 500 MB–2 GB source on every document/session open
+/// evicts the Ready database pages the next query needs. This bounded memo is
+/// keyed by every descriptor fact an unprivileged in-place write or path
+/// replacement changes; it is never persisted across launches.
+private final class TraceSourceHashCache: Sendable {
+    private struct State {
+        var values: [TraceSourceFileSnapshot: TraceSourceHashFacts] = [:]
+        var order: [TraceSourceFileSnapshot] = []
+    }
+
+    private let state = Mutex(State())
+    private let maximumEntries = 64
+
+    func value(for key: TraceSourceFileSnapshot) -> TraceSourceHashFacts? {
+        state.withLock { state in
+            guard let value = state.values[key] else { return nil }
+            state.order.removeAll { $0 == key }
+            state.order.append(key)
+            return value
+        }
+    }
+
+    func insert(_ value: TraceSourceHashFacts, for key: TraceSourceFileSnapshot) {
+        state.withLock { state in
+            state.values[key] = value
+            state.order.removeAll { $0 == key }
+            state.order.append(key)
+            while state.order.count > maximumEntries {
+                state.values.removeValue(forKey: state.order.removeFirst())
+            }
+        }
+    }
+}
+
+private let traceSourceHashCache = TraceSourceHashCache()
+
 struct TraceOwnedDirectory: Sendable {
     let url: URL
     let rootURL: URL
@@ -691,6 +754,7 @@ enum TraceContentAddressedCache {
         stagingDirectory: URL,
         cacheDirectory: URL,
         report: @escaping TraceProgressHandler,
+        performanceObserver: TracePerformanceObserver? = nil,
         hooks: TraceCacheTestHooks = TraceCacheTestHooks(),
         repositoryValidationHook: (@Sendable () async -> Void)? = nil,
         now: @escaping @Sendable () -> Date = Date.init
@@ -770,6 +834,7 @@ enum TraceContentAddressedCache {
                     parser: parserIdentity,
                     sourceByteCount: sourceFacts.byteCount,
                     sourceFormat: source.pathExtension.isEmpty ? nil : source.pathExtension,
+                    performanceObserver: performanceObserver,
                     repositoryValidationHook: repositoryValidationHook
                 ) {
                     let updated = hit.metadata.accessed(at: now())
@@ -891,17 +956,17 @@ enum TraceContentAddressedCache {
                     break
                 }
             }
-            let parsed = try await parser.parse(
+            let parsed = try await parser.parseVerifiedSnapshot(
                 source: sourceSnapshot.url,
-                // Verified equal to the keying hash a few lines above, owned by
-                // this session directory, and 0400 since scanSource wrote it.
-                sourceIsImmutableSnapshot: true,
+                sourceSHA256: sourceSnapshot.sha256,
+                sourceByteCount: sourceSnapshot.byteCount,
                 destination: buildDatabase,
                 progress: parseProgress,
                 prepareDatabase: { databaseURL, progress in
                     try TraceDatabaseStagingPreparer.prepare(
                         databaseURL: databaseURL,
-                        progress: progress
+                        progress: progress,
+                        performanceObserver: performanceObserver
                     )
                 }
             )
@@ -955,6 +1020,7 @@ enum TraceContentAddressedCache {
                 parser: parserIdentity,
                 sourceByteCount: sourceSnapshot.byteCount,
                 sourceFormat: source.pathExtension.isEmpty ? nil : source.pathExtension,
+                performanceObserver: performanceObserver,
                 repositoryValidationHook: nil
             ) != nil else {
                 throw cacheCorrupt(reason: "privateValidationFailed")
@@ -1038,6 +1104,7 @@ enum TraceContentAddressedCache {
                 parser: parserIdentity,
                 sourceByteCount: sourceSnapshot.byteCount,
                 sourceFormat: source.pathExtension.isEmpty ? nil : source.pathExtension,
+                performanceObserver: performanceObserver,
                 repositoryValidationHook: repositoryValidationHook
             ) else {
                 throw cacheCorrupt(reason: "promotedValidationFailed")
@@ -1235,6 +1302,7 @@ enum TraceContentAddressedCache {
         parser: TraceParserIdentity,
         sourceByteCount: Int64,
         sourceFormat: String?,
+        performanceObserver: TracePerformanceObserver?,
         repositoryValidationHook: (@Sendable () async -> Void)?
     ) async throws -> ValidatedEntry? {
         switch directoryProbe(at: layout.entryURL) {
@@ -1276,7 +1344,8 @@ enum TraceContentAddressedCache {
                 databaseURL: layout.databaseURL,
                 parser: parser,
                 source: descriptor,
-                expectedPreparation: metadata.databasePreparation
+                expectedPreparation: metadata.databasePreparation,
+                performanceObserver: performanceObserver
             )
             return ValidatedEntry(
                 repository: repository,
@@ -1468,6 +1537,15 @@ enum TraceContentAddressedCache {
                 message: "Trace input is not a readable regular file"
             )
         }
+        let sourceFileSnapshot = TraceSourceFileSnapshot(sourceInfo)
+        if snapshotDirectory == nil,
+            let cached = traceSourceHashCache.value(for: sourceFileSnapshot) {
+            return TraceSourceSnapshot(
+                url: canonicalSource,
+                sha256: cached.sha256,
+                byteCount: cached.byteCount
+            )
+        }
 
         var destination: URL?
         var output: Int32 = -1
@@ -1542,11 +1620,32 @@ enum TraceContentAddressedCache {
             }
             keepDestination = true
         }
-        return TraceSourceSnapshot(
+        var finalSourceInfo = stat()
+        guard unsafe Darwin.fstat(input, &finalSourceInfo) == 0,
+            TraceSourceFileSnapshot(finalSourceInfo) == sourceFileSnapshot,
+            total == sourceFileSnapshot.byteCount
+        else {
+            throw ArkTraceError(
+                code: .traceFileUnreadable,
+                stage: .hashing,
+                message: "Trace input changed while it was being read"
+            )
+        }
+        let result = TraceSourceSnapshot(
             url: destination ?? canonicalSource,
             sha256: hasher.finalize().lowercaseHexString(),
             byteCount: total
         )
+        if snapshotDirectory == nil {
+            traceSourceHashCache.insert(
+                TraceSourceHashFacts(
+                    sha256: result.sha256,
+                    byteCount: result.byteCount
+                ),
+                for: sourceFileSnapshot
+            )
+        }
+        return result
     }
 
     private static func secureDirectory(at requestedURL: URL) throws -> URL {

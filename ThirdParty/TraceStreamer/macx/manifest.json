@@ -3,13 +3,14 @@
   "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
   "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
   "reportedVersion": "4.3.7",
-  "binarySHA256": "e0167fbb13bf666dd589c7b27d697683bec2762ec66cefc935139e6da49ecbbf",
+  "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
   "architecture": "arm64",
   "adapterVersion": "1",
-  "buildRecipeVersion": "e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06",
+  "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
   "plugins": "hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower",
   "localPatches": [
-    "patches/faultloggerd-apple-clang.patch"
+    "patches/faultloggerd-apple-clang.patch",
+    "patches/proto-reader-sparse-validity.patch"
   ],
   "thirdPartySources": "source-lock.json exact revisions over HTTPS",
   "thirdPartyRevisions": {
@@ -28,5 +29,5 @@
     "c_utils": "634d5c9d0aa3642f697938c7e5706e53ec069ba1"
   },
   "hostToolchain": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
-  "builtAt": "2026-08-15T10:46:53Z"
+  "builtAt": "2026-08-24T06:02:11Z"
 }

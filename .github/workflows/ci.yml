@@ -52,7 +52,7 @@ concurrency:
 
 env:
   PINNED_DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-  TRACE_STREAMER_RELEASE_TAG: trace-streamer-4.3.7-e0167fbb13bf
+  TRACE_STREAMER_RELEASE_TAG: trace-streamer-4.3.7-0665e04e4abf
 
 jobs:
   plan:

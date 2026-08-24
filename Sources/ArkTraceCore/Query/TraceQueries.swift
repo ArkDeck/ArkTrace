@@ -228,9 +228,45 @@ package struct TraceSummaryFacts: Hashable, Codable, Sendable {
     }
 }
 
+/// Process-local identity for immutable query results. SQLite-backed Ready
+/// repositories provide every file fact that changes on replacement or
+/// in-place mutation; test/dynamic repositories use the default `nil` and are
+/// never memoized across requests.
+package struct TraceRepositoryContentIdentity: Hashable, Sendable {
+    public let traceSHA256: String
+    public let device: UInt64
+    public let inode: UInt64
+    public let byteCount: Int64
+    public let modificationSeconds: Int64
+    public let modificationNanoseconds: Int64
+    public let statusChangeSeconds: Int64
+    public let statusChangeNanoseconds: Int64
+
+    public init(
+        traceSHA256: String,
+        device: UInt64,
+        inode: UInt64,
+        byteCount: Int64,
+        modificationSeconds: Int64,
+        modificationNanoseconds: Int64,
+        statusChangeSeconds: Int64,
+        statusChangeNanoseconds: Int64
+    ) {
+        self.traceSHA256 = traceSHA256
+        self.device = device
+        self.inode = inode
+        self.byteCount = byteCount
+        self.modificationSeconds = modificationSeconds
+        self.modificationNanoseconds = modificationNanoseconds
+        self.statusChangeSeconds = statusChangeSeconds
+        self.statusChangeNanoseconds = statusChangeNanoseconds
+    }
+}
+
 /// Typed repository boundary shared by App, CLI, and analysis (DESIGN §9.2).
 /// Phase 1 scope: metadata and process/thread directories.
 package protocol TraceRepositoryProtocol: Sendable {
+    var immutableContentIdentity: TraceRepositoryContentIdentity? { get }
     func metadata() async throws -> TraceMetadata
     func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess>
     func threads(_ query: ThreadQuery) async throws -> BoundedPage<TraceThread>
@@ -251,6 +287,10 @@ package protocol TraceRepositoryProtocol: Sendable {
     func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult
     func eventBatch(_ batch: TraceRepositoryEventBatch) async throws
         -> TraceRepositoryEventBatchResult
+}
+
+package extension TraceRepositoryProtocol {
+    var immutableContentIdentity: TraceRepositoryContentIdentity? { nil }
 }
 
 /// A bounded group of independent, immutable Ready-database reads. The Store

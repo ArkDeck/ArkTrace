@@ -97,6 +97,8 @@ make_fake_repository() {
     chmod +x "$destination/scripts/"*.sh
     printf 'reviewed patch\n' \
         >"$destination/ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch"
+    printf 'reviewed parser patch\n' \
+        >"$destination/ThirdParty/TraceStreamer/patches/proto-reader-sparse-validity.patch"
     jq -n '
       {upstream:{repository:"https://invalid.example/upstream.git",revision:"0000000000000000000000000000000000000000"},tools:{},sources:[]}
     ' >"$destination/ThirdParty/TraceStreamer/source-lock.json"

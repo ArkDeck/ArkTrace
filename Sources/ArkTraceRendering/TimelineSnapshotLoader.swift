@@ -4,30 +4,70 @@ import ArkTraceCore
 /// latest generation, so an older pan/zoom request can never overwrite a new
 /// immutable snapshot.
 package actor TimelineSnapshotLoader {
+    private struct DensityCacheKey: Hashable, Sendable {
+        let traceSHA256: String
+        let range: TraceTimeRange
+        let source: TraceDensitySource
+        let bucketCount: Int
+    }
+
     /// Ceiling on depth rows a single track may reserve. Real traces reach
     /// depth 17, so the cap is not normally hit; it exists so a pathological
     /// stack cannot make one track taller than any viewport and push every
     /// other track out of reach.
     static let maximumDepthRows = 32
+    /// Query half a screen above and below the clip. This absorbs ordinary
+    /// wheel/trackpad movement without loading every expanded lane in a trace.
+    static let verticalOverscanScreens = 0.5
+    /// Exact viewport densities are immutable for a Ready trace. A small LRU
+    /// absorbs selection redraws and repeated/coalesced viewport intents while
+    /// bounding the largest possible retained bucket payload.
+    static let maximumCachedDensities = 64
+    static let maximumCachedDensityBuckets = 200_000
 
     private var latestGeneration: UInt64 = 0
+    /// Off-screen named-slice lanes retain their last observed depth so their
+    /// placeholder layout stays stable while only visible lanes are queried.
+    private var depthRowsByTrack: [TimelineTrackID: Int] = [:]
+    private var densitiesByKey: [DensityCacheKey: TraceDensityResult] = [:]
+    private var densityRecency: [DensityCacheKey] = []
+    private var cachedDensityBucketCount = 0
 
     public init() {}
 
     public func load(
         _ request: ViewportRequest,
-        repository: any TraceRepositoryProtocol
+        repository: any TraceRepositoryProtocol,
+        performanceObserver: TracePerformanceObserver? = nil
     ) async throws -> TimelineSnapshot? {
+        let loadStartedAt = ContinuousClock.now
         latestGeneration = max(latestGeneration, request.generation)
         guard request.generation == latestGeneration else { return nil }
 
-        let visible = request.tracks.filter { !$0.isCollapsed }
+        let expanded = request.tracks.filter { !$0.isCollapsed }
+        let queriedIndices = Self.queriedTrackIndices(
+            in: expanded,
+            viewport: request.viewport,
+            cachedDepthRows: depthRowsByTrack,
+            queryAll: request.preference == .detail
+        )
+        let queriedIndexSet = Set(queriedIndices)
+        defer {
+            TracePerformanceMetrics.record(
+                scope: "timelineSnapshot",
+                operation: "load.total",
+                startedAt: loadStartedAt,
+                workUnits: Int64(queriedIndices.count),
+                workUnit: "queriedTracks",
+                observer: performanceObserver
+            )
+        }
         var remaining = request.maximumPrimitives
-        var y = -request.viewport.verticalOffsetPoints
+        var y = 0.0
         var snapshots: [TimelineTrackSnapshot] = []
         var issues: [TraceDataQualityIssue] = []
-        let fairBudget = visible.isEmpty ? 0 : remaining / visible.count
-        let prefetchedDensities: [TraceDensityResult]?
+        let fairBudget = queriedIndices.isEmpty ? 0 : remaining / queriedIndices.count
+        let prefetchedDensities: [Int: TraceDensityResult]
         // Density is the LOD estimate. When the caller has already committed
         // to detail -- search reveal, for one -- the aggregate is computed and
         // then thrown away, so every visible track pays for two indexed scans
@@ -36,14 +76,52 @@ package actor TimelineSnapshotLoader {
             let bucketCount = max(
                 1, min(max(1, request.pixelWidth / 16), fairBudget)
             )
-            let queries = try visible.map {
+            let queries = try queriedIndices.map { index in
                 try TraceDensityQuery(
                     range: request.viewport.range,
-                    source: $0.source.densitySource,
+                    source: expanded[index].source.densitySource,
                     bucketCount: bucketCount,
                     deadline: request.deadline
                 )
             }
+            let traceSHA256 = try await repository.metadata().traceSHA256
+            let keys = queries.map {
+                DensityCacheKey(
+                    traceSHA256: traceSHA256,
+                    range: $0.range,
+                    source: $0.source,
+                    bucketCount: $0.bucketCount
+                )
+            }
+            var ordered = Array<TraceDensityResult?>(
+                repeating: nil, count: queries.count
+            )
+            var misses: [(index: Int, key: DensityCacheKey, query: TraceDensityQuery)] = []
+            misses.reserveCapacity(queries.count)
+            let cacheLookupStartedAt = ContinuousClock.now
+            for index in queries.indices {
+                if let cached = cachedDensity(for: keys[index]) {
+                    ordered[index] = cached
+                } else {
+                    misses.append((index, keys[index], queries[index]))
+                }
+            }
+            TracePerformanceMetrics.record(
+                scope: "timelineSnapshot",
+                operation: "load.densityCacheHits",
+                startedAt: cacheLookupStartedAt,
+                workUnits: Int64(queries.count - misses.count),
+                workUnit: "queries",
+                observer: performanceObserver
+            )
+            TracePerformanceMetrics.record(
+                scope: "timelineSnapshot",
+                operation: "load.densityCacheMisses",
+                startedAt: cacheLookupStartedAt,
+                workUnits: Int64(misses.count),
+                workUnit: "queries",
+                observer: performanceObserver
+            )
             // One density query per visible track, but a batch carries at most
             // `maximumQueryCount`. The visible track count is a UI property and
             // is not bounded by that cap -- a trace with many counter series
@@ -51,41 +129,92 @@ package actor TimelineSnapshotLoader {
             // instead of failing the whole viewport. Results are concatenated
             // in query order, which is the visible-track order the loop below
             // indexes by.
-            var densities: [TraceDensityResult] = []
-            densities.reserveCapacity(queries.count)
-            for chunk in queries.chunked(by: TraceRepositoryEventBatch.maximumQueryCount) {
+            for chunk in misses.chunked(by: TraceRepositoryEventBatch.maximumQueryCount) {
+                let batchStartedAt = ContinuousClock.now
                 try Task.checkCancellation()
                 guard request.generation == latestGeneration else { return nil }
-                densities.append(
-                    contentsOf: try await repository.eventBatch(
-                        try TraceRepositoryEventBatch(densities: chunk)
-                    ).densities
+                let loaded = try await repository.eventBatch(
+                    try TraceRepositoryEventBatch(densities: chunk.map(\.query))
+                ).densities
+                guard loaded.count == chunk.count else {
+                    throw ArkTraceError(
+                        code: .queryFailed,
+                        stage: .querying,
+                        message: "Density batch returned an invalid result count"
+                    )
+                }
+                for (miss, density) in zip(chunk, loaded) {
+                    ordered[miss.index] = density
+                    cacheDensity(density, for: miss.key)
+                }
+                TracePerformanceMetrics.record(
+                    scope: "timelineSnapshot",
+                    operation: "load.densityBatch",
+                    startedAt: batchStartedAt,
+                    workUnits: Int64(chunk.count),
+                    workUnit: "tracks",
+                    observer: performanceObserver
                 )
             }
-            prefetchedDensities = densities
+            let densities = try ordered.map { density -> TraceDensityResult in
+                guard let density else {
+                    throw ArkTraceError(
+                        code: .queryFailed,
+                        stage: .querying,
+                        message: "Density cache did not resolve every visible track"
+                    )
+                }
+                return density
+            }
+            prefetchedDensities = Dictionary(
+                uniqueKeysWithValues: zip(queriedIndices, densities)
+            )
         } else {
-            prefetchedDensities = nil
+            prefetchedDensities = [:]
         }
 
-        for (index, track) in visible.enumerated() {
+        var queriedRemaining = queriedIndices.count
+        for (index, track) in expanded.enumerated() {
+            let trackStartedAt = ContinuousClock.now
             try Task.checkCancellation()
             guard request.generation == latestGeneration else { return nil }
-            let tracksRemaining = max(1, visible.count - index)
             let trackPrimitives: [TimelinePrimitive]
-            if remaining == 0 {
+            if !queriedIndexSet.contains(index) {
+                trackPrimitives = []
+            } else if remaining == 0 {
                 trackPrimitives = []
             } else {
-                let budget = max(1, remaining / tracksRemaining)
+                // Keep the initial fair share as a hard per-lane ceiling.
+                // Redistributing every unused primitive to the final busy
+                // lane let a 2k-pixel viewport switch that lane from density
+                // to 12k overlapping detail rectangles, pushing a cached
+                // steady frame above 16.7 ms. Explicit detail mode retains
+                // the same global contract; it simply divides it fairly.
+                let budget = min(
+                    max(1, fairBudget),
+                    max(1, remaining / max(1, queriedRemaining))
+                )
                 trackPrimitives = try await primitives(
                     for: track,
                     request: request,
                     budget: budget,
                     repository: repository,
-                    prefetchedDensity: prefetchedDensities?[index],
+                    prefetchedDensity: prefetchedDensities[index],
                     qualityIssues: &issues
                 )
             }
             guard request.generation == latestGeneration else { return nil }
+            if queriedIndexSet.contains(index) {
+                TracePerformanceMetrics.record(
+                    scope: "timelineSnapshot",
+                    operation: Self.performanceOperation(for: track.source),
+                    startedAt: trackStartedAt,
+                    workUnits: Int64(trackPrimitives.count),
+                    workUnit: "primitives",
+                    observer: performanceObserver
+                )
+                queriedRemaining = max(0, queriedRemaining - 1)
+            }
             // The track stretches to the deepest call actually in this
             // viewport, so a shallow region of a deep thread stays compact and
             // panning into nesting grows the track. Depth beyond the cap is
@@ -95,12 +224,19 @@ package actor TimelineSnapshotLoader {
                 guard case .detail(let detail) = primitive else { return current }
                 return max(current, detail.depth)
             }
-            let rowCount = min(observedDepth + 1, Self.maximumDepthRows)
-            appendTruncation(
-                observedDepth + 1 > Self.maximumDepthRows,
-                scope: "timeline.namedSlice.depth",
-                to: &issues
-            )
+            let rowCount: Int
+            if queriedIndexSet.contains(index) {
+                rowCount = min(observedDepth + 1, Self.maximumDepthRows)
+                depthRowsByTrack[track.id] = rowCount
+                appendTruncation(
+                    observedDepth + 1 > Self.maximumDepthRows,
+                    scope: "timeline.namedSlice.depth",
+                    to: &issues
+                )
+            } else {
+                rowCount = depthRowsByTrack[track.id]
+                    ?? Self.defaultDepthRows(for: track.source)
+            }
             let height = TimelineGeometry.trackHeight(depthRowCount: rowCount)
             snapshots.append(
                 TimelineTrackSnapshot(
@@ -120,8 +256,89 @@ package actor TimelineSnapshotLoader {
         )
     }
 
+    private static func queriedTrackIndices(
+        in tracks: [TrackDescriptor],
+        viewport: TimelineViewport,
+        cachedDepthRows: [TimelineTrackID: Int],
+        queryAll: Bool
+    ) -> [Int] {
+        guard !queryAll else { return Array(tracks.indices) }
+        let rulerHeight = Double(TimelineGeometry.rulerHeight)
+        let bodyStart = max(0, viewport.verticalOffsetPoints - rulerHeight)
+        let bodyEnd = max(bodyStart, viewport.verticalOffsetPoints
+            + viewport.heightPoints - rulerHeight)
+        let overscan = viewport.heightPoints * verticalOverscanScreens
+        let queryStart = max(0, bodyStart - overscan)
+        let queryEnd = bodyEnd + overscan
+        var result: [Int] = []
+        var y = 0.0
+        for (index, track) in tracks.enumerated() {
+            let rows = cachedDepthRows[track.id] ?? defaultDepthRows(for: track.source)
+            let height = TimelineGeometry.trackHeight(depthRowCount: rows)
+            if y + height >= queryStart, y <= queryEnd {
+                result.append(index)
+            }
+            y += height
+        }
+        return result
+    }
+
+    private static func defaultDepthRows(for source: TimelineTrackSource) -> Int {
+        if case .frame = source { return 2 }
+        return 1
+    }
+
+    private static func performanceOperation(
+        for source: TimelineTrackSource
+    ) -> String {
+        switch source {
+        case .cpu: "load.track.cpu"
+        case .threadState: "load.track.threadState"
+        case .namedSlice: "load.track.namedSlice"
+        case .cpuCounter: "load.track.cpuCounter"
+        case .processCounter: "load.track.processCounter"
+        case .frame: "load.track.frame"
+        }
+    }
+
     public func invalidate(through generation: UInt64) {
         latestGeneration = max(latestGeneration, generation)
+    }
+
+    /// Drops lane-height observations when a different trace replaces the
+    /// document. Track IDs are intentionally compact and can repeat across
+    /// traces, so retaining this cache would let an off-screen lane inherit a
+    /// depth from unrelated bytes and shift the vertical query window.
+    public func resetLayoutCache() {
+        depthRowsByTrack.removeAll(keepingCapacity: true)
+        densitiesByKey.removeAll(keepingCapacity: true)
+        densityRecency.removeAll(keepingCapacity: true)
+        cachedDensityBucketCount = 0
+    }
+
+    private func cachedDensity(for key: DensityCacheKey) -> TraceDensityResult? {
+        guard let result = densitiesByKey[key] else { return nil }
+        densityRecency.removeAll { $0 == key }
+        densityRecency.append(key)
+        return result
+    }
+
+    private func cacheDensity(_ result: TraceDensityResult, for key: DensityCacheKey) {
+        guard result.buckets.count <= Self.maximumCachedDensityBuckets else { return }
+        if let previous = densitiesByKey[key] {
+            cachedDensityBucketCount -= previous.buckets.count
+        }
+        densitiesByKey[key] = result
+        cachedDensityBucketCount += result.buckets.count
+        densityRecency.removeAll { $0 == key }
+        densityRecency.append(key)
+        while densityRecency.count > Self.maximumCachedDensities
+                || cachedDensityBucketCount > Self.maximumCachedDensityBuckets {
+            let evicted = densityRecency.removeFirst()
+            if let removed = densitiesByKey.removeValue(forKey: evicted) {
+                cachedDensityBucketCount -= removed.buckets.count
+            }
+        }
     }
 
     /// The real event a press on a density band means.

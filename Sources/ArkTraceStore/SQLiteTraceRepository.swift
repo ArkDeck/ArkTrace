@@ -121,6 +121,62 @@ private final class RepositoryValidationCache: Sendable {
 
 private let repositoryValidationCache = RepositoryValidationCache()
 
+private struct RepositoryDensityCacheKey: Hashable, Sendable {
+    let file: TraceDatabaseFileSnapshot
+    let traceSHA256: String
+    let range: TraceTimeRange
+    let source: TraceDensitySource
+    let bucketCount: Int
+}
+
+/// Exact density results are immutable for one Ready database snapshot. This
+/// process-local memo survives repository clones and cache-hit reopenings, but
+/// inode/size/mtime/ctime changes force a miss. The bound keeps the worst-case
+/// 40k-bucket payload finite and avoids turning a pan history into a document
+/// lifetime leak.
+private final class RepositoryDensityCache: Sendable {
+    private struct State {
+        var values: [RepositoryDensityCacheKey: TraceDensityResult] = [:]
+        var order: [RepositoryDensityCacheKey] = []
+        var totalBucketCount = 0
+    }
+
+    private let state = Mutex(State())
+    private let maximumEntries = 64
+    private let maximumBucketCount = 200_000
+
+    func value(for key: RepositoryDensityCacheKey) -> TraceDensityResult? {
+        state.withLock { state in
+            guard let result = state.values[key] else { return nil }
+            state.order.removeAll { $0 == key }
+            state.order.append(key)
+            return result
+        }
+    }
+
+    func insert(_ result: TraceDensityResult, for key: RepositoryDensityCacheKey) {
+        guard result.buckets.count <= maximumBucketCount else { return }
+        state.withLock { state in
+            if let previous = state.values[key] {
+                state.totalBucketCount -= previous.buckets.count
+            }
+            state.values[key] = result
+            state.totalBucketCount += result.buckets.count
+            state.order.removeAll { $0 == key }
+            state.order.append(key)
+            while state.order.count > maximumEntries
+                    || state.totalBucketCount > maximumBucketCount {
+                let evicted = state.order.removeFirst()
+                if let removed = state.values.removeValue(forKey: evicted) {
+                    state.totalBucketCount -= removed.buckets.count
+                }
+            }
+        }
+    }
+}
+
+private let repositoryDensityCache = RepositoryDensityCache()
+
 private enum RepositoryEventBatchItem: Sendable {
     case cpu(Int, TraceEventPage<CpuSlice>)
     case state(Int, TraceEventPage<ThreadStateInterval>)
@@ -162,11 +218,14 @@ package struct TraceSourceDescriptor: Sendable {
 /// trace-relative Int64 nanoseconds (AT-TIME-001/002).
 package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     public nonisolated let databaseFileIdentity: TraceDatabaseFileIdentity
+    public nonisolated let immutableContentIdentity: TraceRepositoryContentIdentity?
     private let databaseURL: URL
     private let expectedPreparation: TraceDatabasePreparationResult?
     private let db: TraceDatabase
+    private let databaseFileSnapshot: TraceDatabaseFileSnapshot?
     private let parserIdentity: TraceParserIdentity
     private let source: TraceSourceDescriptor
+    private let performanceObserver: TracePerformanceObserver?
     private let validation: TraceSchemaAdapter.Validation
     private let processHasEndTs: Bool
     private let processHasThreadCount: Bool
@@ -211,7 +270,27 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             parser: parser,
             source: source,
             expectedPreparation: expectedPreparation,
-            diagnosticQueryObserver: nil
+            diagnosticQueryObserver: nil,
+            performanceObserver: nil
+        )
+    }
+
+    /// Package seam for Runtime to attach the same path-free observer used by
+    /// cold-open evidence to repositories opened from the content cache.
+    package init(
+        databaseURL: URL,
+        parser: TraceParserIdentity,
+        source: TraceSourceDescriptor,
+        expectedPreparation: TraceDatabasePreparationResult? = nil,
+        performanceObserver: TracePerformanceObserver?
+    ) throws {
+        try self.init(
+            databaseURL: databaseURL,
+            parser: parser,
+            source: source,
+            expectedPreparation: expectedPreparation,
+            diagnosticQueryObserver: nil,
+            performanceObserver: performanceObserver
         )
     }
 
@@ -223,7 +302,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         parser: TraceParserIdentity,
         source: TraceSourceDescriptor,
         expectedPreparation: TraceDatabasePreparationResult? = nil,
-        diagnosticQueryObserver: (@Sendable (String, Int) -> Void)?
+        diagnosticQueryObserver: (@Sendable (String, Int) -> Void)?,
+        performanceObserver: TracePerformanceObserver? = nil
     ) throws {
         let db = try TraceDatabase(
             url: databaseURL, readOnly: true,
@@ -282,11 +362,25 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
 
         self.db = db
+        self.databaseFileSnapshot = db.fileSnapshot
+        self.immutableContentIdentity = db.fileSnapshot.map {
+            TraceRepositoryContentIdentity(
+                traceSHA256: source.traceSHA256,
+                device: $0.device,
+                inode: $0.inode,
+                byteCount: $0.byteCount,
+                modificationSeconds: $0.modificationSeconds,
+                modificationNanoseconds: $0.modificationNanoseconds,
+                statusChangeSeconds: $0.statusChangeSeconds,
+                statusChangeNanoseconds: $0.statusChangeNanoseconds
+            )
+        }
         self.databaseURL = databaseURL
         self.expectedPreparation = expectedPreparation
         self.databaseFileIdentity = databaseFileIdentity
         self.parserIdentity = parser
         self.source = source
+        self.performanceObserver = performanceObserver
         self.validation = prepared.validation
         self.processHasEndTs = prepared.processHasEndTs
         self.processHasThreadCount = prepared.processHasThreadCount
@@ -353,14 +447,15 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         var threadDirectories = Array<BoundedPage<TraceThread>?>(
             repeating: nil, count: batch.threads.count
         )
-
         try await withThrowingTaskGroup(of: RepositoryEventBatchItem.self) { group in
             func clone() throws -> SQLiteTraceRepository {
                 let repository = try SQLiteTraceRepository(
                     databaseURL: databaseURL,
                     parser: parserIdentity,
                     source: source,
-                    expectedPreparation: expectedPreparation
+                    expectedPreparation: expectedPreparation,
+                    diagnosticQueryObserver: nil,
+                    performanceObserver: performanceObserver
                 )
                 guard repository.databaseFileIdentity == expectedIdentity else {
                     throw ArkTraceError(
@@ -1844,6 +1939,36 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     }
 
     public func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
+        let performanceStartedAt = ContinuousClock.now
+        var vmInstructions: Int = 0
+        var cacheHit = false
+        defer {
+            TracePerformanceMetrics.record(
+                scope: "sqliteQuery",
+                operation: cacheHit
+                    ? Self.densityCachePerformanceOperation(query.source)
+                    : Self.densityPerformanceOperation(query.source),
+                startedAt: performanceStartedAt,
+                workUnits: cacheHit ? Int64(query.bucketCount) : Int64(vmInstructions),
+                workUnit: cacheHit ? "buckets" : "vmInstructions",
+                observer: performanceObserver
+            )
+        }
+        try checkQueryBoundary(query.deadline)
+        let cacheKey = databaseFileSnapshot.map {
+            RepositoryDensityCacheKey(
+                file: $0,
+                traceSHA256: source.traceSHA256,
+                range: query.range,
+                source: query.source,
+                bucketCount: query.bucketCount
+            )
+        }
+        if let cacheKey, let cached = repositoryDensityCache.value(for: cacheKey) {
+            cacheHit = true
+            try checkQueryBoundary(query.deadline)
+            return cached
+        }
         let range = try validatedAbsoluteRange(query.range)
         let (quotient, remainder) = query.range.durationNs.quotientAndRemainder(
             dividingBy: Int64(query.bucketCount)
@@ -2013,6 +2138,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             FROM sampled GROUP BY bucket ORDER BY bucket ASC
             """,
             bindings: bindings,
+            vmStepObserver: { vmInstructions = $0 },
             observesTaskCancellation: true,
             deadline: query.deadline
         ) { row in
@@ -2025,6 +2151,22 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 clampedDurations: row.int64(6)
             )
         }
+        let result = try densityResult(
+            rows: rows,
+            query: query,
+            bucketWidth: bucketWidth,
+            timeQualityScope: timeQualityScope
+        )
+        if let cacheKey { repositoryDensityCache.insert(result, for: cacheKey) }
+        return result
+    }
+
+    private func densityResult(
+        rows: [DensityAggregateRow],
+        query: TraceDensityQuery,
+        bucketWidth: Int64,
+        timeQualityScope: String
+    ) throws -> TraceDensityResult {
         var buckets: [TraceDensityBucket] = []
         var clampedTimestampCount: Int64 = 0
         var invalidCounterDurationCount: Int64 = 0
@@ -2041,8 +2183,12 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     message: "Density aggregation returned an invalid bucket"
                 )
             }
-            let (offset, offsetOverflow) = bucket.multipliedReportingOverflow(by: bucketWidth)
-            let (start, startOverflow) = query.range.startNs.addingReportingOverflow(offset)
+            let (offset, offsetOverflow) = bucket.multipliedReportingOverflow(
+                by: bucketWidth
+            )
+            let (start, startOverflow) = query.range.startNs.addingReportingOverflow(
+                offset
+            )
             let (candidateEnd, endOverflow) = start.addingReportingOverflow(bucketWidth)
             guard !offsetOverflow, !startOverflow else {
                 throw ArkTraceError(
@@ -2051,7 +2197,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     message: "Density bucket cannot be represented"
                 )
             }
-            let end = endOverflow ? query.range.endNs : min(candidateEnd, query.range.endNs)
+            let end = endOverflow
+                ? query.range.endNs : min(candidateEnd, query.range.endNs)
             clampedTimestampCount += row.clampedTimestamps ?? 0
             invalidCounterDurationCount += row.invalidDurations ?? 0
             clampedCounterDurationCount += row.clampedDurations ?? 0
@@ -2121,6 +2268,32 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             capabilityAvailable: true,
             dataQuality: TraceDataQuality(issues: issues)
         )
+    }
+
+    private static func densityPerformanceOperation(
+        _ source: TraceDensitySource
+    ) -> String {
+        switch source {
+        case .cpu: "density.cpu"
+        case .threadState: "density.threadState"
+        case .namedSlice: "density.namedSlice"
+        case .cpuCounter: "density.cpuCounter"
+        case .frame: "density.frame"
+        case .processCounter: "density.processCounter"
+        }
+    }
+
+    private static func densityCachePerformanceOperation(
+        _ source: TraceDensitySource
+    ) -> String {
+        switch source {
+        case .cpu: "densityCache.hit.cpu"
+        case .threadState: "densityCache.hit.threadState"
+        case .namedSlice: "densityCache.hit.namedSlice"
+        case .cpuCounter: "densityCache.hit.cpuCounter"
+        case .frame: "densityCache.hit.frame"
+        case .processCounter: "densityCache.hit.processCounter"
+        }
     }
 
     // MARK: - Helpers

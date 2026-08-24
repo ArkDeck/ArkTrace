@@ -466,6 +466,61 @@ final class TraceDatabase {
         }
     }
 
+    /// The parser output is a private, disposable staging database until the
+    /// caller validates, indexes and atomically promotes it. A memory journal
+    /// therefore preserves in-process rollback without paying disk-journal
+    /// and fsync costs for every index B-tree. The larger page cache and memory
+    /// temp store are bounded and connection-local.
+    func configureForPrivateIndexBuild() throws {
+        let modes = try query(
+            "PRAGMA journal_mode = MEMORY",
+            stage: .indexing,
+            observesTaskCancellation: true
+        ) { $0.text(0)?.lowercased() }
+        guard modes.first == "memory" else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .indexing,
+                message: "Failed to configure private index journal"
+            )
+        }
+        try execute(
+            """
+            PRAGMA synchronous = OFF;
+            PRAGMA temp_store = MEMORY;
+            PRAGMA cache_size = -131072;
+            PRAGMA locking_mode = EXCLUSIVE;
+            """,
+            stage: .indexing,
+            observesTaskCancellation: true
+        )
+    }
+
+    /// Ready databases reopen with conservative defaults and never retain the
+    /// staging-only memory-journal policy in their persistent header.
+    func restoreAfterPrivateIndexBuild() throws {
+        try execute(
+            """
+            PRAGMA locking_mode = NORMAL;
+            PRAGMA synchronous = FULL;
+            PRAGMA temp_store = DEFAULT;
+            PRAGMA cache_size = -2000;
+            """,
+            stage: .indexing
+        )
+        let modes = try query(
+            "PRAGMA journal_mode = DELETE",
+            stage: .indexing
+        ) { $0.text(0)?.lowercased() }
+        guard modes.first == "delete" else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .indexing,
+                message: "Failed to restore Ready database journal"
+            )
+        }
+    }
+
     func quickCheckIsOK(
         stage: ArkTraceError.Stage = .validating,
         progressHook: (@Sendable () -> Void)? = nil

@@ -10,11 +10,14 @@ script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd)
 lock="$repository_root/ThirdParty/TraceStreamer/source-lock.json"
 manifest="$repository_root/ThirdParty/TraceStreamer/macx/manifest.json"
-patch="$repository_root/ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch"
+faultloggerd_patch="$repository_root/ThirdParty/TraceStreamer/patches/faultloggerd-apple-clang.patch"
+proto_reader_patch="$repository_root/ThirdParty/TraceStreamer/patches/proto-reader-sparse-validity.patch"
 build_script="$repository_root/scripts/build_trace_streamer.sh"
 safety_helper="$repository_root/scripts/phase3_shell_safety.sh"
 
-for path in "$lock" "$manifest" "$patch" "$build_script" "$safety_helper"; do
+for path in "$lock" "$manifest" "$faultloggerd_patch" "$proto_reader_patch" \
+    "$build_script" "$safety_helper"
+do
     [ -s "$path" ] || fail "required locked input is missing"
 done
 
@@ -47,10 +50,12 @@ manifest_sources=$(jq -cS '.thirdPartyRevisions' "$manifest")
 build_sha=$(shasum -a 256 "$build_script" | awk '{print $1}')
 safety_sha=$(shasum -a 256 "$safety_helper" | awk '{print $1}')
 lock_sha=$(shasum -a 256 "$lock" | awk '{print $1}')
-patch_sha=$(shasum -a 256 "$patch" | awk '{print $1}')
+faultloggerd_patch_sha=$(shasum -a 256 "$faultloggerd_patch" | awk '{print $1}')
+proto_reader_patch_sha=$(shasum -a 256 "$proto_reader_patch" | awk '{print $1}')
 recipe=$(
-    printf 'build-script:%s\nsafety-helper:%s\nsource-lock:%s\nlocal-patch:%s\n' \
-        "$build_sha" "$safety_sha" "$lock_sha" "$patch_sha" \
+    printf 'build-script:%s\nsafety-helper:%s\nsource-lock:%s\nfaultloggerd-patch:%s\nproto-reader-patch:%s\n' \
+        "$build_sha" "$safety_sha" "$lock_sha" \
+        "$faultloggerd_patch_sha" "$proto_reader_patch_sha" \
         | shasum -a 256 | awk '{print $1}'
 )
 [ "$recipe" = "$(jq -er '.buildRecipeVersion' "$manifest")" ] \

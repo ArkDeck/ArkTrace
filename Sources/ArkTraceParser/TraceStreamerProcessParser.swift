@@ -19,7 +19,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     public static let expectedArchitecture = "arm64"
     public static let adapterVersion = "1"
     public static let supportedBuildRecipeVersion =
-        "e4fec8cc9cbb1be13748e7149424ce664a545c2296b424b6ff520cc3e84d3f06"
+        "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20"
 
     private let configuredExecutableURL: URL
     private let configuredManifestURL: URL?
@@ -187,6 +187,55 @@ package struct TraceStreamerProcessParser: TraceParser {
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ParsedTrace {
+        try await parseImplementation(
+            source: source,
+            sourceIsImmutableSnapshot: sourceIsImmutableSnapshot,
+            verifiedSource: nil,
+            destination: destination,
+            progress: progress,
+            prepareDatabase: prepareDatabase
+        )
+    }
+
+    package func parseVerifiedSnapshot(
+        source: URL,
+        sourceSHA256: String,
+        sourceByteCount: Int64,
+        destination: URL,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
+    ) async throws -> ParsedTrace {
+        guard sourceSHA256.count == 64,
+            sourceSHA256.utf8.allSatisfy({
+                ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
+                    || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
+            }),
+            sourceByteCount >= 0
+        else {
+            throw ArkTraceError(
+                code: .invalidArgument,
+                stage: .preparing,
+                message: "Verified trace snapshot identity is invalid"
+            )
+        }
+        return try await parseImplementation(
+            source: source,
+            sourceIsImmutableSnapshot: true,
+            verifiedSource: (sourceSHA256, sourceByteCount),
+            destination: destination,
+            progress: progress,
+            prepareDatabase: prepareDatabase
+        )
+    }
+
+    private func parseImplementation(
+        source: URL,
+        sourceIsImmutableSnapshot: Bool,
+        verifiedSource: (sha256: String, byteCount: Int64)?,
+        destination: URL,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
+    ) async throws -> ParsedTrace {
         progress?(.preparing)
         let configuredExecutableURL = configuredExecutableURL
         let configuredManifestURL = configuredManifestURL
@@ -202,6 +251,7 @@ package struct TraceStreamerProcessParser: TraceParser {
             try Self.prepareParse(
                 source: source,
                 sourceIsImmutableSnapshot: sourceIsImmutableSnapshot,
+                verifiedSource: verifiedSource,
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
@@ -432,6 +482,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         let sourceSnapshotURL: URL
         let sourceSHA256: String
         let sourceByteCount: Int64
+        let verifiedSourceFileSnapshot: SourceFileSnapshot?
         let parserSnapshot: ParserSnapshot
     }
 
@@ -478,6 +529,16 @@ package struct TraceStreamerProcessParser: TraceParser {
         let inode: UInt64
     }
 
+    private struct SourceFileSnapshot: Equatable, Sendable {
+        let device: UInt64
+        let inode: UInt64
+        let byteCount: Int64
+        let modificationSeconds: Int64
+        let modificationNanoseconds: Int64
+        let statusChangeSeconds: Int64
+        let statusChangeNanoseconds: Int64
+    }
+
     private enum FileIdentityProbe: Sendable {
         case regular(FileIdentity)
         case nonRegular
@@ -514,20 +575,28 @@ package struct TraceStreamerProcessParser: TraceParser {
             try Self.verify(snapshot: prepared.parserSnapshot)
             try Task.checkCancellation()
 
-            let sourceAfterParse: (sha256: String, byteCount: Int64)
-            do {
-                sourceAfterParse = try Self.sha256AndSize(at: prepared.sourceSnapshotURL)
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch let error as ArkTraceError {
-                throw error
-            } catch {
-                throw Self.snapshotIOFailure(reason: "verifySourceSnapshot")
-            }
-            guard sourceAfterParse.sha256 == prepared.sourceSHA256,
-                sourceAfterParse.byteCount == prepared.sourceByteCount
-            else {
-                throw Self.sourceChanged()
+            if let expected = prepared.verifiedSourceFileSnapshot {
+                guard try Self.sourceFileSnapshot(at: prepared.sourceSnapshotURL)
+                    == expected
+                else { throw Self.sourceChanged() }
+            } else {
+                let sourceAfterParse: (sha256: String, byteCount: Int64)
+                do {
+                    sourceAfterParse = try Self.sha256AndSize(
+                        at: prepared.sourceSnapshotURL
+                    )
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch let error as ArkTraceError {
+                    throw error
+                } catch {
+                    throw Self.snapshotIOFailure(reason: "verifySourceSnapshot")
+                }
+                guard sourceAfterParse.sha256 == prepared.sourceSHA256,
+                    sourceAfterParse.byteCount == prepared.sourceByteCount
+                else {
+                    throw Self.sourceChanged()
+                }
             }
             finalizationHook?()
             try Task.checkCancellation()
@@ -642,6 +711,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     private static func prepareParse(
         source: URL,
         sourceIsImmutableSnapshot: Bool,
+        verifiedSource: (sha256: String, byteCount: Int64)?,
         destination: URL,
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
@@ -652,6 +722,7 @@ package struct TraceStreamerProcessParser: TraceParser {
             return try prepareParseUnchecked(
                 source: source,
                 sourceIsImmutableSnapshot: sourceIsImmutableSnapshot,
+                verifiedSource: verifiedSource,
                 destination: destination,
                 configuredExecutableURL: configuredExecutableURL,
                 configuredManifestURL: configuredManifestURL,
@@ -670,6 +741,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     private static func prepareParseUnchecked(
         source: URL,
         sourceIsImmutableSnapshot: Bool,
+        verifiedSource: (sha256: String, byteCount: Int64)?,
         destination: URL,
         configuredExecutableURL: URL,
         configuredManifestURL: URL?,
@@ -786,7 +858,22 @@ package struct TraceStreamerProcessParser: TraceParser {
                     message: "Trace snapshot is not a regular file"
                 )
             }
-            let sourceIdentity = try sha256AndSize(at: sourceSnapshotURL)
+            let verifiedSourceFileSnapshot: SourceFileSnapshot?
+            let sourceIdentity: (sha256: String, byteCount: Int64)
+            if let verifiedSource {
+                guard sourceIsImmutableSnapshot else {
+                    throw destinationUnavailable(reason: "unverifiedSource")
+                }
+                let snapshot = try sourceFileSnapshot(at: sourceSnapshotURL)
+                guard snapshot.byteCount == verifiedSource.byteCount else {
+                    throw sourceChanged()
+                }
+                verifiedSourceFileSnapshot = snapshot
+                sourceIdentity = verifiedSource
+            } else {
+                verifiedSourceFileSnapshot = nil
+                sourceIdentity = try sha256AndSize(at: sourceSnapshotURL)
+            }
             return PreparedParse(
                 destinationURL: canonicalDestination,
                 destinationMetadataURL: destinationMetadata,
@@ -797,6 +884,7 @@ package struct TraceStreamerProcessParser: TraceParser {
                 sourceSnapshotURL: sourceSnapshotURL,
                 sourceSHA256: sourceIdentity.sha256,
                 sourceByteCount: sourceIdentity.byteCount,
+                verifiedSourceFileSnapshot: verifiedSourceFileSnapshot,
                 parserSnapshot: parserSnapshot
             )
         } catch {
@@ -1551,6 +1639,31 @@ package struct TraceStreamerProcessParser: TraceParser {
             return nil
         }
         return identity
+    }
+
+    private static func sourceFileSnapshot(at url: URL) throws -> SourceFileSnapshot {
+        let descriptor = unsafe url.path.withCString {
+            unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
+            throw snapshotIOFailure(reason: "verifiedSourceOpen")
+        }
+        defer { Darwin.close(descriptor) }
+        var info = stat()
+        guard unsafe Darwin.fstat(descriptor, &info) == 0,
+            (info.st_mode & S_IFMT) == S_IFREG
+        else {
+            throw snapshotIOFailure(reason: "verifiedSourceStat")
+        }
+        return SourceFileSnapshot(
+            device: UInt64(info.st_dev),
+            inode: UInt64(info.st_ino),
+            byteCount: Int64(info.st_size),
+            modificationSeconds: Int64(info.st_mtimespec.tv_sec),
+            modificationNanoseconds: Int64(info.st_mtimespec.tv_nsec),
+            statusChangeSeconds: Int64(info.st_ctimespec.tv_sec),
+            statusChangeNanoseconds: Int64(info.st_ctimespec.tv_nsec)
+        )
     }
 
     private static func fileIdentityProbe(at url: URL) -> FileIdentityProbe {

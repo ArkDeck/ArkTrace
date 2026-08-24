@@ -5,26 +5,68 @@ import SwiftUI
 import XCTest
 
 final class TimelineRenderingTests: XCTestCase {
+    private final class PerformanceMetricRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var values: [TracePerformanceMetric] = []
+
+        func record(_ metric: TracePerformanceMetric) {
+            lock.withLock { values.append(metric) }
+        }
+
+        func snapshot() -> [TracePerformanceMetric] {
+            lock.withLock { values }
+        }
+    }
+
     private actor DensityRepository: TraceRepositoryProtocol {
         let eventCount: Int64
         let delay: Duration?
         let counterPage: TraceEventPage<CounterSeries>?
         let slicePage: TraceEventPage<TraceSlice>?
+        let traceSHA256: String
         private var requestedDensitySources: [TraceDensitySource] = []
 
         init(
             eventCount: Int64,
             delay: Duration? = nil,
             counterPage: TraceEventPage<CounterSeries>? = nil,
-            slicePage: TraceEventPage<TraceSlice>? = nil
+            slicePage: TraceEventPage<TraceSlice>? = nil,
+            traceSHA256: String = String(repeating: "a", count: 64)
         ) {
             self.eventCount = eventCount
             self.delay = delay
             self.counterPage = counterPage
             self.slicePage = slicePage
+            self.traceSHA256 = traceSHA256
         }
 
-        func metadata() async throws -> TraceMetadata { throw CancellationError() }
+        func metadata() async throws -> TraceMetadata {
+            TraceMetadata(
+                traceSHA256: traceSHA256,
+                sourceByteCount: 1,
+                durationNs: 1_000_000,
+                sourceFormat: "htrace",
+                parser: TraceParserIdentity(
+                    name: "fixture",
+                    reportedVersion: "1",
+                    binarySHA256: String(repeating: "b", count: 64),
+                    upstreamRepository: "https://example.invalid/upstream.git",
+                    upstreamRevision: String(repeating: "c", count: 40),
+                    architecture: "arm64",
+                    adapterVersion: "1",
+                    buildRecipeVersion: "1"
+                ),
+                schemaFingerprint: String(repeating: "d", count: 64),
+                capabilities: TraceCapabilities(
+                    cpuScheduling: true,
+                    threadStates: true,
+                    namedSlices: true,
+                    cpuCounters: true,
+                    processCounters: true
+                ),
+                dataQuality: TraceDataQuality()
+            )
+        }
         func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess> {
             BoundedPage(items: [], truncated: false)
         }
@@ -1607,6 +1649,111 @@ final class TimelineRenderingTests: XCTestCase {
         )
     }
 
+    func testSnapshotLoaderReportsDensityBatchTrackAndTotalMetrics() async throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 2
+        )
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: [TrackDescriptor(title: "CPU 0", source: .cpu(0))],
+            pixelWidth: 100,
+            generation: viewport.generation,
+            preference: .density,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let recorder = PerformanceMetricRecorder()
+        _ = try await TimelineSnapshotLoader().load(
+            request,
+            repository: DensityRepository(eventCount: 1_000_000),
+            performanceObserver: { recorder.record($0) }
+        )
+
+        let metrics = recorder.snapshot()
+        XCTAssertTrue(metrics.allSatisfy {
+            $0.scope == "timelineSnapshot" && $0.elapsedMilliseconds >= 0
+        })
+        XCTAssertEqual(
+            metrics.filter { $0.operation == "load.densityBatch" }.count,
+            1
+        )
+        XCTAssertEqual(
+            metrics.first { $0.operation == "load.track.cpu" }?.workUnit,
+            "primitives"
+        )
+        let total = try XCTUnwrap(metrics.last { $0.operation == "load.total" })
+        XCTAssertEqual(total.workUnits, 1)
+        XCTAssertEqual(total.workUnit, "queriedTracks")
+    }
+
+    func testSnapshotLoaderCachesOnlyExactDensityWithinTheSameTrace() async throws {
+        let loader = TimelineSnapshotLoader()
+        let track = TrackDescriptor(title: "CPU 0", source: .cpu(0))
+        let firstRepository = DensityRepository(eventCount: 1_000_000)
+        let secondRepository = DensityRepository(
+            eventCount: 1_000_000,
+            traceSHA256: String(repeating: "e", count: 64)
+        )
+        func request(generation: UInt64, startNs: Int64 = 0) throws -> ViewportRequest {
+            let viewport = try TimelineViewport(
+                range: TraceTimeRange.query(
+                    startNs: startNs,
+                    endNs: startNs + 1_000_000
+                ),
+                widthPoints: 100,
+                heightPoints: 80,
+                generation: generation
+            )
+            return try ViewportRequest(
+                viewport: viewport,
+                tracks: [track],
+                pixelWidth: 100,
+                generation: generation,
+                preference: .density,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        }
+
+        _ = try await loader.load(
+            request(generation: 1), repository: firstRepository
+        )
+        let recorder = PerformanceMetricRecorder()
+        _ = try await loader.load(
+            request(generation: 2),
+            repository: firstRepository,
+            performanceObserver: { recorder.record($0) }
+        )
+        var firstRequestCount = await firstRepository.densitySources().count
+        XCTAssertEqual(firstRequestCount, 1)
+        XCTAssertEqual(
+            recorder.snapshot().last { $0.operation == "load.densityCacheHits" }?.workUnits,
+            1
+        )
+        XCTAssertFalse(recorder.snapshot().contains { $0.operation == "load.densityBatch" })
+
+        // A different exact range is a miss, and the same query against a
+        // different trace identity can never reuse the first trace's result.
+        _ = try await loader.load(
+            request(generation: 3, startNs: 1), repository: firstRepository
+        )
+        firstRequestCount = await firstRepository.densitySources().count
+        XCTAssertEqual(firstRequestCount, 2)
+        _ = try await loader.load(
+            request(generation: 4), repository: secondRepository
+        )
+        var secondRequestCount = await secondRepository.densitySources().count
+        XCTAssertEqual(secondRequestCount, 1)
+
+        await loader.resetLayoutCache()
+        _ = try await loader.load(
+            request(generation: 5), repository: secondRepository
+        )
+        secondRequestCount = await secondRepository.densitySources().count
+        XCTAssertEqual(secondRequestCount, 2)
+    }
+
     func testPrimitiveBudgetIsGlobalAcrossTracks() async throws {
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 0, endNs: 1_000_000),
@@ -1630,6 +1777,62 @@ final class TimelineRenderingTests: XCTestCase {
         )
         XCTAssertEqual(snapshot?.tracks.count, 4)
         XCTAssertEqual(snapshot?.primitiveCount, 3)
+    }
+
+    func testAutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack() async throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 10,
+            heightPoints: 120,
+            generation: 5
+        )
+        let firstThread = ThreadKey(itid: 1)
+        let secondThread = ThreadKey(itid: 2)
+        let rows = try (0..<6).map { index in
+            let thread = index < 3 ? firstThread : secondThread
+            return TraceSlice(
+                key: EventKey(table: .callstack, rowID: Int64(index + 1)),
+                range: try TraceTimeRange(
+                    startNs: Int64(index * 10 + 1),
+                    endNs: Int64(index * 10 + 2)
+                ),
+                threadKey: thread,
+                processKey: nil,
+                name: "slice",
+                category: nil,
+                depth: nil,
+                parentEventKey: nil,
+                isAsync: false,
+                isOpenEnded: false
+            )
+        }
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: [
+                TrackDescriptor(title: "first", source: .namedSlice(firstThread)),
+                TrackDescriptor(title: "second", source: .namedSlice(secondThread)),
+            ],
+            pixelWidth: 10,
+            generation: viewport.generation,
+            preference: .automatic,
+            maximumPrimitives: 10,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let snapshot = try await TimelineSnapshotLoader().load(
+            request,
+            repository: DensityRepository(
+                eventCount: 6,
+                slicePage: TraceEventPage(items: rows, truncated: false)
+            )
+        )
+        XCTAssertEqual(snapshot?.tracks.count, 2)
+        XCTAssertEqual(snapshot?.primitiveCount, 2)
+        XCTAssertTrue(snapshot?.tracks.allSatisfy { track in
+            track.primitives.count == 1 && track.primitives.allSatisfy {
+                if case .density = $0 { return true }
+                return false
+            }
+        } == true)
     }
 
     /// Visible track count is a UI property; the repository event batch caps at
@@ -1667,6 +1870,99 @@ final class TimelineRenderingTests: XCTestCase {
         // Each track kept its own density result rather than being shifted by a
         // chunk boundary.
         XCTAssertTrue(snapshot?.tracks.allSatisfy { !$0.primitives.isEmpty } == true)
+    }
+
+    func testLoaderQueriesOnlyVerticallyVisibleTracksWithOverscan() async throws {
+        let repository = DensityRepository(eventCount: 1_000_000)
+        let trackCount = 100
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000_000),
+            widthPoints: 400,
+            heightPoints: 280,
+            verticalOffsetPoints: 1_120,
+            generation: 8
+        )
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: (0..<trackCount).map {
+                TrackDescriptor(title: "CPU \($0)", source: .cpu(Int64($0)))
+            },
+            pixelWidth: 800,
+            generation: 8,
+            preference: .density,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+
+        let loaded = try await TimelineSnapshotLoader().load(
+            request, repository: repository
+        )
+        let snapshot = try XCTUnwrap(loaded)
+        let queried = await repository.densitySources()
+        XCTAssertEqual(snapshot.tracks.count, trackCount, "layout retains every lane")
+        XCTAssertGreaterThan(queried.count, 10, "half-screen overscan was prefetched")
+        XCTAssertLessThan(queried.count, trackCount / 3, "off-screen lanes reached no query")
+        XCTAssertTrue(snapshot.tracks[0].primitives.isEmpty)
+        XCTAssertFalse(snapshot.tracks[40].primitives.isEmpty)
+        XCTAssertEqual(snapshot.tracks[0].y, 0)
+        XCTAssertEqual(snapshot.tracks[99].y, 99 * 28)
+    }
+
+    func testResetLayoutCachePreventsCrossTraceDepthReuse() async throws {
+        let track = TrackDescriptor(
+            title: "thread 1", source: .namedSlice(ThreadKey(itid: 1))
+        )
+        let deepSlice = TraceSlice(
+            key: EventKey(table: .callstack, rowID: 1),
+            range: try TraceTimeRange(startNs: 100, endNs: 200),
+            threadKey: ThreadKey(itid: 1),
+            processKey: nil,
+            name: "deep",
+            category: nil,
+            depth: 7,
+            parentEventKey: nil,
+            isAsync: false,
+            isOpenEnded: false
+        )
+        let repository = DensityRepository(
+            eventCount: 1,
+            slicePage: TraceEventPage(items: [deepSlice], truncated: false)
+        )
+        let loader = TimelineSnapshotLoader()
+        let detailViewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 100,
+            heightPoints: 80,
+            generation: 1
+        )
+        let detail = try ViewportRequest(
+            viewport: detailViewport,
+            tracks: [track],
+            pixelWidth: 200,
+            generation: 1,
+            preference: .detail,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let observed = try await loader.load(detail, repository: repository)
+        XCTAssertEqual(observed?.tracks.first?.depthRowCount, 8)
+
+        await loader.resetLayoutCache()
+        let offscreenViewport = try TimelineViewport(
+            range: detailViewport.range,
+            widthPoints: 100,
+            heightPoints: 80,
+            verticalOffsetPoints: 1_000,
+            generation: 2
+        )
+        let offscreen = try ViewportRequest(
+            viewport: offscreenViewport,
+            tracks: [track],
+            pixelWidth: 200,
+            generation: 2,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let reset = try await loader.load(offscreen, repository: repository)
+        XCTAssertEqual(reset?.tracks.first?.depthRowCount, 1)
+        XCTAssertTrue(reset?.tracks.first?.primitives.isEmpty == true)
     }
 
     /// Upstream labels a CPU slice with its process and thread

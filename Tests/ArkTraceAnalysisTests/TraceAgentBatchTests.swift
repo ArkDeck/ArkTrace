@@ -4,6 +4,19 @@ import Foundation
 import XCTest
 
 final class TraceAgentBatchTests: XCTestCase {
+    private final class MetricRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var metrics: [TracePerformanceMetric] = []
+
+        func record(_ metric: TracePerformanceMetric) {
+            lock.withLock { metrics.append(metric) }
+        }
+
+        func operations() -> [String] {
+            lock.withLock { metrics.map(\.operation) }
+        }
+    }
+
     private final class ByteCountBarrier: @unchecked Sendable {
         let reached = DispatchSemaphore(value: 0)
         let release = DispatchSemaphore(value: 0)
@@ -22,6 +35,7 @@ final class TraceAgentBatchTests: XCTestCase {
     }
 
     private actor Repository: TraceRepositoryProtocol {
+        nonisolated let immutableContentIdentity: TraceRepositoryContentIdentity?
         let traceMetadata: TraceMetadata
         let processRows: [TraceProcess]
         let threadRows: [TraceThread]
@@ -52,8 +66,10 @@ final class TraceAgentBatchTests: XCTestCase {
             hideBroadDirectories: Bool = false,
             metadataDelay: Duration? = nil,
             metadataFails: Bool = false,
-            metadataIgnoresCancellation: Bool = false
+            metadataIgnoresCancellation: Bool = false,
+            immutableContentIdentity: TraceRepositoryContentIdentity? = nil
         ) {
+            self.immutableContentIdentity = immutableContentIdentity
             traceMetadata = Self.metadata(durationNs: durationNs, capabilities: capabilities)
             processRows = processes
             threadRows = threads
@@ -922,6 +938,73 @@ final class TraceAgentBatchTests: XCTestCase {
                 as: UTF8.self
             ),
             #"{"matchedCount":null,"returnedCount":1,"truncated":true}"#
+        )
+    }
+
+    func testContextCacheRequiresExactRequestAndImmutableRepositoryIdentity() async throws {
+        func identity(inode: UInt64) -> TraceRepositoryContentIdentity {
+            TraceRepositoryContentIdentity(
+                traceSHA256: String(repeating: "d", count: 64),
+                device: 1,
+                inode: inode,
+                byteCount: 4_096,
+                modificationSeconds: 1,
+                modificationNanoseconds: 2,
+                statusChangeSeconds: 3,
+                statusChangeNanoseconds: 4
+            )
+        }
+        let event = cpuSlice(
+            1, 1, 2, cpu: 0,
+            process: ProcessKey(ipid: 1),
+            thread: ThreadKey(itid: 1)
+        )
+        let repository = Repository(
+            durationNs: 10,
+            cpuSlices: [event],
+            immutableContentIdentity: identity(inode: 900_001)
+        )
+        let request = try TraceContextRequest(
+            time: .range(TraceTimeRange.query(startNs: 0, endNs: 10)),
+            maximumEvents: 1,
+            maximumRows: 10,
+            maximumOutputBytes: 64 * 1_024
+        )
+        let metrics = MetricRecorder()
+        let builder = TraceContextBuilder(
+            repository: repository,
+            performanceObserver: { metrics.record($0) }
+        )
+        let first = try await builder.build(request)
+        let second = try await builder.build(request)
+        XCTAssertEqual(first, second)
+        let exactCallCount = await repository.capturedCPUCallCount()
+        XCTAssertEqual(exactCallCount, 1)
+        XCTAssertTrue(metrics.operations().contains("cache.miss"))
+        XCTAssertTrue(metrics.operations().contains("cache.store"))
+        XCTAssertTrue(metrics.operations().contains("cache.hit"))
+
+        _ = try await builder.build(
+            TraceContextRequest(
+                time: request.time,
+                maximumEvents: 2,
+                maximumRows: request.maximumRows,
+                maximumOutputBytes: request.maximumOutputBytes
+            )
+        )
+        let changedRequestCallCount = await repository.capturedCPUCallCount()
+        XCTAssertEqual(changedRequestCallCount, 2)
+
+        let replacement = Repository(
+            durationNs: 10,
+            cpuSlices: [event],
+            immutableContentIdentity: identity(inode: 900_002)
+        )
+        _ = try await TraceContextBuilder(repository: replacement).build(request)
+        let replacementCallCount = await replacement.capturedCPUCallCount()
+        XCTAssertEqual(
+            replacementCallCount, 1,
+            "a replacement Ready database must not inherit cached Context bytes"
         )
     }
 

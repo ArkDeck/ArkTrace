@@ -17,6 +17,7 @@ final class TraceDocumentControllerTests: XCTestCase {
         let threadRows: [TraceThread]
         let cpuRows: [CpuSlice]
         let counterRows: [CounterSeries]
+        private var densityQueryCount = 0
 
         init(
             identity: String,
@@ -109,7 +110,8 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
 
         func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
-            TraceDensityResult(
+            densityQueryCount += 1
+            return TraceDensityResult(
                 buckets: [
                     TraceDensityBucket(
                         range: query.range,
@@ -121,6 +123,8 @@ final class TraceDocumentControllerTests: XCTestCase {
                 ]
             )
         }
+
+        func observedDensityQueryCount() -> Int { densityQueryCount }
     }
 
     private actor CloseRecorder {
@@ -215,6 +219,85 @@ final class TraceDocumentControllerTests: XCTestCase {
         await controller.close()
         let closedAfterClose = await closes.values()
         XCTAssertTrue(closedAfterClose.contains("second.htrace"))
+    }
+
+    func testRapidViewportBurstCoalescesIntoOneDensityReload() async throws {
+        let suite = "ArkTraceViewportCoalescingTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let threadKey = ThreadKey(itid: 1)
+        let slice = TraceSlice(
+            key: EventKey(table: .callstack, rowID: 1),
+            range: try TraceTimeRange(startNs: 100, endNs: 200),
+            threadKey: threadKey,
+            processKey: ProcessKey(ipid: 1),
+            name: "work",
+            category: nil,
+            depth: 0,
+            parentEventKey: nil,
+            isAsync: false,
+            isOpenEnded: false
+        )
+        let repository = Repository(
+            identity: "v",
+            durationNs: 10_000,
+            capabilities: TraceCapabilities(
+                cpuScheduling: false,
+                threadStates: false,
+                namedSlices: true,
+                cpuCounters: false,
+                processCounters: false
+            ),
+            slices: [slice],
+            threads: [Self.makeThread(itid: 1, ipid: 1, name: "worker")]
+        )
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: repository,
+                    cacheHit: false,
+                    cacheMetadata: nil,
+                    close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-viewport-coalescing-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+        let initialQueries = await repository.observedDensityQueryCount()
+
+        for _ in 0..<12 {
+            let viewport = try XCTUnwrap(controller.snapshot?.viewport)
+            controller.handleViewportIntent(
+                .zoom(
+                    anchorNs: viewport.range.startNs + viewport.range.durationNs / 2,
+                    scale: 0.98,
+                    sourceViewport: viewport
+                )
+            )
+        }
+
+        try await Task.sleep(
+            for: TraceDocumentController.viewportQueryCoalescingDelay
+                + .milliseconds(50)
+        )
+        var attempts = 0
+        while controller.snapshot?.isLoading == true, attempts < 10_000 {
+            attempts += 1
+            await Task.yield()
+        }
+        let finalQueries = await repository.observedDensityQueryCount()
+        XCTAssertEqual(
+            finalQueries,
+            initialQueries + 1,
+            "only the final viewport in the gesture burst should reach SQLite"
+        )
+        await controller.close()
     }
 
     func testRecentBookmarksAreBoundedDeduplicatedAndResolvable() throws {

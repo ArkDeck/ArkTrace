@@ -166,4 +166,36 @@ package protocol TraceParser: Sendable {
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ParsedTrace
+
+    /// Fast path for a snapshot just materialized, hashed and pinned by the
+    /// content-addressed cache. Implementations may replace redundant full
+    /// byte scans with before/after file-identity checks, while the default
+    /// keeps third-party/test parsers on the conservative `parse` contract.
+    func parseVerifiedSnapshot(
+        source: URL,
+        sourceSHA256: String,
+        sourceByteCount: Int64,
+        destination: URL,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
+    ) async throws -> ParsedTrace
+}
+
+package extension TraceParser {
+    func parseVerifiedSnapshot(
+        source: URL,
+        sourceSHA256: String,
+        sourceByteCount: Int64,
+        destination: URL,
+        progress: TraceProgressHandler?,
+        prepareDatabase: @escaping TraceDatabasePreparer
+    ) async throws -> ParsedTrace {
+        try await parse(
+            source: source,
+            sourceIsImmutableSnapshot: true,
+            destination: destination,
+            progress: progress,
+            prepareDatabase: prepareDatabase
+        )
+    }
 }

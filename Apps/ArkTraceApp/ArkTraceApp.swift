@@ -964,6 +964,7 @@ private struct TraceTimelinePane: View {
                             onSelectFlag: { editingFlag = $0 },
                             onAnnotationCommand: controller.handleAnnotationCommand,
                             onViewportIntent: controller.handleViewportIntent,
+                            onVisibleRegionChange: controller.updateTimelineVisibleRegion,
                             onZoomSelection: controller.zoomToSelection,
                             onResetViewport: controller.resetViewport
                         )

@@ -347,8 +347,8 @@ jq -e \
     --arg parserSHA "$parser_sha" --arg provenanceSHA "$provenance_sha" \
     --arg provenanceSource "$provenance_source" --arg licenseSHA "$license_sha" \
     --argjson dirty "$worktree_dirty" '
-    .formatVersion == 4
-    and ((keys | sort) == ["analysisWorkload","arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","contextWorkload","databaseByteCount","deterministicAnalysisP50Ms","deterministicAnalysisP95Ms","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","storage","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
+    .formatVersion == 5
+    and ((keys | sort) == ["analysisWorkload","arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","bottlenecks","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","contextWorkload","databaseByteCount","deterministicAnalysisP50Ms","deterministicAnalysisP95Ms","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","performanceMetrics","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","storage","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
     and .fixtureClass == $class
     and .arkTraceBaseRevision == $base
     and .workingTreeDirty == ($dirty == 1)
@@ -392,6 +392,29 @@ jq -e \
     and .contextP95Ms <= (if $class == "large" then 2000 else 1000 end)
     and .deterministicAnalysisP95Ms <= (if $class == "large" then 5000 else 3000 end)
     and .peakRSSBytes <= 1610612736
+    and (.performanceMetrics | type == "array" and length >= 8 and length <= 64)
+    and ([.performanceMetrics[] |
+        ((keys | sort) == ["maximumMs","operation","p50Ms","p95Ms","sampleCount","scope","totalWorkUnits","workUnit"])
+        and (.scope | test("^[A-Za-z][A-Za-z0-9.]{0,63}$"))
+        and (.operation | test("^[A-Za-z][A-Za-z0-9._]{0,95}$"))
+        and .sampleCount > 0 and .p50Ms >= 0 and .p95Ms >= .p50Ms
+        and .maximumMs >= .p95Ms
+        and (.totalWorkUnits == null or (.totalWorkUnits | type == "number" and . >= 0))
+        and (.workUnit == null or (.workUnit | test("^[A-Za-z][A-Za-z0-9]{0,31}$")))
+    ] | all)
+    and (.bottlenecks | type == "array" and length >= 1 and length <= 8)
+    and ([.bottlenecks[] |
+        ((keys | sort) == ["operation","p95Ms","rank","scope"])
+        and .rank >= 1 and .rank <= 8 and .p95Ms >= 0
+        and (.scope | test("^[A-Za-z][A-Za-z0-9.]{0,63}$"))
+        and (.operation | test("^[A-Za-z][A-Za-z0-9._]{0,95}$"))
+    ] | all)
+    and ([.bottlenecks[].rank] == [range(1; (.bottlenecks | length) + 1)])
+    and ([.bottlenecks[].p95Ms] == ([.bottlenecks[].p95Ms] | sort | reverse))
+    and ([.bottlenecks[] as $b |
+        any(.performanceMetrics[]; .scope == $b.scope and .operation == $b.operation
+            and .p95Ms == $b.p95Ms)
+    ] | all)
     and .capabilities.cpuScheduling == true
     and .capabilities.threadStates == true
     and .capabilities.namedSlices == true
@@ -440,12 +463,18 @@ if [ "$fixture_class" = medium ]; then
         .diagnostics.tableRowCounts == $lock[0].medium.requiredRows
     ' "$partial_evidence" >/dev/null || fail "medium semantic row counts drifted"
 else
-    jq -e --slurpfile provenance "$provenance" '
-        .traceSHA256 == $provenance[0].trace.sha256
-        and .traceByteCount == $provenance[0].trace.byteCount
-        and .traceDurationNs == $provenance[0].trace.durationNs
-        and .diagnostics.tableRowCounts == $provenance[0].trace.requiredRows
-    ' "$partial_evidence" >/dev/null || fail "large semantic evidence drifted"
+    jq -e --slurpfile provenance "$provenance" \
+        '.traceSHA256 == $provenance[0].trace.sha256' \
+        "$partial_evidence" >/dev/null || fail "large trace SHA evidence drifted"
+    jq -e --slurpfile provenance "$provenance" \
+        '.traceByteCount == $provenance[0].trace.byteCount' \
+        "$partial_evidence" >/dev/null || fail "large trace byte-count evidence drifted"
+    jq -e --slurpfile provenance "$provenance" \
+        '.traceDurationNs == $provenance[0].trace.durationNs' \
+        "$partial_evidence" >/dev/null || fail "large trace duration evidence drifted"
+    jq -e --slurpfile provenance "$provenance" \
+        '.diagnostics.tableRowCounts == $provenance[0].trace.requiredRows' \
+        "$partial_evidence" >/dev/null || fail "large table-row evidence drifted"
 
     cancellation_evidence="$temporary_root/large-cancellation.json"
     cancellation_log="$temporary_root/large-cancellation.log"

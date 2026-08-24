@@ -305,6 +305,23 @@ package enum TraceDatabaseStagingPreparer {
         try prepare(
             databaseURL: databaseURL,
             progress: progress,
+            performanceObserver: nil,
+            quickCheckProgressHook: nil
+        )
+    }
+
+    /// Package performance seam used by Runtime's production open pipeline.
+    /// The observer is never persisted; every operation is also emitted to the
+    /// points-of-interest log when no benchmark observer is installed.
+    package static func prepare(
+        databaseURL: URL,
+        progress: TraceProgressHandler? = nil,
+        performanceObserver: TracePerformanceObserver?
+    ) throws -> TraceDatabasePreparationResult {
+        try prepare(
+            databaseURL: databaseURL,
+            progress: progress,
+            performanceObserver: performanceObserver,
             quickCheckProgressHook: nil
         )
     }
@@ -313,18 +330,30 @@ package enum TraceDatabaseStagingPreparer {
     static func prepare(
         databaseURL: URL,
         progress: TraceProgressHandler? = nil,
+        performanceObserver: TracePerformanceObserver? = nil,
         quickCheckProgressHook: (@Sendable () -> Void)?
     ) throws -> TraceDatabasePreparationResult {
         progress?(.validating)
         try Task.checkCancellation()
-        let upstreamDatabase = try sha256AndSize(at: databaseURL)
+        let upstreamDatabase = try measured(
+            "database.hash", observer: performanceObserver
+        ) {
+            try sha256AndSize(at: databaseURL)
+        }
         try Task.checkCancellation()
-        let db = try TraceDatabase(
-            url: databaseURL,
-            readOnly: false,
-            createIfMissing: false
-        )
-        guard try db.quickCheckIsOK(progressHook: quickCheckProgressHook) else {
+        let db = try measured("database.open", observer: performanceObserver) {
+            try TraceDatabase(
+                url: databaseURL,
+                readOnly: false,
+                createIfMissing: false
+            )
+        }
+        let initialQuickCheck = try measured(
+            "quickCheck.beforeIndexes", observer: performanceObserver
+        ) {
+            try db.quickCheckIsOK(progressHook: quickCheckProgressHook)
+        }
+        guard initialQuickCheck else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .validating,
@@ -333,46 +362,80 @@ package enum TraceDatabaseStagingPreparer {
         }
         try Task.checkCancellation()
 
-        let available = try availableColumns(in: db)
+        let available = try measured(
+            "schema.availableColumns", observer: performanceObserver
+        ) {
+            try availableColumns(in: db)
+        }
         // These two target indexes bound the relationship probes on upstream
         // exports that contain no indexes. They are validation infrastructure;
         // the full migration stage begins only after semantic validation.
         try recreateIndexes(
             indexes.filter(\.bootstrapForValidation),
             availableColumns: available,
-            in: db
+            in: db,
+            phase: "bootstrap",
+            performanceObserver: performanceObserver
         )
         try Task.checkCancellation()
 
-        let validation = try TraceSchemaAdapter.validate(db)
+        let validation = try measured(
+            "schema.semanticValidation", observer: performanceObserver
+        ) {
+            try TraceSchemaAdapter.validate(db)
+        }
         try Task.checkCancellation()
         progress?(.indexing)
-        try recreateIndexes(
-            indexes,
-            availableColumns: available,
-            in: db,
-            report: { created, total in
-                progress?(
-                    TraceLoadingProgress(
-                        stage: .indexing,
-                        completed: Int64(created),
-                        total: Int64(total)
+        try measured("indexes.configure", observer: performanceObserver) {
+            try db.configureForPrivateIndexBuild()
+        }
+        // Bootstrap indexes were created from ArkTrace-owned definitions in
+        // the transaction above. Rebuilding the same bytes here only repeats
+        // an indexed table scan; keep them and build the remaining Ready
+        // closure once.
+        do {
+            try recreateIndexes(
+                indexes.filter { !$0.bootstrapForValidation },
+                availableColumns: available,
+                in: db,
+                phase: "ready",
+                performanceObserver: performanceObserver,
+                report: { created, total in
+                    progress?(
+                        TraceLoadingProgress(
+                            stage: .indexing,
+                            completed: Int64(created),
+                            total: Int64(total)
+                        )
                     )
-                )
+                }
+            )
+            try measured("indexes.restore", observer: performanceObserver) {
+                try db.restoreAfterPrivateIndexBuild()
             }
-        )
+        } catch {
+            try? db.restoreAfterPrivateIndexBuild()
+            throw error
+        }
         try Task.checkCancellation()
-        guard try db.quickCheckIsOK(
-            stage: .indexing,
-            progressHook: quickCheckProgressHook
-        ) else {
+        let finalQuickCheck = try measured(
+            "quickCheck.afterIndexes", observer: performanceObserver
+        ) {
+            try db.quickCheckIsOK(
+                stage: .indexing,
+                progressHook: quickCheckProgressHook
+            )
+        }
+        guard finalQuickCheck else {
             throw ArkTraceError(
                 code: .traceDatabaseInvalid,
                 stage: .indexing,
                 message: "SQLite quick_check failed after index migration"
             )
         }
-        try db.flush()
+        try measured("database.flush", observer: performanceObserver) {
+            try db.flush()
+        }
         try Task.checkCancellation()
 
         return TraceDatabasePreparationResult(
@@ -659,6 +722,8 @@ package enum TraceDatabaseStagingPreparer {
         _ definitions: [IndexDefinition],
         availableColumns: [String: Set<String>],
         in db: TraceDatabase,
+        phase: String,
+        performanceObserver: TracePerformanceObserver?,
         report: ((_ created: Int, _ total: Int) -> Void)? = nil
     ) throws {
         let applicable = definitions.filter { definition in
@@ -681,40 +746,73 @@ package enum TraceDatabaseStagingPreparer {
         }
         guard !applicable.isEmpty else { return }
 
-        try db.execute(
-            "BEGIN IMMEDIATE",
-            stage: .indexing,
-            observesTaskCancellation: true
-        )
-        do {
-            for (position, definition) in applicable.enumerated() {
-                try Task.checkCancellation()
-                try db.execute(
-                    "DROP INDEX IF EXISTS \(definition.name)",
-                    stage: .indexing,
-                    observesTaskCancellation: true
-                )
-                try db.execute(
-                    "CREATE INDEX \(definition.name) ON \(definition.table)"
-                        + "(\(definition.columns.joined(separator: ", ")))",
-                    stage: .indexing,
-                    observesTaskCancellation: true
-                )
-                // Indexes differ in cost, so this counts indexes rather than
-                // claiming a share of the time. It is the only honest measure
-                // the stage has, and on a cold open of a 265 MB capture that
-                // stage is a third of the wait.
-                report?(position + 1, applicable.count)
-            }
+        try measured(
+            "indexes.\(phase).total",
+            workUnits: Int64(applicable.count),
+            workUnit: "indexes",
+            observer: performanceObserver
+        ) {
             try db.execute(
-                "COMMIT",
+                "BEGIN IMMEDIATE",
                 stage: .indexing,
                 observesTaskCancellation: true
             )
-        } catch {
-            try? db.execute("ROLLBACK", stage: .indexing)
-            throw error
+            do {
+                for (position, definition) in applicable.enumerated() {
+                    try Task.checkCancellation()
+                    try measured(
+                        "index.\(phase).\(definition.name)",
+                        observer: performanceObserver
+                    ) {
+                        try db.execute(
+                            "DROP INDEX IF EXISTS \(definition.name)",
+                            stage: .indexing,
+                            observesTaskCancellation: true
+                        )
+                        try db.execute(
+                            "CREATE INDEX \(definition.name) ON \(definition.table)"
+                                + "(\(definition.columns.joined(separator: ", ")))",
+                            stage: .indexing,
+                            observesTaskCancellation: true
+                        )
+                    }
+                    // Indexes differ in cost, so this counts indexes rather than
+                    // claiming a share of the time. It is the only honest measure
+                    // the stage has, and on a cold open of a 265 MB capture that
+                    // stage is a third of the wait.
+                    report?(position + 1, applicable.count)
+                }
+                try db.execute(
+                    "COMMIT",
+                    stage: .indexing,
+                    observesTaskCancellation: true
+                )
+            } catch {
+                try? db.execute("ROLLBACK", stage: .indexing)
+                throw error
+            }
         }
+    }
+
+    private static func measured<T>(
+        _ operation: String,
+        workUnits: Int64? = nil,
+        workUnit: String? = nil,
+        observer: TracePerformanceObserver?,
+        _ body: () throws -> T
+    ) throws -> T {
+        let startedAt = ContinuousClock.now
+        defer {
+            TracePerformanceMetrics.record(
+                scope: "databasePreparation",
+                operation: operation,
+                startedAt: startedAt,
+                workUnits: workUnits,
+                workUnit: workUnit,
+                observer: observer
+            )
+        }
+        return try body()
     }
 
     private static func sha256AndSize(

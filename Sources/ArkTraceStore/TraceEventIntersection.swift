@@ -61,6 +61,7 @@ package enum TraceEventIntersection {
         return """
         typeof(\(prefix)ts) = 'integer'
         AND (\(prefix)dur IS NULL OR typeof(\(prefix)dur) = 'integer')
+        AND \(prefix)ts < ?
         AND (
             (\(prefix)dur = 0 AND \(prefix)ts >= ? AND \(prefix)ts < ?)
             OR (
@@ -81,6 +82,7 @@ package enum TraceEventIntersection {
         traceEnd: Int64
     ) -> [TraceDatabase.Binding] {
         [
+            .int64(queryEnd),
             .int64(queryStart), .int64(queryEnd),
             .int64(queryEnd), .int64(traceEnd), .int64(queryStart),
             .int64(queryEnd), .int64(queryStart), .int64(queryStart),

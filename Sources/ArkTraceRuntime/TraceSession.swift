@@ -139,6 +139,7 @@ package actor TraceSession {
         stagingDirectory: URL,
         cacheDirectory: URL,
         progress: TraceProgressHandler? = nil,
+        performanceObserver: TracePerformanceObserver? = nil,
         hooks: TraceCacheTestHooks = TraceCacheTestHooks(),
         repositoryValidationHook: (@Sendable () async -> Void)? = nil,
         now: @escaping @Sendable () -> Date = Date.init
@@ -152,6 +153,7 @@ package actor TraceSession {
                 stagingDirectory: stagingDirectory,
                 cacheDirectory: cacheDirectory,
                 report: report,
+                performanceObserver: performanceObserver,
                 hooks: hooks,
                 repositoryValidationHook: repositoryValidationHook,
                 now: now
