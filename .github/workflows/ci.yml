@@ -124,8 +124,6 @@ jobs:
     if: needs.plan.outputs.lane_swiftpm == 'true'
     runs-on: macos-26
     timeout-minutes: 60
-    env:
-      ARKTRACE_SWIFTPM_CACHE_ROOT: ${{ runner.temp }}/arktrace-swiftpm
     steps:
       - uses: actions/checkout@v4
 
@@ -166,12 +164,12 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace
-            !${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/build
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/dependencies
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/ModuleCache
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/source-state
+            ${{ runner.temp }}/arktrace-swiftpm/workspace
+            !${{ runner.temp }}/arktrace-swiftpm/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ runner.temp }}/arktrace-swiftpm/build
+            ${{ runner.temp }}/arktrace-swiftpm/dependencies
+            ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
+            ${{ runner.temp }}/arktrace-swiftpm/source-state
           key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
           restore-keys: |
             spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-
@@ -181,6 +179,8 @@ jobs:
       # newer SDK introduces an unavoidable warning, relax this step rather
       # than letting the invariant rot silently.
       - name: Build (warnings are failures)
+        env:
+          ARKTRACE_SWIFTPM_CACHE_ROOT: ${{ runner.temp }}/arktrace-swiftpm
         run: |
           set -o pipefail
           sh scripts/run-swiftpm.sh build 2>&1 | tee build.log
@@ -197,6 +197,8 @@ jobs:
       # classes still runs -- AppDistributionTests also holds the Info.plist
       # and document-type checks, which are among the most valuable here.
       - name: Test
+        env:
+          ARKTRACE_SWIFTPM_CACHE_ROOT: ${{ runner.temp }}/arktrace-swiftpm
         run: |
           set -o pipefail
           sh scripts/run-swiftpm.sh test \
@@ -239,12 +241,12 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace
-            !${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/build
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/dependencies
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/ModuleCache
-            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/source-state
+            ${{ runner.temp }}/arktrace-swiftpm/workspace
+            !${{ runner.temp }}/arktrace-swiftpm/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ runner.temp }}/arktrace-swiftpm/build
+            ${{ runner.temp }}/arktrace-swiftpm/dependencies
+            ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
+            ${{ runner.temp }}/arktrace-swiftpm/source-state
           key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
 
       - name: Upload logs
@@ -264,9 +266,6 @@ jobs:
     if: needs.plan.outputs.lane_app == 'true'
     runs-on: macos-26
     timeout-minutes: 60
-    env:
-      ARKTRACE_XCODE_CACHE_ROOT: ${{ runner.temp }}/arktrace-xcode
-      ARKTRACE_XCODE_OUTPUT_ROOT: ${{ runner.temp }}/sym
     steps:
       - uses: actions/checkout@v4
 
@@ -309,16 +308,16 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace
-            !${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/Objects
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/SourcePackages
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PackageCache
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/ModuleCache
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PrecompiledHeaders
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/source-state
-            ${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug
-            !${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug/ArkTrace.app
+            ${{ runner.temp }}/arktrace-xcode/workspace
+            !${{ runner.temp }}/arktrace-xcode/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ runner.temp }}/arktrace-xcode/Objects
+            ${{ runner.temp }}/arktrace-xcode/SourcePackages
+            ${{ runner.temp }}/arktrace-xcode/PackageCache
+            ${{ runner.temp }}/arktrace-xcode/ModuleCache
+            ${{ runner.temp }}/arktrace-xcode/PrecompiledHeaders
+            ${{ runner.temp }}/arktrace-xcode/source-state
+            ${{ runner.temp }}/sym/Debug
+            !${{ runner.temp }}/sym/Debug/ArkTrace.app
           key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
           restore-keys: |
             xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-
@@ -339,6 +338,9 @@ jobs:
       - name: Build app target (unsigned)
         id: app_build
         if: steps.parser.outputs.present == 'true'
+        env:
+          ARKTRACE_XCODE_CACHE_ROOT: ${{ runner.temp }}/arktrace-xcode
+          ARKTRACE_XCODE_OUTPUT_ROOT: ${{ runner.temp }}/sym
         run: |
           set -o pipefail
           sh scripts/run-xcodebuild.sh 2>&1 | tee xcodebuild.log
@@ -364,16 +366,16 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace
-            !${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/Objects
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/SourcePackages
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PackageCache
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/ModuleCache
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PrecompiledHeaders
-            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/source-state
-            ${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug
-            !${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug/ArkTrace.app
+            ${{ runner.temp }}/arktrace-xcode/workspace
+            !${{ runner.temp }}/arktrace-xcode/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ runner.temp }}/arktrace-xcode/Objects
+            ${{ runner.temp }}/arktrace-xcode/SourcePackages
+            ${{ runner.temp }}/arktrace-xcode/PackageCache
+            ${{ runner.temp }}/arktrace-xcode/ModuleCache
+            ${{ runner.temp }}/arktrace-xcode/PrecompiledHeaders
+            ${{ runner.temp }}/arktrace-xcode/source-state
+            ${{ runner.temp }}/sym/Debug
+            !${{ runner.temp }}/sym/Debug/ArkTrace.app
           key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
 
       - name: Upload logs
