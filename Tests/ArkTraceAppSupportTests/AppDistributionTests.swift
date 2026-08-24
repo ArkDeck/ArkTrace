@@ -28,10 +28,10 @@ final class AppDistributionTests: XCTestCase {
         }
     }
 
-    func testDistributionHasNoAmbientCapabilitiesAndSharesProductVersion() {
+    func testDistributionContainsCaptureWithoutNetworkUploadAndSharesProductVersion() {
         XCTAssertFalse(ArkTraceAppDistribution.appSandboxEnabled)
         XCTAssertFalse(ArkTraceAppDistribution.permitsNetworkUpload)
-        XCTAssertFalse(ArkTraceAppDistribution.permitsDeviceAccess)
+        XCTAssertTrue(ArkTraceAppDistribution.permitsDeviceAccess)
         XCTAssertEqual(ArkTraceProduct.version, "0.1.0")
         XCTAssertEqual(ArkTraceProduct.build, "1")
         XCTAssertEqual(ArkTraceAppDistribution.bundleIdentifier, "com.arktrace.ArkTrace")

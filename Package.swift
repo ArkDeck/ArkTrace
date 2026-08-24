@@ -29,6 +29,7 @@ let package = Package(
         .library(name: "ArkTraceAnalysis", targets: ["ArkTraceAnalysis"]),
         .library(name: "ArkTraceRendering", targets: ["ArkTraceRendering"]),
         .library(name: "ArkTraceAppSupport", targets: ["ArkTraceAppSupport"]),
+        .library(name: "ArkTraceCapture", targets: ["ArkTraceCapture"]),
         .library(name: "ArkTraceCLI", targets: ["ArkTraceCLI"]),
         .executable(name: "arktrace", targets: ["arktrace"]),
     ],
@@ -65,6 +66,13 @@ let package = Package(
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering",
             ],
+            swiftSettings: firstPartySwiftSettings
+        ),
+        // Deliberately isolated from Core/Runtime/CLI. Device discovery and
+        // capture are an explicit GUI capability; analysis products never
+        // acquire an HDC dependency by transitivity.
+        .target(
+            name: "ArkTraceCapture",
             swiftSettings: firstPartySwiftSettings
         ),
         // C target: Swift settings (strict memory safety, warning groups) do
@@ -116,6 +124,10 @@ let package = Package(
                 "ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser",
                 "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering",
             ]
+        ),
+        .testTarget(
+            name: "ArkTraceCaptureTests",
+            dependencies: ["ArkTraceCapture"]
         ),
         .testTarget(
             name: "ArkTraceCLITests",

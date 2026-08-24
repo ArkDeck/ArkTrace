@@ -187,7 +187,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 每个阶段都必须保持：
 
-1. ArkTrace 无 HDC/device/capture 权限；
+1. Phase 0–7 的 ArkTrace 无 HDC/device/capture 权限；2026-08-24 起该历史不变量由 AT-SYS-003 的能力隔离取代：仅 GUI `ArkTraceCapture` 有用户发起的 HDC capture，CLI/Core/ArkDeck analyzer 仍为零；
 2. 原始 Trace 永不原地修改；
 3. App、CLI、ArkDeck 共用 Core/Runtime/Store/Analysis；
 4. Agent API 不暴露 raw SQL；

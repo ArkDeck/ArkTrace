@@ -11,9 +11,10 @@
 
 **Native macOS trace workbench for OpenHarmony** — one core that serves both humans, through a native timeline viewer, and AI agents, through a deterministic CLI.
 
-ArkTrace reuses the pinned OpenHarmony TraceStreamer to parse offline traces (`.htrace` / `.ftrace` / `.systrace`) into a local SQLite database, and builds on top of it:
+ArkTrace captures traces from an explicitly selected OpenHarmony device or opens existing files, then reuses the pinned TraceStreamer to parse `.htrace` / `.ftrace` / `.systrace` data into a local SQLite database:
 
 - **ArkTrace.app** — a SwiftUI + CoreGraphics native timeline viewer: CPU / thread-state / named-slice / counter / frame tracks grouped by process, with call-depth rows, zoom, pan, search, range selection, timeline flags and marks, and an inspector with range analysis.
+- **Device capture** — a native, cancellable HDC workflow with App responsiveness, CPU scheduling and System overview presets; captured files are validated, saved locally and opened automatically.
 - **`arktrace` CLI** — typed, bounded, versioned JSON queries and analysis built for agents: `doctor`, `inspect`, `summary`, `processes`, `threads`, `query`, `context`, `analyze`, plus a fail-closed `licenses` command.
 - **ArkDeck integration** — a host-only Trace Analysis Engine inside [ArkDeck](https://github.com/ArkDeck)'s automated debugging loop, with zero device capability by design.
 
@@ -29,6 +30,7 @@ ArkTrace reuses the pinned OpenHarmony TraceStreamer to parse offline traces (`.
 
 - Apple silicon Mac running macOS 26 or later
 - Swift 6.3 toolchain / Xcode 26.6 (Xcode for building the app)
+- OpenHarmony SDK `hdc` and a connected device with `hiprofiler_cmd` (capture only)
 - `jq` — ships with macOS 15+
 - Network access the first time you build the pinned TraceStreamer
 
@@ -72,6 +74,8 @@ Full command reference, Machine JSON contract, limits, signal handling and priva
 ### 4. Run the viewer
 
 Open `ArkTrace.xcodeproj` in Xcode, select the `ArkTraceApp` scheme and run. Open `.htrace` / `.ftrace` / `.systrace` files via **File → Open**, Finder “Open With”, drag & drop, or Recents; **Reload** reopens the current trace from its original file.
+
+To capture a new trace, connect an OpenHarmony device with USB or network debugging enabled, then choose **File → Capture Trace…** (<kbd>⌘N</kbd>). ArkTrace finds `hdc` in the configured SDK/PATH or lets you choose it directly. Select a device, profile, duration and buffer size, choose the local destination, and start capture. The completed file opens automatically. Full behavior and failure recovery: [docs/CAPTURE.md](docs/CAPTURE.md).
 
 The sidebar toggles tracks and filters them to one process by name or PID; the timeline supports mouse/trackpad pan and zoom, range selection and real event selection; the toolbar search locates events by TID / thread / slice name; the inspector shows event details or range analysis.
 
@@ -135,13 +139,14 @@ CI builds, tests and runs the offline gates on every pull request, but hosted ru
 
 Phases 0–7 are complete and **all 10 release gates are closed**. Phase 7 (upstream alignment, 13/13) closed every actionable gap in [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) behind `scripts/test_phase7.sh`. The final gate closed a real debug loop on a DAYU 200 board — typed capture → structured analysis → agent judgement → typed re-verification — with the target app's CPU usage judged `improved` (−87.09%). Full task index: [docs/TASKS.md](docs/TASKS.md); final report: [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md).
 
-Known limitations of the first release: Apple silicon / macOS 26+ only; offline analysis only — no capture, device or network capability. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
+Known limitations: Apple silicon / macOS 26+ only; capture requires an OpenHarmony SDK `hdc`, a connected device and device-side `hiprofiler_cmd`. The viewer does not draw irq / hilog / syscall lanes (those tables are empty in every real capture checked so far), does not offer user-defined colour themes, and its range statistics have no min/avg/max percentiles yet — see [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10 for the next-round list. The CLI and ArkDeck analyzer remain host-only and have no device authority. The macOS 26 minimum is the current baseline; distribution artifacts signed before this bump were built against macOS 14 and remain valid only as historical evidence — the next signed release must be produced and verified against the new baseline.
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
 | [docs/DESIGN.md](docs/DESIGN.md) | Product and technical design: evidence baseline, architecture, domain model, TraceStreamer integration, renderer, ArkDeck boundary, release gates |
+| [docs/CAPTURE.md](docs/CAPTURE.md) | App-only HDC capture workflow, profiles, lifecycle, security boundary and troubleshooting |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | Normative requirements (`AT-*`), machine JSON contract, end-to-end acceptance scenarios (`AC-AT-*`), Definition of Done |
 | [docs/TASKS.md](docs/TASKS.md) | Phase 0–6 task index and release-gate status |
 | [docs/CLI.md](docs/CLI.md) | `arktrace` installation, commands, flags, Machine JSON, exit status, signals and privacy |

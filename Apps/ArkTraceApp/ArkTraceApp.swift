@@ -1,13 +1,16 @@
 import AppKit
 import ArkTraceAnalysis
 import ArkTraceAppSupport
+import ArkTraceCapture
 import ArkTraceCore
 import ArkTraceRendering
 import SwiftUI
+import UniformTypeIdentifiers
 
 @main
 struct ArkTraceNativeApp: App {
     @State private var controller = TraceDocumentController()
+    @State private var captureController = TraceCaptureController()
     @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
@@ -18,6 +21,10 @@ struct ArkTraceNativeApp: App {
         .defaultSize(width: 1_280, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
+                Button("Capture Trace…") {
+                    openWindow(id: ArkTraceWindow.capture)
+                }
+                .keyboardShortcut("n")
                 Button("Open Trace…") { presentOpenPanel() }
                     .keyboardShortcut("o")
                 Button("Reload") { controller.reload() }
@@ -51,6 +58,14 @@ struct ArkTraceNativeApp: App {
             ShortcutHelpView()
         }
         .defaultSize(width: 520, height: 620)
+
+        Window("Capture Trace", id: ArkTraceWindow.capture) {
+            TraceCaptureWindow(
+                capture: captureController,
+                documentController: controller
+            )
+        }
+        .defaultSize(width: 580, height: 640)
 
         Settings {
             SettingsRootView(controller: controller)
@@ -89,6 +104,7 @@ private struct TraceViewerRootView: View {
 
     var controller: TraceDocumentController
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.openWindow) private var openWindow
     @FocusState private var focusRegion: TraceViewerFocusRegion?
     /// Whether *this window* shows the Inspector right now. Deliberately not
     /// the stored preference itself: auto-collapse is a property of one
@@ -229,7 +245,8 @@ private struct TraceViewerRootView: View {
         TraceTimelinePane(
             controller: controller,
             focusRegion: $focusRegion,
-            openPanel: presentOpenPanel
+            openPanel: presentOpenPanel,
+            openCapture: { openWindow(id: ArkTraceWindow.capture) }
         )
     }
 
@@ -266,6 +283,18 @@ private struct TraceViewerRootView: View {
     /// per-frame snapshot updates away from the rest of the toolbar.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
+        // Kept in its own item for the same Swift frontend reason as the
+        // Inspector toggle below: the primary group is already at the generic
+        // content-size boundary observed in release builds.
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                openWindow(id: ArkTraceWindow.capture)
+            } label: {
+                Label("Capture", systemImage: "record.circle")
+            }
+            .help("Capture a trace from a connected OpenHarmony device")
+            .primaryToolbarTarget()
+        }
         ToolbarItemGroup(placement: .primaryAction) {
             Button(action: presentOpenPanel) {
                 Label("Open", systemImage: "folder")
@@ -870,6 +899,7 @@ private struct TraceTimelinePane: View {
     var controller: TraceDocumentController
     var focusRegion: FocusState<TraceViewerFocusRegion?>.Binding
     let openPanel: @MainActor () -> Void
+    let openCapture: @MainActor () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Whether the canvas is advertising keyboard focus right now.
     @State private var keyboardFocusIsVisible = false
@@ -890,9 +920,13 @@ private struct TraceTimelinePane: View {
             } description: {
                 Text("Open, drop, or choose a recent .htrace/.ftrace/.systrace file.")
             } actions: {
-                Button("Open Trace…", action: openPanel)
-                    .buttonStyle(.borderedProminent)
-                    .arktraceAccessibleTarget()
+                HStack(spacing: 12) {
+                    Button("Capture Trace…", action: openCapture)
+                        .buttonStyle(.borderedProminent)
+                        .arktraceAccessibleTarget()
+                    Button("Open Trace…", action: openPanel)
+                        .arktraceAccessibleTarget()
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed where controller.snapshot == nil:
@@ -2217,9 +2251,374 @@ private struct RangeInspectorView: View {
     }
 }
 
+// MARK: - Capture
+
+/// A separate utility window because capture and inspection are parallel
+/// activities: the current trace stays readable while the next one records.
+/// All device/process authority remains behind `ArkTraceCapture`; this view
+/// owns only native controls, save/open panels and the handoff to the existing
+/// document controller.
+private struct TraceCaptureWindow: View {
+    @Bindable var capture: TraceCaptureController
+    var documentController: TraceDocumentController
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Form {
+                connectionSection
+                configurationSection
+                if let issue = capture.issue {
+                    issueSection(issue)
+                }
+            }
+            .formStyle(.grouped)
+
+            Divider()
+            footer
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+        }
+        .frame(minWidth: 500, minHeight: 520)
+        // Closing the only control surface during a running capture would
+        // strand its cancel action. Discovery is short and remains closable;
+        // only the actual device operation disables the close affordance.
+        .windowDismissBehavior(capture.phase.isCapturing ? .disabled : .enabled)
+        .transaction { transaction in
+            if reduceMotion { transaction.animation = nil }
+        }
+        .task {
+            guard capture.devices.isEmpty, !capture.phase.isBusy else { return }
+            capture.refreshDevices()
+        }
+        .onChange(of: capture.phase) { _, phase in
+            announce(phase)
+        }
+    }
+
+    private var connectionSection: some View {
+        Section("Connection") {
+            LabeledContent("HDC") {
+                HStack(spacing: 10) {
+                    if let url = capture.hdcExecutableURL {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(url.lastPathComponent)
+                            Text(url.deletingLastPathComponent().path)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .help(url.path)
+                        }
+                    } else {
+                        Label("Not configured", systemImage: "exclamationmark.circle")
+                            .foregroundStyle(.secondary)
+                    }
+                    Button("Choose…", action: chooseHDC)
+                        .disabled(capture.phase.isCapturing)
+                        .arktraceAccessibleTarget()
+                }
+            }
+
+            LabeledContent("Device") {
+                HStack(spacing: 8) {
+                    Picker("Device", selection: $capture.selectedDeviceID) {
+                        Text("Select a device").tag(String?.none)
+                        ForEach(capture.devices) { device in
+                            Label(
+                                deviceLabel(device),
+                                systemImage: device.transport == .network
+                                    ? "network" : "cable.connector"
+                            )
+                            .tag(Optional(device.id))
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(minWidth: 250)
+                    .disabled(capture.devices.isEmpty || capture.phase.isCapturing)
+
+                    if capture.phase == .discovering {
+                        ProgressView()
+                            .controlSize(.small)
+                            .accessibilityLabel("Refreshing connected devices")
+                    }
+                    Button {
+                        capture.refreshDevices()
+                    } label: {
+                        Label("Refresh devices", systemImage: "arrow.clockwise")
+                            .labelStyle(.iconOnly)
+                    }
+                    .help("Refresh connected devices")
+                    .accessibilityLabel("Refresh connected devices")
+                    .disabled(
+                        capture.hdcExecutableURL == nil || capture.phase.isBusy
+                    )
+                    .arktraceAccessibleTarget()
+                }
+            }
+
+            if capture.phase == .ready, capture.devices.isEmpty {
+                Label(
+                    "No devices found. Connect a device and enable USB or network debugging, then refresh.",
+                    systemImage: "externaldrive.badge.questionmark"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var configurationSection: some View {
+        Section("Capture setup") {
+            Picker("Profile", selection: $capture.profile) {
+                ForEach(TraceCaptureProfile.allCases) { profile in
+                    Text(profileTitle(profile)).tag(profile)
+                }
+            }
+            .disabled(capture.phase.isCapturing)
+
+            Text(profileDescription(capture.profile))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Stepper(
+                value: $capture.durationSeconds,
+                in: TraceCaptureRequest.durationRange,
+                step: 5
+            ) {
+                LabeledContent(
+                    "Duration",
+                    value: "\(capture.durationSeconds) seconds"
+                )
+            }
+            .disabled(capture.phase.isCapturing)
+
+            Picker("Trace buffer", selection: $capture.bufferSizeMB) {
+                ForEach(TraceCaptureRequest.allowedBufferSizesMB, id: \.self) { size in
+                    Text("\(size) MB").tag(size)
+                }
+            }
+            .disabled(capture.phase.isCapturing)
+
+            Label(
+                "A larger buffer reduces dropped events but uses more memory on the device.",
+                systemImage: "info.circle"
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func issueSection(_ issue: TraceCaptureIssue) -> some View {
+        Section {
+            Label("Capture needs attention", systemImage: "exclamationmark.triangle")
+                .font(.headline)
+                .foregroundStyle(.red)
+            Text(issue.message)
+            Text(issue.recoverySuggestion)
+                .foregroundStyle(.secondary)
+            if let diagnostic = issue.diagnostic, !diagnostic.isEmpty {
+                DisclosureGroup("Diagnostics") {
+                    Text(diagnostic)
+                        .font(.caption.monospaced())
+                        .textSelection(.enabled)
+                }
+                .arktraceAccessibleTarget()
+            }
+        }
+    }
+
+    private var footer: some View {
+        HStack(alignment: .center, spacing: 16) {
+            status
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            switch capture.phase {
+            case .preparing, .recording, .transferring, .cancelling:
+                Button("Cancel capture", role: .cancel) {
+                    capture.cancelCapture()
+                }
+                .keyboardShortcut(.cancelAction)
+                .disabled(capture.phase == .cancelling)
+                .arktraceAccessibleTarget()
+            case .completed:
+                Button("Show in Finder", action: showCompletedTrace)
+                    .arktraceAccessibleTarget()
+                Button("Capture again") {
+                    capture.prepareForAnotherCapture()
+                }
+                .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.defaultAction)
+                .arktraceAccessibleTarget()
+            default:
+                Button("Start capture", action: chooseDestinationAndStart)
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(!capture.canStart)
+                    .arktraceAccessibleTarget()
+            }
+        }
+    }
+
+    @ViewBuilder private var status: some View {
+        switch capture.phase {
+        case .discovering:
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text("Looking for devices…")
+            }
+        case .preparing:
+            captureProgress("Preparing the device…", value: nil)
+        case .recording:
+            captureProgress(
+                "Recording — \(capture.elapsedSeconds) of \(capture.durationSeconds) seconds",
+                value: capture.progressFraction
+            )
+        case .transferring:
+            captureProgress("Copying the trace to this Mac…", value: nil)
+        case .cancelling:
+            captureProgress("Stopping the capture…", value: nil)
+        case .completed:
+            VStack(alignment: .leading, spacing: 3) {
+                Label("Capture complete", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                if let url = capture.completedURL {
+                    Text("Opened \(url.lastPathComponent)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
+        case .cancelled:
+            Label("Capture cancelled", systemImage: "xmark.circle")
+                .foregroundStyle(.secondary)
+        case .failed:
+            Label("Fix the issue above, then try again.", systemImage: "exclamationmark.circle")
+                .foregroundStyle(.secondary)
+        case .idle, .ready:
+            Label(
+                "The trace stays on this Mac and opens automatically.",
+                systemImage: "lock"
+            )
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    private func captureProgress(_ label: String, value: Double?) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label).monospacedDigit()
+            if let value {
+                ProgressView(value: value)
+            } else {
+                ProgressView()
+            }
+        }
+        .frame(maxWidth: 270, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(label)
+    }
+
+    private func chooseHDC() {
+        let panel = NSOpenPanel()
+        panel.title = "Choose HDC"
+        panel.prompt = "Choose"
+        panel.message = "Choose the hdc executable in the OpenHarmony SDK toolchains folder."
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        if let current = capture.hdcExecutableURL {
+            panel.directoryURL = current.deletingLastPathComponent()
+        }
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        capture.setHDCExecutable(url)
+    }
+
+    private func chooseDestinationAndStart() {
+        let panel = NSSavePanel()
+        panel.title = "Save Captured Trace"
+        panel.prompt = "Start Capture"
+        panel.message = "Choose where ArkTrace should save the trace after recording."
+        panel.canCreateDirectories = true
+        panel.isExtensionHidden = false
+        panel.nameFieldStringValue = defaultCaptureName()
+        if let type = UTType(filenameExtension: "htrace") {
+            panel.allowedContentTypes = [type]
+        }
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        capture.startCapture(to: url) { capturedURL in
+            documentController.open(capturedURL)
+        }
+    }
+
+    private func showCompletedTrace() {
+        guard let url = capture.completedURL else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
+    private func defaultCaptureName() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        return "ArkTrace_\(formatter.string(from: Date())).htrace"
+    }
+
+    private func deviceLabel(_ device: TraceCaptureDevice) -> String {
+        let transport = device.transport == .network ? "Network" : "USB"
+        return "\(device.id) · \(transport)"
+    }
+
+    private func profileTitle(_ profile: TraceCaptureProfile) -> LocalizedStringResource {
+        switch profile {
+        case .appResponsiveness: "App responsiveness"
+        case .cpuScheduling: "CPU scheduling"
+        case .systemOverview: "System overview"
+        }
+    }
+
+    private func profileDescription(
+        _ profile: TraceCaptureProfile
+    ) -> LocalizedStringResource {
+        switch profile {
+        case .appResponsiveness:
+            "Scheduling, ArkUI/ACE, Binder, graphics and window events. Best for jank and slow interactions."
+        case .cpuScheduling:
+            "Scheduling, wakeups, CPU frequency and idle events. Best for contention and CPU investigations."
+        case .systemOverview:
+            "The app and CPU profiles together, plus distributed, memory and system categories. Produces the largest trace."
+        }
+    }
+
+    private func announce(_ phase: TraceCapturePhase) {
+        let message: String?
+        switch phase {
+        case .recording: message = "Trace capture started"
+        case .transferring: message = "Trace captured, copying to this Mac"
+        case .completed: message = "Trace capture complete and opened"
+        case .cancelled: message = "Trace capture cancelled"
+        case .failed: message = capture.issue?.message ?? "Trace capture failed"
+        default: message = nil
+        }
+        guard let message, let application = NSApp else { return }
+        unsafe NSAccessibility.post(
+            element: application,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: message,
+                .priority: NSNumber(value: phase == .failed ? 90 : 50),
+            ]
+        )
+    }
+}
+
 // MARK: - Keyboard shortcuts
 
 enum ArkTraceWindow {
+    static let capture = "arktrace.window.capture"
     static let keyboardShortcuts = "arktrace.window.keyboardShortcuts"
 }
 

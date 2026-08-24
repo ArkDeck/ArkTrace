@@ -13,6 +13,7 @@
 		010000000000000000000007 /* ArkTraceAnalysis in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000004 /* ArkTraceAnalysis */; };
 		010000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000008 /* Assets.xcassets */; };
 		010000000000000000000009 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000009 /* Localizable.xcstrings */; };
+		01000000000000000000000A /* ArkTraceCapture in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000005 /* ArkTraceCapture */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 				010000000000000000000005 /* ArkTraceRendering in Frameworks */,
 				010000000000000000000006 /* ArkTraceAppSupport in Frameworks */,
 				010000000000000000000007 /* ArkTraceAnalysis in Frameworks */,
+				01000000000000000000000A /* ArkTraceCapture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +107,7 @@
 				090000000000000000000002 /* ArkTraceRendering */,
 				090000000000000000000003 /* ArkTraceAppSupport */,
 				090000000000000000000004 /* ArkTraceAnalysis */,
+				090000000000000000000005 /* ArkTraceCapture */,
 			);
 			productName = ArkTrace;
 			productReference = 020000000000000000000006 /* ArkTrace.app */;
@@ -272,6 +275,7 @@
 		090000000000000000000002 /* ArkTraceRendering */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceRendering;};
 		090000000000000000000003 /* ArkTraceAppSupport */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceAppSupport;};
 		090000000000000000000004 /* ArkTraceAnalysis */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceAnalysis;};
+		090000000000000000000005 /* ArkTraceCapture */ = {isa = XCSwiftPackageProductDependency; package = 080000000000000000000001; productName = ArkTraceCapture;};
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 070000000000000000000001 /* Project object */;

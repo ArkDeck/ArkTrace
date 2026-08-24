@@ -31,8 +31,28 @@ when URLs arrive with a security scope, but it will not treat a bookmark as
 permission to broaden a path or to upload data.
 
 The empty app entitlement file deliberately grants no network client/server,
-USB/device, HDC, camera, microphone, location, or automation capability.
-ArkTrace 0.1 is an offline local viewer.
+camera, microphone, location, or automation capability. Trace analysis remains
+offline and host-only. The GUI App now has one explicit device boundary: after
+the user opens **Capture Trace…**, it may launch a user-visible `hdc` executable
+to discover a selected OpenHarmony target, run a bounded `hiprofiler_cmd`
+capture, and copy the result to a Save-panel destination. It does not provide
+deployment, flashing, a general remote shell, background capture, or unattended
+device control. CLI, Core, Runtime and the ArkDeck analyzer do not link this
+capture module and retain no HDC/device route.
+
+## Capture child boundary
+
+Capture and parsing deliberately use different trust models. The bundled
+TraceStreamer parser remains pinned and never searches `PATH`. HDC is an SDK
+tool chosen by the user or resolved from documented SDK/PATH locations, and its
+resolved path stays visible and replaceable in the capture UI. ArkTrace invokes
+it directly with `Process.executableURL` and an argument array; no host shell or
+command string is involved, and fixed device-side subcommands do not form a
+general remote console. Duration and buffers are bounded, output is
+bounded, device-side names are per-request UUIDs, and the local trace is exposed
+only after a non-empty partial file is atomically promoted. Success, failure,
+and cancellation all attempt to stop the profiler and remove only paths owned
+by that capture request. See `docs/CAPTURE.md` and AT-APP-014…019.
 
 ## Parser bundle boundary
 

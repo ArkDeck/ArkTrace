@@ -7,6 +7,7 @@
 > 本轮范围：规范性需求与验收；不包含开发任务拆分  
 > 配套设计：[DESIGN.md](./DESIGN.md)  
 > 0.1a 修订（2026-08-12）：新增 AT-TIME-006（instant 事件）与 AC-AT-017；AT-TIME-003/004 适用范围澄清；AT-AN-001/AT-CLI-003 range-scoped summary 语义；AT-CLI-007 窗口映射；§21.1 增补 instant 覆盖
+> Capture 修订（2026-08-24）：AT-SYS-003 改为能力隔离；新增 AT-APP-014～019；仅 GUI App 获得用户发起的 HDC capture，CLI/ArkDeck analyzer 仍为 host-only
 
 ## 1. 规范约定
 
@@ -47,6 +48,8 @@ Core/CLI 的可移植性可以保留，但 Windows、Linux GUI、iOS、visionOS 
 
 扩展名只用于 File Picker 和提示，格式是否支持由 parser 结果和 schema validation 决定。0.1 不把任意 SQLite 文件当成公开输入格式。
 
+GUI Capture 只负责先把设备侧 `hiprofiler_cmd` 结果物化为上述 Host 文件；该文件随后进入完全相同的 parser/schema validation 链路，不构成第二种输入语义。
+
 ## 3. 系统级要求
 
 ### AT-SYS-001 独立仓库
@@ -57,9 +60,9 @@ ArkTrace 必须是与 ArkDeck 平级的独立仓库，不得嵌入 `ArkDeck/ArkT
 
 App、CLI 与 ArkDeck adapter 必须共享 ArkTrace Core/Runtime/Store/Analysis。禁止任一产品面重新实现 parser、SQL 语义或 analysis formula。
 
-### AT-SYS-003 无设备能力
+### AT-SYS-003 设备能力隔离
 
-ArkTrace binary、App sandbox/entitlement、Core API 和 CLI 均不得提供 HDC、设备发现、应用部署、Flash、Trace capture 或设备授权能力。
+只有 GUI App 明示的 Capture 窗口可以通过独立 `ArkTraceCapture` target 提供 HDC 设备发现与 Trace capture。Core API、Runtime、CLI、ArkDeck analyzer 及其依赖闭包均不得链接 Capture、提供 HDC route 或获得设备授权。App 仍不得提供应用部署、Flash、通用远程 shell 或后台无人值守设备控制。
 
 ### AT-SYS-004 Local-first
 
@@ -79,6 +82,7 @@ Store → App/Rendering/ArkDeck
 Analysis → App/ArkDeck/LLM SDK
 Rendering → TraceStreamer Process/SQLite
 CLI → App
+CLI/Core/Runtime/ArkDeck adapter → ArkTraceCapture/HDC
 ```
 
 ## 4. 时间与身份规格
@@ -1197,6 +1201,30 @@ Canvas 不要求为每个不可见 event 创建 accessibility element，也不�
 
 MainActor 只做 UI state 与 drawing。任何单次主线程同步数据库/文件/hash/parser 操作超过一个 run-loop tick 都是不符合。
 
+### AT-APP-014 Capture entry and flow
+
+App 必须从 File menu、主 toolbar 和无文档 empty state 提供 **Capture Trace…**。流程顺序必须是 HDC → device → profile → duration/buffer → Save panel → capture；完成后必须走既有 `TraceDocumentController.open`，不得另造 parser/open 链路。当前已打开 Trace 在下一轮采集期间仍可查看。
+
+### AT-APP-015 Capture bounds and presets
+
+采集时长硬限制为 5–300 秒；buffer 只能从 16/32/64/128/256 MB 选择。必须提供 App responsiveness、CPU scheduling、System overview 三种 closed preset；不得把任意 protobuf 文本或 shell command 作为此 UI 的输入。
+
+### AT-APP-016 Capture process safety
+
+HDC 必须解析为可读、可执行 regular file，并通过 `Process.executableURL + arguments[]` 直接调用。禁止调用宿主 shell、拼接命令字符串、把 device ID 当命令解释或暴露通用 remote shell；设备端 `hdc shell` 只允许固定的 `hiprofiler_cmd` 与 session-owned `rm` 参数数组。stdout/stderr 必须 bounded。HDC 可来自上次用户选择、明确 SDK 环境、App 的 PATH 或 reviewed 默认 SDK 位置；最终解析路径必须在 UI 中可见并可由用户替换。该规则只适用于 HDC，AT-SEC-005 对 pinned parser/analyzer 的禁止 PATH 选择不变。
+
+### AT-APP-017 Capture promotion and cleanup
+
+每次采集必须使用不可预测且本次 request 独占的设备端路径。本机先接收到目标目录内的 session-owned partial，确认是非空 regular file、完成远端清理尝试并再次检查取消状态后，才可原子 move/replace；partial 不得进入 Parser、Recent 或 cache。成功、失败和取消都必须尝试停止 device profiler 并清理本次拥有的设备端 config/trace；远端断线可使清理成为 best-effort，但禁止删除用户提供的远端路径，因为 Capture API 根本不得接受这种路径。
+
+### AT-APP-018 Capture cancellation and stale results
+
+取消必须终止当前 HDC child，必要时只对已记录 PID 升级 SIGKILL，并以独立 cleanup task 请求 `hiprofiler_cmd -k`。被取消或旧 generation 的 capture 不得自动打开文件、覆盖新 capture 状态或提升 partial。采集中必须保留可键盘触达的 Cancel；只要它是唯一控制面，窗口关闭必须禁用。
+
+### AT-APP-019 Capture accessibility and recovery
+
+Device、profile、duration、buffer 必须使用带可见 label 的原生 control。recording 显示 elapsed/total 和 determinate progress；transfer 可以 indeterminate。完成、取消、错误不得只靠颜色表达，并以合并 VoiceOver notification 宣告。错误必须同时给出简短原因与具体恢复动作；无设备是可恢复 empty state，不得伪装成 crash。
+
 ## 15. Renderer 规格
 
 ### AT-RENDER-001 Backend
@@ -1428,11 +1456,11 @@ ArkTrace analyzer profile 必须是 `hostOnly`、`binding:none`，不得获得 R
 
 ### AT-SEC-004 Network
 
-App/CLI 运行 parser/query/analysis 时不得访问网络。获取源码/fixtures/update 是独立、显式开发或发布流程。
+App/CLI 运行 parser/query/analysis 时不得访问网络。GUI Capture 只允许用户发起的 HDC USB/TCP transport，不得上传 Trace、访问云服务或扩展为任意网络客户端。获取源码/fixtures/update 是独立、显式开发或发布流程。
 
 ### AT-SEC-005 Tool selection
 
-生产 App 和 ArkDeck adapter 不搜索 PATH。CLI developer override 必须是显式 absolute path，并在 result 中记录 binary hash 而非 path。
+生产 App 的 pinned TraceStreamer 与 ArkDeck analyzer 不搜索 PATH。CLI developer override 必须是显式 absolute path，并在 result 中记录 binary hash 而非 path。HDC 是用户 SDK 工具而非分析 identity，可按 AT-APP-016 从明确环境/PATH 发现，但解析结果必须是 absolute executable URL，并允许用户在 Capture 窗口核对与替换。
 
 ### AT-SEC-006 Resource exhaustion
 
@@ -1795,7 +1823,7 @@ captured immutable trace Artifact lease
 - Web frontend；
 - Windows/Linux GUI；
 - iOS/visionOS；
-- Trace capture/HDC/device runtime；
+- 后台/无人值守 capture、通用 HDC console、设备授权代理；
 - HAP/`.so`/Flash；
 - cloud backend/account/telemetry；
 - LLM SDK 或通用 Agent Framework；

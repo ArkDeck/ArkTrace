@@ -73,4 +73,25 @@ final class AppCommandTests: XCTestCase {
             "a focused field is shown by its caret, not by a blue ring"
         )
     }
+
+    func testCaptureIsReachableFromMenuToolbarAndEmptyState() throws {
+        let source = try source()
+        XCTAssertTrue(
+            source.contains(#"Window("Capture Trace", id: ArkTraceWindow.capture)"#),
+            "capture needs a dedicated window so the current trace remains inspectable"
+        )
+        XCTAssertTrue(
+            source.contains(#"Button("Capture Trace…") {"#)
+                && source.contains(#".keyboardShortcut("n")"#),
+            "File → Capture Trace… must have the native ⌘N command"
+        )
+        XCTAssertTrue(
+            source.contains(#"Label("Capture", systemImage: "record.circle")"#),
+            "the main toolbar must expose capture"
+        )
+        XCTAssertTrue(
+            source.contains(#"Button("Capture Trace…", action: openCapture)"#),
+            "the no-document state must offer capture without requiring the menu"
+        )
+    }
 }

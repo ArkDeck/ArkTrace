@@ -11,9 +11,10 @@
 
 **macOS 原生 OpenHarmony Trace Workbench** —— 同一套核心同时服务人（原生 Timeline Viewer）与 AI Agent（确定性 CLI）。
 
-ArkTrace 复用 pinned 的 OpenHarmony TraceStreamer，将 `.htrace` / `.ftrace` / `.systrace` 等离线 Trace 解析为本地 SQLite，并在其上构建：
+ArkTrace 可从用户明确选择的 OpenHarmony 设备采集 Trace，也可打开已有文件；随后复用 pinned 的 TraceStreamer，将 `.htrace` / `.ftrace` / `.systrace` 解析为本地 SQLite，并在其上构建：
 
 - **ArkTrace.app** —— SwiftUI + CoreGraphics 原生 Timeline Viewer：CPU / thread state / named slice / counter / frame 泳道按进程分组，named slice 按调用深度分层，支持 zoom、pan、搜索、range selection、时间轴 flag 与 mark，以及带 range analysis 的 Inspector。
+- **设备采集** —— 原生、可取消的 HDC 流程，提供「应用响应」「CPU 调度」「系统概览」三种预设；完成后校验文件、保存到本机并自动打开。
 - **`arktrace` CLI** —— 面向 Agent 的 typed、bounded、versioned JSON 查询与分析：`doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`，以及 fail-closed 的 `licenses`。
 - **ArkDeck 集成** —— 作为 [ArkDeck](https://github.com/ArkDeck) 自动调试闭环中的 host-only Trace Analysis Engine，设计上零设备能力。
 
@@ -29,6 +30,7 @@ ArkTrace 复用 pinned 的 OpenHarmony TraceStreamer，将 `.htrace` / `.ftrace`
 
 - Apple silicon Mac，macOS 26 及以上
 - Swift 6.3 toolchain / Xcode 26.6（构建 App 需要 Xcode）
+- OpenHarmony SDK `hdc`，以及带 `hiprofiler_cmd` 的已连接设备（仅采集需要）
 - `jq` —— macOS 15 起随系统提供
 - 首次构建 pinned TraceStreamer 需要网络访问
 
@@ -72,6 +74,8 @@ PARSER="$PWD/ThirdParty/TraceStreamer/macx/trace_streamer"
 ### 4. 运行 Viewer
 
 用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过 **File → Open**、Finder「打开方式」、拖放或 Recents 打开 `.htrace` / `.ftrace` / `.systrace`；**Reload** 会从原始文件重新打开当前 Trace。
+
+要采集新 Trace，请先通过 USB 或网络调试连接 OpenHarmony 设备，再选择 **File → Capture Trace…**（<kbd>⌘N</kbd>）。ArkTrace 会从已配置的 SDK/PATH 查找 `hdc`，也允许直接选择其位置；随后选择设备、预设、时长与缓冲区，指定本地保存位置并开始采集。完成的文件会自动打开。完整行为与故障恢复见 [docs/CAPTURE.md](docs/CAPTURE.md)。
 
 Sidebar 控制轨道显隐，并可按进程名或 PID 过滤出某个进程；Timeline 支持鼠标/触控板 pan 与 zoom、range selection 与真实 event selection；工具栏的 Search 按 TID / thread / slice 名称定位 event；Inspector 展示 event 详情或 range analysis。
 
@@ -135,13 +139,14 @@ CI 会在每个 pull request 上构建、测试并运行离线 gate，但托管 
 
 Phase 0–7 全部完成，**10 个发布门全部关闭**。Phase 7（上游对齐，13/13）把 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) 里每一条可动手的 GAP 关闭在 `scripts/test_phase7.sh` 之后。最后一道门以 DAYU 200 真机闭合了一次真实调试闭环——typed capture → structured analysis → Agent 判断 → typed 复验——目标 App 的 CPU 占用判定为 `improved`（−87.09%）。完整任务索引见 [docs/TASKS.md](docs/TASKS.md)，最终报告见 [docs/PHASE_6_VERIFICATION.md](docs/PHASE_6_VERIFICATION.md)。
 
-首发已知限制：仅支持 Apple silicon / macOS 26+；仅离线分析——不含 capture、设备与网络能力。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
+已知限制：仅支持 Apple silicon / macOS 26+；采集需要 OpenHarmony SDK `hdc`、已连接设备和设备侧 `hiprofiler_cmd`。查看器不画 irq / hilog / syscall 泳道（这几张表在目前核对过的每个真机库里都是 0 行），不提供用户自定义配色，区间统计也还没有 min/avg/max 分位——下一轮清单见 [docs/UPSTREAM_ALIGNMENT_AUDIT.md](docs/UPSTREAM_ALIGNMENT_AUDIT.md) §10。CLI 与 ArkDeck analyzer 仍是 host-only，不获得设备权限。macOS 26 是当前基线；此前签名的分发产物基于 macOS 14 构建，仅作为历史 evidence 保留——下一次签名发布必须在新基线上重新产出并验证。
 
 ## 文档
 
 | 文档 | 内容 |
 |---|---|
 | [docs/DESIGN.md](docs/DESIGN.md) | 产品与技术设计：证据基线、架构、域模型、TraceStreamer 集成、Renderer、ArkDeck 边界、发布门 |
+| [docs/CAPTURE.md](docs/CAPTURE.md) | App-only HDC 采集流程、预设、生命周期、安全边界与故障排查 |
 | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) | 规范性需求（`AT-*`）、machine JSON contract、端到端验收场景（`AC-AT-*`）、Definition of Done |
 | [docs/TASKS.md](docs/TASKS.md) | Phase 0–7 任务索引与发布门状态 |
 | [docs/CLI.md](docs/CLI.md) | `arktrace` 安装、命令、flags、Machine JSON、exit status、signal 与隐私 |

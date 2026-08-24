@@ -115,14 +115,15 @@ SmartPerf 的可复用语义包括：
 - `AnalyzerProvider` 已实现 immutable artifact lease 校验、固定 analyzer ref、固定参数、无 shell 的 descriptor-bound process dispatch、JSON 校验和 derived artifact provenance；
 - 当前 daemon 只实际配置 crash analyzer profile；trace summary 虽在 Catalog 中存在，但生产环境默认 `analyzer.profileUnavailable`；
 - 当前 `AnalyzerExecutableResolver` 实际只支持一个 analyzer 可执行文件，不过基础 resolver 协议已经支持 `resolveExecutable(for action:)`，因此可以在保留同一 provider 的前提下按 closed `analyzerRef` 选择多个 pinned executable；
-- ArkDeck 的 raw Trace Artifact 由 `capture.diagnostics@1` 产生，ArkTrace 不需要也不得获得 HDC 或设备控制能力。
+- ArkDeck 的 raw Trace Artifact 仍由 `capture.diagnostics@1` 产生；ArkTrace **analyzer/CLI** 不得获得 HDC 或设备控制能力。GUI 的用户发起采集是独立产品面，隔离在 `ArkTraceCapture`，不进入 ArkDeck route。
 
 ## 3. 产品目标
 
 ### 3.1 Human 路径
 
 ```text
-Trace 文件
+已连接设备（可选） → App-only HDC capture → 本机 Trace 文件
+  或已有 Trace 文件
   → 本地异步解析
   → 原生 Timeline
   → CPU / Process / Thread / Slice / Counter
@@ -157,6 +158,7 @@ ArkDeck capture.diagnostics@1
 
 ### 4.1 ArkTrace 负责
 
+- GUI 中用户明确发起的 HDC 设备发现与 bounded Trace capture；
 - Host 上已有 Trace Artifact 的解析；
 - TraceStreamer 依赖管理与调用；
 - SQLite schema 适配、校验、索引和查询；
@@ -168,17 +170,17 @@ ArkDeck capture.diagnostics@1
 
 ### 4.2 ArkTrace 永不负责
 
-- HDC、设备发现、设备身份或授权；
-- Trace capture；
 - HAP、`.so`、Flash 或应用生命周期；
+- 后台/无人值守设备控制、设备授权代理或通用 HDC console；
+- CLI、Core 或 ArkDeck analyzer 中的 device/capture route；
 - ArkDeck Runtime/Job/Capability 状态机；
 - LLM SDK、prompt orchestration 或通用 Agent Framework；
 - 云上传、账号或遥测平台。
 
 ### 4.3 边界不变量
 
-1. ArkTrace 的设备权限为零。
-2. ArkTrace 的输入必须是 Host 可读文件或 ArkDeck 已解析的 immutable Artifact lease。
+1. 设备权限只存在于 GUI 明示打开的 `ArkTraceCapture` 流程；Core、CLI 与 ArkDeck analyzer 为零。
+2. Parser/Runtime 的输入仍必须是 Host 可读文件或 ArkDeck 已解析的 immutable Artifact lease；Capture 先产出 Host 文件，再交给既有 open 链路。
 3. App、CLI 与 ArkDeck adapter 复用同一 Core/Store/Analysis，不各自实现 Trace 语义。
 4. Agent API 不暴露 raw SQL。
 5. 原始 Trace 永不原地修改。
@@ -188,6 +190,9 @@ ArkDeck capture.diagnostics@1
 
 ```mermaid
 flowchart TB
+    DEVICE["OpenHarmony device\nhiprofiler_cmd"] --> HDC["User SDK hdc"]
+    HDC --> CAPTURE["ArkTraceCapture\napp-only boundary"]
+    CAPTURE --> APP
     APP["ArkTrace.app\nSwiftUI shell"] --> RENDER["ArkTraceRendering\nNSView + CoreGraphics"]
     APP --> RUNTIME["ArkTraceRuntime\nTraceSession actor"]
     CLI["arktrace CLI"] --> RUNTIME
@@ -216,8 +221,9 @@ ArkTraceAnalysis   → Core
 ArkTraceRendering  → Core
 ArkTraceRuntime    → Core + Parser + Store
 ArkTraceAppSupport → Core + Parser + Runtime + Analysis + Rendering
+ArkTraceCapture    ← 独立 Foundation/Process target，不依赖 Core/Runtime/CLI
 ArkTraceCLI        → Core + Parser + Store + Runtime + Analysis + SignalShim
-ArkTraceApp        → Core + Analysis + Rendering + AppSupport
+ArkTraceApp        → Core + Analysis + Rendering + AppSupport + Capture
 ```
 
 `Package.swift` 是这张图的事实源。`ArkTraceAppSupport` 承载 App 的 document/session
@@ -227,6 +233,8 @@ ArkTraceApp        → Core + Analysis + Rendering + AppSupport
 policy；这些都不经过 `Runtime` 的 session 编排。
 
 `ArkTraceRuntime` 是必要的两用编排层：App 与 CLI 都要共享 session、cache、parse、schema validation 和 cancellation。如果把这些职责放入 App 或 CLI，会产生两套生命周期；如果放入 Core，会反向引入 Process/SQLite 依赖。
+
+`ArkTraceCapture` 反向保持独立：它只把设备侧结果安全地物化为 Host regular file，不理解 Trace domain，也不调用 Parser。只有 App 链接它；CLI 与 ArkDeck analyzer 的依赖闭包不含该 target。完整 lifecycle、预设与失败安全见 [CAPTURE.md](./CAPTURE.md)。
 
 ## 6. 仓库结构
 
@@ -246,6 +254,7 @@ ArkTrace/
 │   ├── ArkTraceRuntime/
 │   ├── ArkTraceRendering/
 │   ├── ArkTraceAppSupport/
+│   ├── ArkTraceCapture/
 │   ├── ArkTraceSignalShim/
 │   ├── ArkTraceCLI/
 │   └── arktrace/
@@ -256,6 +265,7 @@ ArkTrace/
 │   ├── ArkTraceAnalysisTests/
 │   ├── ArkTraceRenderingTests/
 │   ├── ArkTraceAppSupportTests/
+│   ├── ArkTraceCaptureTests/
 │   ├── ArkTraceCLITests/
 │   └── ArkTraceIntegrationTests/
 ├── Fixtures/
@@ -271,6 +281,7 @@ ArkTrace/
 │   └── test_phase<N>.sh
 └── docs/
     ├── DESIGN.md
+    ├── CAPTURE.md
     ├── SPECIFICATION.md
     ├── TRACE_STREAMER.md
     ├── CLI.md

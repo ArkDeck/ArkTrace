@@ -9,9 +9,9 @@
 ## 1. 审计边界
 
 只回答一个问题：**上游能做而 ArkTrace 不能做（或做得不一样）的、与离线看 trace 相关的事。** 以下按
-DESIGN §4.2 与 README Status 属**已声明的非目标**，不作为差距：
+本审计只覆盖离线 viewer；以下不纳入这份离线差距计数：
 
-1. 采集、设备、网络能力（AT-SYS-003）；
+1. 采集、设备、网络能力（后续已由独立 `ArkTraceCapture` 实现，见 [CAPTURE.md](./CAPTURE.md)，仍不属于本审计）；
 2. 重写 parser（AT-SYS-005）；
 3. 移植 Web 架构（worker 池、Web Component、DOM 耦合，DESIGN §2.1「不复用」清单）；
 4. CLI 与上游对标（上游没有 CLI）；
@@ -227,7 +227,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 
 | 项 | 依据 |
 |---|---|
-| Trace 采集（`component/SpRecordTrace.ts` 80KB、`SpRecordConfigModel.ts`） | DESIGN §4.2、AT-SYS-003、README:111 |
+| Trace 采集（`component/SpRecordTrace.ts` 80KB、`SpRecordConfigModel.ts`） | 不参与本次**离线 viewer** 对齐；后续原生 App-only 实现见 CAPTURE.md |
 | 任意 SQL 查询页（`component/SpQuerySQL.ts`） | DESIGN §4.3 不变量 4、AT-DB-006/007 |
 | `Ctrl+B` 隐藏菜单与搜索框（`SpSystemTrace.event.ts:899-941` 直改 DOM 样式） | Web 特有 DOM 耦合，DESIGN §2.1「不复用」；macOS 原生 sidebar 折叠 + AT-APP-003 已覆盖 |
 | `v` 键 VSync 叠加（`component/chart/VSync.ts:133-134`） | 是 G01 的下游装饰 —— counter 泳道拿不到数据前没有数据源。先修 G01 |

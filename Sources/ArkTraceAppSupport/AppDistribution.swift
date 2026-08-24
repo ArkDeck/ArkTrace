@@ -16,7 +16,10 @@ public enum ArkTraceAppDistribution {
     public static let appSandboxEnabled = false
     public static let signingCandidate = "Developer ID Application"
     public static let permitsNetworkUpload = false
-    public static let permitsDeviceAccess = false
+    /// The GUI's explicit Capture window may invoke a user-selected or
+    /// discovered OpenHarmony SDK `hdc`. Core, CLI and the ArkDeck analyzer do
+    /// not link ArkTraceCapture and retain zero device authority.
+    public static let permitsDeviceAccess = true
 
     /// Reviewed file-picker and Finder hint extensions (SPEC 2.3). The format
     /// is decided by the parser and schema validation, never by the extension;
