@@ -21,10 +21,19 @@ public struct TraceCaptureDevice: Hashable, Codable, Sendable, Identifiable {
 
     public let id: String
     public let transport: Transport
+    public let name: String?
+    public let systemVersion: String?
 
-    public init(id: String, transport: Transport? = nil) {
+    public init(
+        id: String,
+        transport: Transport? = nil,
+        name: String? = nil,
+        systemVersion: String? = nil
+    ) {
         self.id = id
         self.transport = transport ?? (id.contains(":") ? .network : .usb)
+        self.name = name
+        self.systemVersion = systemVersion
     }
 }
 
@@ -662,7 +671,8 @@ struct HDCTraceCaptureClient: Sendable {
                 diagnostic: outcome.diagnosticText
             )
         }
-        return Self.parseDevices(String(decoding: outcome.stdout, as: UTF8.self))
+        let devices = Self.parseDevices(String(decoding: outcome.stdout, as: UTF8.self))
+        return try await enrichDevices(devices, executableURL: executableURL)
     }
 
     static func parseDevices(_ output: String) -> [TraceCaptureDevice] {
@@ -678,6 +688,93 @@ struct HDCTraceCaptureClient: Sendable {
             guard seen.insert(id).inserted else { return nil }
             return TraceCaptureDevice(id: id)
         }
+    }
+
+    static func parseDeviceProperty(_ output: String) -> String? {
+        var value = output.prefix(1_024).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty, value.utf8.count <= 256 else { return nil }
+        if value.count >= 2,
+            (value.first == "\"" && value.last == "\"")
+                || (value.first == "'" && value.last == "'")
+        {
+            value.removeFirst()
+            value.removeLast()
+            value = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        let normalized = value.lowercased()
+        guard !value.isEmpty,
+            !["default", "unknown", "none", "null", "[empty]"].contains(normalized),
+            !normalized.hasPrefix("[fail]"),
+            !(normalized.contains("get parameter") && normalized.contains("fail")),
+            value.unicodeScalars.allSatisfy({
+                !CharacterSet.controlCharacters.contains($0)
+            })
+        else { return nil }
+        return value
+    }
+
+    private func enrichDevices(
+        _ devices: [TraceCaptureDevice],
+        executableURL: URL
+    ) async throws -> [TraceCaptureDevice] {
+        guard !devices.isEmpty else { return [] }
+        return try await withThrowingTaskGroup(
+            of: (Int, TraceCaptureDevice).self,
+            returning: [TraceCaptureDevice].self
+        ) { group in
+            for (index, device) in devices.enumerated() {
+                group.addTask {
+                    async let name = deviceProperty(
+                        executableURL: executableURL,
+                        deviceID: device.id,
+                        key: "const.product.name"
+                    )
+                    async let systemVersion = deviceProperty(
+                        executableURL: executableURL,
+                        deviceID: device.id,
+                        key: "const.ohos.fullname"
+                    )
+                    return try await (
+                        index,
+                        TraceCaptureDevice(
+                            id: device.id,
+                            transport: device.transport,
+                            name: name,
+                            systemVersion: systemVersion
+                        )
+                    )
+                }
+            }
+
+            var enriched = devices
+            for try await (index, device) in group {
+                enriched[index] = device
+            }
+            return enriched
+        }
+    }
+
+    private func deviceProperty(
+        executableURL: URL,
+        deviceID: String,
+        key: String
+    ) async throws -> String? {
+        let outcome: HDCProcessOutcome
+        do {
+            outcome = try await runner(
+                executableURL,
+                ["-t", deviceID, "shell", "param", "get", key]
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            return nil
+        }
+        guard outcome.succeeded, !outcome.outputWasTruncated else { return nil }
+        return Self.parseDeviceProperty(
+            String(decoding: outcome.stdout + outcome.stderr, as: UTF8.self)
+        )
     }
 
     func capture(

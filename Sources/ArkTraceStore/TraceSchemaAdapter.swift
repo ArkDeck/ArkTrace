@@ -566,7 +566,84 @@ enum TraceSchemaAdapter {
                 message: "trace_range duration exceeds supported Int64 nanoseconds"
             )
         }
-        return (start, end, duration)
+        let effectiveStart = try credibleTraceStart(
+            db,
+            declaredStart: start,
+            declaredEnd: end
+        ) ?? start
+        let (effectiveDuration, effectiveOverflow) = end.subtractingReportingOverflow(
+            effectiveStart
+        )
+        guard !effectiveOverflow, effectiveDuration > 0 else {
+            throw ArkTraceError(
+                code: .traceDatabaseInvalid,
+                stage: .validating,
+                message: "effective trace range exceeds supported Int64 nanoseconds"
+            )
+        }
+        return (effectiveStart, end, effectiveDuration)
+    }
+
+    /// TraceStreamer 4.3.7 can very occasionally decode the first few Hitrace
+    /// callstack packets with a timestamp from a different clock epoch. Its
+    /// exported `trace_range.start_ts` then follows that isolated value and a
+    /// seconds-long capture appears to last for hours, compressing every real
+    /// event into an invisible strip at the right edge of the timeline.
+    ///
+    /// This is deliberately a conservative, bounded correction rather than a
+    /// general replacement for the upstream range. We inspect at most 1,024
+    /// insertion-order timestamps from each of the three required timed event
+    /// tables, require at least two independent tables to agree, and only
+    /// ignore the declared start when it is both over a minute away and at
+    /// least eight times farther from the consensus than the remaining trace.
+    /// The existing quality probe then reports the excluded early timestamps
+    /// as clamped values instead of silently hiding the parser defect.
+    private static func credibleTraceStart(
+        _ db: TraceDatabase,
+        declaredStart: Int64,
+        declaredEnd: Int64
+    ) throws -> Int64? {
+        let tables = ["sched_slice", "thread_state", "callstack"]
+        let samplesByTable = try tables.compactMap { table -> [Int64]? in
+            let values = try db.query(
+                """
+                SELECT ts
+                FROM \(table)
+                WHERE typeof(ts) = 'integer'
+                LIMIT \(semanticProbeLimit)
+                """,
+                stage: .validating,
+                observesTaskCancellation: true
+            ) { $0.int64(0) }.compactMap { $0 }.filter {
+                $0 >= declaredStart && $0 <= declaredEnd
+            }
+            return values.isEmpty ? nil : values
+        }
+        guard samplesByTable.count >= 2 else { return nil }
+
+        let tableMedians = samplesByTable.map { values in
+            let sorted = values.sorted()
+            return sorted[sorted.count / 2]
+        }.sorted()
+        let anchor = tableMedians[tableMedians.count / 2]
+        let (earlyGap, earlyOverflow) = anchor.subtractingReportingOverflow(declaredStart)
+        let (remainingSpan, remainingOverflow) = declaredEnd.subtractingReportingOverflow(anchor)
+        let minute: Int64 = 60_000_000_000
+        guard !earlyOverflow, !remainingOverflow,
+            earlyGap > minute, remainingSpan > 0,
+            earlyGap / remainingSpan >= 8
+        else { return nil }
+
+        let (doubledSpan, doubledOverflow) = remainingSpan.multipliedReportingOverflow(by: 2)
+        let lookback = doubledOverflow ? Int64.max : max(1_000_000_000, doubledSpan)
+        let (proposedLowerBound, lowerOverflow) = anchor.subtractingReportingOverflow(lookback)
+        let lowerBound = lowerOverflow ? declaredStart : max(declaredStart, proposedLowerBound)
+        let credibleByTable = samplesByTable.compactMap { values -> [Int64]? in
+            let credible = values.filter { $0 >= lowerBound && $0 <= declaredEnd }
+            return credible.isEmpty ? nil : credible
+        }
+        guard credibleByTable.count >= 2 else { return nil }
+        return credibleByTable.flatMap { $0 }.min()
     }
 
     /// Required identities must use SQLite's INTEGER storage class. SQLite's

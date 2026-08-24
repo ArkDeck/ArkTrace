@@ -143,7 +143,6 @@
 /* Begin PBXShellScriptBuildPhase section */
 		030000000000000000000001 /* Copy Pinned TraceStreamer Bytes */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = ();
 			inputPaths = (

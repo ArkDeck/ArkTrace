@@ -65,7 +65,7 @@ ready → preparing → recording → transferring → completed
 | CPU scheduling | scheduling/wakeup + CPU frequency/idle | 调度竞争、CPU 忙碌、频率变化 |
 | System overview | 上述两组 + distributed、memory、system category | 尚不确定根因的宽采集 |
 
-时长可直接输入，并可在秒与分钟之间切换；秒模式提供 15s/30s/45s/60s，分钟模式提供 1/2/3 min 快捷选择。切换到分钟时向上取整，避免单位切换无意缩短采集。底层时长仍统一换算为秒并硬限制为 5–300 秒；buffer 可选 16/32/64/128/256 MB。两者都是硬边界，避免 UI 或 API 产生无界采集。配置使用 OpenHarmony 官方 `hiprofiler_cmd` protobuf text 形状：`session_config`、`ftrace-plugin`、`sample_duration`、`buffer_size_kb`、`ftrace_events` 与 `hitrace_categories`。
+时长可直接输入，并可在秒与分钟之间切换；秒模式提供 15s/30s/45s/60s，分钟模式提供 1/2/3 min 快捷选择。切换到分钟时向上取整，避免单位切换无意缩短采集。底层时长仍统一换算为秒并硬限制为 5–300 秒；buffer 可选 16/32/64/128/256 MB。两者都是硬边界，避免 UI 或 API 产生无界采集。配置使用 OpenHarmony 官方 `hiprofiler_cmd` protobuf text 形状：`session_config`、`ftrace-plugin`、`sample_duration`、`buffer_size_kb`、`ftrace_events` 与 `hitrace_categories`。`ftrace-plugin` 描述的是容器内的数据源，不是文件格式；官方命令仍把 `result_file` 与 `-o` 输出命名为 `.htrace`。ArkTrace 因此保存 `OHOSPROF` 容器为 `.htrace`，而不是把它伪装成文本 `.ftrace`；Save panel 只负责追加一次扩展名。
 
 ## 5. HDC 发现与调用
 
@@ -99,6 +99,9 @@ stdout/stderr 各自有 64 KiB 上限；错误详情最多保留 4 KiB，避免�
 - `.partial` 永不交给 Parser，也不会进入 Recent；
 - 只有非空文件完成原子 promotion 后才触发自动打开；
 - 已存在目标只会在 NSSavePanel 已确认覆盖后替换；
+- TraceStreamer 偶发把少量 Hitrace callstack packet 解码到错误 clock epoch 时，ArkTrace
+  仅在至少两个独立事件表形成明确共识、离群跨度超过 60 秒且达到剩余有效区间的
+  8 倍后修正有效 trace start；异常值继续以 `callstack.ts` clamped-value 质量证据公开；
 - 远端清理是 best-effort：断线时本次 UUID 文件可能暂留在设备的
   `/data/local/tmp`，但 ArkTrace 不会因此删除任何用户原始 Trace，也不会把
   已取消的本机 partial 提升为正式文件。

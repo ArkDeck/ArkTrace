@@ -53,6 +53,15 @@ swift build -c release --product arktrace
 swift test
 ```
 
+日常在不同分支或 worktree 间迭代时，建议使用稳定缓存 runner。它们复用同一个
+按内容校验的源码镜像，以及共享的构建、依赖和模块缓存；源码未变化时不会重新编译：
+
+```bash
+sh scripts/run-swiftpm.sh build
+sh scripts/run-swiftpm.sh test
+sh scripts/run-xcodebuild.sh
+```
+
 ### 3. 用 CLI 查询 Trace
 
 仓库自带一个小型示例 Trace，以下命令开箱即用：

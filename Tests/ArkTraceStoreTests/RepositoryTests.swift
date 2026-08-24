@@ -2934,6 +2934,44 @@ final class RepositoryTests: XCTestCase {
         assertRepositoryInitialization(at: url, failsWith: .traceSchemaUnsupported)
     }
 
+    func testGrossEarlyCallstackClockOutlierDoesNotExpandTimelineRange() async throws {
+        let url = try makeTemporaryDatabase(
+            """
+            CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER);
+            INSERT INTO trace_range VALUES (0, 120000000000);
+            CREATE TABLE process (ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER);
+            CREATE TABLE thread (
+                itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER, ipid INTEGER
+            );
+            \(Self.requiredEventTablesSQL)
+            INSERT INTO sched_slice VALUES
+                (1, 110000000000, 1000, 0, 0, 0),
+                (2, 111000000000, 1000, 0, 0, 0);
+            INSERT INTO thread_state VALUES
+                (1, 110200000000, 1000, 0, 0, 'Running'),
+                (2, 111200000000, 1000, 0, 0, 'Sleeping');
+            INSERT INTO callstack VALUES
+                (1, 1000000000, 1000, 0, 'wrong clock epoch'),
+                (2, 110100000000, 1000, 0, 'valid start'),
+                (3, 111100000000, 1000, 0, 'valid work');
+            """
+        )
+        defer { try? FileManager.default.removeItem(at: url) }
+        let repository = try SQLiteTraceRepository(
+            databaseURL: url,
+            parser: Self.dummyParser,
+            source: Self.dummySource
+        )
+
+        let metadata = try await repository.metadata()
+        XCTAssertEqual(metadata.durationNs, 10_000_000_000)
+        XCTAssertTrue(metadata.dataQuality.issues.contains {
+            $0.category == .clampedValue
+                && $0.scope == "callstack.ts"
+                && $0.count == 1
+        })
+    }
+
     func testOverflowingTraceRangeReturnsTypedDatabaseError() throws {
         let url = try makeTemporaryDatabase(
             """

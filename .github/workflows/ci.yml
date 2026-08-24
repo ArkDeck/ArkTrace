@@ -125,7 +125,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
     env:
-      SPM_SCRATCH: ${{ github.workspace }}/.build
+      ARKTRACE_SWIFTPM_CACHE_ROOT: ${{ runner.temp }}/arktrace-swiftpm
     steps:
       - uses: actions/checkout@v4
 
@@ -152,10 +152,10 @@ jobs:
           } | tee -a "$GITHUB_STEP_SUMMARY"
           echo "xcode=26.6" >> "$GITHUB_OUTPUT"
 
-      # Restore ladder: exact inputs+commit, then same inputs, then the newest
-      # protected-main cache for this runner/arch/toolchain (only main ever
-      # saves, so every prefix hit is a main-produced cache). A cache failure
-      # must never fail the correctness gate: cold builds continue.
+      # The cache owns a stable source mirror as well as build/dependency/module
+      # state. Restoring only `.build` under an ephemeral checkout path causes
+      # llbuild to see a different package identity on every runner/worktree.
+      # Only protected main saves; pull requests can restore but never poison.
       #
       # The pinned TraceStreamer binary is deliberately NOT part of any cache
       # path: it is gitignored, absent on hosted runners, and a restored copy
@@ -165,11 +165,17 @@ jobs:
         continue-on-error: true
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.SPM_SCRATCH }}
-          key: spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}-${{ github.sha }}
+          path: |
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace
+            !${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/build
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/dependencies
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/ModuleCache
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/source-state
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
           restore-keys: |
-            spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}-
-            spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
+            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-
+            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
 
       # The package builds warning-free today and that is worth holding. If a
       # newer SDK introduces an unavoidable warning, relax this step rather
@@ -177,7 +183,7 @@ jobs:
       - name: Build (warnings are failures)
         run: |
           set -o pipefail
-          swift build --scratch-path "$SPM_SCRATCH" 2>&1 | tee build.log
+          sh scripts/run-swiftpm.sh build 2>&1 | tee build.log
           if grep -q 'warning:' build.log; then
             echo '::error::swift build emitted warnings'
             grep 'warning:' build.log
@@ -193,7 +199,7 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
-          swift test --scratch-path "$SPM_SCRATCH" \
+          sh scripts/run-swiftpm.sh test \
             --skip 'ArkTraceAppSupportTests\.AppDistributionTests/testBundled' \
             --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testCLITimeoutDrainsCacheRollbackBeforeReturning' \
             --skip 'ArkTraceCLITests\.ProductionCommandExecutorTests/testRealFixtureRunsAllEightCommandsInHumanAndMachineModes' \
@@ -232,8 +238,14 @@ jobs:
         continue-on-error: true
         uses: actions/cache/save@v4
         with:
-          path: ${{ env.SPM_SCRATCH }}
-          key: spm-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**') }}-${{ github.sha }}
+          path: |
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace
+            !${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/build
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/dependencies
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/ModuleCache
+            ${{ env.ARKTRACE_SWIFTPM_CACHE_ROOT }}/source-state
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
@@ -252,6 +264,9 @@ jobs:
     if: needs.plan.outputs.lane_app == 'true'
     runs-on: macos-26
     timeout-minutes: 60
+    env:
+      ARKTRACE_XCODE_CACHE_ROOT: ${{ runner.temp }}/arktrace-xcode
+      ARKTRACE_XCODE_OUTPUT_ROOT: ${{ runner.temp }}/sym
     steps:
       - uses: actions/checkout@v4
 
@@ -285,18 +300,29 @@ jobs:
           fi
           echo "present=true" >> "$GITHUB_OUTPUT"
 
-      # Restore ladder mirrors the SwiftPM job. OBJROOT holds object files
-      # only; SYMROOT (the assembled bundle, including the copied parser) is
-      # never cached.
+      # Stable source/object/package/module paths let Xcode reuse the graph
+      # across ephemeral checkouts. Package products under SYMROOT are cached,
+      # while the assembled app (and therefore its parser) is excluded. The
+      # ignored parser is also excluded from source-mirror archives.
       - name: Restore Xcode object cache
         continue-on-error: true
         uses: actions/cache/restore@v4
         with:
-          path: ${{ runner.temp }}/obj
-          key: xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**') }}-${{ github.sha }}
+          path: |
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace
+            !${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/Objects
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/SourcePackages
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PackageCache
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/ModuleCache
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PrecompiledHeaders
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/source-state
+            ${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug
+            !${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug/ArkTrace.app
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
           restore-keys: |
-            xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**') }}-
-            xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
+            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-
+            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
 
       # The app target lives in the Xcode project, outside the SwiftPM graph,
       # so `swift build` never compiles it. It also has a "Copy Pinned
@@ -315,15 +341,7 @@ jobs:
         if: steps.parser.outputs.present == 'true'
         run: |
           set -o pipefail
-          xcodebuild \
-            -project ArkTrace.xcodeproj \
-            -target ArkTraceApp \
-            -configuration Debug \
-            SYMROOT="$RUNNER_TEMP/sym" \
-            OBJROOT="$RUNNER_TEMP/obj" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
-            build 2>&1 | tee xcodebuild.log
+          sh scripts/run-xcodebuild.sh 2>&1 | tee xcodebuild.log
 
       - name: Verify app document types
         if: steps.app_build.outcome == 'success'
@@ -345,8 +363,18 @@ jobs:
         continue-on-error: true
         uses: actions/cache/save@v4
         with:
-          path: ${{ runner.temp }}/obj
-          key: xcobj-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**') }}-${{ github.sha }}
+          path: |
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace
+            !${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/workspace/ThirdParty/TraceStreamer/macx/trace_streamer
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/Objects
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/SourcePackages
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PackageCache
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/ModuleCache
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/PrecompiledHeaders
+            ${{ env.ARKTRACE_XCODE_CACHE_ROOT }}/source-state
+            ${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug
+            !${{ env.ARKTRACE_XCODE_OUTPUT_ROOT }}/Debug/ArkTrace.app
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
@@ -373,6 +401,8 @@ jobs:
           scripts/verify_trace_streamer_lock.sh
           scripts/test_phase6.sh
           sh scripts/test_ci_plan.sh
+          python3 scripts/test_run_swiftpm.py
+          python3 scripts/test_run_xcodebuild.py
 
   # The single required check for branch protection. It runs always, and it
   # fails when a planned lane failed, was cancelled, or was skipped despite

@@ -97,6 +97,24 @@ final class TraceCaptureConfigurationTests: XCTestCase {
         XCTAssertEqual(devices.map(\.transport), [.usb, .network])
     }
 
+    func testDevicePropertyParserRejectsFailureAndPlaceholderValues() {
+        XCTAssertEqual(
+            HDCTraceCaptureClient.parseDeviceProperty("HUAWEI Mate 80 Pro \n"),
+            "HUAWEI Mate 80 Pro"
+        )
+        XCTAssertEqual(
+            HDCTraceCaptureClient.parseDeviceProperty("\"OpenHarmony-7.0.0.39\"\n"),
+            "OpenHarmony-7.0.0.39"
+        )
+        XCTAssertNil(HDCTraceCaptureClient.parseDeviceProperty("default\n"))
+        XCTAssertNil(
+            HDCTraceCaptureClient.parseDeviceProperty(
+                "Get parameter \"const.product.name\" fail! errNum is:106!\n"
+            )
+        )
+        XCTAssertNil(HDCTraceCaptureClient.parseDeviceProperty("value\nwith-control\n"))
+    }
+
     func testLocatorPrefersPersistedThenConfiguredThenPathCandidates() {
         let candidates = HDCExecutableLocator.candidates(
             persistedPath: "/chosen/hdc",
@@ -164,6 +182,78 @@ final class HDCTraceCaptureClientTests: XCTestCase {
 
         XCTAssertEqual(version, "3.2.0f")
         XCTAssertEqual(invocations.withLock { $0 }, [["-v"]])
+    }
+
+    func testDiscoveryEnrichesEveryDeviceWithoutChangingItsSelectionKey() async throws {
+        let invocations = Mutex<[[String]]>([])
+        let client = HDCTraceCaptureClient { _, arguments in
+            invocations.withLock { $0.append(arguments) }
+            let output: String
+            switch arguments {
+            case ["list", "targets"]:
+                output = "150100424a544434520325874bbf4900\n5SM0125725000252\n"
+            case ["-t", "150100424a544434520325874bbf4900", "shell", "param", "get", "const.product.name"]:
+                output = "OpenHarmony 3.2\n"
+            case ["-t", "150100424a544434520325874bbf4900", "shell", "param", "get", "const.ohos.fullname"]:
+                output = "OpenHarmony-7.0.0.37\n"
+            case ["-t", "5SM0125725000252", "shell", "param", "get", "const.product.name"]:
+                output = "HUAWEI Mate 80 Pro\n"
+            case ["-t", "5SM0125725000252", "shell", "param", "get", "const.ohos.fullname"]:
+                output = "OpenHarmony-7.0.0.39\n"
+            default:
+                XCTFail("unexpected HDC invocation: \(arguments)")
+                output = ""
+            }
+            return HDCProcessOutcome(
+                exitStatus: 0,
+                stdout: Data(output.utf8),
+                stderr: Data(),
+                outputWasTruncated: false
+            )
+        }
+
+        let devices = try await client.discoverDevices(
+            executableURL: URL(filePath: "/sdk/hdc")
+        )
+
+        XCTAssertEqual(
+            devices,
+            [
+                TraceCaptureDevice(
+                    id: "150100424a544434520325874bbf4900",
+                    name: "OpenHarmony 3.2",
+                    systemVersion: "OpenHarmony-7.0.0.37"
+                ),
+                TraceCaptureDevice(
+                    id: "5SM0125725000252",
+                    name: "HUAWEI Mate 80 Pro",
+                    systemVersion: "OpenHarmony-7.0.0.39"
+                ),
+            ]
+        )
+        let observed = invocations.withLock { $0 }
+        XCTAssertEqual(observed.count, 5)
+        XCTAssertEqual(observed.first, ["list", "targets"])
+    }
+
+    func testDiscoveryKeepsDeviceWhenMetadataIsUnavailable() async throws {
+        let client = HDCTraceCaptureClient { _, arguments in
+            if arguments == ["list", "targets"] {
+                return HDCProcessOutcome(
+                    exitStatus: 0,
+                    stdout: Data("device-key\n".utf8),
+                    stderr: Data(),
+                    outputWasTruncated: false
+                )
+            }
+            throw URLError(.cannotConnectToHost)
+        }
+
+        let devices = try await client.discoverDevices(
+            executableURL: URL(filePath: "/sdk/hdc")
+        )
+
+        XCTAssertEqual(devices, [TraceCaptureDevice(id: "device-key")])
     }
 
     func testCaptureUsesArgumentArraysTransfersThenAtomicallyPromotes() async throws {

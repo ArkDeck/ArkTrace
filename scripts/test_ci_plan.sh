@@ -40,17 +40,28 @@ lane_contracts=false' \
     'README.md
 README.zh-CN.md'
 
-expect "source change selects SwiftPM and app lanes" \
+expect "app-linked source selects SwiftPM and app lanes" \
     'lane_swiftpm=true
 lane_app=true
 lane_contracts=false' \
     'Sources/ArkTraceCore/Model/TraceModels.swift'
 
-expect "test change selects SwiftPM and app lanes" \
+expect "test change selects only the SwiftPM lane" \
     'lane_swiftpm=true
-lane_app=true
+lane_app=false
 lane_contracts=false' \
     'Tests/ArkTraceCoreTests/TraceTimeTests.swift'
+
+expect "CLI-only source selects only the SwiftPM lane" \
+    'lane_swiftpm=true
+lane_app=false
+lane_contracts=false' \
+    'Sources/ArkTraceCLI/CLIApplication.swift
+Sources/ArkTraceSignalShim/SignalShim.c
+Sources/arktrace/main.swift'
+
+expect "new source module fails closed to every lane" "$all_lanes" \
+    'Sources/NewProductModule/Feature.swift'
 
 expect "manifest change selects SwiftPM and app lanes" \
     'lane_swiftpm=true
@@ -97,6 +108,10 @@ expect "workflow change fails closed to every lane" "$all_lanes" \
 
 expect "planner self-change fails closed to every lane" "$all_lanes" \
     'scripts/ci_plan.sh'
+
+expect "stable build runner change fails closed to every lane" "$all_lanes" \
+    'scripts/run-swiftpm.sh
+scripts/test_run_xcodebuild.py'
 
 expect "unknown path fails closed to every lane" "$all_lanes" \
     'mystery/new-subsystem.c'

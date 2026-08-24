@@ -13,9 +13,9 @@
 #   - any path that matches no known rule selects every lane;
 #   - workflow or planner changes select every lane.
 #
-# The mapping is deliberately superset-happy: a path may light up several
-# lanes, and docs-only changes are the only way to skip the expensive macOS
-# compile lanes.
+# The mapping follows the actual target graph. Tests and CLI-only modules do
+# not rebuild the GUI; modules linked by ArkTraceApp still select both compile
+# lanes. Unknown source modules fail closed because their graph is not known.
 set -eu
 
 swiftpm=false
@@ -33,14 +33,26 @@ while IFS= read -r path; do
     [ -n "$path" ] || continue
     saw_any=true
     case "$path" in
-        .github/workflows/*|scripts/ci_plan.sh|scripts/test_ci_plan.sh)
+        .github/workflows/*|scripts/ci_plan.sh|scripts/test_ci_plan.sh|scripts/run-swiftpm.sh|scripts/test_run_swiftpm.py|scripts/run-xcodebuild.sh|scripts/test_run_xcodebuild.py)
             # The planner cannot prove anything about a change to itself.
             select_all
             ;;
-        Package.swift|Sources/*|Tests/*)
-            # Package sources feed both the SwiftPM graph and the app target.
+        Package.swift)
             swiftpm=true
             app=true
+            ;;
+        Sources/ArkTraceCore/*|Sources/ArkTraceParser/*|Sources/ArkTraceStore/*|Sources/ArkTraceRuntime/*|Sources/ArkTraceAnalysis/*|Sources/ArkTraceRendering/*|Sources/ArkTraceAppSupport/*|Sources/ArkTraceCapture/*)
+            # These modules are linked directly or transitively by ArkTraceApp.
+            swiftpm=true
+            app=true
+            ;;
+        Sources/ArkTraceCLI/*|Sources/ArkTraceSignalShim/*|Sources/ArkTraceCLIResourceFixtures/*|Sources/arktrace/*|Tests/*)
+            # Tests and command-line-only targets never feed the app binary.
+            swiftpm=true
+            ;;
+        Sources/*)
+            # A newly added source target has unknown app reachability.
+            select_all
             ;;
         scripts/api-baseline/*|scripts/test_api_baseline.sh)
             # The API baseline compiles against the package surface, so it

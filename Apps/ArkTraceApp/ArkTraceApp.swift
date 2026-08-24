@@ -2322,20 +2322,42 @@ private struct TraceCaptureWindow: View {
 
             LabeledContent("Device") {
                 HStack(spacing: 8) {
-                    Picker("Device", selection: $capture.selectedDeviceID) {
-                        Text("Select a device").tag(String?.none)
-                        ForEach(capture.devices) { device in
-                            Label(
-                                deviceLabel(device),
-                                systemImage: device.transport == .network
-                                    ? "network" : "cable.connector"
-                            )
-                            .tag(Optional(device.id))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Picker("Device", selection: $capture.selectedDeviceID) {
+                            Text("Select a device").tag(String?.none)
+                            ForEach(capture.devices) { device in
+                                HStack(alignment: .center, spacing: 8) {
+                                    Image(
+                                        systemName: device.transport == .network
+                                            ? "network" : "cable.connector"
+                                    )
+                                    .frame(width: 16)
+                                    .foregroundStyle(.secondary)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(verbatim: deviceDisplayName(device))
+                                        Text(verbatim: deviceDetail(device))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel(deviceAccessibilityLabel(device))
+                                .tag(Optional(device.id))
+                            }
+                        }
+                        .labelsHidden()
+                        .disabled(capture.devices.isEmpty || capture.phase.isCapturing)
+
+                        if let device = selectedDevice {
+                            Text(verbatim: deviceDetail(device))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .help(deviceAccessibilityLabel(device))
                         }
                     }
-                    .labelsHidden()
-                    .frame(minWidth: 250)
-                    .disabled(capture.devices.isEmpty || capture.phase.isCapturing)
+                    .frame(minWidth: 370, alignment: .leading)
 
                     if capture.phase == .discovering {
                         ProgressView()
@@ -2605,7 +2627,9 @@ private struct TraceCaptureWindow: View {
         panel.message = "Choose where ArkTrace should save the trace after recording."
         panel.canCreateDirectories = true
         panel.isExtensionHidden = false
-        panel.nameFieldStringValue = defaultCaptureName()
+        // NSSavePanel appends the selected content type's preferred extension.
+        // Supplying it here as well produces names such as `.htrace.htrace`.
+        panel.nameFieldStringValue = defaultCaptureBaseName()
         if let type = UTType(filenameExtension: "htrace") {
             panel.allowedContentTypes = [type]
         }
@@ -2620,17 +2644,47 @@ private struct TraceCaptureWindow: View {
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
-    private func defaultCaptureName() -> String {
+    private func defaultCaptureBaseName() -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        return "ArkTrace_\(formatter.string(from: Date())).htrace"
+        return "ArkTrace_\(formatter.string(from: Date()))"
     }
 
-    private func deviceLabel(_ device: TraceCaptureDevice) -> String {
+    private func deviceDisplayName(_ device: TraceCaptureDevice) -> String {
+        device.name ?? device.id
+    }
+
+    private var selectedDevice: TraceCaptureDevice? {
+        guard let selectedDeviceID = capture.selectedDeviceID else { return nil }
+        return capture.devices.first(where: { $0.id == selectedDeviceID })
+    }
+
+    private func deviceDetail(_ device: TraceCaptureDevice) -> String {
+        var components: [String] = []
+        if let systemVersion = device.systemVersion {
+            components.append(systemVersion)
+        }
+        components.append(abbreviatedDeviceID(device.id))
         let transport = device.transport == .network ? "Network" : "USB"
-        return "\(device.id) · \(transport)"
+        components.append(transport)
+        return components.joined(separator: " · ")
+    }
+
+    private func abbreviatedDeviceID(_ id: String) -> String {
+        guard id.count > 12 else { return id }
+        return "\(id.prefix(4))…\(id.suffix(5))"
+    }
+
+    private func deviceAccessibilityLabel(_ device: TraceCaptureDevice) -> String {
+        var components = [deviceDisplayName(device)]
+        if let systemVersion = device.systemVersion {
+            components.append(systemVersion)
+        }
+        components.append("Device \(device.id)")
+        components.append(device.transport == .network ? "Network" : "USB")
+        return components.joined(separator: ", ")
     }
 
     private func hdcDisplayName(_ url: URL) -> String {

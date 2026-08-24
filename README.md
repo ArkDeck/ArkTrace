@@ -53,6 +53,16 @@ swift build -c release --product arktrace
 swift test
 ```
 
+For fast day-to-day iteration across branches and worktrees, use the stable
+cache runners. They reuse one content-verified source mirror and shared build,
+dependency and module caches; unchanged source is not recompiled:
+
+```bash
+sh scripts/run-swiftpm.sh build
+sh scripts/run-swiftpm.sh test
+sh scripts/run-xcodebuild.sh
+```
+
 ### 3. Query a trace from the CLI
 
 A small sample trace ships in the repository, so this works out of the box:

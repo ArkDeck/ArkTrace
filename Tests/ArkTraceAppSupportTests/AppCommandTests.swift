@@ -123,4 +123,29 @@ final class AppCommandTests: XCTestCase {
             "the selected HDC name must include its asynchronously resolved version"
         )
     }
+
+    func testCaptureDevicePickerShowsTwoLineMetadataAndFullAccessibleID() throws {
+        let source = try source()
+        XCTAssertTrue(
+            source.contains(#"Text(verbatim: deviceDisplayName(device))"#)
+                && source.contains(#"Text(verbatim: deviceDetail(device))"#)
+                && source.contains(#"if let device = selectedDevice"#)
+                && source.contains(#"VStack(alignment: .leading, spacing: 1)"#),
+            "each device option must show its name above version, shortened ID and transport"
+        )
+        XCTAssertTrue(
+            source.contains(#".accessibilityLabel(deviceAccessibilityLabel(device))"#)
+                && source.contains(#"components.append("Device \(device.id)")"#),
+            "the picker must preserve the complete device ID for assistive technologies"
+        )
+    }
+
+    func testCaptureSavePanelLetsTheContentTypeAppendHTraceOnce() throws {
+        let source = try source()
+        XCTAssertTrue(
+            source.contains(#"panel.nameFieldStringValue = defaultCaptureBaseName()"#)
+                && source.contains(#"return "ArkTrace_\(formatter.string(from: Date()))""#),
+            "the suggested base name must not duplicate NSSavePanel's .htrace extension"
+        )
+    }
 }
