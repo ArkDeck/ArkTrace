@@ -2732,10 +2732,10 @@ private struct TraceCaptureWindow: View {
 
     private func quickDurationTitle(_ value: Int) -> LocalizedStringResource {
         switch (capture.durationUnit, value) {
+        case (.seconds, 5): "5s"
+        case (.seconds, 10): "10s"
         case (.seconds, 15): "15s"
         case (.seconds, 30): "30s"
-        case (.seconds, 45): "45s"
-        case (.seconds, 60): "60s"
         case (.minutes, 1): "1 min"
         case (.minutes, 2): "2 min"
         case (.minutes, 3): "3 min"
@@ -2747,10 +2747,10 @@ private struct TraceCaptureWindow: View {
         _ value: Int
     ) -> String {
         switch (capture.durationUnit, value) {
+        case (.seconds, 5): "Set duration to 5 seconds"
+        case (.seconds, 10): "Set duration to 10 seconds"
         case (.seconds, 15): "Set duration to 15 seconds"
         case (.seconds, 30): "Set duration to 30 seconds"
-        case (.seconds, 45): "Set duration to 45 seconds"
-        case (.seconds, 60): "Set duration to 60 seconds"
         case (.minutes, 1): "Set duration to 1 minute"
         case (.minutes, 2): "Set duration to 2 minutes"
         case (.minutes, 3): "Set duration to 3 minutes"

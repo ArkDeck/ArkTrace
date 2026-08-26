@@ -104,7 +104,7 @@ public enum TraceCaptureDurationUnit: String, CaseIterable, Hashable, Sendable, 
 
     public var quickValues: [Int] {
         switch self {
-        case .seconds: [15, 30, 45, 60]
+        case .seconds: [5, 10, 15, 30]
         case .minutes: [1, 2, 3]
         }
     }
@@ -965,7 +965,7 @@ public final class TraceCaptureController {
     public private(set) var devices: [TraceCaptureDevice] = []
     public var selectedDeviceID: String?
     public var profile: TraceCaptureProfile = .appResponsiveness
-    public var durationInputValue = 15
+    public var durationInputValue = 10
     public private(set) var durationUnit: TraceCaptureDurationUnit = .seconds
     public var bufferSizeMB = 64
     public private(set) var phase: TraceCapturePhase = .idle
@@ -1077,7 +1077,7 @@ public final class TraceCaptureController {
 
     public func setDurationUnit(_ unit: TraceCaptureDurationUnit) {
         guard !phase.isCapturing, unit != durationUnit else { return }
-        let currentSeconds = durationUnit.durationSeconds(for: durationInputValue) ?? 15
+        let currentSeconds = durationUnit.durationSeconds(for: durationInputValue) ?? 10
         durationUnit = unit
         durationInputValue = unit.inputValue(forDurationSeconds: currentSeconds)
     }

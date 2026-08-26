@@ -54,7 +54,7 @@ final class TraceCaptureConfigurationTests: XCTestCase {
 
     func testDurationUnitsExposeBoundedInputAndRequestedQuickValues() {
         XCTAssertEqual(TraceCaptureDurationUnit.seconds.inputRange, 5...300)
-        XCTAssertEqual(TraceCaptureDurationUnit.seconds.quickValues, [15, 30, 45, 60])
+        XCTAssertEqual(TraceCaptureDurationUnit.seconds.quickValues, [5, 10, 15, 30])
         XCTAssertEqual(TraceCaptureDurationUnit.minutes.inputRange, 1...5)
         XCTAssertEqual(TraceCaptureDurationUnit.minutes.quickValues, [1, 2, 3])
 
@@ -413,6 +413,8 @@ final class TraceCaptureControllerTests: XCTestCase {
         controller.refreshDevices()
         while controller.phase == .discovering { await Task.yield() }
 
+        XCTAssertEqual(controller.durationInputValue, 10)
+        XCTAssertEqual(controller.durationSeconds, 10)
         controller.durationSeconds = 45
         XCTAssertEqual(controller.durationUnit, .seconds)
         XCTAssertEqual(controller.durationInputValue, 45)
@@ -432,8 +434,8 @@ final class TraceCaptureControllerTests: XCTestCase {
         XCTAssertFalse(controller.canStart)
 
         controller.setDurationUnit(.seconds)
-        XCTAssertEqual(controller.durationInputValue, 15)
-        XCTAssertEqual(controller.durationSeconds, 15)
+        XCTAssertEqual(controller.durationInputValue, 10)
+        XCTAssertEqual(controller.durationSeconds, 10)
         XCTAssertTrue(controller.canStart)
     }
 

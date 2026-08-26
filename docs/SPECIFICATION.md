@@ -1207,7 +1207,7 @@ App 必须从 File menu、主 toolbar 和无文档 empty state 提供 **Capture 
 
 ### AT-APP-015 Capture bounds and presets
 
-采集时长必须可直接输入、可在秒/分钟之间切换，并在秒模式提供 15s/30s/45s/60s、分钟模式提供 1/2/3 min 快捷选择；切换到分钟必须向上取整，不得无意缩短 capture。最终换算后的时长硬限制为 5–300 秒，无效输入必须就地说明且禁止开始；buffer 只能从 16/32/64/128/256 MB 选择。必须提供 App responsiveness、CPU scheduling、System overview 三种 closed preset；不得把任意 protobuf 文本或 shell command 作为此 UI 的输入。
+采集时长必须可直接输入、可在秒/分钟之间切换；秒模式默认 10s，并提供 5s/10s/15s/30s 快捷选择，分钟模式提供 1/2/3 min 快捷选择；切换到分钟必须向上取整，不得无意缩短 capture。最终换算后的时长硬限制为 5–300 秒，无效输入必须就地说明且禁止开始；buffer 只能从 16/32/64/128/256 MB 选择。必须提供 App responsiveness、CPU scheduling、System overview 三种 closed preset；不得把任意 protobuf 文本或 shell command 作为此 UI 的输入。
 
 ### AT-APP-016 Capture process safety
 

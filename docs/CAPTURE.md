@@ -65,7 +65,7 @@ ready → preparing → recording → transferring → completed
 | CPU scheduling | scheduling/wakeup + CPU frequency/idle | 调度竞争、CPU 忙碌、频率变化 |
 | System overview | 上述两组 + distributed、memory、system category | 尚不确定根因的宽采集 |
 
-时长可直接输入，并可在秒与分钟之间切换；秒模式提供 15s/30s/45s/60s，分钟模式提供 1/2/3 min 快捷选择。切换到分钟时向上取整，避免单位切换无意缩短采集。底层时长仍统一换算为秒并硬限制为 5–300 秒；buffer 可选 16/32/64/128/256 MB。两者都是硬边界，避免 UI 或 API 产生无界采集。配置使用 OpenHarmony 官方 `hiprofiler_cmd` protobuf text 形状：`session_config`、`ftrace-plugin`、`sample_duration`、`buffer_size_kb`、`ftrace_events` 与 `hitrace_categories`。`ftrace-plugin` 描述的是容器内的数据源，不是文件格式；官方命令仍把 `result_file` 与 `-o` 输出命名为 `.htrace`。ArkTrace 因此保存 `OHOSPROF` 容器为 `.htrace`，而不是把它伪装成文本 `.ftrace`；Save panel 只负责追加一次扩展名。
+时长可直接输入，并可在秒与分钟之间切换；秒模式默认 10s，提供 5s/10s/15s/30s 快捷选择，分钟模式提供 1/2/3 min 快捷选择。切换到分钟时向上取整，避免单位切换无意缩短采集。底层时长仍统一换算为秒并硬限制为 5–300 秒；buffer 可选 16/32/64/128/256 MB。两者都是硬边界，避免 UI 或 API 产生无界采集。配置使用 OpenHarmony 官方 `hiprofiler_cmd` protobuf text 形状：`session_config`、`ftrace-plugin`、`sample_duration`、`buffer_size_kb`、`ftrace_events` 与 `hitrace_categories`。`ftrace-plugin` 描述的是容器内的数据源，不是文件格式；官方命令仍把 `result_file` 与 `-o` 输出命名为 `.htrace`。ArkTrace 因此保存 `OHOSPROF` 容器为 `.htrace`，而不是把它伪装成文本 `.ftrace`；Save panel 只负责追加一次扩展名。
 
 ## 5. HDC 发现与调用
 
@@ -121,7 +121,7 @@ stdout/stderr 各自有 64 KiB 上限；错误详情最多保留 4 KiB，避免�
 
 `ArkTraceCaptureTests` 固定以下契约：
 
-- duration/buffer 的输入边界；
+- duration/buffer 的输入边界、10 秒默认值与秒/分钟快捷值；
 - 三种预设生成的官方字段与单位换算；
 - HDC target 去重和 USB/network 分类；
 - 全流程只使用参数数组；
