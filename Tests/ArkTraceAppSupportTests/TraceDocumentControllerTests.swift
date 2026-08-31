@@ -17,6 +17,7 @@ final class TraceDocumentControllerTests: XCTestCase {
         let threadRows: [TraceThread]
         let cpuRows: [CpuSlice]
         let counterRows: [CounterSeries]
+        let argumentRows: [Int64: [TraceEventArgument]]
         private var densityQueryCount = 0
 
         init(
@@ -29,7 +30,8 @@ final class TraceDocumentControllerTests: XCTestCase {
             slices: [TraceSlice] = [],
             threads: [TraceThread] = [],
             cpuSlices: [CpuSlice] = [],
-            counters: [CounterSeries] = []
+            counters: [CounterSeries] = [],
+            arguments: [Int64: [TraceEventArgument]] = [:]
         ) {
             self.identity = identity
             self.durationNs = durationNs
@@ -38,6 +40,7 @@ final class TraceDocumentControllerTests: XCTestCase {
             threadRows = threads
             cpuRows = cpuSlices
             counterRows = counters
+            argumentRows = arguments
         }
 
         func metadata() async throws -> TraceMetadata {
@@ -125,6 +128,14 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
 
         func observedDensityQueryCount() -> Int { densityQueryCount }
+
+        func arguments(_ query: TraceArgumentQuery) async throws -> TraceEventPage<TraceEventArgument> {
+            let rows = argumentRows[query.argSetID] ?? []
+            return TraceEventPage(
+                items: Array(rows.prefix(query.limit)),
+                truncated: rows.count > query.limit
+            )
+        }
     }
 
     private actor CloseRecorder {
@@ -948,6 +959,103 @@ final class TraceDocumentControllerTests: XCTestCase {
         await controller.close()
     }
 
+    func testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem() async throws {
+        let suite = "ArkTraceSearchArgumentTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let threadKey = ThreadKey(itid: 1)
+        let slices = try (1...2).map { index in
+            TraceSlice(
+                key: EventKey(table: .callstack, rowID: Int64(index)),
+                range: try TraceTimeRange(
+                    startNs: Int64(index) * 200, endNs: Int64(index) * 200 + 60
+                ),
+                threadKey: threadKey, processKey: ProcessKey(ipid: 1),
+                name: "needle \(index)", category: "work", depth: 0,
+                parentEventKey: nil, isAsync: false, isOpenEnded: false,
+                argSetID: Int64(index)
+            )
+        }
+        let firstArguments = (0...TraceArgumentQuery.maximumLimit).map {
+            TraceEventArgument(key: "old \($0)", value: "first", typeName: "string")
+        }
+        let secondArguments = [
+            TraceEventArgument(key: "selected", value: "second", typeName: "string")
+        ]
+        let repository = Repository(
+            identity: "a",
+            capabilities: TraceCapabilities(
+                cpuScheduling: false, threadStates: false, namedSlices: true,
+                cpuCounters: false, processCounters: false
+            ),
+            slices: slices,
+            threads: [Self.makeThread(itid: 1, ipid: 1, name: "worker")],
+            arguments: [1: firstArguments, 2: secondArguments]
+        )
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil,
+            opener: { _, _ in
+                TraceOpenedDocument(
+                    repository: repository, cacheHit: false, cacheMetadata: nil, close: {}
+                )
+            }
+        )
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-search-arguments-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+
+        let track = try XCTUnwrap(controller.trackGroups.flatMap(\.tracks).first {
+            $0.source == .namedSlice(threadKey)
+        })
+        controller.selectDensityBand(
+            TimelineDensityHit(
+                trackID: track.id,
+                bucket: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                timeNs: 220
+            )
+        )
+        for _ in 0..<10_000 where !controller.selectedEventArgumentsTruncated {
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.selectedEvent?.key, slices[0].key)
+        XCTAssertEqual(
+            controller.selectedEventArguments,
+            Array(firstArguments.prefix(TraceArgumentQuery.maximumLimit))
+        )
+        XCTAssertTrue(controller.selectedEventArgumentsTruncated)
+        XCTAssertNotNil(controller.selectedEventLocation)
+        controller.selectRange(try TraceTimeRange.query(startNs: 100, endNs: 300))
+
+        controller.search("needle 2")
+        while controller.isSearching { await Task.yield() }
+        let focusBefore = controller.timelineFocusRequestID
+        let targetIndex = try XCTUnwrap(controller.searchResults.items.firstIndex {
+            $0.eventKey == slices[1].key
+        })
+        for _ in 0...targetIndex {
+            XCTAssertTrue(controller.stepSearchResult(by: 1))
+        }
+        for _ in 0..<10_000 where controller.selectedEventArguments != secondArguments {
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.selectedEvent?.key, slices[1].key)
+        XCTAssertEqual(controller.selectedEventArguments, secondArguments)
+        XCTAssertFalse(controller.selectedEventArgumentsTruncated)
+        XCTAssertNil(controller.selectedEventLocation)
+        XCTAssertNil(controller.selectedRange)
+        XCTAssertEqual(controller.timelineFocusRequestID, focusBefore)
+
+        controller.open(source)
+        XCTAssertTrue(controller.selectedEventArguments.isEmpty)
+        XCTAssertFalse(controller.selectedEventArgumentsTruncated)
+        while controller.phase != .ready { await Task.yield() }
+        await controller.close()
+    }
+
     /// Annotations are session state. Upstream's `m` keeps only the newest
     /// transient mark while `Shift+m` accumulates, and AT-APP-002 requires a
     /// replacement document to start clean.
@@ -979,6 +1087,7 @@ final class TraceDocumentControllerTests: XCTestCase {
 
         controller.open(first)
         while controller.phase != .ready { await Task.yield() }
+        let firstAnnotationSessionID = controller.annotationSessionID
 
         // Flags: created in any order, always read back in time order.
         controller.addFlag(atNs: 800)
@@ -1024,6 +1133,10 @@ final class TraceDocumentControllerTests: XCTestCase {
 
         // AT-APP-002: the next document starts with none of them.
         controller.open(second)
+        XCTAssertNotEqual(
+            controller.annotationSessionID, firstAnnotationSessionID,
+            "deferred annotation edits must expire as soon as document replacement starts"
+        )
         while controller.phase != .ready { await Task.yield() }
         XCTAssertTrue(
             controller.annotations.isEmpty,

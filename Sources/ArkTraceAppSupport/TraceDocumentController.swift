@@ -415,6 +415,11 @@ public final class TraceDocumentController {
     /// cleared when the document is replaced (AT-APP-002) and never written to
     /// analysis output.
     public private(set) var annotations = TimelineAnnotations()
+    /// Session token for deferred annotation edits. Annotation IDs may be
+    /// reused after open or reload, so editors must compare their captured
+    /// token before applying an action to the current document. This is an
+    /// action-time guard backed by the non-observable document generation.
+    public var annotationSessionID: UInt64 { documentGeneration }
     /// Lanes the user pinned, in their arranged order. Ordered rather than a
     /// set because the point of pinning four lanes is to watch them side by
     /// side in a chosen order.
@@ -609,6 +614,7 @@ public final class TraceDocumentController {
         searchTask?.cancel()
         analysisTask?.cancel()
         maintenanceTask?.cancel()
+        argumentsTask?.cancel()
         densityResolutionTask?.cancel()
         if let closing {
             Task { try? await closing.close() }
@@ -835,9 +841,9 @@ public final class TraceDocumentController {
         else { return }
         let generation = documentGeneration
         argumentsTask = Task { [weak self] in
-            guard let argSetID = await Self.argumentSetID(
+            guard !Task.isCancelled, let argSetID = await Self.argumentSetID(
                 for: event, in: repository
-            ) else { return }
+            ), !Task.isCancelled else { return }
             guard let query = try? TraceArgumentQuery(
                 argSetID: argSetID,
                 deadline: ContinuousClock.now.advanced(by: .seconds(5))
@@ -1554,10 +1560,9 @@ public final class TraceDocumentController {
                         self.publishScrollTarget(for: pending)
                     }
                     if let key = self.pendingSelectionKey,
-                        let inspector = self.inspector(for: key)
+                        self.inspector(for: key) != nil
                     {
-                        self.selectedEvent = inspector
-                        self.pendingSelectionKey = nil
+                        self.selectEvent(key)
                     }
                 }
             } catch {
@@ -1624,12 +1629,14 @@ public final class TraceDocumentController {
         viewportTask?.cancel()
         searchTask?.cancel()
         analysisTask?.cancel()
+        argumentsTask?.cancel()
         densityResolutionTask?.cancel()
         densityResolutionTask = nil
         openTask = nil
         viewportTask = nil
         searchTask = nil
         analysisTask = nil
+        argumentsTask = nil
     }
 
     private func resetDocumentState() {
@@ -1662,6 +1669,8 @@ public final class TraceDocumentController {
         pendingScrollGroupID = nil
         selectedEvent = nil
         selectedEventLocation = nil
+        selectedEventArguments = []
+        selectedEventArgumentsTruncated = false
         hoveredEvent = nil
         selectedRange = nil
         // Annotations belong to the trace that was open, so a replacement

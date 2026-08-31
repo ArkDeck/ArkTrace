@@ -10,24 +10,11 @@ import XCTest
 /// key window hands first responder straight back, so the field opens without
 /// the keyboard. `FocusableTextField` makes the request in AppKit instead, and
 /// that is also where the focus ring is turned off. There is no UI harness for
-/// any of this, so it is parsed out of `Apps/ArkTraceApp/ArkTraceApp.swift`,
+/// any of this, so it is parsed out of the feature files in `Apps/ArkTraceApp`,
 /// the way `ObservationBoundaryTests` does.
 final class AppCommandTests: XCTestCase {
-    private static let appSource: String = {
-        let repositoryRoot = URL(filePath: #filePath)
-            .deletingLastPathComponent()  // AppCommandTests.swift
-            .deletingLastPathComponent()  // ArkTraceAppSupportTests
-            .deletingLastPathComponent()  // Tests
-        let url = repositoryRoot.appending(
-            path: "Apps/ArkTraceApp/ArkTraceApp.swift"
-        )
-        return (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-    }()
-
     private func source() throws -> String {
-        let source = Self.appSource
-        XCTAssertFalse(source.isEmpty, "app source is unreadable")
-        return source
+        try AppSource.read().text
     }
 
     func testFindCommandsAreBoundAndReachTheController() throws {

@@ -136,12 +136,7 @@ final class LocalizationCatalogTests: XCTestCase {
     /// the table must appear in the app source, so a new catalog key cannot
     /// exist without a wired-up reference.
     func testAppReferencesEveryGeneratedTypedSymbol() throws {
-        let appSource = try String(
-            contentsOf: Self.repositoryRoot.appending(
-                path: "Apps/ArkTraceApp/ArkTraceApp.swift"
-            ),
-            encoding: .utf8
-        )
+        let appSource = try AppSource.read().text
         for (key, symbol) in Self.typedKeySymbols {
             XCTAssertTrue(
                 appSource.contains(".\(symbol)"),

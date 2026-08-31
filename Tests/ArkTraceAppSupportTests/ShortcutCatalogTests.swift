@@ -102,8 +102,7 @@ final class ShortcutCatalogTests: XCTestCase {
     /// the way `ObservationBoundaryTests` checks the app's other structural
     /// promises.
     func testTheHelpWindowIsOnTheHelpMenuAndRendersTheCatalog() throws {
-        let url = Self.repositoryRoot.appending(path: "Apps/ArkTraceApp/ArkTraceApp.swift")
-        let source = try String(contentsOf: url, encoding: .utf8)
+        let source = try AppSource.read().text
         XCTAssertTrue(
             source.contains("CommandGroup(replacing: .help)"),
             "the shortcut reference belongs on the Help menu (macOS convention)"

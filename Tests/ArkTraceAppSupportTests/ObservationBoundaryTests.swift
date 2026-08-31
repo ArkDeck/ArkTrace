@@ -5,41 +5,13 @@ import XCTest
 ///
 /// SwiftUI + Observation invalidates exactly the views whose `body` read a
 /// changed property, so the boundary IS the set of `controller.` reads inside
-/// each child view. These tests parse `Apps/ArkTraceApp/ArkTraceApp.swift` and
+/// each child view. These tests parse the feature files in `Apps/ArkTraceApp` and
 /// fail when a high-frequency property read creeps back into a view that must
 /// stay out of its invalidation set — the regression that previously made
 /// every snapshot/hover/search update re-evaluate the whole window.
 final class ObservationBoundaryTests: XCTestCase {
-    private static let appSource: String = {
-        let repositoryRoot = URL(filePath: #filePath)
-            .deletingLastPathComponent()  // ObservationBoundaryTests.swift
-            .deletingLastPathComponent()  // ArkTraceAppSupportTests
-            .deletingLastPathComponent()  // Tests
-        let url = repositoryRoot.appending(
-            path: "Apps/ArkTraceApp/ArkTraceApp.swift"
-        )
-        return (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-    }()
-
-    /// Text of one top-level type declaration, from its `struct <name>` line
-    /// to the next top-level declaration.
     private func block(_ name: String) throws -> String {
-        let source = Self.appSource
-        XCTAssertFalse(source.isEmpty, "app source is unreadable")
-        guard let start = source.range(of: "struct \(name)") else {
-            throw XCTSkip("declaration \(name) is absent")
-        }
-        let tail = source[start.lowerBound...]
-        // Top-level declarations in this file are all "private struct" /
-        // "private extension" / "private func" at column zero.
-        let boundaries = ["\nprivate struct ", "\nprivate extension ", "\nprivate func "]
-        var end = tail.endIndex
-        for boundary in boundaries {
-            if let found = tail.dropFirst(1).range(of: boundary) {
-                end = min(end, found.lowerBound)
-            }
-        }
-        return String(tail[..<end])
+        try AppSource.read().declaration(named: name)
     }
 
     private func assertNoRead(
@@ -65,10 +37,7 @@ final class ObservationBoundaryTests: XCTestCase {
             "TraceInspectorPane", "TraceErrorBannerOverlay", "TraceAnnouncementBridge",
             "TraceSearchField", "SettingsRootView", "TraceCacheSettingsView",
         ] {
-            XCTAssertTrue(
-                Self.appSource.contains("struct \(name)"),
-                "expected Observation boundary view \(name) to exist"
-            )
+            _ = try block(name)
         }
     }
 

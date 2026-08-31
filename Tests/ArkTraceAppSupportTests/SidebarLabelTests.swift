@@ -10,27 +10,16 @@ import XCTest
 /// names no lane at all. The title must wrap instead, which in SwiftUI means an
 /// unbounded line limit plus a vertical `fixedSize`; one without the other still
 /// truncates. There is no UI harness for these views, so this parses
-/// `Apps/ArkTraceApp/ArkTraceApp.swift`, the way `ObservationBoundaryTests` does.
+/// the feature files in `Apps/ArkTraceApp`, as `ObservationBoundaryTests` does.
 final class SidebarLabelTests: XCTestCase {
-    private static let appSource: String = {
-        let repositoryRoot = URL(filePath: #filePath)
-            .deletingLastPathComponent()  // SidebarLabelTests.swift
-            .deletingLastPathComponent()  // ArkTraceAppSupportTests
-            .deletingLastPathComponent()  // Tests
-        let url = repositoryRoot.appending(
-            path: "Apps/ArkTraceApp/ArkTraceApp.swift"
-        )
-        return (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-    }()
-
     /// The source that renders `title`, from its `Text(...)` to the end of the
     /// modifier chain — the next line whose indentation returns to the `Text`'s.
     private func labelChain(after title: String) throws -> String {
-        let source = Self.appSource
-        XCTAssertFalse(source.isEmpty, "app source is unreadable")
-        guard let start = source.range(of: "Text(\(title))") else {
-            throw XCTSkip("label Text(\(title)) is absent")
-        }
+        let source = try AppSource.read().text
+        let start = try XCTUnwrap(
+            source.range(of: "Text(\(title))"),
+            "label Text(\(title)) is absent"
+        )
         let lines = source[start.lowerBound...].split(
             separator: "\n", omittingEmptySubsequences: false
         )

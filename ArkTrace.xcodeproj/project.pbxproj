@@ -6,6 +6,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11000000000000000000002A /* TraceCaptureStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000002A /* TraceCaptureStatusView.swift */; };
 		010000000000000000000001 /* ArkTraceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* ArkTraceApp.swift */; };
 		010000000000000000000004 /* ArkTraceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000001 /* ArkTraceCore */; };
 		010000000000000000000005 /* ArkTraceRendering in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000002 /* ArkTraceRendering */; };
@@ -14,9 +15,51 @@
 		010000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000008 /* Assets.xcassets */; };
 		010000000000000000000009 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000009 /* Localizable.xcstrings */; };
 		01000000000000000000000A /* ArkTraceCapture in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000005 /* ArkTraceCapture */; };
+		110000000000000000000001 /* TraceCaptureWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000001 /* TraceCaptureWindow.swift */; };
+		110000000000000000000002 /* ShortcutHelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000002 /* ShortcutHelpView.swift */; };
+		110000000000000000000003 /* AnnotationInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000003 /* AnnotationInspectorView.swift */; };
+		110000000000000000000004 /* AnnotationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000004 /* AnnotationRow.swift */; };
+		110000000000000000000005 /* EventInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000005 /* EventInspectorView.swift */; };
+		110000000000000000000006 /* FlagTagEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000006 /* FlagTagEditor.swift */; };
+		110000000000000000000007 /* InspectorDockMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000007 /* InspectorDockMenu.swift */; };
+		110000000000000000000008 /* InspectorFocusButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000008 /* InspectorFocusButton.swift */; };
+		110000000000000000000009 /* InspectorToolbarToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000009 /* InspectorToolbarToggle.swift */; };
+		11000000000000000000000A /* RangeInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000000A /* RangeInspectorView.swift */; };
+		11000000000000000000000B /* SliceAggregateSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000000B /* SliceAggregateSort.swift */; };
+		11000000000000000000000C /* TraceInspectorDock+Symbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000000C /* TraceInspectorDock+Symbol.swift */; };
+		11000000000000000000000D /* TraceInspectorPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000000D /* TraceInspectorPane.swift */; };
+		11000000000000000000000E /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000000E /* SettingsRootView.swift */; };
+		11000000000000000000000F /* TraceCacheSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000000F /* TraceCacheSettingsView.swift */; };
+		110000000000000000000010 /* TraceLicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000010 /* TraceLicensesView.swift */; };
+		110000000000000000000011 /* ArkTraceWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000011 /* ArkTraceWindow.swift */; };
+		110000000000000000000012 /* FocusableTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000012 /* FocusableTextField.swift */; };
+		110000000000000000000013 /* TraceAccessibilityMessage+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000013 /* TraceAccessibilityMessage+Localization.swift */; };
+		110000000000000000000014 /* TraceAppErrorTitle+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000014 /* TraceAppErrorTitle+Localization.swift */; };
+		110000000000000000000015 /* TraceFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000015 /* TraceFormatting.swift */; };
+		110000000000000000000016 /* TraceLoadingStageLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000016 /* TraceLoadingStageLabel.swift */; };
+		110000000000000000000017 /* View+PrimaryToolbarTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000017 /* View+PrimaryToolbarTarget.swift */; };
+		110000000000000000000018 /* DepthDisclosureButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000018 /* DepthDisclosureButton.swift */; };
+		110000000000000000000019 /* ProcessFilterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000019 /* ProcessFilterBar.swift */; };
+		11000000000000000000001A /* RecentDocumentRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001A /* RecentDocumentRow.swift */; };
+		11000000000000000000001B /* RecentDocumentsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001B /* RecentDocumentsSection.swift */; };
+		11000000000000000000001C /* SearchResultsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001C /* SearchResultsSection.swift */; };
+		11000000000000000000001D /* TraceViewerSidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001D /* TraceViewerSidebar.swift */; };
+		11000000000000000000001E /* TrackRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001E /* TrackRow.swift */; };
+		11000000000000000000001F /* TraceAnnouncementBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001F /* TraceAnnouncementBridge.swift */; };
+		110000000000000000000020 /* TraceErrorBannerOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000020 /* TraceErrorBannerOverlay.swift */; };
+		110000000000000000000021 /* TraceLoadingPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000021 /* TraceLoadingPane.swift */; };
+		110000000000000000000022 /* TraceReloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000022 /* TraceReloadButton.swift */; };
+		110000000000000000000023 /* TraceResetZoomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000023 /* TraceResetZoomButton.swift */; };
+		110000000000000000000024 /* TraceSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000024 /* TraceSearchField.swift */; };
+		110000000000000000000025 /* TraceTimelinePane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000025 /* TraceTimelinePane.swift */; };
+		110000000000000000000026 /* TraceViewerRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000026 /* TraceViewerRootView.swift */; };
+		110000000000000000000027 /* TraceZoomInButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000027 /* TraceZoomInButton.swift */; };
+		110000000000000000000028 /* TraceZoomOutButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000028 /* TraceZoomOutButton.swift */; };
+		110000000000000000000029 /* TraceZoomSelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000029 /* TraceZoomSelectionButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		12000000000000000000002A /* TraceCaptureStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceCaptureStatusView.swift; sourceTree = "<group>"; };
 		020000000000000000000001 /* ArkTraceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArkTraceApp.swift; sourceTree = "<group>"; };
 		020000000000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		020000000000000000000003 /* ArkTraceApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ArkTraceApp.entitlements; sourceTree = "<group>"; };
@@ -26,6 +69,47 @@
 		020000000000000000000007 /* ArkTraceProduct.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ArkTraceProduct.xcconfig; sourceTree = "<group>"; };
 		020000000000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		020000000000000000000009 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		120000000000000000000001 /* TraceCaptureWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceCaptureWindow.swift"; sourceTree = "<group>"; };
+		120000000000000000000002 /* ShortcutHelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShortcutHelpView.swift"; sourceTree = "<group>"; };
+		120000000000000000000003 /* AnnotationInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnnotationInspectorView.swift"; sourceTree = "<group>"; };
+		120000000000000000000004 /* AnnotationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnnotationRow.swift"; sourceTree = "<group>"; };
+		120000000000000000000005 /* EventInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventInspectorView.swift"; sourceTree = "<group>"; };
+		120000000000000000000006 /* FlagTagEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FlagTagEditor.swift"; sourceTree = "<group>"; };
+		120000000000000000000007 /* InspectorDockMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InspectorDockMenu.swift"; sourceTree = "<group>"; };
+		120000000000000000000008 /* InspectorFocusButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InspectorFocusButton.swift"; sourceTree = "<group>"; };
+		120000000000000000000009 /* InspectorToolbarToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InspectorToolbarToggle.swift"; sourceTree = "<group>"; };
+		12000000000000000000000A /* RangeInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RangeInspectorView.swift"; sourceTree = "<group>"; };
+		12000000000000000000000B /* SliceAggregateSort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SliceAggregateSort.swift"; sourceTree = "<group>"; };
+		12000000000000000000000C /* TraceInspectorDock+Symbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceInspectorDock+Symbol.swift"; sourceTree = "<group>"; };
+		12000000000000000000000D /* TraceInspectorPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceInspectorPane.swift"; sourceTree = "<group>"; };
+		12000000000000000000000E /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsRootView.swift"; sourceTree = "<group>"; };
+		12000000000000000000000F /* TraceCacheSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceCacheSettingsView.swift"; sourceTree = "<group>"; };
+		120000000000000000000010 /* TraceLicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceLicensesView.swift"; sourceTree = "<group>"; };
+		120000000000000000000011 /* ArkTraceWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArkTraceWindow.swift"; sourceTree = "<group>"; };
+		120000000000000000000012 /* FocusableTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FocusableTextField.swift"; sourceTree = "<group>"; };
+		120000000000000000000013 /* TraceAccessibilityMessage+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceAccessibilityMessage+Localization.swift"; sourceTree = "<group>"; };
+		120000000000000000000014 /* TraceAppErrorTitle+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceAppErrorTitle+Localization.swift"; sourceTree = "<group>"; };
+		120000000000000000000015 /* TraceFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceFormatting.swift"; sourceTree = "<group>"; };
+		120000000000000000000016 /* TraceLoadingStageLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceLoadingStageLabel.swift"; sourceTree = "<group>"; };
+		120000000000000000000017 /* View+PrimaryToolbarTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+PrimaryToolbarTarget.swift"; sourceTree = "<group>"; };
+		120000000000000000000018 /* DepthDisclosureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DepthDisclosureButton.swift"; sourceTree = "<group>"; };
+		120000000000000000000019 /* ProcessFilterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProcessFilterBar.swift"; sourceTree = "<group>"; };
+		12000000000000000000001A /* RecentDocumentRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecentDocumentRow.swift"; sourceTree = "<group>"; };
+		12000000000000000000001B /* RecentDocumentsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RecentDocumentsSection.swift"; sourceTree = "<group>"; };
+		12000000000000000000001C /* SearchResultsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchResultsSection.swift"; sourceTree = "<group>"; };
+		12000000000000000000001D /* TraceViewerSidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceViewerSidebar.swift"; sourceTree = "<group>"; };
+		12000000000000000000001E /* TrackRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrackRow.swift"; sourceTree = "<group>"; };
+		12000000000000000000001F /* TraceAnnouncementBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceAnnouncementBridge.swift"; sourceTree = "<group>"; };
+		120000000000000000000020 /* TraceErrorBannerOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceErrorBannerOverlay.swift"; sourceTree = "<group>"; };
+		120000000000000000000021 /* TraceLoadingPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceLoadingPane.swift"; sourceTree = "<group>"; };
+		120000000000000000000022 /* TraceReloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceReloadButton.swift"; sourceTree = "<group>"; };
+		120000000000000000000023 /* TraceResetZoomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceResetZoomButton.swift"; sourceTree = "<group>"; };
+		120000000000000000000024 /* TraceSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceSearchField.swift"; sourceTree = "<group>"; };
+		120000000000000000000025 /* TraceTimelinePane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceTimelinePane.swift"; sourceTree = "<group>"; };
+		120000000000000000000026 /* TraceViewerRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceViewerRootView.swift"; sourceTree = "<group>"; };
+		120000000000000000000027 /* TraceZoomInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceZoomInButton.swift"; sourceTree = "<group>"; };
+		120000000000000000000028 /* TraceZoomOutButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceZoomOutButton.swift"; sourceTree = "<group>"; };
+		120000000000000000000029 /* TraceZoomSelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceZoomSelectionButton.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +142,13 @@
 			isa = PBXGroup;
 			children = (
 				020000000000000000000001 /* ArkTraceApp.swift */,
+				150000000000000000000001 /* Capture */,
+				150000000000000000000002 /* Help */,
+				150000000000000000000003 /* Inspector */,
+				150000000000000000000004 /* Settings */,
+				150000000000000000000005 /* Shared */,
+				150000000000000000000006 /* Sidebar */,
+				150000000000000000000007 /* Viewer */,
 				020000000000000000000008 /* Assets.xcassets */,
 				020000000000000000000009 /* Localizable.xcstrings */,
 				020000000000000000000002 /* Info.plist */,
@@ -86,6 +177,97 @@
 			children = (020000000000000000000007 /* ArkTraceProduct.xcconfig */);
 			path = Config;
 			sourceTree = SOURCE_ROOT;
+		};
+		150000000000000000000001 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				120000000000000000000001 /* TraceCaptureWindow.swift */,
+				12000000000000000000002A /* TraceCaptureStatusView.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		150000000000000000000002 /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				120000000000000000000002 /* ShortcutHelpView.swift */,
+			);
+			path = Help;
+			sourceTree = "<group>";
+		};
+		150000000000000000000003 /* Inspector */ = {
+			isa = PBXGroup;
+			children = (
+				120000000000000000000003 /* AnnotationInspectorView.swift */,
+				120000000000000000000004 /* AnnotationRow.swift */,
+				120000000000000000000005 /* EventInspectorView.swift */,
+				120000000000000000000006 /* FlagTagEditor.swift */,
+				120000000000000000000007 /* InspectorDockMenu.swift */,
+				120000000000000000000008 /* InspectorFocusButton.swift */,
+				120000000000000000000009 /* InspectorToolbarToggle.swift */,
+				12000000000000000000000A /* RangeInspectorView.swift */,
+				12000000000000000000000B /* SliceAggregateSort.swift */,
+				12000000000000000000000C /* TraceInspectorDock+Symbol.swift */,
+				12000000000000000000000D /* TraceInspectorPane.swift */,
+			);
+			path = Inspector;
+			sourceTree = "<group>";
+		};
+		150000000000000000000004 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				12000000000000000000000E /* SettingsRootView.swift */,
+				12000000000000000000000F /* TraceCacheSettingsView.swift */,
+				120000000000000000000010 /* TraceLicensesView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		150000000000000000000005 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				120000000000000000000011 /* ArkTraceWindow.swift */,
+				120000000000000000000012 /* FocusableTextField.swift */,
+				120000000000000000000013 /* TraceAccessibilityMessage+Localization.swift */,
+				120000000000000000000014 /* TraceAppErrorTitle+Localization.swift */,
+				120000000000000000000015 /* TraceFormatting.swift */,
+				120000000000000000000016 /* TraceLoadingStageLabel.swift */,
+				120000000000000000000017 /* View+PrimaryToolbarTarget.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		150000000000000000000006 /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				120000000000000000000018 /* DepthDisclosureButton.swift */,
+				120000000000000000000019 /* ProcessFilterBar.swift */,
+				12000000000000000000001A /* RecentDocumentRow.swift */,
+				12000000000000000000001B /* RecentDocumentsSection.swift */,
+				12000000000000000000001C /* SearchResultsSection.swift */,
+				12000000000000000000001D /* TraceViewerSidebar.swift */,
+				12000000000000000000001E /* TrackRow.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		150000000000000000000007 /* Viewer */ = {
+			isa = PBXGroup;
+			children = (
+				12000000000000000000001F /* TraceAnnouncementBridge.swift */,
+				120000000000000000000020 /* TraceErrorBannerOverlay.swift */,
+				120000000000000000000021 /* TraceLoadingPane.swift */,
+				120000000000000000000022 /* TraceReloadButton.swift */,
+				120000000000000000000023 /* TraceResetZoomButton.swift */,
+				120000000000000000000024 /* TraceSearchField.swift */,
+				120000000000000000000025 /* TraceTimelinePane.swift */,
+				120000000000000000000026 /* TraceViewerRootView.swift */,
+				120000000000000000000027 /* TraceZoomInButton.swift */,
+				120000000000000000000028 /* TraceZoomOutButton.swift */,
+				120000000000000000000029 /* TraceZoomSelectionButton.swift */,
+			);
+			path = Viewer;
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -184,7 +366,51 @@
 		0B0000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (010000000000000000000001 /* ArkTraceApp.swift in Sources */);
+			files = (
+				010000000000000000000001 /* ArkTraceApp.swift in Sources */,
+				110000000000000000000001 /* TraceCaptureWindow.swift in Sources */,
+				11000000000000000000002A /* TraceCaptureStatusView.swift in Sources */,
+				110000000000000000000002 /* ShortcutHelpView.swift in Sources */,
+				110000000000000000000003 /* AnnotationInspectorView.swift in Sources */,
+				110000000000000000000004 /* AnnotationRow.swift in Sources */,
+				110000000000000000000005 /* EventInspectorView.swift in Sources */,
+				110000000000000000000006 /* FlagTagEditor.swift in Sources */,
+				110000000000000000000007 /* InspectorDockMenu.swift in Sources */,
+				110000000000000000000008 /* InspectorFocusButton.swift in Sources */,
+				110000000000000000000009 /* InspectorToolbarToggle.swift in Sources */,
+				11000000000000000000000A /* RangeInspectorView.swift in Sources */,
+				11000000000000000000000B /* SliceAggregateSort.swift in Sources */,
+				11000000000000000000000C /* TraceInspectorDock+Symbol.swift in Sources */,
+				11000000000000000000000D /* TraceInspectorPane.swift in Sources */,
+				11000000000000000000000E /* SettingsRootView.swift in Sources */,
+				11000000000000000000000F /* TraceCacheSettingsView.swift in Sources */,
+				110000000000000000000010 /* TraceLicensesView.swift in Sources */,
+				110000000000000000000011 /* ArkTraceWindow.swift in Sources */,
+				110000000000000000000012 /* FocusableTextField.swift in Sources */,
+				110000000000000000000013 /* TraceAccessibilityMessage+Localization.swift in Sources */,
+				110000000000000000000014 /* TraceAppErrorTitle+Localization.swift in Sources */,
+				110000000000000000000015 /* TraceFormatting.swift in Sources */,
+				110000000000000000000016 /* TraceLoadingStageLabel.swift in Sources */,
+				110000000000000000000017 /* View+PrimaryToolbarTarget.swift in Sources */,
+				110000000000000000000018 /* DepthDisclosureButton.swift in Sources */,
+				110000000000000000000019 /* ProcessFilterBar.swift in Sources */,
+				11000000000000000000001A /* RecentDocumentRow.swift in Sources */,
+				11000000000000000000001B /* RecentDocumentsSection.swift in Sources */,
+				11000000000000000000001C /* SearchResultsSection.swift in Sources */,
+				11000000000000000000001D /* TraceViewerSidebar.swift in Sources */,
+				11000000000000000000001E /* TrackRow.swift in Sources */,
+				11000000000000000000001F /* TraceAnnouncementBridge.swift in Sources */,
+				110000000000000000000020 /* TraceErrorBannerOverlay.swift in Sources */,
+				110000000000000000000021 /* TraceLoadingPane.swift in Sources */,
+				110000000000000000000022 /* TraceReloadButton.swift in Sources */,
+				110000000000000000000023 /* TraceResetZoomButton.swift in Sources */,
+				110000000000000000000024 /* TraceSearchField.swift in Sources */,
+				110000000000000000000025 /* TraceTimelinePane.swift in Sources */,
+				110000000000000000000026 /* TraceViewerRootView.swift in Sources */,
+				110000000000000000000027 /* TraceZoomInButton.swift in Sources */,
+				110000000000000000000028 /* TraceZoomOutButton.swift in Sources */,
+				110000000000000000000029 /* TraceZoomSelectionButton.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
