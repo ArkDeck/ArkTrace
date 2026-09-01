@@ -2,6 +2,7 @@ import ArkTraceAnalysis
 import ArkTraceAppSupport
 import ArkTraceCore
 import ArkTraceRendering
+import ArkTraceRuntime
 import Foundation
 import UniformTypeIdentifiers
 
@@ -108,6 +109,22 @@ private func pinAppSupportSurface(
     _ = productConfiguration.stagingDirectory
     _ = productConfiguration.bundledParserExecutionPolicy.rawValue
     _ = TraceDocumentController(configuration: productConfiguration)
+
+    let maintenance = try! TraceCacheMaintenanceService(
+        cacheDirectory: productConfiguration.cacheDirectory,
+        stagingDirectory: productConfiguration.stagingDirectory
+    )
+    let inventory = try! await maintenance.inventory()
+    _ = inventory.entryCount
+    _ = inventory.totalByteCount
+    _ = inventory.activeEntryCount
+    let report = try! await maintenance.purgeUnused()
+    _ = report.before
+    _ = report.after
+    _ = report.recoveredPrivateDirectoryCount
+    _ = report.removedOrphanOwnerMarkerCount
+    _ = report.removedEntryCount
+    _ = report.skippedActiveEntryCount
 }
 
 @MainActor
