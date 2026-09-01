@@ -2713,7 +2713,7 @@ public struct TraceCacheInventory: Hashable, Sendable {
     }
 }
 
-package struct TraceCacheMaintenanceReport: Hashable, Sendable {
+public struct TraceCacheMaintenanceReport: Hashable, Sendable {
     public let before: TraceCacheInventory
     public let after: TraceCacheInventory
     public let recoveredPrivateDirectoryCount: Int
@@ -2735,6 +2735,38 @@ package struct TraceCacheMaintenanceReport: Hashable, Sendable {
         self.removedOrphanOwnerMarkerCount = removedOrphanOwnerMarkerCount
         self.removedEntryCount = removedEntryCount
         self.skippedActiveEntryCount = skippedActiveEntryCount
+    }
+}
+
+/// Narrow public maintenance surface for products that keep cache ownership
+/// outside their UI process.
+///
+/// The caller fixes the two dedicated sibling roots once at construction.
+/// Individual requests cannot supply a path, and purge still uses the same
+/// key-lock, exclusive-lease and exact-owner transaction as the document
+/// engine. Original trace inputs are not part of this cache and can never be
+/// selected by this service.
+public actor TraceCacheMaintenanceService {
+    private let maintenance: TraceCacheMaintenance
+
+    public init(
+        cacheDirectory: URL,
+        stagingDirectory: URL,
+        maximumEntries: Int = 4_096
+    ) throws {
+        maintenance = try TraceCacheMaintenance(
+            cacheDirectory: cacheDirectory,
+            stagingDirectory: stagingDirectory,
+            maximumEntries: maximumEntries
+        )
+    }
+
+    public func inventory() async throws -> TraceCacheInventory {
+        try await maintenance.inventory()
+    }
+
+    public func purgeUnused() async throws -> TraceCacheMaintenanceReport {
+        try await maintenance.purgeUnused()
     }
 }
 

@@ -23,6 +23,7 @@ let package = Package(
                 .product(name: "ArkTraceCore", package: "ArkTrace"),
                 .product(name: "ArkTraceAnalysis", package: "ArkTrace"),
                 .product(name: "ArkTraceRendering", package: "ArkTrace"),
+                .product(name: "ArkTraceRuntime", package: "ArkTrace"),
                 .product(name: "ArkTraceAppSupport", package: "ArkTrace"),
             ]
         )
