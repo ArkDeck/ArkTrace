@@ -1,0 +1,89 @@
+name: Agent PR
+
+# Agent branches are pushed with the maintainer's repository credentials, but
+# the pull request itself must be opened by GitHub Actions so the human
+# maintainer remains eligible to review and approve it.
+on:
+  push:
+    branches:
+      - "agent/**"
+
+permissions: {}
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Create or validate the GitHub Actions pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          case "$BRANCH" in
+            agent/*) ;;
+            *)
+              echo "::error::Agent PR workflow only accepts agent/** branches"
+              exit 1
+              ;;
+          esac
+
+          candidates() {
+            gh api --method GET "/repos/$GITHUB_REPOSITORY/pulls" \
+              -f state=open \
+              -f "head=$GITHUB_REPOSITORY_OWNER:$BRANCH" \
+              -f per_page=10
+          }
+
+          before=$(candidates)
+          count=$(printf '%s' "$before" | jq 'length')
+          if [ "$count" -eq 0 ]; then
+            title=$(git log -1 --pretty=%s)
+            body="$RUNNER_TEMP/pull-request-body.md"
+            cat > "$body" <<EOF
+          Agent-drafted change from \`$BRANCH\`.
+
+          The pull request is opened by GitHub Actions so the human maintainer can provide the independent review required for merge.
+          EOF
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$BRANCH" \
+              --base main \
+              --title "$title" \
+              --body-file "$body"
+          elif [ "$count" -ne 1 ]; then
+            echo "::error::Expected at most one open pull request for $BRANCH"
+            exit 1
+          fi
+
+          after=$(candidates)
+          count=$(printf '%s' "$after" | jq 'length')
+          [ "$count" -eq 1 ] || {
+            echo "::error::Expected exactly one open pull request for $BRANCH"
+            exit 1
+          }
+          number=$(printf '%s' "$after" | jq -r '.[0].number')
+          author=$(gh api "/repos/$GITHUB_REPOSITORY/pulls/$number" --jq '.user.login')
+          head_sha=$(gh api "/repos/$GITHUB_REPOSITORY/pulls/$number" --jq '.head.sha')
+          draft=$(gh api "/repos/$GITHUB_REPOSITORY/pulls/$number" --jq '.draft')
+          [ "$author" = "github-actions[bot]" ] || {
+            echo "::error::Pull request author is $author, not github-actions[bot]"
+            exit 1
+          }
+          [ "$head_sha" = "$HEAD_SHA" ] || {
+            echo "::error::Pull request head does not match this push"
+            exit 1
+          }
+          [ "$draft" = "false" ] || {
+            echo "::error::Agent pull requests must be ready for review"
+            exit 1
+          }
