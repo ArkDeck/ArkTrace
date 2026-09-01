@@ -36,8 +36,13 @@ name: CI
 
 on:
   pull_request:
+  # Agent PRs are opened with GITHUB_TOKEN. Their pull_request-triggered runs
+  # may wait for approval, so run the same required gate on the exact pushed
+  # head as well.
   push:
-    branches: [main]
+    branches:
+      - main
+      - "agent/**"
   workflow_dispatch:
   schedule:
     # Nightly slow lane only; the fast lanes also run, keeping main's cache
