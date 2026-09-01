@@ -125,6 +125,32 @@ private func pinAppSupportSurface(
     _ = report.removedOrphanOwnerMarkerCount
     _ = report.removedEntryCount
     _ = report.skippedActiveEntryCount
+
+    let inspector = TraceOfflineInspectionService(configuration: productConfiguration)
+    let inspection = try! await inspector.inspect(
+        source: URL(filePath: "/tmp/consumer/source.htrace"),
+        expectedSourceSHA256: String(repeating: "0", count: 64),
+        expectedSourceByteCount: 1
+    )
+    _ = inspection.engineVersion
+    _ = inspection.engineBuild
+    _ = inspection.sourceSHA256
+    _ = inspection.sourceByteCount
+    _ = inspection.durationNs
+    _ = inspection.schemaFingerprint
+    _ = inspection.capabilities.cpuScheduling
+    _ = inspection.dataQualityStatus.rawValue
+    _ = inspection.dataQualityIssues.map { ($0.category.rawValue, $0.scope, $0.count) }
+    _ = inspection.provenance.parser.name
+    _ = inspection.provenance.parser.version
+    _ = inspection.provenance.parser.upstreamRevision
+    _ = inspection.provenance.parser.binarySHA256
+    _ = inspection.provenance.parser.adapterVersion
+    _ = inspection.provenance.parser.buildRecipeVersion
+    _ = inspection.provenance.schemaAdapterVersion
+    _ = inspection.provenance.indexSchemaVersion
+    _ = inspection.provenance.upstreamDatabaseSHA256
+    _ = inspection.provenance.upstreamDatabaseByteCount
 }
 
 @MainActor
