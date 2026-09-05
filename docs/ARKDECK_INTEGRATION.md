@@ -94,9 +94,10 @@ the derived Artifact remained readable with the same SHA-256. The path-free mach
 rehashes those bytes and closes their source, parser, distribution, Job, restart, and lineage
 relationships.
 
-## Deferred large evidence
+## Historical large-evidence deferral
 
-This run is a real small Trace captured by ArkDeck. It closes Phase 5 Gate 9, but it is not the
-independently captured, redistributable >500 MiB fixture. Phase 3 Gates 6/7, P4-T06 large
-performance, and the Phase 3/4 full exits remain open and fail closed when that external evidence
-is absent.
+This Phase 5 run used a real small Trace captured by ArkDeck and closed Gate 9. At that time it
+did not close the separate >500 MiB fixture and performance gates. Gates 6/7 were subsequently
+closed with independent large-trace evidence on 2026-08-15, as recorded in [DESIGN.md](./DESIGN.md)
+§24 and [TASKS.md](./TASKS.md) §4. That historical result does not replace a new candidate's
+required validation: missing required large-trace inputs still fail the applicable gate.

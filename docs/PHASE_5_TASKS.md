@@ -15,7 +15,7 @@
 
 ## 2. 责任边界
 
-ArkDeck 负责 device/capture/job/capability/artifact lease；ArkTrace 只处理 Host 上已有 Trace。集成禁止：
+在此集成路径中，ArkDeck 负责 device/capture/job/capability/artifact lease；ArkTrace analyzer/CLI 只处理 Host 上已有 Trace。GUI Capture 是后续独立能力，见 AT-SYS-003 与 [CAPTURE.md](./CAPTURE.md)。集成禁止：
 
 - 创建重复 summary operation；
 - 让调用方提供 executable path/argv；

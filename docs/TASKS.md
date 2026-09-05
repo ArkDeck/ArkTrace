@@ -1,5 +1,9 @@
 # ArkTrace 全阶段任务索引
 
+本文是 Phase 0–7 的历史任务与验收索引。当前仓库任务从 [AGENTS.md](../AGENTS.md) 进入，
+按当前规格、实现和改动范围执行；下述阶段顺序与状态更新不是普通修复的开工前置。
+Completed 记录不替代当前工作树的验证，未勾选验收项仍保留其证据缺口。
+
 > 状态基线：2026-08-18 / Phase 0–7 全部完成，10 个发布门全部关闭
 > 任务总数：70
 > 已完成：70（Phase 0 六项 + Phase 1 九项 + Phase 2 七项 + Phase 3 十项 + Phase 4 七项 + Phase 5 九项 + Phase 6 九项 + Phase 7 十三项）
@@ -32,9 +36,9 @@ flowchart LR
     P6 --> P7["Phase 7\nUpstream Alignment"]
 ~~~
 
-阶段默认必须按 Exit Checklist 依次进入。2026-08-14 用户明确要求暂时跳过独立 large Trace、进入 Phase 5；该产品排程授权当时只允许推进不依赖 large fixture 的 ArkDeck integration，不能作为发布豁免。Gate 6/7 后来由 2026-08-15 的独立采集/审核、许可、真实 cancellation 与 benchmark 单独关闭。
+初次实施按 Exit Checklist 依次进入阶段。2026-08-14 用户明确要求暂时跳过独立 large Trace、进入 Phase 5；该产品排程授权当时只允许推进不依赖 large fixture 的 ArkDeck integration，不能作为发布豁免。Gate 6/7 后来由 2026-08-15 的独立采集/审核、许可、真实 cancellation 与 benchmark 单独关闭。该排程已结束，不要求后续任务重新进入这些阶段。
 
-实施允许流水并行：P4-T01/P4-T02 可在 P3-T02/P3-T03 contract 稳定后提前开工，避免 a11y、性能或打包等正交工作阻塞 Agent Core；但 Phase 4 Exit 仍必须以 Phase 3 Exit 已完成为前提，且提前工作不得复制或绕过尚未稳定的 Store/LOD contract。
+当时允许流水并行：P4-T01/P4-T02 可在 P3-T02/P3-T03 contract 稳定后提前开工；Phase 4 Exit 仍以 Phase 3 Exit 已完成为前提，提前工作不能复制或绕过尚未稳定的 Store/LOD contract。
 
 ## 3. 全阶段任务目录
 
@@ -187,11 +191,11 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 每个阶段都必须保持：
 
-1. Phase 0–7 的 ArkTrace 无 HDC/device/capture 权限；2026-08-24 起该历史不变量由 AT-SYS-003 的能力隔离取代：仅 GUI `ArkTraceCapture` 有用户发起的 HDC capture，CLI/Core/ArkDeck analyzer 仍为零；
+1. 设备能力遵守当前 AT-SYS-003：仅 GUI `ArkTraceCapture` 有用户发起的 HDC capture，CLI/Core/Runtime/ArkDeck analyzer 仍为 host-only；这已取代 Phase 0–7 的全产品无设备权限约束；
 2. 原始 Trace 永不原地修改；
 3. App、CLI、ArkDeck 共用 Core/Runtime/Store/Analysis；
 4. Agent API 不暴露 raw SQL；
-5. 生产 executable selection 不搜索 PATH；
+5. 生产 TraceStreamer selection 不搜索 PATH；GUI HDC 使用 [CAPTURE.md](./CAPTURE.md) 中明确的 SDK/PATH 发现规则；
 6. parser/query/analysis 本地执行，不自动上传；
 7. 时间为 trace-relative Int64 ns，区间与 instant 语义统一；
 8. ipid/itid 是 identity，PID/TID 是属性；
@@ -200,7 +204,8 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 ## 6. Gate 执行约定
 
-每个阶段最终应提供一个非交互 gate：
+以下是已建立的阶段验收入口。日常改动按 [AGENTS.md](../AGENTS.md) 与 CI planner 选择验证，
+不因存在这些脚本而逐个重跑所有阶段：
 
     scripts/test_phase1.sh
     scripts/test_phase2.sh
@@ -212,7 +217,7 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 规则：
 
-- Phase N gate 包含或先执行 Phase 1…N-1 的必要 regression；
+- 继承关系以各脚本为准：Phase 6 是留存真实闭环证据的离线校验；Phase 7 继承 Phase 1、Phase 6 等相关回归，不运行 Phase 3/4/5 分发链；
 - real binary/fixture/device/ArkDeck 是阶段 acceptance 时，缺失必须 fail，不得 skip；
 - 普通 contributor unit tests 可以对昂贵外部 fixture skip，但不能代替 phase gate；
 - gate 输出记录 tool/parser/fixture identity、测试结果和性能 evidence；
@@ -221,13 +226,14 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 
 ## 7. 变更与状态更新
 
-完成任务时：
+维护历史阶段验收状态时适用以下规则。普通新任务只更新实际受影响的代码、测试和契约文档；
+不必新建 Phase、重勾已完成清单或补写状态文档。
 
 1. 只在真实验收全部通过后将状态改为 Completed；
 2. 在对应 Phase Exit Checklist 勾选；
 3. 更新相关 AT-* / AC-AT-* coverage；
 4. 发布门只在 DESIGN §24 同步证据后关闭；
-5. 若 contract 变化，先更新 reviewed design/spec，再调整任务；
+5. 若 contract 变化，在同一改动中同步 design/spec、实现与验收；超出用户授权的行为或兼容性变化先明确范围，不把文档同步变成独立的审批前置；
 6. 不因任务困难降低 requirement；
 7. 发现跨阶段依赖时，把能力移动到最早消费者阶段，避免复制实现。
 

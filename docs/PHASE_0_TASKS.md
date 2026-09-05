@@ -60,7 +60,7 @@ Phase 0 只调查会改变实现方向的事实，不实现产品功能，不展
 - [x] 确认 AnalyzerProvider 已具备 no-shell process、JSON 和 provenance 基础；
 - [x] 确认当前缺 trace analyzer production profile；
 - [x] 确认 resolver protocol 可演进为按 analyzerRef 选择多个 pinned executable；
-- [x] 确认 ArkTrace 永不取得 HDC/device capability。
+- [x] 当时确认 ArkTrace 无 HDC/device capability；2026-08-24 起由 AT-SYS-003 的能力隔离取代：仅 GUI Capture 可采集，Core/Runtime/CLI/ArkDeck analyzer 仍为 host-only。
 
 ### P0-T06 — 固化证据、边界和发布门
 

@@ -8,24 +8,26 @@
 > 验收目标：在 ArkTrace 已声明的边界内，把「上游 SmartPerf Host 能做而 ArkTrace 不能做」的离线看 trace 能力补齐到不再影响真实分析
 > 证据基线：[UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md)（36 项核实结果、`path:line` 双边引用、非目标清单）
 
-## 0. 给任务实现者的强制前置
+## 0. 阶段实施依据与按需阅读
 
-**开工前必须读完**，否则会把刻意的非目标当成缺失，或者踩到已知陷阱：
+本文件保留 Phase 7 实施与验收记录。新任务从 [AGENTS.md](../AGENTS.md) 进入，
+仅按所改行为读取以下相关部分；当时的非目标与排程不自动否决用户后续明确的新需求：
 
-1. [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md) §1 审计边界、§5 ALIGNED、§6 INTENTIONAL-DIFFERENCE、§7 OUT-OF-SCOPE —— **这三节列出的东西不得实现、不得「顺手对齐」**；
+1. [UPSTREAM_ALIGNMENT_AUDIT.md](./UPSTREAM_ALIGNMENT_AUDIT.md) §1 审计边界、§5 ALIGNED、§6 INTENTIONAL-DIFFERENCE、§7 OUT-OF-SCOPE —— 避免把有意差异误判为缺陷或擅自扩大上游对齐范围；
 2. [DESIGN.md](./DESIGN.md) §13 Timeline Renderer（含 §13.5 配色）、§14 macOS App；
 3. [SPECIFICATION.md](./SPECIFICATION.md) 的 `AT-APP-*`、`AT-RENDER-*`、`AT-DB-*`；
-4. [TASKS.md](./TASKS.md) §5 跨阶段不变量、§7 变更与状态更新 —— 尤其 rule 5「若 contract 变化，先更新 reviewed design/spec，再调整任务」与 rule 6「不因任务困难降低 requirement」。
+4. [TASKS.md](./TASKS.md) §5 跨阶段不变量、§7 变更与状态更新 —— contract 变化同步规格、实现与验收，不因测试失败降低 requirement。
 
 **取上游源码**：按 AUDIT §2.1 的 sparse-checkout 步骤，落点必须精确等于 `source-lock.json` 的
 `upstream.revision`。不要用 master、不要凭记忆、不要看博客 —— 上游有多处实现与「常识」不符
 （例：`ColorUtils.hash` 的 offset basis 被 `0xfffffff` 七个 f 截断且乘法在 JS `Number` 域内；
 `hashFunc` 会剥掉数字，所以只在数字上不同的名字**故意**同色）。
 
-**已知的环境噪声，不是回归**：新 worktree 里 `swift test` 会有约 55 个失败，因为
-`ThirdParty/TraceStreamer/macx/trace_streamer` 未构建（需要网络的 `scripts/build_trace_streamer.sh`）。
-`ProductionCommandExecutorTests` 与 `AppDistributionTests` 全部失败属预期；`xcodebuild` 同样只在
-"Copy Pinned TraceStreamer Bytes" 阶段失败。判断回归要以构建过 parser 的环境为准。
+**Parser 缺失的处理**：新 worktree 不携带被 Git 忽略的
+`ThirdParty/TraceStreamer/macx/trace_streamer`。需要真实 parser 时按
+[TRACE_STREAMER.md](./TRACE_STREAMER.md) 构建并校验；无法取得时记录受影响检查。
+只有 `.github/workflows/ci.yml` 明列的 parser-dependent 排除和 skip 可用于 hosted CI；
+不要按历史失败数量或整个测试类豁免，其他失败仍需排查。App 构建和 Phase 7 gate 需要真实 parser。
 
 **移植上游代码即触发 Apache-2.0 署名义务**：需在 `THIRD_PARTY_NOTICES.md` 记录，而这会连带触发三处
 digest re-pin（`Sources/ArkTraceCLI/CLILicenseResources.swift`、`scripts/verify_licenses.sh`、
@@ -70,8 +72,8 @@ flowchart LR
     T12["P7-T12 小项批次"] --> T13
 ~~~
 
-**可立即并行开工，互不冲突**：P7-T01（Store）、P7-T02（Analysis）、P7-T03（Loader 单行）。
-P7-T04 必须先于 P7-T06 —— 分组会改 track 布局，depth 会改 track 高度，反序做要改两遍。
+历史实施顺序：P7-T01（Store）、P7-T02（Analysis）、P7-T03（Loader 单行）可并行；
+P7-T04 先于 P7-T06，以避免重复修改 track 高度和分组布局。这些已完成任务不要求重新开工。
 
 ## 4. 具体任务
 
@@ -1007,7 +1009,7 @@ docs-only、跳过 SwiftPM lane —— 也就是「只改 README」这个断言�
 4. **`v` 键 VSync 叠加** —— 是 P7-T01 的下游装饰，先修 P7-T01；
 5. **WASD 的 `tan` 加速曲线** —— DESIGN §14.3 已决策；
 6. **thread state 标签硬编码白色** —— 回退会违反 AT-RENDER-008 与 AT-APP-011；
-7. **`Ctrl+B` 隐藏菜单**、**任意 SQL 查询页**、**采集**、**插件来源的泳道族** —— 非目标或数据源缺失；
+7. **`Ctrl+B` 隐藏菜单**、**任意 SQL 查询页**、**插件来源的泳道族** —— 本阶段非目标或数据源缺失；**采集**当时未纳入 Phase 7，后续已通过独立 GUI Capture 实现（AT-SYS-003、[CAPTURE.md](./CAPTURE.md)），不属于当前产品禁令；
 8. **搜索历史** —— 价值最低，P7-T12 明确不做；
 9. **上游的底部 sheet 架构** —— ArkTrace 用 Inspector 承载同等语义，不移植 Web 的 tab sheet。
 

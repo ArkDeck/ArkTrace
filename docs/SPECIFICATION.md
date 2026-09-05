@@ -1,10 +1,14 @@
 # ArkTrace 产品与系统规格
 
-> 状态：Draft for Review  
-> 规格版本：0.1a  
+> 用途：持续维护的产品行为与验收要求；Agent 执行入口见 [AGENTS.md](../AGENTS.md)
+>
+> 初始规格版本：0.1a（下列修订与正文共同记录后续演进）
+>
 > Machine contract：`1.0`  
-> 日期：2026-08-12  
-> 本轮范围：规范性需求与验收；不包含开发任务拆分  
+> 初稿日期：2026-08-12
+>
+> 范围：规范性需求与验收；不包含开发任务排程。
+>
 > 配套设计：[DESIGN.md](./DESIGN.md)  
 > 0.1a 修订（2026-08-12）：新增 AT-TIME-006（instant 事件）与 AC-AT-017；AT-TIME-003/004 适用范围澄清；AT-AN-001/AT-CLI-003 range-scoped summary 语义；AT-CLI-007 窗口映射；§21.1 增补 instant 覆盖
 > Capture 修订（2026-08-24）：AT-SYS-003 改为能力隔离；新增 AT-APP-014～019；仅 GUI App 获得用户发起的 HDC capture，CLI/ArkDeck analyzer 仍为 host-only

@@ -1,9 +1,11 @@
 # ArkTrace 设计文档
 
-> 状态：Draft for Review  
-> 文档版本：0.1b  
-> 日期：2026-08-12  
-> 本轮范围：产品与技术设计；不包含开发任务拆分  
+> 用途：架构与设计依据；Agent 执行入口见 [AGENTS.md](../AGENTS.md)
+>
+> 初始设计版本：0.1b。初稿日期：2026-08-12；下列日期、pin 与实现注记保留各次变更的历史语境。
+>
+> 范围：产品与技术设计；不作为日常任务的审批或排程入口。
+>
 > 配套规格：[SPECIFICATION.md](./SPECIFICATION.md)  
 > 0.1a 修订（2026-08-12）：§2.1 证据基线改锚 GitCode canonical upstream 并记录基线偏差；§11.1 新增 instant 事件语义；§24 新增发布门 1（上游重锚定）；§25 新增关注点 9–11  
 > 0.1b 修订（2026-08-12，Phase 0）：§2.1 完成 GitCode 重锚定（pin `447a0a49`），发布门 1 关闭；新增 [TRACE_STREAMER.md](./TRACE_STREAMER.md)
@@ -108,6 +110,9 @@ SmartPerf 的可复用语义包括：
 - 与特定 Web sheet、hover 全局变量和 UI 状态耦合的查询。
 
 ### 2.2 ArkDeck
+
+本节保留初次设计审阅的下游快照；其中 profile/resolver 的“当前”仅指该时点。
+后续集成记录见 [ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md)，实际跨仓库任务需重新核对消费方代码。
 
 - 官方仓库：[ArkDeck/ArkDeck](https://github.com/ArkDeck/ArkDeck)
 - 审阅的远端主线快照：`259e16d4`（本地 `origin/main`）
@@ -1677,7 +1682,7 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 
 发布前必须产出：
 
-- `ThirdParty/TraceStreamer/manifest.json`；
+- `ThirdParty/TraceStreamer/macx/manifest.json`；
 - upstream revision、binary SHA-256、architecture、build recipe；
 - 完整 license inventory；
 - `THIRD_PARTY_NOTICES.md`；
@@ -1703,7 +1708,7 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 | Cache | content-addressed，parser/schema/index identity 参与 key |
 | ArkDeck summary | 扩展现有 `analyzer.summarize-trace@1` |
 | ArkDeck deep analysis | 需要时新增非重复 typed operation，不污染 ArkTrace Core |
-| Device access | ArkTrace 永远没有 |
+| Device access | 仅 GUI 明示的 `ArkTraceCapture` 流程；Core/Runtime/CLI/ArkDeck analyzer 保持 host-only（AT-SYS-003） |
 
 ## 24. 必须实证的发布门
 
@@ -1720,11 +1725,13 @@ ArkTrace 自身许可证已于 2026-08-12 建仓时确定为 MIT（与 ArkDeck �
 9. ~~一次真实链路：ArkDeck Trace Artifact → ArkTrace → derived analysis Artifact~~——已关闭（2026-08-15，P5-T09）：真实 `capture.diagnostics@1` source Artifact `ART-fd0a93c85a005703f6edf1cfb47a3daa`（SHA-256 `a5c20c3b85b3daf56618517b114f678635391e4e4da653acbedf38d0c4b85b35`）经 host-only pinned ArkTrace 产出 persisted derived Artifact `ART-13f8ddd3192811c11efc40c048a078eb`（SHA-256 `009f9beb60ea9265fd8b21161689cf705b83a78f6b7cecd178e85a721055a3fe`），daemon restart 后 exact bytes 仍可读；LaunchAgent profile 安装由 ArkDeck PR #1311 / merge `4e478b46f202a139dbeb2c91d79e36d6d7774fac` 闭合，证据见 [ARKDECK_INTEGRATION.md](./ARKDECK_INTEGRATION.md)；
 10. ~~一次真实调试闭环：baseline capture → structured analysis → Agent evidence-backed decision → 下一轮 ArkDeck typed request → follow-up capture → deterministic comparison。~~——**已关闭**（2026-08-16，Phase 6 / P6-T09）：`com.example.waterflowdemo` 在 DAYU 200 / OpenHarmony-7.0.0.37 上，经 `capture.diagnostics@1` 采集 baseline（`ART-d15ec022…`，2,132,120 B，SHA-256 `f0aa075e…`），由 `analyzer.summarize-trace@1` 与 `analyzer.analyze-trace@1`（cpu/scheduling/slices/hot-intervals）产出 structured evidence；Agent 仅据此判定主线程每次 reload 全量重测嵌套 WaterFlow（命中预登记候选 C1，排除 C4），下一轮以 `artifact import-hap → workspace.sign-openharmony-hap@1 → debug.hap@1 → capture.diagnostics@1` 的 typed 链路施加并复验（`ART-6bc7bd62…`，1,023,605 B，SHA-256 `5efdd137…`）。按冻结规则判定 **improved**：App 进程 shareOfOneCPU 0.026339 → 0.003255（−87.6%），主线程 −88.2%，top-5 hot interval score −20.6%。证据 `Fixtures/release-evidence/phase6-real-debug-loop.json`，gate `scripts/test_phase6.sh`，报告 [PHASE_6_VERIFICATION.md](./PHASE_6_VERIFICATION.md)。**承载轮更新（2026-08-16）**：当日的 CLI re-pin 替换了上述首轮所依赖的 tool 与 parser，因此按同一冻结场景在**在产分发**（tool `a7859d69…` / parser `66887fae…`）上整条重跑，门 10 现在关闭在这一轮：baseline `ART-5b17a1a0…`（2,135,494 B，SHA-256 `4b113194…`）、follow-up `ART-5e0feb41…`（1,243,942 B，SHA-256 `5e1781a9…`），判定同为 **improved**（M1 −87.09%、M2 −87.79%、M5 −9.10%；M5 为佐证指标不参与判定）。留存机器证据与 gate 常量均指向该轮，首轮保留为历史记录，见 PHASE_6_VERIFICATION.md §7.3 与 §9。原 `kind=context` finding 已关闭：ArkDeck#1318（commit `28af92cb`）允许每个 series 一个 carry-in counter 样本，端到端复验 job `job-1b81c838…`，证据 `Fixtures/release-evidence/phase6-context-closure.json`。
 
-这些门的关闭结果应进入后续实现与验证报告；本轮不把它们拆成任务。
+这些是各次发布的历史验收结果，不证明当前工作树或新分发已经通过。后续任务按实际影响选择验证，
+只有重新取得对应证据才更新发布结论；日常开发不要求重复整套发布流程。
 
 ## 25. Review 关注点
 
-本设计 review 建议重点确认：
+以下保留初次设计 review 的问题与后续决策记录，不要求新任务逐项重新确认。
+当前任务以正文、SPECIFICATION 与实现为依据，仅处理与本次改动有关的未决问题：
 
 1. `ArkTraceRuntime` 作为 App/CLI 共享编排层是否接受；
 2. 对外统一 Trace-relative Int64 ns 是否接受；
