@@ -528,7 +528,7 @@ enum TraceStorageTransactionError: Error {
     case cleanup
 }
 
-private struct TraceSourceSnapshot: Sendable {
+struct TraceSourceSnapshot: Sendable {
     let url: URL
     let sha256: String
     let byteCount: Int64
@@ -1449,16 +1449,27 @@ enum TraceContentAddressedCache {
         )
     }
 
+    // The syscall parameters are internal seams for interrupted/short I/O;
+    // production always uses Darwin against the already-bound descriptor.
     private static func writeAll(_ data: Data, descriptor: Int32) throws {
+        unsafe try writeAll(data, descriptor: descriptor, write: { unsafe Darwin.write($0, $1, $2) })
+    }
+
+    static func writeAll(
+        _ data: Data,
+        descriptor: Int32,
+        write: (Int32, UnsafeRawPointer, Int) -> Int
+    ) throws {
         unsafe try data.withUnsafeBytes { rawBuffer in
             guard let base = rawBuffer.baseAddress else { return }
             var offset = 0
             while offset < rawBuffer.count {
-                let count = unsafe Darwin.write(
+                let count = unsafe write(
                     descriptor,
                     base.advanced(by: offset),
                     rawBuffer.count - offset
                 )
+                if count < 0, errno == EINTR { continue }
                 guard count > 0 else { throw CacheIO.destination }
                 offset += count
             }
@@ -1499,6 +1510,19 @@ enum TraceContentAddressedCache {
         snapshotDirectory: URL?,
         report: TraceProgressHandler? = nil,
         stage: TraceLoadingStage = .hashing
+    ) throws -> TraceSourceSnapshot {
+        unsafe try scanSource(
+            source: source, snapshotDirectory: snapshotDirectory, report: report, stage: stage,
+            read: { unsafe Darwin.read($0, $1, $2) }
+        )
+    }
+
+    static func scanSource(
+        source: URL,
+        snapshotDirectory: URL?,
+        report: TraceProgressHandler? = nil,
+        stage: TraceLoadingStage = .hashing,
+        read: (Int32, UnsafeMutableRawPointer?, Int) -> Int
     ) throws -> TraceSourceSnapshot {
         try Task.checkCancellation()
         let canonicalSource = source.resolvingSymlinksInPath().standardizedFileURL
@@ -1569,8 +1593,9 @@ enum TraceContentAddressedCache {
         while true {
             try Task.checkCancellation()
             let count = unsafe buffer.withUnsafeMutableBytes { rawBuffer in
-                unsafe Darwin.read(input, rawBuffer.baseAddress, rawBuffer.count)
+                unsafe read(input, rawBuffer.baseAddress, rawBuffer.count)
             }
+            if count < 0, errno == EINTR { continue }
             guard count >= 0 else {
                 throw ArkTraceError(
                     code: .traceFileUnreadable,
@@ -2247,9 +2272,9 @@ enum TraceContentAddressedCache {
         guard Darwin.fsync(descriptor) == 0 else { throw CacheIO.destination }
     }
 
-    private static func synchronizeDirectory(at url: URL) throws {
+    static func synchronizeDirectory(at url: URL) throws {
         let descriptor = unsafe url.path.withCString {
-            unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+            unsafe Darwin.open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else { throw CacheIO.directory }
         defer { _ = Darwin.close(descriptor) }

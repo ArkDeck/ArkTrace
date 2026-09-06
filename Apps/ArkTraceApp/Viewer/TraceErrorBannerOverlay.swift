@@ -33,7 +33,8 @@ struct TraceErrorBannerOverlay: View {
                         SettingsLink { Text("Cache Settings…") }
                             .arktraceAccessibleTarget()
                     case .dismiss:
-                        EmptyView()
+                        Button("Dismiss", action: dismissError)
+                            .arktraceAccessibleTarget()
                     }
                     Spacer()
                 }
@@ -45,5 +46,10 @@ struct TraceErrorBannerOverlay: View {
             .focused(focusRegion, equals: .errorRecovery)
             .padding(12)
         }
+    }
+
+    private func dismissError() {
+        controller.dismissError()
+        focusRegion.wrappedValue = .sidebar
     }
 }

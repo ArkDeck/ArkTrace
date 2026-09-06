@@ -19,6 +19,23 @@
         }
       }
     },
+    "Dismiss": {
+      "comment": "Closes an error banner while keeping the current document open.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss"
+          }
+        }
+      }
+    },
     "Dock Inspector": {
       "comment": "Menu that chooses which edge the Inspector is docked to.",
       "localizations": {

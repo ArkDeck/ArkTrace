@@ -230,7 +230,7 @@ jobs:
           {
             echo '### Tests'
             echo "Excluded by --skip (need the pinned parser bytes): 7"
-            echo "XCTSkip at runtime (parser/fixture guards): ${skipped:-0}"
+            echo "XCTSkip at runtime (parser/fixture guards and opt-in gates): ${skipped:-0}"
             echo
             echo 'Both groups require the locally built TraceStreamer binary.'
             echo 'Run the phase scripts on a machine that has it before release.'

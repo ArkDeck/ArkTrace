@@ -903,10 +903,7 @@ public final class TimelineNSView: NSView {
     /// A loading generation with no primitives has nothing to rescale (the
     /// first viewport of a document), so it falls back to what was on screen.
     private var displayedSnapshot: TimelineSnapshot? {
-        if let snapshot, snapshot.isLoading {
-            return snapshot.tracks.isEmpty ? (previousSnapshot ?? snapshot) : snapshot
-        }
-        return snapshot ?? previousSnapshot
+        Self.displayedSnapshot(current: snapshot, previous: previousSnapshot)
     }
 
     private func drawRuler(_ snapshot: TimelineSnapshot, context: CGContext) {
@@ -1210,18 +1207,23 @@ public final class TimelineNSView: NSView {
         // only, and hand the state back the way it was found.
         context.saveGState()
         context.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
-        let visibleLabels = Self.bands(covering: dirtyRect)
-            .compactMap { cached.labelBands[$0] }
-            .joined()
-        for label in visibleLabels where label.frame.intersects(dirtyRect) {
-            drawnLabels += 1
-            if !label.text.isLaidOut { laidOutLabels += 1 }
-            context.saveGState()
-            // AT-RENDER-005: a label never draws outside its own primitive.
-            context.clip(to: label.frame.insetBy(dx: 1, dy: 1))
-            context.textPosition = label.origin
-            CTLineDraw(label.text.prepared(), context)
-            context.restoreGState()
+        let dirtyBands = Self.bands(covering: dirtyRect)
+        for band in dirtyBands {
+            for label in cached.labelBands[band] ?? [] where label.frame.intersects(dirtyRect) {
+                // A straddling label is filed in both bands so either strip
+                // can redraw it. Draw only from its first dirty band when a
+                // frame covers both, without merging distinct same-name labels.
+                guard band == max(dirtyBands.lowerBound, Self.bands(covering: label.frame).lowerBound)
+                else { continue }
+                drawnLabels += 1
+                if !label.text.isLaidOut { laidOutLabels += 1 }
+                context.saveGState()
+                // AT-RENDER-005: a label never draws outside its own primitive.
+                context.clip(to: label.frame.insetBy(dx: 1, dy: 1))
+                context.textPosition = label.origin
+                CTLineDraw(label.text.prepared(), context)
+                context.restoreGState()
+            }
         }
         context.restoreGState()
         labelRenderHook?(drawnLabels, laidOutLabels)
@@ -1947,16 +1949,19 @@ public final class TimelineNSView: NSView {
         TimelinePalette.trackIdentityColor(descriptor.id.rawValue)
     }
 
+    private static func displayedSnapshot(
+        current: TimelineSnapshot?, previous: TimelineSnapshot?
+    ) -> TimelineSnapshot? {
+        if let current, current.isLoading {
+            return current.tracks.isEmpty ? (previous ?? current) : current
+        }
+        return current ?? previous
+    }
+
     private static func renderIdentity(
         current: TimelineSnapshot?, previous: TimelineSnapshot?
     ) -> RenderIdentity? {
-        let displayed: TimelineSnapshot?
-        if current?.isLoading == true {
-            displayed = previous ?? current
-        } else {
-            displayed = current ?? previous
-        }
-        return displayed.map {
+        displayedSnapshot(current: current, previous: previous).map {
             RenderIdentity(generation: $0.generation, isLoading: $0.isLoading)
         }
     }

@@ -472,12 +472,10 @@ python3 -B "$script_directory/verify_phase5_cli_distribution.py" \
     snapshot-json "$record_staging" "$partial_record" \
     || fail "CLI candidate record publication snapshot failed"
 
-expected_candidate_tree=$(python3 -B "$script_directory/verify_phase5_cli_distribution.py" \
-    tree-sha "$partial_candidate") || fail "CLI candidate partial identity is unavailable"
 expected_record_sha=$(shasum -a 256 "$partial_record" | awk '{print $1}')
 expected_record_bytes=$(stat -f '%z' "$partial_record")
 arktrace_phase5_publish_candidate_pair \
-    "$partial_candidate" "$candidate" "$expected_candidate_tree" \
+    "$partial_candidate" "$candidate" "$app_tree_sha" \
     "$partial_record" "$record" "$expected_record_sha" "$expected_record_bytes" \
     "$script_directory/verify_phase5_cli_distribution.py" \
     || fail "CLI candidate publication collided"

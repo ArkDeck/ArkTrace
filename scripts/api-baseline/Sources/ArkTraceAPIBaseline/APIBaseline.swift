@@ -21,6 +21,7 @@ private func pinAppSupportSurface(
     // Document lifecycle and state the app reads.
     controller.open(URL(filePath: "/dev/null"))
     controller.reload()
+    controller.dismissError()
     controller.cancel()
     _ = controller.phase == TraceDocumentPhase.ready
     _ = controller.sourceURL

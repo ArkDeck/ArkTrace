@@ -180,6 +180,22 @@ final class TraceDocumentControllerTests: XCTestCase {
         func count() -> Int { attempts }
     }
 
+    private actor MaintenanceGate {
+        private var released = false
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        func wait() async {
+            guard !released else { return }
+            await withCheckedContinuation { continuation = $0 }
+        }
+
+        func release() {
+            released = true
+            continuation?.resume()
+            continuation = nil
+        }
+    }
+
     func testNewOpenGenerationPreventsOldResultFromReplacingDocument() async throws {
         let suite = "ArkTraceControllerTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
@@ -435,9 +451,15 @@ final class TraceDocumentControllerTests: XCTestCase {
             cacheDirectory: cache.resolvingSymlinksInPath().standardizedFileURL,
             stagingDirectory: staging.resolvingSymlinksInPath().standardizedFileURL
         )
+        let gate = MaintenanceGate()
+        let maintenanceStarted = expectation(description: "maintenance reached its gate")
         let controller = TraceDocumentController(
             recentStore: TraceRecentDocumentStore(defaults: defaults),
             maintenance: maintenance,
+            beforeCacheMaintenance: {
+                maintenanceStarted.fulfill()
+                await gate.wait()
+            },
             opener: { _, _ in
                 TraceOpenedDocument(
                     repository: Repository(identity: "m"),
@@ -452,12 +474,15 @@ final class TraceDocumentControllerTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: source) }
 
         controller.open(source)
-        while controller.phase != .ready { await Task.yield() }
+        await fulfillment(of: [maintenanceStarted], timeout: 5)
         // Reaching Ready must not depend on housekeeping having finished; it
         // used to run two full inventories and an owner scan before the
         // parser was even started (AT-PERF-002).
         XCTAssertEqual(controller.phase, .ready)
+        XCTAssertNil(controller.cacheInventory)
+        XCTAssertNil(controller.cacheMaintenanceReport)
 
+        await gate.release()
         await controller.awaitCacheMaintenanceForTesting()
         XCTAssertNotNil(
             controller.cacheInventory,
@@ -465,6 +490,7 @@ final class TraceDocumentControllerTests: XCTestCase {
         )
         XCTAssertNotNil(controller.cacheMaintenanceReport)
         XCTAssertNil(controller.errorPresentation)
+        await controller.close()
     }
 
     /// The stages that can measure themselves say so, and the app is what
@@ -599,6 +625,12 @@ final class TraceDocumentControllerTests: XCTestCase {
         await controller.close()
         XCTAssertEqual(controller.phase, .failed)
         XCTAssertEqual(controller.errorPresentation?.recoveryAction, .retry)
+        let snapshot = controller.snapshot
+        controller.dismissError()
+        XCTAssertNil(controller.errorPresentation)
+        XCTAssertEqual(controller.phase, .failed)
+        XCTAssertEqual(controller.sourceURL, source.standardizedFileURL)
+        XCTAssertEqual(controller.snapshot, snapshot)
         let firstCount = await closer.count()
         XCTAssertEqual(firstCount, 1)
         await controller.close()
@@ -608,17 +640,28 @@ final class TraceDocumentControllerTests: XCTestCase {
     }
 
     func testTypedErrorPresentationDoesNotExposeUnboundedDetails() {
+        // Producers own path safety (AT-ERR-002). This presentation boundary
+        // promises a detail-count and Character limit, not path redaction or
+        // a total UTF-8 byte limit for arbitrary keys/messages.
+        let value = String(repeating: "值", count: 10_000)
         let error = ArkTraceError(
             code: .traceCacheCorrupt,
             stage: .cacheLookup,
             message: "Cache maintenance could not complete safely",
             retryable: true,
-            details: ["reason": String(repeating: "x", count: 10_000)]
+            details: Dictionary(uniqueKeysWithValues: (0..<20).map {
+                (String(format: "detail%02d", $0), value)
+            })
         )
         let presentation = TraceAppErrorPresentation(error: error)
         XCTAssertEqual(presentation.recoveryAction, .openCacheSettings)
-        XCTAssertLessThan(presentation.diagnostic.utf8.count, 512)
-        XCTAssertFalse(presentation.diagnostic.contains("/Users/"))
+        let prefix = "TRACE_CACHE_CORRUPT · cacheLookup · "
+        XCTAssertTrue(presentation.diagnostic.hasPrefix(prefix))
+        let pairs = presentation.diagnostic.dropFirst(prefix.count).components(separatedBy: ", ")
+        XCTAssertEqual(pairs.count, 16)
+        for (index, pair) in pairs.enumerated() {
+            XCTAssertEqual(pair, String(format: "detail%02d=", index) + String(repeating: "值", count: 128))
+        }
     }
 
     func testAccessibilityAnnouncementsAreCoalescedAtMeaningfulBoundaries() async throws {
@@ -1142,6 +1185,24 @@ final class TraceDocumentControllerTests: XCTestCase {
             controller.annotations.isEmpty,
             "a replacement session must not inherit the previous trace's annotations"
         )
+        controller.addFlag(atNs: 200)
+        controller.selectRange(try TraceTimeRange.query(startNs: 100, endNs: 400))
+        XCTAssertNotNil(controller.addMark(isPersistent: true))
+        let closingSessionID = controller.annotationSessionID
+        await controller.close()
+        XCTAssertEqual(controller.phase, .idle)
+        XCTAssertNil(controller.sourceURL)
+        XCTAssertNil(controller.snapshot)
+        XCTAssertNil(controller.loadingFraction)
+        XCTAssertNil(controller.selectedRange)
+        XCTAssertTrue(controller.annotations.isEmpty)
+        XCTAssertFalse(controller.isSearching)
+        XCTAssertNotEqual(controller.annotationSessionID, closingSessionID)
+
+        controller.open(first)
+        while controller.phase != .ready { await Task.yield() }
+        controller.addFlag(atNs: 100)
+        XCTAssertEqual(controller.annotations.flags.map(\.id), [1])
         await controller.close()
     }
 
@@ -1214,6 +1275,8 @@ final class TraceDocumentControllerTests: XCTestCase {
             TraceDocumentController.maximumFavoriteTracks
         )
         await controller.close()
+        XCTAssertTrue(controller.favoriteTrackIDs.isEmpty)
+        XCTAssertTrue(controller.favoriteTracks().isEmpty)
     }
 
     private static func makeThread(

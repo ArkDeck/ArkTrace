@@ -1,6 +1,7 @@
 import ArkTraceCore
 import ArkTraceRuntime
 import Foundation
+import OSLog
 
 /// One bounded, path-free data-quality fact from an offline Trace inspection.
 ///
@@ -164,22 +165,55 @@ public actor TraceOfflineInspectionService {
             stagingDirectory: configuration.stagingDirectory,
             storagePolicy: .ephemeral
         )
+        return try await Self.withClosedSession(
+            logger: Logger(subsystem: configuration.signpostSubsystem, category: "OfflineInspection"),
+            operation: {
+                let metadata = try await session.repository.metadata()
+                let report = try TraceOfflineInspectionReport(
+                    parsed: await session.parsed,
+                    metadata: metadata,
+                    expectedSourceSHA256: expectedSourceSHA256,
+                    expectedSourceByteCount: expectedSourceByteCount
+                )
+                try Task.checkCancellation()
+                return report
+            },
+            close: { try await session.close() }
+        )
+    }
+
+    /// A failed inspection keeps its primary error. Cleanup is attempted once
+    /// on either path, and a cleanup failure after success remains a failure.
+    static func withClosedSession<Value: Sendable>(
+        logger: Logger,
+        operation: @Sendable () async throws -> Value,
+        close: @Sendable () async throws -> Void
+    ) async throws -> Value {
+        let result: Value
         do {
-            let metadata = try await session.repository.metadata()
-            let report = try TraceOfflineInspectionReport(
-                parsed: await session.parsed,
-                metadata: metadata,
-                expectedSourceSHA256: expectedSourceSHA256,
-                expectedSourceByteCount: expectedSourceByteCount
-            )
-            try Task.checkCancellation()
-            try await session.close()
-            return report
+            result = try await operation()
         } catch {
             let operationError = error
-            try await session.close()
+            do {
+                try await close()
+            } catch {
+                // Never log error descriptions: dependencies may include a
+                // user path. Untyped errors (including cancellation) retain
+                // their identity, with cleanup failure visible in this log.
+                logger.error("Offline inspection session cleanup also failed")
+                if let typed = operationError as? ArkTraceError {
+                    var details = typed.details
+                    details["sessionCleanupFailed"] = "true"
+                    throw ArkTraceError(
+                        code: typed.code, stage: typed.stage, message: typed.message,
+                        retryable: typed.retryable, details: details
+                    )
+                }
+            }
             throw operationError
         }
+        try await close()
+        return result
     }
 
     package static func invalidResult(reason: String) -> ArkTraceError {

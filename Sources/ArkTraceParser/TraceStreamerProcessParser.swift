@@ -386,12 +386,10 @@ package struct TraceStreamerProcessParser: TraceParser {
         // pipe rather than a TTY and the pinned binary full-buffers: measured,
         // the whole parse arrives as one chunk at exit, so the parse stage
         // shows an indeterminate bar rather than a live fraction (DESIGN
-        // §13.4). Even that last chunk only reaches the scanner when the
-        // readability handler wins the race with the post-exit drain, which
-        // does not call the observer. The scanner is kept because it costs
-        // nothing and becomes real progress the day a parser flushes
-        // incrementally. It is fed from the pipe's callback queue, so it
-        // lives behind a lock.
+        // §13.4). The observer receives both live reads and the post-exit
+        // drain in stream order. Incremental progress becomes available when
+        // a parser flushes incrementally. The scanner is shared with the
+        // pipe's callback queue, so it lives behind a lock.
         let scanner = Mutex(TraceStreamerProgressScanner())
         let sourceByteCount = prepared.sourceByteCount
         var stdoutObserver: (@Sendable (Data) -> Void)?
@@ -1196,6 +1194,7 @@ package struct TraceStreamerProcessParser: TraceParser {
                 let chunk = handle.availableData
                 guard !chunk.isEmpty else { break }
                 appendBounded(chunk)
+                observer?(chunk)
             }
             return snapshot()
         }
@@ -1228,8 +1227,6 @@ package struct TraceStreamerProcessParser: TraceParser {
             } else {
                 appendBoundedWhileLocked(chunk)
             }
-            activeReadabilityCallbacks -= 1
-            condition.broadcast()
             condition.unlock()
 
             // Outside the lock, and only for real bytes: an observer that
@@ -1240,6 +1237,13 @@ package struct TraceStreamerProcessParser: TraceParser {
             // Leaving the handler installed at EOF can repeatedly schedule an
             // empty callback until the owner observes process termination.
             if reachedEOF { handle.readabilityHandler = nil }
+
+            // EOF drain must wait for delivery, not just the buffer append;
+            // otherwise it can notify later bytes ahead of this observer.
+            condition.lock()
+            activeReadabilityCallbacks -= 1
+            condition.broadcast()
+            condition.unlock()
         }
 
         private func stopReadabilityHandler(waitForActiveCallback: Bool) {

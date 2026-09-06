@@ -2,6 +2,7 @@ import ArkTraceCore
 import CryptoKit
 import Darwin
 import Foundation
+import Synchronization
 import XCTest
 
 @testable import ArkTraceParser
@@ -219,6 +220,61 @@ final class TraceStreamerIdentityTests: XCTestCase {
                 "version tail was truncated on iteration \(iteration)"
             )
         }
+    }
+
+    func testSynchronousDrainDeliversEveryByteToObserverBeyondDiagnosticCapacity() throws {
+        let observed = Mutex(Data())
+        let sink = TraceStreamerProcessParser.BoundedPipeSink(capacity: 4) { chunk in
+            observed.withLock { $0.append(chunk) }
+        }
+        // Disable the live reader before writing, so this cannot accidentally
+        // pass by having the readability handler consume the entire payload.
+        sink.finish()
+        let payload = Data("LoadingFile:1.00 MB\n".utf8)
+        try sink.pipe.fileHandleForWriting.write(contentsOf: payload)
+        try sink.pipe.fileHandleForWriting.close()
+        let result = sink.finishAndDrainToEOF()
+        XCTAssertEqual(observed.withLock { $0 }, payload)
+        XCTAssertEqual(result.data, payload.prefix(4))
+        XCTAssertEqual(result.observedByteCount, payload.count)
+        XCTAssertTrue(result.truncated)
+    }
+
+    func testDrainWaitsForInFlightObserverBeforeDeliveringTail() async throws {
+        let firstEntered = DispatchSemaphore(value: 0)
+        let releaseFirst = DispatchSemaphore(value: 0)
+        let observed = Mutex(Data())
+        let sink = TraceStreamerProcessParser.BoundedPipeSink { chunk in
+            if chunk == Data("first".utf8) {
+                firstEntered.signal()
+                XCTAssertEqual(releaseFirst.wait(timeout: .now() + 5), .success)
+            }
+            observed.withLock { $0.append(chunk) }
+        }
+        defer { releaseFirst.signal() }
+        try sink.pipe.fileHandleForWriting.write(contentsOf: Data("first".utf8))
+        XCTAssertEqual(firstEntered.wait(timeout: .now() + 5), .success)
+        sink.finish()
+        try sink.pipe.fileHandleForWriting.write(contentsOf: Data("tail".utf8))
+        try sink.pipe.fileHandleForWriting.close()
+
+        let started = expectation(description: "drain started")
+        let premature = expectation(description: "drain must wait for the observer")
+        premature.isInverted = true
+        let released = Mutex(false)
+        let drain = Task.detached {
+            started.fulfill()
+            let result = sink.finishAndDrainToEOF()
+            if !released.withLock({ $0 }) { premature.fulfill() }
+            return result
+        }
+        await fulfillment(of: [started], timeout: 5)
+        await fulfillment(of: [premature], timeout: 0.1)
+        released.withLock { $0 = true }
+        releaseFirst.signal()
+        let result = await drain.value
+        XCTAssertEqual(result.data, Data("firsttail".utf8))
+        XCTAssertEqual(observed.withLock { $0 }, result.data)
     }
 
     func testChildInvocationUsesLiteralArgumentsAndFixedNoMetaFlag() async throws {

@@ -591,8 +591,27 @@ final class CLITests: XCTestCase {
         XCTAssertEqual(compact, try CLIMachineEncoder().encode(value, pretty: false, maximumBytes: Int.max))
         XCTAssertEqual(String(decoding: compact, as: UTF8.self), #"{"a":"one","z":2}"# + "\n")
         let pretty = try CLIMachineEncoder().encode(value, pretty: true, maximumBytes: Int.max)
-        XCTAssertTrue(String(decoding: pretty, as: UTF8.self).contains("\n"))
-        XCTAssertNotEqual(pretty, CLIHumanRenderer().help())
+        XCTAssertNotEqual(pretty, compact)
+        XCTAssertTrue(String(decoding: pretty, as: UTF8.self).contains("\n  \"a\""))
+        XCTAssertEqual(try JSONDecoder().decode(Value.self, from: pretty), value)
+        XCTAssertThrowsError(try JSONSerialization.jsonObject(with: CLIHumanRenderer().help()))
+    }
+
+    func testStderrClippingKeepsCompleteUTF8CharactersAtTheBudgetBoundary() {
+        let cases: [(String, Int, String)] = [
+            ("aé!", 3, "aé"), ("é…", 2, "é"),
+            ("a€!", 4, "a€"), ("a😀!", 5, "a😀"),
+            ("aé!", 2, "a"), ("a€!", 3, "a"), ("a😀!", 4, "a"),
+            ("é!", 1, ""), ("ascii", 3, "asc"), ("ascii", 5, "ascii"),
+            ("é", 8, "é"), ("é", 0, ""), ("", 1, ""),
+        ]
+        for (input, budget, expected) in cases {
+            let writer = MemoryWriter()
+            CLIApplication.writeStderrIfFits(Data(input.utf8), maximumBytes: budget, writer: writer)
+            XCTAssertEqual(writer.stderrString, expected, "\(input), budget \(budget)")
+            XCTAssertLessThanOrEqual(writer.stderrString.utf8.count, budget)
+            XCTAssertTrue(writer.stdoutData.isEmpty)
+        }
     }
 
     private func assertUsageError(

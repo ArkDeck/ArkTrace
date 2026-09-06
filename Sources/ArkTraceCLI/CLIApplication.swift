@@ -485,7 +485,7 @@ package struct CLIApplication: Sendable {
         }
     }
 
-    private static func writeStderrIfFits(
+    static func writeStderrIfFits(
         _ data: Data,
         maximumBytes: Int,
         writer: any CLIOutputWriting
@@ -495,15 +495,17 @@ package struct CLIApplication: Sendable {
             try? writer.writeStderr(data)
             return
         }
-        // Never exit non-zero with no diagnostic anywhere: clip the error
-        // line to the remaining budget (on a UTF-8 boundary) instead of
-        // silently discarding it.
+        // Preserve the longest complete UTF-8 prefix that fits the remaining
+        // budget. A cut at a character boundary needs no trimming.
         var clipped = data.prefix(maximumBytes)
-        while let last = clipped.last, (last & 0xC0) == 0x80 {
-            clipped = clipped.dropLast()
-        }
-        if let last = clipped.last, last >= 0xC0 {
-            clipped = clipped.dropLast()
+        let nextByte = data[data.index(data.startIndex, offsetBy: maximumBytes)]
+        if (nextByte & 0xC0) == 0x80 {
+            while let last = clipped.last, (last & 0xC0) == 0x80 {
+                clipped = clipped.dropLast()
+            }
+            if let last = clipped.last, last >= 0xC0 {
+                clipped = clipped.dropLast()
+            }
         }
         guard !clipped.isEmpty else { return }
         try? writer.writeStderr(Data(clipped))

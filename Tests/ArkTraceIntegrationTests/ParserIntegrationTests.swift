@@ -453,6 +453,14 @@ final class ParserIntegrationTests: XCTestCase {
         func wait() async {
             await Task.detached { self.waitBlocking() }.value
         }
+
+        private func waitBlocking(seconds: Double) -> Bool {
+            semaphore.wait(timeout: .now() + seconds) == .success
+        }
+
+        func wait(seconds: Double) async -> Bool {
+            await Task.detached { self.waitBlocking(seconds: seconds) }.value
+        }
     }
 
     private final class URLRecorder: @unchecked Sendable {
@@ -1580,7 +1588,9 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testPhase1GateWritesBoundedMachineEvidenceWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
-        guard environment["ARKTRACE_PHASE1_GATE"] == "1" else { return }
+        guard environment["ARKTRACE_PHASE1_GATE"] == "1" else {
+            throw XCTSkip("ARKTRACE_PHASE1_GATE gate was not requested")
+        }
         let outputPath = try XCTUnwrap(environment["ARKTRACE_PHASE1_EVIDENCE_OUTPUT"])
         let outputURL = URL(filePath: outputPath)
         let (binary, fixture) = try requireEnvironment()
@@ -1666,7 +1676,9 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
-        guard environment["ARKTRACE_PHASE2_GATE"] == "1" else { return }
+        guard environment["ARKTRACE_PHASE2_GATE"] == "1" else {
+            throw XCTSkip("ARKTRACE_PHASE2_GATE gate was not requested")
+        }
         let outputPath = try XCTUnwrap(environment["ARKTRACE_PHASE2_EVIDENCE_OUTPUT"])
         let outputURL = URL(filePath: outputPath)
         let (binary, fixture) = try requireCacheEnvironment()
@@ -1781,7 +1793,9 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testPhase3CachedContextDiagnosticWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
-        guard environment["ARKTRACE_PHASE3_CONTEXT_DIAGNOSTIC"] == "1" else { return }
+        guard environment["ARKTRACE_PHASE3_CONTEXT_DIAGNOSTIC"] == "1" else {
+            throw XCTSkip("ARKTRACE_PHASE3_CONTEXT_DIAGNOSTIC gate was not requested")
+        }
         let source = URL(filePath: try XCTUnwrap(environment["ARKTRACE_PHASE3_TRACE"]))
         let parserURL = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_TRACE_STREAMER"]
@@ -1857,7 +1871,9 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testPhase3GateWritesViewportPerformanceEvidenceWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
-        guard environment["ARKTRACE_PHASE3_GATE"] == "1" else { return }
+        guard environment["ARKTRACE_PHASE3_GATE"] == "1" else {
+            throw XCTSkip("ARKTRACE_PHASE3_GATE gate was not requested")
+        }
         let fixtureClass = environment["ARKTRACE_PHASE3_FIXTURE_CLASS"] ?? "medium"
         XCTAssertTrue(["medium", "large"].contains(fixtureClass))
         let outputURL = URL(filePath: try XCTUnwrap(
@@ -2635,7 +2651,9 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested() async throws {
         let environment = ProcessInfo.processInfo.environment
-        guard environment["ARKTRACE_PHASE3_LARGE_CANCELLATION"] == "1" else { return }
+        guard environment["ARKTRACE_PHASE3_LARGE_CANCELLATION"] == "1" else {
+            throw XCTSkip("ARKTRACE_PHASE3_LARGE_CANCELLATION gate was not requested")
+        }
         let fixture = URL(filePath: try XCTUnwrap(
             environment["ARKTRACE_PHASE3_TRACE"]
         ))
@@ -2986,24 +3004,47 @@ final class ParserIntegrationTests: XCTestCase {
         let staging = FileManager.default.temporaryDirectory
             .appending(path: "arktrace-cancel-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: staging) }
-
+        let barrier = ProcessLaunchBarrier()
+        let (events, continuation) = AsyncStream.makeStream(of: ProcessLaunchEvent.self)
+        let parser = try TraceStreamerProcessParser(
+            executableURL: binary,
+            finalizationHook: nil,
+            processDidLaunchHook: { pid in
+                _ = Darwin.kill(pid, SIGSTOP)
+                continuation.yield(.launched(pid))
+                barrier.record(pid)
+                _ = Darwin.kill(pid, SIGCONT)
+            }
+        )
         let task = Task.detached {
+            defer {
+                continuation.yield(.openCompleted)
+                continuation.finish()
+            }
             return try await TraceSession.open(
-                source: fixture,
-                parser: try TraceStreamerProcessParser(executableURL: binary),
-                stagingDirectory: staging
+                source: fixture, parser: parser, stagingDirectory: staging
             )
         }
+        defer { task.cancel(); barrier.resume() }
+        let event = try await Self.firstProcessLaunchEvent(from: events, timeout: .seconds(15))
+        guard case .launched(let pid) = event else {
+            if case .success(let session) = await task.result { try await session.close() }
+            return XCTFail("cancellation test must reach a live parser")
+        }
+        XCTAssertEqual(Darwin.kill(pid, 0), 0)
         task.cancel()
+        barrier.resume()
         do {
-            _ = try await task.value
-            // Tiny fixtures may finish before the cancellation lands; both
-            // outcomes are acceptable, silent partial output is not.
+            let session = try await task.value
+            try await session.close()
+            XCTFail("a cancelled running parser must not return Ready")
         } catch let error as ArkTraceError {
             XCTAssertEqual(error.code, .cancelled)
-        } catch is CancellationError {
-            // Structured concurrency surfaced the cancellation directly.
-        }
+        } catch is CancellationError {}
+        errno = 0
+        XCTAssertEqual(Darwin.kill(pid, 0), -1)
+        XCTAssertEqual(errno, ESRCH, "the child must be reaped before cancellation returns")
+        XCTAssertTrue(try publicSessionEntries(at: staging).isEmpty)
     }
 
     func testCancellationDuringStagingQuickCheckCannotPromoteReady() async throws {
@@ -3303,7 +3344,9 @@ final class ParserIntegrationTests: XCTestCase {
 
     func testCacheCrossProcessWorker() async throws {
         let environment = ProcessInfo.processInfo.environment
-        guard let action = environment["ARKTRACE_CACHE_WORKER_ACTION"] else { return }
+        guard let action = environment["ARKTRACE_CACHE_WORKER_ACTION"] else {
+            throw XCTSkip("cache worker subprocess was not requested")
+        }
         let root = URL(filePath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_ROOT"]))
         let binary = URL(filePath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_BINARY"]))
         let fixture = URL(filePath: try XCTUnwrap(environment["ARKTRACE_CACHE_WORKER_FIXTURE"]))
@@ -4673,15 +4716,18 @@ final class ParserIntegrationTests: XCTestCase {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let metadata = try decoder.decode(TraceCacheMetadata.self, from: metadataData)
+        let contention = OneShotSignal()
         let mutation = PromotionBarrier()
         let mutationTask = Task {
             try await TraceContentAddressedCache.withExclusiveEntryMutation(
                 cacheDirectory: cache,
                 key: metadata.cacheKey,
+                contentionHook: { contention.signal() },
                 operation: { mutation.pause(at: $0) }
             )
         }
-        try await Task.sleep(for: .milliseconds(50))
+        let observedContention = await contention.wait(seconds: 5)
+        XCTAssertTrue(observedContention, "mutation must attempt the held lease")
         XCTAssertFalse(mutation.hasReached())
         handoff.resume()
         let session = try await task.value

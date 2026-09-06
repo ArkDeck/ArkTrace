@@ -764,20 +764,23 @@ final class TypedMachinePayloadTests: XCTestCase {
         XCTAssertEqual(error.details["reason"], .string("invalidRetryability"))
     }
 
-    func testTypedSupplementalFieldsCannotCarryDiagnosticsOrPaths() {
+    func testTypedSupplementalFieldsCannotCarryDiagnosticsOrPaths() throws {
         XCTAssertThrowsError(try CLIMachineDoctorCheck(
             code: "parser",
             name: "/Users/private/trace_streamer",
             status: .ok
         ))
-        let quality = try? CLIMachineDataQuality(TraceDataQuality(issues: [
+        let quality = try CLIMachineDataQuality(TraceDataQuality(issues: [
             TraceDataQualityIssue(
                 category: .invalidValue,
                 scope: "process.start_ts",
                 message: "source /Users/private/trace.htrace"
             ),
         ]))
-        XCTAssertNil(quality?.warnings.first?.message)
+        let warning = try XCTUnwrap(quality.warnings.first)
+        XCTAssertEqual(warning.scope, "process.start_ts")
+        XCTAssertEqual(warning.category, .invalidValue)
+        XCTAssertNil(warning.message)
         XCTAssertThrowsError(try CLIMachineDataQuality(TraceDataQuality(issues: [
             TraceDataQualityIssue(category: .invalidValue, scope: "SELECT.secret"),
         ])))
