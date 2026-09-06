@@ -5,28 +5,72 @@ import XCTest
 @testable import ArkTraceCapture
 
 final class TraceCaptureConfigurationTests: XCTestCase {
-    func testProfilesProduceBoundedOfficialHiprofilerConfiguration() throws {
-        let destination = URL(filePath: "/tmp/result.htrace")
-        let request = try TraceCaptureRequest(
-            deviceID: "device-1",
-            profile: .systemOverview,
-            durationSeconds: 30,
-            bufferSizeMB: 64,
-            destinationURL: destination
-        )
-        let text = TraceCaptureConfigurationBuilder.text(
-            for: request,
-            remoteTracePath: "/data/local/tmp/result.htrace"
+    /// The bounds are shared by every profile, but the event and category sets
+    /// are the *only* thing a profile selects -- so each one is pinned here.
+    /// Driving the whole of `allCases` is deliberate: a new profile that
+    /// nobody mapped fails this test instead of silently shipping empty.
+    func testEveryProfileProducesItsOwnBoundedHiprofilerConfiguration() throws {
+        let expected: [TraceCaptureProfile: (categories: [String], cpuPower: Bool)] = [
+            .appResponsiveness: (
+                ["ability", "ace", "binder", "graphic", "ohos", "rpc", "sched", "sync", "window"],
+                false
+            ),
+            .cpuScheduling: (["freq", "idle", "sched"], true),
+            .systemOverview: (
+                [
+                    "ability", "ace", "binder", "dsoftbus", "freq", "graphic", "idle",
+                    "memory", "ohos", "rpc", "sched", "sync", "window",
+                ],
+                true
+            ),
+        ]
+        XCTAssertEqual(
+            Set(expected.keys), Set(TraceCaptureProfile.allCases),
+            "a new capture profile has to pin its own event and category mapping"
         )
 
-        XCTAssertTrue(text.contains("pages: 16384"))
-        XCTAssertTrue(text.contains("sample_duration: 30000"))
-        XCTAssertTrue(text.contains("buffer_size_kb: 65536"))
-        XCTAssertTrue(text.contains("ftrace_events: \"sched/sched_switch\""))
-        XCTAssertTrue(text.contains("ftrace_events: \"power/cpu_frequency\""))
-        XCTAssertTrue(text.contains("hitrace_categories: \"ace\""))
-        XCTAssertTrue(text.contains("hitrace_categories: \"window\""))
-        XCTAssertFalse(text.contains("result_file: \"\(destination.path)\""))
+        let destination = URL(filePath: "/tmp/result.htrace")
+        for profile in TraceCaptureProfile.allCases {
+            let mapping = try XCTUnwrap(expected[profile])
+            let request = try TraceCaptureRequest(
+                deviceID: "device-1",
+                profile: profile,
+                durationSeconds: 30,
+                bufferSizeMB: 64,
+                destinationURL: destination
+            )
+            let text = TraceCaptureConfigurationBuilder.text(
+                for: request,
+                remoteTracePath: "/data/local/tmp/result.htrace"
+            )
+
+            // Bounds: identical for every profile.
+            XCTAssertTrue(text.contains("pages: 16384"), "\(profile)")
+            XCTAssertTrue(text.contains("sample_duration: 30000"), "\(profile)")
+            XCTAssertTrue(text.contains("buffer_size_kb: 65536"), "\(profile)")
+            XCTAssertFalse(
+                text.contains("result_file: \"\(destination.path)\""),
+                "\(profile): the host path must never reach the device config"
+            )
+
+            // The mapping the profile actually selects.
+            func values(_ key: String) -> [String] {
+                text.split(separator: "\n").compactMap { line in
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    guard trimmed.hasPrefix("\(key): \"") else { return nil }
+                    return String(trimmed.dropFirst(key.utf8.count + 3).dropLast())
+                }
+            }
+            XCTAssertEqual(values("hitrace_categories"), mapping.categories, "\(profile)")
+            XCTAssertTrue(
+                values("ftrace_events").contains("sched/sched_switch"),
+                "\(profile): scheduling events are common to every profile"
+            )
+            XCTAssertEqual(
+                values("ftrace_events").contains("power/cpu_frequency"), mapping.cpuPower,
+                "\(profile): only the CPU-power profiles carry the frequency probe"
+            )
+        }
     }
 
     func testRequestRejectsUnboundedSettings() throws {

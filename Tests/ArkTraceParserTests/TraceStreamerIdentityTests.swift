@@ -81,7 +81,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         return (directory, binary, manifest)
     }
 
-    func testSignedBundleModeExecutesReviewedNestedHelperInPlace() async throws {
+    func testSignedBundleModeVerifiesReviewedNestedHelperWithoutRelocatingIt() async throws {
         try requirePinnedFiles()
         let bundle = FileManager.default.temporaryDirectory
             .appending(path: "ArkDeck-\(UUID().uuidString).app", directoryHint: .isDirectory)
@@ -181,8 +181,19 @@ final class TraceStreamerIdentityTests: XCTestCase {
         return (directory, script)
     }
 
+    /// A child that never publishes its PID is exactly the regression the
+    /// reaping tests exist to catch, so this fails rather than skipping --
+    /// a skip here is also invisible to CI, whose audit already tolerates
+    /// skips from this target.
+    private struct ChildDidNotStart: Error, CustomStringConvertible {
+        var description: String {
+            "child process never published its PID; it failed to launch"
+        }
+    }
+
     private func waitForPID(at url: URL) async throws -> pid_t {
-        for _ in 0..<2_000 {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        while ContinuousClock.now < deadline {
             if let data = try? Data(contentsOf: url),
                 let text = String(data: data, encoding: .utf8),
                 let pid = pid_t(text.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -191,7 +202,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
             }
             try await Task.sleep(for: .milliseconds(1))
         }
-        throw XCTSkip("child process did not publish its PID")
+        throw ChildDidNotStart()
     }
 
     func testBoundedPipeSinkDrainsTrailingVersionBytesThroughEOF() throws {
@@ -241,15 +252,11 @@ final class TraceStreamerIdentityTests: XCTestCase {
 
     func testChildEnvironmentRejectsAmbientPathAndDYLDForIdentityAndRealParse() async throws {
         try requirePinnedFiles()
-        let fixture = try makeExecutableScript("""
-            print -r -- "path=$PATH"
-            print -r -- "dyld=${DYLD_INSERT_LIBRARIES-unset}"
-            print -r -- "sentinel=${ARKTRACE_PARENT_SECRET-unset}"
-            """)
-        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let ambientDirectory = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-ambient-\(UUID().uuidString)", directoryHint: .isDirectory)
 
         let keysAndValues = [
-            "PATH": fixture.directory.path,
+            "PATH": ambientDirectory.path,
             "DYLD_INSERT_LIBRARIES": "/tmp/arktrace-missing-injected-library.dylib",
             "DYLD_PRINT_ENV": "1",
             "ARKTRACE_PARENT_SECRET": "must-not-reach-child",
