@@ -1,5 +1,3 @@
-import Foundation
-
 /// Bounded lookup of one slice's argument set.
 ///
 /// Arguments are fetched only for the event the user actually selected, never

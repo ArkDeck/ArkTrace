@@ -590,15 +590,7 @@ private final class TraceContextResultCache: Sendable {
 private let traceContextResultCache = TraceContextResultCache()
 
 package struct TraceContextBuilder: Sendable {
-    private enum CandidateKind: Int, Sendable {
-        case cpuSlice
-        case threadState
-        case slice
-        case counter
-    }
-
     private struct Candidate: Sendable {
-        let kind: CandidateKind
         let key: EventKey
         let startNs: Int64
         let durationNs: Int64
@@ -1489,7 +1481,7 @@ package struct TraceContextBuilder: Sendable {
         for (index, value) in loaded.cpu.cpuSlices.enumerated() {
             if index.isMultiple(of: 1_024) { try check(deadline) }
             values.append(Candidate(
-                kind: .cpuSlice, key: value.key, startNs: value.startNs,
+                key: value.key, startNs: value.startNs,
                 durationNs: value.range.durationNs,
                 explicitlyMatched: cpuExplicit,
                 centerDistanceNs: distance(
@@ -1501,7 +1493,7 @@ package struct TraceContextBuilder: Sendable {
         for (index, value) in loaded.states.threadStates.enumerated() {
             if index.isMultiple(of: 1_024) { try check(deadline) }
             values.append(Candidate(
-                kind: .threadState, key: value.key, startNs: value.startNs,
+                key: value.key, startNs: value.startNs,
                 durationNs: value.range.durationNs,
                 explicitlyMatched: stateExplicit,
                 centerDistanceNs: distance(
@@ -1513,7 +1505,7 @@ package struct TraceContextBuilder: Sendable {
         for (index, value) in loaded.slices.slices.enumerated() {
             if index.isMultiple(of: 1_024) { try check(deadline) }
             values.append(Candidate(
-                kind: .slice, key: value.key, startNs: value.startNs,
+                key: value.key, startNs: value.startNs,
                 durationNs: value.range.durationNs,
                 explicitlyMatched: sliceExplicit,
                 centerDistanceNs: distance(
@@ -1537,7 +1529,7 @@ package struct TraceContextBuilder: Sendable {
             }
             values.append(
                 Candidate(
-                    kind: .counter, key: sample.key, startNs: sample.timestampNs,
+                    key: sample.key, startNs: sample.timestampNs,
                     durationNs: effectiveDuration,
                     explicitlyMatched: counterExplicit,
                     centerDistanceNs: distance(

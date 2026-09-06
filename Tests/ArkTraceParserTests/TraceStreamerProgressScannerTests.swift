@@ -30,10 +30,8 @@ final class TraceStreamerProgressScannerTests: XCTestCase {
         XCTAssertEqual(scanner.consume("58 MB\r"), 12_580_000)
     }
 
-    /// Everything else on the stream is not a progress record, and the tail
-    /// that never terminates must not become an unbounded buffer fed by a
-    /// subprocess.
-    func testNonRecordsAreIgnoredAndTheHeldTailIsBounded() {
+    /// Everything else the parser writes to stdout is not a progress record.
+    func testNonRecordsAreIgnored() {
         var scanner = TraceStreamerProgressScanner()
         XCTAssertNil(scanner.consume("ParserDuration:\t1536 ms\r"))
         XCTAssertNil(scanner.consume("LoadingFile:\tnonsense MB\r"))
@@ -44,6 +42,34 @@ final class TraceStreamerProgressScannerTests: XCTestCase {
         XCTAssertEqual(
             scanner.consume("\rLoadingFile:\t7.00 MB\r"), 7_000_000,
             "and the scanner still reads the next real record"
+        )
+    }
+
+    /// A child that never emits a delimiter must not be able to grow the held
+    /// tail without limit. The drop is only observable through what happens to
+    /// a record straddling the limit, so pin it from both sides: at the limit
+    /// the split record still completes, one byte past it the tail is gone and
+    /// the same record cannot.
+    func testAnUnterminatedTailIsDroppedOnceItPassesTheResidualLimit() {
+        let head = "LoadingFile:\t7.00"
+        let padding = TraceStreamerProgressScanner.residualLimit - head.utf8.count
+
+        var atLimit = TraceStreamerProgressScanner()
+        XCTAssertNil(atLimit.consume(String(repeating: "x", count: padding) + head))
+        XCTAssertEqual(
+            atLimit.consume(" MB\r"), 7_000_000,
+            "a tail exactly at the limit is still held, so the record completes"
+        )
+
+        var pastLimit = TraceStreamerProgressScanner()
+        XCTAssertNil(pastLimit.consume(String(repeating: "x", count: padding + 1) + head))
+        XCTAssertNil(
+            pastLimit.consume(" MB\r"),
+            "one byte past the limit the tail is dropped, so nothing completes"
+        )
+        XCTAssertEqual(
+            pastLimit.consume("\rLoadingFile:\t9.00 MB\r"), 9_000_000,
+            "dropping the tail must not wedge the scanner"
         )
     }
 }

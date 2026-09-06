@@ -226,11 +226,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         progress: TraceProgressHandler?,
         prepareDatabase: @escaping TraceDatabasePreparer
     ) async throws -> ParsedTrace {
-        guard sourceSHA256.count == 64,
-            sourceSHA256.utf8.allSatisfy({
-                ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
-                    || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
-            }),
+        guard ArkTraceIdentityGrammar.isSHA256(sourceSHA256),
             sourceByteCount >= 0
         else {
             throw ArkTraceError(
@@ -386,10 +382,16 @@ package struct TraceStreamerProcessParser: TraceParser {
         )
 
         progress?(.parsing)
-        // The child says how far through the source it is; the source's size
-        // is already known, so the parse -- the longest single stage of a cold
-        // open -- reports a real fraction instead of a spinner. The scanner is
-        // fed from the pipe's callback queue, so it lives behind a lock.
+        // The child does write its read position to stdout, but stdout is a
+        // pipe rather than a TTY and the pinned binary full-buffers: measured,
+        // the whole parse arrives as one chunk at exit, so the parse stage
+        // shows an indeterminate bar rather than a live fraction (DESIGN
+        // §13.4). Even that last chunk only reaches the scanner when the
+        // readability handler wins the race with the post-exit drain, which
+        // does not call the observer. The scanner is kept because it costs
+        // nothing and becomes real progress the day a parser flushes
+        // incrementally. It is fed from the pipe's callback queue, so it
+        // lives behind a lock.
         let scanner = Mutex(TraceStreamerProgressScanner())
         let sourceByteCount = prepared.sourceByteCount
         var stdoutObserver: (@Sendable (Data) -> Void)?

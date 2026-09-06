@@ -211,11 +211,8 @@ package enum CLILicenseResources {
     }
 
     private static func shaValue(_ value: Any?) -> String? {
-        guard let string = value as? String, string.utf8.count == 64,
-            string.utf8.allSatisfy({
-                ($0 >= UInt8(ascii: "0") && $0 <= UInt8(ascii: "9"))
-                    || ($0 >= UInt8(ascii: "a") && $0 <= UInt8(ascii: "f"))
-            })
+        guard let string = value as? String,
+            ArkTraceIdentityGrammar.isSHA256(string)
         else { return nil }
         return string
     }

@@ -264,7 +264,6 @@ package struct TraceRepositoryContentIdentity: Hashable, Sendable {
 }
 
 /// Typed repository boundary shared by App, CLI, and analysis (DESIGN §9.2).
-/// Phase 1 scope: metadata and process/thread directories.
 package protocol TraceRepositoryProtocol: Sendable {
     var immutableContentIdentity: TraceRepositoryContentIdentity? { get }
     func metadata() async throws -> TraceMetadata

@@ -1,6 +1,6 @@
+import AppKit
 import ArkTraceCore
 @testable import ArkTraceRendering
-import AppKit
 import SwiftUI
 import XCTest
 

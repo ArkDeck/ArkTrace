@@ -81,8 +81,6 @@ CANVASES = (
     ("DarkAqua even rows", "#1e1e1e"),
     ("DarkAqua odd rows", "#292929"),
 )
-LIGHT_CANVAS = "#ffffff"
-DARK_CANVAS = "#1e1e1e"
 
 # The number of distinct fills upstream's `getStateColor` chain implies: D-NIO,
 # D-IO, R, R-B, I, Running, S. Pinned so that *merging* two states -- which

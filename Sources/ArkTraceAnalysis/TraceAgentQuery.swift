@@ -53,9 +53,10 @@ package struct TraceAgentQueryEngine: Sendable {
         }
     }
 
-    /// Internal absolute-deadline entry used by TraceContext so a valid
-    /// 100 ms top-level request does not manufacture an invalid sub-request
-    /// after some of that same deadline has elapsed.
+    /// Internal absolute-deadline entry, so a valid 100 ms top-level request
+    /// does not manufacture an invalid sub-request after some of that same
+    /// deadline has already elapsed. Its caller is `query(_:)` above;
+    /// TraceContext takes the batched entry instead.
     func query(
         view: TraceAgentQueryView,
         range: TraceTimeRange,

@@ -1,10 +1,11 @@
-@testable import ArkTraceCLI
 import ArkTraceAnalysis
 import ArkTraceCLIResourceFixtures
 import ArkTraceCore
 import ArkTraceParser
 import Foundation
 import XCTest
+
+@testable import ArkTraceCLI
 
 final class CLITests: XCTestCase {
     func testHelpAndVersionShortCircuitExecutionAndTraceParsing() async throws {
