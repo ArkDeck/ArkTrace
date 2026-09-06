@@ -1,12 +1,12 @@
 import AppKit
 import ArkTraceAnalysis
 import ArkTraceCore
-import ArkTraceRendering
 import CryptoKit
 import Darwin
 import XCTest
 
 @testable import ArkTraceParser
+@testable import ArkTraceRendering
 
 @_silgen_name("flock")
 private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
@@ -2410,8 +2410,14 @@ final class ParserIntegrationTests: XCTestCase {
                         return "\(track.descriptor.id.rawValue):d\(detail)/b\(density)"
                     }.joined(separator: ",")
             )
-            XCTAssertLessThanOrEqual(selectionFrameP95, 16.7)
-            XCTAssertLessThanOrEqual(panFrameP95, 16.7)
+            XCTAssertLessThanOrEqual(
+                selectionFrameP95, 16.7,
+                "selection frame samplesMs=\(selectionFrameMs)"
+            )
+            XCTAssertLessThanOrEqual(
+                panFrameP95, 16.7,
+                "pan frame samplesMs=\(panFrameMs)"
+            )
             XCTAssertLessThanOrEqual(rebuildFrameP95, 250)
             XCTAssertLessThanOrEqual(peakRSSBytes, 1_610_612_736)
         }
@@ -2816,6 +2822,38 @@ final class ParserIntegrationTests: XCTestCase {
     }
 
     @MainActor
+    func testFrameEvidenceSelectionSamplesReusePreparedPaths() throws {
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
+            widthPoints: 500, heightPoints: 80, generation: 1
+        )
+        let descriptor = TrackDescriptor(title: "CPU 0", source: .cpu(0))
+        let snapshot = TimelineSnapshot(
+            viewport: viewport,
+            tracks: [TimelineTrackSnapshot(
+                descriptor: descriptor, y: 0, height: 28,
+                primitives: [.detail(TimelineDetailPrimitive(
+                    trackID: descriptor.id,
+                    eventKey: EventKey(table: .schedSlice, rowID: 1),
+                    range: try TraceTimeRange(startNs: 100, endNs: 900),
+                    label: "Selected event", category: "cpu"
+                ))]
+            )],
+            generation: 1, dataQuality: TraceDataQuality()
+        )
+        // Exercise the real sampling harness without a parser or timing
+        // threshold. Its cache assertion must hold from the first sample,
+        // through both selection states and the intervening pan rebuilds.
+        let frames = try Self.drawDurations(
+            snapshot: snapshot, interactionSnapshot: snapshot, iterations: 4
+        )
+        for samples in [frames.steady, frames.selection, frames.pan, frames.rebuild] {
+            XCTAssertEqual(samples.count, 4)
+            XCTAssertTrue(samples.allSatisfy { $0.isFinite && $0 >= 0 })
+        }
+    }
+
+    @MainActor
     private static func drawDurations(
         snapshot: TimelineSnapshot,
         interactionSnapshot: TimelineSnapshot,
@@ -2844,6 +2882,8 @@ final class ParserIntegrationTests: XCTestCase {
         )
         view.snapshot = snapshot
         interactionView.snapshot = interactionSnapshot
+        var interactionPathBuilds = 0
+        interactionView.pathCacheBuildHook = { _, _ in interactionPathBuilds += 1 }
         // Exclude one-time AppKit/CoreGraphics glyph and immutable snapshot
         // path construction from the steady-state 60 fps frame distribution.
         for _ in 0..<2 {
@@ -2892,11 +2932,27 @@ final class ParserIntegrationTests: XCTestCase {
                 endNs: originalRange.endNs - shift
             )
         }
+        // Selection measures an already displayed snapshot, just like the
+        // steady family. Prepare both the selected and focus-only outlines:
+        // AppKit resolves their dynamic colors lazily, and the first detail
+        // draw also builds paths and lays out glyphs. None is a selection
+        // redraw. Pan and rebuild still time their new snapshot construction.
+        for _ in 0..<2 {
+            interactionView.selectedEventKey = selectableEvent
+            _ = draw(interactionView)
+            interactionView.selectedEventKey = nil
+            _ = draw(interactionView)
+        }
         for iteration in 0..<iterations {
             steady.append(draw())
             interactionView.selectedEventKey = iteration.isMultiple(of: 2)
                 ? selectableEvent : nil
+            let buildsBeforeSelection = interactionPathBuilds
             selection.append(draw(interactionView))
+            XCTAssertEqual(
+                interactionPathBuilds, buildsBeforeSelection,
+                "selection evidence must reuse prepared paths; cold builds belong to rebuild evidence"
+            )
             let panGeneration = interactionSnapshot.generation &+ UInt64(iteration * 2 + 1)
             let panViewport = try TimelineViewport(
                 range: iteration.isMultiple(of: 2) ? shiftedRange : originalRange,
