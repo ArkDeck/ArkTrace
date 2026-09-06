@@ -1,5 +1,3 @@
-import Foundation
-
 /// Bounded query over `frame_slice`.
 package struct TraceFrameQuery: Hashable, Sendable {
     public let range: TraceTimeRange

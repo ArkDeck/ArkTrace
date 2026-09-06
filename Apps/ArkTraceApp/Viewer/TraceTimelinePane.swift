@@ -87,14 +87,6 @@ struct TraceTimelinePane: View {
                             )
                         )
                         .onAppear { controller.markTimelineDisplayed() }
-                        // Anchored to the canvas, not to the pane: the canvas
-                        // is what scrolls, so the editor stays on its flag.
-                        // The anchor is always in the hierarchy and only moves
-                        // -- a popover attached to a view created in the same
-                        // update as the presentation simply does not appear --
-                        // and it is `position`, not `offset`, because a popover
-                        // anchors to the layout frame and `offset` does not
-                        // move that.
                         // The editor rides on the canvas so it stays with its
                         // flag while the content scrolls. A panel rather than a
                         // popover: SwiftUI will not present a popover anchored

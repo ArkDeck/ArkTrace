@@ -201,7 +201,6 @@ public final class TimelineNSView: NSView {
     private struct DensityPaths {
         let backingScale: CGFloat
         let bands: [Int: [DensityPaintKey: CGPath]]
-        let fillCount: Int
     }
 
     /// One batched detail fill. The semantic style stays the outer sort key so
@@ -282,7 +281,6 @@ public final class TimelineNSView: NSView {
     private struct DetailPaths {
         let backingScale: CGFloat
         let bands: [Int: [DetailPaintKey: CGPath]]
-        let fillCount: Int
         let labelBands: [Int: [DetailLabel]]
         let events: [EventKey: (TimelineDetailPrimitive, CGRect)]
         /// Frames grouped by hover name at build time, so the same-name wash
@@ -307,7 +305,7 @@ public final class TimelineNSView: NSView {
     /// only the ones no earlier frame has laid out.
     var labelRenderHook: ((_ drawn: Int, _ laidOut: Int) -> Void)?
 
-    private enum DetailVisualStyle: Int, CaseIterable {
+    private enum DetailVisualStyle: Int {
         case running
         case runnable
         case blocked
@@ -1051,9 +1049,7 @@ public final class TimelineNSView: NSView {
                     }
                 }
             }
-            cached = DensityPaths(
-                backingScale: backingScale, bands: bands, fillCount: keys.count
-            )
+            cached = DensityPaths(backingScale: backingScale, bands: bands)
             densityPathCache = cached
             pathCacheBuildHook?("density", keys.count)
         }
@@ -1181,7 +1177,6 @@ public final class TimelineNSView: NSView {
             cached = DetailPaths(
                 backingScale: backingScale,
                 bands: bands,
-                fillCount: keys.count,
                 labelBands: labelBands,
                 events: events,
                 washFramesByName: washFramesByName

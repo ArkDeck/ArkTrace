@@ -1,7 +1,6 @@
 import ArkTraceCore
 import ArkTraceParser
 import ArkTraceStore
-import Darwin
 import Foundation
 import Synchronization
 
@@ -371,7 +370,6 @@ package actor TraceSession {
         }
         return (sidecar, snapshot.fileIdentity)
     }
-
 
     private static func cancelled(stage: ArkTraceError.Stage) -> ArkTraceError {
         ArkTraceError(

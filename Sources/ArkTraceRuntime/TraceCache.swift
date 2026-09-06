@@ -8,8 +8,7 @@ import Synchronization
 @_silgen_name("flock")
 private func arkTraceFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
 
-/// Storage policy shared by App and CLI. Phase 2 deliberately exposes no
-/// cache mutation API; eviction and purge arrive with the Phase 3 App flow.
+/// Storage policy shared by App and CLI.
 package enum TraceSessionStoragePolicy: Sendable {
     case contentAddressed(cacheDirectory: URL)
     case ephemeral
@@ -511,7 +510,6 @@ final class TraceCacheEntryLease: @unchecked Sendable {
 
 private enum CacheIO: Error {
     case directory
-    case source
     case destination
     case metadata
     case lockOpen
@@ -600,7 +598,6 @@ private let traceSourceHashCache = TraceSourceHashCache()
 
 struct TraceOwnedDirectory: Sendable {
     let url: URL
-    let rootURL: URL
     let recoveryRootURL: URL
     let device: UInt64
     let inode: UInt64
@@ -1414,7 +1411,6 @@ enum TraceContentAddressedCache {
         )?.data
     }
 
-
     private static func writeMetadata(
         _ metadata: TraceCacheMetadata,
         to url: URL
@@ -1822,7 +1818,6 @@ enum TraceContentAddressedCache {
                     if let handle = openedHandle, let boundIdentity {
                         let directory = TraceOwnedDirectory(
                             url: lastKnownURL,
-                            rootURL: setup.0,
                             recoveryRootURL: setup.4,
                             device: boundIdentity.0,
                             inode: boundIdentity.1,
@@ -1851,7 +1846,6 @@ enum TraceContentAddressedCache {
             }
             let directory = TraceOwnedDirectory(
                 url: created.1,
-                rootURL: setup.0,
                 recoveryRootURL: setup.4,
                 device: created.0.device,
                 inode: created.0.inode,
@@ -1965,7 +1959,6 @@ enum TraceContentAddressedCache {
                     quarantineParent = parent
                     residual = TraceOwnedDirectory(
                         url: candidate,
-                        rootURL: directory.rootURL,
                         recoveryRootURL: directory.recoveryRootURL,
                         device: directory.device,
                         inode: directory.inode,
@@ -2495,7 +2488,6 @@ enum TraceContentAddressedCache {
     ) -> TraceOwnedDirectory {
         TraceOwnedDirectory(
             url: url,
-            rootURL: directory.rootURL,
             recoveryRootURL: directory.recoveryRootURL,
             device: directory.device,
             inode: directory.inode,
@@ -2925,7 +2917,6 @@ private extension TraceContentAddressedCache {
     struct MaintenanceOwnerRecord: Sendable {
         let markerURL: URL
         let evidenceURL: URL
-        let ownerRootURL: URL
         let recoveryRootURL: URL
         let evidence: TraceOwnerEvidence
         let targetURL: URL
@@ -3306,7 +3297,6 @@ private extension TraceContentAddressedCache {
                 MaintenanceOwnerRecord(
                     markerURL: markerURL,
                     evidenceURL: evidenceURL,
-                    ownerRootURL: ownerRoot,
                     recoveryRootURL: recoveryRoot,
                     evidence: evidence,
                     targetURL: targetURL
@@ -3324,7 +3314,6 @@ private extension TraceContentAddressedCache {
         return MaintenanceOwnerRecord(
             markerURL: record.markerURL,
             evidenceURL: record.evidenceURL,
-            ownerRootURL: record.ownerRootURL,
             recoveryRootURL: record.recoveryRootURL,
             evidence: evidence,
             targetURL: try ownerTarget(
@@ -3395,7 +3384,6 @@ private extension TraceContentAddressedCache {
         )
         return TraceOwnedDirectory(
             url: located,
-            rootURL: record.ownerRootURL,
             recoveryRootURL: record.recoveryRootURL,
             device: device,
             inode: inode,

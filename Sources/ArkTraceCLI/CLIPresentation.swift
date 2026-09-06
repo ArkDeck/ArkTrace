@@ -344,7 +344,6 @@ package struct CLIHumanRenderer: Sendable {
 package struct CLIMachineEncoder: Sendable {
     package init() {}
 
-
     /// Fully materializes and validates one canonical UTF-8 document before
     /// the caller attempts stdout. The byte budget includes the final newline.
     package func encode<T: Encodable>(

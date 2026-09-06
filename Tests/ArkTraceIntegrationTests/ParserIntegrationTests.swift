@@ -1,11 +1,12 @@
-import ArkTraceCore
-@testable import ArkTraceParser
-import ArkTraceAnalysis
-import ArkTraceRendering
 import AppKit
+import ArkTraceAnalysis
+import ArkTraceCore
+import ArkTraceRendering
 import CryptoKit
 import Darwin
 import XCTest
+
+@testable import ArkTraceParser
 
 @_silgen_name("flock")
 private func arkTraceTestFlock(_ descriptor: Int32, _ operation: Int32) -> Int32
@@ -261,42 +262,6 @@ final class ParserIntegrationTests: XCTestCase {
         private let release = DispatchSemaphore(value: 0)
 
         func pauseUntilReleased() {
-            reached.signal()
-            release.wait()
-        }
-
-        private func waitBlocking() {
-            reached.wait()
-        }
-
-        func waitUntilReached() async {
-            await Task.detached { self.waitBlocking() }.value
-        }
-
-        func resume() {
-            release.signal()
-        }
-    }
-
-    private final class BlockingStageBarrier: @unchecked Sendable {
-        private let target: TraceLoadingStage
-        private let lock = NSLock()
-        private let reached = DispatchSemaphore(value: 0)
-        private let release = DispatchSemaphore(value: 0)
-        private var didPause = false
-
-        init(_ target: TraceLoadingStage) {
-            self.target = target
-        }
-
-        func record(_ stage: TraceLoadingStage) {
-            guard stage == target else { return }
-            let shouldPause = lock.withLock {
-                guard !didPause else { return false }
-                didPause = true
-                return true
-            }
-            guard shouldPause else { return }
             reached.signal()
             release.wait()
         }

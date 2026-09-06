@@ -106,7 +106,7 @@ parser_sha=$(shasum -a 256 "$parser" | awk '{print $1}')
     || fail "repository TraceStreamer SHA is inconsistent"
 
 if [ "$fixture_class" = medium ]; then
-    trace=$($script_directory/fetch_phase3_fixtures.sh)
+    trace=$("$script_directory/fetch_phase3_fixtures.sh")
     provenance="$fixture_lock"
     provenance_sha=$(shasum -a 256 "$provenance" | awk '{print $1}')
     provenance_source=$(jq -er \

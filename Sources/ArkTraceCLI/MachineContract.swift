@@ -2068,13 +2068,6 @@ private enum CLIMachineValueValidation {
         else { throw contractFailure(reason: "unsafeIdentifier") }
     }
 
-    static func requireSafeDiagnosticText(_ value: String, maximumBytes: Int) throws {
-        guard !value.isEmpty, value.utf8.count <= maximumBytes,
-            !value.contains("/"), !value.contains("\\"),
-            !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) })
-        else { throw contractFailure(reason: "unsafeDiagnostic") }
-    }
-
     static func contractFailure(reason: String) -> ArkTraceError {
         ArkTraceError(
             code: .internalError,

@@ -512,7 +512,7 @@ package struct TraceRangeAnalysisEngine: Sendable {
             let overlap = slice.range.clippedOverlapNs(with: request.range)
             var currentCPU = cpu[slice.cpu] ?? (0, 0)
             currentCPU.raw = Self.saturatedAdd(currentCPU.raw, overlap)
-            currentCPU.count = min(Int.max, currentCPU.count + 1)
+            currentCPU.count = Self.saturatedIncrement(currentCPU.count)
             cpu[slice.cpu] = currentCPU
             if let key = slice.threadKey {
                 var value = threads[key] ?? ThreadAccumulator()
@@ -520,10 +520,10 @@ package struct TraceRangeAnalysisEngine: Sendable {
                 value.pid = value.pid ?? slice.pid
                 value.name = value.name ?? slice.threadName
                 value.occupiedNs = Self.saturatedAdd(value.occupiedNs, overlap)
-                value.count = min(Int.max, value.count + 1)
+                value.count = Self.saturatedIncrement(value.count)
                 var perCPU = value.perCPU[slice.cpu] ?? (0, 0)
                 perCPU.occupiedNs = Self.saturatedAdd(perCPU.occupiedNs, overlap)
-                perCPU.count = min(Int.max, perCPU.count + 1)
+                perCPU.count = Self.saturatedIncrement(perCPU.count)
                 value.perCPU[slice.cpu] = perCPU
                 threads[key] = value
             }
@@ -709,7 +709,7 @@ package struct TraceRangeAnalysisEngine: Sendable {
             let overlap = slice.range.clippedOverlapNs(with: range)
             if var current = values[slice.name] {
                 current.totalDurationNs = saturatedAdd(current.totalDurationNs, overlap)
-                current.occurrences = min(Int.max, current.occurrences + 1)
+                current.occurrences = Self.saturatedIncrement(current.occurrences)
                 // "First" is by event order, so the jump target is stable
                 // regardless of the order the page happened to arrive in.
                 if eventPrecedes(slice, current.firstKey, current.firstRange) {
@@ -769,6 +769,14 @@ package struct TraceRangeAnalysisEngine: Sendable {
     private static func saturatedAdd(_ lhs: Int64, _ rhs: Int64) -> Int64 {
         let (value, overflow) = lhs.addingReportingOverflow(rhs)
         return overflow ? Int64.max : value
+    }
+
+    /// A clamped `+ 1`. Writing it as a `min` against `Int.max` reads as a
+    /// saturating bump but is not one: the addition is evaluated first and
+    /// traps before `min` can clamp anything.
+    private static func saturatedIncrement(_ value: Int) -> Int {
+        let (result, overflow) = value.addingReportingOverflow(1)
+        return overflow ? Int.max : result
     }
 
     private static func check(_ deadline: ContinuousClock.Instant) throws {

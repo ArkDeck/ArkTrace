@@ -1,6 +1,5 @@
-import XCTest
-
 import ArkTraceCore
+import XCTest
 
 final class ArkTraceErrorContractTests: XCTestCase {
     func testEveryStableCodeHasAnAcceptingPublicPolicy() {
