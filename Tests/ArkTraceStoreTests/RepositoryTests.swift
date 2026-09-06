@@ -1,5 +1,5 @@
-import ArkTraceCore
 import ArkTraceCLI
+import ArkTraceCore
 import CryptoKit
 import XCTest
 
@@ -2604,6 +2604,82 @@ final class RepositoryTests: XCTestCase {
         XCTAssertEqual(
             page.items.map(\.typeName), ["string", "int32_t", "boolean"]
         )
+    }
+
+    /// One unusable value must be counted once. `cpuSlices` builds its
+    /// invalid-value tally by summing a list of CASE terms, one per optional
+    /// column, so a term repeated in that list inflates the reported count and
+    /// makes a single bad name look like two dropped values to the Inspector
+    /// and to `arktrace --machine`.
+    func testCpuSliceQualityCountsOneUnusableNameOnce() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            -- Blobs: a storage class TEXT affinity does not coerce, so the
+            -- value contract rejects both names. One bad process name and one
+            -- bad thread name, on one row.
+            INSERT INTO process VALUES (4, 4, 400, x'0102', 1000);
+            INSERT INTO thread VALUES (4, 4, 400, x'0304', 1000, 2000, 4, 0);
+            INSERT INTO sched_slice VALUES (1, 1200, 100, 0, 4, 4);
+            """
+        )
+        let page = try await makeRepository().cpuSlices(
+            CpuSliceQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                cpu: 0, limit: 10,
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        let slice = try XCTUnwrap(page.items.first)
+        XCTAssertNil(slice.processName, "a non-text name is not surfaced")
+        XCTAssertNil(slice.threadName)
+        XCTAssertEqual(
+            page.dataQuality.issues.first {
+                $0.category == .droppedValue && $0.scope == "sched_slice.value"
+            }?.count,
+            2,
+            "two unusable names, counted once each -- not once per CASE term"
+        )
+    }
+
+    /// The Inspector resolves a selected slice's arguments in two hops:
+    /// `slices(includesArgumentSet: true)` hands back the `argsetid`, and only
+    /// then does `arguments(_:)` run. The hand-off is the part with no other
+    /// witness -- `arguments(_:)` is always called with a literal id in the
+    /// tests above, and the app-level suite drives a mock repository that fills
+    /// `argSetID` itself, so neither notices if the SQLite path drops it.
+    func testSlicesCarryTheArgumentSetOnlyWhenTheCallerAsksForIt() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            INSERT INTO callstack VALUES (1, 1200, 200, 2, 'inside', 5);
+            """
+        )
+        let repository = try makeRepository()
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+
+        let requested = try await repository.slices(
+            TraceSliceQuery(
+                range: range, name: .exact("inside"), includesArgumentSet: true,
+                limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(requested.items.first).argSetID, 5,
+            "the id the Inspector needs must survive the hand-off out of slices()"
+        )
+
+        // The default keeps `argsetid` out of the viewport query: it is in no
+        // ArkTrace index, so naming it there drops the hottest query off its
+        // covering-index plan (DESIGN 9.4 / 14.2.4).
+        let notRequested = try await repository.slices(
+            TraceSliceQuery(
+                range: range, name: .exact("inside"), limit: 10, deadline: deadline
+            )
+        )
+        XCTAssertNil(try XCTUnwrap(notRequested.items.first).argSetID)
     }
 
     /// A trace without `args` is not an error: the capability is optional and

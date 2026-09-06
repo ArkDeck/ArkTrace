@@ -947,10 +947,6 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 + "OR length(CAST(p.name AS BLOB)) > 4096) THEN 1 ELSE 0 END",
             "CASE WHEN t.name IS NOT NULL AND (typeof(t.name) <> 'text' "
                 + "OR length(CAST(t.name AS BLOB)) > 4096) THEN 1 ELSE 0 END",
-            "CASE WHEN p.name IS NOT NULL AND (typeof(p.name) <> 'text' "
-                + "OR length(CAST(p.name AS BLOB)) > 4096) THEN 1 ELSE 0 END",
-            "CASE WHEN t.name IS NOT NULL AND (typeof(t.name) <> 'text' "
-                + "OR length(CAST(t.name AS BLOB)) > 4096) THEN 1 ELSE 0 END",
         ]
         if schedSliceHasEndState {
             invalidValueTerms.append(
@@ -1386,7 +1382,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                     parentEventKey: row.parentID.map {
                         EventKey(table: .callstack, rowID: $0)
                     },
-                    isAsync: row.isAsync, isOpenEnded: interval.openEnded
+                    isAsync: row.isAsync, isOpenEnded: interval.openEnded,
+                    argSetID: row.argSetID
                 )
             )
         }
@@ -2663,12 +2660,6 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         return (Array(rows.prefix(limit)), rows.count > limit)
     }
 
-    /// Builds the counter-density subquery for one scope. A scope whose
-    /// samples live in more than one physical table contributes one branch per
-    /// table, merged with UNION ALL so the bucket histogram counts exactly the
-    /// rows `counters()` would page. Each branch repeats the bucket expression,
-    /// so bindings are emitted alongside the SQL rather than assembled by the
-    /// caller.
     /// One row of the density aggregation.
     ///
     /// A named shape rather than a tuple: `identityRow` only means anything
@@ -2839,6 +2830,12 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         Array(repeating: "?", count: count).joined(separator: ", ")
     }
 
+    /// Builds the counter-density subquery for one scope. A scope whose
+    /// samples live in more than one physical table contributes one branch per
+    /// table, merged with UNION ALL so the bucket histogram counts exactly the
+    /// rows `counters()` would page. Each branch repeats the bucket expression,
+    /// so bindings are emitted alongside the SQL rather than assembled by the
+    /// caller.
     private func counterDensitySource(
         sampleTables: [CounterSampleTable],
         filterTable: String,
@@ -3501,20 +3498,6 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             try checkQueryBoundary(deadline)
         }
         return source
-    }
-
-    private func boundedCount(_ raw: Int64?, limit: Int) throws -> TraceBoundedCount {
-        guard let raw, raw >= 0 else {
-            throw ArkTraceError(
-                code: .queryFailed,
-                stage: .querying,
-                message: "Trace count query returned an invalid value"
-            )
-        }
-        return TraceBoundedCount(
-            value: min(raw, Int64(limit)),
-            truncated: raw > Int64(limit)
-        )
     }
 
     private func checkQueryBoundary(_ deadline: ContinuousClock.Instant) throws {
