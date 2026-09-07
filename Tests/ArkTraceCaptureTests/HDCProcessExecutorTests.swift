@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import Synchronization
 import XCTest
 
 @testable import ArkTraceCapture
@@ -35,20 +36,33 @@ final class HDCProcessExecutorTests: XCTestCase {
         process.environment = environment
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
+        let (exits, continuation) = AsyncStream.makeStream(of: Int32.self)
+        process.terminationHandler = { child in
+            continuation.yield(child.terminationStatus)
+            continuation.finish()
+        }
         try process.run()
         defer {
             if process.isRunning { _ = Darwin.kill(process.processIdentifier, SIGKILL) }
-            process.waitUntilExit()
         }
-        let deadline = ContinuousClock.now.advanced(by: .seconds(15))
-        while process.isRunning, ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(10))
+        let timedOut = Mutex(false)
+        let timeout = Task {
+            do { try await Task.sleep(for: .seconds(15)) }
+            catch { return }
+            if process.isRunning {
+                timedOut.withLock { $0 = true }
+                _ = Darwin.kill(process.processIdentifier, SIGKILL)
+            }
         }
-        let timedOut = process.isRunning
-        if timedOut { _ = Darwin.kill(process.processIdentifier, SIGKILL) }
-        process.waitUntilExit()
-        XCTAssertFalse(timedOut, "launch failure left the HDC pipe drain blocked")
-        XCTAssertEqual(process.terminationStatus, 0)
+        defer { timeout.cancel() }
+
+        // An async test may resume on a different cooperative-pool thread.
+        // Foundation's synchronous waitUntilExit can strand that thread in
+        // its run loop even after the child exits. The termination callback
+        // supplies the reaped child's status without a thread-bound wait.
+        let status = await exits.first(where: { _ in true })
+        XCTAssertFalse(timedOut.withLock { $0 }, "launch failure left the HDC pipe drain blocked")
+        XCTAssertEqual(status, 0)
     }
 
     func testDrainRetainsBytesAlreadyReadWhenCallbacksStop() throws {
