@@ -1,9 +1,91 @@
-import ArkTraceAppSupport
+@testable import ArkTraceAppSupport
 import ArkTraceCore
 import Foundation
+import OSLog
+import Synchronization
 import XCTest
 
 final class TraceOfflineInspectionServiceTests: XCTestCase {
+    func testFailedInspectionPreservesPrimaryErrorWhenCleanupAlsoFails() async throws {
+        for cleanupFails in [false, true] {
+            let closeCount = Mutex(0)
+            let primary = ArkTraceError(
+                code: .traceDatabaseInvalid, stage: .validating,
+                message: "Offline Trace inspection provenance is invalid",
+                details: ["reason": "sourceBindingMismatch"]
+            )
+            do {
+                let _: Int = try await TraceOfflineInspectionService.withClosedSession(
+                    logger: Logger(subsystem: "ArkTraceTests", category: "OfflineInspection"),
+                    operation: { throw primary },
+                    close: {
+                        closeCount.withLock { $0 += 1 }
+                        if cleanupFails {
+                            throw NSError(domain: "/Users/private/staging", code: 1)
+                        }
+                    }
+                )
+                XCTFail("failed inspection must not return a report")
+            } catch let error as ArkTraceError {
+                XCTAssertEqual(error.code, primary.code)
+                XCTAssertEqual(error.stage, primary.stage)
+                XCTAssertEqual(error.message, primary.message)
+                XCTAssertEqual(error.retryable, primary.retryable)
+                XCTAssertEqual(error.details["reason"], "sourceBindingMismatch")
+                XCTAssertEqual(error.details["sessionCleanupFailed"], cleanupFails ? "true" : nil)
+                XCTAssertFalse(error.details.values.contains { $0.contains("/Users/") })
+            }
+            XCTAssertEqual(closeCount.withLock { $0 }, 1)
+        }
+    }
+
+    func testSuccessfulInspectionRequiresOneSuccessfulCleanup() async throws {
+        for cleanupFails in [false, true] {
+            let closeCount = Mutex(0)
+            do {
+                let value = try await TraceOfflineInspectionService.withClosedSession(
+                    logger: Logger(subsystem: "ArkTraceTests", category: "OfflineInspection"),
+                    operation: { 42 },
+                    close: {
+                        closeCount.withLock { $0 += 1 }
+                        if cleanupFails {
+                            throw ArkTraceError(
+                                code: .traceParseFailed, stage: .openingDatabase,
+                                message: "Trace session storage could not be released",
+                                retryable: true, details: ["reason": "sessionCleanupFailed"]
+                            )
+                        }
+                    }
+                )
+                XCTAssertFalse(cleanupFails)
+                XCTAssertEqual(value, 42)
+            } catch let error as ArkTraceError {
+                XCTAssertTrue(cleanupFails)
+                XCTAssertEqual(error.code, .traceParseFailed)
+                XCTAssertEqual(error.details, ["reason": "sessionCleanupFailed"])
+            }
+            XCTAssertEqual(closeCount.withLock { $0 }, 1)
+        }
+    }
+
+    func testCancellationIdentitySurvivesFailedCleanup() async throws {
+        let closeCount = Mutex(0)
+        do {
+            let _: Int = try await TraceOfflineInspectionService.withClosedSession(
+                logger: Logger(subsystem: "ArkTraceTests", category: "OfflineInspection"),
+                operation: { throw CancellationError() },
+                close: {
+                    closeCount.withLock { $0 += 1 }
+                    throw CocoaError(.fileWriteUnknown)
+                }
+            )
+            XCTFail("cancelled inspection must fail")
+        } catch {
+            XCTAssertTrue(error is CancellationError)
+        }
+        XCTAssertEqual(closeCount.withLock { $0 }, 1)
+    }
+
     func testReportBindsExactSourceAndPublishesPathFreeProvenance() throws {
         let sourceSHA = String(repeating: "1", count: 64)
         let databaseSHA = String(repeating: "2", count: 64)

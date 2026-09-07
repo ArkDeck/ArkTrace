@@ -2731,6 +2731,10 @@ final class RepositoryTests: XCTestCase {
             extraSQL: """
             -- A second, shorter slice on the same thread; the longer one wins.
             INSERT INTO callstack VALUES (4, 1600, 50, 2, 'shorter');
+            -- PID, TID and internal keys intentionally differ.
+            INSERT INTO process VALUES (9, 900, 'disambiguated', 1200, NULL);
+            INSERT INTO thread VALUES (9, 901, 'disambiguated', 1200, NULL, 9);
+            INSERT INTO sched_slice VALUES (5, 1400, 100, 8, 9, 9);
             """
         )
         defer { try? FileManager.default.removeItem(at: url) }
@@ -2762,6 +2766,11 @@ final class RepositoryTests: XCTestCase {
             )
         )
         XCTAssertEqual(cpu.buckets.first?.dominant, .processOrThread(101))
+
+        let disambiguated = try await repository.density(
+            TraceDensityQuery(range: range, source: .cpu(8), bucketCount: 1, deadline: deadline)
+        )
+        XCTAssertEqual(disambiguated.buckets.first?.dominant, .processOrThread(900))
 
         // Upstream draws counters as an area chart, so a counter sample has no
         // fill to borrow. The result says so rather than inventing one.

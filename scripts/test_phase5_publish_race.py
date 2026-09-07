@@ -211,6 +211,21 @@ def directory_replacement(root: Path) -> None:
     assert (hidden / "file").read_bytes() == b"reviewed"
 
 
+def recorded_tree_mutation(root: Path) -> None:
+    source = root / "recorded.partial"
+    destination = root / "recorded.final"
+    source.mkdir()
+    (source / "file").write_bytes(b"recorded")
+    recorded_tree = VERIFIER.tree_sha(source)
+    (source / "file").write_bytes(b"changed after record")
+    require_failure(lambda: VERIFIER.publish_directory(source, destination, recorded_tree))
+    assert not destination.exists()
+    builder = (SCRIPT_DIRECTORY / "build_phase5_cli_distribution_candidate.sh").read_text()
+    publication = builder.split("arktrace_phase5_publish_candidate_pair", 1)[1]
+    assert '\"$partial_candidate\" \"$candidate\" \"$app_tree_sha\"' in publication
+    assert "expected_candidate_tree=" not in builder
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="arktrace-phase5-publish-race-") as raw:
         root = Path(raw).resolve()
@@ -219,6 +234,7 @@ def main() -> None:
         source_recreation(root)
         tree_snapshot_root_replacement(root)
         directory_replacement(root)
+        recorded_tree_mutation(root)
     print("Phase 5 publication race contract passed")
 
 

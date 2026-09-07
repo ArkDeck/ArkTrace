@@ -1,41 +1,54 @@
+import ArkTraceCore
 import Foundation
 import XCTest
 
 @testable import ArkTraceRendering
 
-/// The canvas time labels migrated from `String(format: "%.3f")` to a shared
-/// `FloatingPointFormatStyle`. These tests pin the migration contract: POSIX
-/// decimal point, exactly three fraction digits, and no grouping separator,
-/// regardless of the user's locale.
+/// Exercise the formatter through the tooltip the canvas actually displays,
+/// rather than recreating a Foundation style in the test.
+@MainActor
 final class TimelineTimeLabelFormatTests: XCTestCase {
-    private let style = FloatingPointFormatStyle<Double>(
-        locale: Locale(identifier: "en_US_POSIX")
-    )
-    .precision(.fractionLength(3))
-    .grouping(.never)
+    private func tooltip(durationNs: Int64) throws -> String {
+        let key = EventKey(table: .callstack, rowID: 1)
+        let range = try TraceTimeRange.query(startNs: 0, endNs: max(1, durationNs))
+        let inspector = TraceEventInspector(
+            key: key, type: .namedSlice, name: "worker", range: range,
+            semanticDurationNs: durationNs, isOpenEnded: false,
+            processKey: nil, threadKey: nil, pid: nil, tid: nil, cpu: nil,
+            processName: nil, threadName: nil, category: nil, state: nil,
+            value: nil, unit: nil
+        )
+        return try XCTUnwrap(TimelineNSView.tooltipText(for: TimelineDetailPrimitive(
+            trackID: TimelineTrackID(rawValue: "named-slice:1"),
+            eventKey: key, range: range, label: "worker", inspector: inspector
+        )))
+    }
 
-    func testStyleMatchesLegacyPrintfRendering() {
-        let samples: [Double] = [
-            0.001, 0.5, 1.0, 1.2345, 45.998941664, 999.9994, 3_600.25, 86_400.0,
+    func testProductUnitsAndFractionsMatchLegacyPrintfRendering() throws {
+        XCTAssertEqual(try tooltip(durationNs: 0), "worker · 0 ns")
+        XCTAssertEqual(try tooltip(durationNs: 999), "worker · 999 ns")
+        let samples: [(Int64, Double, String)] = [
+            (1_000, 1_000, "µs"), (1_234, 1_000, "µs"),
+            (1_000_000, 1_000_000, "ms"), (1_234_500, 1_000_000, "ms"),
+            (45_998_941, 1_000_000, "ms"), (999_999_400, 1_000_000, "ms"),
+            (1_000_000_000, 1_000_000_000, "s"),
+            (3_600_250_000_000, 1_000_000_000, "s"),
+            (86_400_000_000_000, 1_000_000_000, "s"),
         ]
-        for value in samples {
-            XCTAssertEqual(
-                style.format(value),
-                String(format: "%.3f", value),
-                "FormatStyle output drifted from the fixed %.3f contract for \(value)"
-            )
+        for (nanoseconds, divisor, unit) in samples {
+            let legacy = String(format: "%.3f", Double(nanoseconds) / divisor)
+            XCTAssertEqual(try tooltip(durationNs: nanoseconds), "worker · \(legacy) \(unit)")
         }
     }
 
-    func testNoGroupingSeparatorForLargeSecondValues() {
-        XCTAssertEqual(style.format(3_600.0), "3600.000")
-        XCTAssertEqual(style.format(1_234_567.891), "1234567.891")
+    func testNoGroupingSeparatorForLargeSecondValues() throws {
+        XCTAssertEqual(try tooltip(durationNs: 3_600_000_000_000), "worker · 3600.000 s")
+        XCTAssertEqual(try tooltip(durationNs: 1_234_567_891_000_000), "worker · 1234567.891 s")
     }
 
-    func testPosixDecimalPointIsLocaleIndependent() {
-        // The style pins en_US_POSIX explicitly, so a German-locale process
-        // must not switch the canvas labels to a decimal comma.
-        XCTAssertFalse(style.format(1.5).contains(","))
-        XCTAssertEqual(style.format(1.5), "1.500")
+    func testProductTooltipUsesPosixDecimalPoint() throws {
+        let text = try tooltip(durationNs: 1_500_000)
+        XCTAssertFalse(text.contains(","))
+        XCTAssertEqual(text, "worker · 1.500 ms")
     }
 }

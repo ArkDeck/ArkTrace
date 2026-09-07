@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import Synchronization
 import XCTest
 
@@ -400,6 +401,81 @@ final class HDCTraceCaptureClientTests: XCTestCase {
 
 @MainActor
 final class TraceCaptureControllerTests: XCTestCase {
+    private func waitForPhase(_ phase: TraceCapturePhase, in controller: TraceCaptureController) async throws {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        while controller.phase != phase, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        XCTAssertEqual(controller.phase, phase)
+    }
+
+    private func assertLateProgressIsIgnored(
+        in controller: TraceCaptureController,
+        progress: @Sendable (TraceCaptureStage) -> Void
+    ) async {
+        let phase = controller.phase
+        let changed = expectation(description: "late progress must not change \(phase)")
+        changed.isInverted = true
+        withObservationTracking { _ = controller.phase } onChange: { changed.fulfill() }
+        progress(.recording)
+        progress(.transferring)
+        await fulfillment(of: [changed], timeout: 0.05)
+        XCTAssertEqual(controller.phase, phase)
+    }
+
+    func testQueuedProgressCannotUndoCancellationOrCancelledState() async throws {
+        let progressSlot = Mutex<(@Sendable (TraceCaptureStage) -> Void)?>(nil)
+        let completion = Mutex<CheckedContinuation<Void, Never>?>(nil)
+        let controller = TraceCaptureController(
+            executableURL: URL(filePath: "/sdk/hdc"),
+            discover: { _ in [TraceCaptureDevice(id: "one-device")] },
+            capture: { _, request, progress in
+                progressSlot.withLock { $0 = progress }
+                await withCheckedContinuation { continuation in
+                    completion.withLock { $0 = continuation }
+                    progress(.recording)
+                }
+                // A dependency may finish despite cancellation. The controller
+                // must still honor the user's cancellation before publishing.
+                return request.destinationURL
+            }
+        )
+        defer { completion.withLock { $0?.resume(); $0 = nil } }
+        controller.refreshDevices()
+        try await waitForPhase(.ready, in: controller)
+        controller.startCapture(to: URL(filePath: "/tmp/cancelled.htrace")) { _ in
+            XCTFail("cancelled capture must not publish")
+        }
+        try await waitForPhase(.recording, in: controller)
+        let progress = try XCTUnwrap(progressSlot.withLock { $0 })
+        controller.cancelCapture()
+        await assertLateProgressIsIgnored(in: controller, progress: progress)
+        completion.withLock { $0?.resume(); $0 = nil }
+        try await waitForPhase(.cancelled, in: controller)
+        await assertLateProgressIsIgnored(in: controller, progress: progress)
+    }
+
+    func testQueuedProgressCannotUndoCompletedOrFailedState() async throws {
+        for shouldFail in [false, true] {
+            let progressSlot = Mutex<(@Sendable (TraceCaptureStage) -> Void)?>(nil)
+            let controller = TraceCaptureController(
+                executableURL: URL(filePath: "/sdk/hdc"),
+                discover: { _ in [TraceCaptureDevice(id: "one-device")] },
+                capture: { _, request, progress in
+                    progressSlot.withLock { $0 = progress }
+                    if shouldFail { throw CocoaError(.fileReadUnknown) }
+                    return request.destinationURL
+                }
+            )
+            controller.refreshDevices()
+            try await waitForPhase(.ready, in: controller)
+            controller.startCapture(to: URL(filePath: "/tmp/completed.htrace")) { _ in }
+            try await waitForPhase(shouldFail ? .failed : .completed, in: controller)
+            let progress = try XCTUnwrap(progressSlot.withLock { $0 })
+            await assertLateProgressIsIgnored(in: controller, progress: progress)
+        }
+    }
+
     func testDiscoverySelectsOnlyDeviceAndCompletedCaptureCallsBack() async throws {
         let destination = URL(filePath: "/tmp/controller-capture.htrace")
         let controller = TraceCaptureController(

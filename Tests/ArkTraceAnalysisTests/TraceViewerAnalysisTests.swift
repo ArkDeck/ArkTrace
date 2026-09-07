@@ -528,6 +528,17 @@ final class TraceViewerAnalysisTests: XCTestCase {
         XCTAssertFalse(result.topThreadsTruncated)
         XCTAssertFalse(result.longSlicesTruncated)
 
+        let repeated = try await TraceRangeAnalysisEngine(repository: repository).analyze(
+            TraceRangeAnalysisRequest(range: range, maximumSlices: 2, topThreadLimit: 2, longSliceLimit: 2)
+        )
+        let reversed = try await TraceRangeAnalysisEngine(
+            repository: Repository(slices: named.reversed(), cpuSlices: [second, first])
+        ).analyze(
+            TraceRangeAnalysisRequest(range: range, maximumSlices: 2, topThreadLimit: 2, longSliceLimit: 2)
+        )
+        XCTAssertEqual(result, repeated)
+        XCTAssertEqual(result, reversed)
+
         let task = Task {
             try await TraceRangeAnalysisEngine(
                 repository: Repository(cpuSlices: [first], cpuDelay: .seconds(5))

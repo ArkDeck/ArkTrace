@@ -446,7 +446,7 @@ private final class HDCProcessBox: @unchecked Sendable {
     }
 }
 
-private final class HDCBoundedPipeSink: @unchecked Sendable {
+final class HDCBoundedPipeSink: @unchecked Sendable {
     let pipe = Pipe()
     private let condition = NSCondition()
     private let capacity: Int
@@ -454,20 +454,24 @@ private final class HDCBoundedPipeSink: @unchecked Sendable {
     private var truncated = false
     private var accepting = true
     private var activeCallbacks = 0
+    // Internal seams for exercising a read already in flight during teardown.
+    private let readDidCompleteHook: (@Sendable () -> Void)?
 
-    init(capacity: Int = 65_536) {
+    init(capacity: Int = 65_536, readDidCompleteHook: (@Sendable () -> Void)? = nil) {
         self.capacity = capacity
+        self.readDidCompleteHook = readDidCompleteHook
         pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            self?.consume(handle.availableData, from: handle)
+            self?.consume(from: handle)
         }
     }
 
-    func finishAndDrain() -> (Data, Bool) {
+    func finishAndDrain(callbacksStoppedHook: (@Sendable () -> Void)? = nil) -> (Data, Bool) {
         let handle = pipe.fileHandleForReading
         condition.lock()
         accepting = false
         condition.unlock()
         handle.readabilityHandler = nil
+        callbacksStoppedHook?()
         condition.lock()
         while activeCallbacks > 0 { condition.wait() }
         condition.unlock()
@@ -481,13 +485,20 @@ private final class HDCBoundedPipeSink: @unchecked Sendable {
         return (data, truncated)
     }
 
-    private func consume(_ chunk: Data, from handle: FileHandle) {
+    private func consume(from handle: FileHandle) {
         condition.lock()
         guard accepting else {
             condition.unlock()
             return
         }
         activeCallbacks += 1
+        condition.unlock()
+
+        // Register before reading: stopping callbacks must not discard bytes
+        // already removed from the pipe, or start a competing EOF drain.
+        let chunk = handle.availableData
+        readDidCompleteHook?()
+        condition.lock()
         if chunk.isEmpty {
             accepting = false
         } else {
@@ -569,6 +580,10 @@ enum HDCProcessExecutor {
                 box.cancel()
             }
         } catch {
+            // No child was launched, so Foundation still owns both parent
+            // write ends. Close them before waiting for EOF on the readers.
+            try? stdout.pipe.fileHandleForWriting.close()
+            try? stderr.pipe.fileHandleForWriting.close()
             _ = stdout.finishAndDrain()
             _ = stderr.finishAndDrain()
             if error is CancellationError || Task.isCancelled { throw CancellationError() }
@@ -1197,6 +1212,7 @@ public final class TraceCaptureController {
                         }
                     }
                 )
+                try Task.checkCancellation()
                 guard let self, self.generation == generation else { return }
                 self.stopElapsedTimer()
                 self.completedURL = url
@@ -1228,6 +1244,7 @@ public final class TraceCaptureController {
     public func cancelCapture() {
         guard phase.isCapturing else { return }
         phase = .cancelling
+        stopElapsedTimer()
         captureTask?.cancel()
     }
 
@@ -1240,6 +1257,11 @@ public final class TraceCaptureController {
     }
 
     private func apply(_ stage: TraceCaptureStage) {
+        // Progress is delivered by queued MainActor tasks. Only a live
+        // capture can advance; cancellation and terminal states are final.
+        guard phase == .preparing || phase == .recording || phase == .transferring else {
+            return
+        }
         switch stage {
         case .preparing:
             phase = .preparing

@@ -223,12 +223,44 @@ final class AppDistributionTests: XCTestCase {
             )
         }
 
-        // Every error code must map to one of those keys.
+        let expected: [ArkTraceError.Code: (TraceAppErrorTitle, TraceAppRecoveryAction, TraceAppRecoveryAction)] = [
+            .invalidArgument: (.traceCouldNotBeOpened, .chooseAnotherFile, .chooseAnotherFile),
+            .traceFileNotFound: (.couldNotFinish, .dismiss, .retry),
+            .traceFileUnreadable: (.traceCouldNotBeOpened, .chooseAnotherFile, .chooseAnotherFile),
+            .traceFormatUnsupported: (.couldNotFinish, .dismiss, .retry),
+            .traceStreamerUnavailable: (.bundledParserUnavailable, .retry, .retry),
+            .traceStreamerIdentityMismatch: (.bundledParserUnavailable, .retry, .retry),
+            .traceParseFailed: (.couldNotFinish, .dismiss, .retry),
+            .traceSchemaUnsupported: (.couldNotFinish, .dismiss, .retry),
+            .traceDatabaseInvalid: (.couldNotFinish, .dismiss, .retry),
+            .traceCacheCorrupt: (.cacheNeedsAttention, .openCacheSettings, .openCacheSettings),
+            .queryFailed: (.couldNotFinish, .dismiss, .retry),
+            .queryTimeout: (.couldNotFinish, .dismiss, .retry),
+            .queryLimitExceeded: (.couldNotFinish, .dismiss, .retry),
+            .outputLimitExceeded: (.couldNotFinish, .dismiss, .retry),
+            .analysisUnsupported: (.couldNotFinish, .dismiss, .retry),
+            .cancelled: (.openingCancelled, .dismiss, .dismiss),
+            .internalError: (.couldNotFinish, .dismiss, .retry),
+        ]
+        XCTAssertEqual(Set(expected.keys), Set(ArkTraceError.Code.allCases))
         for code in ArkTraceError.Code.allCases {
-            let presentation = TraceAppErrorPresentation(
-                error: ArkTraceError(code: code, stage: .request, message: "m")
-            )
-            XCTAssertEqual(presentation.title, presentation.titleKey.sourceText)
+            let mapping = try XCTUnwrap(expected[code])
+            for retryable in [false, true] {
+                let presentation = TraceAppErrorPresentation(
+                    error: ArkTraceError(code: code, stage: .request, message: "m", retryable: retryable)
+                )
+                XCTAssertEqual(presentation.titleKey, mapping.0, "\(code)")
+                XCTAssertEqual(presentation.title, mapping.0.sourceText, "\(code)")
+                XCTAssertEqual(presentation.recoveryAction, retryable ? mapping.2 : mapping.1, "\(code)")
+            }
+        }
+
+        let dismiss = try XCTUnwrap(strings["Dismiss"] as? [String: Any])
+        let localizedDismiss = try XCTUnwrap(dismiss["localizations"] as? [String: Any])
+        for language in ["en", "de"] {
+            let translation = try XCTUnwrap(localizedDismiss[language] as? [String: Any])
+            let unit = try XCTUnwrap(translation["stringUnit"] as? [String: Any])
+            XCTAssertFalse(try XCTUnwrap(unit["value"] as? String).isEmpty)
         }
     }
 

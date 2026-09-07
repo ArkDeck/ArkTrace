@@ -665,15 +665,20 @@ final class TraceAgentBatchTests: XCTestCase {
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
-        for value in [
-            try JSONSerialization.jsonObject(with: encoder.encode(result.topProcesses[0])),
-            try JSONSerialization.jsonObject(with: encoder.encode(result.topThreads[0])),
-            try JSONSerialization.jsonObject(with: encoder.encode(result.threadStateDistribution[0])),
-            try JSONSerialization.jsonObject(with: encoder.encode(result.longSlices[0])),
+        for (value, nullKeys) in [
+            (try encoder.encode(result.topProcesses[0]), ["pid", "name"]),
+            (try encoder.encode(result.topThreads[0]), ["tid", "pid", "name", "processName"]),
+            (try encoder.encode(result.threadStateDistribution[0]), ["processKey", "tid", "pid", "normalizedState"]),
+            (try encoder.encode(result.longSlices[0]), ["category", "processKey", "threadKey", "pid", "tid", "processName", "threadName"]),
         ] {
-            let object = try XCTUnwrap(value as? [String: Any])
-            XCTAssertTrue(object.values.contains { $0 is NSNull })
+            let object = try XCTUnwrap(JSONSerialization.jsonObject(with: value) as? [String: Any])
+            for key in nullKeys {
+                XCTAssertTrue(object[key] is NSNull, "missing explicit null for \(key)")
+            }
         }
+        XCTAssertEqual(result.topProcesses[0].processKey, processKey)
+        XCTAssertEqual(result.topThreads[0].threadKey, threadKey)
+        XCTAssertEqual(result.longSlices[0].name, "x")
     }
 
     func testDeterministicAnalysisCoversClippingRankingStatesLatencyAndHotBuckets() async throws {

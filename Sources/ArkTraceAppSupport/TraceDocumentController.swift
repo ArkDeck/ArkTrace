@@ -481,6 +481,8 @@ public final class TraceDocumentController {
     @ObservationIgnored private var searchTask: Task<Void, Never>?
     @ObservationIgnored private var analysisTask: Task<Void, Never>?
     @ObservationIgnored private var maintenanceTask: Task<Void, Never>?
+    /// Internal gate for proving that background housekeeping never gates Ready.
+    @ObservationIgnored private let beforeCacheMaintenance: (@Sendable () async -> Void)?
     @ObservationIgnored private var documentGeneration: UInt64 = 0
     @ObservationIgnored private var viewportGeneration: UInt64 = 0
     @ObservationIgnored private var searchGeneration: UInt64 = 0
@@ -572,11 +574,13 @@ public final class TraceDocumentController {
         signposts: TraceAppSignposts = TraceAppSignposts(
             subsystem: ArkTraceAppDistribution.bundleIdentifier
         ),
+        beforeCacheMaintenance: (@Sendable () async -> Void)? = nil,
         opener: @escaping TraceDocumentOpener
     ) {
         self.recentStore = recentStore
         self.maintenance = maintenance
         self.signposts = signposts
+        self.beforeCacheMaintenance = beforeCacheMaintenance
         self.opener = opener
         recentDocuments = recentStore.documents()
         signposts.event("AppModelReady")
@@ -641,6 +645,11 @@ public final class TraceDocumentController {
     public func reload() {
         guard let sourceURL else { return }
         open(sourceURL)
+    }
+
+    /// Hides the current error without closing or replacing the document.
+    public func dismissError() {
+        errorPresentation = nil
     }
 
     public func cancel() {
@@ -1340,10 +1349,14 @@ public final class TraceDocumentController {
     private func scheduleCacheMaintenance() {
         guard let maintenance, maintenanceTask == nil else { return }
         let generation = documentGeneration
+        let beforeCacheMaintenance = self.beforeCacheMaintenance
         maintenanceTask = Task { [weak self] in
             let outcome: Result<TraceCacheMaintenanceReport, any Error>
-            do { outcome = .success(try await maintenance.maintain()) }
-            catch { outcome = .failure(error) }
+            do {
+                await beforeCacheMaintenance?()
+                try Task.checkCancellation()
+                outcome = .success(try await maintenance.maintain())
+            } catch { outcome = .failure(error) }
             guard let self else { return }
             self.maintenanceTask = nil
             switch outcome {
@@ -1640,25 +1653,11 @@ public final class TraceDocumentController {
     }
 
     private func resetDocumentState() {
+        clearViewerStateForReplacement()
         phase = .idle
         sourceURL = nil
-        metadata = nil
-        trackGroups = []
-        snapshot = nil
-        timelineScrollRequest = nil
-        pendingScrollGroupID = nil
-        selectedEvent = nil
-        selectedEventLocation = nil
-        selectedEventArguments = []
-        selectedEventArgumentsTruncated = false
-        hoveredEvent = nil
-        selectedRange = nil
-        rangeAnalysis = nil
-        searchResults = TraceSearchResults(items: [], truncated: false)
-        processFilterText = ""
-        cacheHit = false
+        loadingFraction = nil
         errorPresentation = nil
-        catalogThreads = []
     }
 
     private func clearViewerStateForReplacement() {

@@ -24,6 +24,7 @@ final class TimelineRenderingTests: XCTestCase {
         let counterPage: TraceEventPage<CounterSeries>?
         let slicePage: TraceEventPage<TraceSlice>?
         let traceSHA256: String
+        let identifiesSources: Bool
         private var requestedDensitySources: [TraceDensitySource] = []
 
         init(
@@ -31,13 +32,15 @@ final class TimelineRenderingTests: XCTestCase {
             delay: Duration? = nil,
             counterPage: TraceEventPage<CounterSeries>? = nil,
             slicePage: TraceEventPage<TraceSlice>? = nil,
-            traceSHA256: String = String(repeating: "a", count: 64)
+            traceSHA256: String = String(repeating: "a", count: 64),
+            identifiesSources: Bool = false
         ) {
             self.eventCount = eventCount
             self.delay = delay
             self.counterPage = counterPage
             self.slicePage = slicePage
             self.traceSHA256 = traceSHA256
+            self.identifiesSources = identifiesSources
         }
 
         func metadata() async throws -> TraceMetadata {
@@ -79,11 +82,17 @@ final class TimelineRenderingTests: XCTestCase {
         func density(_ query: TraceDensityQuery) async throws -> TraceDensityResult {
             requestedDensitySources.append(query.source)
             if let delay { try await Task.sleep(for: delay) }
+            let sourceCount: Int64
+            if identifiesSources, case .processCounter(let filterID, _) = query.source {
+                sourceCount = filterID + 1
+            } else {
+                sourceCount = 1
+            }
             if query.bucketCount == 1 {
                 return TraceDensityResult(
                     buckets: [
                         TraceDensityBucket(
-                            range: query.range, eventCount: eventCount,
+                            range: query.range, eventCount: identifiesSources ? sourceCount : eventCount,
                             occupiedNs: nil, utilization: nil, dominant: nil
                         )
                     ]
@@ -96,7 +105,7 @@ final class TimelineRenderingTests: XCTestCase {
                     ? query.range.endNs : min(query.range.endNs, start + width)
                 return TraceDensityBucket(
                     range: try TraceTimeRange.query(startNs: start, endNs: end),
-                    eventCount: 1,
+                    eventCount: sourceCount,
                     occupiedNs: nil,
                     utilization: nil,
                     dominant: nil
@@ -964,9 +973,16 @@ final class TimelineRenderingTests: XCTestCase {
             ]
         )
         let view = TimelineNSView(frame: CGRect(x: 0, y: 0, width: 200, height: 80))
+        let window = NSWindow(
+            contentRect: view.bounds, styleMask: [.titled], backing: .buffered, defer: false
+        )
+        window.contentView?.addSubview(view)
+        defer { withExtendedLifetime(window) {} }
         view.snapshot = TimelineSnapshot(
             viewport: wide, tracks: [track], generation: 1, dataQuality: TraceDataQuality()
         )
+        view.display()
+        XCTAssertFalse(view.needsDisplay, "the paint request was consumed")
         let body = TimelineGeometry.rulerHeight + 8
         // 400…600 ns of 0…1000 is x 80…120, so x 190 is well clear of it.
         XCTAssertEqual(view.event(at: CGPoint(x: 100, y: body)), key)
@@ -982,10 +998,43 @@ final class TimelineRenderingTests: XCTestCase {
             viewport: zoomed, tracks: [track], generation: 2,
             dataQuality: TraceDataQuality(), isLoading: true
         )
+        XCTAssertTrue(view.needsDisplay, "the pending viewport must schedule a paint")
+        view.display()
         XCTAssertEqual(
             view.event(at: CGPoint(x: 190, y: body)), key,
             "the pending viewport is what the frame draws and hit-tests"
         )
+
+        let pending = view.snapshot
+        view.display()
+        XCTAssertFalse(view.needsDisplay, "the paint request was consumed")
+        view.snapshot = pending
+        XCTAssertFalse(view.needsDisplay, "reapplying the same pending frame must not invalidate it")
+
+        view.snapshot = TimelineSnapshot(
+            viewport: zoomed, tracks: [], generation: 3,
+            dataQuality: TraceDataQuality(), isLoading: true
+        )
+        XCTAssertFalse(view.needsDisplay, "an empty pending frame keeps the displayed fallback")
+        XCTAssertEqual(view.event(at: CGPoint(x: 190, y: body)), key)
+
+        // cacheDisplay draws into a bitmap but changes AppKit's dirty-region
+        // bookkeeping. Use a separate view to verify pixels/cache reuse, so
+        // it cannot interfere with the window invalidation assertions above.
+        let drawingView = TimelineNSView(frame: view.bounds)
+        var detailBuilds = 0
+        drawingView.pathCacheBuildHook = { kind, _ in
+            if kind == "detail" { detailBuilds += 1 }
+        }
+        drawingView.snapshot = TimelineSnapshot(
+            viewport: wide, tracks: [track], generation: 1, dataQuality: TraceDataQuality()
+        )
+        let bitmap = try XCTUnwrap(drawingView.bitmapImageRepForCachingDisplay(in: drawingView.bounds))
+        drawingView.cacheDisplay(in: drawingView.bounds, to: bitmap)
+        XCTAssertEqual(detailBuilds, 1)
+        drawingView.snapshot = pending
+        drawingView.cacheDisplay(in: drawingView.bounds, to: bitmap)
+        XCTAssertEqual(detailBuilds, 2, "pending geometry must invalidate the settled path cache")
     }
 
     /// The other half of drawing a carried-over generation: its primitives are
@@ -1072,7 +1121,7 @@ final class TimelineRenderingTests: XCTestCase {
     /// forty-point strip, and scrolling crawled.
     @MainActor
     func testAStripRedrawDrawsOnlyTheLabelsInsideIt() throws {
-        let trackCount = 6
+        let trackCount = 12
         let viewport = try TimelineViewport(
             range: TraceTimeRange.query(startNs: 0, endNs: 1_000),
             widthPoints: 200,
@@ -1116,6 +1165,17 @@ final class TimelineRenderingTests: XCTestCase {
             drawn, [1],
             "a strip covering one track draws that track's label and no others"
         )
+
+        // Track 8 crosses the 256-point cache-band edge. It must draw once
+        // when both bands are dirty and remain visible from either side.
+        let crossing = TimelineGeometry.trackFrame(tracks[8])
+        XCTAssertLessThan(crossing.minY, TimelineNSView.pathBandHeight)
+        XCTAssertGreaterThan(crossing.maxY, TimelineNSView.pathBandHeight)
+        for y in [250.0, 256.0] {
+            drawn.removeAll()
+            view.cacheDisplay(in: CGRect(x: 0, y: y, width: 200, height: 5), to: bitmap)
+            XCTAssertEqual(drawn, [1], "the straddling label must survive a single-band redraw")
+        }
     }
 
     /// The layout outlives the frame that paid for it, and one name shared by
@@ -1864,12 +1924,22 @@ final class TimelineRenderingTests: XCTestCase {
             deadline: ContinuousClock.now.advanced(by: .seconds(5))
         )
         let snapshot = try await TimelineSnapshotLoader().load(
-            request, repository: DensityRepository(eventCount: 1_000_000)
+            request, repository: DensityRepository(eventCount: 1_000_000, identifiesSources: true)
         )
         XCTAssertEqual(snapshot?.tracks.count, trackCount)
         // Each track kept its own density result rather than being shifted by a
         // chunk boundary.
         XCTAssertTrue(snapshot?.tracks.allSatisfy { !$0.primitives.isEmpty } == true)
+        for (index, track) in try XCTUnwrap(snapshot).tracks.enumerated() {
+            XCTAssertEqual(track.descriptor.source, .processCounter(filterID: Int64(index), processKey: ProcessKey(ipid: 1)))
+            for primitive in track.primitives {
+                guard case .density(let density) = primitive else {
+                    XCTFail("density request returned a detail primitive")
+                    continue
+                }
+                XCTAssertEqual(density.bucket.eventCount, Int64(index + 1), "source association drifted at track \(index)")
+            }
+        }
     }
 
     func testLoaderQueriesOnlyVerticallyVisibleTracksWithOverscan() async throws {

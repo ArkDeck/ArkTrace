@@ -258,6 +258,24 @@ final class TimelineDensitySelectionTests: XCTestCase {
         )
         XCTAssertLessThan(instant.width, TimelineNSView.resolvedSelectionMinimumWidth)
         XCTAssertEqual(instant.midY, bandFrame.midY)
+
+        let detailTrack = TimelineTrackSnapshot(
+            descriptor: track.descriptor, y: track.y, height: track.height, primitives: []
+        )
+        let snapshot = TimelineSnapshot(
+            viewport: viewport, tracks: [detailTrack], generation: 2,
+            dataQuality: TraceDataQuality()
+        )
+        view.selectedEventKey = EventKey(table: .schedSlice, rowID: 1)
+        view.selectedEventLocation = TimelineEventLocation(
+            trackID: track.descriptor.id,
+            range: try TraceTimeRange.query(startNs: 100, endNs: 101)
+        )
+        let outline = try XCTUnwrap(view.resolvedSelectionOutline(in: snapshot, backingScale: 2))
+        XCTAssertEqual(outline.width, TimelineNSView.resolvedSelectionMinimumWidth)
+        XCTAssertEqual(outline.midX, instant.midX)
+        XCTAssertEqual(outline.minY, instant.minY)
+        XCTAssertEqual(outline.height, instant.height)
     }
 
     /// Ranking a press: anything covering the instant wins, and among those
