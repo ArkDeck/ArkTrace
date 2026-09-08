@@ -182,6 +182,48 @@ final class TraceStreamerIdentityTests: XCTestCase {
         return (directory, script)
     }
 
+    /// A fixture body that publishes its PID and then spins until signalled.
+    ///
+    /// The spin is deliberate: the cancellation tests below measure how fast
+    /// the child reacts to SIGTERM, and a `sleep`-based loop defers zsh's trap
+    /// until the current `sleep` returns, which spends a measurable slice of
+    /// the grace period the tests assert against. The deadline is the second
+    /// line of defence behind `reapChildProcessGroup`: a child orphaned by a
+    /// crashed or externally killed test run stops burning a core on its own
+    /// instead of surviving indefinitely. It is far longer than any caller
+    /// needs -- `waitForPID` gives up after ten seconds and cancellation
+    /// follows immediately -- so it can never end a child while a test is
+    /// still using it.
+    private func boundedSpinBody(termTrap: String, lifetimeSeconds: Int = 60) -> String {
+        """
+        \(termTrap)
+        print -r -- $$ > "$1"
+        integer deadline=$(( SECONDS + \(lifetimeSeconds) ))
+        while (( SECONDS < deadline )); do :; done
+        """
+    }
+
+    /// Terminates a fixture child that nothing else reaped.
+    ///
+    /// Deleting the fixture directory does not stop a running child, so a test
+    /// that unwinds before the parser terminates it -- a `waitForPID` that
+    /// times out, a throwing `task.value`, a failed assertion -- would
+    /// otherwise leave the script reparented to launchd, spinning forever.
+    /// `Process` starts every child in its own process group, so the negative
+    /// PID reaches the script and anything it spawned while leaving the test
+    /// runner's own group untouched; the liveness probe keeps the signal off a
+    /// PID the system has already recycled.
+    private func reapChildProcessGroup(publishedAt pidFile: URL) {
+        guard let data = try? Data(contentsOf: pidFile),
+            let text = String(data: data, encoding: .utf8),
+            let pid = pid_t(text.trimmingCharacters(in: .whitespacesAndNewlines)),
+            pid > 0,
+            Darwin.kill(pid, 0) == 0
+        else { return }
+        _ = Darwin.kill(-pid, SIGKILL)
+        _ = Darwin.kill(pid, SIGKILL)
+    }
+
     /// A child that never publishes its PID is exactly the regression the
     /// reaping tests exist to catch, so this fails rather than skipping --
     /// a skip here is also invisible to CI, whose audit already tolerates
@@ -387,13 +429,12 @@ final class TraceStreamerIdentityTests: XCTestCase {
     }
 
     func testCancellationWaitsForSIGTERMExitAndReapsChild() async throws {
-        let fixture = try makeExecutableScript("""
-            trap 'exit 0' TERM
-            print -r -- $$ > "$1"
-            while true; do :; done
-            """)
-        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let fixture = try makeExecutableScript(boundedSpinBody(termTrap: "trap 'exit 0' TERM"))
         let pidFile = fixture.directory.appending(path: "pid")
+        defer {
+            reapChildProcessGroup(publishedAt: pidFile)
+            try? FileManager.default.removeItem(at: fixture.directory)
+        }
         let task = Task {
             try await TraceStreamerProcessParser.run(
                 executable: fixture.script,
@@ -412,13 +453,12 @@ final class TraceStreamerIdentityTests: XCTestCase {
     }
 
     func testCancellationEscalatesIgnoredSIGTERMAndReapsChild() async throws {
-        let fixture = try makeExecutableScript("""
-            trap '' TERM
-            print -r -- $$ > "$1"
-            while true; do :; done
-            """)
-        defer { try? FileManager.default.removeItem(at: fixture.directory) }
+        let fixture = try makeExecutableScript(boundedSpinBody(termTrap: "trap '' TERM"))
         let pidFile = fixture.directory.appending(path: "pid")
+        defer {
+            reapChildProcessGroup(publishedAt: pidFile)
+            try? FileManager.default.removeItem(at: fixture.directory)
+        }
         let task = Task {
             try await TraceStreamerProcessParser.run(
                 executable: fixture.script,
@@ -434,6 +474,88 @@ final class TraceStreamerIdentityTests: XCTestCase {
         XCTAssertTrue(outcome.escalatedToSIGKILL)
         XCTAssertEqual(Darwin.kill(pid, 0), -1)
         XCTAssertEqual(errno, ESRCH)
+    }
+
+    /// Starts a fixture child directly, outside the parser, so the test owns
+    /// the only handle to it. Returns once the child has published its PID.
+    private func startUnparentedFixture(
+        body: String
+    ) async throws -> (process: Process, pid: pid_t, pidFile: URL, directory: URL) {
+        let fixture = try makeExecutableScript(body)
+        let pidFile = fixture.directory.appending(path: "pid")
+        let process = Process()
+        process.executableURL = fixture.script
+        process.arguments = [pidFile.path]
+        try process.run()
+        do {
+            let pid = try await waitForPID(at: pidFile)
+            return (process, pid, pidFile, fixture.directory)
+        } catch {
+            // The child that never published a PID may still be running.
+            reapChildProcessGroup(publishedAt: pidFile)
+            process.terminate()
+            try? FileManager.default.removeItem(at: fixture.directory)
+            throw error
+        }
+    }
+
+    /// Waits for a fixture child to leave the process table.
+    ///
+    /// `Process.waitUntilExit` spins the calling thread's run loop, and off the
+    /// main thread that run loop has no input source to wake it: it keeps
+    /// blocking in `mach_msg` long after the child is gone. Polling the
+    /// observed state instead cannot outlast the deadline, so a regression
+    /// fails these tests rather than hanging the whole run.
+    private func waitForExit(of process: Process, within duration: Duration) async throws -> Bool {
+        let deadline = ContinuousClock.now.advanced(by: duration)
+        while process.isRunning, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        return !process.isRunning
+    }
+
+    func testFixtureCleanupReapsAChildThatNothingElseTerminated() async throws {
+        // `trap '' TERM` makes the child survive everything short of the
+        // process-group SIGKILL, which is the signal cleanup must actually send.
+        let child = try await startUnparentedFixture(body: boundedSpinBody(termTrap: "trap '' TERM"))
+        defer {
+            reapChildProcessGroup(publishedAt: child.pidFile)
+            try? FileManager.default.removeItem(at: child.directory)
+        }
+
+        XCTAssertEqual(Darwin.kill(child.pid, 0), 0)
+        XCTAssertEqual(
+            getpgid(child.pid),
+            child.pid,
+            "cleanup signals the negative PID, which only reaches the child if "
+                + "Process still starts each one in its own process group"
+        )
+
+        reapChildProcessGroup(publishedAt: child.pidFile)
+
+        let exited = try await waitForExit(of: child.process, within: .seconds(20))
+        XCTAssertTrue(exited, "cleanup must terminate the child it signalled")
+        XCTAssertEqual(Darwin.kill(child.pid, 0), -1)
+        XCTAssertEqual(errno, ESRCH)
+    }
+
+    func testLeakedFixtureChildExpiresWithoutBeingSignalled() async throws {
+        // Nothing signals this child, so only the body's own deadline can end
+        // it. Without that deadline it is exactly the orphan that survives a
+        // killed test run and spins a core until the host is rebooted.
+        let child = try await startUnparentedFixture(
+            body: boundedSpinBody(termTrap: "trap '' TERM", lifetimeSeconds: 1))
+        defer {
+            reapChildProcessGroup(publishedAt: child.pidFile)
+            try? FileManager.default.removeItem(at: child.directory)
+        }
+
+        // `terminationStatus` traps while the process is still running, so a
+        // regression has to fail here rather than take the runner down with it.
+        guard try await waitForExit(of: child.process, within: .seconds(20)) else {
+            return XCTFail("an unsignalled fixture child must expire on its own deadline")
+        }
+        XCTAssertEqual(child.process.terminationStatus, 0)
     }
 
     func testProcessOutcomeRejectsFailureMissingGarbageAndSymlinkOutput() async throws {
