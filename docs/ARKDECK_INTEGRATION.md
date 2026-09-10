@@ -22,6 +22,12 @@ dependency bump is not proof of parity by itself; the downstream change must sti
 contract fixtures and ArkDeck's complete Trace/App lanes. Once the copies are removed, ArkDeck
 updates should change only the pinned ArkTrace revision plus intentional adapter/UI code.
 
+Cache metadata readers require the current encoded field set at the root and in
+`cacheKey`, `parser` and `databasePreparation`. Extra fields are not silently dropped
+by a read/write cycle. Maintenance treats such metadata as unaccounted, retains its
+measured bytes and skips the entry during unused-cache cleanup. This validation
+does not change the metadata format version, encoded keys or valid record bytes.
+
 ## Production profile
 
 The signed ArkTrace CLI distribution is selected by an owner-only descriptor. ArkDeck installs
