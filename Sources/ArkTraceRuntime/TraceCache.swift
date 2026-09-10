@@ -99,6 +99,57 @@ package struct TraceCacheMetadata: Hashable, Codable, Sendable {
     public let createdAt: Date
     public let lastAccessedAt: Date
 
+    private enum CodingKeys: String, CodingKey, CaseIterable {
+        case formatVersion, cacheKey, parser, traceSHA256, sourceSHA256, sourceByteCount
+        case schemaFingerprint, schemaAdapterVersion, indexSchemaVersion
+        case databasePreparation, databaseByteCount, createdAt, lastAccessedAt
+    }
+
+    private struct FieldKey: CodingKey {
+        let stringValue: String
+        var intValue: Int? { nil }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { return nil }
+    }
+
+    private static func requireFields(_ expected: Set<String>, from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: FieldKey.self)
+        guard Set(container.allKeys.map(\.stringValue)) == expected else {
+            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath,
+                debugDescription: "Cache metadata fields do not match the current format"))
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        try Self.requireFields(Set(CodingKeys.allCases.map(\.rawValue)), from: decoder)
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        // These nested records are also used outside cache metadata. Keep the
+        // cache's fixed document boundary here instead of changing their other
+        // consumers or accepting fields that a cache writer cannot preserve.
+        try Self.requireFields(["traceSHA256", "parserBinarySHA256", "upstreamRevision",
+            "schemaAdapterVersion", "indexSchemaVersion", "parserKey"],
+            from: values.superDecoder(forKey: .cacheKey))
+        try Self.requireFields(["name", "reportedVersion", "binarySHA256", "upstreamRepository",
+            "upstreamRevision", "architecture", "adapterVersion", "buildRecipeVersion"],
+            from: values.superDecoder(forKey: .parser))
+        try Self.requireFields(["schemaAdapterVersion", "schemaFingerprint", "indexVersion",
+            "upstreamDatabaseSHA256", "upstreamDatabaseByteCount"],
+            from: values.superDecoder(forKey: .databasePreparation))
+        formatVersion = try values.decode(Int.self, forKey: .formatVersion)
+        cacheKey = try values.decode(TraceCacheKey.self, forKey: .cacheKey)
+        parser = try values.decode(TraceParserIdentity.self, forKey: .parser)
+        traceSHA256 = try values.decode(String.self, forKey: .traceSHA256)
+        sourceSHA256 = try values.decode(String.self, forKey: .sourceSHA256)
+        sourceByteCount = try values.decode(Int64.self, forKey: .sourceByteCount)
+        schemaFingerprint = try values.decode(String.self, forKey: .schemaFingerprint)
+        schemaAdapterVersion = try values.decode(String.self, forKey: .schemaAdapterVersion)
+        indexSchemaVersion = try values.decode(Int.self, forKey: .indexSchemaVersion)
+        databasePreparation = try values.decode(TraceDatabasePreparationResult.self, forKey: .databasePreparation)
+        databaseByteCount = try values.decode(Int64.self, forKey: .databaseByteCount)
+        createdAt = try values.decode(Date.self, forKey: .createdAt)
+        lastAccessedAt = try values.decode(Date.self, forKey: .lastAccessedAt)
+    }
+
     public init(
         formatVersion: Int = 1,
         cacheKey: TraceCacheKey,
