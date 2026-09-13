@@ -3421,9 +3421,13 @@ private extension TraceContentAddressedCache {
             components.count <= 8,
             components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." })
         else { throw CacheIO.metadata }
+        // Owner targets are always directories. The explicit hint keeps the
+        // trailing-slash form identical to the directory-hinted layout and
+        // enumeration URLs that maintenance compares by exact URL equality;
+        // `append(path:)` alone never marks an existing directory.
         var target = recoveryRoot.standardizedFileURL
         for component in components {
-            target.append(path: String(component))
+            target.append(path: String(component), directoryHint: .isDirectory)
         }
         target = target.standardizedFileURL
         guard try relativePath(from: recoveryRoot, to: target) == evidence.relativePath else {
