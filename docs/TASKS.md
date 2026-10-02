@@ -1,5 +1,10 @@
 # ArkTrace 全阶段任务索引
 
+当前 Rust 跨平台迁移从 [RUST_CORE_MIGRATION_TASKS.md](RUST_CORE_MIGRATION_TASKS.md)
+执行，架构见 [RUST_CORE_MIGRATION_DESIGN.md](RUST_CORE_MIGRATION_DESIGN.md)。
+该清单覆盖共享 Rust 内核、macOS/Windows 原生 UI、ArkDeck 消费接入和旧实现清退；
+下面的 Phase 0–7 状态只描述原 Swift 实现的历史交付，不表示迁移已完成。
+
 本文是 Phase 0–7 的历史任务与验收索引。当前仓库任务从 [AGENTS.md](../AGENTS.md) 进入，
 按当前规格、实现和改动范围执行；下述阶段顺序与状态更新不是普通修复的开工前置。
 Completed 记录不替代当前工作树的验证，未勾选验收项仍保留其证据缺口。

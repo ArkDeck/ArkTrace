@@ -1,5 +1,10 @@
 # ArkDeck integration
 
+The Rust migration is defined in [the migration design](RUST_CORE_MIGRATION_DESIGN.md)
+and [tasks AT-RUST-017/018](RUST_CORE_MIGRATION_TASKS.md). It covers both the daemon's
+reviewed CLI distribution and the macOS App's directly linked Swift SDK. The current
+distribution and historical evidence below do not certify the future Rust or Windows builds.
+
 ArkDeck consumes ArkTrace only through reviewed, typed analyzer operations. The production
 integration does not accept an executable path, argv array, shell fragment, raw SQL, GUI
 automation, HDC route, or RuntimeCapability from the caller.

@@ -1,5 +1,10 @@
 # ArkTrace 产品与系统规格
 
+Rust/Windows 迁移目标与需求映射见 [迁移设计](RUST_CORE_MIGRATION_DESIGN.md) 和
+[迁移任务](RUST_CORE_MIGRATION_TASKS.md)。现有行为与安全要求继续有效；本次文档编制
+未宣称 Windows 已支持，也未改变现行 Machine JSON。语言、平台与渲染实现的条款在
+对应能力实际交付时同步，最终由 AT-RUST-020 核对。
+
 > 用途：持续维护的产品行为与验收要求；Agent 执行入口见 [AGENTS.md](../AGENTS.md)
 >
 > 初始规格版本：0.1a（下列修订与正文共同记录后续演进）
