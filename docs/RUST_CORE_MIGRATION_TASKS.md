@@ -1,0 +1,610 @@
+# ArkTrace Rust 内核迁移任务
+
+> 日期：2026-10-02；版本：1.0。架构依据：[迁移设计](RUST_CORE_MIGRATION_DESIGN.md)。
+> 初始状态：20 项任务，0 项完成；本文件的创建不代表实现、测试或发布已通过。
+> 实施基线：ArkTrace `9172c9525f954ec397e0555d7d03cd4367f3efcf`。
+
+## 1. 执行规则与完成语义
+
+- 一个任务交付一段可观察产品能力，包含代码、正向/负向验证和必要文档；可以分多个 PR，
+  但不能只改任务状态就算交付。S/M/L 是相对规模，不是工期承诺。
+- **开工依赖**决定接口/源码是否足以开始；**完成依赖**决定该任务能否验收。
+  Windows 图形会话、生产签名、真机缺失只阻塞需要它的验收，不阻塞其他软件。
+- 先核对实际 diff 和当前源码。不要照抄旧任务里的函数名、版本、PR 状态或历史 PASS。
+  变更 parser、schema、ABI、SDK、发行格式时同步真实消费者，不只更新本仓测试。
+- `ready`=可开始；`planned`=尚未开始且存在列出的接口依赖；`in-progress`=已开始；
+  `blocked`=具体外部条件使该任务剩余工作无法推进；`done`=交付物与要求的验证均完成。
+  缺真机不能标真机完成；有软件结果时写子项实际状态。
+- 软件任务不要求先做正式签名/真机发布。001、002、003 可以立即开展；Windows parser
+  尽早验证，避免再出现“WinUI 完成后才发现引擎不能分发”。
+- macOS 现有功能、原始 Trace、flags/marks/favorites 和 ArkDeck 消费 API 是迁移约束。
+  发现旧缺陷时增加有依据的差异向量，不逐字复制 bug，不为通过测试放宽规格。
+- 表中拟新增路径和脚本是目标，不表示当前存在。实际创建时再把验证命令写进 run 记录。
+  本任务清单不授权 Repo Agent 绕过 ArkDeck Runtime 操作设备。
+
+## 2. 任务总表与依赖
+
+表内编号均为 `AT-RUST-` 后缀；更精确的按平台完成条件见各任务。
+
+| 编号 | 交付 | 开工依赖 | 完成依赖 | 状态 | 规模 |
+|---|---|---|---|---|---|
+| 001 | 行为/契约/oracle/性能基线 | 无 | 无 | ready | M |
+| 002 | Rust workspace、工具链、双平台 CI | 无 | 无 | ready | M |
+| 003 | Windows TraceStreamer 构建与身份 | 无 | 无 | ready | L |
+| 004 | 文件身份、权限、锁与原子发布端口 | 002 | 001、002 | planned | L |
+| 005 | 进程树、取消、输出预算与签名端口 | 002 | 004 | planned | L |
+| 006 | 真实解析→校验→索引→Ready | 001、002 | 004、005；Windows 加 003 | planned | L |
+| 007 | SQLite typed query、搜索与目录 | 001、002 | 006 | planned | L |
+| 008 | Session/cache/lease/标注迁移 | 001、002 | 004、006、007 | planned | L |
+| 009 | summary/context/analyze 与质量事实 | 001、002 | 007 | planned | L |
+| 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | planned | L |
+| 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | planned | L |
+| 012 | C ABI、Swift/C# SDK 与生命周期 | 001、002 | 008、009、011 | planned | L |
+| 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | planned | L |
+| 014 | Windows 原生 Viewer | 002、012 接口冻结 | 003、008、011、012 | planned | L |
+| 015 | 独立 GUI Capture 共享实现 | 002、004、005 | 004、005、013、014 | planned | L |
+| 016 | 两平台 CLI/SDK/App 发行契约与打包 | 002；Windows recipe 待 003 | 003、005、010、012；GUI 包加 013–015 | planned | L |
+| 017 | ArkDeck macOS CLI + SDK 消费接入 | 010、012 接口冻结 | 010、012、013、016 的 macOS 产物 | planned | L |
+| 018 | ArkDeck Windows 离线消费接入 | 010、016 Windows schema 冻结 | 003、010、016 的 Windows CLI 产物 | planned | L |
+| 019 | 差分/故障/性能/资源验证基础设施 | 001、002 | 001、002；具体能力随实现加入 | planned | L |
+| 020 | 发布验收、安装切换、回滚与 Swift 清退 | 各能力可独立预验收 | 003–019 的适用完整结果 | planned | L |
+
+“接口冻结”指 schema/ABI 与最小可编译 SDK 已在对应任务交付，允许 UI 开始实现；
+不把 scripted engine 当作该 UI 任务的最终成功。016 可按 headless/macOS GUI/Windows GUI
+分别交付产物，017/018 不必等待另一个平台 GUI 打包。
+
+```mermaid
+flowchart LR
+  A[001 契约与基线] --> P[006 真实 parse / Ready]
+  B[002 Workspace / CI] --> H[004 文件 / 005 进程]
+  H --> P
+  W[003 Windows parser] --> WP[Windows 真实 parse]
+  P --> WP
+  P --> Q[007 Query]
+  Q --> S[008 Session / Cache]
+  Q --> AN[009 Analysis]
+  S --> CLI[010 CLI]
+  AN --> CLI
+  Q --> V[011 Viewer 投影]
+  AN --> V
+  S --> ABI[012 ABI / SDK]
+  V --> ABI
+  ABI --> MAC[013 macOS App]
+  ABI --> WIN[014 Windows App]
+  MAC --> CAP[015 GUI Capture]
+  WIN --> CAP
+  CLI --> PKG[016 分发: 分平台/产品]
+  CAP --> PKG
+  PKG --> DM[017 ArkDeck macOS]
+  PKG --> DW[018 ArkDeck Windows]
+  A --> QA[019 差分 / 故障 / 性能]
+  DM --> END[020 验收 / 切换 / 清退]
+  DW --> END
+  QA --> END
+```
+
+图展示主要关系，不把 GUI→016 箭头解释为 headless CLI 打包前置。
+最短可用路线是 001/002 + macOS 004/005 → 006/007 → 010 的 inspect 子集；
+完整 Windows 离线路线再加 003、008/009 和 016/018。HDC/真机不在离线软件关键路径上。
+
+## 3. AT-RUST-001 — 冻结行为、接口、oracle 与当前基线
+
+- 状态：ready；开工依赖：无；完成依赖：无。
+- 平台/输入：macOS 当前 Swift 与可用真实 fixture；Windows 只记录未知项；无设备执行。
+- 需求：AT-SYS-002/006、AT-TIME-*、AT-ID-*、AT-CLI-*、AT-ERR-*、AT-PERF-*。
+- 路径：拟新增 `contracts/`、`rust/tests/fixtures/`、`docs/migration-runs/`；现有 CLI/Core/
+  Store/Rendering tests、`scripts/api-baseline/`；只为 recorder 增加最小 test seam。
+
+交付：
+
+1. 按九命令、SDK 公共 API、Session/cache、query/analysis、Viewer/标注、Capture 建立
+   “现有入口→目标 owner→行为向量→验收任务”清单，标出 package/public/internal 边界。
+2. 提取 Machine JSON、错误 code/stage/retryable、limits、时间/身份、排序/截断和
+   CLI parse 向量。记录 Swift commit、parser/schema/index identity 和每个 corpus digest。
+3. 记录真实 small 三文件结果、medium/large 可用性、无 parser 与 malformed input 的结果。
+   对 Windows provenance 差异制定字段级比较规则；不抹去实际身份。
+4. 列出 `dataQualityNotMachineSafe` 与发行 pin 错配的已知问题；为前者准备修正前后向量，
+   普通 parser warnings 不得被误判成 unsafe machine result。
+5. 在安静主机采当前 Swift open/query/context/analysis/viewport/cancel/内存基线。
+   缺某类 fixture 写明 not measured，不捏造数字；不阻塞合同提取。
+
+验收：
+
+- recorder 连续两次输出相同 canonical 语义；corpus 的哈希与来源可重放。
+- 覆盖 Int64 边界、instant/open-ended、PID/TID reuse、empty/truncated、unknown/null、
+  最小 output budget、非法 quality、unknown key、取消/cleanup failure 优先级。
+- 包外 API 基线与当前 App 消费符号清单对得上；无 orphan 消费者。
+- 有 baseline 原始样本与缺失清单，不把历史 Phase 报告当作本次复测。
+
+## 4. AT-RUST-002 — Workspace、工具链和双平台 CI 骨架
+
+- 状态：ready；开工/完成依赖：无。
+- 平台/输入：macOS arm64、Windows 11 x64 native runner；无设备。
+- 需求：设计 §4/13；AT-SYS-001/003/006。
+- 路径：拟新增 `rust/`、`contracts/` 生成入口、`windows/` 最小 binding 项目；
+  `.github/workflows/`、`scripts/ci_plan.sh` 及 planner tests。
+
+交付：
+
+1. 最小 contract/platform/engine/CLI workspace；其余 crate 在有调用方时逐步加入。
+   exact rust toolchain、Cargo.lock、MSRV 与两个 target 的原生编译记录。
+2. 第一方 unsafe 边界、依赖许可清单、格式/lint/test、架构依赖检查。
+3. 薄 Swift/C# smoke target，证明头文件生成、静态/动态链接、artifact 定位可行，
+   未完成引擎不得包装成可用产品。
+4. 扩展 CI planner，已实现模块选对应 Rust/native/SDK/App 车道；未知 diff 保守选择。
+   doc-only、README shortcut、现有 phase contracts 的选择行为保留。
+
+验收：
+
+- 两端真实 runner build/test，带 native OS 断言；0-test Windows harness 在 macOS 不算 PASS。
+- 修改共享契约/平台代码会选两端车道；仅文档不会意外触发全量构建；planner 自测通过。
+- CLI/engine 的依赖闭包不含 GUI/Capture；无相邻 ArkDeck checkout path dependency。
+- toolchain 和 dependency 缺失的错误可定位，不自动使用任意系统版本。
+
+## 5. AT-RUST-003 — Windows TraceStreamer 可复现构建与 pin
+
+- 状态：ready；开工/完成依赖：无，直接核对当前第三方源码/配方。
+- 平台/输入：Windows 11 x64 构建主机、上游源码、真实 Trace；无设备操作。
+- 需求：AT-SYS-005、AT-PARSE-001/002/004/007、AT-DB-*、AT-SEC-005。
+- 路径：`ThirdParty/TraceStreamer/`、拟新增 Windows build/verify 脚本；
+  `docs/TRACE_STREAMER.md`、`THIRD_PARTY_NOTICES.md`、许可/fixture 检查。
+
+交付：
+
+1. 优先从当前 `447a0a49…`、同插件集合与适用补丁构建 PE x64 parser；核对 upstream
+   Windows 脚本真实入口，不依据未下载的 release ZIP 宣称可用。
+2. 锁定 source/toolchain/dependency/patch/recipe；明确全部 DLL 依赖和安装资源。
+   unsigned 重建字节与 signed 最终 identity 分开记录。
+3. 两个 clean build 的可重复性记录；若 bytes 受可解释构建元数据影响，修构建或明确
+   未通过，不削弱现有 reproducibility 要求。
+4. Windows manifest、license inventory、下载 asset 校验和 parser 语义比对结果。
+
+验收：
+
+- 三份 small + medium 的真实 `-e -nm` 产物；large 若缺失列为发布输入，020 仍需补齐。
+- 与 macOS 同 source 的 required schema、时间、身份、quality、查询语义相符；
+  不要求两 OS 的 executable/DB hash 相同。
+- 空格/Unicode 路径、输出 sidecar、插件覆盖、损坏输入和 DLL 缺失均有实测。
+- manifest drift、hash mismatch、缺 license 拒绝；产物 binary 不直接提交 Git。
+- 若需上游升级，交付明确 delta 与两端 re-pin 方案；不能静默用另一版本冒充 parity。
+
+## 6. AT-RUST-004 — 文件、目录、权限、lease 与发布端口
+
+- 状态：planned；开工依赖：002；完成依赖：001、002。
+- 平台/输入：macOS APFS、Windows NTFS native tests；无设备。
+- 需求：AT-SEC-001/002/007、AT-PARSE-008、AT-CACHE-003/005/006。
+- 路径：`rust/crates/arktrace-platform/`；host identity/lock/promotion 测试。
+
+交付：
+
+1. held file/directory abstraction、identity/digest、受限路径遍历、bounded read/copy。
+2. 私有根创建与权限校验、共享/独占 lease、同卷发布、隔离、回收和持久化原语。
+3. Mac device/inode 与 Windows volume/file ID 的真实身份检查；可重试错误分类与
+   bounded 重试策略，不用无限 sleep 等锁或共享访问解除。
+4. cache 和 source 的不同链接规则：显式原始输入可解析一次，内部/工具路径不可逃逸。
+
+验收：
+
+- 路径/祖先替换、硬链接、symlink/junction/reparse、非私有目录、文件变更、磁盘满、
+  Unicode/大小写/长路径、打开 handle 时 rename/delete 的原生负例。
+- 多进程 lease 排他，shared reader 不被 purge 删除；同卷与跨卷发布行为明确。
+- crash 在发布前/后不会暴露半成品，恢复只处理自己能证明身份的残留。
+- DACL/mode 检查不会擅自修现有用户目录权限，raw bytes 不变。
+
+## 7. AT-RUST-005 — 子进程、签名、取消与输出收取端口
+
+- 状态：planned；开工依赖：002；完成依赖：004。
+- 平台/输入：两个原生主机、可控 process fixtures、开发签名样本；无设备。
+- 需求：AT-PARSE-002/004/009、AT-SEC-005/006、CLI 取消/cleanup 契约。
+- 路径：`arktrace-platform` process/trust/clock；对应 native tests。
+
+交付：
+
+1. verified executable + argument array、允许的 environment、bounded stdout/stderr/sidecar。
+2. macOS process group 与 Windows Job Object、单调 deadline、取消、drain、reap。
+3. parent death、grandchild、继承 handle、exec/launch race 的明确生命周期。
+4. Developer ID/Authenticode 验证端口与 typed trust verdict，开发/生产 pin 隔离。
+
+验收：
+
+- quoting 特殊字符、空参数、Unicode path 不经 shell；Windows lpApplicationName 与 argv
+  正确，CWD/PATH/DLL search 不能替换已核验的 parser。
+- 超量 stdout/stderr、child 退出但管道仍开、启动失败、取消每个窗口、进程树强停，
+  bounded wait 后无 child/handle 泄漏；本身崩溃的残留策略经测试。
+- tool 在核验和启动间被替换必须拒绝；签名无效/错误 publisher/资源漂移均不得执行。
+- 第一轮取消清理后返回，cleanup failure 不被 `CANCELLED` 覆盖。
+
+## 8. AT-RUST-006 — 真实 parser 到 Ready DB 的纵向切片
+
+- 状态：planned；开工依赖：001、002；完成依赖：004、005；Windows 正向另需 003。
+- 平台/输入：先 macOS pinned parser，Windows 随 003 接上；真实 fixture，无设备。
+- 需求：AT-PARSE-*、AT-DB-001～006/009/010、AT-SEC-001/003。
+- 路径：`arktrace-parser`、`arktrace-store` schema/staging；移植参考
+  `TraceStreamerProcessParser`、`TraceDatabaseStagingPreparer`、`TraceSchemaAdapter`。
+
+交付：
+
+1. fixed parser identity、source/tool snapshot、`-e -nm`、owned partial paths。
+2. SQLite integrity、schema introspection、required/optional capabilities、range/relationship
+   validation、index version 3 基线及其真实 metadata。
+3. 私有 transaction 和 Ready 原子发布；`inspect --no-cache` 所需 metadata 可返回。
+4. 精确错误阶段、质量事实、provenance 与 open/parse/index 进度。
+
+验收：
+
+- 三份 small 在两端真实解析并与 oracle 比较；原文件 digest 不变。
+- exit 0 + 无 DB、空 DB、坏 schema/range、额外合法表、坏关联、输出链接均正确拒绝/分类。
+- 每个发布窗口的取消/崩溃注入；零共享 partial，no-cache close 后清理完成。
+- 内层/外层 tool identity、SQLite compile options 与 actual parser bytes 进入记录。
+
+## 9. AT-RUST-007 — Typed 查询、目录、搜索和 Store 全量迁移
+
+- 状态：planned；开工依赖：001、002；完成依赖：006。
+- 平台/输入：两个原生主机、真实 DB 与异常 schema corpus；无设备。
+- 需求：AT-QUERY-*、AT-DB-007/008、AT-TIME-*、AT-ID-*、AT-PERF-003/004。
+- 路径：`arktrace-store`、`arktrace-contract` repository trait；对应 corpus。
+
+交付：
+
+1. process/thread/CPU/state/slice/counter/frame/argument、density、search、event detail 和
+   邻接导航的全部现有查询；含 `process_measure` 与 `measure` 身份区别。
+2. 参数化 SQL、稳定排序、limit+1、range clipping、capability、typed quality。
+3. SQLite connection 单 worker owner、progress handler/interrupt、受限 read pool；
+   不把一条可变连接随意跨线程共享。
+4. 字符串匹配/Unicode、无效值、整数/浮点/NULL 的实际跨平台语义。
+
+验收：
+
+- 所有公开 query family 至少一条真实正向及适用失败/截断/空结果；结果排序与 oracle 一致。
+- Int64 overflow、instant/open-ended、PID/TID reuse、坏字符、NULL、缺可选表、边界 range。
+- cancel 正在运行 SQL、不误 interrupt 下一请求；close 后无 connection/statement 泄漏。
+- 大 Trace/窄视口不全表装载；query plan/索引被实际使用；unsupported 不伪装为零。
+
+## 10. AT-RUST-008 — Session、cache、lease 与标注安全迁移
+
+- 状态：planned；开工依赖：001、002；完成依赖：004、006、007。
+- 平台/输入：APFS/NTFS、多进程测试；无设备。
+- 需求：AT-CACHE-*、AT-APP-004、AT-PARSE-006/008/009、设计 §6/9。
+- 路径：`arktrace-engine`；cache/migration fixtures；Swift cache/view-state 来源录制。
+
+交付：
+
+1. Session 状态、RequestId、预算、cancel/drain/close、独立文档和 generation。
+2. content-addressed cache key、metadata 严格 reader、hit validation、同 key 单 builder、
+   active shared lease、exclusive mutation、corrupt quarantine/最多重建一次、LRU/purge。
+3. 产品配置固定 roots；开发期新 namespace；跨产品无隐式共享或互相清理。
+4. 只读旧格式导入：flags/marks/favorites 原 bytes 备份、digest 记录、幂等导入、
+   多 parser entry 冲突与 unmatched identity 保留；独立数据迁移测试。
+
+验收：
+
+- App/CLI 多进程同开、构建/读取/purge 竞争、异常 owner marker、未知 metadata key、
+  crash 断点、打开后身份变化、低磁盘和重启恢复。
+- close 一个窗口不影响另一 Session；取消后 lease/DB/staging 都完成清理。
+- 旧标注迁移后重新打开能恢复；半写、损坏、版本未知、同 trace 多份冲突不会被覆盖删除。
+- 回滚前的旧 root 不变；新旧进程不能写同 namespace；原始 Trace 从不被 purge。
+
+## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
+
+- 状态：planned；开工依赖：001、002；完成依赖：007。
+- 平台/输入：跨平台纯计算、真实 Store；无设备。
+- 需求：AT-AN-*、Agent query/context/analysis 规格、AT-ERR-*、AT-PERF-005/006。
+- 路径：`arktrace-analysis`、contract machine validation；对应 Swift analysis oracle。
+
+交付：
+
+1. summary、context 与 cpu/scheduling/slices/range/hot-intervals 全部公式和 section budgets。
+2. exact filters、normalized range、global row/event/output bounds、固定优先级截断。
+3. scheduling 的可证明关系、不足时 unsupported；百分位/浮点 rounding 的明确实现。
+4. 统一 machine-safe quality 转换：丢弃 message，校验闭集 category/scope/count，
+   同时保留合法 warnings；供 CLI、offline inspection、SDK 共同使用。
+
+验收：
+
+- 固定真实 Trace/request 的 canonical result 确定；section returnedCount、summary、
+  sampled/truncated facts 与实数组相符。
+- warnings 带自由文本时仍能返回结构化报告；message 中的路径不会泄漏；
+  unclassified/未知 scope/负 count 仍拒绝。
+- 无 scheduling 证据、空 range、overflow、并发取消及预算边界正确。
+- 更换语言不改变分析结论；有意修 bug 的差异有独立向量，不扩大 normalization 范围。
+
+## 12. AT-RUST-010 — Rust CLI 完整替换
+
+- 状态：planned；开工依赖：001、002；完成依赖：005–009；Windows 加 003。
+- 平台/输入：两端 CLI、真实 parser/resources；无设备。
+- 需求：AT-CLI-*、AT-ERR-*、AT-SEC-*、[CLI.md](CLI.md)。
+- 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。
+
+交付：
+
+1. 先交付真实 `inspect --no-cache` 子集，再完成九命令；阶段性 help 不宣传未实现命令。
+2. global/command options、错误优先级、help/version、human escaping、JSON/pretty、exit 0/2–9。
+3. invocation-wide deadline、stdout 一次完整提交、combined output budget、信号与 cleanup。
+4. `doctor --self-test`、`licenses` 与 installed resource locator，不依赖构建机器的绝对路径。
+
+验收：
+
+- 九命令各自可达的 success/empty/truncated/error；不要给不支持这些状态的 licenses 造假。
+- duplicate/unknown/missing flag、`--`、特殊路径、min output、partial write/pipe close、
+  timeout 与首次 Ctrl+C/SIGINT、二次强停都被精确分类。
+- 更名/移走 build tree 后，candidate resources 仍可读取；缺资源/漂移时 fail closed。
+- ArkDeck 使用的 summary/context/analyze/inspect envelope 保持 closed contract，
+  actual engine/parser identity 正确，process stderr 不含 raw parser log/用户路径。
+
+## 13. AT-RUST-011 — 共享 Viewer 投影与交互语义
+
+- 状态：planned；开工依赖：001、002；完成依赖：007、009。
+- 平台/输入：纯 Rust + 真实 DB；无设备、无 GUI 也可验证语义。
+- 需求：AT-APP-004～007、AT-RENDER-002～008、AT-PERF-004/008/009。
+- 路径：`arktrace-viewer`、共享 presentation/action/snapshot vectors；参考现有 Rendering。
+
+交付：
+
+1. track tree/group/filter/expanded/favorite、viewport/depth layout、detail/density/LOD。
+2. Int64 时间到局部坐标、真实 EventKey 命中、range/instant、重叠一像素事件选择。
+3. shared color slot/state rules、label facts、search result navigation、event stepping、
+   annotation 的时间/身份规则；字体与物理绘制留在平台。
+4. request generation、overscan/density cache、immutable batched snapshot 与 hover overlay。
+
+验收：
+
+- 与 Swift 的 layout/hit-test/zoom anchor/selection/配色向量对齐；允许平台 raster 差异。
+- 视口 20k primitive 上限、32 depth-row 行为、极大时间精度、offscreen lanes 不 eager query。
+- 旧 generation 不覆盖新结果，hover 不发 SQL、不重新生成基础颜色批次。
+- 搜索/详情/分析仍指向同一个真实事件，density 聚合不伪造可选择 EventKey。
+
+## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
+
+- 状态：planned；开工依赖：001、002；完成依赖：008、009、011。
+- 平台/输入：Swift/C# native smoke、真实引擎、多线程压力；无设备。
+- 需求：设计 §7；AT-SYS-002/006、AT-PERF-001/009。
+- 路径：`arktrace-ffi`、拟新增 `bindings/`、Swift wrappers、Windows SDK、API baseline。
+
+交付：
+
+1. ABI identity、typed operation schema、生成 header/Swift/C# bindings，opaque handle registry。
+2. 长任务异步 submit/poll/result/release/cancel/close；有界 event queue，背景 async wrappers。
+3. JSON 冷路径和 snapshot array/string table 热路径；明确 memory ownership 与 result lifetime。
+4. FFI/worker panic containment、session poison、Swift owner/C# SafeHandle；实际 unwind build。
+5. 保留已有消费者需要的公开 Swift API 或同车完成适配；不给每个 UI 自写语义的接口。
+
+验收：
+
+- 大 Int64 无损 roundtrip；错误 ABI/digest、失效/跨 Engine handle、重复 release、close 与
+  result acquire 竞争、输入 buffer 提前释放、多个窗口生命周期。
+- valid buffer 范围内 fuzz；null/length overflow 等有界拒绝；不声称能安全处理任意悬空指针。
+- worker 与 exported function 注入 panic 不跨 ABI unwind；native/OOM fault 限制有记录。
+- UI 主线程不跑 parse/query/等待；1000 次 open/query/cancel/close 后资源返回稳定范围，
+  用 baseline 与计数证明，不用固定 sleep 掩盖竞态。
+- 包外 `test_api_baseline.sh` 通过，并提供 C# 消费程序集的正向验证。
+
+## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
+
+- 状态：planned；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。
+- 平台/输入：macOS 26+ arm64 图形会话、真实 medium/large；Capture 此时可保留 Swift。
+- 需求：AT-APP-*、AT-RENDER-*；现有功能不回退。
+- 路径：`Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`ArkTraceRendering/`、
+  Swift compatibility targets、Xcode project 与原生 tests。
+
+交付：
+
+1. TraceDocumentController 的生命周期/查询/分析/cache/标注改为 Rust；
+   Observation、focus、bookmark、picker、window/menu/shortcut 保持原生。
+2. CoreGraphics 消费 shared snapshot；移除 adapter 中重复 SQL、cache 写和计算。
+3. file open/drag-drop/Recents/reload、多窗口、search/process filter、range Inspector、
+   flags/marks/favorites、cache maintenance、licenses 和现有错误处理闭环。
+4. 捕获完成文件经新 Engine 打开；Capture 不因替换离线内核而失效。
+
+验收：
+
+- SwiftPM targeted tests + API baseline + App build，实际 medium/large 打开和交互。
+- 键盘、VoiceOver、Reduce Motion、暗/亮模式、最小窗口、焦点恢复；语义 ID 与 screenshots。
+- 同 source 旧标注导入成功；reload/快速开关/取消/两窗口关闭不串结果。
+- Instruments/等价实测证明主线程无整阶段 IO，绘制与 hit-test 一致；完整 SLO 由 019/020 验收。
+
+## 16. AT-RUST-014 — Windows 原生 Viewer
+
+- 状态：planned；开工依赖：002、012 的 SDK 接口；完成依赖：003、008、011、012。
+- 平台/输入：Windows 11 x64 native 图形会话、真实 parser/Trace；无设备要求。
+- 需求：设计 §11 的 UI parity、AT-PERF-*、对应 AT-APP/RENDER 语义。
+- 路径：拟新增 `windows/App`、`windows/SDK`、`windows/Tests`、XAML/theme/localization。
+
+交付：
+
+1. 固定 .NET/Windows App SDK/renderer 工具链，原生文件关联/picker/drag-drop/Recents。
+2. WinUI shell、Win2D/Direct2D canvas，消费同一 Rust snapshot；不为事件生成逐条 XAML View。
+3. 时间线/目录/search/Inspector/标注/收藏/cache/license/error 与 macOS 行为对应。
+4. 原生快捷键、DPI、主题/高对比度、Narrator、UIA 稳定 ID；Capture 入口随 015 接通。
+
+验收：
+
+- SDK 自动化和 App build；真实 parser → 文件 → timeline → selection/search → analysis。
+- 同一 shared vector 的动作/结果/selected EventKey/状态与 macOS 对等。
+- Unicode/空格路径、多个显示器 DPI、键盘全流程、Narrator、200% 文本缩放和高对比度。
+- 引擎不可用时显示可解释错误；scripted engine 仅用于开发测试，不作为真实链路验收。
+
+## 17. AT-RUST-015 — 独立 GUI Capture 共享实现
+
+- 状态：planned；开工依赖：002、004、005；完成依赖：004、005、013、014。
+- 平台/输入：两端 native host；软件阶段 stand-in；真实验收需要 SDK HDC 与板卡和明确授权。
+- 需求：AT-SYS-003、AT-APP-014～019、[CAPTURE.md](CAPTURE.md)。
+- 路径：独立 `arktrace-capture`、`arktrace-capture-ffi`、两端 Capture UI adapter；
+  不向离线 CLI/engine 添加 Capture feature。
+
+交付：
+
+1. Capture 独立类型/预设/状态机/固定 argv，GUI-only bindings 和明确 dependency graph。
+2. 两端 SDK 发现和用户选择、bounded version/discovery、5–300 s 与 buffer 边界。
+3. UUID-owned remote/local staging、接收校验、原子保存、取消、cleanup 和 stale result 防护。
+4. macOS 旧 Swift Capture 语义退出，窗口/Observation 保留；Windows 入口接通。
+
+验收：
+
+- stand-in 捕获每一步参数、拒绝非法 device/config/path、进程树取消、半文件、保存失败与清理失败。
+- 所有 host-only 产物不链接 capture，不含设备入口；ArkDeck analyzer 无法用该 SDK 启动 HDC。
+- 两端通过明确 GUI 操作各完成一次真实 capture→validate→save→open，含取消与可恢复失败。
+- 设备验证记录 tool/target/firmware/Trace hash，缺板卡只留下真实验收子项，不把 stand-in 当真机。
+
+## 18. AT-RUST-016 — 发行格式、签名与可部署产物
+
+- 状态：planned；开工依赖：002；Windows recipe 来自 003。
+- 完成依赖：CLI/SDK 需要 003、005、010、012；对应 GUI 包加 013–015。
+- 平台/输入：两端构建/开发证书；生产签名/notary/publisher 是 release 输入。
+- 需求：AT-SEC-*、现行 CLI/App distribution 边界、设计 §10。
+- 路径：`scripts/` 发行/验证入口、`contracts/distribution/`、SDK artifact metadata、
+  `docs/CLI_DISTRIBUTION.md`、`docs/APP_DISTRIBUTION.md`、license inventory。
+
+交付：
+
+1. macOS Rust CLI 的现有 `.app` 布局、signed parser、新 manifest；静态 SDK 与 App 包。
+2. Windows headless ZIP、固定 relative resource/DLL layout、GUI MSIX + unpackaged candidate。
+3. 版本化跨平台 manifest schema、平台 tree digest、trust profile、actual provenance，
+   下游可消费的 schema/corpus/拒绝向量；不让旧 Apple-only v1 接受未知字段。
+4. 锁定所有新增 Rust/native/renderer 许可，SBOM/来源清单与签名顺序；离线自检。
+5. versioned install、干净主机 smoke、更新/卸载/回滚脚本，用户数据不随卸载删除。
+
+验收：
+
+- 移走所有 build/source tree、清理开发 PATH 后，CLI doctor/licenses/真实 inspect 仍成功。
+- 错 signer/平台/架构、修改 DLL/parser/resource/manifest、逃逸路径/大小写冲突均拒绝。
+- unsigned reproducibility 与 signed identity 分开，最终 ZIP/MSIX/APP 的 bytes 与 manifest 相符。
+- 开发包可先完成独立子项；只有生产签名、安装与卸载实测完成才称对应 release 包完成。
+- 不把发布凭据写入仓库、日志或 evidence；缺 signer 留下具体输入项，继续其余打包工作。
+
+## 19. AT-RUST-017 — ArkDeck macOS 双消费线接入
+
+- 状态：planned；开工依赖：010/012 接口可用；完成依赖：010、012、013、016 macOS 产物。
+- 平台/输入：macOS、固定 ArkDeck consumer checkout/开发或正式发行包；离线无板卡。
+- 责任边界：本仓交付兼容 SDK/CLI/corpus；下游 ArkDeck 改动独立 PR，遵循其 review 与验证。
+- 路径：本仓 SDK/distribution/API baseline/integration 文档；下游 adapter、package pin、
+  analyzer loader、inspect handler、控制契约及对应 tests。
+
+交付：
+
+1. ArkDeck App 编译/运行 Rust-backed Swift API，保留产品配置、容器权限、recent key 与 parser policy。
+2. daemon 装载新 signed CLI，summary/analyze 正向可用；补齐 trace.inspect handler 与质量转换。
+3. 下游 `resourceNotFound`、schema/generated/corpus 同步，不把默认 unavailable 当成功实现。
+4. cache root/lease/purge owner 对齐；证明 daemon 维护不会删除 App 的 active/new-format entry。
+5. 双边 source/distribution compatibility 记录和已发布安装/回滚步骤。
+
+验收：
+
+- 真实 Trace 经 ArkDeck 合法 Artifact 路径产生 inspect/summary/analysis；来源 digest/bytes
+  与派生结果一致；wrong contract/parser/hash 仍拒绝。
+- App 打开同文件进行 timeline/search/analysis，API baseline 和受影响 App/adapter tests 通过。
+- 旧安装/新 SDK、错误 descriptor、活跃 cache purge、发行升级/回滚和缺 Artifact 负例。
+- 记录下游 PR/CI/consumer revision；本仓测试不代替下游实际消费结果。
+
+## 20. AT-RUST-018 — ArkDeck Windows 离线接入
+
+- 状态：planned；开工依赖：010、016 的 Windows schema；完成依赖：003、010、016 Windows CLI。
+- 平台/输入：Windows 11 x64、真实发行包与 ArkDeck consumer；离线不依赖 HDC 注册。
+- 责任边界：本仓交付 Windows engine/manifest/corpus；ArkDeck 完成 Windows loader/composition。
+- 路径：本仓 integration 文档与消费 fixture；下游 profile/trust/doctor/analyzer runner/
+  Windows composition/trace inspection/control schemas/WinUI 消费 tests。
+
+交付：
+
+1. ArkDeck 读取 Windows 发行契约，验证 publisher/files/tree/DLL/provenance 并运行 doctor。
+2. 注册两个真实 analyzer，接通 job runner；去掉“无 provider”的缺省只有在真实组成完成时。
+3. `trace.inspect` 成功返回 metadata/quality，CLI/WinUI 历史入口可展示；错误映射一致。
+4. 对合法持有的已有 raw Artifact，验证 trace export 和 offline analyze 的完整成功链。
+5. 列明 HDC/USB/设备采集仍由 ArkDeck CHG-2026-078/对应 Runtime 任务处理，不改变其准入。
+
+验收：
+
+- 原生 Windows 实际完成 load→doctor→inspect/summary/analyze→publish/read/export。
+- `operation.list` 显示真实 available；缺依赖/坏签名/坏 manifest 回到准确 unavailable。
+- actual Windows parser identity 可被 validator 接受但不同 identity 不可冒充；输出与 macOS
+  在声明的 T0/T1 范围内相符。
+- 缺 Job/Artifact、敏感导出未授权、cancel、预算和源 hash 变化均有负例。
+- 记录下游 PR/CI 与实际产物；Windows fixture refusal 测试不能代替成功路径。
+
+## 21. AT-RUST-019 — 差分、故障注入、性能和资源验证
+
+- 状态：planned；开工/完成依赖：001、002；各产品能力落地后持续加入对应 suite。
+- 平台/输入：两端 native runner、macOS/Windows 图形会话、真实 small/medium/large；
+  本任务不执行设备采集。
+- 需求：AT-PERF-*、AT-SEC-*、设计 §13；每能力的主要失败路径。
+- 路径：`rust/tests/`、`rust/benches/` 或统一 benchmark runner、native UI tests、
+  `scripts/` 与 CI planner、`docs/migration-runs/`。
+
+交付：
+
+1. 同一 corpus 分别驱动 Swift reference、Rust CLI、SDK、两端 native projections；
+   comparator 对 T0/T1/T2 精确分类，差异有字段路径和最小复现。
+2. child/FS/cache publication/FFI/query 的可控 failpoint；以事件屏障替代时长猜测。
+3. benchmark 含 cold/warm、parse/index/query/context/analyze/draw、FFI copy、whole-product
+   memory/CPU/FD/handles；原始样本、环境与版本随结果保存。
+4. bounded property/fuzz、长期 open/query/cancel/close soak；固定时间/内存预算、seed/
+   toolchain，失败种子进入回归。不以“fuzz 没跑到结束”算通过。
+5. CI incremental lanes、native tests、release-required suites 与 skip audit；每个 gate
+   指向真实命令和产物，benchmark 机器不匹配时报告 not measured。
+
+验收：
+
+- 差分 harness 能检出注入的字段/顺序/quality/provenance 差异，不泛化忽略错误。
+- 每个已完成能力有 fault scenario，失败时所有 owned resources 可核对；没有 silent retry。
+- 相同硬件同 workload 比较迁移前后；现有 SLO 全部有测量项，缺 fixture 明确列出。
+- 本任务 done 表示验证设施可复现且当前接入项通过；**最终所有能力的性能与真实发布结果
+  仍由 020 在最终候选上重跑**，不要求此任务在功能未实现时假造结果。
+
+## 22. AT-RUST-020 — 最终验收、切换、回滚与旧实现清退
+
+- 状态：planned；开工依赖：已可验收的能力可先预演；完成依赖：003–019 的适用完整结果。
+- 平台/输入：两端干净主机/生产签名/图形会话、reviewed large、真实 Capture、下游消费结果。
+- 需求：设计 §1/12 的完整完成条件；所有未变 AT-* 要求。
+- 路径：Swift 旧 engine/CLI targets 与引用、package/Xcode/CI/release scripts、规范/设计/
+  README/API docs；保留 native UI、必要 SDK wrappers、冻结 oracle 和只读数据迁移器。
+
+交付：
+
+1. 候选 preflight：版本/签名/ABI/parser、请求 drain、active leases、磁盘空间、用户数据备份；
+   安装新 versioned 产物并验证 CLI、GUI、ArkDeck 两条消费线。
+2. 标注/cache 迁移、中途退出、失败保持旧安装、升级后回滚的实操记录。
+3. 删除无消费者的 Swift Parser/Store/Runtime/Analysis/CLI/Capture 算法、临时 fallback 与
+   build-only recorder；保留原生 Swift rendering/Observation 和已承诺的 Rust-backed API。
+4. SPECIFICATION 将实现语言与 Windows 平台范围按真实结果更新；旧 Phase 状态保持历史。
+   CLI/App distribution、integration、README、AGENTS 的构建入口与最小验证命令同步。
+5. 最终 native CI、完整契约和性能、清洁安装、签名、真实 GUI Capture 与下游真实集成记录。
+
+验收清单：
+
+- [ ] macOS、Windows 九命令与完整 Viewer 都调用同一个 Rust 语义内核。
+- [ ] 原始 Trace digest 不变；flags/marks/favorites 正向迁移与回滚备份已验证。
+- [ ] 现有 macOS 公开 API/快捷键/无障碍/多窗口/Capture 未回退。
+- [ ] Windows offline/Viewer/Capture 分别有 native 成功记录，不以 unavailable 填补。
+- [ ] 两端 install→doctor→parse→query/analyze→close，以及 upgrade/uninstall/rollback 成功。
+- [ ] ArkDeck macOS SDK/CLI、Windows CLI/Runtime 的消费 PR 与最终 revision 可核查。
+- [ ] cache maintenance 的跨进程 lease/owner 协同成立；无新旧 writer 同 namespace。
+- [ ] 当前候选的 medium/large 性能、内存/handle 稳定性和取消/崩溃路径通过。
+- [ ] 依赖图和源搜索证明无第二份活跃的 Swift 内核；非生产冻结 oracle 不参与运行。
+- [ ] 文档中的支持声明只覆盖实际验证的版本/平台；所有实际缺口明确标记。
+
+## 23. 第一轮实施与任务记录
+
+第一轮应直接执行 001 的行为/API 清单和基线、002 的两端 workspace/CI、003 的 Windows
+parser 构建验证。这三项相互不设状态锁；只有实际接口依赖才决定后续任务顺序。
+之后优先完成 macOS 真实 `inspect --no-cache`，尽早有可执行产物验证方案。
+
+每个任务在 `docs/migration-runs/AT-RUST-NNN-<date>.md`（拟新增目录）记录：
+
+```text
+任务 / 本次交付范围：
+源码 revision、工作树 diff、OS/arch/toolchain：
+真实 parser/fixture/发行 identity：
+可观察结果与相对 oracle 的允许差异：
+
+Local targeted checks
+- 实际命令、exit、日志路径；注明 native / fixture / real parser / device。
+- 未运行项与具体原因，不把 0 tests 或 skip 算成功。
+
+CI
+- 本仓及适用下游 PR、head、run id、结论；未触发则写未触发。
+
+剩余工作
+- 仅列真实未完成项、外部输入和受影响能力；无则写任务完成。
+```
+
+记录随实现提交，不为了回填状态单独制造任务或改写已签名历史 evidence。
+缺某个发布输入时继续可独立推进的软件，最终 020 保留其验收缺口。

@@ -1,5 +1,10 @@
 # ArkTrace 设计文档
 
+2026-10-02 起的目标架构与实施顺序见
+[共享 Rust 内核迁移设计](RUST_CORE_MIGRATION_DESIGN.md) 和
+[迁移任务](RUST_CORE_MIGRATION_TASKS.md)。本文件保留当前 Swift 实现的设计依据；
+迁移时按实际交付同步相关章节，不把目标架构当作已实现状态。
+
 > 用途：架构与设计依据；Agent 执行入口见 [AGENTS.md](../AGENTS.md)
 >
 > 初始设计版本：0.1b。初稿日期：2026-08-12；下列日期、pin 与实现注记保留各次变更的历史语境。
