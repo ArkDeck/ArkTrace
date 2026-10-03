@@ -1,0 +1,28 @@
+[package]
+name = "arktrace-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "arktrace-migration-smoke"
+path = "src/main.rs"
+
+[[bin]]
+name = "arktrace"
+path = "src/entry.rs"
+
+[features]
+development-resources = []
+
+[dependencies]
+arktrace-engine.workspace = true
+arktrace-contract.workspace = true
+arktrace-platform.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

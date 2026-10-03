@@ -13,12 +13,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "arktrace-cli"
+version = "0.1.0"
+dependencies = [
+ "arktrace-contract",
+ "arktrace-engine",
+ "arktrace-platform",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "arktrace-contract"
 version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
  "sha2",
+]
+
+[[package]]
+name = "arktrace-engine"
+version = "0.1.0"
+dependencies = [
+ "arktrace-analysis",
+ "arktrace-contract",
+ "arktrace-platform",
+ "arktrace-store",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
