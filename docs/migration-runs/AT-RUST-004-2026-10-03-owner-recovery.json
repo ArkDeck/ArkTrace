@@ -1,0 +1,583 @@
+{
+  "schemaVersion": "arktrace.migration-owner-recovery/1",
+  "recordedAtUtc": "2026-10-02T20:19:25.743410+00:00",
+  "localRunDate": "2026-10-03",
+  "baseCommit": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+  "goalStatus": "active",
+  "task004Status": "in-progress",
+  "macOSCrossPlatformAcceptance": false,
+  "toolchain": {
+    "rust": "1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "27.0 (27A266a)",
+    "macOS": "27.0 (26A428)",
+    "architecture": "arm64"
+  },
+  "sources": [
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 593,
+      "sha256": "57d31e7643599c9574ec308361d7b1d10278b9888399eaa15ba581de857c08ba"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 5225,
+      "sha256": "5405ca802ad1a41e1750657f33756bb22fc1047d34d10426b3fc9833c0356a09"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "byteCount": 87,
+      "sha256": "b206a08a9e3a50784fcedbd23b8ae0555f70bc6cb5da57bfcd1bb67ac6e56b55"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/Cargo.toml",
+      "byteCount": 894,
+      "sha256": "892f77ca56e5bfc3fa6207ccef9bd64d56aab621c5fe55d96ad49de321189234"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1641,
+      "sha256": "91bcce1fc1d0b37ae45d77b84dc9089536fb67cf241a5a7c1fd5e08b0e72ba02"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 1038,
+      "sha256": "3d909ae237980c1926d96ac332550da5d03ab5d9a541829c0ca73859103052c6"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 1489,
+      "sha256": "481817a7448ca87029caebea0f61892f8af0bda409c2590a6ecf8a5f56536386"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 38971,
+      "sha256": "1b88fbcde1c2dfa3fc2af1acbe40718701933bc828307871a2e464423efc27c3"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_directory.rs",
+      "byteCount": 12385,
+      "sha256": "70304e12594bcb89bea0d0186e2b5a892121f9c851c134c9cec98fd4f5cadcd5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+      "byteCount": 14979,
+      "sha256": "793c62086818f8d934b8db6cc6f2ad59caf51e1a0244858e49e88cd02c0156fd"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+      "byteCount": 39294,
+      "sha256": "9815981a7e6f5f6809db955aaa0c1df99bb19165a41ce6f721b7de12c946bfa8"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+      "byteCount": 9451,
+      "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+      "byteCount": 260,
+      "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+      "byteCount": 22663,
+      "sha256": "4fcfa32553ed8dc5f2b56612f19a8d1b5a0345000622b43243d0bf54449c3575"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+      "byteCount": 18963,
+      "sha256": "5746bfe40eb745787616ef1b99e0a93cb8355927ab2a7050409e31216a556b8e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+      "byteCount": 10264,
+      "sha256": "c4a168c34246b84d75188dc7f7f75ee136a1b01a09486f603dc1ae567fcb895e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+      "byteCount": 12075,
+      "sha256": "9f0e2228d79058082ba246b9313356dc2fa768aea2d9979a4f8bfe5ae1fe3d0a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+      "byteCount": 4936,
+      "sha256": "7ecc158fd794898350d7dbfd03b0e0672c6f3bd907e9db02b0f0f3b730613164"
+    },
+    {
+      "path": "scripts/test_macos_parser_process.py",
+      "byteCount": 6830,
+      "sha256": "938d1e4de32df7b4d8735cd665662c48d5136ccca22397ff0c3b5b2db8a83d9c"
+    },
+    {
+      "path": "scripts/test_macos_file_volumes.py",
+      "byteCount": 3971,
+      "sha256": "e2c73b6648d6966ae76a616090a1258e325a517232de39294976c2fc9b9504a0"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "byteCount": 27880,
+      "sha256": "b5029d55bb61605d5fe00dc78c3c6c686c76f2fa3560624fadede3e5da146bf6"
+    },
+    {
+      "path": "scripts/ci_plan.sh",
+      "byteCount": 5619,
+      "sha256": "dd9986eb1001b1a16759e11c7c0e1e6190768b8c7ed63b638c96a7718c68dae0"
+    },
+    {
+      "path": "scripts/test_ci_plan.sh",
+      "byteCount": 5524,
+      "sha256": "649c16d639e1aa2ce57901b08d02f85f1cac940ca985b8233eb6ce1fa76bb54c"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process_outputs.rs",
+      "byteCount": 11339,
+      "sha256": "1061f4620b18b452847d5759e62239c6811ac918de46645dcab882c069229381"
+    },
+    {
+      "path": "rust/README.md",
+      "byteCount": 6155,
+      "sha256": "1bedbf3effa8fa49a14f236fadcc3a4864b08f94e51441feaa49dec8470a2dd7"
+    },
+    {
+      "path": "docs/RUST_CORE_MIGRATION_DESIGN.md",
+      "byteCount": 64089,
+      "sha256": "7dd91c6040e95fcb57cb67a17027d0e43f1cf5378fd1c89539213cafe82b7e3c"
+    },
+    {
+      "path": "docs/RUST_CORE_MIGRATION_TASKS.md",
+      "byteCount": 51267,
+      "sha256": "f554d4d3bc8a296ec6eadac8318380d4357e98563cd3deb48465effd2e0a3dec"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_owner.rs",
+      "byteCount": 35457,
+      "sha256": "cd0113e30fff06c947ef3eff51a73cf5943ad3e6964b858bd9126e5aec2ae56a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_owners.rs",
+      "byteCount": 15548,
+      "sha256": "5557c7da1140539d337e484a06057a4b73c5bf9ed3be5a80bbda27930d00a550"
+    }
+  ],
+  "ownerProtocol": {
+    "formatVersion": 2,
+    "isolatedRustNamespaceOnly": true,
+    "compatibleWithLegacyFormat1": false,
+    "recordByteLimit": 4096,
+    "relativePathByteLimit": 1024,
+    "maximumTraversalEntries": 4096,
+    "maximumDepth": 8,
+    "ownerLease": "exclusive flock",
+    "states": [
+      "creating",
+      "session",
+      "building",
+      "ready",
+      "removing",
+      "removed"
+    ],
+    "dropPerformsIo": false,
+    "unknownOrInvalidEvidenceDeleted": false,
+    "publishedRecoveryRequiresEntryAuthority": true,
+    "rmdirBeforeTombstoneCrashProvenAsRemoved": false
+  },
+  "tests": {
+    "passed": 76,
+    "failed": 0,
+    "ignored": 0,
+    "warnings": 0,
+    "features": "all-features",
+    "groups": {
+      "contract": 4,
+      "platformUnit": 24,
+      "nativeFiles": 20,
+      "nativeOwners": 10,
+      "nativeProcess": 18
+    },
+    "names": [
+      "swift_time_contract_vectors",
+      "swift_quality_contract_vectors",
+      "machine_quality_is_closed_bounded_and_sorted",
+      "swift_cache_key_and_lease_protocol_vectors",
+      "macos::process::outputs::tests::live_watch_accepts_growth_but_rejects_excess_without_reading_bytes",
+      "macos::process::outputs::tests::ancestor_replacement_cannot_redirect_the_output_watch",
+      "macos::process::outputs::tests::observed_output_cannot_disappear_or_be_replaced_by_same_size_inode",
+      "macos::process::outputs::tests::rejects_links_directory_and_public_mode_without_changing_target",
+      "macos::owner::tests::failed_first_binding_preserves_creating_proof_and_never_infers_path_ownership",
+      "macos::owner::tests::cancellation_after_creating_record_before_mkdir_removes_only_owned_artifacts",
+      "macos::tests::cancellation_immediately_after_atomic_rename_rolls_back_owned_publication",
+      "macos::tests::cancellation_immediately_before_atomic_rename_publishes_nothing",
+      "macos::tests::cancellation_after_first_copy_chunk_removes_partial_output",
+      "macos::tests::directory_ancestor_replacement_at_rename_window_preserves_owned_candidate",
+      "macos::tests::directory_cancel_before_rename_publishes_nothing",
+      "macos::tests::cleanup_failure_takes_priority_over_copy_cancellation_without_deleting_replacement",
+      "macos::tests::directory_cancel_after_rename_restores_complete_identity_and_payloads",
+      "macos::owner::tests::failed_bound_creation_reclaims_relocated_identity_and_preserves_replacement",
+      "macos::tests::directory_replaced_publication_cleanup_failure_wins_over_cancellation",
+      "macos::tests::directory_rollback_collision_preserves_both_directories",
+      "tests::native_runner_matches_the_requested_host",
+      "macos::owner::tests::bound_creation_cancel_removes_directory_and_records_before_return",
+      "macos::tests::injected_enospc_after_partial_write_preserves_closed_failure_and_cleans_output",
+      "macos::tests::parent_replacement_at_publication_window_is_rejected_inside_critical_section",
+      "macos::tests::directory_payload_change_at_publication_windows_is_rejected",
+      "macos::tests::replaced_publication_is_preserved_and_cleanup_failure_is_not_hidden_by_cancel",
+      "macos::tests::input_mutation_during_copy_is_rejected_and_partial_output_removed",
+      "macos::tests::same_inode_same_size_content_mutation_after_rename_is_rejected_and_rolled_back",
+      "cancelled_expired_and_oversized_operations_leave_no_partial_file",
+      "detects_in_place_mutation_and_replaced_source",
+      "copies_unicode_source_to_verified_readonly_snapshot_without_mutating_input",
+      "owned_cleanup_preserves_replacement_and_only_removes_proven_identity",
+      "lease_wait_is_bounded_and_replaced_lease_is_rejected",
+      "accepts_deny_only_acl_and_rejects_allow_acl_on_private_file_and_lease",
+      "directory_promotion_never_overwrites_existing_file_directory_or_symlink",
+      "ancestor_replacement_prevents_publication_and_owned_deletion",
+      "held_files_directories_and_leases_are_not_inherited_by_exec",
+      "accepts_native_unicode_components_beyond_255_utf8_bytes",
+      "refuses_nonregular_objects_and_path_escape_without_blocking_on_fifo",
+      "rejects_existing_public_directory_and_writable_ancestor_without_chmod",
+      "rejects_acl_grants_even_when_mode_bits_are_private_and_preserves_acl",
+      "resolves_explicit_source_link_once_but_refuses_links_inside_storage",
+      "permits_raw_hard_links_and_refuses_private_file_or_lease_hard_links",
+      "publishes_exact_same_volume_identity_and_never_overwrites_existing_target",
+      "publishes_complete_sealed_directory_with_literal_unicode_payloads",
+      "sealed_directory_refuses_writable_links_and_nested_payloads_without_chmod",
+      "shared_readers_block_cross_process_purge_until_all_leases_close",
+      "sealed_directory_refuses_aggregate_excess_and_membership_changes",
+      "owner_moved_outside_recovery_root_retains_proof_and_never_deletes_escaped_bytes",
+      "published_owner_survives_generic_staging_recovery_and_needs_entry_authority",
+      "active_owner_blocks_recovery_then_stale_identity_is_reclaimed",
+      "cleanup_recurses_bounded_held_directories_and_never_follows_links",
+      "cleanup_depth_limit_preserves_identity_record_for_resuming",
+      "stale_relocated_owner_is_found_and_replacement_path_is_preserved",
+      "sigkill_releases_real_owner_lease_and_next_process_recovers_staging",
+      "sigkill_at_creating_mkdir_and_bound_windows_preserves_or_reclaims_exact_proof",
+      "malformed_unknown_and_escaped_evidence_is_preserved_without_target_mutation",
+      "sigkill_at_cleanup_windows_recovers_or_retains_unresolved_identity_without_guessing",
+      "adhoc_development_artifact_cannot_satisfy_production_identity_or_bad_pin",
+      "cancellation_kills_term_ignoring_child_and_grandchild_before_returning",
+      "output_file_cap_kills_term_ignoring_writer_tree_before_return",
+      "preserves_literal_arguments_unicode_empty_value_cwd_and_minimal_environment",
+      "host_sigkill_closes_control_pipe_and_independently_reclaims_process_tree",
+      "host_sigkill_during_suspended_bootstrap_terminates_helper_before_entry",
+      "preserves_nonzero_exit_without_inventing_success",
+      "rejects_invalid_output_declarations_and_existing_objects_before_launch",
+      "rejects_kernel_identity_mismatch_before_resuming_suspended_executable",
+      "rejects_corrupted_signature_even_when_development_digest_matches_bytes",
+      "deadline_kills_term_ignoring_process_tree",
+      "rejects_verified_tool_path_replacement_before_launch",
+      "rejects_pre_cancel_expired_budget_and_nul_argument",
+      "reaps_exit_and_kills_descendants_with_inherited_or_closed_pipes",
+      "stops_stdout_and_stderr_flood_at_separate_caps",
+      "descendants_cannot_hide_output_excess_in_cleanup_after_leader_exit",
+      "transports_full_output_cap_without_replaying_partial_protocol_writes",
+      "short_lived_output_obeys_exact_cap_and_reports_absent_optional_files"
+    ],
+    "logSHA256": "16696a2a3b89e7e67c9fbe3bdb78a842908d919c4ebfe9fcfb9e0637814f2d83"
+  },
+  "nativeCrashWindows": {
+    "process": "actual opt-in fixture process SIGKILL",
+    "activeLeaseVerifiedBeforeEachKill": true,
+    "windows": [
+      {
+        "phase": "creation",
+        "point": 0,
+        "at": "creating record durable, before mkdir",
+        "outcome": "creatingUnbound",
+        "directoryPreserved": false,
+        "recordPreserved": true
+      },
+      {
+        "phase": "creation",
+        "point": 1,
+        "at": "mkdir complete, before first FD binding",
+        "outcome": "creatingUnbound",
+        "directoryPreserved": true,
+        "recordPreserved": true
+      },
+      {
+        "phase": "creation",
+        "point": 2,
+        "at": "bound record durable",
+        "outcome": "removed",
+        "ownerArtifactsRemaining": 0
+      },
+      {
+        "phase": "cleanup",
+        "point": 0,
+        "at": "quarantine durable, before removing record",
+        "outcome": "removed",
+        "ownerArtifactsRemaining": 0
+      },
+      {
+        "phase": "cleanup",
+        "point": 1,
+        "at": "removing record durable",
+        "outcome": "removed",
+        "ownerArtifactsRemaining": 0
+      },
+      {
+        "phase": "cleanup",
+        "point": 2,
+        "at": "child subtree removed, before top-level rmdir",
+        "outcome": "removed",
+        "ownerArtifactsRemaining": 0
+      },
+      {
+        "phase": "cleanup",
+        "point": 3,
+        "at": "top-level rmdir durable, before removed tombstone",
+        "outcome": "identityUnresolved",
+        "recordPreserved": true
+      },
+      {
+        "phase": "cleanup",
+        "point": 4,
+        "at": "removed tombstone durable, before owner artifacts removed",
+        "outcome": "removed",
+        "ownerArtifactsRemaining": 0
+      }
+    ],
+    "hooksIncludedInDefaultProductBuild": false
+  },
+  "clippy": {
+    "passed": true,
+    "allTargets": true,
+    "allFeatures": true,
+    "warnings": 0,
+    "logSHA256": "c5e32a33c950f06a0d2859f2d216385908ea4c89ee66a3bc043bf0aa5429227f"
+  },
+  "format": {
+    "passed": true
+  },
+  "workspaceVerifier": {
+    "passed": true,
+    "crates": 4,
+    "frozenLicenses": 21
+  },
+  "contractsVerifier": {
+    "passed": true,
+    "machineFixtures": 34,
+    "closedScopes": 56
+  },
+  "ciPlanner": {
+    "passed": true,
+    "cases": 29
+  },
+  "nativeParserProbe": {
+    "budgetFailures": [
+      {
+        "databaseLimitBytes": 1,
+        "failure": {
+          "OutputFileLimitExceeded": {
+            "index": 0
+          }
+        },
+        "fixture": "zlib.htrace",
+        "kind": "database",
+        "published": false,
+        "rawBytesUnchanged": true,
+        "sessionDirectory": "stage/session-31a70016-2225-48fb-9284-5e9bcdc357a3",
+        "sessionOwnerIdentifier": "session-31a70016-2225-48fb-9284-5e9bcdc357a3",
+        "sidecarLimitBytes": 65536
+      },
+      {
+        "databaseLimitBytes": 268435456,
+        "failure": {
+          "OutputFileLimitExceeded": {
+            "index": 1
+          }
+        },
+        "fixture": "zlib.htrace",
+        "kind": "sidecar",
+        "published": false,
+        "rawBytesUnchanged": true,
+        "sessionDirectory": "stage/session-e72727d5-8e80-4a89-aa60-c8085c3943a1",
+        "sessionOwnerIdentifier": "session-e72727d5-8e80-4a89-aa60-c8085c3943a1",
+        "sidecarLimitBytes": 89
+      }
+    ],
+    "exports": [
+      {
+        "databaseByteCount": 917504,
+        "databaseMode": 384,
+        "databaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+        "exitCode": 0,
+        "fixture": "zlib.htrace",
+        "liveOutputFileBytes": [
+          917504,
+          90
+        ],
+        "publishedDirectory": "published/case-0",
+        "publishedOwnerIdentifier": "entry-ac4b9302-d96f-4d03-866c-52ce4dcbffc2",
+        "publishedOwnerIdentityVerified": true,
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sessionDirectory": "stage/session-77231d37-29d3-43c3-8acc-50df497c59e4",
+        "sessionOwnerIdentifier": "session-77231d37-29d3-43c3-8acc-50df497c59e4",
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "c5ed9c0f94b73d3f3369db0b866a6ba8f98cead0b5ce6ef8cfd1dd9e136eab61"
+        },
+        "sourceByteCount": 67837,
+        "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 842
+      },
+      {
+        "databaseByteCount": 1929216,
+        "databaseMode": 384,
+        "databaseSHA256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755",
+        "exitCode": 0,
+        "fixture": "hiprofiler_data_ability.htrace",
+        "liveOutputFileBytes": [
+          1929216,
+          90
+        ],
+        "publishedDirectory": "published/case-1",
+        "publishedOwnerIdentifier": "entry-e54cb0fe-f15f-4391-afc2-656204b4a06e",
+        "publishedOwnerIdentityVerified": true,
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sessionDirectory": "stage/session-1454d705-11fa-455c-989f-7467e50194a6",
+        "sessionOwnerIdentifier": "session-1454d705-11fa-455c-989f-7467e50194a6",
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "7ef889ec6386f41b32d37dcbe9bea00337c00129a78deb6a13d8ec3a8966b964"
+        },
+        "sourceByteCount": 557542,
+        "sourceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 1075
+      },
+      {
+        "databaseByteCount": 7344128,
+        "databaseMode": 384,
+        "databaseSHA256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93",
+        "exitCode": 0,
+        "fixture": "trace_small_10.systrace",
+        "liveOutputFileBytes": [
+          7344128,
+          90
+        ],
+        "publishedDirectory": "published/case-2",
+        "publishedOwnerIdentifier": "entry-cfb5044a-1c1b-4358-b810-a04a3ca1497b",
+        "publishedOwnerIdentityVerified": true,
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sessionDirectory": "stage/session-cce7e9d1-4a18-4f26-ad18-f8ae1a9ce97d",
+        "sessionOwnerIdentifier": "session-cce7e9d1-4a18-4f26-ad18-f8ae1a9ce97d",
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "2f1a66de226e118a3530cbe081dbeb050878fade9a9aad5937011d27b322b0d6"
+        },
+        "sourceByteCount": 13465993,
+        "sourceSHA256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 385,
+        "tableCount": 91,
+        "wallTimeMs": 3123
+      }
+    ],
+    "helperSHA256": "c3d618d233c8e181d93b8b204e078fcf38dfa8cd923f443ff52bda9b2edbfb18",
+    "mode": "immutableSnapshot-development-signature",
+    "ownedTemporaryRootRemoved": true,
+    "ownerEvidenceVersion": 2,
+    "ownerRecovery": {
+      "ownerEvidenceVersion": 2,
+      "results": [
+        {
+          "identifier": "entry-ac4b9302-d96f-4d03-866c-52ce4dcbffc2",
+          "outcome": "publishedNeedsEntryLease"
+        },
+        {
+          "identifier": "entry-cfb5044a-1c1b-4358-b810-a04a3ca1497b",
+          "outcome": "publishedNeedsEntryLease"
+        },
+        {
+          "identifier": "entry-e54cb0fe-f15f-4391-afc2-656204b4a06e",
+          "outcome": "publishedNeedsEntryLease"
+        },
+        {
+          "identifier": "session-1454d705-11fa-455c-989f-7467e50194a6",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-31a70016-2225-48fb-9284-5e9bcdc357a3",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-77231d37-29d3-43c3-8acc-50df497c59e4",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-cce7e9d1-4a18-4f26-ad18-f8ae1a9ce97d",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-e72727d5-8e80-4a89-aa60-c8085c3943a1",
+          "outcome": "removed"
+        }
+      ]
+    },
+    "parserSHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "parserTrust": {
+      "code_directory_hash": [
+        225,
+        225,
+        19,
+        88,
+        239,
+        74,
+        51,
+        84,
+        184,
+        64,
+        202,
+        189,
+        191,
+        177,
+        7,
+        161,
+        179,
+        150,
+        195,
+        8
+      ],
+      "developer_id": false,
+      "hardened_runtime": false
+    },
+    "rawInputsAndOriginalParserUnchanged": true,
+    "readyAcceptance": false,
+    "reportedVersion": "4.3.7",
+    "schemaVersion": "arktrace.native-parser-process/1",
+    "versionExitCode": 1
+  },
+  "apfsGate": {
+    "executedThisRun": false,
+    "previousRecord": "AT-RUST-004-005-2026-10-03-publication-bootstrap.json"
+  },
+  "remaining": [
+    "entry/owner lease coordination, lease conversion and published-entry maintenance authority",
+    "additional evidence-write/cleanup IO fault windows and orphan temporary evidence maintenance",
+    "actual ArkDeck format-2 owner/purge interoperability",
+    "Windows native file/process ports",
+    "Rust parser/SQLite/schema/index/metadata and formal Ready handoff",
+    "production signing and signedBundleInPlace",
+    "CLI/SDK/App/ArkDeck integration, medium/large performance, Capture, cutover/rollback"
+  ],
+  "swiftConsumersChangedThisRun": false,
+  "hostedCiExecutedThisRun": false
+}

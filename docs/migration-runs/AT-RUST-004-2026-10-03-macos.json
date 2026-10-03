@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "arktrace.migration-file-ports/1",
+  "recordedAtUtc": "2026-10-02T17:20:29.965637+00:00",
+  "localRunDate": "2026-10-03",
+  "baseCommit": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+  "toolchain": {
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "macOS": "27.0"
+  },
+  "sources": [
+    {
+      "path": "Sources/ArkTraceRuntime/TraceCache.swift",
+      "byteCount": 145556,
+      "sha256": "a399ba16153fe9c906c407ffcdbe722d7e132194d1a7de749a1f17f1ea2cda81"
+    },
+    {
+      "path": "Tests/ArkTraceIntegrationTests/MigrationCacheContractTests.swift",
+      "byteCount": 2101,
+      "sha256": "a7d77107d946aafdc6095bc5383247dc5248ea4cd6ebf1636ab87f5cbe9e40b3"
+    },
+    {
+      "path": "contracts/cache-lease-vectors.json",
+      "byteCount": 11705,
+      "sha256": "34bb05e2d4eb07545a59acc4ad6f1509f9870a0761bcb7dae71d8a25a52a77b4"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 5215,
+      "sha256": "a9c149b0bfcc5097dd7e2f85686f16a5ccf18795d2d722a2eba98520cc274b52"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 593,
+      "sha256": "57d31e7643599c9574ec308361d7b1d10278b9888399eaa15ba581de857c08ba"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/cache.rs",
+      "byteCount": 4016,
+      "sha256": "9620a3ef4a31186740a3dfa265a4662e5f47034102654b2bce8f8ba19676c76d"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/vectors.rs",
+      "byteCount": 5714,
+      "sha256": "559d2a249aa1a95a0b81d8827653d1bcfa177bf5e39cc830380f982e263676a6"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/Cargo.toml",
+      "byteCount": 536,
+      "sha256": "486a396f1296bfdc5f32bfdc5496894ac324a00dc5ff90acd0642e5a721cf12f"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+      "byteCount": 4107,
+      "sha256": "c7b6d1b900bbff9612be75d0bd4b41349ab84084d7dfe671fb684768e67fd84c"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 1489,
+      "sha256": "481817a7448ca87029caebea0f61892f8af0bda409c2590a6ecf8a5f56536386"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 881,
+      "sha256": "e8d4c9690537f49f68436114765653351eefe1bacef42046e4279edda8d60d4f"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1246,
+      "sha256": "5242d483d60ca6811cda2c0bb5d735df0c49bff46e52fc8b311c67a27a7da07c"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 33923,
+      "sha256": "b8d9cd5ee655efadc36f7cf61209e2efacb746278c9dac013be93cf26009e580"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+      "byteCount": 8429,
+      "sha256": "872be349b87028e963cae84a10c4d38f96dd580bbc7dd1b898f05d40006803c2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+      "byteCount": 16541,
+      "sha256": "e16474d751ea0a28c75a58481482dafeb683b28639b397302236db9c80cc9d15"
+    },
+    {
+      "path": "rust/dependency-licenses.json",
+      "byteCount": 11528,
+      "sha256": "c73577a1c5448e43e9b66c3e430af002be6b6b0d5d702dd36d0b745e77febfdb"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "byteCount": 87,
+      "sha256": "b206a08a9e3a50784fcedbd23b8ae0555f70bc6cb5da57bfcd1bb67ac6e56b55"
+    },
+    {
+      "path": "scripts/test_macos_file_volumes.py",
+      "byteCount": 3860,
+      "sha256": "bd1b77d1d49e24fda4d1689849dc428a13e3d2756e66ab88b14f1726da1c718f"
+    }
+  ],
+  "nativeVolumeProbe": {
+    "binaryByteCount": 1254176,
+    "binarySHA256": "aa20c02b8f140753cd22613c937338b2759eb6a942ec7dfade8fec7cf8661746",
+    "report": {
+      "cleanupResidueCount": 0,
+      "crossVolume": "refused_without_mutation",
+      "diskFullErrno": 28,
+      "diskFullFailure": "SystemIo { operation: Write, code: 28 }",
+      "hostDevice": 16777232,
+      "imageDevice": 16777239,
+      "ownershipDisabledRootRefused": true,
+      "passed": true,
+      "rawBytesUnchanged": true,
+      "schemaVersion": "arktrace.native-file-volumes/1",
+      "sourceByteCount": 83886080,
+      "sourceSHA256": "6c3a1c9e8781a13f6e1f667eb2920c6768451867538e655ac0ab9abad036df2f"
+    }
+  },
+  "rustTests": {
+    "passed": 29,
+    "failed": 0,
+    "ignored": 0,
+    "cases": [
+      "swift_time_contract_vectors",
+      "swift_quality_contract_vectors",
+      "machine_quality_is_closed_bounded_and_sorted",
+      "swift_cache_key_and_lease_protocol_vectors",
+      "macos::tests::cancellation_immediately_before_atomic_rename_publishes_nothing",
+      "macos::tests::parent_replacement_at_publication_window_is_rejected_inside_critical_section",
+      "tests::native_runner_matches_the_requested_host",
+      "macos::tests::cancellation_immediately_after_atomic_rename_rolls_back_owned_publication",
+      "macos::tests::replaced_publication_is_preserved_and_cleanup_failure_is_not_hidden_by_cancel",
+      "macos::tests::same_inode_same_size_content_mutation_after_rename_is_rejected_and_rolled_back",
+      "macos::tests::injected_enospc_after_partial_write_preserves_closed_failure_and_cleans_output",
+      "macos::tests::cleanup_failure_takes_priority_over_copy_cancellation_without_deleting_replacement",
+      "macos::tests::cancellation_after_first_copy_chunk_removes_partial_output",
+      "macos::tests::input_mutation_during_copy_is_rejected_and_partial_output_removed",
+      "cancelled_expired_and_oversized_operations_leave_no_partial_file",
+      "detects_in_place_mutation_and_replaced_source",
+      "owned_cleanup_preserves_replacement_and_only_removes_proven_identity",
+      "copies_unicode_source_to_verified_readonly_snapshot_without_mutating_input",
+      "lease_wait_is_bounded_and_replaced_lease_is_rejected",
+      "permits_raw_hard_links_and_refuses_private_file_or_lease_hard_links",
+      "accepts_deny_only_acl_and_rejects_allow_acl_on_private_file_and_lease",
+      "refuses_nonregular_objects_and_path_escape_without_blocking_on_fifo",
+      "rejects_acl_grants_even_when_mode_bits_are_private_and_preserves_acl",
+      "rejects_existing_public_directory_and_writable_ancestor_without_chmod",
+      "resolves_explicit_source_link_once_but_refuses_links_inside_storage",
+      "ancestor_replacement_prevents_publication_and_owned_deletion",
+      "held_files_directories_and_leases_are_not_inherited_by_exec",
+      "publishes_exact_same_volume_identity_and_never_overwrites_existing_target",
+      "shared_readers_block_cross_process_purge_until_all_leases_close"
+    ]
+  },
+  "swiftTests": {
+    "executed": 595,
+    "failed": 0,
+    "skipped": 6,
+    "compilerWarnings": 0,
+    "skippedCases": [
+      "ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker",
+      "ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested",
+      "ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested",
+      "ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested",
+      "ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested",
+      "ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested"
+    ]
+  },
+  "appBuild": {
+    "succeeded": true,
+    "documentTypes": [
+      "htrace",
+      "ftrace",
+      "systrace",
+      "trace"
+    ],
+    "warnings": [
+      "warning: Conditional compilation flags do not have values in Swift; they are either present or absent (rather than '_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG') (in target 'ArkTraceRuntime' from project 'ArkTrace' at path '<stable-xcode-mirror>/Package.swift')",
+      "warning: Conditional compilation flags do not have values in Swift; they are either present or absent (rather than '_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG') (in target 'ArkTraceAppSupport' from project 'ArkTrace' at path '<stable-xcode-mirror>/Package.swift')",
+      "2026-10-03 01:09:30.202 appintentsmetadataprocessor[99477:1538441] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+    ]
+  },
+  "remaining": [
+    "directory owner records and crash recovery",
+    "ArkDeck native purge interoperation",
+    "Windows native file ports and LockFileEx",
+    "parser process ports",
+    "Rust parser-to-Ready, Store, Session, CLI, SDK and App cutover",
+    "migration performance and release acceptance"
+  ]
+}

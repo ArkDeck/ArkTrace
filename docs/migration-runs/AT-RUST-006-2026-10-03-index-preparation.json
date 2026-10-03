@@ -1,0 +1,2037 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-02T21:54:10.625232+00:00",
+  "localRunDate": "2026-10-03",
+  "baseCommit": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+  "goalStatus": "active",
+  "task006Status": "in-progress",
+  "macOSCrossPlatformAcceptance": "not-complete",
+  "toolchain": {
+    "rust": "1.99.0",
+    "rustCommit": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+    "rustHost": "aarch64-apple-darwin",
+    "xcode": "27.0",
+    "xcodeBuild": "27A266a",
+    "swift": "6.4",
+    "macOS": "27.0",
+    "macOSBuild": "26A428",
+    "architecture": "arm64"
+  },
+  "sources": [
+    {
+      "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+      "byteCount": 32838,
+      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+    },
+    {
+      "path": "contracts/README.md",
+      "byteCount": 2484,
+      "sha256": "2e94157ded4cde0790f314621c4dd0399aa4e02c46d1f6dbb60b89162b870db1"
+    },
+    {
+      "path": "contracts/index-definitions.json",
+      "byteCount": 6515,
+      "sha256": "0ca0b1fd418d891484c63fd2f9947ff6879ad54149b0de6c26a12217baf99ec2"
+    },
+    {
+      "path": "contracts/quality-scopes.json",
+      "byteCount": 1341,
+      "sha256": "a8bac982cd95f531aa7d8082bcf173eaa308f618e959ec8510fcd80d61d3c21d"
+    },
+    {
+      "path": "contracts/quality-vectors.json",
+      "byteCount": 2654,
+      "sha256": "24d4d92e2e222aa3948344edd68acc622fddda578b9384063ca470234e2f26d8"
+    },
+    {
+      "path": "docs/RUST_CORE_MIGRATION_DESIGN.md",
+      "byteCount": 65871,
+      "sha256": "6e24bcf1de8f0a7296097666414b95dd7624d43383eccae2a33e5b5ca9870fcf"
+    },
+    {
+      "path": "docs/RUST_CORE_MIGRATION_TASKS.md",
+      "byteCount": 52305,
+      "sha256": "c422e0273e35378891adda0649b3b797f539cd93cfb4d84801d02b5e5254291b"
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-006-2026-10-03-index-preparation.md",
+      "byteCount": 6188,
+      "sha256": "c73b6a7e75efcf6b0e158c80546f5e931f49fb26bdf173885baa971bd47b7a37"
+    },
+    {
+      "path": "rust/.cargo/config.toml",
+      "byteCount": 82,
+      "sha256": "3e7061ede56e72a50c706852a7de35cc9199fe68d1c6c1dbf03797e6490d5122"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 7805,
+      "sha256": "96b8f932403671e39aeecd7d65e4ee524ae983db4c6253336fc6b45e60c0773c"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 749,
+      "sha256": "3bc9937a44f51bce02fb745a49709326f5eba098e41a01de37363f8c9883479b"
+    },
+    {
+      "path": "rust/README.md",
+      "byteCount": 8191,
+      "sha256": "c37f9a51f60083d85d3cd394f0a998d0d001316974e1cc69d835f05a4e952fd0"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/Cargo.toml",
+      "byteCount": 302,
+      "sha256": "ff62eeae96e02e228c588dc838802868f0baaa864462f9abf94bed478c9c0963"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/main.rs",
+      "byteCount": 260,
+      "sha256": "7cce1ea94f6f40a020ffceeba4be8baa47f39ebe1eedd53aa41868c54f96c6e3"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/Cargo.toml",
+      "byteCount": 352,
+      "sha256": "3e964c4bb22c1663c79ae9304e90e2c81e15c82bdb038570dc4ebf536e32ac40"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/build.rs",
+      "byteCount": 618,
+      "sha256": "519a4404229563056ed3f0c207260462cf7dde2e0ee3b316045c772cb504f67e"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/cache.rs",
+      "byteCount": 4016,
+      "sha256": "9620a3ef4a31186740a3dfa265a4662e5f47034102654b2bce8f8ba19676c76d"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/lib.rs",
+      "byteCount": 718,
+      "sha256": "cf6c80ef90dd0f0f73d45f08bc499099022297e81440853f2ff2bea19e9ac448"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/quality.rs",
+      "byteCount": 3043,
+      "sha256": "a6ecab91105e396f649ea22c5cbdca1be211d3a43fb26f3efaf53ac28282ce17"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/time.rs",
+      "byteCount": 2015,
+      "sha256": "1beeba7d7630f2658f1764226e963d11f9aff772bb71d9ac36579a612aa4acbd"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/vectors.rs",
+      "byteCount": 5714,
+      "sha256": "559d2a249aa1a95a0b81d8827653d1bcfa177bf5e39cc830380f982e263676a6"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/Cargo.toml",
+      "byteCount": 357,
+      "sha256": "7671b0cdd1f6d57d6b28e14d595696e1d2cf2db97861f5b359e3ff961588416b"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_store_probe.rs",
+      "byteCount": 3673,
+      "sha256": "c64b327b95dc3e3f1d90c8b85ae989211da8a89e9cd9d402ed2b75f032d01e82"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/lib.rs",
+      "byteCount": 366,
+      "sha256": "c88e32979bb09dbc42c46581b3ac2b8787ff0e9983764a0a0e82e8953f158c9e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/Cargo.toml",
+      "byteCount": 920,
+      "sha256": "af77d99b2ad839b9341f913233f839810ecc020b67b0111ee330d7d3c874170f"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+      "byteCount": 12075,
+      "sha256": "9f0e2228d79058082ba246b9313356dc2fa768aea2d9979a4f8bfe5ae1fe3d0a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+      "byteCount": 4936,
+      "sha256": "7ecc158fd794898350d7dbfd03b0e0672c6f3bd907e9db02b0f0f3b730613164"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+      "byteCount": 260,
+      "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 1489,
+      "sha256": "481817a7448ca87029caebea0f61892f8af0bda409c2590a6ecf8a5f56536386"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 1038,
+      "sha256": "3d909ae237980c1926d96ac332550da5d03ab5d9a541829c0ca73859103052c6"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1655,
+      "sha256": "0ac80d30fd625162c77b5b2b9111935892c35d37c1d738e0ecc47b16f8ad6723"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 41390,
+      "sha256": "383bc5c236b07fca155777beb151078b0c923309a8bd4a486162473310b6a63c"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_directory.rs",
+      "byteCount": 12385,
+      "sha256": "70304e12594bcb89bea0d0186e2b5a892121f9c851c134c9cec98fd4f5cadcd5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_owner.rs",
+      "byteCount": 35457,
+      "sha256": "cd0113e30fff06c947ef3eff51a73cf5943ad3e6964b858bd9126e5aec2ae56a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+      "byteCount": 39294,
+      "sha256": "9815981a7e6f5f6809db955aaa0c1df99bb19165a41ce6f721b7de12c946bfa8"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process_outputs.rs",
+      "byteCount": 11339,
+      "sha256": "1061f4620b18b452847d5759e62239c6811ac918de46645dcab882c069229381"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+      "byteCount": 14979,
+      "sha256": "793c62086818f8d934b8db6cc6f2ad59caf51e1a0244858e49e88cd02c0156fd"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+      "byteCount": 9451,
+      "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_writable.rs",
+      "byteCount": 10317,
+      "sha256": "5cf33714c39db4aaf956707b6e530452ccc2c6ddad0f91f265665c8e731b1c31"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+      "byteCount": 22663,
+      "sha256": "4fcfa32553ed8dc5f2b56612f19a8d1b5a0345000622b43243d0bf54449c3575"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_owners.rs",
+      "byteCount": 15548,
+      "sha256": "5557c7da1140539d337e484a06057a4b73c5bf9ed3be5a80bbda27930d00a550"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+      "byteCount": 18963,
+      "sha256": "5746bfe40eb745787616ef1b99e0a93cb8355927ab2a7050409e31216a556b8e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+      "byteCount": 10264,
+      "sha256": "c4a168c34246b84d75188dc7f7f75ee136a1b01a09486f603dc1ae567fcb895e"
+    },
+    {
+      "path": "rust/crates/arktrace-store/Cargo.toml",
+      "byteCount": 423,
+      "sha256": "05393789f858db233d313a6e956b10d2b1b2982fd50b5de581725348bbd52273"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/database.rs",
+      "byteCount": 15392,
+      "sha256": "96264dc5c54b7fdc83a0c38ac679729a6e7e8d469cf029a665068348318c2d2d"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/indexes.rs",
+      "byteCount": 7925,
+      "sha256": "0c6daebb3aac91e351352d56b1d6e7d5ccc316aebdc4782805fd14951864220f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/lib.rs",
+      "byteCount": 8351,
+      "sha256": "b5bd3534b1af87e5689a05cf1ea2dc29881825209bcafe23ad019a901440ae50"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/schema.rs",
+      "byteCount": 22411,
+      "sha256": "94ab170a9c26f2fecb2e2af8350b3c4bfebc9c1f9e0cb4e975065349c981c964"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/tests.rs",
+      "byteCount": 33378,
+      "sha256": "052aa3cb6f2af86d33006387ef8a23309b79e1935bf6c9cd1aa76e81f5678df7"
+    },
+    {
+      "path": "rust/dependency-licenses.json",
+      "byteCount": 17077,
+      "sha256": "1d975df5ba8c100fcd2dce5b21c5e8d3ccc8f152292b08b306ca8f8aebdd6331"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "byteCount": 87,
+      "sha256": "b206a08a9e3a50784fcedbd23b8ae0555f70bc6cb5da57bfcd1bb67ac6e56b55"
+    },
+    {
+      "path": "rust/sqlite-build-lock.json",
+      "byteCount": 937,
+      "sha256": "11f6f76dc2f34ff9942bff69ab28828ead29046624fdccdb4b78be6aa131b722"
+    },
+    {
+      "path": "scripts/run-cargo.py",
+      "byteCount": 6613,
+      "sha256": "1c69a5486c5b1061f372dde6d53d9596dd43ae8e662609b93bf6e0a1dae6c137"
+    },
+    {
+      "path": "scripts/test_macos_parser_process.py",
+      "byteCount": 10941,
+      "sha256": "82739496773ad1bdc8c8518d1e2295ff859d8538d00af1a3140448d02691cd74"
+    },
+    {
+      "path": "scripts/test_run_cargo.py",
+      "byteCount": 5763,
+      "sha256": "c14988d7d446a6a291ea9c2ce7bb3bd170ada03642260cb97cfcfcdd0ed2ea8a"
+    },
+    {
+      "path": "scripts/verify_migration_contracts.py",
+      "byteCount": 3351,
+      "sha256": "0507939df1abb8d4754c306a65747cfeada420666c27df69e30317de59999d4d"
+    },
+    {
+      "path": "scripts/verify_rust_workspace.py",
+      "byteCount": 5717,
+      "sha256": "23796a9ed51f1a7da19f1a6b0fdf1c6c5fdfe8593673f80ba4a50b7523848ee3"
+    }
+  ],
+  "parser": {
+    "name": "trace_streamer",
+    "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+    "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "reportedVersion": "4.3.7",
+    "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "architecture": "arm64",
+    "adapterVersion": "1",
+    "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+    "plugins": "hilog,hisysevent,arkts,bytrace,rawtrace,htrace,ffrt,memory,hidump,cpudata,network,diskio,process,xpower",
+    "localPatches": [
+      "patches/faultloggerd-apple-clang.patch",
+      "patches/proto-reader-sparse-validity.patch"
+    ],
+    "thirdPartySources": "source-lock.json exact revisions over HTTPS",
+    "thirdPartyRevisions": {
+      "bounds_checking_function": "2ae82839ecaaa7d031e66ccbd2076d671acfd615",
+      "bzip2": "e8e3b464e0b4f89e1f56ba10d7c29654043db91d",
+      "googletest": "51fcc68aa3150d8cd17087650598239a8646a2da",
+      "hiperf": "4c7c8c36779ab3ec5febb4c3616da64f1a63f38f",
+      "json": "3c3d8e61bde0f2e8aaa206a102e50fed7b9b2199",
+      "libbpf": "24eaa918f55ecff0348f9283be451b6612ba5193",
+      "llvm-project": "3cfb0bcc64ed3a74d10b55175cdbdff033d2d8db",
+      "profiler": "73d26bb5acfcafb2b1f4f94ead5640241d1e5f73",
+      "protobuf": "aceafed4cf26d7a6be8169ae887cc13b749d5515",
+      "sqlite": "d21e412dbc6f2cdde2e4c9828e2450fcfca4fbe9",
+      "zlib": "9a1de89f7c80f8fc811527dd57135b8b4c00a2e8",
+      "faultloggerd": "875786f2e3446e3efea8cbc9c4a9c1510ce2c1b9",
+      "c_utils": "634d5c9d0aa3642f697938c7e5706e53ec069ba1"
+    },
+    "hostToolchain": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+    "builtAt": "2026-08-24T06:02:11Z"
+  },
+  "corpus": [
+    {
+      "byteCount": 67837,
+      "path": "Fixtures/traces/zlib.htrace",
+      "sha256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe"
+    },
+    {
+      "byteCount": 557542,
+      "path": "Fixtures/traces/hiprofiler_data_ability.htrace",
+      "sha256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b"
+    },
+    {
+      "byteCount": 13465993,
+      "path": "Fixtures/traces/trace_small_10.systrace",
+      "sha256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef"
+    }
+  ],
+  "sqliteBuildLock": {
+    "version": 1,
+    "crate": "libsqlite3-sys",
+    "crateVersion": "0.38.2",
+    "sqliteVersion": "3.53.2",
+    "sqliteSourceID": "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24",
+    "sourceFiles": [
+      {
+        "path": "sqlite3/sqlite3.c",
+        "byteCount": 9507037,
+        "sha256": "0a409f1633283fa31a9126b11fbfd64a1991c5d30defad07e5745d4667f5e23d"
+      },
+      {
+        "path": "sqlite3/sqlite3.h",
+        "byteCount": 690725,
+        "sha256": "9e69a1353a4288450b0d5239ede11fc7f1f4c8e5eb07491fc8317eacb5b7de7e"
+      }
+    ],
+    "publicDomainDeclaration": {
+      "path": "rust/licenses/libsqlite3-sys-0.38.2/SQLITE-PUBLIC-DOMAIN",
+      "byteCount": 1485,
+      "sha256": "85806d613cfda5901f848b3b5b4b04396c8c64e89c97c0af3706c42b0c44bb47"
+    },
+    "rusqliteVersion": "0.40.2",
+    "features": [
+      "bundled",
+      "hooks",
+      "limits"
+    ],
+    "defaultFeatures": false,
+    "defines": [
+      "SQLITE_ENABLE_FILESTAT=1"
+    ]
+  },
+  "indexContract": {
+    "version": 1,
+    "indexSchemaVersion": 3,
+    "definitions": [
+      {
+        "name": "arktrace_v1_process_pid",
+        "table": "process",
+        "columns": [
+          "pid"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_process_ipid",
+        "table": "process",
+        "columns": [
+          "ipid"
+        ],
+        "bootstrap": true,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_process_ipid_pid_name",
+        "table": "process",
+        "columns": [
+          "ipid",
+          "pid",
+          "name"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_thread_tid_ipid",
+        "table": "thread",
+        "columns": [
+          "tid",
+          "ipid"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_thread_itid",
+        "table": "thread",
+        "columns": [
+          "itid"
+        ],
+        "bootstrap": true,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_thread_itid_tid_name_ipid",
+        "table": "thread",
+        "columns": [
+          "itid",
+          "tid",
+          "name",
+          "ipid"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_sched_slice_ts_cpu",
+        "table": "sched_slice",
+        "columns": [
+          "ts",
+          "cpu"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+        "table": "sched_slice",
+        "columns": [
+          "cpu",
+          "ts",
+          "id",
+          "dur",
+          "itid",
+          "ipid"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+        "table": "sched_slice",
+        "columns": [
+          "cpu",
+          "ts",
+          "id",
+          "dur",
+          "itid",
+          "ipid",
+          "end_state",
+          "priority"
+        ],
+        "bootstrap": false,
+        "required": false,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v3_sched_slice_cpu_ts_dur",
+        "table": "sched_slice",
+        "columns": [
+          "cpu",
+          "ts",
+          "dur"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_sched_slice_itid_ts",
+        "table": "sched_slice",
+        "columns": [
+          "itid",
+          "ts"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_thread_state_ts_cpu",
+        "table": "thread_state",
+        "columns": [
+          "ts",
+          "cpu"
+        ],
+        "bootstrap": false,
+        "required": false,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_thread_state_itid_ts",
+        "table": "thread_state",
+        "columns": [
+          "itid",
+          "ts"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_thread_state_itid_ts_id_dur",
+        "table": "thread_state",
+        "columns": [
+          "itid",
+          "ts",
+          "id",
+          "dur",
+          "state"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_thread_state_itid_ts_cover_cpu",
+        "table": "thread_state",
+        "columns": [
+          "itid",
+          "ts",
+          "id",
+          "dur",
+          "state",
+          "cpu"
+        ],
+        "bootstrap": false,
+        "required": false,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v3_thread_state_itid_ts_dur",
+        "table": "thread_state",
+        "columns": [
+          "itid",
+          "ts",
+          "dur"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_callstack_callid_ts",
+        "table": "callstack",
+        "columns": [
+          "callid",
+          "ts"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_callstack_callid_ts_id_dur",
+        "table": "callstack",
+        "columns": [
+          "callid",
+          "ts",
+          "id",
+          "dur",
+          "name"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_callstack_callid_ts_cover_optional",
+        "table": "callstack",
+        "columns": [
+          "callid",
+          "ts",
+          "id",
+          "dur",
+          "name",
+          "cat",
+          "depth",
+          "parent_id",
+          "cookie"
+        ],
+        "bootstrap": false,
+        "required": false,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v3_callstack_ts_id_dur_callid",
+        "table": "callstack",
+        "columns": [
+          "ts",
+          "id",
+          "dur",
+          "callid",
+          "name"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v3_callstack_callid_ts_dur",
+        "table": "callstack",
+        "columns": [
+          "callid",
+          "ts",
+          "dur"
+        ],
+        "bootstrap": false,
+        "required": true,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v1_measure_filter_id_ts",
+        "table": "measure",
+        "columns": [
+          "filter_id",
+          "ts"
+        ],
+        "bootstrap": true,
+        "required": false,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_cpu_measure_filter_id",
+        "table": "cpu_measure_filter",
+        "columns": [
+          "id"
+        ],
+        "bootstrap": true,
+        "required": false,
+        "unique": false,
+        "partial": false
+      },
+      {
+        "name": "arktrace_v2_process_measure_filter_id",
+        "table": "process_measure_filter",
+        "columns": [
+          "id"
+        ],
+        "bootstrap": true,
+        "required": false,
+        "unique": false,
+        "partial": false
+      }
+    ]
+  },
+  "checks": {
+    "workspaceTests": {
+      "passed": 106,
+      "failed": 0,
+      "ignored": 0,
+      "warnings": 0,
+      "storePassed": 30,
+      "testNames": [
+        "swift_time_contract_vectors",
+        "swift_quality_contract_vectors",
+        "machine_quality_is_closed_bounded_and_sorted",
+        "swift_cache_key_and_lease_protocol_vectors",
+        "macos::process::outputs::tests::live_watch_accepts_growth_but_rejects_excess_without_reading_bytes",
+        "macos::process::outputs::tests::ancestor_replacement_cannot_redirect_the_output_watch",
+        "macos::process::outputs::tests::observed_output_cannot_disappear_or_be_replaced_by_same_size_inode",
+        "macos::owner::tests::failed_first_binding_preserves_creating_proof_and_never_infers_path_ownership",
+        "macos::process::outputs::tests::rejects_links_directory_and_public_mode_without_changing_target",
+        "macos::owner::tests::cancellation_after_creating_record_before_mkdir_removes_only_owned_artifacts",
+        "macos::tests::cancellation_immediately_before_atomic_rename_publishes_nothing",
+        "macos::tests::cancellation_immediately_after_atomic_rename_rolls_back_owned_publication",
+        "macos::tests::cancellation_after_first_copy_chunk_removes_partial_output",
+        "macos::tests::directory_cancel_before_rename_publishes_nothing",
+        "macos::tests::directory_ancestor_replacement_at_rename_window_preserves_owned_candidate",
+        "macos::tests::cleanup_failure_takes_priority_over_copy_cancellation_without_deleting_replacement",
+        "macos::tests::directory_cancel_after_rename_restores_complete_identity_and_payloads",
+        "macos::tests::directory_replaced_publication_cleanup_failure_wins_over_cancellation",
+        "macos::owner::tests::bound_creation_cancel_removes_directory_and_records_before_return",
+        "macos::owner::tests::failed_bound_creation_reclaims_relocated_identity_and_preserves_replacement",
+        "tests::native_runner_matches_the_requested_host",
+        "macos::tests::directory_rollback_collision_preserves_both_directories",
+        "macos::tests::parent_replacement_at_publication_window_is_rejected_inside_critical_section",
+        "macos::tests::injected_enospc_after_partial_write_preserves_closed_failure_and_cleans_output",
+        "macos::tests::directory_payload_change_at_publication_windows_is_rejected",
+        "macos::tests::replaced_publication_is_preserved_and_cleanup_failure_is_not_hidden_by_cancel",
+        "macos::tests::same_inode_same_size_content_mutation_after_rename_is_rejected_and_rolled_back",
+        "macos::tests::input_mutation_during_copy_is_rejected_and_partial_output_removed",
+        "cancelled_expired_and_oversized_operations_leave_no_partial_file",
+        "detects_in_place_mutation_and_replaced_source",
+        "copies_unicode_source_to_verified_readonly_snapshot_without_mutating_input",
+        "accepts_deny_only_acl_and_rejects_allow_acl_on_private_file_and_lease",
+        "owned_cleanup_preserves_replacement_and_only_removes_proven_identity",
+        "held_files_directories_and_leases_are_not_inherited_by_exec",
+        "directory_promotion_never_overwrites_existing_file_directory_or_symlink",
+        "permits_raw_hard_links_and_refuses_private_file_or_lease_hard_links",
+        "lease_wait_is_bounded_and_replaced_lease_is_rejected",
+        "ancestor_replacement_prevents_publication_and_owned_deletion",
+        "accepts_native_unicode_components_beyond_255_utf8_bytes",
+        "rejects_existing_public_directory_and_writable_ancestor_without_chmod",
+        "rejects_acl_grants_even_when_mode_bits_are_private_and_preserves_acl",
+        "refuses_nonregular_objects_and_path_escape_without_blocking_on_fifo",
+        "resolves_explicit_source_link_once_but_refuses_links_inside_storage",
+        "publishes_complete_sealed_directory_with_literal_unicode_payloads",
+        "publishes_exact_same_volume_identity_and_never_overwrites_existing_target",
+        "sealed_directory_refuses_writable_links_and_nested_payloads_without_chmod",
+        "shared_readers_block_cross_process_purge_until_all_leases_close",
+        "sealed_directory_refuses_aggregate_excess_and_membership_changes",
+        "owner_moved_outside_recovery_root_retains_proof_and_never_deletes_escaped_bytes",
+        "published_owner_survives_generic_staging_recovery_and_needs_entry_authority",
+        "active_owner_blocks_recovery_then_stale_identity_is_reclaimed",
+        "cleanup_depth_limit_preserves_identity_record_for_resuming",
+        "cleanup_recurses_bounded_held_directories_and_never_follows_links",
+        "stale_relocated_owner_is_found_and_replacement_path_is_preserved",
+        "sigkill_releases_real_owner_lease_and_next_process_recovers_staging",
+        "sigkill_at_creating_mkdir_and_bound_windows_preserves_or_reclaims_exact_proof",
+        "malformed_unknown_and_escaped_evidence_is_preserved_without_target_mutation",
+        "sigkill_at_cleanup_windows_recovers_or_retains_unresolved_identity_without_guessing",
+        "adhoc_development_artifact_cannot_satisfy_production_identity_or_bad_pin",
+        "cancellation_kills_term_ignoring_child_and_grandchild_before_returning",
+        "preserves_literal_arguments_unicode_empty_value_cwd_and_minimal_environment",
+        "output_file_cap_kills_term_ignoring_writer_tree_before_return",
+        "host_sigkill_closes_control_pipe_and_independently_reclaims_process_tree",
+        "host_sigkill_during_suspended_bootstrap_terminates_helper_before_entry",
+        "preserves_nonzero_exit_without_inventing_success",
+        "rejects_invalid_output_declarations_and_existing_objects_before_launch",
+        "rejects_kernel_identity_mismatch_before_resuming_suspended_executable",
+        "rejects_corrupted_signature_even_when_development_digest_matches_bytes",
+        "deadline_kills_term_ignoring_process_tree",
+        "rejects_verified_tool_path_replacement_before_launch",
+        "rejects_pre_cancel_expired_budget_and_nul_argument",
+        "stops_stdout_and_stderr_flood_at_separate_caps",
+        "transports_full_output_cap_without_replaying_partial_protocol_writes",
+        "reaps_exit_and_kills_descendants_with_inherited_or_closed_pipes",
+        "descendants_cannot_hide_output_excess_in_cleanup_after_leader_exit",
+        "short_lived_output_obeys_exact_cap_and_reports_absent_optional_files",
+        "tests::duplicate_filter_identity_is_a_fatal_schema_ambiguity",
+        "tests::empty_compatible_trace_has_no_capabilities_or_quality_warnings",
+        "tests::active_sqlite_statement_observes_external_cancellation",
+        "tests::clock_epoch_outlier_requires_two_independent_tables_and_reports_clamping",
+        "tests::independent_counter_tables_allow_same_ids_but_shared_tables_reject_ambiguity",
+        "tests::counters_require_an_integer_join_and_read_process_measure_before_legacy_measure",
+        "tests::native_descriptor_open_reads_exact_readonly_database_with_unicode_path",
+        "tests::index_transaction_rolls_back_before_returning_cancellation",
+        "tests::identities_reject_non_integer_storage_without_forging_zero",
+        "tests::index_preparation_creates_complete_applicable_closure_and_keeps_fingerprint",
+        "tests::negative_duration_preserves_open_ended_semantics_and_bad_time_remains_visible",
+        "tests::native_indexing::missing_required_column_and_existing_destination_never_produce_prepared_snapshot",
+        "tests::native_indexing::native_cancellation_keeps_disposable_candidate_writable_and_no_ready_result",
+        "tests::native_snapshot_refuses_wal_sidecars_and_excess_without_modifying_input",
+        "tests::public_errors_contain_no_sqlite_prose_or_user_path",
+        "tests::partial_optional_stat_schema_preserves_trace_and_disables_event_counts",
+        "tests::native_indexing::page_count_budget_exhaustion_rolls_back_and_never_seals_partial_indexes",
+        "tests::quoted_names_delimiters_and_generated_kinds_have_distinct_fingerprints",
+        "tests::required_affinity_accepts_canonical_declarations_and_rejects_missing_or_real",
+        "tests::native_indexing::restored_path_cannot_hide_sqlite_opening_the_foreign_inode",
+        "tests::required_relationships_accept_absent_sentinels_but_reject_missing_identity",
+        "tests::runtime_identity_and_private_readonly_configuration_are_enforced",
+        "tests::trace_range_rejects_coercion_multiple_rows_and_int64_overflow",
+        "tests::vm_interruption_resets_handler_and_cancellation_and_deadline_are_distinct",
+        "tests::optional_counter_budget_records_unproven_relationship_without_reading_it",
+        "tests::optional_index_inputs_enable_full_closure_and_missing_required_inputs_fail",
+        "tests::native_indexing::real_disk_preparation_preserves_source_closes_sqlite_and_seals_readonly",
+        "tests::native_indexing::panic_during_index_transaction_closes_connection_and_owner_cleanup_removes_candidate",
+        "tests::ready_index_validation_rejects_partial_unique_collated_descending_and_wrong_columns",
+        "tests::running_statement_stops_at_deadline"
+      ]
+    },
+    "clippy": {
+      "status": "pass",
+      "warnings": 0
+    },
+    "fmt": "pass",
+    "workspaceVerifier": {
+      "status": "pass",
+      "firstPartyCrates": 5,
+      "thirdPartyLicenseIdentities": 32
+    },
+    "runnerTests": {
+      "passed": 9,
+      "failed": 0
+    },
+    "migrationContracts": {
+      "status": "pass",
+      "machineFixtures": 34,
+      "qualityScopes": 57,
+      "indexDefinitions": 24
+    },
+    "ciPlanner": {
+      "passed": 29
+    },
+    "gitDiffCheck": "pass",
+    "pythonSyntax": "pass",
+    "swiftAppApi": {
+      "executedThisRun": false,
+      "reason": "no Swift source or consumer API changed in this indexing slice",
+      "historicalBaseline": "AT-RUST-006-2026-10-03-store-validation.json"
+    }
+  },
+  "logs": [
+    {
+      "path": "/private/tmp/arktrace-migration-index-workspace-tests.log",
+      "byteCount": 12818,
+      "sha256": "f2ffee565f9ee957266f45cdc726993b27fa4d361518d86d6a2207695f56bffc"
+    },
+    {
+      "path": "/private/tmp/arktrace-migration-index-clippy.log",
+      "byteCount": 524,
+      "sha256": "585a537613f3244b891b96a0081a75dd55a66875588449a324a1b2f387bae3ac"
+    },
+    {
+      "path": "/private/tmp/arktrace-native-index-parser.json",
+      "byteCount": 21925,
+      "sha256": "deec323d2809296972a73422b88251c8ee07c94a55455f2dfe2940dd323ca038"
+    },
+    {
+      "path": "/private/tmp/arktrace-native-index-parser.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "nativeParserAndIndexes": {
+    "budgetFailures": [
+      {
+        "databaseLimitBytes": 1,
+        "failure": {
+          "OutputFileLimitExceeded": {
+            "index": 0
+          }
+        },
+        "fixture": "zlib.htrace",
+        "kind": "database",
+        "published": false,
+        "rawBytesUnchanged": true,
+        "sessionDirectory": "stage/session-afb2649a-635a-4702-bc42-c65ce229ef11",
+        "sessionOwnerIdentifier": "session-afb2649a-635a-4702-bc42-c65ce229ef11",
+        "sidecarLimitBytes": 65536
+      },
+      {
+        "databaseLimitBytes": 268435456,
+        "failure": {
+          "OutputFileLimitExceeded": {
+            "index": 1
+          }
+        },
+        "fixture": "zlib.htrace",
+        "kind": "sidecar",
+        "published": false,
+        "rawBytesUnchanged": true,
+        "sessionDirectory": "stage/session-0bd48d3c-2167-4f0a-bdd1-d0c25d917912",
+        "sessionOwnerIdentifier": "session-0bd48d3c-2167-4f0a-bdd1-d0c25d917912",
+        "sidecarLimitBytes": 89
+      }
+    ],
+    "exports": [
+      {
+        "databaseByteCount": 917504,
+        "databaseMode": 384,
+        "databaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+        "exitCode": 0,
+        "fixture": "zlib.htrace",
+        "liveOutputFileBytes": [
+          917504,
+          90
+        ],
+        "publishedDirectory": "published/case-0",
+        "publishedOwnerIdentifier": "entry-bbae82fa-e5b5-4926-b812-8aa076012b61",
+        "publishedOwnerIdentityVerified": true,
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sessionDirectory": "stage/session-67193ed1-c259-4734-9276-fd362e137a75",
+        "sessionOwnerIdentifier": "session-67193ed1-c259-4734-9276-fd362e137a75",
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "1807e557150925667a2c597ebca0e5107a87924eb741323c26a0c59c95ac8d7a"
+        },
+        "sourceByteCount": 67837,
+        "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 838
+      },
+      {
+        "databaseByteCount": 1929216,
+        "databaseMode": 384,
+        "databaseSHA256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755",
+        "exitCode": 0,
+        "fixture": "hiprofiler_data_ability.htrace",
+        "liveOutputFileBytes": [
+          1929216,
+          90
+        ],
+        "publishedDirectory": "published/case-1",
+        "publishedOwnerIdentifier": "entry-85fd8036-83e0-4100-a415-ae08ce6e7574",
+        "publishedOwnerIdentityVerified": true,
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sessionDirectory": "stage/session-a78f6f51-d27b-4f75-a72e-9a5b3af463eb",
+        "sessionOwnerIdentifier": "session-a78f6f51-d27b-4f75-a72e-9a5b3af463eb",
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "753c791b28334707e045fa8e4a4db6959a84ec80a05fd85b9dce0bf087dc7566"
+        },
+        "sourceByteCount": 557542,
+        "sourceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 1088
+      },
+      {
+        "databaseByteCount": 7344128,
+        "databaseMode": 384,
+        "databaseSHA256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93",
+        "exitCode": 0,
+        "fixture": "trace_small_10.systrace",
+        "liveOutputFileBytes": [
+          7344128,
+          90
+        ],
+        "publishedDirectory": "published/case-2",
+        "publishedOwnerIdentifier": "entry-67ac273a-cf15-4739-88a0-3a9141752174",
+        "publishedOwnerIdentityVerified": true,
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sessionDirectory": "stage/session-ef3c5516-187a-4291-bda5-23ab42e33e77",
+        "sessionOwnerIdentifier": "session-ef3c5516-187a-4291-bda5-23ab42e33e77",
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "a4f3aefddb3d3634bd1ccaf90c6e79d92edcf4d9245b9db1e0ff7b92a875d2e4"
+        },
+        "sourceByteCount": 13465993,
+        "sourceSHA256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 385,
+        "tableCount": 91,
+        "wallTimeMs": 3150
+      }
+    ],
+    "helperSHA256": "35327485f6db17a0c001d99485407c313d332b92d692cdd125a26e9628ed39a5",
+    "mode": "immutableSnapshot-development-signature",
+    "ownedTemporaryRootRemoved": true,
+    "ownerEvidenceVersion": 2,
+    "ownerRecovery": {
+      "ownerEvidenceVersion": 2,
+      "results": [
+        {
+          "identifier": "entry-67ac273a-cf15-4739-88a0-3a9141752174",
+          "outcome": "publishedNeedsEntryLease"
+        },
+        {
+          "identifier": "entry-85fd8036-83e0-4100-a415-ae08ce6e7574",
+          "outcome": "publishedNeedsEntryLease"
+        },
+        {
+          "identifier": "entry-bbae82fa-e5b5-4926-b812-8aa076012b61",
+          "outcome": "publishedNeedsEntryLease"
+        },
+        {
+          "identifier": "session-0bd48d3c-2167-4f0a-bdd1-d0c25d917912",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-67193ed1-c259-4734-9276-fd362e137a75",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-a78f6f51-d27b-4f75-a72e-9a5b3af463eb",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-afb2649a-635a-4702-bc42-c65ce229ef11",
+          "outcome": "removed"
+        },
+        {
+          "identifier": "session-ef3c5516-187a-4291-bda5-23ab42e33e77",
+          "outcome": "removed"
+        }
+      ]
+    },
+    "parserSHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "parserTrust": {
+      "code_directory_hash": [
+        225,
+        225,
+        19,
+        88,
+        239,
+        74,
+        51,
+        84,
+        184,
+        64,
+        202,
+        189,
+        191,
+        177,
+        7,
+        161,
+        179,
+        150,
+        195,
+        8
+      ],
+      "developer_id": false,
+      "hardened_runtime": false
+    },
+    "rawInputsAndOriginalParserUnchanged": true,
+    "readyAcceptance": false,
+    "reportedVersion": "4.3.7",
+    "rustStore": {
+      "readyAcceptance": false,
+      "results": [
+        {
+          "caseIndex": 0,
+          "databaseByteCount": 917504,
+          "databaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+          "independentIndexedQuickCheckAndClosure": "pass",
+          "indexProgress": [
+            {
+              "completed": 1,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 2,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 3,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 4,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 5,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 1,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 2,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 3,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 4,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 5,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 6,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 7,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 8,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 9,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 10,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 11,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 12,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 13,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 14,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 15,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 16,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 17,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 18,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 19,
+              "phase": "Ready",
+              "total": 19
+            }
+          ],
+          "inspection": {
+            "capabilities": {
+              "cpuCounters": false,
+              "cpuScheduling": false,
+              "namedSlices": true,
+              "processCounters": false,
+              "threadStates": false
+            },
+            "cpuCounterSampleTables": [],
+            "dataQuality": {
+              "status": "warnings",
+              "warnings": [
+                {
+                  "category": "droppedValue",
+                  "count": 416,
+                  "message": null,
+                  "scope": "stat.stat_type"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.cookie"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.depth"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.parent_id"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.ts"
+                }
+              ]
+            },
+            "durationNs": 32210627000,
+            "eventSourceCountsAvailable": true,
+            "processCounterSampleTables": [],
+            "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+            "traceEndTs": 535831985215000,
+            "traceStartTs": 535799774588000
+          },
+          "preparation": {
+            "applicableIndexNames": [
+              "arktrace_v1_callstack_callid_ts",
+              "arktrace_v1_measure_filter_id_ts",
+              "arktrace_v1_process_ipid",
+              "arktrace_v1_process_pid",
+              "arktrace_v1_sched_slice_itid_ts",
+              "arktrace_v1_sched_slice_ts_cpu",
+              "arktrace_v1_thread_itid",
+              "arktrace_v1_thread_state_itid_ts",
+              "arktrace_v1_thread_state_ts_cpu",
+              "arktrace_v1_thread_tid_ipid",
+              "arktrace_v2_callstack_callid_ts_cover_optional",
+              "arktrace_v2_callstack_callid_ts_id_dur",
+              "arktrace_v2_cpu_measure_filter_id",
+              "arktrace_v2_process_ipid_pid_name",
+              "arktrace_v2_process_measure_filter_id",
+              "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+              "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+              "arktrace_v2_thread_itid_tid_name_ipid",
+              "arktrace_v2_thread_state_itid_ts_cover_cpu",
+              "arktrace_v2_thread_state_itid_ts_id_dur",
+              "arktrace_v3_callstack_callid_ts_dur",
+              "arktrace_v3_callstack_ts_id_dur_callid",
+              "arktrace_v3_sched_slice_cpu_ts_dur",
+              "arktrace_v3_thread_state_itid_ts_dur"
+            ],
+            "indexSchemaVersion": 3,
+            "inspection": {
+              "capabilities": {
+                "cpuCounters": false,
+                "cpuScheduling": false,
+                "namedSlices": true,
+                "processCounters": false,
+                "threadStates": false
+              },
+              "cpuCounterSampleTables": [],
+              "dataQuality": {
+                "status": "warnings",
+                "warnings": [
+                  {
+                    "category": "droppedValue",
+                    "count": 416,
+                    "message": null,
+                    "scope": "stat.stat_type"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "callstack.cookie"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "callstack.depth"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "callstack.dur"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "callstack.parent_id"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "callstack.ts"
+                  }
+                ]
+              },
+              "durationNs": 32210627000,
+              "eventSourceCountsAvailable": true,
+              "processCounterSampleTables": [],
+              "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+              "traceEndTs": 535831985215000,
+              "traceStartTs": 535799774588000
+            },
+            "preparedDatabaseByteCount": 2351104,
+            "preparedDatabaseSha256": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+            "schemaAdapterVersion": "2",
+            "upstreamDatabaseByteCount": 917504,
+            "upstreamDatabaseSha256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9"
+          },
+          "preparedOwnerCleaned": true,
+          "snapshotUnchanged": true,
+          "swiftOracleSchemaCapabilitiesQualityAndDuration": "T0"
+        },
+        {
+          "caseIndex": 1,
+          "databaseByteCount": 1929216,
+          "databaseSHA256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755",
+          "independentIndexedQuickCheckAndClosure": "pass",
+          "indexProgress": [
+            {
+              "completed": 1,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 2,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 3,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 4,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 5,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 1,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 2,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 3,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 4,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 5,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 6,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 7,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 8,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 9,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 10,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 11,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 12,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 13,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 14,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 15,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 16,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 17,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 18,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 19,
+              "phase": "Ready",
+              "total": 19
+            }
+          ],
+          "inspection": {
+            "capabilities": {
+              "cpuCounters": false,
+              "cpuScheduling": false,
+              "namedSlices": false,
+              "processCounters": true,
+              "threadStates": false
+            },
+            "cpuCounterSampleTables": [],
+            "dataQuality": {
+              "status": "warnings",
+              "warnings": [
+                {
+                  "category": "droppedValue",
+                  "count": 416,
+                  "message": null,
+                  "scope": "stat.stat_type"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.filter_id"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.ts"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.value"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure_filter.id"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure_filter.ipid"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure_filter.name"
+                }
+              ]
+            },
+            "durationNs": 48516841334,
+            "eventSourceCountsAvailable": true,
+            "processCounterSampleTables": [
+              "process_measure"
+            ],
+            "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+            "traceEndTs": 1502026350073755298,
+            "traceStartTs": 1502026301556913964
+          },
+          "preparation": {
+            "applicableIndexNames": [
+              "arktrace_v1_callstack_callid_ts",
+              "arktrace_v1_measure_filter_id_ts",
+              "arktrace_v1_process_ipid",
+              "arktrace_v1_process_pid",
+              "arktrace_v1_sched_slice_itid_ts",
+              "arktrace_v1_sched_slice_ts_cpu",
+              "arktrace_v1_thread_itid",
+              "arktrace_v1_thread_state_itid_ts",
+              "arktrace_v1_thread_state_ts_cpu",
+              "arktrace_v1_thread_tid_ipid",
+              "arktrace_v2_callstack_callid_ts_cover_optional",
+              "arktrace_v2_callstack_callid_ts_id_dur",
+              "arktrace_v2_cpu_measure_filter_id",
+              "arktrace_v2_process_ipid_pid_name",
+              "arktrace_v2_process_measure_filter_id",
+              "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+              "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+              "arktrace_v2_thread_itid_tid_name_ipid",
+              "arktrace_v2_thread_state_itid_ts_cover_cpu",
+              "arktrace_v2_thread_state_itid_ts_id_dur",
+              "arktrace_v3_callstack_callid_ts_dur",
+              "arktrace_v3_callstack_ts_id_dur_callid",
+              "arktrace_v3_sched_slice_cpu_ts_dur",
+              "arktrace_v3_thread_state_itid_ts_dur"
+            ],
+            "indexSchemaVersion": 3,
+            "inspection": {
+              "capabilities": {
+                "cpuCounters": false,
+                "cpuScheduling": false,
+                "namedSlices": false,
+                "processCounters": true,
+                "threadStates": false
+              },
+              "cpuCounterSampleTables": [],
+              "dataQuality": {
+                "status": "warnings",
+                "warnings": [
+                  {
+                    "category": "droppedValue",
+                    "count": 416,
+                    "message": null,
+                    "scope": "stat.stat_type"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure.dur"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure.filter_id"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure.ts"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure.value"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure_filter.id"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure_filter.ipid"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "process_measure_filter.name"
+                  }
+                ]
+              },
+              "durationNs": 48516841334,
+              "eventSourceCountsAvailable": true,
+              "processCounterSampleTables": [
+                "process_measure"
+              ],
+              "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+              "traceEndTs": 1502026350073755298,
+              "traceStartTs": 1502026301556913964
+            },
+            "preparedDatabaseByteCount": 2072576,
+            "preparedDatabaseSha256": "b9c19f1a3ccf53e75864a4d465d087fe61be46bc32fe11c1f5f4c413c5b7732a",
+            "schemaAdapterVersion": "2",
+            "upstreamDatabaseByteCount": 1929216,
+            "upstreamDatabaseSha256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755"
+          },
+          "preparedOwnerCleaned": true,
+          "snapshotUnchanged": true,
+          "swiftOracleSchemaCapabilitiesQualityAndDuration": "T0"
+        },
+        {
+          "caseIndex": 2,
+          "databaseByteCount": 7344128,
+          "databaseSHA256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93",
+          "independentIndexedQuickCheckAndClosure": "pass",
+          "indexProgress": [
+            {
+              "completed": 1,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 2,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 3,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 4,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 5,
+              "phase": "Bootstrap",
+              "total": 5
+            },
+            {
+              "completed": 1,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 2,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 3,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 4,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 5,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 6,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 7,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 8,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 9,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 10,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 11,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 12,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 13,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 14,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 15,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 16,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 17,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 18,
+              "phase": "Ready",
+              "total": 19
+            },
+            {
+              "completed": 19,
+              "phase": "Ready",
+              "total": 19
+            }
+          ],
+          "inspection": {
+            "capabilities": {
+              "cpuCounters": false,
+              "cpuScheduling": true,
+              "namedSlices": false,
+              "processCounters": false,
+              "threadStates": true
+            },
+            "cpuCounterSampleTables": [],
+            "dataQuality": {
+              "status": "warnings",
+              "warnings": [
+                {
+                  "category": "droppedValue",
+                  "count": 416,
+                  "message": null,
+                  "scope": "stat.stat_type"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "sched_slice.cpu"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "sched_slice.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "sched_slice.ts"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "thread_state.cpu"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "thread_state.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "thread_state.ts"
+                }
+              ]
+            },
+            "durationNs": 9127944000,
+            "eventSourceCountsAvailable": true,
+            "processCounterSampleTables": [],
+            "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+            "traceEndTs": 88035820831000,
+            "traceStartTs": 88026692887000
+          },
+          "preparation": {
+            "applicableIndexNames": [
+              "arktrace_v1_callstack_callid_ts",
+              "arktrace_v1_measure_filter_id_ts",
+              "arktrace_v1_process_ipid",
+              "arktrace_v1_process_pid",
+              "arktrace_v1_sched_slice_itid_ts",
+              "arktrace_v1_sched_slice_ts_cpu",
+              "arktrace_v1_thread_itid",
+              "arktrace_v1_thread_state_itid_ts",
+              "arktrace_v1_thread_state_ts_cpu",
+              "arktrace_v1_thread_tid_ipid",
+              "arktrace_v2_callstack_callid_ts_cover_optional",
+              "arktrace_v2_callstack_callid_ts_id_dur",
+              "arktrace_v2_cpu_measure_filter_id",
+              "arktrace_v2_process_ipid_pid_name",
+              "arktrace_v2_process_measure_filter_id",
+              "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+              "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+              "arktrace_v2_thread_itid_tid_name_ipid",
+              "arktrace_v2_thread_state_itid_ts_cover_cpu",
+              "arktrace_v2_thread_state_itid_ts_id_dur",
+              "arktrace_v3_callstack_callid_ts_dur",
+              "arktrace_v3_callstack_ts_id_dur_callid",
+              "arktrace_v3_sched_slice_cpu_ts_dur",
+              "arktrace_v3_thread_state_itid_ts_dur"
+            ],
+            "indexSchemaVersion": 3,
+            "inspection": {
+              "capabilities": {
+                "cpuCounters": false,
+                "cpuScheduling": true,
+                "namedSlices": false,
+                "processCounters": false,
+                "threadStates": true
+              },
+              "cpuCounterSampleTables": [],
+              "dataQuality": {
+                "status": "warnings",
+                "warnings": [
+                  {
+                    "category": "droppedValue",
+                    "count": 416,
+                    "message": null,
+                    "scope": "stat.stat_type"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "sched_slice.cpu"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "sched_slice.dur"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "sched_slice.ts"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "thread_state.cpu"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "thread_state.dur"
+                  },
+                  {
+                    "category": "probeTruncated",
+                    "count": null,
+                    "message": null,
+                    "scope": "thread_state.ts"
+                  }
+                ]
+              },
+              "durationNs": 9127944000,
+              "eventSourceCountsAvailable": true,
+              "processCounterSampleTables": [],
+              "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+              "traceEndTs": 88035820831000,
+              "traceStartTs": 88026692887000
+            },
+            "preparedDatabaseByteCount": 19734528,
+            "preparedDatabaseSha256": "9fc8dfb215db961d215e1ed50a108c02fc3a31fccbdd91c5e852dd3d6dde5249",
+            "schemaAdapterVersion": "2",
+            "upstreamDatabaseByteCount": 7344128,
+            "upstreamDatabaseSha256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93"
+          },
+          "preparedOwnerCleaned": true,
+          "snapshotUnchanged": true,
+          "swiftOracleSchemaCapabilitiesQualityAndDuration": "T0"
+        }
+      ],
+      "sqliteRuntime": {
+        "compileOptions": [
+          "ATOMIC_INTRINSICS=1",
+          "COMPILER=clang-21.0.0",
+          "DEFAULT_AUTOVACUUM",
+          "DEFAULT_CACHE_SIZE=-2000",
+          "DEFAULT_FILE_FORMAT=4",
+          "DEFAULT_FOREIGN_KEYS",
+          "DEFAULT_JOURNAL_SIZE_LIMIT=-1",
+          "DEFAULT_MMAP_SIZE=0",
+          "DEFAULT_PAGE_SIZE=4096",
+          "DEFAULT_PCACHE_INITSZ=20",
+          "DEFAULT_RECURSIVE_TRIGGERS",
+          "DEFAULT_SECTOR_SIZE=4096",
+          "DEFAULT_SYNCHRONOUS=2",
+          "DEFAULT_WAL_AUTOCHECKPOINT=1000",
+          "DEFAULT_WAL_SYNCHRONOUS=2",
+          "DEFAULT_WORKER_THREADS=0",
+          "DIRECT_OVERFLOW_READ",
+          "ENABLE_API_ARMOR",
+          "ENABLE_COLUMN_METADATA",
+          "ENABLE_DBSTAT_VTAB",
+          "ENABLE_FTS3",
+          "ENABLE_FTS3_PARENTHESIS",
+          "ENABLE_FTS5",
+          "ENABLE_LOAD_EXTENSION",
+          "ENABLE_MEMORY_MANAGEMENT",
+          "ENABLE_RTREE",
+          "ENABLE_STAT4",
+          "HAVE_ISNAN",
+          "MALLOC_SOFT_LIMIT=1024",
+          "MAX_ATTACHED=10",
+          "MAX_COLUMN=2000",
+          "MAX_COMPOUND_SELECT=500",
+          "MAX_DEFAULT_PAGE_SIZE=8192",
+          "MAX_EXPR_DEPTH=1000",
+          "MAX_FUNCTION_ARG=1000",
+          "MAX_LENGTH=1000000000",
+          "MAX_LIKE_PATTERN_LENGTH=50000",
+          "MAX_MMAP_SIZE=0x7fff0000",
+          "MAX_PAGE_COUNT=0xfffffffe",
+          "MAX_PAGE_SIZE=65536",
+          "MAX_SQL_LENGTH=1000000000",
+          "MAX_TRIGGER_DEPTH=1000",
+          "MAX_VARIABLE_NUMBER=32766",
+          "MAX_VDBE_OP=250000000",
+          "MAX_WORKER_THREADS=8",
+          "MUTEX_PTHREADS",
+          "SOUNDEX",
+          "SYSTEM_MALLOC",
+          "TEMP_STORE=1",
+          "THREADSAFE=1",
+          "USE_URI"
+        ],
+        "fileStatFunctionAvailable": true,
+        "sourceId": "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24",
+        "version": "3.53.2"
+      },
+      "sqliteSourceID": "2026-06-03 19:12:13 d6e03d8c777cfa2d35e3b60d8ec3e0187f3e9f99d8e2ee9cac695fd6fcdf1a24",
+      "sqliteVersion": "3.53.2",
+      "version": 1
+    },
+    "schemaVersion": "arktrace.native-parser-process/1",
+    "versionExitCode": 1
+  },
+  "limits": [
+    "No formal Ready metadata/entry-lease publication or Engine lifecycle yet",
+    "Three small fixtures only; no medium/large RSS or performance acceptance",
+    "No new Swift SDK/App/ArkDeck/Capture integration or signed production distribution",
+    "Windows native ports and hosted CI unexecuted",
+    "No repeated APFS gate; previous gate remains independent historical evidence"
+  ]
+}

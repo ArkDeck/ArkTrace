@@ -44,7 +44,7 @@ ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库
 
 ## 构建与验证
 
-当前基线为 macOS 26+、Apple silicon、Swift 6.3 / Swift language mode 6；CI 固定 Xcode 26.6。
+当前基线为 macOS 26+、Apple silicon、Swift 6.4 / Swift language mode 6；CI 固定 Xcode 27.0。
 以 `Package.swift` 和 workflow 为准，不为通过检查擅自降低平台或工具链要求。
 日常迭代使用稳定缓存入口（在仓库根目录执行）：
 
@@ -52,9 +52,14 @@ ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库
 sh scripts/run-swiftpm.sh build
 sh scripts/run-swiftpm.sh test --filter '<相关测试套件>'
 sh scripts/run-xcodebuild.sh
+python3 scripts/run-cargo.py build --workspace
+python3 scripts/run-cargo.py test --workspace
 ```
 
 按改动选择命令，不要求每次全部运行。runner 管理稳定 source mirror 与缓存；不要给 SwiftPM runner 传它禁止的 `--package-path`、`--scratch-path` 或 `--cache-path`。
+Rust workspace 使用 exact 1.99.0 / edition 2024；Cargo runner 同样管理仓库外稳定缓存，使用 `--locked`。
+受限环境用 `ARKTRACE_CARGO_CACHE_ROOT` 指定可写根；Rust 改动运行 fmt、clippy、相关测试及 `verify_rust_workspace.py`。
+Windows 产品验证必须在 Windows x64 原生 runner 执行；macOS 交叉编译不形成 Windows 通过证据。
 受限环境可使用 runner 文档中的 `ARKTRACE_SWIFTPM_CACHE_ROOT` / `ARKTRACE_XCODE_CACHE_ROOT` 指定仓库外可写缓存，或按环境流程申请访问。
 
 | 改动 | 适用验证 |

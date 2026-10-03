@@ -1,0 +1,357 @@
+{
+  "task": "AT-RUST-009 parallel pure analysis",
+  "status": "reviewable-pure-module; AT-RUST-009 incomplete",
+  "recordedAtUtc": "2026-10-03T03:03:34.742793+00:00",
+  "workingDirectory": "/private/tmp/arktrace-parallel-analysis-20261003",
+  "sourceSnapshot": {
+    "baseRevision": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+    "createdAtUtc": "2026-10-03T02:34:14.453152+00:00",
+    "snapshotManifestSha256": "e6c69c1e50e61d3e98950c75400fc3ac1397da843f1996118eaa237d72be6e04",
+    "baselineFileCount": 556,
+    "unchangedFileCount": 556,
+    "changedFiles": [],
+    "deletedFiles": [],
+    "cargoWorkspace": {
+      "path": "rust/Cargo.toml",
+      "byteCount": 749,
+      "sha256": "3bc9937a44f51bce02fb745a49709326f5eba098e41a01de37363f8c9883479b"
+    },
+    "cargoLock": {
+      "path": "rust/Cargo.lock",
+      "byteCount": 7884,
+      "sha256": "9a901f924d39b54cc19da65b6492e51501bd24694d6c9acf882d80591456388b"
+    }
+  },
+  "addedPaths": [
+    "docs/migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.json",
+    "docs/migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.md",
+    "docs/migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.sha256",
+    "rust/crates/arktrace-analysis/Cargo.toml",
+    "rust/crates/arktrace-analysis/oracle/OracleHarness.swift",
+    "rust/crates/arktrace-analysis/oracle/generate_inputs.py",
+    "rust/crates/arktrace-analysis/oracle/run_cargo_validation.py",
+    "rust/crates/arktrace-analysis/oracle/run_swift_oracle.py",
+    "rust/crates/arktrace-analysis/src/hot.rs",
+    "rust/crates/arktrace-analysis/src/lib.rs",
+    "rust/crates/arktrace-analysis/src/reduce.rs",
+    "rust/crates/arktrace-analysis/src/scheduling.rs",
+    "rust/crates/arktrace-analysis/src/types.rs",
+    "rust/crates/arktrace-analysis/tests/fixtures/deviation-inputs.json",
+    "rust/crates/arktrace-analysis/tests/fixtures/inputs.json",
+    "rust/crates/arktrace-analysis/tests/fixtures/swift-deviations-receipt.json",
+    "rust/crates/arktrace-analysis/tests/fixtures/swift-deviations.json",
+    "rust/crates/arktrace-analysis/tests/fixtures/swift-oracle-receipt.json",
+    "rust/crates/arktrace-analysis/tests/fixtures/swift-oracle.json",
+    "rust/crates/arktrace-analysis/tests/regressions.rs",
+    "rust/crates/arktrace-analysis/tests/swift_deviations.rs",
+    "rust/crates/arktrace-analysis/tests/swift_oracle.rs"
+  ],
+  "fileDigests": [
+    {
+      "path": "rust/crates/arktrace-analysis/Cargo.toml",
+      "byteCount": 353,
+      "sha256": "45e08764e88cad35ea15243f9348a446085cae267321b65fc4109e0270631dd6"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/oracle/OracleHarness.swift",
+      "byteCount": 5115,
+      "sha256": "09547552d64fdea885457bbd8c0c081223c8bf640056910c6a0c79901d1daf29"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/oracle/generate_inputs.py",
+      "byteCount": 7259,
+      "sha256": "9d645b452028f4e02919d775e0c8566cedc656a007973255d2856540c7cb0bfc"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/oracle/run_cargo_validation.py",
+      "byteCount": 2811,
+      "sha256": "e06eaf6bc700e0e89c6967c909172b62527c718429dd58768a94911dc1b63785"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/oracle/run_swift_oracle.py",
+      "byteCount": 5067,
+      "sha256": "141ef5be445272840771772de7afbd10c0c10586e85e6fa9cf6969b29faa7237"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/hot.rs",
+      "byteCount": 5425,
+      "sha256": "9be825b7ab23ead63135d5c2239f681ccd96aace27c8974f05ebcef4396d2113"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/lib.rs",
+      "byteCount": 13731,
+      "sha256": "851fc6b0e0198d206ac39c0bce85f68159a73af1c107a618711710d5f97869fa"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/reduce.rs",
+      "byteCount": 6957,
+      "sha256": "2f9d85990d953afbc3dfcbe42419d22e37daf7b44e949ce1fe1b32db35f4b804"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/scheduling.rs",
+      "byteCount": 4215,
+      "sha256": "0ebc4e98963f6218ed055c7f771d1c2afac319dd3a47fa42c42eae5604d432d9"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/types.rs",
+      "byteCount": 10716,
+      "sha256": "c42ee7f56dc3a665f298e45fb0dd3f4a85b87d4fa7dd8198ab18d3a7046cc026"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/deviation-inputs.json",
+      "byteCount": 3481,
+      "sha256": "f5afffe7d84f291b5818f5017aca2e2e6e08a506c45addc15fe724aa99477d6a"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/inputs.json",
+      "byteCount": 1146430,
+      "sha256": "02fd544d11698899289a3361d25c3f5645d8e738547fcc22e19303e956200b7e"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-deviations-receipt.json",
+      "byteCount": 5479,
+      "sha256": "218a35e8425ad49b37339b2f88701da3ebe0617f1d5c8deb748ac374b95e46e5"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-deviations.json",
+      "byteCount": 8222,
+      "sha256": "259cf61284bd13aa59338ef1ffa7db1e750ca5f2d3de1d286ea12f2bd067d77f"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-oracle-receipt.json",
+      "byteCount": 5471,
+      "sha256": "fcf4c33b0ba2d5a60d93a3c8c4111cf4a7a0355e9a719a6d619b25c3837e761f"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-oracle.json",
+      "byteCount": 141738,
+      "sha256": "99d72513a68c6b4e6f041ad81f197aa09ebbca17f4c7420a2e59359992a92124"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/regressions.rs",
+      "byteCount": 20538,
+      "sha256": "da5297bc485bdc98bb9a9782cdbec38368fed64eeb81885ca1dbf165b107556e"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/swift_deviations.rs",
+      "byteCount": 2964,
+      "sha256": "ef1d4722dd9f87ea530ce654e2ca03ad4617776514c414b0dd44cbc8426f18be"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/swift_oracle.rs",
+      "byteCount": 6826,
+      "sha256": "cded6a7a0b5943583995988e0bd082c084da999aafc23b6e808e5573e6403055"
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.md",
+      "byteCount": 14809,
+      "sha256": "7337448e38761937476926af6a6aedfbab8eab1edce8532dffd98f5985ff2de2"
+    }
+  ],
+  "checksumManifest": "docs/migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.sha256",
+  "checksumManifestRule": "SHA-256 manifest includes every added file except itself, including this JSON report; fileDigests excludes this JSON to avoid self-reference",
+  "publicApi": [
+    "AnalysisRequest",
+    "AnalysisInput",
+    "AnalysisResult",
+    "SectionStatus",
+    "Check",
+    "AnalysisError",
+    "cpu_utilization",
+    "top_processes",
+    "top_threads",
+    "state_distribution",
+    "scheduling_latency",
+    "hot_intervals",
+    "analyze",
+    "AnalysisResult::retain_rows",
+    "RunnableSemantics",
+    "NamedDurationEvidence"
+  ],
+  "productionDependencies": [
+    "arktrace-contract",
+    "serde"
+  ],
+  "devDependencies": [
+    {
+      "name": "serde_json",
+      "feature": "float_roundtrip"
+    }
+  ],
+  "newThirdPartyPackages": [],
+  "toolchain": {
+    "rust": "1.99.0",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "macosDeploymentTarget": "26.0"
+  },
+  "checks": [
+    {
+      "name": "test",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-analysis/oracle/run_cargo_validation.py",
+        "test",
+        "-p",
+        "arktrace-analysis",
+        "--offline"
+      ],
+      "startedAtUtc": "2026-10-03T02:59:07.052234+00:00",
+      "exitCode": 0,
+      "logPath": "/private/tmp/arktrace-parallel-analysis-cargo/final-test.log",
+      "logSha256": "c35b277000b97c0da8ed8d832d19293b7d6b3adeb0ab6a6e4c9d986fcf5e8f6f",
+      "warningCount": 0,
+      "skipCount": 0
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-analysis/oracle/run_cargo_validation.py",
+        "fmt",
+        "-p",
+        "arktrace-analysis",
+        "--check"
+      ],
+      "startedAtUtc": "2026-10-03T02:59:08.186978+00:00",
+      "exitCode": 0,
+      "logPath": "/private/tmp/arktrace-parallel-analysis-cargo/final-fmt.log",
+      "logSha256": "4f07da1123d61b764b9fe142c04250398e17a360d8f8f1de808bca7c491bdcde",
+      "warningCount": 0,
+      "skipCount": 0
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-analysis/oracle/run_cargo_validation.py",
+        "clippy",
+        "-p",
+        "arktrace-analysis",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "startedAtUtc": "2026-10-03T02:59:08.625905+00:00",
+      "exitCode": 0,
+      "logPath": "/private/tmp/arktrace-parallel-analysis-cargo/final-clippy.log",
+      "logSha256": "444c1f2268a50f137aaaea1f69f17c3a7197d0300fe41d8c2a4b42abbb8e0a35",
+      "warningCount": 0,
+      "skipCount": 0
+    },
+    {
+      "name": "architecture",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-analysis/oracle/run_cargo_validation.py",
+        "verify"
+      ],
+      "startedAtUtc": "2026-10-03T02:59:09.188021+00:00",
+      "exitCode": 0,
+      "logPath": "/private/tmp/arktrace-parallel-analysis-cargo/final-architecture.log",
+      "logSha256": "ab43eedc12258c8eb58f4a72f4e6d657b3ae94671f90593454ed3804656adc16",
+      "warningCount": 0,
+      "skipCount": 0
+    },
+    {
+      "name": "Swift oracle",
+      "exitCode": 0,
+      "logPath": "/private/tmp/arktrace-parallel-analysis-swiftpm/oracle.log",
+      "logSha256": "c195d94ddc1b5677d1e7f4c1c26413b86efb2ba3a9c003ded5538b2e71d0f401",
+      "passedTestCount": 1,
+      "vectorCount": 23,
+      "warningCount": 0,
+      "skipCount": 0
+    },
+    {
+      "name": "Swift swift-regressions",
+      "exitCode": 0,
+      "logPath": "/private/tmp/arktrace-parallel-analysis-swiftpm/swift-regressions.log",
+      "logSha256": "f906c6b6a78c126421aecf22eab31da124547f83f931f904bdb72c54140a8bb0",
+      "passedTestCount": 8,
+      "vectorCount": null,
+      "warningCount": 0,
+      "skipCount": 0
+    }
+  ],
+  "rustTests": {
+    "total": 21,
+    "regressionFunctions": 18,
+    "oracleReplayTests": 1,
+    "actualSwiftParityVectors": 23,
+    "recordedBehaviorGapTests": 2,
+    "hotNaiveGridCases": 180
+  },
+  "swiftOracle": {
+    "receiptPath": "rust/crates/arktrace-analysis/tests/fixtures/swift-oracle-receipt.json",
+    "vectors": 23,
+    "comparison": "exact Int64, binary64 bits, arrays, section returnedCount/matchedCount/truncated, structured quality facts",
+    "scope": "six pure sections; longSlices excluded before actual Swift global retainingRows"
+  },
+  "behaviorGaps": [
+    {
+      "input": "open-ended-runnable-boundary-not-observed",
+      "actualSwift": "supported=true,count=1",
+      "rust": "supported=false,count=0,noProvableRunnableTransitions",
+      "disposition": "conservative unobserved endpoint proof rejection; mainline must review and align Swift or withhold attestation"
+    },
+    {
+      "input": "canonical-unicode-raw-state",
+      "actualSwift": "one canonical-equivalent raw label group,durationNs=60",
+      "rust": "two byte-exact raw label groups,total durationNs=60",
+      "disposition": "unresolved parity gap; shared Unicode semantics decision required; not part of 23 parity vectors"
+    }
+  ],
+  "independentDeviationReceipt": "rust/crates/arktrace-analysis/tests/fixtures/swift-deviations-receipt.json",
+  "integration": {
+    "engineLocation": "rust/crates/arktrace-engine/src/no_cache.rs NoCacheSession::cpu_slices/thread_states",
+    "runnableAttestation": "verified pinned schema adapter mapping plus full event ranges/open-ended flags; same itid and observed end==scheduled start; enum presence alone insufficient",
+    "independentPages": [
+      "cpu",
+      "processes",
+      "threads",
+      "states",
+      "scheduling_cpu",
+      "scheduling_states",
+      "hot_cpu",
+      "hot_named"
+    ],
+    "namedInputMissingBehavior": "named capability true + no typed page => hot supported=false, matchedCount=null, namedSliceInputMissing",
+    "rootCargoLockRequiredChange": "--- snapshot/rust/Cargo.lock\n+++ validation-source/rust/Cargo.lock\n@@ -1,6 +1,15 @@\n # This file is automatically @generated by Cargo.\n # It is not intended for manual editing.\n version = 4\n+\n+[[package]]\n+name = \"arktrace-analysis\"\n+version = \"0.1.0\"\n+dependencies = [\n+ \"arktrace-contract\",\n+ \"serde\",\n+ \"serde_json\",\n+]\n \n [[package]]\n name = \"arktrace-cli\"\n",
+    "rootCargoMembersRequiredChange": null,
+    "verifierRequiredChange": null,
+    "missingContracts": [
+      "actual TraceSlice/TraceSliceQuery and Store named query",
+      "bounded summary facts",
+      "typed context counters/directories and byte enforcement"
+    ],
+    "machineEnvelopeRequired": [
+      "effective exact filters",
+      "trace/parser/tool provenance",
+      "versioned full result",
+      "long-slice section restored in global priority",
+      "output byte enforcement",
+      "error mapping"
+    ]
+  },
+  "initialFailuresResolved": [
+    "SwiftPM sandbox-exec Operation not permitted => runner --disable-sandbox and own config/security paths",
+    "serde_json default decimal decode 1 ULP mismatch => float_roundtrip only dev; exact bit comparison retained",
+    "architecture verifier missing downloaded registry and restricted network => read-only registry copy into isolated dependency cache; CARGO_NET_OFFLINE=true"
+  ],
+  "notExecuted": [
+    "real parser/query oracle in this task",
+    "Store/CLI analysis integration",
+    "complete summary/context/long slice/App range surface",
+    "complete Rust workspace test suite",
+    "full Swift suite",
+    "App build",
+    "Windows native",
+    "performance benchmark",
+    "production distribution validation"
+  ],
+  "noChangesToOtherCheckouts": true,
+  "noNativeProbes": true
+}

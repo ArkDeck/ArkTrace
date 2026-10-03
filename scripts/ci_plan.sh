@@ -6,6 +6,7 @@
 #   lane_app       - Xcode app-target build + bundle document-type checks
 #   lane_contracts - offline release/contract gates (licenses, parser lock,
 #                    phase6 evidence, distribution and planner contracts)
+#   lane_rust_macos / lane_rust_windows - pinned workspace on native hosts
 #
 # Fail-closed rules:
 #   - an empty input selects every lane (an unknown diff is treated as "could
@@ -21,21 +22,49 @@ set -eu
 swiftpm=false
 app=false
 contracts=false
+rust_macos=false
+rust_windows=false
 saw_any=false
 
 select_all() {
     swiftpm=true
     app=true
     contracts=true
+    rust_macos=true
+    rust_windows=true
 }
 
 while IFS= read -r path; do
     [ -n "$path" ] || continue
     saw_any=true
     case "$path" in
-        .github/workflows/*|scripts/ci_plan.sh|scripts/test_ci_plan.sh|scripts/run-swiftpm.sh|scripts/test_run_swiftpm.py|scripts/run-xcodebuild.sh|scripts/test_run_xcodebuild.py)
+        .github/workflows/*|scripts/ci_plan.sh|scripts/test_ci_plan.sh|scripts/run-swiftpm.sh|scripts/test_run_swiftpm.py|scripts/run-xcodebuild.sh|scripts/test_run_xcodebuild.py|scripts/run-cargo.py|scripts/test_run_cargo.py|scripts/verify_rust_workspace.py)
             # The planner cannot prove anything about a change to itself.
             select_all
+            ;;
+        rust/*.md|rust/*/*.md|contracts/*.md|bindings/*.md|windows/*.md)
+            ;;
+        rust/*)
+            rust_macos=true
+            rust_windows=true
+            ;;
+        contracts/*)
+            # Shared vectors are consumed by both language implementations.
+            swiftpm=true
+            contracts=true
+            rust_macos=true
+            rust_windows=true
+            ;;
+        bindings/*)
+            swiftpm=true
+            app=true
+            contracts=true
+            rust_macos=true
+            rust_windows=true
+            ;;
+        windows/*)
+            contracts=true
+            rust_windows=true
             ;;
         Package.swift)
             swiftpm=true
@@ -68,6 +97,11 @@ while IFS= read -r path; do
             # rides the SwiftPM lane rather than the offline contract lane.
             swiftpm=true
             ;;
+        scripts/test_macos_file_volumes.py|scripts/test_macos_parser_process.py|scripts/test_macos_directory_commands.py|scripts/test_macos_event_queries.py|scripts/test_macos_slice_queries.py|scripts/test_macos_counter_queries.py|scripts/test_macos_frame_queries.py|scripts/test_macos_argument_queries.py|scripts/test_macos_search.py|scripts/test_macos_density_queries.py|scripts/test_macos_bounded_analysis.py|scripts/test_macos_rust_cli.py|scripts/build_macos_rust_cli_candidate.py|ThirdParty/TraceStreamer/macx/manifest.json)
+            # This native acceptance harness consumes the macOS Rust port.
+            rust_macos=true
+            contracts=true
+            ;;
         Apps/*|ArkTrace.xcodeproj/*)
             app=true
             contracts=true
@@ -75,9 +109,7 @@ while IFS= read -r path; do
         Config/*)
             # Product identity is mirrored into Swift constants (SwiftPM
             # tests), stamped into the app, and pinned by release contracts.
-            swiftpm=true
-            app=true
-            contracts=true
+            select_all
             ;;
         Fixtures/*)
             # Test fixtures feed SwiftPM tests; release evidence feeds gates.
@@ -115,3 +147,5 @@ fi
 printf 'lane_swiftpm=%s\n' "$swiftpm"
 printf 'lane_app=%s\n' "$app"
 printf 'lane_contracts=%s\n' "$contracts"
+printf 'lane_rust_macos=%s\n' "$rust_macos"
+printf 'lane_rust_windows=%s\n' "$rust_windows"

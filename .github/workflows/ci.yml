@@ -30,7 +30,7 @@ name: CI
 #                parser asset, fetches the locked medium fixture, and fails
 #                closed on any identity drift. Never a merge gate.
 #
-# Toolchain policy: runners are pinned to macos-26 with Xcode 26.6. If the
+# Toolchain policy: runners are pinned to macos-26 with Xcode 27.0. If the
 # pinned toolchain is missing the job fails immediately instead of silently
 # building with whatever is newest.
 
@@ -57,7 +57,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PINNED_DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+  PINNED_DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
   TRACE_STREAMER_RELEASE_TAG: trace-streamer-4.3.7-0665e04e4abf
 
 jobs:
@@ -69,6 +69,8 @@ jobs:
       lane_swiftpm: ${{ steps.plan.outputs.lane_swiftpm }}
       lane_app: ${{ steps.plan.outputs.lane_app }}
       lane_contracts: ${{ steps.plan.outputs.lane_contracts }}
+      lane_rust_macos: ${{ steps.plan.outputs.lane_rust_macos }}
+      lane_rust_windows: ${{ steps.plan.outputs.lane_rust_windows }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -133,7 +135,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Pin Xcode 26.6 (fail closed)
+      - name: Pin Xcode 27.0 (fail closed)
         run: |
           if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
             echo "::error::pinned toolchain $PINNED_DEVELOPER_DIR is absent on this runner; refusing to substitute another Xcode"
@@ -154,7 +156,7 @@ jobs:
             echo "SDK: $(DEVELOPER_DIR=$PINNED_DEVELOPER_DIR xcrun --show-sdk-version)"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
-          echo "xcode=26.6" >> "$GITHUB_OUTPUT"
+          echo "xcode=27.0" >> "$GITHUB_OUTPUT"
 
       # The cache owns a stable source mirror as well as build/dependency/module
       # state. Restoring only `.build` under an ephemeral checkout path causes
@@ -176,10 +178,10 @@ jobs:
             ${{ runner.temp }}/arktrace-swiftpm/dependencies
             ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
             ${{ runner.temp }}/arktrace-swiftpm/source-state
-          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
           restore-keys: |
-            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-
-            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
+            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-
+            spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The package builds warning-free today and that is worth holding. If a
       # newer SDK introduces an unavoidable warning, relax this step rather
@@ -253,7 +255,7 @@ jobs:
             ${{ runner.temp }}/arktrace-swiftpm/dependencies
             ${{ runner.temp }}/arktrace-swiftpm/ModuleCache
             ${{ runner.temp }}/arktrace-swiftpm/source-state
-          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
+          key: spm-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Tests/**', 'scripts/run-swiftpm.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
@@ -275,7 +277,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Pin Xcode 26.6 (fail closed)
+      - name: Pin Xcode 27.0 (fail closed)
         run: |
           if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
             echo "::error::pinned toolchain $PINNED_DEVELOPER_DIR is absent on this runner; refusing to substitute another Xcode"
@@ -324,10 +326,10 @@ jobs:
             ${{ runner.temp }}/arktrace-xcode/source-state
             ${{ runner.temp }}/sym/Debug
             !${{ runner.temp }}/sym/Debug/ArkTrace.app
-          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
           restore-keys: |
-            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-
-            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-
+            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-
+            xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The app target lives in the Xcode project, outside the SwiftPM graph,
       # so `swift build` never compiles it. It also has a "Copy Pinned
@@ -382,7 +384,7 @@ jobs:
             ${{ runner.temp }}/arktrace-xcode/source-state
             ${{ runner.temp }}/sym/Debug
             !${{ runner.temp }}/sym/Debug/ArkTrace.app
-          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode26.6-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
+          key: xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-${{ hashFiles('Package.swift', 'Sources/**', 'Apps/**', 'ArkTrace.xcodeproj/**', 'Config/**', 'scripts/run-xcodebuild.sh') }}-${{ github.sha }}
 
       - name: Upload logs
         if: always()
@@ -413,6 +415,68 @@ jobs:
           sh scripts/test_ci_plan.sh
           python3 scripts/test_run_swiftpm.py
           python3 scripts/test_run_xcodebuild.py
+          python3 scripts/test_run_cargo.py
+          python3 scripts/verify_migration_contracts.py
+
+  rust-macos:
+    name: Rust macOS native
+    needs: plan
+    if: needs.plan.outputs.lane_rust_macos == 'true'
+    runs-on: macos-26
+    timeout-minutes: 20
+    env:
+      ARKTRACE_EXPECT_NATIVE_HOST: macos-arm64
+    steps:
+      - uses: actions/checkout@v7
+      - name: Select pinned Xcode
+        run: |
+          if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
+            echo "::error::pinned Xcode 27 is absent; refusing another SDK"
+            exit 1
+          fi
+          echo "DEVELOPER_DIR=$PINNED_DEVELOPER_DIR" >> "$GITHUB_ENV"
+      - name: Install exact Rust toolchain
+        run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
+      - name: Set external Cargo cache
+        run: echo "ARKTRACE_CARGO_CACHE_ROOT=$RUNNER_TEMP/arktrace-cargo" >> "$GITHUB_ENV"
+      - name: Format, architecture, licenses and contract checks
+        run: |
+          python3 scripts/run-cargo.py fmt --all -- --check
+          python3 scripts/verify_migration_contracts.py
+          python3 scripts/verify_rust_workspace.py
+      - name: Build, lint and native tests
+        run: |
+          python3 scripts/run-cargo.py build --workspace
+          python3 scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
+          python3 scripts/run-cargo.py test --workspace --all-features
+          python3 scripts/run-cargo.py run --bin arktrace-migration-smoke
+
+  rust-windows:
+    name: Rust Windows native
+    needs: plan
+    if: needs.plan.outputs.lane_rust_windows == 'true'
+    runs-on: windows-2025
+    timeout-minutes: 20
+    env:
+      ARKTRACE_EXPECT_NATIVE_HOST: windows-x64
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install exact Rust toolchain
+        run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
+      - name: Set external Cargo cache
+        shell: pwsh
+        run: '"ARKTRACE_CARGO_CACHE_ROOT=$env:RUNNER_TEMP/arktrace-cargo" >> $env:GITHUB_ENV'
+      - name: Format, architecture, licenses and contract checks
+        run: |
+          python scripts/run-cargo.py fmt --all -- --check
+          python scripts/verify_migration_contracts.py
+          python scripts/verify_rust_workspace.py
+      - name: Build, lint and native tests
+        run: |
+          python scripts/run-cargo.py build --workspace
+          python scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
+          python scripts/run-cargo.py test --workspace --all-features
+          python scripts/run-cargo.py run --bin arktrace-migration-smoke
 
   # The single required check for branch protection. It runs always, and it
   # fails when a planned lane failed, was cancelled, or was skipped despite
@@ -420,7 +484,7 @@ jobs:
   # protection.
   ci-required:
     name: CI required
-    needs: [plan, swiftpm, app, contracts]
+    needs: [plan, swiftpm, app, contracts, rust-macos, rust-windows]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -452,6 +516,8 @@ jobs:
           check swiftpm "${{ needs.plan.outputs.lane_swiftpm }}" "${{ needs.swiftpm.result }}"
           check app "${{ needs.plan.outputs.lane_app }}" "${{ needs.app.result }}"
           check contracts "${{ needs.plan.outputs.lane_contracts }}" "${{ needs.contracts.result }}"
+          check rust-macos "${{ needs.plan.outputs.lane_rust_macos }}" "${{ needs.rust-macos.result }}"
+          check rust-windows "${{ needs.plan.outputs.lane_rust_windows }}" "${{ needs.rust-windows.result }}"
           if [ "$failures" -gt 0 ]; then
             exit 1
           fi
@@ -470,7 +536,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Pin Xcode 26.6 (fail closed)
+      - name: Pin Xcode 27.0 (fail closed)
         run: |
           if [ ! -d "$PINNED_DEVELOPER_DIR" ]; then
             echo "::error::pinned toolchain $PINNED_DEVELOPER_DIR is absent on this runner"

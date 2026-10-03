@@ -1,0 +1,294 @@
+{
+  "schemaVersion": "arktrace.migration-process-ports/1",
+  "recordedAtUtc": "2026-10-02T18:29:51.456661+00:00",
+  "localRunDate": "2026-10-03",
+  "baseCommit": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+  "toolchain": {
+    "rust": "1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "27.0 (27A266a)",
+    "macOS": "27.0 (26A428)",
+    "architecture": "arm64"
+  },
+  "sources": [
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 593,
+      "sha256": "57d31e7643599c9574ec308361d7b1d10278b9888399eaa15ba581de857c08ba"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 5225,
+      "sha256": "5405ca802ad1a41e1750657f33756bb22fc1047d34d10426b3fc9833c0356a09"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "byteCount": 87,
+      "sha256": "b206a08a9e3a50784fcedbd23b8ae0555f70bc6cb5da57bfcd1bb67ac6e56b55"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/Cargo.toml",
+      "byteCount": 821,
+      "sha256": "05ef2ef127f82184d9c0e6b72ddcd984af1a63d5998539c8056200220571ad44"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1493,
+      "sha256": "198ed6c2775386e7444a8682401387e1dfa84ccf60048292c929c785604bf365"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 1017,
+      "sha256": "d2ae8d7eb6b15b633bafcc2caa9279b0d8f7feba28c19f4bf07e127e4a54b0a1"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 1489,
+      "sha256": "481817a7448ca87029caebea0f61892f8af0bda409c2590a6ecf8a5f56536386"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 36681,
+      "sha256": "b8c57e4e605d0b5cbc3adf0593d4a5b06f445d87c6de3afb9825f5620e3b68fd"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+      "byteCount": 35213,
+      "sha256": "1d770a977b54f50a4a0ba61a4016d2beaa8e0c48f9421d4be757cc5141c37856"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+      "byteCount": 9451,
+      "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+      "byteCount": 260,
+      "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+      "byteCount": 13218,
+      "sha256": "e4753151de36c8e775165ac54b3eaeaca49a81d3e326ad889e41d00e6961918e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+      "byteCount": 4699,
+      "sha256": "8f20b91b03ad1039f69ddec09f8f2388d13b5eab0be6ba33fcfaca3cc4c0d3e6"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+      "byteCount": 5668,
+      "sha256": "1e8a993d9fedc14121e3b4ddcdfd77e4a41e4a43d6043cc046f1ee20566631e7"
+    },
+    {
+      "path": "scripts/test_macos_parser_process.py",
+      "byteCount": 3766,
+      "sha256": "d2039d88f5d8f4d718681b328dbb981d738eb2e9c52c2db62c1330af336199de"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "byteCount": 27880,
+      "sha256": "b5029d55bb61605d5fe00dc78c3c6c686c76f2fa3560624fadede3e5da146bf6"
+    },
+    {
+      "path": "scripts/ci_plan.sh",
+      "byteCount": 5619,
+      "sha256": "dd9986eb1001b1a16759e11c7c0e1e6190768b8c7ed63b638c96a7718c68dae0"
+    },
+    {
+      "path": "scripts/test_ci_plan.sh",
+      "byteCount": 5524,
+      "sha256": "649c16d639e1aa2ce57901b08d02f85f1cac940ca985b8233eb6ce1fa76bb54c"
+    }
+  ],
+  "rustTests": {
+    "command": "python3 scripts/run-cargo.py test --workspace --all-features",
+    "passed": 42,
+    "failed": 0,
+    "ignored": 0,
+    "tests": [
+      "swift_time_contract_vectors",
+      "swift_quality_contract_vectors",
+      "machine_quality_is_closed_bounded_and_sorted",
+      "swift_cache_key_and_lease_protocol_vectors",
+      "macos::tests::cancellation_immediately_before_atomic_rename_publishes_nothing",
+      "macos::tests::parent_replacement_at_publication_window_is_rejected_inside_critical_section",
+      "macos::tests::cancellation_immediately_after_atomic_rename_rolls_back_owned_publication",
+      "tests::native_runner_matches_the_requested_host",
+      "macos::tests::replaced_publication_is_preserved_and_cleanup_failure_is_not_hidden_by_cancel",
+      "macos::tests::same_inode_same_size_content_mutation_after_rename_is_rejected_and_rolled_back",
+      "macos::tests::injected_enospc_after_partial_write_preserves_closed_failure_and_cleans_output",
+      "macos::tests::cleanup_failure_takes_priority_over_copy_cancellation_without_deleting_replacement",
+      "macos::tests::cancellation_after_first_copy_chunk_removes_partial_output",
+      "macos::tests::input_mutation_during_copy_is_rejected_and_partial_output_removed",
+      "cancelled_expired_and_oversized_operations_leave_no_partial_file",
+      "detects_in_place_mutation_and_replaced_source",
+      "owned_cleanup_preserves_replacement_and_only_removes_proven_identity",
+      "copies_unicode_source_to_verified_readonly_snapshot_without_mutating_input",
+      "lease_wait_is_bounded_and_replaced_lease_is_rejected",
+      "refuses_nonregular_objects_and_path_escape_without_blocking_on_fifo",
+      "rejects_acl_grants_even_when_mode_bits_are_private_and_preserves_acl",
+      "permits_raw_hard_links_and_refuses_private_file_or_lease_hard_links",
+      "rejects_existing_public_directory_and_writable_ancestor_without_chmod",
+      "accepts_deny_only_acl_and_rejects_allow_acl_on_private_file_and_lease",
+      "resolves_explicit_source_link_once_but_refuses_links_inside_storage",
+      "ancestor_replacement_prevents_publication_and_owned_deletion",
+      "held_files_directories_and_leases_are_not_inherited_by_exec",
+      "publishes_exact_same_volume_identity_and_never_overwrites_existing_target",
+      "shared_readers_block_cross_process_purge_until_all_leases_close",
+      "adhoc_development_artifact_cannot_satisfy_production_identity_or_bad_pin",
+      "rejects_corrupted_signature_even_when_development_digest_matches_bytes",
+      "cancellation_kills_term_ignoring_child_and_grandchild_before_returning",
+      "rejects_kernel_identity_mismatch_before_resuming_suspended_executable",
+      "preserves_nonzero_exit_without_inventing_success",
+      "preserves_literal_arguments_unicode_empty_value_cwd_and_minimal_environment",
+      "rejects_verified_tool_path_replacement_before_launch",
+      "rejects_pre_cancel_expired_budget_and_nul_argument",
+      "host_sigkill_closes_control_pipe_and_independently_reclaims_process_tree",
+      "stops_stdout_and_stderr_flood_at_separate_caps",
+      "transports_full_output_cap_without_replaying_partial_protocol_writes",
+      "reaps_exit_and_kills_descendants_with_inherited_or_closed_pipes",
+      "deadline_kills_term_ignoring_process_tree"
+    ],
+    "logSHA256": "079266be8d87800103ac663f554679be12c4ba17fd1219bb1dfd52056afecfe4"
+  },
+  "clippy": {
+    "command": "python3 scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings",
+    "passed": true,
+    "warnings": 0,
+    "logSHA256": "a1978b5f3b6e94a9f39ce23854b1f8ce0a4f95e4bf963a7176d9914f470a255b"
+  },
+  "otherChecks": {
+    "fmt": "passed",
+    "migrationContracts": {
+      "machineFixtureCount": 34,
+      "scopeCount": 56,
+      "passed": true
+    },
+    "workspace": {
+      "firstPartyCrates": 4,
+      "frozenThirdPartyLicenses": 21,
+      "passed": true
+    },
+    "cargoRunner": {
+      "passed": 7,
+      "failed": 0
+    },
+    "ciPlanner": {
+      "passed": 29,
+      "failed": 0
+    },
+    "hostedCIExecuted": false
+  },
+  "nativeParserProcessProbe": {
+    "exports": [
+      {
+        "databaseByteCount": 917504,
+        "databaseMode": 384,
+        "databaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+        "exitCode": 0,
+        "fixture": "zlib.htrace",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "54667473fc30d70cf3110fb6c2091d6a9c77ddf75125b05984339a9a927991d2"
+        },
+        "sourceByteCount": 67837,
+        "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 635
+      },
+      {
+        "databaseByteCount": 1929216,
+        "databaseMode": 384,
+        "databaseSHA256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755",
+        "exitCode": 0,
+        "fixture": "hiprofiler_data_ability.htrace",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "b7786940d1a3266bba802a65c1035bb2857b1c0327e27679703a921c88f0f2e1"
+        },
+        "sourceByteCount": 557542,
+        "sourceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 600
+      },
+      {
+        "databaseByteCount": 7344128,
+        "databaseMode": 384,
+        "databaseSHA256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93",
+        "exitCode": 0,
+        "fixture": "trace_small_10.systrace",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "605f026a20f9e5bd9dcee7dabbde1193edf70412dea7f541cff671f1b1dae6cd"
+        },
+        "sourceByteCount": 13465993,
+        "sourceSHA256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 385,
+        "tableCount": 91,
+        "wallTimeMs": 1432
+      }
+    ],
+    "helperSHA256": "048fa62f3869c43278299a36f3bebe1e0a690d520e3881a082b06a8c223e8e95",
+    "mode": "immutableSnapshot-development-signature",
+    "ownedTemporaryRootRemoved": true,
+    "parserSHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "parserTrust": {
+      "code_directory_hash": [
+        225,
+        225,
+        19,
+        88,
+        239,
+        74,
+        51,
+        84,
+        184,
+        64,
+        202,
+        189,
+        191,
+        177,
+        7,
+        161,
+        179,
+        150,
+        195,
+        8
+      ],
+      "developer_id": false,
+      "hardened_runtime": false
+    },
+    "rawInputsAndOriginalParserUnchanged": true,
+    "readyAcceptance": false,
+    "reportedVersion": "4.3.7",
+    "schemaVersion": "arktrace.native-parser-process/1",
+    "versionExitCode": 1
+  },
+  "remaining": [
+    "helper initial suspended verification parent-death window",
+    "all cancellation/launch race windows and cleanup-failure/panic injection",
+    "live sidecar budget",
+    "signedBundleInPlace and sealed outer bundle/sandbox",
+    "production Developer ID/hardened/notarization and fixed supervisor release pin",
+    "Windows native Job/DACL/handle lifecycle",
+    "directory owner/crash recovery/real ArkDeck purge interop",
+    "Rust parser/schema/range/relationship/index/metadata to Ready",
+    "complete CLI/SDK/App/ArkDeck integration",
+    "medium/large performance and final cutover/rollback"
+  ]
+}

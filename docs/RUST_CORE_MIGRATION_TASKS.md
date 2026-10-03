@@ -5,6 +5,8 @@
 > 实施基线：ArkTrace `9172c9525f954ec397e0555d7d03cd4367f3efcf`（1.1 复核至 `5f9934d6`，其间仅文档变化）。
 > 1.1 修订：补齐各任务需求编号（含此前未引用的 AT-LOD/CTX/JSON/MODEL/AD 与 AT-SYS-004），
 > 加入不依赖 Rust 的下游解阻项、ArkDeck 已裁定的 `trace.inspect` 路线及 Windows 取消/运行时/分发要求。
+> 实施已开始：001/002/004/005/006/007/010 为 in-progress，0 项完整 done；本轮优先推进 macOS 验收。
+> 实际记录：[首轮基线与 workspace](migration-runs/AT-RUST-001-002-2026-10-02.md)。
 
 ## 1. 执行规则与完成语义
 
@@ -33,16 +35,16 @@
 
 | 编号 | 交付 | 开工依赖 | 完成依赖 | 状态 | 规模 |
 |---|---|---|---|---|---|
-| 001 | 行为/契约/oracle/性能基线 | 无 | 无 | ready | M |
-| 002 | Rust workspace、工具链、双平台 CI | 无 | 无 | ready | M |
+| 001 | 行为/契约/oracle/性能基线 | 无 | 无 | in-progress | M |
+| 002 | Rust workspace、工具链、双平台 CI | 无 | 无 | in-progress | M |
 | 003 | Windows TraceStreamer 构建与身份 | 无 | 无 | ready | L |
-| 004 | 文件身份、权限、锁与原子发布端口 | 002 | 001、002 | planned | L |
-| 005 | 进程树、取消、输出预算与签名端口 | 002 | 004 | planned | L |
-| 006 | 真实解析→校验→索引→Ready | 001、002 | 004、005；Windows 加 003 | planned | L |
-| 007 | SQLite typed query、搜索与目录 | 001、002 | 006 | planned | L |
+| 004 | 文件身份、权限、锁与原子发布端口 | 002 | 001、002 | in-progress | L |
+| 005 | 进程树、取消、输出预算与签名端口 | 002 | 004 | in-progress | L |
+| 006 | 真实解析→校验→索引→Ready | 001、002 | 004、005；Windows 加 003 | in-progress | L |
+| 007 | SQLite typed query、搜索与目录 | 001、002 | 006 | in-progress | L |
 | 008 | Session/cache/lease/标注迁移 | 001、002 | 004、006、007 | planned | L |
-| 009 | summary/context/analyze 与质量事实 | 001、002 | 007 | planned | L |
-| 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | planned | L |
+| 009 | summary/context/analyze 与质量事实 | 001、002 | 007 | in-progress | L |
+| 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | in-progress | L |
 | 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | planned | L |
 | 012 | C ABI、Swift/C# SDK 与生命周期 | 001、002 | 008、009、011 | planned | L |
 | 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | planned | L |
@@ -99,7 +101,7 @@ flowchart LR
 
 ## 3. AT-RUST-001 — 冻结行为、接口、oracle 与当前基线
 
-- 状态：ready；开工依赖：无；完成依赖：无。
+- 状态：in-progress；开工依赖：无；完成依赖：无。
 - 平台/输入：macOS 当前 Swift 与可用真实 fixture；Windows 只记录未知项；无设备执行。
 - 需求：AT-SYS-002/006、AT-TIME-*、AT-ID-*、AT-MODEL-002、AT-QUERY-001/002、AT-CLI-*、
   AT-JSON-*、AT-ERR-*、AT-PERF-*；清单范围覆盖 AT-APP-*、AT-RENDER-*、AT-AD-*。
@@ -137,7 +139,7 @@ flowchart LR
 
 ## 4. AT-RUST-002 — Workspace、工具链和双平台 CI 骨架
 
-- 状态：ready；开工/完成依赖：无。
+- 状态：in-progress；开工/完成依赖：无。
 - 平台/输入：macOS arm64、Windows 11 x64 native runner；无设备。
 - 需求：设计 §4/13；AT-SYS-001/003/006。
 - 路径：拟新增 `rust/`、`contracts/` 生成入口、`windows/` 最小 binding 项目；
@@ -197,7 +199,23 @@ flowchart LR
 
 ## 6. AT-RUST-004 — 文件、目录、权限、lease 与发布端口
 
-- 状态：planned；开工依赖：002；完成依赖：001、002。
+- 状态：in-progress；开工依赖：002；完成依赖：001、002。
+- 已实现 macOS held descriptor、owner mode/ACL/ownership 校验、bounded 快照复制、文件同卷无覆盖发布、
+  identity-owned 清理与 shared/exclusive lease；真实 APFS 跨卷和 ENOSPC 结果见
+  [2026-10-03 文件端口记录](migration-runs/AT-RUST-004-2026-10-03-macos.md)。
+  lease conversion、完整 owner/entry-lease 协调、ArkDeck purger 对等与 Windows 文件端口尚未完成，
+  不将 004 标 done。
+- 后续增加 readonly flat-directory seal（64 个 regular files/aggregate byte limit）及完整目录
+  同卷无覆盖发布、取消回退、payload/ancestor/replacement/collision 故障验证。三份实际 parser
+  DB 已复制为 sealed payload 并验证发布前后同 digest；原生 APFS 跨卷目录拒绝且候选保留。
+  此原语未替代 owner/crash/Ready 协议，见
+  [004/005 后续记录](migration-runs/AT-RUST-004-005-2026-10-03-publication-bootstrap.md)。
+- 后续已实现隔离 Rust 根的 owner v2 ledger：exclusive owner lease、creating→bound、发布位置登记、
+  quarantine/removing/removed、有界 held-directory 回收与 stale identity 查找。创建/回收的 8 个实际
+  SIGKILL 窗口区分可回收与不确定证明；已发布状态保留，等待 entry lease authority。76 个 Rust tests
+  及三份真实 parser 的 owner 创建/登记、5 个 session 的后续 Rust 回收通过，见
+  [004 owner 记录](migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
+  v2 不交给旧 format-1 writer/purger；Ready、未绑定 creating、已失去目录身份的记录不会猜测删除。
 - 平台/输入：macOS APFS、Windows NTFS native tests；无设备。
 - 需求：AT-SEC-001/002/007、AT-PARSE-008、AT-CACHE-003/004/005/006。
 - 路径：`rust/crates/arktrace-platform/`；host identity/lock/promotion 测试。
@@ -228,10 +246,22 @@ flowchart LR
 
 ## 7. AT-RUST-005 — 子进程、签名、取消与输出收取端口
 
-- 状态：planned；开工依赖：002；完成依赖：004。
+- 状态：in-progress；开工依赖：002；完成依赖：004。
 - 平台/输入：两个原生主机、可控 process fixtures、开发签名样本；无设备。
 - 需求：AT-PARSE-002/003/004/009、AT-SEC-005/006、AT-CLI-010。
 - 路径：`arktrace-platform` process/trust/clock；对应 native tests。
+
+2026-10-03 macOS 原型已实现私有 executable snapshot、SHA/signature 验证、挂起启动后 kernel
+code identity 核对、有界 stdout/stderr、TERM→KILL、进程树/宿主死亡控制管道与 reap。
+记录见 [005 原生进程证据](migration-runs/AT-RUST-005-2026-10-03-macos.md)。实际 pinned C++ parser
+已由该端口导出三份真实小 trace，并通过独立 `quick_check`；这不是 Ready DB 或生产签名验收。
+初始挂起 bootstrap 窗口已补默认 SIGHUP，并在继承 session/无终端 session 的宿主 SIGKILL 下
+证明 helper 入口未执行；见上方 004/005 后续记录。后续实现声明输出文件的 live/final budget、
+held CWD identity 与 FD/identity 检查，并修复清理阶段忽略 stdout/stderr 超量的问题。62 个 Rust tests
+及实际 parser 的 DB/sidecar 超量负例通过，见
+[005 输出预算记录](migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
+仍需其它取消/launch race/fault 窗口、signedBundleInPlace、
+生产 Developer ID/hardened/notarization、Windows Job Object，以及与 004 owner/crash 协议集成。
 
 交付：
 
@@ -254,11 +284,48 @@ flowchart LR
 
 ## 8. AT-RUST-006 — 真实 parser 到 Ready DB 的纵向切片
 
-- 状态：planned；开工依赖：001、002；完成依赖：004、005；Windows 正向另需 003。
+- 状态：in-progress；开工依赖：001、002；完成依赖：004、005；Windows 正向另需 003。
 - 平台/输入：先 macOS pinned parser，Windows 随 003 接上；真实 fixture，无设备。
 - 需求：AT-PARSE-*、AT-DB-001～006/009/010、AT-SEC-001/003、AT-SYS-004。
 - 路径：`arktrace-parser`、`arktrace-store` schema/staging；移植参考
   `TraceStreamerProcessParser`、`TraceDatabaseStagingPreparer`、`TraceSchemaAdapter`。
+
+macOS 开工证据：[Rust Store 校验记录](migration-runs/AT-RUST-006-2026-10-03-store-validation.md)。
+固定 parser 的三份实际 small 输出，经 held FD/readonly SQLite 校验后，与 Swift oracle 的
+schema fingerprint、capabilities、duration 和全部 quality facts 精确相等。rusqlite 0.40.2/
+bundled SQLite 3.53.2 的源码、license、source ID 和实际 compile options 已冻结/记录。
+Rust 96 tests、Swift 596 tests（6 个既有 opt-in skips）、API baseline 通过。
+后续 [索引准备记录](migration-runs/AT-RUST-006-2026-10-03-index-preparation.md) 完成 bootstrap/
+其余索引的私有事务、完整 index introspection、DELETE 恢复、SQLite close 与 readonly 封存。
+三份实际输出各有 24 条正确索引，复开后上述语义仍 T0 相等；Rust 106 tests、clippy 与
+contract/license verifier 通过。这是 indexed snapshot 子项；metadata、entry lease 与正式
+Engine/CLI/SDK/App 接入尚未完成，`readyAcceptance=false`，006 不标 done。
+
+[Engine no-cache 记录](migration-runs/AT-RUST-006-2026-10-03-engine-no-cache.md) 随后接通真实 parser
+到 metadata/ephemeral Ready/显式 close：三份 small 的 inspection 与原校验、Swift oracle 相等；
+10 个真实负例拒绝 Ready 并清理 owned outputs，替换目录场景保留外来 bytes。Rust 113 tests、
+2 项新增 Swift metadata 兼容性回归通过。当前仅有独立 no-cache lease，persistent cache/shared
+entry handoff 和 CLI/SDK/App 仍未完成。后续已将已知 scratch 文件
+纳入 private protocol 3 的嵌套路径执行/cleanup/final 检查；aggregate/quota 与 undeclared output
+治理仍待完成。
+
+[辅助输出与 Ready 回收记录](migration-runs/AT-RUST-005-006-2026-10-03-scratch-ready-recovery.md)
+补充 nested scratch 的执行/cleanup/final 监督（private protocol 3），实际 zlib 超量返回
+Parsing/OutputFileLimitExceeded(index 2)，11 个 Engine 负例、3 个正例继续通过。
+explicit no-cache recovery 在 key→entry→owner 锁和 metadata/owner/identity 复核后清理已登记
+Ready；active/shared lease、metadata drift、坏 metadata 与外来 replacement 保留/拒绝。
+真实 Engine 在 OpeningDatabase、Ready notification、returned-session 处 SIGKILL 后，自有
+Ready/owner/ephemeral lease 均回收；Rust 122 tests、clippy/contract/license checks 通过。
+rename-before-owner-registration、disposal 中断/orphan lease 及其余 fault 窗口尚未通过；006 保持
+in-progress，产品和最终验收不因上述子项标 done。
+
+[绑定 owner 与发布/清理故障记录](migration-runs/AT-RUST-006-2026-10-03-bound-owner.md) 随后增加
+format-3 ephemeral key/session/lease identity，保留 v2 readers 和现有 metadata/key/schema 版本。
+Engine 在 source copy/parser 前绑定 candidate，在 rename 前持久化 Publishing intent，payload
+删除后保留 Removed tombstone 至 lease unlink 和 owner artifacts 清理。12 个实际 SIGKILL
+窗口中 11 个完成回收；rmdir-before-Removed 保留身份未决 proof 和 bound lease。Rust 126 tests、
+11 个真实负例、3 个 small 正例通过。fresh lease allocation 到 bind、process-active staging
+回收、其它预算/故障以及完整 CLI/SDK/App 仍未完成，006 不标 done。
 
 交付：
 
@@ -278,11 +345,79 @@ flowchart LR
 
 ## 9. AT-RUST-007 — Typed 查询、目录、搜索和 Store 全量迁移
 
-- 状态：planned；开工依赖：001、002；完成依赖：006。
+- 状态：in-progress；开工依赖：001、002；完成依赖：006。
 - 平台/输入：两个原生主机、真实 DB 与异常 schema corpus；无设备。
 - 需求：AT-QUERY-*、AT-MODEL-001、AT-DB-003/006/007/008/011、AT-LOD-003/004、AT-TIME-*、AT-ID-*、
   AT-APP-005/007（详情与搜索）、AT-PERF-003/004。
 - 路径：`arktrace-store`、`arktrace-contract` repository trait；对应 corpus。
+
+首个 macOS 切片：`StoreReader` 在 owner worker 内持有同一 readonly connection（!Send/!Sync），
+共享 typed ProcessQuery/ThreadQuery/DTO 接到 NoCacheSession。参数化 SQL、稳定身份排序、
+limit+1、生命周期归一化、坏名称/倒置 end 降级、exact/prefix/contains 转义、request-owned
+取消/deadline 和 checked close 已实现。三份 small 的 processes/threads 完整机器事实与 Swift
+oracle 一致，实际 SDK key filters 与取消后的下一请求通过；证据见
+[007/010 目录与命令记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
+六个目录回归覆盖边界；其它 query family/search/density/detail/navigation、read pool、Windows
+原生与大样本性能仍未交付，007 不标完成。
+
+后续 macOS 切片已加入 typed CPU scheduling/thread-state 查询和共享 Agent 查询组合层。
+Store 保留半开/instant/open-ended、Int64 时间、源行 limit+1、零关系哨兵、负稳定身份、
+可选字段降级和 typed quality；组合层按归一化时间排序并合并 Trace 整体质量，能力缺失时
+也保留整体质量。三份真实 small 的 **51 组查询事实 T0**，18 个预算/取消/非法请求之后
+同一连接的下一请求通过。15 个 Store、2 个 contract、2 个组合层新增回归通过；证据见
+[CPU/线程状态查询记录](migration-runs/AT-RUST-007-2026-10-03-scheduling-queries.md)。
+Engine/Store API 已接入实际打包 CLI 的 CPU/thread-state query；其它查询族、SDK/App 与正式
+验收仍待完成。后续入口证据见 [query CLI 记录](migration-runs/AT-RUST-010-2026-10-03-query-cli.md)。
+
+named slices 已加入同一 reader 与 NoCacheSession raw/Agent 层，保留完整 14-field coded DTO、
+按需且不编码的 argument-set handle、完整 Trace 时长过滤、depth 能力错误、parent 哨兵、
+转义名称匹配与源行预算。三份真实 small 的 **45 个完整 typed page T0**、30 个负例及后续
+请求通过；9 个 Store、2 个 contract 和 1 个 public error 回归通过。Rust 产品 CLI 的 named
+view 尚未开放；counter/frame/argument/detail/navigation/search/density、pool 与性能仍待迁移。
+详见[named 查询与热点接入记录](migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md)。
+随后已接入产品 CLI named view，核对 Core 发现 Agent/CLI 的名称过滤上界为 **256 UTF-8 bytes**，
+区别于 raw Store 的 4096；已收紧组合入口并补缺名称时的 match guard。新的 **48 个 typed page /
+39 个负例**及完整 CLI 文档与 human 差分通过，见[named CLI 记录](migration-runs/AT-RUST-010-2026-10-03-named-cli.md)。
+随后 counter 样本、独立 series 目录与 Agent 页已接入共享 reader/session 及实际 CLI。
+三份真实 small 的 **48 组 / 144 个完整 typed page T0**与 36 个负例通过；保留 Int64 值、
+物理表 rowid、scope、区间及分页差异。受控实际 Swift 输出确认两条 clamp 观察投影相同
+时仍须保留，已加回归。CPU counters 没有新的真实 fixture，当前只有受控 SQLite 覆盖。
+详见[counter 查询记录](migration-runs/AT-RUST-007-010-2026-10-03-counters.md)。
+随后 raw frame 查询已接入共享 reader/session。Swift 与 Rust 均接受规格所列的七列
+`frame_slice`，可选 `itid` 缺失时返回 nil；保留完整半开区间、instant/open-ended、
+type 0/1、原始 flag、limit+1 与合格列空表的 capability。**62 个实际 Swift 受控用例**
+包含 50 个 frame 请求及 12 个已有 raw/Agent 页；已有三种 Agent view 的独立 clamp
+观察不再被相同机器投影误合并。三份实际 parser/Ready 的 **42 个完整页 T0**及
+15 个失败后下一请求检查通过；三份真实 frame 表均为空，非空 frame 仍缺真实 corpus。
+详见[frame 查询记录](migration-runs/AT-RUST-007-2026-10-03-frame-queries.md)。
+argument/detail/navigation/search/density、pool、SDK/App 接线与完整验收继续保持未完成。
+随后 argument 查询及 Inspector 的按需 slice handle 已接入共享 reader/session。
+只在整数 datatype=1 时解析字典字符串，其它类型保留原始 Int64；保持最多 64 项、
+源行 limit+1 后 compaction、typeName 缺失编码省略与原有独立质量页语义。Swift/Rust
+均支持无 `args.id`（含 WITHOUT ROWID）的最低列集；缺少所需可选类型表/列返回
+unavailable。**84 个实际 Swift 受控用例**、4 个 opt-in handle 两跳、**18 个真实
+parser/Ready 页 T0**与 15 个失败后下一请求检查通过。三份真实 `args` 表经有界采样
+均为空，真实非空参数与 Inspector 场景仍缺新 corpus；该切片不能代表完整 Store。
+详见[argument 查询记录](migration-runs/AT-RUST-007-2026-10-03-argument-queries.md)。
+detail/navigation/search/density、pool、SDK/App 接线与完整验收继续保持未完成。
+
+共享 Viewer search 已迁入纯 Rust Analysis，通过 typed `SearchRepository` 接到同一
+NoCacheSession；按域完全省去排除的查询，保留 name/PID/TID 与 signed 内部 identity
+的独立查找、first-seen identity 合并、UTF-8 标题排序、生命周期/真实 EventKey 与
+最多 1,000 项的结果边界。**138 个实际 Swift 受控结果与 570 次 typed source 调用**
+逐一匹配；三份真实 parser/Ready 的 **67 个完整 SearchResults T0**及 21 个失败后
+下一请求检查通过。过程、线程目录均有真实正向，named slice 的正向来自 zlib。
+Toolbar 的 process 排除不依靠事后结果过滤；Sidebar 的可见行文字过滤仍属于 Viewer。
+详见[共享搜索记录](migration-runs/AT-RUST-007-2026-10-03-search.md)。
+detail/navigation、pool、Viewer/SDK/App 接线、Windows 与完整验收仍未完成。
+
+六类 density 查询已接到同一 StoreReader/NoCacheSession，以聚合 SQL 统计事件并读取最长
+事件的实际颜色身份；最多 40,000 个 bucket，身份回查每批最多 128 个绑定。保持 CPU 的
+PID/TID 回退、原始 state/name/frame flag、unassociated slice 语义、counter 物理表合并
+以及完整质量页；占用时长/利用率仍明确 unavailable。**190 个实际 Swift 受控用例**与
+**60 个真实 parser/Ready 结果 T0**、21 个失败后下一请求检查通过。三份 small 中真实
+非空 CPU counter/frame 尚无证据；density cache/read pool、Viewer/SDK/App 接线仍待完成。
+详见[density 查询记录](migration-runs/AT-RUST-007-2026-10-03-density-queries.md)。
 
 交付：
 
@@ -330,7 +465,7 @@ flowchart LR
 
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 
-- 状态：planned；开工依赖：001、002；完成依赖：007。
+- 状态：in-progress；开工依赖：001、002；完成依赖：007。
 - 平台/输入：跨平台纯计算、真实 Store；无设备。
 - 需求：AT-AN-*、AT-CTX-001～005、AT-JSON-002、AT-QUERY-008、AT-ERR-*、AT-PERF-005/006。
 - 路径：`arktrace-analysis`、contract machine validation；对应 Swift analysis oracle。
@@ -353,12 +488,59 @@ flowchart LR
 - 无 scheduling 证据、空 range、overflow、并发取消及预算边界正确。
 - 更换语言不改变分析结论；有意修 bug 的差异有独立向量，不扩大 normalization 范围。
 
+2026-10-03 主线进展：[原始并行交接](migration-runs/AT-RUST-009-parallel-analysis-2026-10-03.md)
+逐一核对 22 个新增文件后追加导入，未覆盖共享 manifest/lock。主线使用固定 Unicode NFC
+依赖合并 canonical-equivalent raw state，同时保留第一份标签与 UTF-8 输出顺序；修正共享
+Swift 对 open-ended Runnable 终点的证明规则。原始 23 parity / 2 differences 证据保留；
+33 个新 Swift oracle vectors 按 Int64、binary64 位值、数组和 section facts 通过。
+`NoCacheSession::analyze_bounded` 接真实独立 CPU/process/thread/state/scheduling/hot raw
+pages，保留四个 identity/property filters、取消/时限与最终快照身份检查。三份真实 small 的
+15 个请求在四个完整 section 上与 Swift CLI T0 一致，另有 3 个独立预算和 21 个负例。
+详见[主线分析记录](migration-runs/AT-RUST-009-2026-10-03-mainline-analysis.md)。
+
+这仍是六个纯 section 的迁移入口。固定上游 Runnable 语义未完成证明，Engine 保持 unproven；
+后续已把真实 named query 接入 hot：独立预算、最小时长过滤、真实 callstack key/full range、
+quality/truncation 均从 Store page 传递，argument handle 不读取。新增两个时长阈值场景后，
+三份 small 的 **21 组请求**在五个完整数组、section facts 和 analysis dataQuality 上 T0；
+3 个独立页预算和 27 个负例也通过，详见[named/hot 记录](migration-runs/AT-RUST-007-009-2026-10-03-named-hot.md)。
+完整 long slices、summary/context、full envelope、
+编码 byte budget、SDK/App/CLI 接通与 performance 仍待完成，不能将 009 或最终 macOS 验收标记完成。
+
 ## 12. AT-RUST-010 — Rust CLI 完整替换
 
-- 状态：planned；开工依赖：001、002；完成依赖：005–009；Windows 加 003。
+- 状态：in-progress；开工依赖：001、002；完成依赖：005–009；Windows 加 003。
 - 平台/输入：两端 CLI、真实 parser/resources；无设备。
 - 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](CLI.md)。
 - 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。
+
+已开始 shared command composition：inspect/processes/threads 消费实际 NoCacheSession，完整
+Machine JSON 1.0 envelope 验证后 bounded encode，checked session close 成功才返回 bytes；
+失败也 close。真实三份 small 的九份输出中，仅实际 Rust executable SHA 与 hiprofiler 已知
+upstream DB SHA 变化记 T1，其余字段 T0。输出超限、取消、deadline、非法 limits 四个真实
+负例均不返回成功 bytes，Ready/owner/ephemeral lease 清空。证据同
+[007/010 记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
+随后已接通实际 `arktrace` executable adapter：三命令 argv、help/version、pretty/human、闭合
+错误 envelope/exit status、kernel mapped Mach-O identity、sealed bundle resources、首次信号取消和
+有界 stdout/stderr 提交。普通构建要求 Developer ID/hardened runtime；原生验收候选包显式开启
+development-resources，只证明开发签名路径。新证据见
+[打包 CLI 记录](migration-runs/AT-RUST-010-2026-10-03-packaged-cli.md)。
+实际 query 入口随后接入 CPU slices / thread states，要求 view 与成对 range；maxRows/maxEvents
+同时约束，身份/属性互斥，raw/normalized state 只属于 state view。请求、filters、单一事件数组、
+quality、truncation、provenance 的完整机器文档对照冻结新 Swift oracle 的 51 组结果，除实际
+Mach-O SHA 和 hiprofiler 既有 upstream DB SHA 变动外全部 T0。原有九份目录/inspect 文档与
+资源/首次信号/背压矩阵也重跑通过，见 [query CLI 记录](migration-runs/AT-RUST-010-2026-10-03-query-cli.md)。
+query 的 slices 已接通：name/exact/prefix/contains、minimum duration、depth 与身份 filters、
+Agent 256-byte 名称边界；private argument handle 不进入 CLI。实际候选包对 **48 份完整 named
+Machine 文档**通过，仍仅允许实际 tool SHA 和既有 hiprofiler upstream DB SHA 的差异。
+三个 query view 的 fresh Swift human bytes 一致；旧 9 份目录/inspect、51 份 CPU/state 文档、
+**46 个负例**（含新增边界、输出与既有原生信号/背压）通过。见[named CLI 记录](migration-runs/AT-RUST-010-2026-10-03-named-cli.md)。
+随后 counters view 及 filter/name/scope 参数已接通。实际开发候选的 **48 份 counter
+Machine 文档**和原 108 份文档重跑通过，总计 **156 份**；四个 view 的 fresh Swift human
+bytes 一致，60 个 CLI 负例通过。单独保留候选通过真实 1-row counter 查询及 1 KiB 输出
+上限检查，见[counter 查询记录](migration-runs/AT-RUST-007-010-2026-10-03-counters.md)。
+其它五命令仍未接通，010 不标完成。
+其余 query views、其它五命令、二次强停与启动恢复、完整输出压力/TTY 与发行身份、下游消费仍未完成，不能据此
+声称生产 CLI 已替换。原 smoke binary 保留为开发检查。
 
 交付：
 

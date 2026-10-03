@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "arktrace.migration-publication-bootstrap/1",
+  "recordedAtUtc": "2026-10-02T19:21:33.018341+00:00",
+  "localRunDate": "2026-10-03",
+  "baseCommit": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+  "toolchain": {
+    "rust": "1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "27.0 (27A266a)",
+    "macOS": "27.0 (26A428)",
+    "architecture": "arm64"
+  },
+  "sources": [
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 593,
+      "sha256": "57d31e7643599c9574ec308361d7b1d10278b9888399eaa15ba581de857c08ba"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 5225,
+      "sha256": "5405ca802ad1a41e1750657f33756bb22fc1047d34d10426b3fc9833c0356a09"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "byteCount": 87,
+      "sha256": "b206a08a9e3a50784fcedbd23b8ae0555f70bc6cb5da57bfcd1bb67ac6e56b55"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/Cargo.toml",
+      "byteCount": 821,
+      "sha256": "05ef2ef127f82184d9c0e6b72ddcd984af1a63d5998539c8056200220571ad44"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1510,
+      "sha256": "21bae8c145ad30c15413b13d3187157f8e85b90a61e7ff602dfffa35442bb130"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 1017,
+      "sha256": "d2ae8d7eb6b15b633bafcc2caa9279b0d8f7feba28c19f4bf07e127e4a54b0a1"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 1489,
+      "sha256": "481817a7448ca87029caebea0f61892f8af0bda409c2590a6ecf8a5f56536386"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 38362,
+      "sha256": "b6e2a9cd5c0ecbdfcded2b72084a70c0445a011618caada6b97072d339af7b5b"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_directory.rs",
+      "byteCount": 12182,
+      "sha256": "0b1c9b79cd91dc8b214ebbeaecb58d3f9679fc409183a02a5672844ed0440712"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+      "byteCount": 14979,
+      "sha256": "793c62086818f8d934b8db6cc6f2ad59caf51e1a0244858e49e88cd02c0156fd"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+      "byteCount": 36306,
+      "sha256": "33c298abdd2d32fa41825765e049a11bfd0523ae52e2155946eb1854293f3fc5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+      "byteCount": 9451,
+      "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+      "byteCount": 260,
+      "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+      "byteCount": 22663,
+      "sha256": "4fcfa32553ed8dc5f2b56612f19a8d1b5a0345000622b43243d0bf54449c3575"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+      "byteCount": 14238,
+      "sha256": "d512e9cfcb6d8cc536ea6433747a971b0a2a4734b66e1746745c1211bc602484"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+      "byteCount": 5127,
+      "sha256": "c635904fd9ae2316d5c309f4187698908f8ffb26752fc5d4fe4c649724fbe81e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+      "byteCount": 7321,
+      "sha256": "2b7fc6d3c5c6bdcd872a8b060a8d76ba4611098fc97daf44167dac9b1f369e9a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+      "byteCount": 4936,
+      "sha256": "7ecc158fd794898350d7dbfd03b0e0672c6f3bd907e9db02b0f0f3b730613164"
+    },
+    {
+      "path": "scripts/test_macos_parser_process.py",
+      "byteCount": 4634,
+      "sha256": "f0d79572ee96da6a8fe6f4f1ea4291876dbf19f00fa8c7f2137c582de163a76f"
+    },
+    {
+      "path": "scripts/test_macos_file_volumes.py",
+      "byteCount": 3971,
+      "sha256": "e2c73b6648d6966ae76a616090a1258e325a517232de39294976c2fc9b9504a0"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "byteCount": 27880,
+      "sha256": "b5029d55bb61605d5fe00dc78c3c6c686c76f2fa3560624fadede3e5da146bf6"
+    },
+    {
+      "path": "scripts/ci_plan.sh",
+      "byteCount": 5619,
+      "sha256": "dd9986eb1001b1a16759e11c7c0e1e6190768b8c7ed63b638c96a7718c68dae0"
+    },
+    {
+      "path": "scripts/test_ci_plan.sh",
+      "byteCount": 5524,
+      "sha256": "649c16d639e1aa2ce57901b08d02f85f1cac940ca985b8233eb6ce1fa76bb54c"
+    }
+  ],
+  "rustTests": {
+    "passed": 54,
+    "failed": 0,
+    "ignored": 0,
+    "tests": [
+      "swift_time_contract_vectors",
+      "swift_quality_contract_vectors",
+      "machine_quality_is_closed_bounded_and_sorted",
+      "swift_cache_key_and_lease_protocol_vectors",
+      "macos::tests::directory_cancel_before_rename_publishes_nothing",
+      "macos::tests::cancellation_immediately_before_atomic_rename_publishes_nothing",
+      "macos::tests::cancellation_immediately_after_atomic_rename_rolls_back_owned_publication",
+      "macos::tests::directory_ancestor_replacement_at_rename_window_preserves_owned_candidate",
+      "macos::tests::cleanup_failure_takes_priority_over_copy_cancellation_without_deleting_replacement",
+      "macos::tests::directory_cancel_after_rename_restores_complete_identity_and_payloads",
+      "macos::tests::cancellation_after_first_copy_chunk_removes_partial_output",
+      "macos::tests::directory_rollback_collision_preserves_both_directories",
+      "tests::native_runner_matches_the_requested_host",
+      "macos::tests::directory_payload_change_at_publication_windows_is_rejected",
+      "macos::tests::directory_replaced_publication_cleanup_failure_wins_over_cancellation",
+      "macos::tests::injected_enospc_after_partial_write_preserves_closed_failure_and_cleans_output",
+      "macos::tests::parent_replacement_at_publication_window_is_rejected_inside_critical_section",
+      "macos::tests::replaced_publication_is_preserved_and_cleanup_failure_is_not_hidden_by_cancel",
+      "macos::tests::same_inode_same_size_content_mutation_after_rename_is_rejected_and_rolled_back",
+      "macos::tests::input_mutation_during_copy_is_rejected_and_partial_output_removed",
+      "cancelled_expired_and_oversized_operations_leave_no_partial_file",
+      "detects_in_place_mutation_and_replaced_source",
+      "copies_unicode_source_to_verified_readonly_snapshot_without_mutating_input",
+      "owned_cleanup_preserves_replacement_and_only_removes_proven_identity",
+      "accepts_deny_only_acl_and_rejects_allow_acl_on_private_file_and_lease",
+      "lease_wait_is_bounded_and_replaced_lease_is_rejected",
+      "directory_promotion_never_overwrites_existing_file_directory_or_symlink",
+      "held_files_directories_and_leases_are_not_inherited_by_exec",
+      "accepts_native_unicode_components_beyond_255_utf8_bytes",
+      "refuses_nonregular_objects_and_path_escape_without_blocking_on_fifo",
+      "permits_raw_hard_links_and_refuses_private_file_or_lease_hard_links",
+      "ancestor_replacement_prevents_publication_and_owned_deletion",
+      "rejects_acl_grants_even_when_mode_bits_are_private_and_preserves_acl",
+      "rejects_existing_public_directory_and_writable_ancestor_without_chmod",
+      "resolves_explicit_source_link_once_but_refuses_links_inside_storage",
+      "publishes_exact_same_volume_identity_and_never_overwrites_existing_target",
+      "publishes_complete_sealed_directory_with_literal_unicode_payloads",
+      "sealed_directory_refuses_writable_links_and_nested_payloads_without_chmod",
+      "shared_readers_block_cross_process_purge_until_all_leases_close",
+      "sealed_directory_refuses_aggregate_excess_and_membership_changes",
+      "adhoc_development_artifact_cannot_satisfy_production_identity_or_bad_pin",
+      "preserves_literal_arguments_unicode_empty_value_cwd_and_minimal_environment",
+      "cancellation_kills_term_ignoring_child_and_grandchild_before_returning",
+      "preserves_nonzero_exit_without_inventing_success",
+      "rejects_corrupted_signature_even_when_development_digest_matches_bytes",
+      "host_sigkill_closes_control_pipe_and_independently_reclaims_process_tree",
+      "host_sigkill_during_suspended_bootstrap_terminates_helper_before_entry",
+      "rejects_kernel_identity_mismatch_before_resuming_suspended_executable",
+      "rejects_verified_tool_path_replacement_before_launch",
+      "rejects_pre_cancel_expired_budget_and_nul_argument",
+      "deadline_kills_term_ignoring_process_tree",
+      "reaps_exit_and_kills_descendants_with_inherited_or_closed_pipes",
+      "transports_full_output_cap_without_replaying_partial_protocol_writes",
+      "stops_stdout_and_stderr_flood_at_separate_caps"
+    ],
+    "logSHA256": "f53c81a2d402775640bbdea6e6e9dcca092c68f98d02ff3f68967a97ef2aca67",
+    "features": "all-features"
+  },
+  "bootstrap": {
+    "test": "host_sigkill_during_suspended_bootstrap_terminates_helper_before_entry",
+    "passed": true,
+    "contexts": [
+      "inherited session, parent ignores SIGHUP",
+      "new session without controlling terminal, parent ignores SIGHUP"
+    ],
+    "observations": [
+      "helper confirmed SSTOP before Engine SIGKILL",
+      "no live helper after bounded wait",
+      "helper entry marker absent",
+      "parser never started"
+    ],
+    "mechanism": "default SIGHUP + empty mask + Darwin orphaned stopped process group SIGHUP/SIGCONT"
+  },
+  "clippy": {
+    "passed": true,
+    "warnings": 0,
+    "logSHA256": "4f0c6ef121aeee880aea1b0a22b6a6f3be7023bc3fa39eaa16c6f8ccc9809612"
+  },
+  "nativeParserProbe": {
+    "exports": [
+      {
+        "databaseByteCount": 917504,
+        "databaseMode": 384,
+        "databaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+        "exitCode": 0,
+        "fixture": "zlib.htrace",
+        "publishedDirectory": "published/case-0",
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "af53753dd0df0eb2af6f585eddc9fe9dac49ad3bfc642d062a32ee767ac7fde5"
+        },
+        "sourceByteCount": 67837,
+        "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 807
+      },
+      {
+        "databaseByteCount": 1929216,
+        "databaseMode": 384,
+        "databaseSHA256": "5e327ad1821ea908950096f5d4da2b4111db110b7af3a51ac0f15cc759ff7120",
+        "exitCode": 0,
+        "fixture": "hiprofiler_data_ability.htrace",
+        "publishedDirectory": "published/case-1",
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "115105f77b7fbba8f542a0b4c7f9353a8a9e89ae165ab46450f90d23b95289dc"
+        },
+        "sourceByteCount": 557542,
+        "sourceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 115,
+        "tableCount": 91,
+        "wallTimeMs": 1054
+      },
+      {
+        "databaseByteCount": 7344128,
+        "databaseMode": 384,
+        "databaseSHA256": "e03e1d026bfa90e1210ca93c0158d534fa7e2a4c3c48a62dd744bf5afac3fd93",
+        "exitCode": 0,
+        "fixture": "trace_small_10.systrace",
+        "publishedDirectory": "published/case-2",
+        "publishedQuickCheck": "ok",
+        "quickCheck": "ok",
+        "rawBytesUnchanged": true,
+        "sealedPublicationVerified": true,
+        "sidecar": {
+          "byteCount": 90,
+          "mode": 384,
+          "sha256": "97eaa5df357bccfe7c872a674c35066001080a7c3b03eb32577d9bbb1d620948"
+        },
+        "sourceByteCount": 13465993,
+        "sourceSHA256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef",
+        "stderrByteCount": 0,
+        "stdoutByteCount": 385,
+        "tableCount": 91,
+        "wallTimeMs": 3099
+      }
+    ],
+    "helperSHA256": "b9127ff8a6fe566fc9ef33c0bbc24ade1b72735f9cb302685ac972e2f34572e0",
+    "mode": "immutableSnapshot-development-signature",
+    "ownedTemporaryRootRemoved": true,
+    "parserSHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "parserTrust": {
+      "code_directory_hash": [
+        225,
+        225,
+        19,
+        88,
+        239,
+        74,
+        51,
+        84,
+        184,
+        64,
+        202,
+        189,
+        191,
+        177,
+        7,
+        161,
+        179,
+        150,
+        195,
+        8
+      ],
+      "developer_id": false,
+      "hardened_runtime": false
+    },
+    "rawInputsAndOriginalParserUnchanged": true,
+    "readyAcceptance": false,
+    "reportedVersion": "4.3.7",
+    "schemaVersion": "arktrace.native-parser-process/1",
+    "versionExitCode": 1
+  },
+  "nativeVolumeProbe": {
+    "cleanupResidueCount": 0,
+    "crossVolume": "refused_without_mutation",
+    "crossVolumeDirectory": "refused_without_mutation",
+    "directoryCandidateRetained": true,
+    "diskFullErrno": 28,
+    "diskFullFailure": "SystemIo { operation: Write, code: 28 }",
+    "hostDevice": 16777232,
+    "imageDevice": 16777239,
+    "ownedTemporaryRootRemoved": true,
+    "ownershipDisabledRootRefused": true,
+    "passed": true,
+    "probeSHA256": "44caf1f50e69c98d61e5c035def71fc5912abd698358ae7a3ffddf5b235f54d9",
+    "rawBytesUnchanged": true,
+    "schemaVersion": "arktrace.native-file-volumes/1",
+    "sourceByteCount": 83886080,
+    "sourceSHA256": "6c3a1c9e8781a13f6e1f667eb2920c6768451867538e655ac0ab9abad036df2f"
+  },
+  "otherChecks": {
+    "fmt": "passed",
+    "licenseInventoryCount": 21,
+    "machineFixtureCount": 34,
+    "qualityScopeCount": 56,
+    "ciPlannerCasesPassed": 29,
+    "hostedCIExecuted": false
+  },
+  "remaining": [
+    "persistent directory owner/crash recovery/cleanup and lease conversion",
+    "actual ArkDeck purger interop",
+    "remaining spawn/cancellation/launch race and cleanup failure injection",
+    "live sidecar budget",
+    "signedBundleInPlace and production Developer ID/hardened/notarization/supervisor pin",
+    "Windows native ports",
+    "Rust SQLite/schema/range/relationship/index/metadata to product Ready",
+    "complete CLI/SDK/App/ArkDeck integration",
+    "medium/large performance, Capture, distribution, cutover and rollback"
+  ]
+}

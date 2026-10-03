@@ -11,6 +11,12 @@ expect() {
     description=$1
     expected=$2
     input=$3
+    case "$expected" in
+        *lane_rust_macos=*) ;;
+        *) expected="$expected
+lane_rust_macos=false
+lane_rust_windows=false" ;;
+    esac
     actual=$(printf '%s\n' "$input" | sh "$planner")
     if [ "$actual" = "$expected" ]; then
         printf 'ci-plan: ok   %s\n' "$description"
@@ -23,7 +29,9 @@ expect() {
 
 all_lanes='lane_swiftpm=true
 lane_app=true
-lane_contracts=true'
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=true'
 
 docs_only='lane_swiftpm=false
 lane_app=false
@@ -137,6 +145,63 @@ lane_app=true
 lane_contracts=false' \
     'README.md
 Sources/ArkTraceCore/Model/TraceModels.swift'
+
+expect "shared Rust source runs on both native platforms" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=false
+lane_rust_macos=true
+lane_rust_windows=true' 'rust/crates/arktrace-contract/src/time.rs'
+
+expect "contract vectors run both languages and native platforms" \
+    'lane_swiftpm=true
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=true' 'contracts/time-range-vectors.json'
+
+expect "bindings select their consuming builds" "$all_lanes" 'bindings/Swift/Engine.swift'
+
+expect "Windows files select Windows and contract checks" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=false
+lane_rust_windows=true' 'windows/SDK/Engine.cs'
+
+expect "Rust documentation does not build" "$docs_only" 'rust/README.md'
+
+expect "cargo runner change fails closed" "$all_lanes" 'scripts/run-cargo.py'
+
+expect "native APFS harness selects the macOS Rust lane" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'scripts/test_macos_file_volumes.py'
+
+expect "native parser process harness selects the macOS Rust lane" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'scripts/test_macos_parser_process.py'
+
+expect "native directory commands harness selects the macOS Rust lane" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'scripts/test_macos_directory_commands.py'
+
+for path in scripts/test_macos_event_queries.py scripts/test_macos_slice_queries.py scripts/test_macos_counter_queries.py scripts/test_macos_frame_queries.py scripts/test_macos_argument_queries.py scripts/test_macos_search.py scripts/test_macos_density_queries.py scripts/test_macos_bounded_analysis.py scripts/test_macos_rust_cli.py scripts/build_macos_rust_cli_candidate.py ThirdParty/TraceStreamer/macx/manifest.json; do
+    expect "native packaged CLI inputs select the macOS Rust lane" \
+        'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' "$path"
+done
 
 if [ "$failures" -gt 0 ]; then
     printf 'ci-plan: %d failure(s)\n' "$failures" >&2

@@ -26,8 +26,9 @@ Windows 的完整目标包含原生 Viewer 和显式 GUI Capture；离线 CLI �
 阻塞的首要交付，可先于 Viewer 交付。ArkDeck 已把 Windows Trace 的 supported 门槛定为
 capture/inspect/export 对等、Viewer 后置，因此 Windows Viewer 不是 ArkDeck 首版的前置。
 
-本次请求授权的是迁移设计与任务编制。本文指定的 crate、协议、目录和命令凡标为
-“目标”或“拟新增”，均由相应任务实现；写入本文不代表已经存在。
+后续实施请求已授权开始迁移，当前 goal 推进至 macOS 端验收完成。实施状态见
+[迁移任务](RUST_CORE_MIGRATION_TASKS.md)与 `migration-runs/`。本文指定的 crate、协议、
+目录和命令凡标为“目标”或“拟新增”，仍以相应任务的实际源码和验证为准。
 
 最终完成条件：
 
@@ -188,7 +189,7 @@ parser 的 Windows 运行库依赖由 003 列明并随 parser 放在固定目录
 第一方 `unsafe` 限于 platform、FFI，以及必须包装 SQLite progress/interrupt 的窄模块；
 其余 crate 禁止。依赖本身的 native/unsafe 代码仍纳入供应链清单。
 
-macOS 保持现有 Swift 6.3/Xcode 26.6 构建基线；Windows 采用 WinUI 3 + C#。
+macOS 保持现有 Swift 6.4/Xcode 27.0 构建基线；Windows 采用 WinUI 3 + C#。
 ArkDeck 当前 `.NET SDK 10.0.401`（其 `global.json` 允许 latestPatch 浮动）、Windows App SDK `2.5.1`、
 self-contained x64 仅作可复用的候选组合，AT-RUST-002/014 须在本项目验证后写入自己的
 `global.json` 与 package lock，并决定是否同样允许 patch 浮动。
@@ -285,6 +286,59 @@ SQLite 多线程保证取决于编译和连接使用方式，不能只凭 `Send`
 每连接串行访问和 interrupt 生命周期由 Store 包装保证。
 依据：[SQLite threading](https://www.sqlite.org/threadsafe.html)。
 
+006 的首个 macOS 子项已实现：Store 以 rusqlite 0.40.2（关闭默认 features，选择 bundled/hooks/
+limits）编译固定 SQLite 3.53.2；source ID、amalgamation/header digest、crate license 与 SQLite
+public-domain declaration 进入 lock/verifier，实际 compile options 进入原生记录。连接不对包外
+暴露 SQL，readonly/no-follow FD 绑定前后复核，使用零 busy wait、query-only、defensive、untrusted
+schema、禁用 mmap、有限 schema/row/VM 工作与同一请求 cancellation/deadline。
+已移植 schema fingerprint v2、affinity、严格 INTEGER/range/required relationship、optional counter
+source、clock-epoch correction 和 structured quality probes。三份实际 small 的上述机器事实与 Swift
+oracle T0 一致。初始校验的证据和范围见
+[006 Store 记录](migration-runs/AT-RUST-006-2026-10-03-store-validation.md)。
+
+索引准备现以独立 0600 candidate 执行，NativePlatform 在任何 SQL 之前直接读取 pinned SQLite
+FILESTAT metadata，fstat 比较实际 SQLite FD 的 device/inode，拒绝恢复正确路径仍持有外来 inode
+的情况。固定 `SQLITE_ENABLE_FILESTAT=1` 与函数可用性进入独立记录；该版本 compile_options
+不列此 flag。Store 保持 safe Rust，消费与现有 Swift 一致的 24 条 index schema 3 定义，
+用 page-count/file-byte bounds、私有事务、取消/截止时间完成 bootstrap/schema/余下 indexes，
+验证列序、collation、unique、partial 和 ascending key，恢复 DELETE 后关闭 SQLite，再以 0400
+封存并独立 hash。真实三份 small 各 24 条正确索引，复开语义仍 T0。此处尚无 metadata/entry
+lease 的产品 Ready；证据见 [006 索引记录](migration-runs/AT-RUST-006-2026-10-03-index-preparation.md)。
+
+后续 Engine no-cache 子项将真实 export、索引和现有 format-1 metadata 接到原子 ephemeral
+Ready；复开全部索引/metadata、文件模式和身份通过后才返回 session。每次 no-cache 打开使用
+独立 publication name 和 fresh exclusive lease；显式 close 只移除自己的 Ready/owner/lease，
+Drop 保留证据。它不构成 persistent cache 的 shared-reader/eviction 协议。三份实际 small、
+两个同时存活的同源 session 和 10 个负例见
+[Engine no-cache 记录](migration-runs/AT-RUST-006-2026-10-03-engine-no-cache.md)。
+metadata 字段/UTC ISO 8601 通过 Swift/Rust codec 回归，owner format 2 仍隔离。固定 zlib 的
+`ts_tmp/unzlib_file.txt` 按 exact membership/private mode/byte budget 在进程清理后验证；
+该已知辅助文件现也在执行/进程组清理期间接受监督，nested parents 保持 held/no-follow/private
+身份；超限返回 typed failure，完整 exact membership 仍在退出后复核。监督为 polling，尚无
+aggregate/quota 或任意 undeclared file 的执行期治理。
+`recover_no_cache` 现支持已登记 ephemeral Ready 的 explicit 回收：bounded metadata 找到 key，
+按 key→entry→owner 顺序无等待取得现有锁，复核 metadata snapshot/完整 owner record/dev-inode。
+active、invalid metadata 和 unresolved proof 保留；移动的自有目录按身份回收，外来替换保留。
+真实 Engine SIGKILL 的 OpeningDatabase/Ready notification/returned-session 三个窗口通过，见
+[辅助输出与 Ready 回收记录](migration-runs/AT-RUST-005-006-2026-10-03-scratch-ready-recovery.md)。
+rename 到 owner registration 之间、disposal 中断/orphan lease、其它 fault windows 和产品接入
+仍未通过；这不构成 persistent cache eviction 或 legacy Swift recovery。
+随后 [绑定 owner 与发布/清理故障记录](migration-runs/AT-RUST-006-2026-10-03-bound-owner.md)
+补充 format-3 key/session/lease identity、rename 前 durable Publishing intent 和 Removed tombstone
+到 lease unlink/owner proof 删除的顺序。真实 12 个 Engine SIGKILL 窗口中 11 个回收，rmdir 到
+Removed 落盘之间保留 identity-unresolved proof 与已绑定 lease。fresh lease allocation 到 bind
+之间和 process-active staging recovery 尚未覆盖，产品接入仍未完成。
+
+007/010 的 macOS 首个 typed 切片现以 `StoreReader` 维持一个 indexed snapshot/readonly
+connection，由 !Send/!Sync 限制到 owner worker。process/thread 查询复用 connection，保持
+参数绑定、stable identity ordering、limit+1、trace-relative lifecycle、bounded names 与 closed
+quality；每请求重新安装/清除 progress handler，复核 held snapshot 和 session entry/metadata。
+NoCacheSession 在 owner disposal 前 checked-close SQLite。共享 CLI composition 为 inspect/
+processes/threads 生成 bounded Machine JSON 1.0，close 成功后才返回完整 bytes；三份真实
+small 九份输出仅实际 executable SHA 与已知 C++ DB digest 变化允许 T1，其余事实 T0。
+它尚未接到生产 argv/resource/signal/error route，也不构成所有 typed queries/完整 CLI/SDK
+或 App 替换。证据见 [007/010 记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
+
 ## 7. FFI、SDK 与数据所有权
 
 ### 7.1 选定接口
@@ -361,6 +415,23 @@ Windows Job Object 的 kill-on-close 与显式取消需测试嵌套 Job、父退
 依据：[Windows Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects)。
 macOS 自身突然退出时不能仅靠 PID 清理，需验证 parser 父死亡处置/监督策略；不能只测正常 close。
 
+macOS 端口原型使用专用 `arktrace-host-process` 监督 parser：Engine 保持私有 control pipe 的
+唯一 writer；helper 独立进程组监听 EOF，直接清理 parser 的独立进程组并回收 leader。该 helper
+只负责进程生命周期与有界诊断，不承载 Engine/Store 语义，不是全局 daemon。它与 parser 一样
+需要固定分发身份与生产签名；开发 probe 的现场 SHA 不能作为发布 pin。helper 与 parser 都在
+挂起状态核对 kernel code identity 后才恢复。当前测试证明 helper 启动后的 Engine SIGKILL 清理，
+初始挂起核验窗口由 Darwin 孤儿挂起组的 SIGHUP/SIGCONT 处置覆盖：spawn 显式重置默认 SIGHUP、
+清空 mask，原生测试证明继承 session 与新建无终端 session 中宿主 SIGKILL 后 helper 未执行入口。
+005 仍需其它 spawn/取消/fault 窗口、sealed bundle 原位执行、沙箱与签名 gate。证据见
+[005 macOS 记录](migration-runs/AT-RUST-005-2026-10-03-macos.md)。
+新增目录发布与初始挂起窗口证据见
+[004/005 后续记录](migration-runs/AT-RUST-004-005-2026-10-03-publication-bootstrap.md)。
+输出文件预算后续已加入：最多 16 个相对 CWD 的 fresh component，按文件设 byte limit，
+保留首次出现的 FD/identity 并检查权限/链接/替换；解析期间、TERM/grace drain 与进程组清理完成后
+均检查预算。stdout/stderr 的清理阶段超量也不能返回成功。该轮询端口拒绝超量结果，不是磁盘硬配额，
+未声明文件和 crash owner 回收仍需 parser/Engine 策略。实际 pinned parser 的正常与 budget 负例见
+[005 输出预算记录](migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
+
 Windows reparse point 不等于链接：symlink/junction 沿用“显式输入解析一次、内部路径拒绝”；
 OneDrive 云文件占位符、重复数据删除等非链接 tag 既不能笼统按链接拒绝，也不能静默跟随。显式输入
 对这些 tag 的允许范围、读取时 hydration 失败的错误码，以及 UNC/网络共享、`\\?\` 长路径，由 004 实测后冻结。
@@ -406,6 +477,24 @@ Apple-clang 补丁不机械套用；稀疏 protobuf 修复的语义须在两端�
 开发期使用隔离的 Rust cache/staging root。不同 parser hash 本来会生成不同 parserKey；
 除此之外初期采用新的 **根目录 namespace** 避免与 Swift writer 竞争，不在既有 metadata
 中私自增加字段。新 key 算法、schema/index 版本只在语义需要时变更。
+
+macOS owner 原型在这个隔离根使用 format 2：相对 recovery-root 的路径、dev/inode 与 closed state，
+记录上限 4 KiB，exclusive owner lease。creating 在 mkdir 前持久化；首次 FD 绑定后登记 identity。
+quarantine/removing/removed 分别记录回收事务，按 held parents/no-follow/identity 进行有界遍历与删除。
+未绑定 creating、unknown/invalid evidence、失去目录身份以及已发布 Ready 均不由普通 staging 恢复猜测删除。
+目录已删、removed tombstone 尚未落盘的 crash 窗口保留 identity proof；它不伪装成已完成回收。
+v2 不兼容旧 format-1 owner reader；017 的真实 purger 对等与 entry lease 协调完成前，不交给旧维护端。
+此登记证明目录所有权，不替代 006 的 schema/index/metadata/Ready handoff，见
+[004 owner 原生记录](migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
+
+后续 format 3 仅升级已绑定的 ephemeral entry owner：原五字段加 `ephemeral`，其 closed 四字段
+为 keyIdentifier、sessionIdentifier、leaseDevice、leaseInode。4 KiB 和遍历边界不变，Native
+仍读取旧 v2；v2 出现该新增字段（包括 null）、v3 缺 binding/未知字段/重复字段均拒绝。
+binding 在 candidate 创建后、source copy/parser 前落盘，Publishing 意图在 rename 前落盘。
+generic recovery 不处理任何 bound entry；Engine 按 key→entry→owner 取得 authority。Ready
+继续复核现有 format-1 metadata 与 key；Publishing/Removing/Removed 用绑定证据完成对账。
+payload rmdir 后先持久化 Removed，再删除匹配的 lease，最后删 owner artifacts；若目录已消失
+但 Removed 未落盘则保留 unresolved proof。新证据见上述 006 记录；v3 不交给旧维护端。
 
 切换时提供有界、单向的旧 cache reader：
 
