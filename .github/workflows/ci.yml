@@ -30,7 +30,7 @@ name: CI
 #                parser asset, fetches the locked medium fixture, and fails
 #                closed on any identity drift. Never a merge gate.
 #
-# Toolchain policy: runners are pinned to macos-26 with Xcode 27.0. If the
+# Toolchain policy: compile runners are pinned to xcode-27 with Xcode 27.0. If the
 # pinned toolchain is missing the job fails immediately instead of silently
 # building with whatever is newest.
 
@@ -130,7 +130,7 @@ jobs:
     name: SwiftPM build, test and skip audit
     needs: plan
     if: needs.plan.outputs.lane_swiftpm == 'true'
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
@@ -272,7 +272,7 @@ jobs:
     name: App build and bundle checks
     needs: plan
     if: needs.plan.outputs.lane_app == 'true'
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
@@ -422,7 +422,7 @@ jobs:
     name: Rust macOS native
     needs: plan
     if: needs.plan.outputs.lane_rust_macos == 'true'
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 20
     env:
       ARKTRACE_EXPECT_NATIVE_HOST: macos-arm64
@@ -467,11 +467,14 @@ jobs:
         shell: pwsh
         run: '"ARKTRACE_CARGO_CACHE_ROOT=$env:RUNNER_TEMP/arktrace-cargo" >> $env:GITHUB_ENV'
       - name: Format, architecture, licenses and contract checks
+        # Bash propagates every native command failure in these multi-command steps.
+        shell: bash
         run: |
           python scripts/run-cargo.py fmt --all -- --check
           python scripts/verify_migration_contracts.py
           python scripts/verify_rust_workspace.py
       - name: Build, lint and native tests
+        shell: bash
         run: |
           python scripts/run-cargo.py build --workspace
           python scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
@@ -531,7 +534,7 @@ jobs:
   benchmark-slow:
     name: Medium benchmark (slow lane)
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7

@@ -1,6 +1,7 @@
 use arktrace_contract::{
     CounterQuery, CpuSliceQuery, ThreadStateQuery, TraceSliceQuery, TraceTimeRange,
 };
+#[cfg(target_os = "macos")]
 use std::collections::BTreeMap;
 
 /// Closed migration views. Each carries only its applicable typed filters.
@@ -38,6 +39,7 @@ impl EventQuery {
     }
     /// Request identities use scalars; result filters use the existing
     /// nested stable-key Codable shape. Keys below are fixed contract fields.
+    #[cfg(target_os = "macos")]
     pub(crate) fn filters(&self, nested_keys: bool) -> BTreeMap<&'static str, serde_json::Value> {
         let (cpu, process, pid, thread, tid, raw, state) = match self {
             Self::CpuSlices(q) => (q.cpu, q.process_key, q.pid, q.thread_key, q.tid, None, None),
@@ -102,6 +104,7 @@ impl EventQuery {
         });
         filters
     }
+    #[cfg(target_os = "macos")]
     pub(crate) fn parameters(&self) -> BTreeMap<&'static str, serde_json::Value> {
         let mut result = self.filters(false);
         result.extend([
