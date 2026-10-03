@@ -980,9 +980,12 @@ enum TraceSchemaAdapter {
                 )
             }
         }
-        if columnsByTable["stat"]?.contains(where: { $0.name == "stat_type" }) == true,
-            columnsByTable["stat"]?.contains(where: { $0.name == "count" }) == true
-        {
+        // Optional stat schemas may omit source/name. The specialized probe
+        // reads all four columns; missing ones disable it rather than turning
+        // an otherwise compatible trace into a SQL preparation failure.
+        if ["stat_type", "count", "source", "event_name"].allSatisfy({ name in
+            columnsByTable["stat"]?.contains(where: { $0.name == name }) == true
+        }) {
             let result = try statQualityProbe(db)
             if result.nonReceived > 0 {
                 record(

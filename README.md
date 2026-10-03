@@ -29,7 +29,7 @@ ArkTrace captures traces from an explicitly selected OpenHarmony device or opens
 ## Requirements
 
 - Apple silicon Mac running macOS 26 or later
-- Swift 6.3 toolchain / Xcode 26.6 (Xcode for building the app)
+- Swift 6.4 toolchain / Xcode 27.0 (Xcode for building the app)
 - OpenHarmony SDK `hdc` and a connected device with `hiprofiler_cmd` (capture only)
 - `jq` — ships with macOS 15+
 - Network access the first time you build the pinned TraceStreamer

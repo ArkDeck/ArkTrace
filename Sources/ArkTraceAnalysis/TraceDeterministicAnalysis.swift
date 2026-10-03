@@ -876,7 +876,9 @@ package struct TraceDeterministicAnalysisEngine: Sendable {
         var samples: [TraceSchedulingLatencySample] = []
         for (index, state) in states.items.enumerated() {
             if index.isMultiple(of: 256) { try check(deadline) }
-            guard state.normalizedState == .runnable,
+            // A normalized trace-end boundary on an open interval is not an
+            // observed Runnable end and cannot prove a scheduled transition.
+            guard state.normalizedState == .runnable, !state.isOpenEnded,
                 let next = running[
                     RunningTransitionKey(threadKey: state.threadKey, startNs: state.endNs)
                 ]

@@ -15,7 +15,6 @@ public struct TraceOfflineInspectionQualityIssue: Hashable, Sendable {
 
     package init(_ issue: TraceDataQualityIssue) throws {
         guard issue.category != .unclassified,
-            issue.message == nil,
             issue.scope.map({ TraceDataQualityScope.machineAllowed.contains($0) }) ?? true,
             issue.count.map({ $0 >= 0 }) ?? true
         else {
@@ -23,6 +22,8 @@ public struct TraceOfflineInspectionQualityIssue: Hashable, Sendable {
                 reason: "dataQualityNotMachineSafe"
             )
         }
+        // Human diagnostics may contain private paths. Drop them here; the
+        // closed structured facts, rather than prose, determine machine safety.
         category = issue.category
         scope = issue.scope
         count = issue.count

@@ -129,7 +129,7 @@ package final class CLISignalMonitor: Sendable {
     private func drain(_ descriptor: Int32) {
         var buffer = [UInt8](repeating: 0, count: 32)
         while true {
-            let count = unsafe buffer.withUnsafeMutableBytes { bytes in
+            let count = buffer.withUnsafeMutableBytes { bytes in
                 unsafe Darwin.read(descriptor, bytes.baseAddress, bytes.count)
             }
             guard count > 0 else { return }

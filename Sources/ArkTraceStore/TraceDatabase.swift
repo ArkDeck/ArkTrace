@@ -194,7 +194,7 @@ final class TraceDatabase {
         // rejects a database-file symlink without rejecting canonical temp roots.
         let parent = url.deletingLastPathComponent()
         var canonicalParent = [CChar](repeating: 0, count: Int(PATH_MAX))
-        let resolved = unsafe parent.path.withCString {
+        let resolved = parent.path.withCString {
             unsafe Darwin.realpath($0, &canonicalParent)
         }
         let openURL = unsafe resolved.map {
@@ -212,7 +212,7 @@ final class TraceDatabase {
             )
             : false
         if readOnly {
-            let descriptor = unsafe openURL.path.withCString {
+            let descriptor = openURL.path.withCString {
                 unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
             }
             guard descriptor >= 0 else {
@@ -276,7 +276,7 @@ final class TraceDatabase {
         }
         if sandboxedPrivateOpen {
             var reopened = stat()
-            let stable = unsafe openURL.path.withCString {
+            let stable = openURL.path.withCString {
                 unsafe Darwin.lstat($0, &reopened)
             } == 0
                 && (reopened.st_mode & S_IFMT) == S_IFREG

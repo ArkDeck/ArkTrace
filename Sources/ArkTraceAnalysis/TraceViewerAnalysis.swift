@@ -239,12 +239,20 @@ package struct TraceViewerSearchEngine: Sendable {
         let rhsTitle = Data(rhs.title.utf8)
         if lhsTitle != rhsTitle { return lhsTitle.lexicographicallyPrecedes(rhsTitle) }
         if lhs.processKey?.ipid != rhs.processKey?.ipid {
-            return (lhs.processKey?.ipid ?? Int64.min) < (rhs.processKey?.ipid ?? Int64.min)
+            return identityOrdered(lhs.processKey?.ipid, rhs.processKey?.ipid)
         }
         if lhs.threadKey?.itid != rhs.threadKey?.itid {
-            return (lhs.threadKey?.itid ?? Int64.min) < (rhs.threadKey?.itid ?? Int64.min)
+            return identityOrdered(lhs.threadKey?.itid, rhs.threadKey?.itid)
         }
-        return (lhs.eventKey?.rowID ?? Int64.min) < (rhs.eventKey?.rowID ?? Int64.min)
+        return identityOrdered(lhs.eventKey?.rowID, rhs.eventKey?.rowID)
+    }
+
+    private static func identityOrdered(_ lhs: Int64?, _ rhs: Int64?) -> Bool {
+        // Absence is distinct from every valid signed identity, including
+        // Int64.min. A sentinel collision would break the sort's total order.
+        guard let lhs else { return rhs != nil }
+        guard let rhs else { return false }
+        return lhs < rhs
     }
 
     private static func check(_ deadline: ContinuousClock.Instant) throws {

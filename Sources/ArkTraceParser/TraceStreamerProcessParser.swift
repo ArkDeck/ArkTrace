@@ -1692,7 +1692,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func synchronizeFile(at url: URL) throws {
-        let descriptor = unsafe url.path.withCString {
+        let descriptor = url.path.withCString {
             unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW)
         }
         guard descriptor >= 0 else {
@@ -1705,7 +1705,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func synchronizeDirectory(at url: URL) throws {
-        let descriptor = unsafe url.path.withCString { unsafe Darwin.open($0, O_RDONLY) }
+        let descriptor = url.path.withCString { unsafe Darwin.open($0, O_RDONLY) }
         guard descriptor >= 0 else {
             throw stagingFinalizationFailure(reason: "directorySyncOpen")
         }
@@ -1723,7 +1723,7 @@ package struct TraceStreamerProcessParser: TraceParser {
     }
 
     private static func sourceFileSnapshot(at url: URL) throws -> SourceFileSnapshot {
-        let descriptor = unsafe url.path.withCString {
+        let descriptor = url.path.withCString {
             unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else {
@@ -1749,7 +1749,7 @@ package struct TraceStreamerProcessParser: TraceParser {
 
     private static func fileIdentityProbe(at url: URL) -> FileIdentityProbe {
         var info = stat()
-        let result = unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) }
+        let result = url.path.withCString { unsafe Darwin.lstat($0, &info) }
         guard result == 0 else {
             return errno == ENOENT ? .absent : .inaccessible
         }
@@ -1780,8 +1780,8 @@ package struct TraceStreamerProcessParser: TraceParser {
         var renameError: Int32 = 0
         for _ in 0..<8 {
             let candidate = parent.appending(path: ".arktrace-rollback-\(UUID().uuidString)", directoryHint: .notDirectory)
-            let result = unsafe file.url.path.withCString { sourcePath in
-                unsafe candidate.path.withCString { quarantinePath in
+            let result = file.url.path.withCString { sourcePath in
+                candidate.path.withCString { quarantinePath in
                     unsafe Darwin.renameatx_np(
                         AT_FDCWD,
                         sourcePath,
@@ -1819,8 +1819,8 @@ package struct TraceStreamerProcessParser: TraceParser {
             throw cleanupFailure(stage: .parsing, reason: "readyIdentityProbeFailed")
         }
         if shouldRestore {
-            let restoreResult = unsafe quarantineURL.path.withCString { quarantinePath in
-                unsafe file.url.path.withCString { destinationPath in
+            let restoreResult = quarantineURL.path.withCString { quarantinePath in
+                file.url.path.withCString { destinationPath in
                     unsafe Darwin.renameatx_np(
                         AT_FDCWD,
                         quarantinePath,
@@ -1841,7 +1841,7 @@ package struct TraceStreamerProcessParser: TraceParser {
         } catch {
             throw cleanupFailure(stage: .parsing, reason: "readyRemovalFailed")
         }
-        let unlinkResult = unsafe quarantineURL.path.withCString { unsafe Darwin.unlink($0) }
+        let unlinkResult = quarantineURL.path.withCString { unsafe Darwin.unlink($0) }
         guard unlinkResult == 0 else {
             throw cleanupFailure(stage: .parsing, reason: "readyRemovalFailed")
         }
@@ -1894,7 +1894,7 @@ package struct TraceStreamerProcessParser: TraceParser {
 
     private static func pathEntryStatus(at url: URL) -> PathEntryStatus {
         var info = stat()
-        let result = unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) }
+        let result = url.path.withCString { unsafe Darwin.lstat($0, &info) }
         if result == 0 { return .present }
         return errno == ENOENT ? .absent : .inaccessible
     }

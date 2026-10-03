@@ -105,6 +105,7 @@ package enum TraceDataQualityScope {
         "callstack.ts", "callstack.dur", "callstack.depth",
         "callstack.parent_id", "callstack.cookie", "callstack.value",
         "callstack.identity",
+        "frame_slice.ts", "frame_slice.dur", "frame_slice.value",
         "measure.ts", "measure.filter_id", "measure.value", "measure.dur",
         "measure.optional",
         // Process counter samples come from `process_measure`, so quality
@@ -118,6 +119,9 @@ package enum TraceDataQualityScope {
         "process_measure_filter.id", "process_measure_filter.name",
         "process_measure_filter.ipid", "process_measure_filter.unit",
         "stat", "stat.count", "stat.source", "stat.event_name", "stat.stat_type",
+        // An optional counter relationship can remain unproven within its VM
+        // budget; the Store reports this typed degradation at the boundary.
+        "schema.counterSource",
         "timeline.density.occupancy", "timeline.density.dominantThread",
         "timeline.counter",
         "timeline.counter.duration",

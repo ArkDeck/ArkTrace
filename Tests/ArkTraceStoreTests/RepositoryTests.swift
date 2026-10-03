@@ -1882,6 +1882,18 @@ final class RepositoryTests: XCTestCase {
         XCTAssertNotEqual(before.schemaFingerprint, after.schemaFingerprint)
     }
 
+    func testPartialOptionalStatSchemaDoesNotFailRequiredValidation() throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute("""
+            CREATE TABLE stat (stat_type TEXT, count INTEGER);
+            INSERT INTO stat VALUES ('received', 1);
+            """)
+        let validation = try TraceSchemaAdapter.validate(db)
+        XCTAssertFalse(validation.eventSourceCountsAvailable)
+        XCTAssertEqual(validation.durationNs, 1000)
+        XCTAssertFalse(validation.dataQuality.issues.contains { $0.scope == "stat" })
+    }
+
     func testQuotedTableAndColumnNamesParticipateInFingerprint() async throws {
         let before = try await makeRepository().metadata().schemaFingerprint
         let db = try TraceDatabase(url: databaseURL, readOnly: false)
@@ -2695,6 +2707,61 @@ final class RepositoryTests: XCTestCase {
         XCTAssertTrue(page.items.isEmpty)
     }
 
+    func testSliceArgumentsAcceptTheMinimumSchemaWithoutIDOrRowID() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute("""
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            CREATE TABLE args (
+                key INTEGER, datatype INTEGER, value INTEGER, argset INTEGER,
+                PRIMARY KEY(key, datatype, value, argset)
+            ) WITHOUT ROWID;
+            CREATE TABLE data_dict (id INTEGER, data TEXT);
+            CREATE TABLE data_type (typeId INTEGER, desc TEXT);
+            INSERT INTO data_dict VALUES (10, 'key'), (12, 'string value');
+            INSERT INTO data_type VALUES (0, 'int32_t'), (1, 'string');
+            INSERT INTO args VALUES (10, 1, 12, 5), (10, 0, 7, 5), (10, 0, 2, 5);
+            """)
+        let page = try await makeRepository().arguments(
+            TraceArgumentQuery(argSetID: 5, deadline: .now.advanced(by: .seconds(5)))
+        )
+        XCTAssertTrue(page.capabilityAvailable)
+        XCTAssertFalse(page.truncated)
+        XCTAssertEqual(page.items.map(\.value), ["2", "7", "string value"])
+    }
+
+    func testSliceArgumentsWithRepeatedIDsHaveStableValueOrder() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute("""
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            CREATE TABLE args (id INTEGER, key INTEGER, datatype INTEGER, value INTEGER, argset INTEGER);
+            CREATE TABLE data_dict (id INTEGER, data TEXT);
+            CREATE TABLE data_type (typeId INTEGER, desc TEXT);
+            INSERT INTO data_dict VALUES (10, 'key');
+            INSERT INTO data_type VALUES (0, 'int32_t');
+            INSERT INTO args VALUES (1, 10, 0, 7, 5), (1, 10, 0, 2, 5);
+            """)
+        let page = try await makeRepository().arguments(
+            TraceArgumentQuery(argSetID: 5, deadline: .now.advanced(by: .seconds(5)))
+        )
+        XCTAssertEqual(page.items.map(\.value), ["2", "7"])
+    }
+
+    func testSliceArgumentsAreUnavailableWhenTheOptionalTypeTableIsAbsent() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute("""
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            CREATE TABLE args (id INTEGER, key INTEGER, datatype INTEGER, value INTEGER, argset INTEGER);
+            CREATE TABLE data_dict (id INTEGER, data TEXT);
+            INSERT INTO data_dict VALUES (10, 'key');
+            INSERT INTO args VALUES (1, 10, 0, 7, 5);
+            """)
+        let page = try await makeRepository().arguments(
+            TraceArgumentQuery(argSetID: 5, deadline: .now.advanced(by: .seconds(5)))
+        )
+        XCTAssertFalse(page.capabilityAvailable)
+        XCTAssertTrue(page.items.isEmpty)
+    }
+
     /// One slice's argument list is bounded so a malformed set cannot flood the
     /// Inspector (AT-DB-007).
     func testSliceArgumentsAreBoundedAndReportTruncation() async throws {
@@ -2880,6 +2947,32 @@ final class RepositoryTests: XCTestCase {
         )
         XCTAssertFalse(page.capabilityAvailable)
         XCTAssertTrue(page.items.isEmpty)
+    }
+
+    func testFrameThreadKeyColumnIsAdditiveAndMayBeAbsent() async throws {
+        let db = try TraceDatabase(url: databaseURL, readOnly: false)
+        try db.execute(
+            """
+            CREATE TABLE frame_slice (
+                id INTEGER, ts INTEGER, dur INTEGER, vsync INTEGER,
+                ipid INTEGER, type INTEGER, flag INTEGER
+            );
+            INSERT INTO frame_slice VALUES (1, 1100, 100, 99, 1, 0, 2);
+            """
+        )
+        let page = try await makeRepository().frames(
+            TraceFrameQuery(
+                range: try TraceTimeRange.query(startNs: 0, endNs: 1_000),
+                deadline: ContinuousClock.now.advanced(by: .seconds(5))
+            )
+        )
+        XCTAssertTrue(page.capabilityAvailable)
+        XCTAssertEqual(page.items.count, 1)
+        XCTAssertEqual(page.items[0].key.rowID, 1)
+        XCTAssertNil(page.items[0].threadKey)
+        XCTAssertEqual(page.items[0].kind, .actual)
+        XCTAssertEqual(page.items[0].flag, 2)
+        XCTAssertFalse(page.items[0].isJank)
     }
 
     func testFramesAreBoundedAndOrderedDeterministically() async throws {

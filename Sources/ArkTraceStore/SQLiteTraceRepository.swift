@@ -28,9 +28,11 @@ struct PreparedReadySchema: Sendable {
     /// `args` + its two dictionaries. Optional capability (AT-DB-004): a trace
     /// without them simply has no arguments to show.
     let argumentsAvailable: Bool
+    let argumentsHaveID: Bool
     /// `frame_slice`. Optional capability: a capture without frame data shows
     /// the lane group as unavailable rather than failing to open.
     let framesAvailable: Bool
+    let frameSliceHasThreadKey: Bool
     /// `dur` presence per counter sample table. The two sources are
     /// introspected separately because the optional column is additive and a
     /// database may carry it on one table only (AT-DB-004).
@@ -75,10 +77,15 @@ struct PreparedReadySchema: Sendable {
         callstackHasArgSetID = callstack.contains("argsetid")
         let args = try columns("args")
         let dataDict = try columns("data_dict")
+        let dataType = try columns("data_type")
+        argumentsHaveID = args.contains("id")
         argumentsAvailable = callstackHasArgSetID
             && args.isSuperset(of: ["key", "datatype", "value", "argset"])
             && dataDict.isSuperset(of: ["id", "data"])
-        framesAvailable = try columns("frame_slice")
+            && dataType.isSuperset(of: ["typeId", "desc"])
+        let frameSlice = try columns("frame_slice")
+        frameSliceHasThreadKey = frameSlice.contains("itid")
+        framesAvailable = frameSlice
             .isSuperset(of: ["id", "ts", "dur", "vsync", "ipid", "type", "flag"])
         cpuFilterHasUnit = cpuFilter.contains("unit")
         processFilterHasUnit = processFilter.contains("unit")
@@ -240,7 +247,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
     private let callstackHasCookie: Bool
     private let callstackHasArgSetID: Bool
     private let argumentsAvailable: Bool
+    private let argumentsHaveID: Bool
     private let framesAvailable: Bool
+    private let frameSliceHasThreadKey: Bool
     private let counterSampleHasDuration: [CounterSampleTable: Bool]
     private let cpuFilterHasUnit: Bool
     private let processFilterHasUnit: Bool
@@ -395,7 +404,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         self.callstackHasCookie = prepared.callstackHasCookie
         self.callstackHasArgSetID = prepared.callstackHasArgSetID
         self.argumentsAvailable = prepared.argumentsAvailable
+        self.argumentsHaveID = prepared.argumentsHaveID
         self.framesAvailable = prepared.framesAvailable
+        self.frameSliceHasThreadKey = prepared.frameSliceHasThreadKey
         self.counterSampleHasDuration = prepared.counterSampleHasDuration
         self.cpuFilterHasUnit = prepared.cpuFilterHasUnit
         self.processFilterHasUnit = prepared.processFilterHasUnit
@@ -1405,6 +1416,10 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         _ query: TraceArgumentQuery
     ) async throws -> TraceEventPage<TraceEventArgument> {
         guard argumentsAvailable else { return .unavailable }
+        // `id` is additive. A minimum compatible args table still has a
+        // deterministic order, including resolved ties after dictionary joins.
+        let order = (argumentsHaveID ? "a.id ASC, " : "")
+            + "a.key ASC, a.datatype ASC, a.value ASC, keyDict.data ASC, t.desc ASC, valueDict.data ASC"
         let rows = try db.query(
             """
             SELECT keyDict.data, a.datatype, t.desc, valueDict.data, a.value
@@ -1413,7 +1428,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             LEFT JOIN data_type AS t ON t.typeId = a.datatype
             LEFT JOIN data_dict AS valueDict ON valueDict.id = a.value
             WHERE typeof(a.argset) = 'integer' AND a.argset = ?
-            ORDER BY a.id ASC
+            ORDER BY \(order)
             LIMIT ?
             """,
             bindings: [.int64(query.argSetID), .int64(Int64(query.limit) + 1)],
@@ -1468,9 +1483,10 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             bindings.append(.int64(processKey.ipid))
         }
         bindings.append(.int64(Int64(query.limit) + 1))
+        let threadKeySelection = frameSliceHasThreadKey ? "f.itid" : "NULL"
         let rows = try db.query(
             """
-            SELECT f.id, f.ts, f.dur, f.vsync, f.type, f.flag, f.ipid, f.itid,
+            SELECT f.id, f.ts, f.dur, f.vsync, f.type, f.flag, f.ipid, \(threadKeySelection),
                 p.pid, p.name
             FROM frame_slice AS f
             LEFT JOIN process AS p ON p.ipid = f.ipid

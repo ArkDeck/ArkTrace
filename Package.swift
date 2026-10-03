@@ -1,7 +1,7 @@
 // swift-tools-version: 6.3
 import PackageDescription
 
-// Swift 6.0 language mode on the Swift 6.3 toolchain. Strict memory safety is
+// Swift 6.0 language mode on the Swift 6.4 toolchain (Xcode 27.0). Strict memory safety is
 // a per-target opt-in (SE-0458): enabled on every first-party target that owns
 // POSIX/SQLite/process boundaries so unsafe pointer use is visible at the call
 // site.
@@ -141,7 +141,7 @@ let package = Package(
             name: "ArkTraceIntegrationTests",
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime",
-                "ArkTraceAnalysis", "ArkTraceRendering",
+                "ArkTraceAnalysis", "ArkTraceRendering", "ArkTraceAppSupport",
             ]
         ),
     ],

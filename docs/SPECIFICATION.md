@@ -35,7 +35,7 @@ Rust/Windows 迁移目标与需求映射见 [迁移设计](RUST_CORE_MIGRATION_D
 
 - `macOS 26+`
 - Apple silicon 为首要发布架构
-- Swift 6.3 toolchain（Swift language mode 6.0）
+- Swift 6.4 toolchain / Xcode 27.0（Swift language mode 6.0）
 - 原生 macOS App 与 CLI
 
 Core/CLI 的可移植性可以保留，但 Windows、Linux GUI、iOS、visionOS 和 Web 不在 0.1 范围。
@@ -303,6 +303,10 @@ callstack.argsetid                ← optional 列，指向 args.argset
 `447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6`），**不得凭猜测实现**：`args.key` 恒为 `data_dict` 索引；
 **只有 `datatype == 1` 时 `args.value` 才是 `data_dict` 索引**，其余类型直接使用该整数。SmartPerf 的 UI
 自身从不解释 `datatype`，它消费该视图的列（`bean/BinderArgBean.ts`）。
+`args.id` 是 additive column：存在时以其升序为首键；相同或缺失 id 时按
+`key/datatype/value` 升序，再以解析后的 key/type/value 处理 join ties，保持最低兼容列集（含 WITHOUT ROWID 表）的
+有界确定性。缺少 `data_type(typeId,desc)` 等该组必需列时参数页为 unavailable；
+类型表中没有某个 typeId 的行只令该参数的 typeName 为 nil。
 
 ### AT-DB-004 Additive compatibility
 

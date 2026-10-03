@@ -29,7 +29,7 @@ ArkTrace 可从用户明确选择的 OpenHarmony 设备采集 Trace，也可打�
 ## 环境要求
 
 - Apple silicon Mac，macOS 26 及以上
-- Swift 6.3 toolchain / Xcode 26.6（构建 App 需要 Xcode）
+- Swift 6.4 toolchain / Xcode 27.0（构建 App 需要 Xcode）
 - OpenHarmony SDK `hdc`，以及带 `hiprofiler_cmd` 的已连接设备（仅采集需要）
 - `jq` —— macOS 15 起随系统提供
 - 首次构建 pinned TraceStreamer 需要网络访问

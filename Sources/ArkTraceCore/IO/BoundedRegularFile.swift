@@ -46,7 +46,7 @@ public enum ArkTraceBoundedRegularFile {
         afterOpen: (() throws -> Void)?
     ) throws -> Contents {
         guard maximumByteCount > 0 else { throw BoundedFileError.invalidLimit }
-        let descriptor = unsafe url.path.withCString {
+        let descriptor = url.path.withCString {
             unsafe Darwin.open($0, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
         }
         guard descriptor >= 0 else { throw BoundedFileError.openFailed }
@@ -62,7 +62,7 @@ public enum ArkTraceBoundedRegularFile {
         var buffer = [UInt8](repeating: 0, count: min(64 * 1_024, maximumByteCount))
         while true {
             try Task.checkCancellation()
-            let count = unsafe buffer.withUnsafeMutableBytes { rawBuffer in
+            let count = buffer.withUnsafeMutableBytes { rawBuffer in
                 unsafe Darwin.read(descriptor, rawBuffer.baseAddress, rawBuffer.count)
             }
             if count == 0 { break }

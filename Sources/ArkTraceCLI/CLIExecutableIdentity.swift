@@ -40,7 +40,7 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
 
     func resolveBuildRevision() throws -> String {
         let expected = try mappedIdentity()
-        let descriptor = unsafe executableURL.path.withCString {
+        let descriptor = executableURL.path.withCString {
             unsafe open($0, O_RDONLY | O_CLOEXEC | O_NOFOLLOW)
         }
         guard descriptor >= 0 else {
@@ -89,7 +89,7 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
         var buffer = [UInt8](repeating: 0, count: 1 * 1_024 * 1_024)
         while true {
             if Task.isCancelled { throw CancellationError() }
-            let count = unsafe buffer.withUnsafeMutableBytes { rawBuffer in
+            let count = buffer.withUnsafeMutableBytes { rawBuffer in
                 unsafe pread(descriptor, rawBuffer.baseAddress, rawBuffer.count, offset)
             }
             if count < 0 {
@@ -149,7 +149,7 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
             throw identityFailure(reason: "mappedExecutableUnavailable")
         }
         var info = proc_regionwithpathinfo()
-        let byteCount = unsafe withUnsafeMutablePointer(to: &info) {
+        let byteCount = withUnsafeMutablePointer(to: &info) {
             unsafe proc_pidinfo(
                 getpid(),
                 PROC_PIDREGIONPATHINFO,
@@ -167,7 +167,7 @@ struct CLIExecutableIdentityResolver: @unchecked Sendable {
         else {
             throw identityFailure(reason: "mappedExecutableInvalid")
         }
-        let path = unsafe withUnsafePointer(to: &info.prp_vip.vip_path) { pointer in
+        let path = withUnsafePointer(to: &info.prp_vip.vip_path) { pointer in
             unsafe pointer.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) {
                 unsafe String(cString: $0)
             }

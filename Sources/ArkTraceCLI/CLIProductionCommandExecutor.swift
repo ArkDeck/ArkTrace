@@ -637,7 +637,7 @@ package struct CLIProductionCommandExecutor: CLICommandExecuting, @unchecked Sen
         var candidate = url.standardizedFileURL
         for _ in 0..<16 {
             var info = stat()
-            let probe = unsafe candidate.path.withCString { unsafe Darwin.lstat($0, &info) }
+            let probe = candidate.path.withCString { unsafe Darwin.lstat($0, &info) }
             if probe == 0 {
                 let attributes = try? FileManager.default.attributesOfFileSystem(
                     forPath: candidate.path

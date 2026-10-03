@@ -87,12 +87,12 @@ package struct TraceBundledParserResolver: Sendable {
             guard Self.hasMode(current, expected: expected) else { return false }
         }
         let mode = executable ? (R_OK | X_OK) : R_OK
-        return unsafe candidate.path.withCString { unsafe Darwin.access($0, mode) } == 0
+        return candidate.path.withCString { unsafe Darwin.access($0, mode) } == 0
     }
 
     private static func hasMode(_ url: URL, expected: mode_t) -> Bool {
         var info = stat()
-        return unsafe url.path.withCString { unsafe Darwin.lstat($0, &info) } == 0
+        return url.path.withCString { unsafe Darwin.lstat($0, &info) } == 0
             && (info.st_mode & S_IFMT) == expected
     }
 }

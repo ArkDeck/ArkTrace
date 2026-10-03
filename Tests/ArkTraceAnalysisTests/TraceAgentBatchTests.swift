@@ -788,6 +788,40 @@ final class TraceAgentBatchTests: XCTestCase {
         )
     }
 
+    func testSchedulingRequiresObservedRunnableEndAndPreservesClosedProof() async throws {
+        let thread = ThreadKey(itid: 11)
+        let process = ProcessKey(ipid: 1)
+        let running = cpuSlice(1, 100, 200, cpu: 0, process: process, thread: thread)
+        let unobserved = ThreadStateInterval(
+            key: EventKey(table: .threadState, rowID: 2),
+            range: try TraceTimeRange(startNs: 0, endNs: 100),
+            threadKey: thread, processKey: process, state: "R", normalizedState: .runnable,
+            cpu: nil, tid: nil, pid: nil, processName: nil, threadName: nil,
+            isOpenEnded: true
+        )
+        let request = try TraceDeterministicAnalysisRequest(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        )
+        let unsupported = try await TraceDeterministicAnalysisEngine(
+            repository: Repository(cpuSlices: [running], states: [unobserved])
+        ).analyze(request)
+        XCTAssertFalse(unsupported.schedulingLatency.supported)
+        XCTAssertEqual(unsupported.schedulingLatency.unsupportedReason, .noProvableRunnableTransitions)
+        XCTAssertEqual(unsupported.schedulingLatency.count, 0)
+        XCTAssertNil(unsupported.schedulingLatency.percentiles)
+        XCTAssertTrue(unsupported.schedulingLatency.topSamples.isEmpty)
+
+        let observed = state(3, 80, 100, thread: thread, process: process,
+                             raw: "R", normalized: .runnable)
+        let supported = try await TraceDeterministicAnalysisEngine(
+            repository: Repository(cpuSlices: [running], states: [unobserved, observed])
+        ).analyze(request)
+        XCTAssertTrue(supported.schedulingLatency.supported)
+        XCTAssertEqual(supported.schedulingLatency.count, 1)
+        XCTAssertEqual(supported.schedulingLatency.percentiles?.p50Ns, 20)
+        XCTAssertEqual(supported.schedulingLatency.topSamples.first?.runnableEventKey, observed.key)
+    }
+
     func testSchedulingPercentileNearestRankAndUnsupportedAreStable() async throws {
         let process = process(1, pid: 10)
         var cpu: [CpuSlice] = []

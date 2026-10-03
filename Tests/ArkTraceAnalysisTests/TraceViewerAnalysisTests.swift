@@ -192,6 +192,25 @@ final class TraceViewerAnalysisTests: XCTestCase {
         XCTAssertEqual(byInternalIdentity.items.map(\.threadKey?.itid), [3])
     }
 
+    func testSearchOrdersMissingIdentityBeforeTheValidMinimumIdentity() async throws {
+        func slice(_ id: Int64, process: ProcessKey?, thread: ThreadKey?) throws -> TraceSlice {
+            TraceSlice(key: EventKey(table: .callstack, rowID: id),
+                range: try TraceTimeRange(startNs: 100, endNs: 101),
+                threadKey: thread, processKey: process, name: "collision",
+                category: nil, depth: nil, parentEventKey: nil,
+                isAsync: false, isOpenEnded: false)
+        }
+        let repository = Repository(slices: [
+            try slice(10, process: ProcessKey(ipid: .min), thread: ThreadKey(itid: .min)),
+            try slice(20, process: nil, thread: ThreadKey(itid: -40)),
+            try slice(30, process: ProcessKey(ipid: .min), thread: nil),
+        ])
+        let result = try await TraceViewerSearchEngine(repository: repository).search(
+            TraceViewerSearchRequest(text: "collision", domains: [.slice])
+        )
+        XCTAssertEqual(result.items.map(\.eventKey?.rowID), [20, 30, 10])
+    }
+
     /// The viewer asks two questions from two fields: the sidebar filter finds
     /// a process, the toolbar field finds what happened. A domain the request
     /// excludes must not come back in the results -- and must not be queried

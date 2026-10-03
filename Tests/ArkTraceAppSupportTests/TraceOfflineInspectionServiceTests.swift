@@ -6,6 +6,36 @@ import Synchronization
 import XCTest
 
 final class TraceOfflineInspectionServiceTests: XCTestCase {
+    func testSharedRustMigrationQualityVectorsAgainstSwiftOracle() throws {
+        struct Corpus: Decodable {
+            struct Vector: Decodable {
+                let id: String
+                let issue: TraceDataQualityIssue
+                let valid: Bool
+            }
+            let version: Int
+            let vectors: [Vector]
+        }
+        let root = URL(filePath: #filePath).deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+        let corpus = try JSONDecoder().decode(
+            Corpus.self, from: Data(contentsOf: root.appending(path: "contracts/quality-vectors.json"))
+        )
+        XCTAssertEqual(corpus.version, 1)
+        XCTAssertFalse(corpus.vectors.isEmpty)
+        for vector in corpus.vectors {
+            if vector.valid {
+                let issue = try TraceOfflineInspectionQualityIssue(vector.issue)
+                XCTAssertEqual(issue.category, vector.issue.category, vector.id)
+                XCTAssertEqual(issue.scope, vector.issue.scope, vector.id)
+                XCTAssertEqual(issue.count, vector.issue.count, vector.id)
+                XCTAssertFalse(String(reflecting: issue).contains("/Users/"), vector.id)
+            } else {
+                XCTAssertThrowsError(try TraceOfflineInspectionQualityIssue(vector.issue), vector.id)
+            }
+        }
+    }
+
     func testFailedInspectionPreservesPrimaryErrorWhenCleanupAlsoFails() async throws {
         for cleanupFails in [false, true] {
             let closeCount = Mutex(0)
@@ -212,25 +242,57 @@ final class TraceOfflineInspectionServiceTests: XCTestCase {
         }
     }
 
-    func testReportRejectsFreeFormOrUnboundedQualityFacts() throws {
-        let fixture = matchingFixture(quality: TraceDataQuality(issues: [
+    func testReportDropsDiagnosticMessagesAndPreservesStructuredWarnings() throws {
+        let issue = TraceDataQualityIssue(
+            category: .probeTruncated, scope: "thread.start_ts", count: 7,
+            message: "/Users/private/source.htrace: bounded probe reached its limit"
+        )
+        let fixture = matchingFixture(quality: TraceDataQuality(issues: [issue]))
+        let report = try TraceOfflineInspectionReport(
+            parsed: fixture.parsed, metadata: fixture.metadata,
+            expectedSourceSHA256: fixture.parsed.sourceSHA256,
+            expectedSourceByteCount: fixture.parsed.sourceByteCount
+        )
+
+        XCTAssertEqual(report.dataQualityStatus, .warnings)
+        XCTAssertEqual(report.dataQualityIssues.count, 1)
+        XCTAssertEqual(report.dataQualityIssues.first?.category, issue.category)
+        XCTAssertEqual(report.dataQualityIssues.first?.scope, issue.scope)
+        XCTAssertEqual(report.dataQualityIssues.first?.count, issue.count)
+        XCTAssertFalse(String(reflecting: report).contains("/Users/private/"))
+        XCTAssertFalse(String(reflecting: report).contains("bounded probe"))
+    }
+
+    func testReportRejectsInvalidStructuredQualityFactsEvenWithMessages() throws {
+        let invalidIssues = [
             TraceDataQualityIssue(
                 category: .unclassified,
                 message: "/private/source.htrace failed"
-            )
-        ]))
+            ),
+            TraceDataQualityIssue(
+                category: .probeTruncated, scope: "/private/source.htrace",
+                message: "diagnostic"
+            ),
+            TraceDataQualityIssue(
+                category: .probeTruncated, scope: "thread.start_ts", count: -1,
+                message: "diagnostic"
+            ),
+        ]
+        for issue in invalidIssues {
+            let fixture = matchingFixture(quality: TraceDataQuality(issues: [issue]))
 
-        XCTAssertThrowsError(try TraceOfflineInspectionReport(
-            parsed: fixture.parsed,
-            metadata: fixture.metadata,
-            expectedSourceSHA256: fixture.parsed.sourceSHA256,
-            expectedSourceByteCount: fixture.parsed.sourceByteCount
-        )) {
-            XCTAssertEqual(($0 as? ArkTraceError)?.code, .traceDatabaseInvalid)
-            XCTAssertEqual(
-                ($0 as? ArkTraceError)?.details["reason"],
-                "dataQualityNotMachineSafe"
-            )
+            XCTAssertThrowsError(try TraceOfflineInspectionReport(
+                parsed: fixture.parsed,
+                metadata: fixture.metadata,
+                expectedSourceSHA256: fixture.parsed.sourceSHA256,
+                expectedSourceByteCount: fixture.parsed.sourceByteCount
+            )) {
+                XCTAssertEqual(($0 as? ArkTraceError)?.code, .traceDatabaseInvalid)
+                XCTAssertEqual(
+                    ($0 as? ArkTraceError)?.details["reason"],
+                    "dataQualityNotMachineSafe"
+                )
+            }
         }
     }
 
