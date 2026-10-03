@@ -423,6 +423,15 @@ PID/TID 回退、原始 state/name/frame flag、unassociated slice 语义、coun
 非空 CPU counter/frame 尚无证据；density cache/read pool、Viewer/SDK/App 接线仍待完成。
 详见[density 查询记录](migration-runs/AT-RUST-007-2026-10-03-density-queries.md)。
 
+七类 typed eventBatch 已接到同一 Session；1–32 个查询保留各族输入顺序，三个附加 worker
+各自持有/关闭 connection，全部排空才返回，不发布部分结果。共享 allocation credit 与
+request-owned abort 已接入 SQL progress handler；保守 credit 不等同 RSS 验收。
+三份真实 Ready DB 的 **36 个完整 Swift/Rust T0 输出（243 个成功 typed 查询）**与
+**21 个失败后下一请求不变**检查通过，FD 与明确关闭后的 owner/lease/Ready 均核验。
+macOS `/dev/fd` 瞬时 EBADF 已用同身份、同预算、最多八次重试处理；1,536 次连接 churn
+回归通过。265 项 Rust tests 通过；完整 SDK async executor、density cache、detail/navigation、
+Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](migration-runs/AT-RUST-007-2026-10-03-batch-queries.md)。
+
 交付：
 
 1. process/thread/CPU/state/slice/counter/frame/argument、density、search、event detail 和
