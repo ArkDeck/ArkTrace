@@ -45,7 +45,7 @@
 | 008 | Session/cache/lease/标注迁移 | 001、002 | 004、006、007 | in-progress | L |
 | 009 | summary/context/analyze 与质量事实 | 001、002 | 007 | in-progress | L |
 | 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | in-progress | L |
-| 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | planned | L |
+| 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | in-progress | L |
 | 012 | C ABI、Swift/C# SDK 与生命周期 | 001、002 | 008、009、011 | planned | L |
 | 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | planned | L |
 | 014 | Windows 原生 Viewer | 002、012 接口冻结 | 003、008、011、012 | planned | L |
@@ -586,7 +586,7 @@ bytes 一致，60 个 CLI 负例通过。单独保留候选通过真实 1-row co
 
 ## 13. AT-RUST-011 — 共享 Viewer 投影与交互语义
 
-- 状态：planned；开工依赖：001、002；完成依赖：007、009。
+- 状态：in-progress；开工依赖：001、002；完成依赖：007、009。
 - 平台/输入：纯 Rust + 真实 DB；无设备、无 GUI 也可验证语义。
 - 需求：AT-LOD-001～006、AT-APP-003～007、AT-RENDER-002～008、AT-TIME-002、AT-PERF-004/008/009。
 - 路径：`arktrace-viewer`、共享 presentation/action/snapshot vectors；参考现有 Rendering。
@@ -606,6 +606,13 @@ bytes 一致，60 个 CLI 负例通过。单独保留候选通过真实 1-row co
   32 depth-row 行为、极大时间精度、offscreen lanes 不 eager query；点击 density band 以有界 query 取回真实事件。
 - 旧 generation 不覆盖新结果，hover 不发 SQL、不重新生成基础颜色批次。
 - 搜索/详情/分析仍指向同一个真实事件，density 聚合不伪造可选择 EventKey。
+
+2026-10-04 已逐项审查并导入并行交接的 28 个新增路径，保留 679 个私有基线身份与
+原始 oracle/差异记录；共享 lock 由主线生成，只加 Viewer package。主线 301 项 Rust tests、
+strict clippy/fmt、七 crate/35 份 license 与契约通过。独立生产依赖消费端发现默认 JSON
+解码器拒绝 891/10,000 个合法完整 Viewport roundtrip；产品启用 float_roundtrip 后全部
+通过，并把该消费端检查接入两平台 CI。显式 detail 的离屏查询例外、quality scope 与真实
+Store/SDK 接线仍待完成，不能据纯模块完成 011。详见[主线 Viewer 记录](migration-runs/AT-RUST-011-2026-10-04-mainline-viewer.md)。
 
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 

@@ -1,0 +1,376 @@
+{
+  "task": "AT-RUST-011 mainline pure Viewer import and production binary64 JSON",
+  "status": "in-progress; Engine/SDK/App still pending",
+  "recordedAtUtc": "2026-10-03T17:10:46.180399+00:00",
+  "commits": {
+    "viewerImport": "88241e4c701f57db2c019785f22fb639880da2be",
+    "productionJSON": "e8272ee42e36092dc6f02c5450af5f71a1f5835b"
+  },
+  "handoff": {
+    "privateSnapshot": "/private/tmp/arktrace-parallel-viewer-20261003",
+    "baselineFilesUnchanged": 679,
+    "reviewedAddedOwnedPaths": 28,
+    "rootLockGeneratedOnMain": true,
+    "thirdPartyPackageChanges": 0,
+    "currentMainSwiftSourceDigestsMatchAllThreeOracleReceipts": true,
+    "originalReport": "docs/migration-runs/AT-RUST-011-parallel-viewer-2026-10-03.json"
+  },
+  "validation": {
+    "workspaceRustTestsPassed": 301,
+    "rustFailures": 0,
+    "rustIgnored": 0,
+    "warnings": 0,
+    "viewerRustTestsPassed": 29,
+    "frozenActualSwiftVectors": 41,
+    "frozenActualSwiftRegressions": 27,
+    "strictClippy": "passed",
+    "fmt": "passed",
+    "workspaceCrates": 7,
+    "frozenThirdPartyLicenses": 35,
+    "migrationContracts": "passed",
+    "plannerCases": 44,
+    "logs": [
+      {
+        "path": "/private/tmp/arktrace-viewer-main-20261004-evidence/arktrace-viewer-main-tests-20261004.log",
+        "byteCount": 33687,
+        "sha256": "f7b5fcec184d33e7fc8f3f89e039f9f1daa118f22d1d9929af28d4e6daa4cc00"
+      },
+      {
+        "path": "/private/tmp/arktrace-viewer-main-20261004-evidence/arktrace-viewer-clippy-final-20261004.log",
+        "byteCount": 907,
+        "sha256": "ff2e7a44011ac45e2da25565bc0f60aebc0613f4a023117fa1646830fe0f6ad4"
+      },
+      {
+        "path": "/private/tmp/arktrace-viewer-main-20261004-evidence/arktrace-viewer-workspace-final-20261004.log",
+        "byteCount": 109,
+        "sha256": "c2275c0b20648353dfc85742aa7a8ac7688b5aa0231ad5ad55814bcf92ceb2f3"
+      },
+      {
+        "path": "/private/tmp/arktrace-viewer-main-20261004-evidence/arktrace-viewer-contracts-final-20261004.log",
+        "byteCount": 454,
+        "sha256": "b2c815f374688fabf808f9315491e8414f8dd67b9b83da339b48e28f096f09d6"
+      },
+      {
+        "path": "/private/tmp/arktrace-viewer-main-20261004-evidence/arktrace-viewer-planner-20261004.log",
+        "byteCount": 2854,
+        "sha256": "e90cd1f160e5541f7cd2768dd2acb2e59c9db51157ff7570a6e80c89ac928917"
+      },
+      {
+        "path": "/private/tmp/arktrace-viewer-main-20261004-evidence/arktrace-viewer-production-json-final-20261004.json",
+        "byteCount": 6941,
+        "sha256": "638ad5cc02a48d4125b13de1471ff27e0e5230d1f074ed4b5811c5fd1290b94a"
+      }
+    ]
+  },
+  "productionJSON": {
+    "standaloneProductionDependencyConsumer": true,
+    "toolchain": "1.99.0",
+    "serdeJSON": {
+      "version": "1.0.151",
+      "features": [
+        "default",
+        "float_roundtrip",
+        "std"
+      ]
+    },
+    "results": {
+      "default": {
+        "cases": 10000,
+        "examples": [
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.09090909090909091,\"widthPoints\":11.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 11
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.018867924528301886,\"widthPoints\":53.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 53
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.015384615384615385,\"widthPoints\":65.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 65
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.014285714285714285,\"widthPoints\":70.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 70
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.014084507042253521,\"widthPoints\":71.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 71
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.011764705882352941,\"widthPoints\":85.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 85
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.011235955056179775,\"widthPoints\":89.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 89
+          },
+          {
+            "durationNs": 1,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":1},\"nsPerPoint\":0.010638297872340425,\"widthPoints\":94.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 94
+          },
+          {
+            "durationNs": 2,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":2},\"nsPerPoint\":0.18181818181818182,\"widthPoints\":11.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 11
+          },
+          {
+            "durationNs": 2,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":2},\"nsPerPoint\":0.15384615384615385,\"widthPoints\":13.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 13
+          },
+          {
+            "durationNs": 2,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":2},\"nsPerPoint\":0.11764705882352941,\"widthPoints\":17.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 17
+          },
+          {
+            "durationNs": 2,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":2},\"nsPerPoint\":0.09523809523809523,\"widthPoints\":21.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 21
+          },
+          {
+            "durationNs": 2,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":2},\"nsPerPoint\":0.09090909090909091,\"widthPoints\":22.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 22
+          },
+          {
+            "durationNs": 2,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":2},\"nsPerPoint\":0.023529411764705882,\"widthPoints\":85.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 85
+          },
+          {
+            "durationNs": 3,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":3},\"nsPerPoint\":0.23076923076923078,\"widthPoints\":13.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 13
+          },
+          {
+            "durationNs": 3,
+            "encodedUtf8": "{\"range\":{\"startNs\":0,\"endNs\":3},\"nsPerPoint\":0.15789473684210525,\"widthPoints\":19.0,\"heightPoints\":80.0,\"verticalOffsetPoints\":0.0,\"generation\":1}",
+            "widthPoints": 19
+          }
+        ],
+        "productJSON": false,
+        "rejected": 891
+      },
+      "product": {
+        "cases": 10000,
+        "examples": [],
+        "productJSON": true,
+        "rejected": 0
+      }
+    },
+    "retainedFiles": [
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/Cargo.lock",
+        "byteCount": 5125,
+        "sha256": "2517b61a796732e01b2acdd2122e28a2a498dcc1ee075bb9667b7eb17773893b"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/Cargo.toml",
+        "byteCount": 293,
+        "sha256": "e0029c59d86d70cab339f0ce95ae18d0c4d32563e3e7cae559789d611c013af7"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/default.json",
+        "byteCount": 4060,
+        "sha256": "79ae74988eb359dfa269ec184b42937c8bce7809bcef6d3f5c32ae5f398d8c3c"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/default.log",
+        "byteCount": 1136,
+        "sha256": "6c4472dfcf088ff3d06cf84c3f7fe651c45c3d9538ca04212c98d61434c560a9"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/lock.log",
+        "byteCount": 66,
+        "sha256": "9f85323e9ec3d61d6c11d917146a162d34adbb5f14fba257c8b2675f57d16858"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/metadata.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/product.json",
+        "byteCount": 79,
+        "sha256": "f190fe45e63fcda238b82ee5974929061d29b27de7d6ce0cd5a9d04dcd7bdaa0"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/product.log",
+        "byteCount": 534,
+        "sha256": "f7588e03d0021755b4254be8badb9680aa58d09fc474cea92fa18496afc769dd"
+      },
+      {
+        "path": "/private/var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewer-wire-ci5diq_2/src/main.rs",
+        "byteCount": 1160,
+        "sha256": "3c02c870a4499e207b0147a85abbb7b3716f741a936bfd1e11879bc3a1230c09"
+      }
+    ],
+    "macOSAppOrSDKAcceptance": false
+  },
+  "sourceDigests": [
+    {
+      "path": "rust/crates/arktrace-viewer/Cargo.toml",
+      "byteCount": 351,
+      "sha256": "31077d2034838465fc5359c855f6c06db4052ef034fc6d7a9c3e670cc497cc1b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/OracleHarness.swift",
+      "byteCount": 19286,
+      "sha256": "96ff8ac8dc3130f483d8c3305a8159ab629717d28504673733cc3c9235ef76dd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/generate_inputs.py",
+      "byteCount": 7954,
+      "sha256": "e3eb5afc93c805f2b1c101d04e523983351073ada37bc1f2369d8ccb8fd2af4e"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/run_cargo_validation.py",
+      "byteCount": 2803,
+      "sha256": "44733dc5bdf9a791010d5b61a6c4c2d6c5f9a1abc147199c679cf91a273f995a"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/run_swift_oracle.py",
+      "byteCount": 6031,
+      "sha256": "69d970effa825d0aa72538c0e3ce33b9ec8e4c7ab2a7d0a7fde72f9352b20f4b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/geometry.rs",
+      "byteCount": 6353,
+      "sha256": "4358060ba3ba6b3b7b41bb231cba9dc2ba3148ea07f296f409ae5afb41773f55"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/interaction.rs",
+      "byteCount": 3391,
+      "sha256": "641857a11ba96be0505c8008620fe735e3ab367159a173d71ac22c1a2915760b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "byteCount": 3079,
+      "sha256": "9247626bae00af31e08190aaca52b17b31ebd8ff07bccf5f9679630d277421d2"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/plan.rs",
+      "byteCount": 10071,
+      "sha256": "1999d20338237c26a6063449f3b9e5173160635cd1f85637dc17a141af34e132"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/snapshot.rs",
+      "byteCount": 20567,
+      "sha256": "0840c1b2aeb704b2cbb70c4ded5d5814d6e4336661134e85714b8c0c54b00959"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/types.rs",
+      "byteCount": 8236,
+      "sha256": "e1f432106021442c8ca32992a4a9f4d34cf31fb44dd9d0262202f2a3f6270928"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/common/mod.rs",
+      "byteCount": 3276,
+      "sha256": "91689b0731108773f5f2ae2dca7ccc82f67e937fd28df87d0209b2bc188fc139"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/boundary-inputs.json",
+      "byteCount": 832,
+      "sha256": "8e63aee5abd0b7b235e693f26a0b1624027ed0183ba451ea0f9f99f7f66c5eb8"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/geometry-inputs.json",
+      "byteCount": 304469,
+      "sha256": "35dc59b0616955e58f1b29af397daff4cfc771d5c0fffd36b4f284bfbc0f9889"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/plan-inputs.json",
+      "byteCount": 74498,
+      "sha256": "01e76fcc00118baaa8ba5dd3caf728cdfcf33e2867557fd6f5012b7d82467fbd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle-receipt.json",
+      "byteCount": 5692,
+      "sha256": "438ac2e7e7a386a60a5c6b160689e9d17ea130759b47bba974ac6021b9b5b4d7"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle.json",
+      "byteCount": 1330,
+      "sha256": "8a86a13bb51d8d062977c5b69c8c1e9e25f1be9b6c04a3a54dc8dd026b554ebc"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle-receipt.json",
+      "byteCount": 5693,
+      "sha256": "65e95a3f2a08cda09ebd5de9abff19f1b08ea8dc90fa4659ee2d1128b6a031f9"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle.json",
+      "byteCount": 149596,
+      "sha256": "63c5c245fe004a0192170e3dd7949cd0e1dfcbe8d490ebe94e0c25eb6740df31"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle-receipt.json",
+      "byteCount": 5670,
+      "sha256": "5b3254b37065438ad4f8da8da235ac8479537498fe46e6cfb9dc23aed74780fa"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle.json",
+      "byteCount": 113089,
+      "sha256": "cf9f881793ad76501f3294cf5857be38c510de73f27056b6ba7b4de0912aaa97"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/regressions.rs",
+      "byteCount": 20672,
+      "sha256": "8a404f3a5e42cb6b58783e39af1a11e039ceced3aafc2eaa8d09b9b5bdadcf14"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_boundary_oracle.rs",
+      "byteCount": 2245,
+      "sha256": "49b677bf3b2107c8047d6b4393a46b0d67e700ffca18cc3aec37bc5530df3563"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_geometry_oracle.rs",
+      "byteCount": 4233,
+      "sha256": "b91157276326c3d201c907724e213caa2cfc693b6fcfc2d91a8c5f7b75667553"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_plan_oracle.rs",
+      "byteCount": 6532,
+      "sha256": "ea1a254bbed589c8f25f77a836b37835fcb60c763dd23b72d261b016781554b0"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 887,
+      "sha256": "8c9752fbed8041286d0023c687d7f08fa685438586c1d882b290b4f708f27a44"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 8843,
+      "sha256": "f649794c19a085370668f8a00360d6bd9e1e3d79aee4e0913ad7ceba8a56557b"
+    },
+    {
+      "path": "scripts/test_viewer_json_roundtrip.py",
+      "byteCount": 4782,
+      "sha256": "c0b52d243d32d2cee9c13709951280ce299c99cee5f74666ec8ec21d588e699f"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "byteCount": 28403,
+      "sha256": "eba939182453dc6144db94ad9fc17d1ef8094868ada2903180ad6d072becd6a5"
+    }
+  ],
+  "requiredBeforeProductIntegration": [
+    "explicit detail still queries all expanded lanes, conflicts with offscreen no-eager migration requirement; retained original Swift vector, fix with explicit independent difference vector",
+    "register five currently missing Viewer machine-quality scopes and merge derived facts",
+    "actual Store-to-detail adapters, focused event and density resolution",
+    "generation/cache arbitration, palette/labels, tree/navigation/annotations",
+    "C ABI and native Swift/C# SDK",
+    "macOS UI and Windows native integration",
+    "medium/large performance and signing/distribution"
+  ]
+}
