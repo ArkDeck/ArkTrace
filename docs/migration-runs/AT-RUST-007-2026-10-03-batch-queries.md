@@ -37,11 +37,24 @@ Ready/owner/lease 清空，原始 bytes 不变，成功 harness 根已删除。�
 Rust 1.99.0、Xcode 27.0（27A266a）、Swift 6.4、macOS 27.0 arm64：265 项 all-target/all-feature
 Rust 测试通过，零失败/忽略/warning；strict clippy、fmt、workspace/35 份 license、migration
 contract 与 42 个 planner 检查通过。Swift 产品源未改；本轮实际编译 Swift batch oracle，
-尚未重跑产品 App 构建或 SDK/Viewer 交互。完整 diff 因 planner 更新选择全部五个 CI 车道；
-远端结果在实际完成后另记，不以本地通过预报 CI 成功。
+尚未重跑产品 App 构建或 SDK/Viewer 交互。完整 diff 因 planner 更新选择全部五个 CI 车道。
+
+实现提交 `55089354fab64bd1847343560fee1bcdbc9af904`、oracle/证据提交
+`b70507b1a916a735a1d0ce2a716b7557f0223823` 已快进合入 main 并正常推送，远端 SHA 读回一致。
+实际 main 上的 Rust tests/clippy/fmt、workspace/license、contract、planner 再核验通过；源
+digest 与真实原生运行一致。36 个留存输出的排序 UTF-8 canonical JSON bytes 也逐一一致。
+
+[CI run 37130588955](https://github.com/ArkDeck/ArkTrace/actions/runs/37130588955) 在上述
+`b70507b` head 上 completed/success：macOS Rust 265 项、Windows Rust 150 项测试，零失败、
+忽略或编译 warning；两端 build/fmt/strict clippy 与契约均通过，Windows 多命令步骤由 Bash
+fail-fast 执行。SwiftPM 实际开始 597 项、517 通过、80 项允许的 runtime guard 跳过，另七项
+parser-dependent exclusion；API baseline 与 skip audit 通过，编译零 warning。App job 虽
+success，实际 App build/document-type 检查因 pinned parser 不在 hosted runner 而 skipped；
+普通 push 的 medium slow lane 也未执行。这里不把 job 的 success 转写为 App/性能验收通过。
+机器记录包含原始 CI job facts 及不可变日志/Swift artifact 身份。
 
 持久读池/async 生命周期、density cache、detail/navigation、Windows 数据库端口、SDK/App
 接线、medium/large 性能、正式签名与完整 macOS 验收仍待完成。007 与 Goal 保持 in-progress/active。
 
-机器记录：[batch JSON](AT-RUST-007-2026-10-03-batch-queries.json)，814432 bytes，SHA-256
-`3e6a1933d8364a65f261650683279d4eb9169ee3550fb8bcad61bb58005c2fc9`。
+机器记录：[batch JSON](AT-RUST-007-2026-10-03-batch-queries.json)，828345 bytes，SHA-256
+`829ad0164ae6ff4686d57ee9f8822f1330ca6fbd501836de91582fae3ae2499e`。
