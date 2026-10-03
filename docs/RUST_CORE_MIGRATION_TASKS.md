@@ -140,6 +140,10 @@ flowchart LR
 ## 4. AT-RUST-002 — Workspace、工具链和双平台 CI 骨架
 
 - 状态：in-progress；开工/完成依赖：无。
+- 已有严格双平台原生 CI：main `45bf447` 使用 Rust 1.99.0、Xcode 27.0，macOS 258 项、
+  Windows 146 项测试及 build/lint/contract 通过；Windows gate 已修正失败传播和 checkout 字节身份。
+  hosted App 实际构建仍因缺 parser 跳过，binding 链接与干净 Windows 运行库验收未完成，
+  见 [双平台 CI 记录](migration-runs/AT-RUST-002-2026-10-03-native-ci.md)。
 - 平台/输入：macOS arm64、Windows 11 x64 native runner；无设备。
 - 需求：设计 §4/13；AT-SYS-001/003/006。
 - 路径：拟新增 `rust/`、`contracts/` 生成入口、`windows/` 最小 binding 项目；
