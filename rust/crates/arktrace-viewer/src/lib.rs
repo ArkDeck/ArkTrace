@@ -4,19 +4,23 @@
 //! Coordinates are logical points; only minimum visual width uses backing scale.
 mod detail;
 mod geometry;
+mod hot_snapshot;
 mod interaction;
 mod loader;
 mod plan;
 mod snapshot;
 mod types;
+mod wire_records;
 
 pub use detail::*;
 pub use geometry::*;
+pub use hot_snapshot::*;
 pub use interaction::*;
 pub use loader::*;
 pub use plan::*;
 pub use snapshot::*;
 pub use types::*;
+pub use wire_records::*;
 
 use arktrace_contract::{ContractError, DataQuality};
 pub const VIEWER_API_VERSION: u32 = 1;

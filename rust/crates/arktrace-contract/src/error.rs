@@ -189,6 +189,9 @@ impl PublicError {
     pub fn stage(&self) -> Stage {
         self.stage
     }
+    pub fn retryable(&self) -> bool {
+        self.retryable
+    }
     pub fn is_cleanup_failure(&self) -> bool {
         self.code == Code::TraceParseFailed && self.retryable
     }

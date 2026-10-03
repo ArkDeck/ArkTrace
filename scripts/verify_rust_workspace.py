@@ -38,6 +38,18 @@ def main():
                     assert '#[cfg(target_os = "macos")]\n#[allow(unsafe_code)]\nmod macos;' in source
                 elif source_path.name != "macos.rs":
                     assert "unsafe_code" not in source, "unreviewed unsafe exception"
+        elif manifest["package"]["name"] == "arktrace-ffi":
+            assert manifest["lints"]["rust"] == {"unsafe_code": "deny", "unsafe_op_in_unsafe_fn": "deny"}
+            assert manifest["lints"]["clippy"]["all"] == "deny"
+            for source_path in (manifest_path.parent / "src").rglob("*.rs"):
+                source = source_path.read_text(encoding="utf-8")
+                if source_path.name == "lib.rs":
+                    assert source.count("unsafe_code") == 1
+                    assert '#[allow(unsafe_code)]\nmod exports;' in source
+                else:
+                    assert "unsafe_code" not in source, "unreviewed FFI unsafe exception"
+                    if source_path.name != "exports.rs":
+                        assert "unsafe " not in source, "unsafe outside FFI exports"
         else:
             assert manifest["lints"]["workspace"] is True, "first-party crate relaxed workspace lints"
     metadata = json.loads(subprocess.check_output(
@@ -91,7 +103,7 @@ def main():
     assert len(data) == declaration["byteCount"] and hashlib.sha256(data).hexdigest() == declaration["sha256"]
     store_source = (ROOT / "rust/crates/arktrace-store/src/lib.rs").read_text(encoding="utf-8")
     assert f'"{sqlite_lock["sqliteVersion"]}"' in store_source and f'"{sqlite_lock["sqliteSourceID"]}"' in store_source
-    print(f"Rust workspace: {len(metadata['workspace_members'])} crates, {len(actual)} frozen third-party license expressions; unsafe confined to macOS syscall module")
+    print(f"Rust workspace: {len(metadata['workspace_members'])} crates, {len(actual)} frozen third-party license expressions; unsafe confined to macOS syscall and FFI export modules")
 
 
 if __name__ == "__main__":

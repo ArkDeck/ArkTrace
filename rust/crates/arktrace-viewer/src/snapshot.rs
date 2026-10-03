@@ -43,6 +43,9 @@ impl ProjectedSnapshot {
     pub fn source_generation(&self) -> u64 {
         self.source_generation
     }
+    pub fn backing_scale(&self) -> f64 {
+        self.backing_scale
+    }
     pub fn visible_frames(&self) -> impl Iterator<Item = &Rect> {
         self.tracks
             .iter()

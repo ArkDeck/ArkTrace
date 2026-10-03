@@ -444,6 +444,7 @@ jobs:
           python3 scripts/run-cargo.py fmt --all -- --check
           python3 scripts/verify_migration_contracts.py
           python3 scripts/verify_rust_workspace.py
+          python3 scripts/generate_ffi_bindings.py --check
       - name: Build, lint and native tests
         run: |
           python3 scripts/run-cargo.py build --workspace
@@ -451,6 +452,7 @@ jobs:
           python3 scripts/run-cargo.py test --workspace --all-features
           python3 scripts/run-cargo.py run --bin arktrace-migration-smoke
           python3 scripts/test_viewer_json_roundtrip.py
+          python3 scripts/test_ffi_contract.py
 
   rust-windows:
     name: Rust Windows native
@@ -464,6 +466,10 @@ jobs:
       - uses: actions/checkout@v7
       - name: Install exact Rust toolchain
         run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy
+      - name: Install C# consumer SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
       - name: Set external Cargo cache
         shell: pwsh
         run: '"ARKTRACE_CARGO_CACHE_ROOT=$env:RUNNER_TEMP/arktrace-cargo" >> $env:GITHUB_ENV'
@@ -474,6 +480,7 @@ jobs:
           python scripts/run-cargo.py fmt --all -- --check
           python scripts/verify_migration_contracts.py
           python scripts/verify_rust_workspace.py
+          python scripts/generate_ffi_bindings.py --check
       - name: Build, lint and native tests
         shell: bash
         run: |
@@ -482,6 +489,7 @@ jobs:
           python scripts/run-cargo.py test --workspace --all-features
           python scripts/run-cargo.py run --bin arktrace-migration-smoke
           python scripts/test_viewer_json_roundtrip.py
+          python scripts/test_ffi_contract.py
 
   # The single required check for branch protection. It runs always, and it
   # fails when a planned lane failed, was cancelled, or was skipped despite

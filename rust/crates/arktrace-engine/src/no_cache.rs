@@ -762,7 +762,7 @@ impl NoCacheSession {
             .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))
     }
 }
-fn viewer_error(error: arktrace_viewer::ViewerError) -> EngineError {
+pub(crate) fn viewer_error(error: arktrace_viewer::ViewerError) -> EngineError {
     use arktrace_viewer::ViewerError::*;
     let cause = match error {
         Cancelled => EngineFailure::Host(HostError::Cancelled),

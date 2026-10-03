@@ -11,6 +11,8 @@ pub use async_runtime::{
 mod handles;
 #[cfg(any(target_os = "macos", test))]
 mod owned_result;
+#[cfg(target_os = "macos")]
+pub use arktrace_platform::CodeTrustPolicy;
 pub use handles::{HandleError, RuntimeHandle};
 #[cfg(target_os = "macos")]
 pub use owned_result::OwnedResult;

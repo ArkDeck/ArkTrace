@@ -1,0 +1,4 @@
+module CArkTrace {
+    header "arktrace_ffi.h"
+    export *
+}

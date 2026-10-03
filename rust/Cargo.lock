@@ -46,6 +46,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "arktrace-ffi"
+version = "0.1.0"
+dependencies = [
+ "arktrace-contract",
+ "arktrace-engine",
+ "arktrace-viewer",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "arktrace-platform"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,29 @@
+[package]
+name = "arktrace-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[features]
+process-fixtures = ["arktrace-engine/process-fixtures"]
+
+[dependencies]
+arktrace-contract.workspace = true
+arktrace-engine.workspace = true
+arktrace-viewer.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+# One reviewed export module admits caller pointer buffers and C symbols.
+# Record layouts, registry, JSON validation and domain code remain safe Rust.
+[lints.rust]
+unsafe_code = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+all = "deny"

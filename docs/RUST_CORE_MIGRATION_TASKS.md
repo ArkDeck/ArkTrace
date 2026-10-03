@@ -647,7 +647,7 @@ SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
 
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
-- 状态：planned；开工依赖：001、002；完成依赖：008、009、011。
+- 状态：in-progress；开工依赖：001、002；完成依赖：008、009、011。
 - 平台/输入：Swift/C# native smoke、真实引擎、多线程压力；无设备。
 - 需求：设计 §7；AT-SYS-002/003/006、AT-TIME-002、AT-MODEL-002、AT-ERR-001、AT-APP-013、AT-PERF-001/009。
 - 路径：`arktrace-ffi`、拟新增 `bindings/`、Swift wrappers、Windows SDK、API baseline。
@@ -674,6 +674,12 @@ SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
 - UI 主线程不跑 parse/query/等待；1000 次 open/query/cancel/close 后资源返回稳定范围，
   用 baseline 与计数证明，不用固定 sleep 掩盖竞态。
 - 包外 `test_api_baseline.sh` 通过，并提供 C# 消费程序集的正向验证。
+
+本轮已落地 provisional C ABI、Rust-owned JSON/snapshot records、生成 C/Swift-layout/C#
+声明与真实 macOS owner/Swift parity 验证。22 exports、10 records/95 offsets、336 Rust
+测试及 1,000 valid-allocation byte cases 通过。async Swift SDK、C# SafeHandle、完整
+生命周期压力、event/metric batches、SDK 分发与 App 切换仍未通过，见
+[C ABI owner 记录](migration-runs/AT-RUST-012-2026-10-04-c-abi-owner.md)。
 
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 

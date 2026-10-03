@@ -1,0 +1,984 @@
+{
+  "abiVersion": 1,
+  "snapshotFormatVersion": 1,
+  "records": [
+    {
+      "name": "AbiIdentity",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "abi_version",
+          "type": "u32"
+        },
+        {
+          "name": "capabilities",
+          "type": "u64"
+        },
+        {
+          "name": "contract_digest",
+          "type": "u8[32]"
+        }
+      ]
+    },
+    {
+      "name": "OpenTicket",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        },
+        {
+          "name": "request",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "PollStatus",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "state",
+          "type": "u32"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        },
+        {
+          "name": "progress",
+          "type": "u32"
+        },
+        {
+          "name": "failure_present",
+          "type": "u32"
+        },
+        {
+          "name": "code",
+          "type": "u32"
+        },
+        {
+          "name": "stage",
+          "type": "u32"
+        },
+        {
+          "name": "retryable",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "SessionStatus",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "state",
+          "type": "u32"
+        },
+        {
+          "name": "resources_closed",
+          "type": "u32"
+        },
+        {
+          "name": "failure_present",
+          "type": "u32"
+        },
+        {
+          "name": "code",
+          "type": "u32"
+        },
+        {
+          "name": "stage",
+          "type": "u32"
+        },
+        {
+          "name": "retryable",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "ResultView",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "kind",
+          "type": "u32"
+        },
+        {
+          "name": "owner",
+          "type": "u64"
+        },
+        {
+          "name": "data",
+          "type": "const u8*"
+        },
+        {
+          "name": "length",
+          "type": "u64"
+        },
+        {
+          "name": "retained_bytes",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "ViewportRecord",
+      "fields": [
+        {
+          "name": "start_ns",
+          "type": "i64"
+        },
+        {
+          "name": "end_ns",
+          "type": "i64"
+        },
+        {
+          "name": "ns_per_point",
+          "type": "f64"
+        },
+        {
+          "name": "width_points",
+          "type": "f64"
+        },
+        {
+          "name": "height_points",
+          "type": "f64"
+        },
+        {
+          "name": "vertical_offset_points",
+          "type": "f64"
+        },
+        {
+          "name": "generation",
+          "type": "u64"
+        },
+        {
+          "name": "source_generation",
+          "type": "u64"
+        },
+        {
+          "name": "backing_scale",
+          "type": "f64"
+        }
+      ]
+    },
+    {
+      "name": "TrackRecord",
+      "fields": [
+        {
+          "name": "source_kind",
+          "type": "u32"
+        },
+        {
+          "name": "flags",
+          "type": "u32"
+        },
+        {
+          "name": "source_value",
+          "type": "i64"
+        },
+        {
+          "name": "filter_id",
+          "type": "i64"
+        },
+        {
+          "name": "owner_value",
+          "type": "i64"
+        },
+        {
+          "name": "id_offset",
+          "type": "u32"
+        },
+        {
+          "name": "id_length",
+          "type": "u32"
+        },
+        {
+          "name": "y",
+          "type": "f64"
+        },
+        {
+          "name": "height",
+          "type": "f64"
+        },
+        {
+          "name": "depth_rows",
+          "type": "u32"
+        },
+        {
+          "name": "primitive_start",
+          "type": "u32"
+        },
+        {
+          "name": "primitive_count",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "PrimitiveRecord",
+      "fields": [
+        {
+          "name": "kind",
+          "type": "u32"
+        },
+        {
+          "name": "flags",
+          "type": "u32"
+        },
+        {
+          "name": "track_index",
+          "type": "u32"
+        },
+        {
+          "name": "event_table",
+          "type": "u32"
+        },
+        {
+          "name": "style",
+          "type": "u32"
+        },
+        {
+          "name": "reserved_header",
+          "type": "u32"
+        },
+        {
+          "name": "depth",
+          "type": "i64"
+        },
+        {
+          "name": "row_id",
+          "type": "i64"
+        },
+        {
+          "name": "start_ns",
+          "type": "i64"
+        },
+        {
+          "name": "end_ns",
+          "type": "i64"
+        },
+        {
+          "name": "x",
+          "type": "f64"
+        },
+        {
+          "name": "y",
+          "type": "f64"
+        },
+        {
+          "name": "width",
+          "type": "f64"
+        },
+        {
+          "name": "height",
+          "type": "f64"
+        },
+        {
+          "name": "event_count",
+          "type": "i64"
+        },
+        {
+          "name": "occupied_ns",
+          "type": "i64"
+        },
+        {
+          "name": "utilization",
+          "type": "f64"
+        },
+        {
+          "name": "dominant_kind",
+          "type": "u32"
+        },
+        {
+          "name": "text_offset",
+          "type": "u32"
+        },
+        {
+          "name": "text_length",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        },
+        {
+          "name": "dominant_value",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "QualityRecord",
+      "fields": [
+        {
+          "name": "category",
+          "type": "u32"
+        },
+        {
+          "name": "flags",
+          "type": "u32"
+        },
+        {
+          "name": "scope_offset",
+          "type": "u32"
+        },
+        {
+          "name": "scope_length",
+          "type": "u32"
+        },
+        {
+          "name": "count",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "SnapshotView",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "format_version",
+          "type": "u32"
+        },
+        {
+          "name": "owner",
+          "type": "u64"
+        },
+        {
+          "name": "viewport",
+          "type": "ViewportRecord"
+        },
+        {
+          "name": "tracks",
+          "type": "const TrackRecord*"
+        },
+        {
+          "name": "track_count",
+          "type": "u64"
+        },
+        {
+          "name": "primitives",
+          "type": "const PrimitiveRecord*"
+        },
+        {
+          "name": "primitive_count",
+          "type": "u64"
+        },
+        {
+          "name": "quality",
+          "type": "const QualityRecord*"
+        },
+        {
+          "name": "quality_count",
+          "type": "u64"
+        },
+        {
+          "name": "strings",
+          "type": "const u8*"
+        },
+        {
+          "name": "string_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "retained_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "quality_status",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "STATUS_OK": 0,
+    "STATUS_BUSY": 1,
+    "STATUS_CAPACITY": 2,
+    "STATUS_INVALID_INPUT": 3,
+    "STATUS_INVALID_BUFFER": 4,
+    "STATUS_INVALID_HANDLE": 5,
+    "STATUS_ABI_MISMATCH": 6,
+    "STATUS_UNSUPPORTED_HOST": 7,
+    "STATUS_CLOSED": 8,
+    "STATUS_CANCELLED": 9,
+    "STATUS_INTERNAL": 10,
+    "STATUS_UNSUPPORTED_OPERATION": 11,
+    "STATUS_OUTPUT_LIMIT": 12,
+    "STATUS_POISONED": 13,
+    "CAP_MACOS_ENGINE": 1,
+    "CAP_COLD_JSON": 2,
+    "CAP_VIEWPORT_RECORDS": 4,
+    "CAP_DEVELOPMENT_FIXTURES": 8,
+    "RESULT_SUCCESS": 0,
+    "RESULT_FAILURE": 1,
+    "REQUEST_QUEUED": 1,
+    "REQUEST_RUNNING": 2,
+    "REQUEST_CANCELLING": 3,
+    "REQUEST_SUCCEEDED": 4,
+    "REQUEST_FAILED": 5,
+    "SESSION_OPENING": 1,
+    "SESSION_READY": 2,
+    "SESSION_CANCELLING": 3,
+    "SESSION_CLOSING": 4,
+    "SESSION_FAILED": 5,
+    "SESSION_CLOSED": 6,
+    "DRAIN_RUNNING": 1,
+    "DRAIN_DRAINING": 2,
+    "DRAIN_DRAINED": 3,
+    "PRIMITIVE_DETAIL": 1,
+    "PRIMITIVE_DENSITY": 2,
+    "FLAG_VISIBLE": 1,
+    "FLAG_FRAME": 2,
+    "FLAG_OPEN_ENDED": 4,
+    "FLAG_OCCUPANCY": 8,
+    "FLAG_UTILIZATION": 16,
+    "TRACK_COLLAPSED": 1,
+    "TRACK_NESTED": 2,
+    "TRACK_OWNER": 4,
+    "QUALITY_SCOPE": 1,
+    "QUALITY_COUNT": 2,
+    "MAXIMUM_ENGINES": 8,
+    "MAXIMUM_RESULT_OWNERS": 256,
+    "MAXIMUM_CONFIG_BYTES": 16384,
+    "MAXIMUM_REQUEST_BYTES": 1048576,
+    "MAXIMUM_PATH_BYTES": 4096,
+    "CODE_INVALID_ARGUMENT": 1,
+    "CODE_TRACE_FILE_NOT_FOUND": 2,
+    "CODE_TRACE_FILE_UNREADABLE": 3,
+    "CODE_TRACE_FORMAT_UNSUPPORTED": 4,
+    "CODE_TRACE_STREAMER_UNAVAILABLE": 5,
+    "CODE_TRACE_STREAMER_IDENTITY_MISMATCH": 6,
+    "CODE_TRACE_PARSE_FAILED": 7,
+    "CODE_TRACE_SCHEMA_UNSUPPORTED": 8,
+    "CODE_TRACE_DATABASE_INVALID": 9,
+    "CODE_TRACE_CACHE_CORRUPT": 10,
+    "CODE_QUERY_FAILED": 11,
+    "CODE_QUERY_TIMEOUT": 12,
+    "CODE_QUERY_LIMIT_EXCEEDED": 13,
+    "CODE_OUTPUT_LIMIT_EXCEEDED": 14,
+    "CODE_ANALYSIS_UNSUPPORTED": 15,
+    "CODE_CANCELLED": 16,
+    "CODE_INTERNAL_ERROR": 17,
+    "STAGE_REQUEST": 1,
+    "STAGE_PREPARING": 2,
+    "STAGE_HASHING": 3,
+    "STAGE_CACHE_LOOKUP": 4,
+    "STAGE_PARSING": 5,
+    "STAGE_VALIDATING": 6,
+    "STAGE_INDEXING": 7,
+    "STAGE_OPENING_DATABASE": 8,
+    "STAGE_QUERYING": 9,
+    "STAGE_ANALYZING": 10,
+    "STAGE_ENCODING": 11,
+    "SOURCE_CPU": 1,
+    "SOURCE_THREAD_STATE": 2,
+    "SOURCE_NAMED_SLICE": 3,
+    "SOURCE_CPU_COUNTER": 4,
+    "SOURCE_PROCESS_COUNTER": 5,
+    "SOURCE_FRAME": 6,
+    "TABLE_SCHED_SLICE": 1,
+    "TABLE_THREAD_STATE": 2,
+    "TABLE_CALLSTACK": 3,
+    "TABLE_MEASURE": 4,
+    "TABLE_PROCESS_MEASURE": 5,
+    "TABLE_FRAME_SLICE": 6,
+    "STYLE_RUNNING": 1,
+    "STYLE_RUNNABLE": 2,
+    "STYLE_BLOCKED": 3,
+    "STYLE_SLEEPING": 4,
+    "STYLE_COUNTER": 5,
+    "STYLE_ACCENT": 6,
+    "DOMINANT_NAME": 2,
+    "DOMINANT_THREAD_STATE": 3,
+    "DOMINANT_JANK": 4,
+    "QUALITY_PROBE_TRUNCATED": 1,
+    "QUALITY_INVALID_VALUE": 2,
+    "QUALITY_CLAMPED_VALUE": 3,
+    "QUALITY_DROPPED_VALUE": 4,
+    "QUALITY_REFERENTIAL_INTEGRITY": 5,
+    "QUALITY_UNAVAILABLE_VALUE": 6,
+    "QUALITY_UNCLASSIFIED": 7,
+    "PROGRESS_SOURCE_SNAPSHOT": 1,
+    "PROGRESS_PARSER_IDENTITY": 2,
+    "PROGRESS_PARSING": 3,
+    "PROGRESS_INDEXING": 4,
+    "PROGRESS_VALIDATING": 5,
+    "PROGRESS_PUBLISHING": 6,
+    "PROGRESS_OPENING_DATABASE": 7,
+    "PROGRESS_READY": 8,
+    "DOMINANT_IDENTITY": 1,
+    "QUALITY_STATUS_OK": 1,
+    "QUALITY_STATUS_WARNINGS": 2
+  },
+  "functions": [
+    {
+      "name": "arktrace_abi_identity",
+      "parameters": [
+        {
+          "name": "output",
+          "type": "AbiIdentity*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_engine_create",
+      "parameters": [
+        {
+          "name": "input",
+          "type": "const u8*"
+        },
+        {
+          "name": "input_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_engine_create_fixture",
+      "parameters": [
+        {
+          "name": "input",
+          "type": "const u8*"
+        },
+        {
+          "name": "input_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_engine_drain",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_engine_drain_status",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "u32*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_engine_release",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_session_open",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "source",
+          "type": "const u8*"
+        },
+        {
+          "name": "source_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "format",
+          "type": "u32"
+        },
+        {
+          "name": "timeout_ms",
+          "type": "u32"
+        },
+        {
+          "name": "output",
+          "type": "OpenTicket*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_session_poll",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "SessionStatus*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_session_close",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_session_release",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_request_submit",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        },
+        {
+          "name": "input",
+          "type": "const u8*"
+        },
+        {
+          "name": "input_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "timeout_ms",
+          "type": "u32"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_request_poll",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "request",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "PollStatus*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_request_cancel",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "request",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_request_release",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "request",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_result_acquire",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "request",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "ResultView*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_result_view",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "ResultView*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_result_clone",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_result_release",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_snapshot_acquire",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "request",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "SnapshotView*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_snapshot_view",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "SnapshotView*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_fixture_panic",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_engine_retained_result_bytes",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    }
+  ],
+  "requestOperations": [
+    "processes",
+    "threads",
+    "cpuSlices",
+    "threadStates",
+    "slices",
+    "counters",
+    "counterSeries",
+    "frames",
+    "arguments",
+    "density",
+    "viewerDetails",
+    "viewport",
+    "resolveDensity",
+    "batch",
+    "search",
+    "analyze"
+  ],
+  "ownership": "Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed.",
+  "panic": "Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process.",
+  "hostStatus": "Windows exports identity and closed admission outcomes; native Engine support remains pending and must report UNSUPPORTED_HOST, not simulated success.",
+  "engineConfiguration": {
+    "cachePolicy": "ephemeral",
+    "parserIdentity": "TraceParserIdentity; SHA256 and recipe/schema identity remain pinned",
+    "publisher": "Normal create requires teamIdentifier, helperCodeIdentifier and parserCodeIdentifier. Fixture create is feature-gated DevelopmentPinned and still checks Mach-O signatures and SHA256."
+  }
+}

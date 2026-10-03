@@ -170,6 +170,8 @@ pub struct RuntimeConfiguration {
     pub helper_sha256: String,
     pub parser_identity: TraceParserIdentity,
     pub trust: CodeTrustPolicy,
+    /// Helper and parser have distinct signed code identifiers in production.
+    pub helper_trust: CodeTrustPolicy,
     pub limits: RuntimeLimits,
     #[cfg(feature = "process-fixtures")]
     fault: Option<Arc<dyn Fn(WorkerBoundary) + Send + Sync>>,
@@ -189,6 +191,7 @@ impl RuntimeConfiguration {
             parser,
             helper_sha256,
             parser_identity,
+            helper_trust: trust.clone(),
             trust,
             limits: RuntimeLimits::default(),
             #[cfg(feature = "process-fixtures")]
@@ -646,6 +649,33 @@ impl AsyncEngine {
             _ => Err(RuntimeFailure::InvalidHandle),
         }
     }
+    /// Small closed failure envelope for the ABI. No diagnostic prose or IO.
+    /// Actual retained capacity uses the same budget as successful results.
+    pub fn acquire_error_result(
+        &self,
+        request: RuntimeHandle,
+    ) -> Result<OwnedResult, RuntimeFailure> {
+        let registry = self.registry()?;
+        let Record::Request(record) = registry.table.get(request)? else {
+            return Err(RuntimeFailure::InvalidHandle);
+        };
+        let failure = record.status.failure.ok_or(RuntimeFailure::Busy)?;
+        let failure = if !fatal(failure) && record.viewport_generation.is_some_and(|generation| matches!(registry.table.get(record.status.session), Ok(Record::Session(s)) if generation < s.latest_viewport_generation)) { RuntimeFailure::Cancelled } else { failure };
+        let error = failure
+            .public_error()
+            .ok_or(RuntimeFailure::InvalidRequest)?;
+        owned_result::encode(
+            &Envelope {
+                format_version: 1,
+                session: record.status.session,
+                request,
+                body: &error,
+            },
+            self.shared.result_budget.clone(),
+            self.limits.maximum_result_bytes,
+        )
+        .map_err(|_| RuntimeFailure::OutputLimit)
+    }
     pub fn cancel(&self, request: RuntimeHandle) -> Result<(), RuntimeFailure> {
         let mut registry = self.registry()?;
         match registry.table.get_mut(request)? {
@@ -804,7 +834,7 @@ fn load_tools(
         .map_err(|e| engine_failure(EngineStage::SourceSnapshot, EngineFailure::Host(e)))?;
     let owners = OwnerStore::open(&actors, &namespace)
         .map_err(|e| engine_failure(EngineStage::SourceSnapshot, EngineFailure::Host(e)))?;
-    let tool = |path: &std::path::Path, pin: &str| {
+    let tool = |path: &std::path::Path, pin: &str, trust: &CodeTrustPolicy| {
         let parent =
             HeldDirectory::open_private(path.parent().ok_or(RuntimeFailure::InvalidRequest)?)
                 .map_err(|e| engine_failure(EngineStage::ParserIdentity, EngineFailure::Host(e)))?;
@@ -815,12 +845,16 @@ fn load_tools(
                     .ok_or(RuntimeFailure::InvalidRequest)?,
             )
             .map_err(|e| engine_failure(EngineStage::ParserIdentity, EngineFailure::Host(e)))?;
-        VerifiedExecutable::verify(file, pin, config.trust.clone(), &io)
+        VerifiedExecutable::verify(file, pin, trust.clone(), &io)
             .map_err(|e| engine_failure(EngineStage::ParserIdentity, EngineFailure::Process(e)))
     };
     Ok(Tools {
-        helper: tool(&config.helper, &config.helper_sha256)?,
-        parser: tool(&config.parser, &config.parser_identity.binary_sha256)?,
+        helper: tool(&config.helper, &config.helper_sha256, &config.helper_trust)?,
+        parser: tool(
+            &config.parser,
+            &config.parser_identity.binary_sha256,
+            &config.trust,
+        )?,
         identity: config.parser_identity.clone(),
         owners,
     })
@@ -909,7 +943,51 @@ fn query(
         RepositoryRequest::ViewerViewport {
             request,
             backing_scale,
-        } => read!(session.viewer_viewport(request, *backing_scale, b)),
+        } => {
+            let loaded = session
+                .viewer_viewport(request, *backing_scale, b)
+                .map_err(RuntimeFailure::Engine)?;
+            let scene = loaded
+                .as_ref()
+                .map(|s| {
+                    arktrace_viewer::HotSnapshot::pack(
+                        &s.snapshot,
+                        config.limits.maximum_result_bytes,
+                        &mut || {
+                            if b.cancellation.is_cancelled() {
+                                Err(arktrace_viewer::ViewerError::Cancelled)
+                            } else if Instant::now() >= b.deadline {
+                                Err(arktrace_viewer::ViewerError::DeadlineReached)
+                            } else {
+                                Ok(())
+                            }
+                        },
+                    )
+                })
+                .transpose()
+                .map_err(|e| match e {
+                    arktrace_viewer::ViewerError::Cancelled => RuntimeFailure::Cancelled,
+                    arktrace_viewer::ViewerError::InputBudgetExceeded => {
+                        RuntimeFailure::OutputLimit
+                    }
+                    other => RuntimeFailure::Engine(crate::no_cache::viewer_error(other)),
+                })?;
+            if b.cancellation.is_cancelled() {
+                return Err(RuntimeFailure::Cancelled);
+            }
+            owned_result::encode_with_scene(
+                &Envelope {
+                    format_version: 1,
+                    session: command.session,
+                    request: command.request.ok_or(RuntimeFailure::InvalidHandle)?,
+                    body: &loaded,
+                },
+                scene,
+                shared.result_budget.clone(),
+                config.limits.maximum_result_bytes,
+            )
+            .map_err(|_| RuntimeFailure::OutputLimit)
+        }
         RepositoryRequest::ViewerResolveDensity(request) => {
             read!(session.viewer_resolve_density(request, b))
         }

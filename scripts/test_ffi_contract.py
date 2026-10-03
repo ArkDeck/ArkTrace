@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Real native library / generated records / Swift or C# admission smoke."""
+import ctypes as C
+import hashlib
+import json
+import os
+import random
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+from ffi_test_support import ABI, CONTRACT, K, ROOT, TYPES
+
+def main():
+    subprocess.run([sys.executable,str(ROOT/'scripts/generate_ffi_bindings.py'),'--check'],check=True)
+    def cargo(*args):
+        return subprocess.check_output([sys.executable,str(ROOT/'scripts/run-cargo.py'),*args],cwd=ROOT,text=True)
+    cargo('build','-p','arktrace-ffi')
+    target=Path(json.loads(cargo('metadata','--format-version','1','--no-deps'))['target_directory'])/'debug'
+    name='arktrace_ffi.dll' if sys.platform=='win32' else 'libarktrace_ffi.dylib' if sys.platform=='darwin' else 'libarktrace_ffi.so'
+    library=target/name;abi=ABI(library)
+    layouts=json.loads((ROOT/'bindings/ffi-layouts.json').read_text())
+    fields=0
+    for r in layouts:
+        typ=TYPES[r['name']];assert C.sizeof(typ)==r['size'] and C.alignment(typ)==r['alignment']
+        for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
+    identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
+    assert bytes(identity.contract_digest)==expected and identity.abi_version==1
+    assert identity.capabilities==(7 if sys.platform=='darwin' else 0)
+    abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
+    abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
+    storage=(C.c_uint64*8)();bad=C.cast(C.byref(storage,1),C.POINTER(TYPES['AbiIdentity']))
+    abi.call('abi_identity',bad,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
+    for name in ('engine_drain','engine_release','result_release','fixture_panic'):
+        abi.call(name,2**64-1,expected=K['STATUS_INVALID_HANDLE'])
+    # Bounded arbitrary bytes are valid allocations, never dangling pointers.
+    for payload in (b'{}',b'null',b'[]',b'\xff',b'{"sql":"SELECT *"}'):
+        abi.input('engine_create',payload,'u64',expected=K['STATUS_INVALID_INPUT'])
+    randomizer=random.Random(0xA7F1)
+    for _ in range(1000):
+        payload=randomizer.randbytes(randomizer.randrange(1,512))
+        abi.input('engine_create',payload,'u64',expected=K['STATUS_INVALID_INPUT'])
+    # Every byte in the rejected oversize buffer is genuinely allocated.
+    abi.input('engine_create',b'x'*(K['MAXIMUM_CONFIG_BYTES']+1),'u64',expected=K['STATUS_INVALID_BUFFER'])
+    consumer={}
+    with tempfile.TemporaryDirectory(prefix='arktrace-ffi-consumer-') as folder:
+        base=Path(folder)
+        if sys.platform=='darwin':
+            assert subprocess.check_output(['xcodebuild','-version'],text=True).startswith('Xcode 27.')
+            subprocess.run(['xcrun','clang','-x','c','-std=c11','-Wall','-Werror','-fsyntax-only','-I',str(ROOT/'bindings/c'),'-'],input='#include "arktrace_ffi.h"\n',text=True,check=True)
+            executable=base/'swift-smoke'
+            subprocess.run(['xcrun','swiftc','-swift-version','6','-parse-as-library','-warnings-as-errors','-module-cache-path',str(base/'modules'),'-target','arm64-apple-macos26.0','-I',str(ROOT/'bindings/c'),str(ROOT/'bindings/swift/Smoke.swift'),str(ROOT/'bindings/swift/GeneratedLayouts.swift'),str(target/'libarktrace_ffi.a'),'-framework','Security','-framework','CoreFoundation','-o',str(executable)],check=True)
+            consumer=json.loads(subprocess.check_output([str(executable)],text=True))
+        elif sys.platform=='win32':
+            shutil.copytree(ROOT/'bindings/csharp',base/'csharp')
+            subprocess.run(['dotnet','build',str(base/'csharp/Smoke/Smoke.csproj'),'--configuration','Release','--output',str(base/'out'),'--nologo','--verbosity','quiet'],check=True)
+            consumer=json.loads(subprocess.check_output(['dotnet',str(base/'out/Smoke.dll'),str(library),str(ROOT/'bindings/ffi-layouts.json')],text=True))
+            assert consumer['records']==len(layouts) and consumer['fields']==fields
+        else:raise SystemExit('native macOS/Windows required for foreign consumer; no simulated PASS')
+    assert consumer['abiVersion']==1 and consumer['nativeEngineAcceptance'] is False
+    print(json.dumps({'abiVersion':1,'contractSHA256':expected.hex(),'records':len(layouts),'fields':fields,'exports':len(CONTRACT['functions']),'consumer':consumer,'nativeEngineAcceptance':False,'validAllocationFuzzCases':1000},sort_keys=True))
+if __name__=='__main__':main()

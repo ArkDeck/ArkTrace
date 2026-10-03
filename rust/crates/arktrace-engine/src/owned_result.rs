@@ -41,6 +41,7 @@ impl Drop for Charge {
 }
 struct Data {
     bytes: Vec<u8>,
+    scene: Option<arktrace_viewer::HotSnapshot>,
     _charge: Charge,
 }
 /// Rust-owned immutable UTF-8 result. It survives request release, the next
@@ -51,6 +52,12 @@ pub struct OwnedResult(Arc<Data>);
 impl OwnedResult {
     pub fn bytes(&self) -> &[u8] {
         &self.0.bytes
+    }
+    pub fn snapshot(&self) -> Option<&arktrace_viewer::HotSnapshot> {
+        self.0.scene.as_ref()
+    }
+    pub fn retained_bytes(&self) -> usize {
+        self.0._charge.bytes
     }
 }
 struct BoundedWriter {
@@ -97,21 +104,77 @@ pub(crate) fn encode<T: Serialize>(
     budget: Arc<ResultBudget>,
     limit: usize,
 ) -> Result<OwnedResult, ()> {
-    budget.reserve(64).map_err(|_| ())?;
+    encode_with_scene(value, None, budget, limit)
+}
+pub(crate) fn encode_with_scene<T: Serialize>(
+    value: &T,
+    scene: Option<arktrace_viewer::HotSnapshot>,
+    budget: Arc<ResultBudget>,
+    limit: usize,
+) -> Result<OwnedResult, ()> {
+    let scene_bytes = match &scene {
+        Some(scene) => scene.retained_bytes().ok_or(())?,
+        None => 0,
+    };
+    let output_limit = limit.checked_sub(scene_bytes).ok_or(())?;
+    let initial = scene_bytes.checked_add(64).ok_or(())?;
+    budget.reserve(initial).map_err(|_| ())?;
     let mut writer = BoundedWriter {
         bytes: Vec::new(),
-        limit,
-        charge: Charge { budget, bytes: 64 },
+        limit: output_limit,
+        charge: Charge {
+            budget,
+            bytes: initial,
+        },
     };
     serde_json::to_writer(&mut writer, value).map_err(|_| ())?;
     Ok(OwnedResult(Arc::new(Data {
         bytes: writer.bytes,
+        scene,
         _charge: writer.charge,
     })))
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn scene_and_json_share_the_owned_budget_and_refund_only_after_last_owner() {
+        use arktrace_contract::*;
+        use arktrace_viewer::*;
+        let snapshot = project(
+            &Viewport::new(TraceTimeRange::query(0, 100).unwrap(), 100.0, 80.0, 0.0, 1).unwrap(),
+            1,
+            &[],
+            1.0,
+            &DataQuality::machine(QualityStatus::Ok, vec![]).unwrap(),
+            &mut || Ok(()),
+        )
+        .unwrap();
+        let pack = || HotSnapshot::pack(&snapshot, 4096, &mut || Ok(())).unwrap();
+        let scene_bytes = pack().retained_bytes().unwrap();
+        let budget = ResultBudget::new(4096);
+        assert!(
+            encode_with_scene(
+                &"large".repeat(100),
+                Some(pack()),
+                budget.clone(),
+                scene_bytes + 16
+            )
+            .is_err()
+        );
+        assert_eq!(budget.used(), 0);
+        let owned = encode_with_scene(&7, Some(pack()), budget.clone(), scene_bytes + 32).unwrap();
+        assert!(owned.retained_bytes() >= scene_bytes + owned.bytes().len());
+        assert_eq!(owned.retained_bytes(), budget.used());
+        let clone = owned.clone();
+        drop(owned);
+        assert_eq!(clone.bytes(), b"7");
+        assert_eq!(clone.snapshot().unwrap().viewport.generation, 1);
+        assert!(budget.used() > scene_bytes);
+        drop(clone);
+        assert_eq!(budget.used(), 0);
+        assert!(encode_with_scene(&7, Some(pack()), ResultBudget::new(scene_bytes), 4096).is_err());
+    }
     #[test]
     fn retained_results_stay_charged_after_request_release_and_encoding_failure() {
         let budget = ResultBudget::new(128);

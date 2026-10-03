@@ -1,0 +1,167 @@
+[
+  {
+    "name": "AbiIdentity",
+    "size": 48,
+    "alignment": 8,
+    "offsets": {
+      "struct_size": 0,
+      "abi_version": 4,
+      "capabilities": 8,
+      "contract_digest": 16
+    }
+  },
+  {
+    "name": "OpenTicket",
+    "size": 24,
+    "alignment": 8,
+    "offsets": {
+      "struct_size": 0,
+      "reserved": 4,
+      "session": 8,
+      "request": 16
+    }
+  },
+  {
+    "name": "PollStatus",
+    "size": 40,
+    "alignment": 8,
+    "offsets": {
+      "struct_size": 0,
+      "state": 4,
+      "session": 8,
+      "progress": 16,
+      "failure_present": 20,
+      "code": 24,
+      "stage": 28,
+      "retryable": 32,
+      "reserved": 36
+    }
+  },
+  {
+    "name": "SessionStatus",
+    "size": 32,
+    "alignment": 4,
+    "offsets": {
+      "struct_size": 0,
+      "state": 4,
+      "resources_closed": 8,
+      "failure_present": 12,
+      "code": 16,
+      "stage": 20,
+      "retryable": 24,
+      "reserved": 28
+    }
+  },
+  {
+    "name": "ResultView",
+    "size": 40,
+    "alignment": 8,
+    "offsets": {
+      "struct_size": 0,
+      "kind": 4,
+      "owner": 8,
+      "data": 16,
+      "length": 24,
+      "retained_bytes": 32
+    }
+  },
+  {
+    "name": "ViewportRecord",
+    "size": 72,
+    "alignment": 8,
+    "offsets": {
+      "start_ns": 0,
+      "end_ns": 8,
+      "ns_per_point": 16,
+      "width_points": 24,
+      "height_points": 32,
+      "vertical_offset_points": 40,
+      "generation": 48,
+      "source_generation": 56,
+      "backing_scale": 64
+    }
+  },
+  {
+    "name": "TrackRecord",
+    "size": 72,
+    "alignment": 8,
+    "offsets": {
+      "source_kind": 0,
+      "flags": 4,
+      "source_value": 8,
+      "filter_id": 16,
+      "owner_value": 24,
+      "id_offset": 32,
+      "id_length": 36,
+      "y": 40,
+      "height": 48,
+      "depth_rows": 56,
+      "primitive_start": 60,
+      "primitive_count": 64,
+      "reserved": 68
+    }
+  },
+  {
+    "name": "PrimitiveRecord",
+    "size": 136,
+    "alignment": 8,
+    "offsets": {
+      "kind": 0,
+      "flags": 4,
+      "track_index": 8,
+      "event_table": 12,
+      "style": 16,
+      "reserved_header": 20,
+      "depth": 24,
+      "row_id": 32,
+      "start_ns": 40,
+      "end_ns": 48,
+      "x": 56,
+      "y": 64,
+      "width": 72,
+      "height": 80,
+      "event_count": 88,
+      "occupied_ns": 96,
+      "utilization": 104,
+      "dominant_kind": 112,
+      "text_offset": 116,
+      "text_length": 120,
+      "reserved": 124,
+      "dominant_value": 128
+    }
+  },
+  {
+    "name": "QualityRecord",
+    "size": 24,
+    "alignment": 8,
+    "offsets": {
+      "category": 0,
+      "flags": 4,
+      "scope_offset": 8,
+      "scope_length": 12,
+      "count": 16
+    }
+  },
+  {
+    "name": "SnapshotView",
+    "size": 168,
+    "alignment": 8,
+    "offsets": {
+      "struct_size": 0,
+      "format_version": 4,
+      "owner": 8,
+      "viewport": 16,
+      "tracks": 88,
+      "track_count": 96,
+      "primitives": 104,
+      "primitive_count": 112,
+      "quality": 120,
+      "quality_count": 128,
+      "strings": 136,
+      "string_bytes": 144,
+      "retained_bytes": 152,
+      "quality_status": 160,
+      "reserved": 164
+    }
+  }
+]

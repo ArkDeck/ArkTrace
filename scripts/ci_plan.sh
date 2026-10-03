@@ -52,6 +52,11 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
+        scripts/generate_ffi_bindings.py|scripts/ffi_test_support.py|scripts/test_ffi_contract.py)
+            contracts=true
+            rust_macos=true
+            rust_windows=true
+            ;;
         contracts/*)
             # Shared vectors are consumed by both language implementations.
             swiftpm=true
@@ -101,7 +106,7 @@ while IFS= read -r path; do
             # rides the SwiftPM lane rather than the offline contract lane.
             swiftpm=true
             ;;
-        scripts/test_macos_file_volumes.py|scripts/test_macos_parser_process.py|scripts/test_macos_directory_commands.py|scripts/test_macos_event_queries.py|scripts/test_macos_slice_queries.py|scripts/test_macos_counter_queries.py|scripts/test_macos_frame_queries.py|scripts/test_macos_argument_queries.py|scripts/test_macos_search.py|scripts/test_macos_density_queries.py|scripts/test_macos_batch_queries.py|scripts/test_macos_async_runtime.py|scripts/test_macos_viewer_owner.py|scripts/test_macos_viewport_owner.py|scripts/test_macos_bounded_analysis.py|scripts/test_macos_rust_cli.py|scripts/build_macos_rust_cli_candidate.py|ThirdParty/TraceStreamer/macx/manifest.json)
+        scripts/test_macos_file_volumes.py|scripts/test_macos_parser_process.py|scripts/test_macos_directory_commands.py|scripts/test_macos_event_queries.py|scripts/test_macos_slice_queries.py|scripts/test_macos_counter_queries.py|scripts/test_macos_frame_queries.py|scripts/test_macos_argument_queries.py|scripts/test_macos_search.py|scripts/test_macos_density_queries.py|scripts/test_macos_batch_queries.py|scripts/test_macos_async_runtime.py|scripts/test_macos_viewer_owner.py|scripts/test_macos_viewport_owner.py|scripts/test_macos_ffi_owner.py|scripts/test_macos_bounded_analysis.py|scripts/test_macos_rust_cli.py|scripts/build_macos_rust_cli_candidate.py|ThirdParty/TraceStreamer/macx/manifest.json)
             # This native acceptance harness consumes the macOS Rust port.
             rust_macos=true
             contracts=true

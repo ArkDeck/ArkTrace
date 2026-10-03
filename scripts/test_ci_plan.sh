@@ -201,13 +201,22 @@ lane_contracts=true
 lane_rust_macos=true
 lane_rust_windows=false' 'scripts/test_macos_directory_commands.py'
 
-for path in scripts/test_macos_event_queries.py scripts/test_macos_slice_queries.py scripts/test_macos_counter_queries.py scripts/test_macos_frame_queries.py scripts/test_macos_argument_queries.py scripts/test_macos_search.py scripts/test_macos_density_queries.py scripts/test_macos_batch_queries.py scripts/test_macos_async_runtime.py scripts/test_macos_viewer_owner.py scripts/test_macos_viewport_owner.py scripts/test_macos_bounded_analysis.py scripts/test_macos_rust_cli.py scripts/build_macos_rust_cli_candidate.py ThirdParty/TraceStreamer/macx/manifest.json; do
+for path in scripts/test_macos_event_queries.py scripts/test_macos_slice_queries.py scripts/test_macos_counter_queries.py scripts/test_macos_frame_queries.py scripts/test_macos_argument_queries.py scripts/test_macos_search.py scripts/test_macos_density_queries.py scripts/test_macos_batch_queries.py scripts/test_macos_async_runtime.py scripts/test_macos_viewer_owner.py scripts/test_macos_viewport_owner.py scripts/test_macos_ffi_owner.py scripts/test_macos_bounded_analysis.py scripts/test_macos_rust_cli.py scripts/build_macos_rust_cli_candidate.py ThirdParty/TraceStreamer/macx/manifest.json; do
     expect "native packaged CLI inputs select the macOS Rust lane" \
         'lane_swiftpm=false
 lane_app=false
 lane_contracts=true
 lane_rust_macos=true
 lane_rust_windows=false' "$path"
+done
+
+for path in scripts/generate_ffi_bindings.py scripts/ffi_test_support.py scripts/test_ffi_contract.py; do
+    expect "generated ABI inputs select both Rust host consumers" \
+        'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=true' "$path"
 done
 
 if [ "$failures" -gt 0 ]; then
