@@ -1,0 +1,1055 @@
+{
+  "nativeRuntime": {
+    "fixedSessionWorkers": true,
+    "negativeCases": [
+      {
+        "id": "nonblocking-close-and-drain-with-full-normal-queue",
+        "passed": true
+      },
+      {
+        "id": "active-and-queued-cancel-do-not-contaminate-next-query",
+        "passed": true
+      },
+      {
+        "id": "panic-open",
+        "passed": true
+      },
+      {
+        "id": "panic-query",
+        "passed": true
+      },
+      {
+        "id": "panic-close",
+        "passed": true
+      },
+      {
+        "id": "close-opening-drains-owned-staging-before-terminal",
+        "passed": true
+      },
+      {
+        "id": "result-allocation-exhaustion-cleans-real-ready-session",
+        "passed": true
+      },
+      {
+        "id": "retained-results-cannot-bypass-engine-capacity",
+        "passed": true,
+        "retainedCountAtExhaustion": 33
+      },
+      {
+        "id": "actual-parser-cancel-reaps-helper-and-parser-before-terminal",
+        "observedHelperPID": 96888,
+        "observedParserPID": 96919,
+        "passed": true
+      },
+      {
+        "id": "drop-signals-owner-cleanup-without-waiting-or-invalidating-owned-result",
+        "passed": true
+      },
+      {
+        "id": "cleanup-and-request-terminal-publish-atomically-after-close-race",
+        "passed": true
+      },
+      {
+        "id": "missing-source-does-not-leak-path-or-owned-scope",
+        "passed": true
+      }
+    ],
+    "persistentCacheAcceptance": false,
+    "realParserIdentity": {
+      "adapterVersion": "1",
+      "architecture": "arm64",
+      "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+      "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+      "name": "trace_streamer",
+      "reportedVersion": "4.3.7",
+      "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+      "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
+    },
+    "sdkAcceptance": false,
+    "sources": [
+      {
+        "descriptorsAfter": 23,
+        "descriptorsBefore": 23,
+        "fixture": "zlib.htrace",
+        "fullBatchSearchAnalysisParity": true,
+        "inspection": {
+          "capabilities": {
+            "cpuCounters": false,
+            "cpuScheduling": false,
+            "namedSlices": true,
+            "processCounters": false,
+            "threadStates": false
+          },
+          "cpuCounterSampleTables": [],
+          "dataQuality": {
+            "status": "warnings",
+            "warnings": [
+              {
+                "category": "droppedValue",
+                "count": 416,
+                "message": null,
+                "scope": "stat.stat_type"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "callstack.cookie"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "callstack.depth"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "callstack.dur"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "callstack.parent_id"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "callstack.ts"
+              }
+            ]
+          },
+          "durationNs": 32210627000,
+          "eventSourceCountsAvailable": true,
+          "processCounterSampleTables": [],
+          "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+          "traceEndTs": 535831985215000,
+          "traceStartTs": 535799774588000
+        },
+        "isolatedSessions": true,
+        "ownedScopesRemoved": true,
+        "rawBytesUnchanged": true,
+        "responsesUtf8": {
+          "analysis": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968068,\"body\":{\"kind\":\"boundedPureAnalysis\",\"parameters\":{\"range\":{\"startNs\":0,\"endNs\":32210627000},\"maximumCPUSlices\":64,\"maximumProcessSlices\":64,\"maximumThreadSlices\":64,\"maximumStateIntervals\":64,\"maximumSchedulingEvents\":64,\"maximumHotEvents\":64,\"topProcessLimit\":10,\"topThreadLimit\":10,\"schedulingSampleLimit\":20,\"hotIntervalLimit\":20,\"hotBucketCount\":8,\"minimumLongSliceDurationNs\":0,\"maximumOutputRows\":64},\"range\":{\"startNs\":0,\"endNs\":32210627000},\"cpuUtilization\":[],\"topProcesses\":[],\"topThreads\":[],\"threadStateDistribution\":[],\"schedulingLatency\":{\"supported\":false,\"unsupportedReason\":\"capabilityUnavailable\",\"count\":0,\"percentiles\":null,\"topSamples\":[],\"truncated\":false},\"hotIntervals\":[{\"range\":{\"startNs\":0,\"endNs\":4026328375},\"score\":{\"cpuBusyNs\":0,\"contextSwitchCount\":0,\"contextSwitchScoreNs\":0,\"longSliceNs\":38228999,\"total\":38228999},\"cpuSliceCount\":0,\"namedSliceCount\":50},{\"range\":{\"startNs\":4026328375,\"endNs\":8052656750},\"score\":{\"cpuBusyNs\":0,\"contextSwitchCount\":0,\"contextSwitchScoreNs\":0,\"longSliceNs\":10467001,\"total\":10467001},\"cpuSliceCount\":0,\"namedSliceCount\":14}],\"hotIntervalsUnsupportedReason\":null,\"sections\":{\"cpuUtilization\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"topProcesses\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"topThreads\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"threadStateDistribution\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"schedulingLatency\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"hotIntervals\":{\"returnedCount\":2,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":true}},\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.cookie\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.depth\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.parent_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.ts\",\"count\":null,\"message\":null}]}}}",
+          "batch": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967556,\"body\":{\"cpuSlices\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"threadStates\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"slices\":[{\"items\":[{\"key\":{\"table\":\"callstack\",\"rowID\":0},\"range\":{\"startNs\":0,\"endNs\":798000},\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"pid\":6709,\"tid\":6709,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":1},\"range\":{\"startNs\":272000,\"endNs\":429000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":2},\"range\":{\"startNs\":285000,\"endNs\":409000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrHostImpl::GetBundleInstaller()\",\"category\":null,\"depth\":1,\"parentEventKey\":{\"table\":\"callstack\",\"rowID\":1},\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":3},\"range\":{\"startNs\":4337000,\"endNs\":5916000},\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"pid\":6709,\"tid\":6709,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":4},\"range\":{\"startNs\":4494000,\"endNs\":5581000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleDumpInfos(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":5},\"range\":{\"startNs\":766968000,\"endNs\":767738000},\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":3},\"pid\":6727,\"tid\":6727,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":6},\"range\":{\"startNs\":767264000,\"endNs\":767383000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":7},\"range\":{\"startNs\":767276000,\"endNs\":767366000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrHostImpl::GetBundleInstaller()\",\"category\":null,\"depth\":1,\"parentEventKey\":{\"table\":\"callstack\",\"rowID\":6},\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":8},\"range\":{\"startNs\":770858999,\"endNs\":772557999},\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":3},\"pid\":6727,\"tid\":6727,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":9},\"range\":{\"startNs\":771026999,\"endNs\":772126000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleDumpInfos(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":10},\"range\":{\"startNs\":802011000,\"endNs\":802773000},\"threadKey\":{\"itid\":5},\"processKey\":{\"ipid\":4},\"pid\":6730,\"tid\":6730,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":11},\"range\":{\"startNs\":802259000,\"endNs\":802375000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":12},\"range\":{\"startNs\":802272000,\"endNs\":802357000},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrHostImpl::GetBundleInstaller()\",\"category\":null,\"depth\":1,\"parentEventKey\":{\"table\":\"callstack\",\"rowID\":11},\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":13},\"range\":{\"startNs\":806067999,\"endNs\":807804000},\"threadKey\":{\"itid\":5},\"processKey\":{\"ipid\":4},\"pid\":6730,\"tid\":6730,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":14},\"range\":{\"startNs\":806229000,\"endNs\":807261999},\"threadKey\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"pid\":532,\"tid\":5301,\"processName\":null,\"threadName\":null,\"name\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleDumpInfos(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false},{\"key\":{\"table\":\"callstack\",\"rowID\":15},\"range\":{\"startNs\":1547917000,\"endNs\":1548746999},\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":5},\"pid\":6744,\"tid\":6744,\"processName\":null,\"threadName\":null,\"name\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"category\":null,\"depth\":0,\"parentEventKey\":null,\"isAsync\":false,\"isOpenEnded\":false}],\"truncated\":true,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.cookie\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.depth\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.parent_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.ts\",\"count\":null,\"message\":null}]}}],\"counters\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"counterSeries\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"densities\":[{\"buckets\":[],\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"threads\":[{\"items\":[{\"key\":{\"itid\":77},\"processKey\":{\"ipid\":39},\"tid\":198,\"pid\":198,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":78},\"processKey\":{\"ipid\":39},\"tid\":891,\"pid\":198,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":76},\"processKey\":{\"ipid\":39},\"tid\":1125,\"pid\":198,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":19},\"processKey\":{\"ipid\":16},\"tid\":277,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":48},\"processKey\":{\"ipid\":16},\"tid\":287,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":20},\"processKey\":{\"ipid\":16},\"tid\":419,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":164},\"processKey\":{\"ipid\":16},\"tid\":742,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":33},\"processKey\":{\"ipid\":16},\"tid\":793,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":92},\"processKey\":{\"ipid\":16},\"tid\":794,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":53},\"processKey\":{\"ipid\":16},\"tid\":1420,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":22},\"processKey\":{\"ipid\":16},\"tid\":2955,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":49},\"processKey\":{\"ipid\":16},\"tid\":2956,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":93},\"processKey\":{\"ipid\":16},\"tid\":4594,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":23},\"processKey\":{\"ipid\":16},\"tid\":6843,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":50},\"processKey\":{\"ipid\":16},\"tid\":6845,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":18},\"processKey\":{\"ipid\":16},\"tid\":6863,\"pid\":277,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false}],\"truncated\":true,\"dataQualityIssues\":[]}]}}",
+          "search": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967812,\"body\":{\"items\":[{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleDumpInfos(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":4},\"range\":{\"startNs\":4494000,\"endNs\":5581000}},{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleDumpInfos(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":9},\"range\":{\"startNs\":771026999,\"endNs\":772126000}},{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleDumpInfos(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":14},\"range\":{\"startNs\":806229000,\"endNs\":807261999}},{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":1},\"range\":{\"startNs\":272000,\"endNs\":429000}},{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":6},\"range\":{\"startNs\":767264000,\"endNs\":767383000}},{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":11},\"range\":{\"startNs\":802259000,\"endNs\":802375000}},{\"kind\":\"slice\",\"title\":\"H:OHOS::ErrCode OHOS::AppExecFwk::BundleMgrHost::HandleGetBundleInstaller(OHOS::MessageParcel &, OHOS::MessageParcel &)\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":16},\"range\":{\"startNs\":1548206000,\"endNs\":1548332999}},{\"kind\":\"slice\",\"title\":\"H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)\",\"processKey\":{\"ipid\":1},\"threadKey\":{\"itid\":1},\"eventKey\":{\"table\":\"callstack\",\"rowID\":3},\"range\":{\"startNs\":4337000,\"endNs\":5916000}},{\"kind\":\"slice\",\"title\":\"H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)\",\"processKey\":{\"ipid\":3},\"threadKey\":{\"itid\":4},\"eventKey\":{\"table\":\"callstack\",\"rowID\":8},\"range\":{\"startNs\":770858999,\"endNs\":772557999}},{\"kind\":\"slice\",\"title\":\"H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)\",\"processKey\":{\"ipid\":4},\"threadKey\":{\"itid\":5},\"eventKey\":{\"table\":\"callstack\",\"rowID\":13},\"range\":{\"startNs\":806067999,\"endNs\":807804000}},{\"kind\":\"slice\",\"title\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrHostImpl::GetBundleInstaller()\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":2},\"range\":{\"startNs\":285000,\"endNs\":409000}},{\"kind\":\"slice\",\"title\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrHostImpl::GetBundleInstaller()\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":7},\"range\":{\"startNs\":767276000,\"endNs\":767366000}},{\"kind\":\"slice\",\"title\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrHostImpl::GetBundleInstaller()\",\"processKey\":{\"ipid\":2},\"threadKey\":{\"itid\":2},\"eventKey\":{\"table\":\"callstack\",\"rowID\":12},\"range\":{\"startNs\":802272000,\"endNs\":802357000}},{\"kind\":\"slice\",\"title\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"processKey\":{\"ipid\":1},\"threadKey\":{\"itid\":1},\"eventKey\":{\"table\":\"callstack\",\"rowID\":0},\"range\":{\"startNs\":0,\"endNs\":798000}},{\"kind\":\"slice\",\"title\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"processKey\":{\"ipid\":3},\"threadKey\":{\"itid\":4},\"eventKey\":{\"table\":\"callstack\",\"rowID\":5},\"range\":{\"startNs\":766968000,\"endNs\":767738000}},{\"kind\":\"slice\",\"title\":\"H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()\",\"processKey\":{\"ipid\":4},\"threadKey\":{\"itid\":5},\"eventKey\":{\"table\":\"callstack\",\"rowID\":10},\"range\":{\"startNs\":802011000,\"endNs\":802773000}}],\"truncated\":true}}"
+        },
+        "resultSurvivesReleaseCloseDrain": true,
+        "responseDigests": {
+          "analysis": {
+            "byteCount": 2395,
+            "sha256": "583b9c3842bf62c43e18fc265774453de626a3967d3bb71caadf8ba0446eedbe"
+          },
+          "batch": {
+            "byteCount": 10152,
+            "sha256": "8a357694ac25aa42125381b156c3d7a091f75e66ff1de7a69e8663afcc64b5de"
+          },
+          "search": {
+            "byteCount": 4586,
+            "sha256": "8106dd09aac6b70a30109fd223717c6b6294f8d017e9a38aff4049ee4b485235"
+          }
+        }
+      },
+      {
+        "descriptorsAfter": 23,
+        "descriptorsBefore": 23,
+        "fixture": "hiprofiler_data_ability.htrace",
+        "fullBatchSearchAnalysisParity": true,
+        "inspection": {
+          "capabilities": {
+            "cpuCounters": false,
+            "cpuScheduling": false,
+            "namedSlices": false,
+            "processCounters": true,
+            "threadStates": false
+          },
+          "cpuCounterSampleTables": [],
+          "dataQuality": {
+            "status": "warnings",
+            "warnings": [
+              {
+                "category": "droppedValue",
+                "count": 416,
+                "message": null,
+                "scope": "stat.stat_type"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure.dur"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure.filter_id"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure.ts"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure.value"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure_filter.id"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure_filter.ipid"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "process_measure_filter.name"
+              }
+            ]
+          },
+          "durationNs": 48516841334,
+          "eventSourceCountsAvailable": true,
+          "processCounterSampleTables": [
+            "process_measure"
+          ],
+          "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+          "traceEndTs": 1502026350073755298,
+          "traceStartTs": 1502026301556913964
+        },
+        "isolatedSessions": true,
+        "ownedScopesRemoved": true,
+        "rawBytesUnchanged": true,
+        "responsesUtf8": {
+          "analysis": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589935364,\"body\":{\"kind\":\"boundedPureAnalysis\",\"parameters\":{\"range\":{\"startNs\":0,\"endNs\":48516841334},\"maximumCPUSlices\":64,\"maximumProcessSlices\":64,\"maximumThreadSlices\":64,\"maximumStateIntervals\":64,\"maximumSchedulingEvents\":64,\"maximumHotEvents\":64,\"topProcessLimit\":10,\"topThreadLimit\":10,\"schedulingSampleLimit\":20,\"hotIntervalLimit\":20,\"hotBucketCount\":8,\"minimumLongSliceDurationNs\":0,\"maximumOutputRows\":64},\"range\":{\"startNs\":0,\"endNs\":48516841334},\"cpuUtilization\":[],\"topProcesses\":[],\"topThreads\":[],\"threadStateDistribution\":[],\"schedulingLatency\":{\"supported\":false,\"unsupportedReason\":\"capabilityUnavailable\",\"count\":0,\"percentiles\":null,\"topSamples\":[],\"truncated\":false},\"hotIntervals\":[],\"hotIntervalsUnsupportedReason\":null,\"sections\":{\"cpuUtilization\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"topProcesses\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"topThreads\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"threadStateDistribution\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"schedulingLatency\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false},\"hotIntervals\":{\"returnedCount\":0,\"matchedCount\":0,\"truncated\":false,\"sampled\":false,\"supported\":false}},\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.filter_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.value\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.ipid\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.name\",\"count\":null,\"message\":null}]}}}",
+          "batch": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589934852,\"body\":{\"cpuSlices\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"threadStates\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"slices\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"counters\":[{\"items\":[{\"filterID\":0,\"name\":\"mem.vm.size\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":1},\"timestampNs\":4137882125,\"value\":8000,\"durationNs\":4999371877}]},{\"filterID\":1,\"name\":\"mem.rss\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":2},\"timestampNs\":4137882125,\"value\":4580,\"durationNs\":4999371877}]},{\"filterID\":2,\"name\":\"mem.rss.anon\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":3},\"timestampNs\":4137882125,\"value\":1216,\"durationNs\":4999371877}]},{\"filterID\":3,\"name\":\"mem.rss.file\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":4},\"timestampNs\":4137882125,\"value\":3232,\"durationNs\":4999371877}]},{\"filterID\":4,\"name\":\"mem.rss.schem\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":5},\"timestampNs\":4137882125,\"value\":132,\"durationNs\":4999371877}]},{\"filterID\":5,\"name\":\"mem.swap\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":6},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":6,\"name\":\"mem.locked\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":7},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":7,\"name\":\"mem.hwm\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":8},\"timestampNs\":4137882125,\"value\":4948,\"durationNs\":4999371877}]},{\"filterID\":8,\"name\":\"mm.oom_score_adj\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":9},\"timestampNs\":4137882125,\"value\":-1000,\"durationNs\":4999371877}]},{\"filterID\":9,\"name\":\"mem.vm.size\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":10},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":10,\"name\":\"mem.rss\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":11},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":11,\"name\":\"mem.rss.anon\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":12},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":12,\"name\":\"mem.rss.file\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":13},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":13,\"name\":\"mem.rss.schem\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":14},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":14,\"name\":\"mem.swap\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":15},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]},{\"filterID\":15,\"name\":\"mem.locked\",\"scope\":\"process\",\"cpu\":null,\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\",\"unit\":null,\"samples\":[{\"key\":{\"table\":\"process_measure\",\"rowID\":16},\"timestampNs\":4137882125,\"value\":0,\"durationNs\":4999371877}]}],\"truncated\":true,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.filter_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.value\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.ipid\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.name\",\"count\":null,\"message\":null}]}}],\"counterSeries\":[{\"items\":[{\"filterID\":0,\"name\":\"mem.vm.size\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":1,\"name\":\"mem.rss\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":2,\"name\":\"mem.rss.anon\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":3,\"name\":\"mem.rss.file\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":4,\"name\":\"mem.rss.schem\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":5,\"name\":\"mem.swap\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":6,\"name\":\"mem.locked\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":7,\"name\":\"mem.hwm\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":8,\"name\":\"mm.oom_score_adj\",\"scope\":\"process\",\"processKey\":{\"ipid\":1},\"pid\":1,\"processName\":\"/bin/init\"},{\"filterID\":9,\"name\":\"mem.vm.size\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"},{\"filterID\":10,\"name\":\"mem.rss\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"},{\"filterID\":11,\"name\":\"mem.rss.anon\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"},{\"filterID\":12,\"name\":\"mem.rss.file\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"},{\"filterID\":13,\"name\":\"mem.rss.schem\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"},{\"filterID\":14,\"name\":\"mem.swap\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"},{\"filterID\":15,\"name\":\"mem.locked\",\"scope\":\"process\",\"processKey\":{\"ipid\":2},\"pid\":2,\"processName\":\"kthreadd\"}],\"truncated\":true,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.filter_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.value\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.ipid\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.name\",\"count\":null,\"message\":null}]}}],\"densities\":[{\"buckets\":[],\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"threads\":[{\"items\":[{\"key\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"tid\":1,\"pid\":1,\"name\":\"/bin/init\",\"processName\":\"/bin/init\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":2},\"processKey\":{\"ipid\":2},\"tid\":2,\"pid\":2,\"name\":\"kthreadd\",\"processName\":\"kthreadd\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":3,\"pid\":3,\"name\":\"rcu_gp\",\"processName\":\"rcu_gp\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":4},\"processKey\":{\"ipid\":4},\"tid\":4,\"pid\":4,\"name\":\"rcu_par_gp\",\"processName\":\"rcu_par_gp\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":5},\"processKey\":{\"ipid\":5},\"tid\":8,\"pid\":8,\"name\":\"mm_percpu_wq\",\"processName\":\"mm_percpu_wq\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":6},\"processKey\":{\"ipid\":6},\"tid\":9,\"pid\":9,\"name\":\"rcu_tasks_rude_\",\"processName\":\"rcu_tasks_rude_\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":7},\"processKey\":{\"ipid\":7},\"tid\":10,\"pid\":10,\"name\":\"ksoftirqd/0\",\"processName\":\"ksoftirqd/0\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":8},\"processKey\":{\"ipid\":8},\"tid\":11,\"pid\":11,\"name\":\"rcu_sched\",\"processName\":\"rcu_sched\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":9},\"processKey\":{\"ipid\":9},\"tid\":12,\"pid\":12,\"name\":\"migration/0\",\"processName\":\"migration/0\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":10},\"processKey\":{\"ipid\":10},\"tid\":13,\"pid\":13,\"name\":\"cpuhp/0\",\"processName\":\"cpuhp/0\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":11},\"processKey\":{\"ipid\":11},\"tid\":14,\"pid\":14,\"name\":\"cpuhp/1\",\"processName\":\"cpuhp/1\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":12},\"processKey\":{\"ipid\":12},\"tid\":15,\"pid\":15,\"name\":\"migration/1\",\"processName\":\"migration/1\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":13},\"processKey\":{\"ipid\":13},\"tid\":16,\"pid\":16,\"name\":\"ksoftirqd/1\",\"processName\":\"ksoftirqd/1\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":14},\"processKey\":{\"ipid\":14},\"tid\":19,\"pid\":19,\"name\":\"cpuhp/2\",\"processName\":\"cpuhp/2\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":15},\"processKey\":{\"ipid\":15},\"tid\":20,\"pid\":20,\"name\":\"migration/2\",\"processName\":\"migration/2\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":16},\"processKey\":{\"ipid\":16},\"tid\":21,\"pid\":21,\"name\":\"ksoftirqd/2\",\"processName\":\"ksoftirqd/2\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true}],\"truncated\":true,\"dataQualityIssues\":[]}]}}",
+          "search": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589935108,\"body\":{\"items\":[{\"kind\":\"process\",\"title\":\"kauditd\",\"subtitle\":\"PID 36 · ipid 23\",\"processKey\":{\"ipid\":23}},{\"kind\":\"process\",\"title\":\"khungtaskd\",\"subtitle\":\"PID 37 · ipid 24\",\"processKey\":{\"ipid\":24}},{\"kind\":\"process\",\"title\":\"kswapd0\",\"subtitle\":\"PID 130 · ipid 37\",\"processKey\":{\"ipid\":37}},{\"kind\":\"process\",\"title\":\"kthreadd\",\"subtitle\":\"PID 2 · ipid 2\",\"processKey\":{\"ipid\":2}},{\"kind\":\"process\",\"title\":\"migration/0\",\"subtitle\":\"PID 12 · ipid 9\",\"processKey\":{\"ipid\":9}},{\"kind\":\"process\",\"title\":\"migration/1\",\"subtitle\":\"PID 15 · ipid 12\",\"processKey\":{\"ipid\":12}},{\"kind\":\"process\",\"title\":\"migration/2\",\"subtitle\":\"PID 20 · ipid 15\",\"processKey\":{\"ipid\":15}},{\"kind\":\"process\",\"title\":\"migration/3\",\"subtitle\":\"PID 25 · ipid 18\",\"processKey\":{\"ipid\":18}},{\"kind\":\"process\",\"title\":\"oom_reaper\",\"subtitle\":\"PID 38 · ipid 25\",\"processKey\":{\"ipid\":25}},{\"kind\":\"process\",\"title\":\"rcu_par_gp\",\"subtitle\":\"PID 4 · ipid 4\",\"processKey\":{\"ipid\":4}},{\"kind\":\"process\",\"title\":\"rcu_tasks_rude_\",\"subtitle\":\"PID 9 · ipid 6\",\"processKey\":{\"ipid\":6}},{\"kind\":\"process\",\"title\":\"snapshotd\",\"subtitle\":\"PID 131 · ipid 38\",\"processKey\":{\"ipid\":38}},{\"kind\":\"process\",\"title\":\"watchdogd\",\"subtitle\":\"PID 86 · ipid 32\",\"processKey\":{\"ipid\":32}},{\"kind\":\"process\",\"title\":\"writeback\",\"subtitle\":\"PID 39 · ipid 26\",\"processKey\":{\"ipid\":26}},{\"kind\":\"process\",\"title\":\"xfs_mru_cache\",\"subtitle\":\"PID 135 · ipid 42\",\"processKey\":{\"ipid\":42}},{\"kind\":\"process\",\"title\":\"xfsalloc\",\"subtitle\":\"PID 134 · ipid 41\",\"processKey\":{\"ipid\":41}}],\"truncated\":true}}"
+        },
+        "resultSurvivesReleaseCloseDrain": true,
+        "responseDigests": {
+          "analysis": {
+            "byteCount": 2224,
+            "sha256": "250a5396ed02ed4afdad56a4484a180279baa8e219d2195b7a0f28467c081095"
+          },
+          "batch": {
+            "byteCount": 10603,
+            "sha256": "30a8aa7d74620e993a5c86a60273ff973b323de3d792f8ad6064d9046da18680"
+          },
+          "search": {
+            "byteCount": 1625,
+            "sha256": "1b331238dc6869aa2f7db6a1d622c8c9cbf68e96dda0a81ae2e3c76290325016"
+          }
+        }
+      },
+      {
+        "descriptorsAfter": 23,
+        "descriptorsBefore": 23,
+        "fixture": "trace_small_10.systrace",
+        "fullBatchSearchAnalysisParity": true,
+        "inspection": {
+          "capabilities": {
+            "cpuCounters": false,
+            "cpuScheduling": true,
+            "namedSlices": false,
+            "processCounters": false,
+            "threadStates": true
+          },
+          "cpuCounterSampleTables": [],
+          "dataQuality": {
+            "status": "warnings",
+            "warnings": [
+              {
+                "category": "droppedValue",
+                "count": 416,
+                "message": null,
+                "scope": "stat.stat_type"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "sched_slice.cpu"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "sched_slice.dur"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "sched_slice.ts"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "thread_state.cpu"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "thread_state.dur"
+              },
+              {
+                "category": "probeTruncated",
+                "count": null,
+                "message": null,
+                "scope": "thread_state.ts"
+              }
+            ]
+          },
+          "durationNs": 9127944000,
+          "eventSourceCountsAvailable": true,
+          "processCounterSampleTables": [],
+          "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+          "traceEndTs": 88035820831000,
+          "traceStartTs": 88026692887000
+        },
+        "isolatedSessions": true,
+        "ownedScopesRemoved": true,
+        "rawBytesUnchanged": true,
+        "responsesUtf8": {
+          "analysis": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884902660,\"body\":{\"kind\":\"boundedPureAnalysis\",\"parameters\":{\"range\":{\"startNs\":0,\"endNs\":9127944000},\"maximumCPUSlices\":64,\"maximumProcessSlices\":64,\"maximumThreadSlices\":64,\"maximumStateIntervals\":64,\"maximumSchedulingEvents\":64,\"maximumHotEvents\":64,\"topProcessLimit\":10,\"topThreadLimit\":10,\"schedulingSampleLimit\":20,\"hotIntervalLimit\":20,\"hotBucketCount\":8,\"minimumLongSliceDurationNs\":0,\"maximumOutputRows\":64},\"range\":{\"startNs\":0,\"endNs\":9127944000},\"cpuUtilization\":[{\"cpu\":0,\"rawRunningNs\":10310000,\"occupiedNs\":10310000,\"sliceCount\":21,\"utilization\":0.0011294986034094863},{\"cpu\":1,\"rawRunningNs\":7535000,\"occupiedNs\":7535000,\"sliceCount\":8,\"utilization\":0.0008254870976421415},{\"cpu\":2,\"rawRunningNs\":9790000,\"occupiedNs\":9790000,\"sliceCount\":12,\"utilization\":0.001072530681608038},{\"cpu\":3,\"rawRunningNs\":10080000,\"occupiedNs\":10080000,\"sliceCount\":23,\"utilization\":0.0011043012533819227}],\"topProcesses\":[{\"processKey\":{\"ipid\":4},\"pid\":3873,\"name\":null,\"runningNs\":733000,\"shareOfOneCPU\":0.00008030285900088783,\"sliceCount\":2},{\"processKey\":{\"ipid\":3},\"pid\":338,\"name\":\"hilogd\",\"runningNs\":539000,\"shareOfOneCPU\":0.00005904944202111669,\"sliceCount\":5},{\"processKey\":{\"ipid\":5},\"pid\":272,\"name\":null,\"runningNs\":424000,\"shareOfOneCPU\":0.00004645076700733484,\"sliceCount\":9},{\"processKey\":{\"ipid\":2},\"pid\":325,\"name\":\"wifi_hal_servic\",\"runningNs\":328000,\"shareOfOneCPU\":0.00003593361221322129,\"sliceCount\":9},{\"processKey\":{\"ipid\":1},\"pid\":3882,\"name\":\"hiprofiler_plug\",\"runningNs\":174000,\"shareOfOneCPU\":0.000019062343064330807,\"sliceCount\":1},{\"processKey\":{\"ipid\":6},\"pid\":1172,\"name\":null,\"runningNs\":173000,\"shareOfOneCPU\":0.00001895278936855879,\"sliceCount\":1},{\"processKey\":{\"ipid\":11},\"pid\":348,\"name\":null,\"runningNs\":157000,\"shareOfOneCPU\":0.00001719993023620653,\"sliceCount\":1},{\"processKey\":{\"ipid\":8},\"pid\":1155,\"name\":null,\"runningNs\":141000,\"shareOfOneCPU\":0.000015447071103854273,\"sliceCount\":1},{\"processKey\":{\"ipid\":7},\"pid\":1190,\"name\":null,\"runningNs\":140000,\"shareOfOneCPU\":0.00001533751740808226,\"sliceCount\":1},{\"processKey\":{\"ipid\":9},\"pid\":1126,\"name\":null,\"runningNs\":135000,\"shareOfOneCPU\":0.000014789748929222177,\"sliceCount\":1}],\"topThreads\":[{\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"tid\":3885,\"pid\":3873,\"name\":\"UnixSocketRecv\",\"processName\":null,\"runningNs\":733000,\"shareOfOneCPU\":0.00008030285900088783,\"sliceCount\":2},{\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"name\":\"hilogd.server\",\"processName\":\"hilogd\",\"runningNs\":539000,\"shareOfOneCPU\":0.00005904944202111669,\"sliceCount\":5},{\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"tid\":366,\"pid\":272,\"name\":\"mmi_service\",\"processName\":null,\"runningNs\":424000,\"shareOfOneCPU\":0.00004645076700733484,\"sliceCount\":9},{\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"tid\":325,\"pid\":325,\"name\":\"wifi_hal_servic\",\"processName\":\"wifi_hal_servic\",\"runningNs\":328000,\"shareOfOneCPU\":0.00003593361221322129,\"sliceCount\":9},{\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"tid\":3884,\"pid\":3882,\"name\":\"UnixSocketRecv\",\"processName\":\"hiprofiler_plug\",\"runningNs\":174000,\"shareOfOneCPU\":0.000019062343064330807,\"sliceCount\":1},{\"threadKey\":{\"itid\":10},\"processKey\":{\"ipid\":6},\"tid\":1206,\"pid\":1172,\"name\":\"anr\",\"processName\":null,\"runningNs\":173000,\"shareOfOneCPU\":0.00001895278936855879,\"sliceCount\":1},{\"threadKey\":{\"itid\":19},\"processKey\":{\"ipid\":11},\"tid\":722,\"pid\":348,\"name\":\"render_service\",\"processName\":null,\"runningNs\":157000,\"shareOfOneCPU\":0.00001719993023620653,\"sliceCount\":1},{\"threadKey\":{\"itid\":13},\"processKey\":{\"ipid\":8},\"tid\":1207,\"pid\":1155,\"name\":\"anr\",\"processName\":null,\"runningNs\":141000,\"shareOfOneCPU\":0.000015447071103854273,\"sliceCount\":1},{\"threadKey\":{\"itid\":12},\"processKey\":{\"ipid\":7},\"tid\":1211,\"pid\":1190,\"name\":\"anr\",\"processName\":null,\"runningNs\":140000,\"shareOfOneCPU\":0.00001533751740808226,\"sliceCount\":1},{\"threadKey\":{\"itid\":14},\"processKey\":{\"ipid\":9},\"tid\":1146,\"pid\":1126,\"name\":\"anr\",\"processName\":null,\"runningNs\":135000,\"shareOfOneCPU\":0.000014789748929222177,\"sliceCount\":1}],\"threadStateDistribution\":[{\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"tid\":3884,\"pid\":3882,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":19000,\"percentageOfRange\":2.0815202196683065e-6,\"intervalCount\":1},{\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"tid\":3884,\"pid\":3882,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":174000,\"percentageOfRange\":0.000019062343064330807,\"intervalCount\":1},{\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"tid\":3884,\"pid\":3882,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":9115183000,\"percentageOfRange\":0.9986019852882533,\"intervalCount\":2},{\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":241000,\"percentageOfRange\":0.00002640244068105589,\"intervalCount\":5},{\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":539000,\"percentageOfRange\":0.00005904944202111669,\"intervalCount\":5},{\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":85952000,\"percentageOfRange\":0.00941635925899633,\"intervalCount\":5},{\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"tid\":325,\"pid\":325,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":148000,\"percentageOfRange\":0.000016213946974258387,\"intervalCount\":5},{\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"tid\":325,\"pid\":325,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":192000,\"percentageOfRange\":0.000021034309588227096,\"intervalCount\":5},{\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"tid\":325,\"pid\":325,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":5302000,\"percentageOfRange\":0.0005808536949832295,\"intervalCount\":5},{\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"tid\":3885,\"pid\":3873,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":85000,\"percentageOfRange\":9.31206414062137e-6,\"intervalCount\":2},{\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"tid\":3885,\"pid\":3873,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":733000,\"percentageOfRange\":0.00008030285900088783,\"intervalCount\":2},{\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"tid\":3885,\"pid\":3873,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":9114781000,\"percentageOfRange\":0.998557944702553,\"intervalCount\":2},{\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"tid\":366,\"pid\":272,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":78000,\"percentageOfRange\":8.545188270217259e-6,\"intervalCount\":4},{\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"tid\":366,\"pid\":272,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":202000,\"percentageOfRange\":0.000022129846545947258,\"intervalCount\":4},{\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"tid\":366,\"pid\":272,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":4221000,\"percentageOfRange\":0.0004624261498536801,\"intervalCount\":4},{\"threadKey\":{\"itid\":10},\"processKey\":{\"ipid\":6},\"tid\":1206,\"pid\":1172,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":22000,\"percentageOfRange\":2.4101813069843547e-6,\"intervalCount\":1},{\"threadKey\":{\"itid\":10},\"processKey\":{\"ipid\":6},\"tid\":1206,\"pid\":1172,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":173000,\"percentageOfRange\":0.00001895278936855879,\"intervalCount\":1},{\"threadKey\":{\"itid\":10},\"processKey\":{\"ipid\":6},\"tid\":1206,\"pid\":1172,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":1000000000,\"percentageOfRange\":0.10955369577201612,\"intervalCount\":1},{\"threadKey\":{\"itid\":12},\"processKey\":{\"ipid\":7},\"tid\":1211,\"pid\":1190,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":25000,\"percentageOfRange\":2.7388423943004034e-6,\"intervalCount\":1},{\"threadKey\":{\"itid\":12},\"processKey\":{\"ipid\":7},\"tid\":1211,\"pid\":1190,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":140000,\"percentageOfRange\":0.00001533751740808226,\"intervalCount\":1},{\"threadKey\":{\"itid\":12},\"processKey\":{\"ipid\":7},\"tid\":1211,\"pid\":1190,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":1000125000,\"percentageOfRange\":0.10956738998398763,\"intervalCount\":1},{\"threadKey\":{\"itid\":13},\"processKey\":{\"ipid\":8},\"tid\":1207,\"pid\":1155,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":22000,\"percentageOfRange\":2.4101813069843547e-6,\"intervalCount\":1},{\"threadKey\":{\"itid\":13},\"processKey\":{\"ipid\":8},\"tid\":1207,\"pid\":1155,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":141000,\"percentageOfRange\":0.000015447071103854273,\"intervalCount\":1},{\"threadKey\":{\"itid\":13},\"processKey\":{\"ipid\":8},\"tid\":1207,\"pid\":1155,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":1000007000,\"percentageOfRange\":0.10955446264788653,\"intervalCount\":1},{\"threadKey\":{\"itid\":14},\"processKey\":{\"ipid\":9},\"tid\":1146,\"pid\":1126,\"rawState\":\"R\",\"normalizedState\":\"runnable\",\"durationNs\":23000,\"percentageOfRange\":2.519735002756371e-6,\"intervalCount\":1},{\"threadKey\":{\"itid\":14},\"processKey\":{\"ipid\":9},\"tid\":1146,\"pid\":1126,\"rawState\":\"Running\",\"normalizedState\":\"running\",\"durationNs\":135000,\"percentageOfRange\":0.000014789748929222177,\"intervalCount\":1},{\"threadKey\":{\"itid\":14},\"processKey\":{\"ipid\":9},\"tid\":1146,\"pid\":1126,\"rawState\":\"S\",\"normalizedState\":\"sleeping\",\"durationNs\":900632000,\"percentageOfRange\":0.09866756413054244,\"intervalCount\":1}],\"schedulingLatency\":{\"supported\":false,\"unsupportedReason\":\"runnableSemanticsUnproven\",\"count\":0,\"percentiles\":null,\"topSamples\":[],\"truncated\":true},\"hotIntervals\":[{\"range\":{\"startNs\":0,\"endNs\":1140993000},\"score\":{\"cpuBusyNs\":37715000,\"contextSwitchCount\":64,\"contextSwitchScoreNs\":64000000,\"longSliceNs\":0,\"total\":101715000},\"cpuSliceCount\":64,\"namedSliceCount\":0}],\"hotIntervalsUnsupportedReason\":null,\"sections\":{\"cpuUtilization\":{\"returnedCount\":4,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":true},\"topProcesses\":{\"returnedCount\":10,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":true},\"topThreads\":{\"returnedCount\":10,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":true},\"threadStateDistribution\":{\"returnedCount\":27,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":true},\"schedulingLatency\":{\"returnedCount\":0,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":false},\"hotIntervals\":{\"returnedCount\":1,\"matchedCount\":null,\"truncated\":true,\"sampled\":true,\"supported\":true}},\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null}]}}}",
+          "batch": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884902148,\"body\":{\"cpuSlices\":[{\"items\":[{\"key\":{\"table\":\"sched_slice\",\"rowID\":0},\"range\":{\"startNs\":112000,\"endNs\":152000},\"cpu\":3,\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"tid\":325,\"pid\":325,\"threadName\":\"wifi_hal_servic\",\"processName\":\"wifi_hal_servic\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":1},\"range\":{\"startNs\":115000,\"endNs\":308000},\"cpu\":2,\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"threadName\":\"hilogd.server\",\"processName\":\"hilogd\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":2},\"range\":{\"startNs\":152000,\"endNs\":453000},\"cpu\":3,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":3},\"range\":{\"startNs\":308000,\"endNs\":456000},\"cpu\":2,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":4},\"range\":{\"startNs\":453000,\"endNs\":1163000},\"cpu\":3,\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"tid\":3885,\"pid\":3873,\"threadName\":\"UnixSocketRecv\",\"processName\":null,\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":5},\"range\":{\"startNs\":456000,\"endNs\":561000},\"cpu\":2,\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"threadName\":\"hilogd.server\",\"processName\":\"hilogd\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":6},\"range\":{\"startNs\":550000,\"endNs\":770000},\"cpu\":0,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":7},\"range\":{\"startNs\":561000,\"endNs\":722000},\"cpu\":2,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":8},\"range\":{\"startNs\":722000,\"endNs\":805000},\"cpu\":2,\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"threadName\":\"hilogd.server\",\"processName\":\"hilogd\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":9},\"range\":{\"startNs\":770000,\"endNs\":832000},\"cpu\":0,\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"tid\":366,\"pid\":272,\"threadName\":\"mmi_service\",\"processName\":null,\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":10},\"range\":{\"startNs\":805000,\"endNs\":934000},\"cpu\":2,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":11},\"range\":{\"startNs\":832000,\"endNs\":1127000},\"cpu\":0,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":12},\"range\":{\"startNs\":934000,\"endNs\":1015000},\"cpu\":2,\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"threadName\":\"hilogd.server\",\"processName\":\"hilogd\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":13},\"range\":{\"startNs\":1015000,\"endNs\":1059000},\"cpu\":2,\"threadKey\":null,\"processKey\":null,\"tid\":0,\"pid\":0,\"threadName\":\"swapper\",\"processName\":\"swapper\",\"endState\":\"R\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":14},\"range\":{\"startNs\":1059000,\"endNs\":1136000},\"cpu\":2,\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"tid\":511,\"pid\":338,\"threadName\":\"hilogd.server\",\"processName\":\"hilogd\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false},{\"key\":{\"table\":\"sched_slice\",\"rowID\":15},\"range\":{\"startNs\":1127000,\"endNs\":1301000},\"cpu\":0,\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"tid\":3884,\"pid\":3882,\"threadName\":\"UnixSocketRecv\",\"processName\":\"hiprofiler_plug\",\"endState\":\"S\",\"priority\":120,\"isOpenEnded\":false}],\"truncated\":true,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null}]}}],\"threadStates\":[{\"items\":[{\"key\":{\"table\":\"thread_state\",\"rowID\":0},\"range\":{\"startNs\":30000,\"endNs\":115000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"R\",\"normalizedState\":\"runnable\",\"cpu\":null,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":1},\"range\":{\"startNs\":86000,\"endNs\":112000},\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"state\":\"R\",\"normalizedState\":\"runnable\",\"cpu\":null,\"tid\":325,\"pid\":325,\"processName\":\"wifi_hal_servic\",\"threadName\":\"wifi_hal_servic\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":2},\"range\":{\"startNs\":112000,\"endNs\":152000},\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"state\":\"Running\",\"normalizedState\":\"running\",\"cpu\":3,\"tid\":325,\"pid\":325,\"processName\":\"wifi_hal_servic\",\"threadName\":\"wifi_hal_servic\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":3},\"range\":{\"startNs\":115000,\"endNs\":308000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"Running\",\"normalizedState\":\"running\",\"cpu\":2,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":4},\"range\":{\"startNs\":152000,\"endNs\":1221000},\"threadKey\":{\"itid\":4},\"processKey\":{\"ipid\":2},\"state\":\"S\",\"normalizedState\":\"sleeping\",\"cpu\":null,\"tid\":325,\"pid\":325,\"processName\":\"wifi_hal_servic\",\"threadName\":\"wifi_hal_servic\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":5},\"range\":{\"startNs\":308000,\"endNs\":354000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"S\",\"normalizedState\":\"sleeping\",\"cpu\":null,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":6},\"range\":{\"startNs\":354000,\"endNs\":456000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"R\",\"normalizedState\":\"runnable\",\"cpu\":null,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":7},\"range\":{\"startNs\":430000,\"endNs\":453000},\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"state\":\"R\",\"normalizedState\":\"runnable\",\"cpu\":null,\"tid\":3885,\"pid\":3873,\"processName\":null,\"threadName\":\"UnixSocketRecv\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":8},\"range\":{\"startNs\":453000,\"endNs\":1163000},\"threadKey\":{\"itid\":6},\"processKey\":{\"ipid\":4},\"state\":\"Running\",\"normalizedState\":\"running\",\"cpu\":3,\"tid\":3885,\"pid\":3873,\"processName\":null,\"threadName\":\"UnixSocketRecv\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":9},\"range\":{\"startNs\":456000,\"endNs\":561000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"Running\",\"normalizedState\":\"running\",\"cpu\":2,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":10},\"range\":{\"startNs\":550000,\"endNs\":1108000},\"threadKey\":{\"itid\":1},\"processKey\":{\"ipid\":1},\"state\":\"S\",\"normalizedState\":\"sleeping\",\"cpu\":null,\"tid\":3884,\"pid\":3882,\"processName\":\"hiprofiler_plug\",\"threadName\":\"UnixSocketRecv\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":11},\"range\":{\"startNs\":561000,\"endNs\":702000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"S\",\"normalizedState\":\"sleeping\",\"cpu\":null,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":12},\"range\":{\"startNs\":702000,\"endNs\":722000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"R\",\"normalizedState\":\"runnable\",\"cpu\":null,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":13},\"range\":{\"startNs\":722000,\"endNs\":805000},\"threadKey\":{\"itid\":3},\"processKey\":{\"ipid\":3},\"state\":\"Running\",\"normalizedState\":\"running\",\"cpu\":2,\"tid\":511,\"pid\":338,\"processName\":\"hilogd\",\"threadName\":\"hilogd.server\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":14},\"range\":{\"startNs\":748000,\"endNs\":770000},\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"state\":\"R\",\"normalizedState\":\"runnable\",\"cpu\":null,\"tid\":366,\"pid\":272,\"processName\":null,\"threadName\":\"mmi_service\",\"isOpenEnded\":false},{\"key\":{\"table\":\"thread_state\",\"rowID\":15},\"range\":{\"startNs\":770000,\"endNs\":832000},\"threadKey\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"state\":\"Running\",\"normalizedState\":\"running\",\"cpu\":0,\"tid\":366,\"pid\":272,\"processName\":null,\"threadName\":\"mmi_service\",\"isOpenEnded\":false}],\"truncated\":true,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null}]}}],\"slices\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"counters\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"counterSeries\":[{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}],\"densities\":[{\"buckets\":[{\"range\":{\"startNs\":0,\"endNs\":285248250},\"eventCount\":529},{\"range\":{\"startNs\":285248250,\"endNs\":570496500},\"eventCount\":617},{\"range\":{\"startNs\":570496500,\"endNs\":855744750},\"eventCount\":231},{\"range\":{\"startNs\":855744750,\"endNs\":1140993000},\"eventCount\":452},{\"range\":{\"startNs\":1140993000,\"endNs\":1426241250},\"eventCount\":336},{\"range\":{\"startNs\":1426241250,\"endNs\":1711489500},\"eventCount\":157},{\"range\":{\"startNs\":1711489500,\"endNs\":1996737750},\"eventCount\":613},{\"range\":{\"startNs\":1996737750,\"endNs\":2281986000},\"eventCount\":678},{\"range\":{\"startNs\":2281986000,\"endNs\":2567234250},\"eventCount\":365},{\"range\":{\"startNs\":2567234250,\"endNs\":2852482500},\"eventCount\":391},{\"range\":{\"startNs\":2852482500,\"endNs\":3137730750},\"eventCount\":473},{\"range\":{\"startNs\":3137730750,\"endNs\":3422979000},\"eventCount\":423},{\"range\":{\"startNs\":3422979000,\"endNs\":3708227250},\"eventCount\":279},{\"range\":{\"startNs\":3708227250,\"endNs\":3993475500},\"eventCount\":713},{\"range\":{\"startNs\":3993475500,\"endNs\":4278723750},\"eventCount\":34,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":4278723750,\"endNs\":4563972000},\"eventCount\":166,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":4563972000,\"endNs\":4849220250},\"eventCount\":350,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":4849220250,\"endNs\":5134468500},\"eventCount\":380,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":5134468500,\"endNs\":5419716750},\"eventCount\":72,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":5419716750,\"endNs\":5704965000},\"eventCount\":368},{\"range\":{\"startNs\":5704965000,\"endNs\":5990213250},\"eventCount\":303,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":5990213250,\"endNs\":6275461500},\"eventCount\":396,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":6275461500,\"endNs\":6560709750},\"eventCount\":195,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":6560709750,\"endNs\":6845958000},\"eventCount\":424,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":6845958000,\"endNs\":7131206250},\"eventCount\":292,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":7131206250,\"endNs\":7416454500},\"eventCount\":257,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":7416454500,\"endNs\":7701702750},\"eventCount\":315,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":7701702750,\"endNs\":7986951000},\"eventCount\":425},{\"range\":{\"startNs\":7986951000,\"endNs\":8272199250},\"eventCount\":381,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":8272199250,\"endNs\":8557447500},\"eventCount\":114,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":8557447500,\"endNs\":8842695750},\"eventCount\":230,\"dominant\":{\"processOrThread\":{\"_0\":3882}}},{\"range\":{\"startNs\":8842695750,\"endNs\":9127944000},\"eventCount\":284,\"dominant\":{\"processOrThread\":{\"_0\":3882}}}],\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"timeline.density.dominantThread\",\"count\":null,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"timeline.density.occupancy\",\"count\":null,\"message\":null}]}}],\"threads\":[{\"items\":[{\"key\":{\"itid\":84},\"processKey\":{\"ipid\":42},\"tid\":2,\"pid\":2,\"name\":\"kthreadd\",\"processName\":\"kthreadd\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":62},\"processKey\":{\"ipid\":31},\"tid\":10,\"pid\":10,\"name\":\"ksoftirqd/0\",\"processName\":\"ksoftirqd/0\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":18},\"processKey\":{\"ipid\":10},\"tid\":11,\"pid\":11,\"name\":\"rcu_sched\",\"processName\":\"rcu_sched\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":76},\"processKey\":{\"ipid\":38},\"tid\":16,\"pid\":16,\"name\":\"ksoftirqd/1\",\"processName\":\"ksoftirqd/1\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":78},\"processKey\":{\"ipid\":39},\"tid\":21,\"pid\":21,\"name\":\"ksoftirqd/2\",\"processName\":\"ksoftirqd/2\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":73},\"processKey\":{\"ipid\":36},\"tid\":26,\"pid\":26,\"name\":\"ksoftirqd/3\",\"processName\":\"ksoftirqd/3\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":87},\"processKey\":{\"ipid\":45},\"tid\":34,\"pid\":34,\"name\":\"kworker/3:1\",\"processName\":\"kworker/3:1\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":88},\"processKey\":{\"ipid\":46},\"tid\":36,\"pid\":36,\"name\":\"khungtaskd\",\"processName\":\"khungtaskd\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":28},\"processKey\":{\"ipid\":16},\"tid\":93,\"pid\":93,\"name\":\"kworker/2:14\",\"processName\":\"kworker/2:14\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":27},\"processKey\":{\"ipid\":15},\"tid\":180,\"pid\":180,\"name\":\"sugov:0\",\"processName\":\"sugov:0\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":26},\"processKey\":{\"ipid\":14},\"tid\":188,\"pid\":188,\"name\":\"kworker/0:2\",\"processName\":\"kworker/0:2\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":95},\"processKey\":{\"ipid\":47},\"tid\":220,\"pid\":220,\"name\":\"jbd2/mmcblk0p7-\",\"processName\":\"jbd2/mmcblk0p7-\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":86},\"processKey\":{\"ipid\":44},\"tid\":232,\"pid\":232,\"name\":\"uinput_inject\",\"processName\":\"uinput_inject\",\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":9},\"processKey\":{\"ipid\":5},\"tid\":272,\"pid\":272,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":true},{\"key\":{\"itid\":8},\"processKey\":{\"ipid\":5},\"tid\":366,\"pid\":272,\"name\":\"mmi_service\",\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":false},{\"key\":{\"itid\":75},\"processKey\":{\"ipid\":37},\"tid\":276,\"pid\":276,\"name\":null,\"processName\":null,\"startNs\":null,\"endNs\":null,\"isMainThread\":true}],\"truncated\":true,\"dataQualityIssues\":[]}]}}",
+          "search": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884902404,\"body\":{\"items\":[{\"kind\":\"process\",\"title\":\"com.example.kik\",\"subtitle\":\"PID 1277 · ipid 24\",\"processKey\":{\"ipid\":24}},{\"kind\":\"process\",\"title\":\"khungtaskd\",\"subtitle\":\"PID 36 · ipid 46\",\"processKey\":{\"ipid\":46}},{\"kind\":\"process\",\"title\":\"kthreadd\",\"subtitle\":\"PID 2 · ipid 42\",\"processKey\":{\"ipid\":42}},{\"kind\":\"process\",\"title\":\"thermal\",\"subtitle\":\"PID 450 · ipid 35\",\"processKey\":{\"ipid\":35}},{\"kind\":\"process\",\"title\":\"wifi_hal_servic\",\"subtitle\":\"PID 325 · ipid 2\",\"processKey\":{\"ipid\":2}},{\"kind\":\"thread\",\"title\":\"CellularDataSer\",\"subtitle\":\"TID 1033 · itid 32\",\"processKey\":{\"ipid\":18},\"threadKey\":{\"itid\":32}},{\"kind\":\"thread\",\"title\":\"anr\",\"subtitle\":\"TID 1146 · itid 14\",\"processKey\":{\"ipid\":9},\"threadKey\":{\"itid\":14}},{\"kind\":\"thread\",\"title\":\"anr\",\"subtitle\":\"TID 1141 · itid 57\",\"processKey\":{\"ipid\":12},\"threadKey\":{\"itid\":57}},{\"kind\":\"thread\",\"title\":\"appspawn\",\"subtitle\":\"TID 1121 · itid 22\",\"processKey\":{\"ipid\":12},\"threadKey\":{\"itid\":22}},{\"kind\":\"thread\",\"title\":\"appspawn\",\"subtitle\":\"TID 3969 · itid 23\",\"processKey\":{\"ipid\":12},\"threadKey\":{\"itid\":23}},{\"kind\":\"thread\",\"title\":\"appspawn\",\"subtitle\":\"TID 317 · itid 74\",\"processKey\":{\"ipid\":37},\"threadKey\":{\"itid\":74}},{\"kind\":\"thread\",\"title\":\"distributeddata\",\"subtitle\":\"TID 849 · itid 29\",\"processKey\":{\"ipid\":17},\"threadKey\":{\"itid\":29}},{\"kind\":\"thread\",\"title\":\"faultloggerd\",\"subtitle\":\"TID 379 · itid 69\",\"processKey\":{\"ipid\":34},\"threadKey\":{\"itid\":69}},{\"kind\":\"thread\",\"title\":\"foundation\",\"subtitle\":\"TID 1643 · itid 101\",\"processKey\":{\"ipid\":27},\"threadKey\":{\"itid\":101}},{\"kind\":\"thread\",\"title\":\"khungtaskd\",\"subtitle\":\"TID 36 · itid 88\",\"processKey\":{\"ipid\":46},\"threadKey\":{\"itid\":88}},{\"kind\":\"thread\",\"title\":\"kthreadd\",\"subtitle\":\"TID 2 · itid 84\",\"processKey\":{\"ipid\":42},\"threadKey\":{\"itid\":84}}],\"truncated\":true}}"
+        },
+        "resultSurvivesReleaseCloseDrain": true,
+        "responseDigests": {
+          "analysis": {
+            "byteCount": 11139,
+            "sha256": "8e66cc793d5995d760631b8260f5703021713cbcda4e032003416fc533d60a85"
+          },
+          "batch": {
+            "byteCount": 16709,
+            "sha256": "7bc436deb472f3abd7e31709d87122f2710c8a32b5c594250af36e4e1fa683ae"
+          },
+          "search": {
+            "byteCount": 1899,
+            "sha256": "c7021878c1187c7b607434997bf2b24592f87df6788f3b7eea666161ac6bee1d"
+          }
+        }
+      }
+    ]
+  },
+  "parser": {
+    "name": "trace_streamer",
+    "reportedVersion": "4.3.7",
+    "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+    "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "architecture": "arm64",
+    "adapterVersion": "1",
+    "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20"
+  },
+  "sourceDigests": [
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 841,
+      "sha256": "de38091efc696ba89d78a3fb64eb13cbe6c7d3096aa725bcd4b9d54b5e16bb60"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 8721,
+      "sha256": "ea81800ddf0aa0fe0234b628334f5a3ad62690f3a031826ed4cd71e7645d3cb6"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "byteCount": 86,
+      "sha256": "2ad6f15416572b4836585087f1d4abc53b8fa2dbd616f8dacfaa587ed6714228"
+    },
+    {
+      "path": "scripts/run-cargo.py",
+      "byteCount": 7151,
+      "sha256": "89248867fbc827b68fefc9a766c8c02dce3641b2a81d68bb6834c5a911a16ecc"
+    },
+    {
+      "path": "scripts/test_macos_parser_process.py",
+      "byteCount": 19912,
+      "sha256": "e6284c90cb5216e6be8c38cb37feff53f8840af2191a65febfee5f4042fe6aa0"
+    },
+    {
+      "path": "scripts/test_macos_async_runtime.py",
+      "byteCount": 5402,
+      "sha256": "ed73144c20f95c8b4a76d37e807d1939941d578679eeff77a5f15d763dd3681c"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/Cargo.toml",
+      "byteCount": 392,
+      "sha256": "688e29c2bb5418655fe68833da30a662c14d861cb3d6bbfbe939e8f02a204546"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/Cargo.toml",
+      "byteCount": 510,
+      "sha256": "d2fd77ffbfe19ab17cd146b46cb0215f281dcc1959389f04ccb1466224593e56"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/Cargo.toml",
+      "byteCount": 352,
+      "sha256": "3e964c4bb22c1663c79ae9304e90e2c81e15c82bdb038570dc4ebf536e32ac40"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/Cargo.toml",
+      "byteCount": 465,
+      "sha256": "7474bf57a9c686b3736e50209894098ea8da53c0e8b8c4887e16dc426f8fc5ae"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/Cargo.toml",
+      "byteCount": 920,
+      "sha256": "af77d99b2ad839b9341f913233f839810ecc020b67b0111ee330d7d3c874170f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/Cargo.toml",
+      "byteCount": 423,
+      "sha256": "05393789f858db233d313a6e956b10d2b1b2982fd50b5de581725348bbd52273"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/hot.rs",
+      "byteCount": 5425,
+      "sha256": "9be825b7ab23ead63135d5c2239f681ccd96aace27c8974f05ebcef4396d2113"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/lib.rs",
+      "byteCount": 13878,
+      "sha256": "fd29fe155cc539ae356f733d76761b238c274fb6fcd54fe9aaad4dad594cd194"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/reduce.rs",
+      "byteCount": 8005,
+      "sha256": "9b53650f8024f7b6f3400424722ec427a6f724aba77f011e3bbab6e86acc4a05"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/scheduling.rs",
+      "byteCount": 4215,
+      "sha256": "0ebc4e98963f6218ed055c7f771d1c2afac319dd3a47fa42c42eae5604d432d9"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/search/tests.rs",
+      "byteCount": 7645,
+      "sha256": "1ce994218dfe9fb72b56aa605993d36e8c4da3b2ba2a3b29c5f7d12e2bc903d4"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/search.rs",
+      "byteCount": 10146,
+      "sha256": "8fae5935aa21e63e9431a3bcaeefd5b022f8ea7d7ee727ea005af997afd28d44"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/types.rs",
+      "byteCount": 10716,
+      "sha256": "c42ee7f56dc3a665f298e45fb0dd3f4a85b87d4fa7dd8198ab18d3a7046cc026"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/regressions.rs",
+      "byteCount": 21544,
+      "sha256": "039990b4002bd3c351e49bfdd0ba40e3b865de35dbee2c8fac207a7830bad4fc"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/swift_deviations.rs",
+      "byteCount": 2985,
+      "sha256": "1ebd6324063d438b7e1c5b031d2a3bad47e3a8baaf1b74d25b5d6f944296a9aa"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/swift_oracle.rs",
+      "byteCount": 7135,
+      "sha256": "d37b3247d09ac344931dc3aa493b73f9b0c5bfadff239088cb52bf374b3cd9fc"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/examples/macos_commands_probe.rs",
+      "byteCount": 8145,
+      "sha256": "76367fe3042fd01271f445d98d656d92d54e4b8190eea4b3b7dc39e94ea89624"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/arguments.rs",
+      "byteCount": 31783,
+      "sha256": "8ca1b7de27c1cdc74d6f2d8b78cf13783ad1ee860895d68e361767fd03999e30"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/driver.rs",
+      "byteCount": 20066,
+      "sha256": "2bd183fa5c96408faaeefe95787bdb7d554d341d9c9a75de416ac87cc7d57c75"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/entry.rs",
+      "byteCount": 339,
+      "sha256": "0bca65ba602113bed9fd069e72c71b710545efc40c6d9325b925830333e8e543"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/event_query.rs",
+      "byteCount": 4428,
+      "sha256": "abda11c94d899926dd64890b29ec9aa3a436e61db86a5a98855b49017fec0543"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/lib.rs",
+      "byteCount": 432,
+      "sha256": "11a4845ea8c0d6ce447a67fa013d4b3407cc8bfff584af950358b70713a9c3d4"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/machine.rs",
+      "byteCount": 58961,
+      "sha256": "ff7fcc04bd77711a0041232d9adcf4d454ff3e703e91848a8c3986939fb472c2"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/main.rs",
+      "byteCount": 260,
+      "sha256": "7cce1ea94f6f40a020ffceeba4be8baa47f39ebe1eedd53aa41868c54f96c6e3"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/public_error.rs",
+      "byteCount": 1325,
+      "sha256": "0dc0865687114bf4eb7be69d25d1b2a67a01d01805922d4f7ac1d069d5d15aba"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/resources.rs",
+      "byteCount": 7584,
+      "sha256": "4a1267edeab3e5862c04a16d344e075e81535d316c1133343223a663ad9f5039"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/build.rs",
+      "byteCount": 618,
+      "sha256": "519a4404229563056ed3f0c207260462cf7dde2e0ee3b316045c772cb504f67e"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/arguments.rs",
+      "byteCount": 2555,
+      "sha256": "1930c845b786ded211782bd6ba02d81ffb2d60ee02a0417467038b10991e803b"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/batch.rs",
+      "byteCount": 5314,
+      "sha256": "78d9f9e84176f0341442a6a47fd6f59d839f635dd1366fddea5de55e9b2d6d64"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/cache.rs",
+      "byteCount": 4016,
+      "sha256": "9620a3ef4a31186740a3dfa265a4662e5f47034102654b2bce8f8ba19676c76d"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/counters.rs",
+      "byteCount": 7340,
+      "sha256": "f692666267505ca53a9152b2a769edcb5c0a90a84d88a7759f56e1c030fe44b4"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/density.rs",
+      "byteCount": 4672,
+      "sha256": "fe31fe83dde2169dd2caea88152d566180e97906d41af5593360beee008ba58b"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/directory.rs",
+      "byteCount": 2364,
+      "sha256": "238e555118f8fd9af4d709d30754c76467c7369a22770d833d0c68bd793b112f"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/error.rs",
+      "byteCount": 9040,
+      "sha256": "27efa768fd8c6f40efebb962b2bc6b546767c1210b188ad76a01b2dd111d4f7e"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/events.rs",
+      "byteCount": 4233,
+      "sha256": "17c48bb8ee56bb9e1f62991d6da74c33d5333aa08177c003f2e3ba241029659d"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/frames.rs",
+      "byteCount": 4351,
+      "sha256": "40ff4e89f383aed7a4fb13c8eb5958f755ca88df0d01302660505b24c7c85ea3"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/lib.rs",
+      "byteCount": 2301,
+      "sha256": "83922a3c178563f3818e4ed4eacf3d273a9fcccf37717ac3e0d1b1269401ae0f"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/parser.rs",
+      "byteCount": 1916,
+      "sha256": "d7094cd12538813a376db9a57a2bf4959d0a1e6193343b8c35030c8e508d10bb"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/quality.rs",
+      "byteCount": 3043,
+      "sha256": "a6ecab91105e396f649ea22c5cbdca1be211d3a43fb26f3efaf53ac28282ce17"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/search.rs",
+      "byteCount": 4144,
+      "sha256": "066ffd44ae1c86f9880a98b61f838d46e8e6b2be53b28a514ccfc3094d3de9fa"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/slices.rs",
+      "byteCount": 2168,
+      "sha256": "74f5a9ad8c3739a3792e08366e2da6851e749df159052b98f7403179a3c13dbe"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/time.rs",
+      "byteCount": 2015,
+      "sha256": "1beeba7d7630f2658f1764226e963d11f9aff772bb71d9ac36579a612aa4acbd"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/events.rs",
+      "byteCount": 2918,
+      "sha256": "3467115f39f6464d1a5271f4fdef36517bee6ae6569208ea65aeabe7adc5f1e0"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/slices.rs",
+      "byteCount": 2901,
+      "sha256": "59b95e8e4ca64234b0c7c8bab4ef4d47c6a19429bbd81bd9ab865bdfa36ae60c"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/vectors.rs",
+      "byteCount": 5714,
+      "sha256": "559d2a249aa1a95a0b81d8827653d1bcfa177bf5e39cc830380f982e263676a6"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_analysis_probe.rs",
+      "byteCount": 12176,
+      "sha256": "a7bc21dcdbab7535b3782d42d95d35a6cef61b433917527e95e8d9ad5887bd1e"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_arguments_probe.rs",
+      "byteCount": 12938,
+      "sha256": "7915418becddbbf8e7ffff266da4f1e5236121f64a6664580e2c7a40fa2a41c8"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_batch_probe.rs",
+      "byteCount": 14099,
+      "sha256": "f4195991129926e233e163c97991da37a11b8470994977481c8c56194fc38c2a"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_counters_probe.rs",
+      "byteCount": 10197,
+      "sha256": "da015a4d6ee29c5ec1f0389395f5aaaf474d6890929e9cce9946ae202e9c774f"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_density_probe.rs",
+      "byteCount": 12341,
+      "sha256": "f3c2612b20ba13811e7bd0b1c60d4cc8ec4e79116ad505a18fc8388f6493d780"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_engine_probe.rs",
+      "byteCount": 18775,
+      "sha256": "7aaf7d4ee8a6199177d3834936b4579711e3eebebd458b4e2299d6497677c519"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_events_probe.rs",
+      "byteCount": 8534,
+      "sha256": "f5cb85462f5bcb6eb29f8ee20c778d3d32612c63e701668ba7dc4365000870ba"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_frames_probe.rs",
+      "byteCount": 11076,
+      "sha256": "c1ccce7fc9a667d87e47dc5381f292d3974bf814ca029ac364986ec2274951dd"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_runtime_probe.rs",
+      "byteCount": 35806,
+      "sha256": "9c349c6bd326678897b117fa24a87ae1bb94ce3bcfa8c938b8554c9c3afb43a4"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_search_probe.rs",
+      "byteCount": 13211,
+      "sha256": "7f63ce9265862a8785ae307fce09b40c26245c2bcda17ee9a910d5b61cb42cb9"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_slices_probe.rs",
+      "byteCount": 9605,
+      "sha256": "915b1bc6c871bc63fa6730952f2ff0032044d9e5ea58cf5dd6b2bc8392c630e4"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_store_probe.rs",
+      "byteCount": 3673,
+      "sha256": "c64b327b95dc3e3f1d90c8b85ae989211da8a89e9cd9d402ed2b75f032d01e82"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/async_runtime.rs",
+      "byteCount": 51348,
+      "sha256": "950dba3a169ad21f17a6045d422919844081e79e8531ae6a59624dd68b240939"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/handles.rs",
+      "byteCount": 4796,
+      "sha256": "b83fccd6bac1b7e0fcd87db59a5829fe4b6b2b3f110e9c6c749b9750370bed5a"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/lib.rs",
+      "byteCount": 1519,
+      "sha256": "d89b491ae39c84b9a022a387f3b69d5815be444ad60d87e5cd73d674b9f0aa0a"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/metadata.rs",
+      "byteCount": 10068,
+      "sha256": "62d54886af71af13b6b899d25bd659d5d908da46229a80d9df1ed9307cc3c8a8"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/no_cache.rs",
+      "byteCount": 66994,
+      "sha256": "3ed5c1df0a66672a65449061c3c25e089b69ad71e13ce5a4afe48200f98286fb"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/owned_result.rs",
+      "byteCount": 4184,
+      "sha256": "c3e99ca99b8051c934509e168e953bfedd09d84a559ca0b51c54090f407ae56b"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/public_error.rs",
+      "byteCount": 10273,
+      "sha256": "5e48f5332310a1f7176333e5b8da2af8132cb8fab2dc4d2dadabb4a4cc7c28ea"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_cli_ports_probe.rs",
+      "byteCount": 1176,
+      "sha256": "2a4089ed04454150b8b682e8d2b551c70f8b854514b8a46b57c41ce0d7c3f616"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+      "byteCount": 12075,
+      "sha256": "9f0e2228d79058082ba246b9313356dc2fa768aea2d9979a4f8bfe5ae1fe3d0a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+      "byteCount": 4936,
+      "sha256": "7ecc158fd794898350d7dbfd03b0e0672c6f3bd907e9db02b0f0f3b730613164"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+      "byteCount": 260,
+      "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 2487,
+      "sha256": "c9ab2d00c2f9e502b08f4b4bd0a1af7efad63ea6dda4f6fed9e4ef013d6a53b5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 1038,
+      "sha256": "3d909ae237980c1926d96ac332550da5d03ab5d9a541829c0ca73859103052c6"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1787,
+      "sha256": "fa1a186f4f2bfe237260eabb4235bef2c2c4fa244bf0ae73b348bfa0dbae2fe0"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 46249,
+      "sha256": "e1e360084c52142453ea8076f00f986f9858bd7149f7512d2850a1139c34dced"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_cli.rs",
+      "byteCount": 17731,
+      "sha256": "f3813f04694390ac928db99cd95c34e8549373a9e84428f3eedb0513660f6e41"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_directory.rs",
+      "byteCount": 12385,
+      "sha256": "70304e12594bcb89bea0d0186e2b5a892121f9c851c134c9cec98fd4f5cadcd5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_owner.rs",
+      "byteCount": 68401,
+      "sha256": "5a2da32a7261916e1ec5be03a059f044b717872cc2ee99931f8b0df671eea873"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+      "byteCount": 39372,
+      "sha256": "d27e1fb71cd15dd811f486e71b187ada94aaf97f96cac88c4789fe25537aaf00"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process_outputs.rs",
+      "byteCount": 16643,
+      "sha256": "82090010a6e1545b6690cc680298389ceb6508213bfc346a82aafb6b5c506935"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+      "byteCount": 14979,
+      "sha256": "793c62086818f8d934b8db6cc6f2ad59caf51e1a0244858e49e88cd02c0156fd"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+      "byteCount": 9451,
+      "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_writable.rs",
+      "byteCount": 10317,
+      "sha256": "5cf33714c39db4aaf956707b6e530452ccc2c6ddad0f91f265665c8e731b1c31"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+      "byteCount": 24987,
+      "sha256": "aee3e30c14273fa22afabb0207ce0cffd6d2fb9cded19105eea28a28e61ace9b"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_owners.rs",
+      "byteCount": 16046,
+      "sha256": "448b567440b0a21ab266269ab1662b4f22fa3e2e5721c4fcedb403077cba846e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+      "byteCount": 20556,
+      "sha256": "0913972ee33e5855760a6311e6f8799316c6e4a9d9823accd7cd8d8082b2dd9e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+      "byteCount": 10741,
+      "sha256": "d4db4d94c44e874ebf671d51b256a98a2dc885383dc85f862f2dd48b90f8a969"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/argument_oracle_tests.rs",
+      "byteCount": 4982,
+      "sha256": "6b73b431f2ff500a23b1ceae97fce639991ed84d7ebb452f1eed29df82f33dbc"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/arguments/tests.rs",
+      "byteCount": 7225,
+      "sha256": "8a2bcb1cb363fef6db51422d8814efbee4f3cd06be7c5c49df5fced5a85bce7f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/arguments.rs",
+      "byteCount": 4064,
+      "sha256": "2af056fb71a9216a07533ee326217e8f0093795373771de693c2de8bb1582ec1"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/counters/tests.rs",
+      "byteCount": 17273,
+      "sha256": "d9c3bb898cf42a6d24e54bd97eb46dbac4a0088c425a9df27d4e840435c98b96"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/counters.rs",
+      "byteCount": 22428,
+      "sha256": "41f2f4677ff6804d2d4bd2d9e1eb43b2fa0895ac49d336fa01e4372b5e96c03d"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/database.rs",
+      "byteCount": 18264,
+      "sha256": "3347e495a51b2e2277f320d8bfac17aa3411d25aed4272050fcf50a761bbac7b"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/density.rs",
+      "byteCount": 16560,
+      "sha256": "0343694a2d6d9b8065f6ca59b37da6ce93dbebb344e3913257a5062b09db7089"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/density_oracle_tests.rs",
+      "byteCount": 3549,
+      "sha256": "73f7188b2a254beef0bebd9a90ac3917d92e0ee852aa6458db078ec41f29f0e9"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/directory.rs",
+      "byteCount": 19633,
+      "sha256": "6b0e46f4e7d16c245167485748fc6f76f54e5fc2f411f5bbc73fb376c62850f8"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/event_oracle_tests.rs",
+      "byteCount": 6529,
+      "sha256": "e40dfcb11a8d3531893afec7e095c5a208358c7b6d29c5cb5e9c68b42e023a9a"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/events/tests.rs",
+      "byteCount": 18377,
+      "sha256": "c4eec2c99d3f9e103e1bdd795f541ed18c9c470c1e7c054c4e76209e557a8d1f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/events.rs",
+      "byteCount": 20532,
+      "sha256": "e64a73a503105de9acfd89abfa177c7fd2dacdf499dae39689de7733e5f26f7c"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/frames/tests.rs",
+      "byteCount": 7350,
+      "sha256": "88d9841a6d8fc4bdb160550a89b0f575fd3a71b726a6e5200d426193c0362a77"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/frames.rs",
+      "byteCount": 5158,
+      "sha256": "a33618db68784d72e52d838513609a80a10ac3d6eb91ea9dd7cfa2eb59352ff2"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/indexes.rs",
+      "byteCount": 7925,
+      "sha256": "0c6daebb3aac91e351352d56b1d6e7d5ccc316aebdc4782805fd14951864220f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/lib.rs",
+      "byteCount": 11004,
+      "sha256": "4429538a57000985262e4405d6bfb3d56a832670f4b2b10c631346c968d25bec"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/query_resources.rs",
+      "byteCount": 3863,
+      "sha256": "eb3ed8fb92b195c29fec735deca0bb179906b154cc6cb87887662c76011e7ccb"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/read_pool.rs",
+      "byteCount": 10068,
+      "sha256": "f89caf1771f3f2a34eab04670c754cc8a3cdae768e1a31c69899cbf5ca093c18"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/reader.rs",
+      "byteCount": 8908,
+      "sha256": "af3555b5ae17336f9298d8421a3897a4fde19e5ce8199397f7c92fa620e3c2cb"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/schema.rs",
+      "byteCount": 22411,
+      "sha256": "94ab170a9c26f2fecb2e2af8350b3c4bfebc9c1f9e0cb4e975065349c981c964"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/slices/tests.rs",
+      "byteCount": 13011,
+      "sha256": "6c7a03854f6d222a3059cb0b473cb2046eea620afc0f772213a6d8f2f7780467"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/slices.rs",
+      "byteCount": 9486,
+      "sha256": "89b83a06120c2716809c226bd6af22b1b997762766833958a1895cc87bb4939f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/tests.rs",
+      "byteCount": 45597,
+      "sha256": "abbc45549aaa7855cf9b111bf6b13060d577daf00ead9ce36555558641f4ae09"
+    }
+  ],
+  "retainedExactRunArtifacts": [
+    {
+      "path": "/private/tmp/arktrace-runtime-artifacts-5jl_258w/host-process",
+      "sha256": "fca7965b3ff8002e1157ce61bed65b8687e0635d24463e79fdddde57704bf1f5",
+      "byteCount": 2019112
+    },
+    {
+      "path": "/private/tmp/arktrace-runtime-artifacts-5jl_258w/runtime-probe",
+      "sha256": "60fd9989645cdf12be3fc1d33134f9640ddbc8a7056e669d95a3694f9caba2e8",
+      "byteCount": 14953032
+    }
+  ],
+  "toolchain": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.1",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: aarch64-apple-darwin\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.90+curl-8.21.0 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Mac OS 27.0.0 [64-bit]",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428"
+  },
+  "ownedHarnessRootRemoved": true,
+  "task": "AT-RUST-008 async no-cache Session lifecycle prerequisite for AT-RUST-012",
+  "recordedAtUtc": "2026-10-03T16:21:19.095743+00:00",
+  "status": "reviewable-native-slice; full 008/012/macOS acceptance incomplete",
+  "validation": {
+    "rustTestsPassed": 272,
+    "rustTestsFailed": 0,
+    "rustTestsIgnored": 0,
+    "rustBuildWarnings": 0,
+    "nativeFullUTF8Responses": 9,
+    "nativeLifecycleCases": 12,
+    "strictClippy": "passed",
+    "fmt": "passed",
+    "workspaceCrates": 6,
+    "frozenThirdPartyLicenses": 35,
+    "migrationContract": "passed",
+    "plannerCases": 43,
+    "logs": [
+      {
+        "name": "native-json",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-native-20261004.json",
+        "byteCount": 103511,
+        "sha256": "bde5156986d4f5c3ffe0403ad3ee84fb4780724ccd801cbb37550021764913cd",
+        "exitCode": 0
+      },
+      {
+        "name": "native-log",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-native-20261004.log",
+        "byteCount": 1449,
+        "sha256": "4b703328dd7cb64b0d00fff1358907189e20db12ba5f3e767e5aa0c0c96cf4e0",
+        "exitCode": 0
+      },
+      {
+        "name": "rust-tests",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-tests-20261004.log",
+        "byteCount": 30266,
+        "sha256": "82b6f6245dfe5ee2496761b9d4c5294c36161194159fc3b8b9af40070e3469aa",
+        "exitCode": 0
+      },
+      {
+        "name": "clippy",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-clippy.log",
+        "byteCount": 294,
+        "sha256": "e5a98d45fda3b9fc99616454f8b9adac0e62206ca62bc5883d4f03a5c61492d0",
+        "exitCode": 0
+      },
+      {
+        "name": "build",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-build-20261004.log",
+        "byteCount": 406,
+        "sha256": "78c6078c79800388607e0dd17608220647d652f13b0c77ac824537ea71cf96be",
+        "exitCode": 0
+      },
+      {
+        "name": "fmt",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-fmt-20261004.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "exitCode": 0
+      },
+      {
+        "name": "workspace",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-workspace-20261004.log",
+        "byteCount": 109,
+        "sha256": "b67fd8c7171062aab8ea875e7b6deda4e5f1b1d439cd369073393967b57a97b1",
+        "exitCode": 0
+      },
+      {
+        "name": "contracts",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-contracts.log",
+        "byteCount": 454,
+        "sha256": "b2c815f374688fabf808f9315491e8414f8dd67b9b83da339b48e28f096f09d6",
+        "exitCode": 0
+      },
+      {
+        "name": "planner",
+        "path": "/private/tmp/arktrace-runtime-20261004-evidence/arktrace-runtime-planner.log",
+        "byteCount": 2778,
+        "sha256": "ca2aa2826ce67e65098b4720fccea1986d79a6b3641b52e3b498cc6b948595f3",
+        "exitCode": 0
+      }
+    ]
+  },
+  "lifecycleLimits": {
+    "sessionWorkersDefault": 2,
+    "sessionWorkersMaximum": 4,
+    "retainedSessionsMaximum": 8,
+    "retainedRequestsMaximum": 128,
+    "normalQueuePerWorkerMaximum": 64,
+    "reservedCloseCapacityPerWorker": "maximum retained Session count; no request/result allocation",
+    "resultBytesMaximum": 16777216,
+    "retainedResultAllocationCreditMaximum": 268435456,
+    "resultAllocationCredit": "actual retained Vec capacity plus conservative 64-byte Arc/data header; allocator/process RSS not measured",
+    "batchAdditionalReadWorkersMaximumPerActiveRequest": 3,
+    "requestTimeoutMaximumSeconds": 300
+  },
+  "notImplementedOrNotVerified": [
+    "persistent cache hit/rebuild/LRU/purge",
+    "automatic outer actor namespace restart recovery",
+    "annotations and old view-state import",
+    "Windows actual async parser/DB runtime",
+    "C ABI, Swift/C# SDK, 1000 native SDK lifecycle stress",
+    "Store/Engine Viewer integration and full Viewer behaviors",
+    "macOS App UI cutover and GUI interaction",
+    "medium/large time/RSS/CPU performance",
+    "Developer ID/signing/distribution and ArkDeck consumption"
+  ],
+  "gitBaseline": "d7d8ec3c8e8b8ce1eb8da2fa903fb531f3702303",
+  "implementationCommit": "06575da9f5ff357deae2f681c71154dd5076a267"
+}

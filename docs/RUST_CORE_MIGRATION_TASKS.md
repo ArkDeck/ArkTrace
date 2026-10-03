@@ -42,7 +42,7 @@
 | 005 | 进程树、取消、输出预算与签名端口 | 002 | 004 | in-progress | L |
 | 006 | 真实解析→校验→索引→Ready | 001、002 | 004、005；Windows 加 003 | in-progress | L |
 | 007 | SQLite typed query、搜索与目录 | 001、002 | 006 | in-progress | L |
-| 008 | Session/cache/lease/标注迁移 | 001、002 | 004、006、007 | planned | L |
+| 008 | Session/cache/lease/标注迁移 | 001、002 | 004、006、007 | in-progress | L |
 | 009 | summary/context/analyze 与质量事实 | 001、002 | 007 | in-progress | L |
 | 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | in-progress | L |
 | 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | planned | L |
@@ -450,7 +450,7 @@ Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](migra
 
 ## 10. AT-RUST-008 — Session、cache、lease 与标注安全迁移
 
-- 状态：planned；开工依赖：001、002；完成依赖：004、006、007。
+- 状态：in-progress；开工依赖：001、002；完成依赖：004、006、007。
 - 平台/输入：APFS/NTFS、多进程测试；无设备。
 - 需求：AT-CACHE-*、AT-APP-002/003/004、AT-ERR-003、AT-SYS-002、AT-SEC-007、
   AT-PARSE-006/008/009、设计 §6/9。
@@ -475,6 +475,13 @@ Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](migra
   释放全部可释放资源，残留有记录并在下次启动回收。
 - 旧标注迁移后重新打开能恢复；半写、损坏、版本未知、同 trace 多份冲突不会被覆盖删除。
 - 回滚前的旧 root 不变；新旧进程不能写同 namespace；原始 Trace 从不被 purge。
+
+2026-10-04 已将真实 no-cache parser/Store 接到固定 Session worker 的异步运行时：
+generation handles、有界 queue/results、nonblocking poll/cancel、预留 close control、
+Failed 可 close、owner worker drain/Drop 与原子 Request/资源终态。三份实际 small 的九份
+完整 batch/search/analysis UTF-8 response 一致，12 项原生生命周期检查与 272 项 Rust tests
+通过。持久 cache、外层 namespace 自动重启恢复、旧标注导入和 Windows runtime 仍待完成；
+这也是 012 的后端前置，尚非 SDK/App 验收。详见[异步生命周期记录](migration-runs/AT-RUST-008-012-2026-10-04-async-runtime.md)。
 
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 
