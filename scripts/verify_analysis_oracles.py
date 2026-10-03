@@ -14,7 +14,7 @@ def main():
         ("swift-deviations", "deviation-inputs", 2, False),
         ("swift-mainline", "mainline-inputs", 33, True),
     ]:
-        receipt = json.loads((ROOT / FIXTURE / f"{stem}-receipt.json").read_text())
+        receipt = json.loads((ROOT / FIXTURE / f"{stem}-receipt.json").read_text(encoding="utf-8"))
         assert receipt["vectors"] == count
         assert receipt["xcode"] == "Xcode 27.0\nBuild version 27A266a"
         assert receipt["swift"].startswith("Apple Swift version 6.4 ")
@@ -30,14 +30,14 @@ def main():
             # current Swift intentionally fixes its recorded scheduling bug.
             if current or relative in required:
                 data = path.read_bytes()
-                assert len(data) == entry["byteCount"]
+                assert len(data) == entry["byteCount"], relative
                 assert hashlib.sha256(data).hexdigest() == entry["sha256"], relative
         assert required <= seen
         if current:
             assert "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift" in seen
             assert "rust/crates/arktrace-analysis/oracle/OracleHarness.swift" in seen
-        inputs = json.loads((ROOT / FIXTURE / f"{input_name}.json").read_text())
-        output = json.loads((ROOT / FIXTURE / f"{stem}.json").read_text())
+        inputs = json.loads((ROOT / FIXTURE / f"{input_name}.json").read_text(encoding="utf-8"))
+        output = json.loads((ROOT / FIXTURE / f"{stem}.json").read_text(encoding="utf-8"))
         names = [v["name"] for v in inputs]
         assert len(inputs) == len(output) == len(set(names)) == count
         assert names == [v["name"] for v in output]

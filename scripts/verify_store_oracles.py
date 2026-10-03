@@ -9,7 +9,7 @@ FIXTURE = "rust/crates/arktrace-store/tests/fixtures/"
 
 
 def verify(stem, input_name, count, databases, required, facts):
-    receipt = json.loads((ROOT / FIXTURE / f"{stem}-receipt.json").read_text())
+    receipt = json.loads((ROOT / FIXTURE / f"{stem}-receipt.json").read_text(encoding="utf-8"))
     assert receipt["vectors"] == count
     assert all(receipt[key] == value for key, value in facts.items())
     assert receipt["xcode"] == "Xcode 27.0\nBuild version 27A266a"
@@ -24,10 +24,10 @@ def verify(stem, input_name, count, databases, required, facts):
         data = path.read_bytes()
         assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
     for name in ("ArkTraceCore", "ArkTraceStore", "ArkTraceAnalysis"):
-        assert {str(p.relative_to(ROOT)) for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"Sources/{name}/")}
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"Sources/{name}/")}
     assert {FIXTURE + input_name + ".json", FIXTURE + stem + ".json", *required} <= seen
-    inputs = json.loads((ROOT / FIXTURE / (input_name + ".json")).read_text())
-    output = json.loads((ROOT / FIXTURE / (stem + ".json")).read_text())
+    inputs = json.loads((ROOT / FIXTURE / (input_name + ".json")).read_text(encoding="utf-8"))
+    output = json.loads((ROOT / FIXTURE / (stem + ".json")).read_text(encoding="utf-8"))
     ids = [v["id"] for v in inputs["cases"]]
     assert len(ids) == len(set(ids)) == len(output) == count
     assert set(ids) == {v["id"] for v in output}
@@ -48,13 +48,13 @@ def main():
            ["rust/crates/arktrace-store/oracle/DensityOracle.swift", "rust/crates/arktrace-store/oracle/run_density_oracle.py"], {})
     # The old Swift implementation and harness are historical identities;
     # immutable controlled input and output remain verifiable in this tree.
-    receipt = json.loads((ROOT / FIXTURE / "swift-arguments-before-receipt.json").read_text())
+    receipt = json.loads((ROOT / FIXTURE / "swift-arguments-before-receipt.json").read_text(encoding="utf-8"))
     assert receipt["vectors"] == 84
     for entry in receipt["sourceDigests"]:
         if entry["path"] in {FIXTURE + "argument-pages-input.json", FIXTURE + "swift-arguments-before.json"}:
             data = (ROOT / entry["path"]).read_bytes()
             assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], entry["path"]
-    search_before = json.loads((ROOT / FIXTURE / "swift-search-before-receipt.json").read_text())
+    search_before = json.loads((ROOT / FIXTURE / "swift-search-before-receipt.json").read_text(encoding="utf-8"))
     assert search_before["vectors"] == 138
     for entry in search_before["sourceDigests"]:
         if entry["path"] in {FIXTURE + "search-pages-input.json", FIXTURE + "swift-search-before.json"}:

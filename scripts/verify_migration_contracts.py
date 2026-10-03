@@ -13,11 +13,11 @@ def main():
     verify_analysis_oracles()
     from verify_store_oracles import main as verify_store_oracles
     verify_store_oracles()
-    source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text()
+    source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
     scope_block = source.split("machineAllowed: Set<String> = [", 1)[1].split("\n    ]", 1)[0]
     scopes = sorted(re.findall(r'"([^"\n]+)"', scope_block))
-    assert scopes == json.loads((ROOT / "contracts/quality-scopes.json").read_text()), "quality scope drift"
-    index = json.loads((ROOT / "contracts/machine-fixtures-index.json").read_text())
+    assert scopes == json.loads((ROOT / "contracts/quality-scopes.json").read_text(encoding="utf-8")), "quality scope drift"
+    index = json.loads((ROOT / "contracts/machine-fixtures-index.json").read_text(encoding="utf-8"))
     assert index["version"] == 1
     fixtures = {p.relative_to(ROOT).as_posix() for p in (ROOT / index["sourceDirectory"]).glob("*.json")}
     assert fixtures == {entry["path"] for entry in index["fixtures"]}, "machine fixture set drift"
@@ -26,16 +26,16 @@ def main():
         assert hashlib.sha256(data).hexdigest() == entry["sha256"], entry["path"]
         assert json.loads(data)["schemaVersion"] == "1.0", entry["path"]
     for name in ["time-range-vectors.json", "quality-vectors.json", "cache-lease-vectors.json"]:
-        corpus = json.loads((ROOT / "contracts" / name).read_text())
+        corpus = json.loads((ROOT / "contracts" / name).read_text(encoding="utf-8"))
         assert corpus["version"] == 1 and corpus["vectors"]
         ids = [vector["id"] for vector in corpus["vectors"]]
         assert len(ids) == len(set(ids)), f"duplicate vector in {name}"
-    protocol = json.loads((ROOT / "contracts/cache-lease-vectors.json").read_text())["protocol"]
+    protocol = json.loads((ROOT / "contracts/cache-lease-vectors.json").read_text(encoding="utf-8"))["protocol"]
     assert protocol["windows"] == {"primitive": "LockFileEx", "offsetDecimal": str(2**64 - 2), "lengthBytes": 1}
     assert protocol["lockOrder"] == ["keyLock", "exclusiveEntryLease", "ownerLock"]
-    definitions = json.loads((ROOT / "contracts/index-definitions.json").read_text())
+    definitions = json.loads((ROOT / "contracts/index-definitions.json").read_text(encoding="utf-8"))
     assert definitions["version"] == 1 and definitions["indexSchemaVersion"] == 3
-    preparer = (ROOT / "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift").read_text()
+    preparer = (ROOT / "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift").read_text(encoding="utf-8")
     block = preparer.split("private static let indexes = [", 1)[1].split("\n    ]", 1)[0]
     frozen = []
     for definition in re.findall(r"IndexDefinition\((.*?)\n        \)", block, re.S):
@@ -56,14 +56,14 @@ def main():
         })
     assert len(frozen) == 24 and definitions["definitions"] == frozen, "Swift/Rust index definition drift"
     assert len({d["name"] for d in frozen}) == 24
-    metadata = json.loads((ROOT / "contracts/ready-metadata.json").read_text())
-    runtime = (ROOT / "Sources/ArkTraceRuntime/TraceCache.swift").read_text()
+    metadata = json.loads((ROOT / "contracts/ready-metadata.json").read_text(encoding="utf-8"))
+    runtime = (ROOT / "Sources/ArkTraceRuntime/TraceCache.swift").read_text(encoding="utf-8")
     keys = runtime.split("private enum CodingKeys: String, CodingKey, CaseIterable {", 1)[1].split("\n    }", 1)[0]
     expected = {key.strip() for line in keys.splitlines() if "case " in line for key in line.split("case ", 1)[1].split(",")}
     assert set(metadata) == expected and metadata["formatVersion"] == 1, "metadata root fields drift"
     parser = source.split("public struct TraceParserIdentity", 1)[1].split("/// Capability", 1)[0]
     assert set(metadata["parser"]) == set(re.findall(r"public let (\w+):", parser)), "parser identity fields drift"
-    parser_api = (ROOT / "Sources/ArkTraceCore/Parser/TraceParser.swift").read_text()
+    parser_api = (ROOT / "Sources/ArkTraceCore/Parser/TraceParser.swift").read_text(encoding="utf-8")
     preparation = parser_api.split("package struct TraceDatabasePreparationResult", 1)[1].split("package struct TraceDatabaseMetadataSidecar", 1)[0]
     assert set(metadata["databasePreparation"]) == set(re.findall(r"public let (\w+):", preparation)), "preparation metadata fields drift"
     assert len((ROOT / "contracts/ready-metadata.json").read_bytes()) <= 16384

@@ -24,15 +24,15 @@ ALLOWED = {
 
 
 def main():
-    workspace = tomllib.loads((ROOT / "rust/Cargo.toml").read_text())
+    workspace = tomllib.loads((ROOT / "rust/Cargo.toml").read_text(encoding="utf-8"))
     assert workspace["workspace"]["lints"]["rust"]["unsafe_code"] == "forbid"
     for manifest_path in sorted((ROOT / "rust/crates").glob("*/Cargo.toml")):
-        manifest = tomllib.loads(manifest_path.read_text())
+        manifest = tomllib.loads(manifest_path.read_text(encoding="utf-8"))
         if manifest["package"]["name"] == "arktrace-platform":
             assert manifest["lints"]["rust"]["unsafe_code"] == "deny"
             platform_sources = manifest_path.parent / "src"
             for source_path in platform_sources.rglob("*.rs"):
-                source = source_path.read_text()
+                source = source_path.read_text(encoding="utf-8")
                 if source_path.name == "lib.rs":
                     assert source.count("unsafe_code") == 1
                     assert '#[cfg(target_os = "macos")]\n#[allow(unsafe_code)]\nmod macos;' in source
@@ -43,7 +43,7 @@ def main():
     metadata = json.loads(subprocess.check_output(
         [sys.executable, str(ROOT / "scripts/run-cargo.py"), "metadata", "--format-version", "1"], cwd=ROOT,
     ))
-    inventory = json.loads((ROOT / "rust/dependency-licenses.json").read_text())
+    inventory = json.loads((ROOT / "rust/dependency-licenses.json").read_text(encoding="utf-8"))
     actual = []
     for package in metadata["packages"]:
         if package["id"] in metadata["workspace_members"]:
@@ -66,9 +66,9 @@ def main():
             data = path.read_bytes()
             assert len(data) == license_text["byteCount"]
             assert hashlib.sha256(data).hexdigest() == license_text["sha256"], str(path.relative_to(ROOT))
-    sqlite_lock = json.loads((ROOT / "rust/sqlite-build-lock.json").read_text())
+    sqlite_lock = json.loads((ROOT / "rust/sqlite-build-lock.json").read_text(encoding="utf-8"))
     assert sqlite_lock["defines"] == ["SQLITE_ENABLE_FILESTAT=1"], "SQLite descriptor metadata support drift"
-    runner_source = (ROOT / "scripts/run-cargo.py").read_text()
+    runner_source = (ROOT / "scripts/run-cargo.py").read_text(encoding="utf-8")
     assert 'environment["LIBSQLITE3_FLAGS"] = "-DSQLITE_ENABLE_FILESTAT=1"' in runner_source
     sqlite_dependency = workspace["workspace"]["dependencies"]["rusqlite"]
     assert sqlite_dependency == {
@@ -89,7 +89,7 @@ def main():
     assert path.resolve().is_relative_to(ROOT / "rust/licenses") and not path.is_symlink()
     data = path.read_bytes()
     assert len(data) == declaration["byteCount"] and hashlib.sha256(data).hexdigest() == declaration["sha256"]
-    store_source = (ROOT / "rust/crates/arktrace-store/src/lib.rs").read_text()
+    store_source = (ROOT / "rust/crates/arktrace-store/src/lib.rs").read_text(encoding="utf-8")
     assert f'"{sqlite_lock["sqliteVersion"]}"' in store_source and f'"{sqlite_lock["sqliteSourceID"]}"' in store_source
     print(f"Rust workspace: {len(metadata['workspace_members'])} crates, {len(actual)} frozen third-party license expressions; unsafe confined to macOS syscall module")
 
