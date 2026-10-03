@@ -1,0 +1,144 @@
+{
+  "oracle": "actual Swift TraceDeterministicAnalysisEngine + retainingRows",
+  "xcode": "Xcode 27.0\nBuild version 27A266a",
+  "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+  "scope": "six pure section projections; longSlices excluded before Swift global row projection",
+  "vectors": 33,
+  "sourceDigests": [
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+      "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+      "byteCount": 20622
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceContext.swift",
+      "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+      "byteCount": 68967
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+      "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+      "byteCount": 51087
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceSummary.swift",
+      "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+      "byteCount": 14839
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+      "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+      "byteCount": 33088
+    },
+    {
+      "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+      "byteCount": 11275
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+      "byteCount": 4367
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+      "byteCount": 1042
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+      "byteCount": 375
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+      "byteCount": 862
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+      "byteCount": 17503
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+      "byteCount": 1526
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+      "sha256": "19ff38ae4dd0245cc19ccf23bff502094feeaed028e955ba10a249905a8302da",
+      "byteCount": 11790
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "byteCount": 5258
+    },
+    {
+      "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+      "byteCount": 8071
+    },
+    {
+      "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+      "byteCount": 3147
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+      "byteCount": 16011
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+      "byteCount": 1186
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+      "byteCount": 3873
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
+      "byteCount": 8888
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+      "byteCount": 863
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+      "byteCount": 16274
+    },
+    {
+      "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+      "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+      "byteCount": 2757
+    },
+    {
+      "path": "Tests/ArkTraceAnalysisTests/TraceAgentBatchTests.swift",
+      "sha256": "adcc7a35d2a961a91d11fde27a9c145ada2f5fa97dd8a2a73d012fe230c3f041",
+      "byteCount": 76233
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/oracle/OracleHarness.swift",
+      "sha256": "09547552d64fdea885457bbd8c0c081223c8bf640056910c6a0c79901d1daf29",
+      "byteCount": 5115
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/mainline-inputs.json",
+      "sha256": "9942805f8013077945c2d582c6d7a67edf1dca834d27f9711ade6fe7f43e1536",
+      "byteCount": 1169203
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-mainline.json",
+      "sha256": "01d29b8c925d598ee58731c81e178bfc169bec980e3b9b223d8040def1be1415",
+      "byteCount": 180208
+    }
+  ]
+}

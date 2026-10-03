@@ -1,0 +1,5776 @@
+[
+  {
+    "name" : "empty-supported",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 7,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 1000,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "all-capabilities-unavailable",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 7,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 1000,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "capabilityUnavailable"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "clipping-overlap-reused-pid-tid-and-instant",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 100,
+          "rawRunningNs" : 150,
+          "sliceCount" : 2,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 100,
+          "rawRunningNs" : 100,
+          "sliceCount" : 1,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 0,
+          "rawRunningNs" : 0,
+          "sliceCount" : 1,
+          "utilization" : 0
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 1,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 4,
+          "namedSliceCount" : 2,
+          "range" : {
+            "endNs" : 125,
+            "startNs" : 100
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 75,
+            "longSliceNs" : 25,
+            "total" : 1000100
+          }
+        },
+        {
+          "cpuSliceCount" : 3,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 150,
+            "startNs" : 125
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 75,
+            "longSliceNs" : 25,
+            "total" : 100
+          }
+        },
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 175,
+            "startNs" : 150
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 50,
+            "longSliceNs" : 25,
+            "total" : 75
+          }
+        },
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 200,
+            "startNs" : 175
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 50,
+            "longSliceNs" : 25,
+            "total" : 75
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 4,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 200,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 1,
+        "percentiles" : {
+          "maxNs" : 0,
+          "p50Ns" : 0,
+          "p90Ns" : 0,
+          "p95Ns" : 0,
+          "p99Ns" : 0
+        },
+        "supported" : true,
+        "topSamples" : [
+          {
+            "latencyNs" : 0,
+            "runnableEndNs" : 120,
+            "runnableEventKey" : {
+              "rowID" : 3,
+              "table" : "thread_state"
+            },
+            "runningEventKey" : {
+              "rowID" : 4,
+              "table" : "sched_slice"
+            },
+            "runningStartNs" : 120,
+            "threadKey" : {
+              "itid" : 11
+            }
+          }
+        ],
+        "truncated" : false,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 4,
+          "returnedCount" : 3,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 4,
+          "returnedCount" : 4,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 2,
+          "returnedCount" : 2,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 2,
+          "returnedCount" : 2,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 2,
+          "returnedCount" : 2,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 0,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 30,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.29999999999999999,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 100,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 1
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 50,
+          "shareOfOneCPU" : 0.5,
+          "sliceCount" : 2
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 50,
+          "shareOfOneCPU" : 0.5,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "independent-input-and-output-budgets",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 50,
+          "rawRunningNs" : 50,
+          "sliceCount" : 1,
+          "utilization" : 0.5
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 2,
+          "range" : {
+            "endNs" : 125,
+            "startNs" : 100
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 50,
+            "longSliceNs" : 25,
+            "total" : 75
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 4,
+        "hotIntervalLimit" : 1,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 1,
+        "maximumHotEvents" : 2,
+        "maximumNamedSlices" : 2,
+        "maximumProcessSlices" : 2,
+        "maximumSchedulingEvents" : 1,
+        "maximumStateIntervals" : 1,
+        "maximumThreadSlices" : 3,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 1,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 1,
+        "topThreadLimit" : 1
+      },
+      "range" : {
+        "endNs" : 200,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : true,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 1,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 1,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 1,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 1,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 1,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 30,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.29999999999999999,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 100,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 1
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "global-row-budget",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 100,
+          "rawRunningNs" : 150,
+          "sliceCount" : 2,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 100,
+          "rawRunningNs" : 100,
+          "sliceCount" : 1,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 0,
+          "rawRunningNs" : 0,
+          "sliceCount" : 1,
+          "utilization" : 0
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 1,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 4,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 200,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 1,
+        "percentiles" : {
+          "maxNs" : 0,
+          "p50Ns" : 0,
+          "p90Ns" : 0,
+          "p95Ns" : 0,
+          "p99Ns" : 0
+        },
+        "supported" : true,
+        "topSamples" : [
+
+        ],
+        "truncated" : true,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 4,
+          "returnedCount" : 3,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 4,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 1,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 2,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : 2,
+          "returnedCount" : 1,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : 2,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 100,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 1
+        }
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "zero-output-rows-retains-evidence",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 1,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 4,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 200,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 1,
+        "percentiles" : {
+          "maxNs" : 0,
+          "p50Ns" : 0,
+          "p90Ns" : 0,
+          "p95Ns" : 0,
+          "p99Ns" : 0
+        },
+        "supported" : true,
+        "topSamples" : [
+
+        ],
+        "truncated" : true,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 4,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : 4,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 1,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 2,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : 2,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : 2,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "nearest-rank-percentiles-and-duplicate-boundary",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 450,
+          "rawRunningNs" : 450,
+          "sliceCount" : 6,
+          "utilization" : 0.45000000000000001
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 143,
+            "startNs" : 0
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 50,
+            "longSliceNs" : 0,
+            "total" : 2000050
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 715,
+            "startNs" : 572
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 100,
+            "longSliceNs" : 0,
+            "total" : 1000100
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 286,
+            "startNs" : 143
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 86,
+            "longSliceNs" : 0,
+            "total" : 1000086
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 858,
+            "startNs" : 715
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 58,
+            "longSliceNs" : 0,
+            "total" : 1000058
+          }
+        },
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 429,
+            "startNs" : 286
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 43,
+            "longSliceNs" : 0,
+            "total" : 1000043
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 572,
+            "startNs" : 429
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 71,
+            "longSliceNs" : 0,
+            "total" : 71
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 1000,
+            "startNs" : 858
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 42,
+            "longSliceNs" : 0,
+            "total" : 42
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 7,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 2,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 1000,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 5,
+        "percentiles" : {
+          "maxNs" : 100,
+          "p50Ns" : 3,
+          "p90Ns" : 100,
+          "p95Ns" : 100,
+          "p99Ns" : 100
+        },
+        "supported" : true,
+        "topSamples" : [
+          {
+            "latencyNs" : 100,
+            "runnableEndNs" : 800,
+            "runnableEventKey" : {
+              "rowID" : 5,
+              "table" : "thread_state"
+            },
+            "runningEventKey" : {
+              "rowID" : 6,
+              "table" : "sched_slice"
+            },
+            "runningStartNs" : 800,
+            "threadKey" : {
+              "itid" : 15
+            }
+          },
+          {
+            "latencyNs" : 4,
+            "runnableEndNs" : 600,
+            "runnableEventKey" : {
+              "rowID" : 4,
+              "table" : "thread_state"
+            },
+            "runningEventKey" : {
+              "rowID" : 5,
+              "table" : "sched_slice"
+            },
+            "runningStartNs" : 600,
+            "threadKey" : {
+              "itid" : 14
+            }
+          }
+        ],
+        "truncated" : true,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 6,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 7,
+          "returnedCount" : 7,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 5,
+          "returnedCount" : 2,
+          "truncated" : true
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 6,
+          "returnedCount" : 6,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 5,
+          "returnedCount" : 5,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 1,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 2,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.002,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 100,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.10000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "Runnable",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 3,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.0030000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 4,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.0040000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 100,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.10000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 450,
+          "shareOfOneCPU" : 0.45000000000000001,
+          "sliceCount" : 6
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 0.10000000000000001,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 0.10000000000000001,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 0.10000000000000001,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 0.10000000000000001,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 50,
+          "shareOfOneCPU" : 0.050000000000000003,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "metadata-null-first-nonnull-and-state-order",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 600,
+          "rawRunningNs" : 600,
+          "sliceCount" : 3,
+          "utilization" : 0.59999999999999998
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 143,
+            "startNs" : 0
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 186,
+            "longSliceNs" : 0,
+            "total" : 2000186
+          }
+        },
+        {
+          "cpuSliceCount" : 3,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 286,
+            "startNs" : 143
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 200,
+            "longSliceNs" : 0,
+            "total" : 1000200
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 429,
+            "startNs" : 286
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 143,
+            "longSliceNs" : 0,
+            "total" : 143
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 572,
+            "startNs" : 429
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 71,
+            "longSliceNs" : 0,
+            "total" : 71
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 7,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 1000,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 3,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 4,
+          "returnedCount" : 4,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 4,
+          "returnedCount" : 4,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 2,
+          "returnedCount" : 2,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 2,
+          "returnedCount" : 2,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 20,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.02,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : "é",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 20,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.02,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "é",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 20,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.02,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "é",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 20,
+          "intervalCount" : 1,
+          "normalizedState" : "blocked",
+          "percentageOfRange" : 0.02,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "é",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 300,
+          "shareOfOneCPU" : 0.29999999999999999,
+          "sliceCount" : 1
+        },
+        {
+          "name" : "p",
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 300,
+          "shareOfOneCPU" : 0.29999999999999999,
+          "sliceCount" : 2
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 300,
+          "shareOfOneCPU" : 0.29999999999999999,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "name" : "t",
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : "p",
+          "runningNs" : 300,
+          "shareOfOneCPU" : 0.29999999999999999,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "checked-saturation-max-time",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 9223372036854775807,
+          "rawRunningNs" : 9223372036854775807,
+          "sliceCount" : 2,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 2,
+          "range" : {
+            "endNs" : 9223372036854775807,
+            "startNs" : 0
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 9223372036854775807,
+            "longSliceNs" : 9223372036854775807,
+            "total" : 9223372036854775807
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 1,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 9223372036854775807,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 2,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 2,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 9223372036854775807,
+          "intervalCount" : 2,
+          "normalizedState" : null,
+          "percentageOfRange" : 1,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 9223372036854775807,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 2
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 9223372036854775807,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "near-int64-max-open-ended-and-remainder",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 10,
+          "rawRunningNs" : 10,
+          "sliceCount" : 2,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 9223372036854775801,
+            "startNs" : 9223372036854775799
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 2,
+            "longSliceNs" : 2,
+            "total" : 1000004
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 9223372036854775799,
+            "startNs" : 9223372036854775797
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 2,
+            "longSliceNs" : 1,
+            "total" : 1000003
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 9223372036854775803,
+            "startNs" : 9223372036854775801
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 2,
+            "longSliceNs" : 2,
+            "total" : 4
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 9223372036854775805,
+            "startNs" : 9223372036854775803
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 2,
+            "longSliceNs" : 2,
+            "total" : 4
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 9223372036854775806,
+            "startNs" : 9223372036854775805
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 9223372036854775807,
+            "startNs" : 9223372036854775806
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 6,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 9223372036854775807,
+        "startNs" : 9223372036854775797
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 2,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 6,
+          "returnedCount" : 6,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 10,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 1,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 10,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 2
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 10,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "nanosecond-buckets-long-threshold-and-start-observations",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 6,
+          "rawRunningNs" : 6,
+          "sliceCount" : 2,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 2,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 5,
+            "startNs" : 4
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 1000002
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 2,
+            "startNs" : 1
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 3,
+            "startNs" : 2
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 4,
+            "startNs" : 3
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 6,
+            "startNs" : 5
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 1,
+          "range" : {
+            "endNs" : 7,
+            "startNs" : 6
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 1,
+            "longSliceNs" : 1,
+            "total" : 2
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 100,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 2,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 7,
+        "startNs" : 1
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 2,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 6,
+          "returnedCount" : 6,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 6,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 2
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 6,
+          "shareOfOneCPU" : 1,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-0",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 1,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 751,
+          "sliceCount" : 2,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 641,
+          "rawRunningNs" : 641,
+          "sliceCount" : 3,
+          "utilization" : 0.9157142857142857
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 1,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 37,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 5,
+        "maximumHotEvents" : 41,
+        "maximumNamedSlices" : 41,
+        "maximumProcessSlices" : 41,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 55,
+        "maximumThreadSlices" : 8,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 2,
+        "percentiles" : {
+          "maxNs" : 255,
+          "p50Ns" : 0,
+          "p90Ns" : 255,
+          "p95Ns" : 255,
+          "p99Ns" : 255
+        },
+        "supported" : true,
+        "topSamples" : [
+
+        ],
+        "truncated" : true,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 2,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 2,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "runningNs" : 3796,
+          "shareOfOneCPU" : 5.4228571428571426,
+          "sliceCount" : 14
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 2518,
+          "shareOfOneCPU" : 3.597142857142857,
+          "sliceCount" : 12
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 1659,
+          "shareOfOneCPU" : 2.3700000000000001,
+          "sliceCount" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "runningNs" : 1243,
+          "shareOfOneCPU" : 1.7757142857142858,
+          "sliceCount" : 8
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 760,
+          "shareOfOneCPU" : 1.0857142857142856,
+          "sliceCount" : 3,
+          "threadKey" : {
+            "itid" : 16
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 336,
+          "shareOfOneCPU" : 0.47999999999999998,
+          "sliceCount" : 2,
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 322,
+          "shareOfOneCPU" : 0.46000000000000002,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 310,
+          "shareOfOneCPU" : 0.44285714285714284,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-1",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 3180,
+          "sliceCount" : 14,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 1,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 6578,
+          "sliceCount" : 27,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2957,
+          "sliceCount" : 16,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 3435,
+          "sliceCount" : 17,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 4,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 68,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 74,
+        "maximumHotEvents" : 23,
+        "maximumNamedSlices" : 23,
+        "maximumProcessSlices" : 1,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 47,
+        "maximumThreadSlices" : 40,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 1,
+        "percentiles" : {
+          "maxNs" : 82,
+          "p50Ns" : 82,
+          "p90Ns" : 82,
+          "p95Ns" : 82,
+          "p99Ns" : 82
+        },
+        "supported" : true,
+        "topSamples" : [
+
+        ],
+        "truncated" : true,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 1,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 1,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 5,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 293,
+          "shareOfOneCPU" : 0.41857142857142859,
+          "sliceCount" : 1
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 1857,
+          "shareOfOneCPU" : 2.652857142857143,
+          "sliceCount" : 7,
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 1795,
+          "shareOfOneCPU" : 2.5642857142857145,
+          "sliceCount" : 5,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 1679,
+          "shareOfOneCPU" : 2.3985714285714286,
+          "sliceCount" : 7,
+          "threadKey" : {
+            "itid" : 16
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 1408,
+          "shareOfOneCPU" : 2.0114285714285716,
+          "sliceCount" : 8,
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 1301,
+          "shareOfOneCPU" : 1.8585714285714285,
+          "sliceCount" : 5,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-2",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 4,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 61,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 65,
+        "maximumHotEvents" : 7,
+        "maximumNamedSlices" : 7,
+        "maximumProcessSlices" : 16,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 65,
+        "maximumThreadSlices" : 55,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-3",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 1441,
+          "sliceCount" : 8,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 1,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 1448,
+          "sliceCount" : 7,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 1875,
+          "sliceCount" : 7,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 1212,
+          "sliceCount" : 6,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 4,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 32,
+          "namedSliceCount" : 32,
+          "range" : {
+            "endNs" : 260,
+            "startNs" : 252
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 248,
+            "longSliceNs" : 248,
+            "total" : 3000496
+          }
+        },
+        {
+          "cpuSliceCount" : 30,
+          "namedSliceCount" : 30,
+          "range" : {
+            "endNs" : 228,
+            "startNs" : 220
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 221,
+            "longSliceNs" : 221,
+            "total" : 3000442
+          }
+        },
+        {
+          "cpuSliceCount" : 33,
+          "namedSliceCount" : 33,
+          "range" : {
+            "endNs" : 380,
+            "startNs" : 373
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 219,
+            "longSliceNs" : 219,
+            "total" : 3000438
+          }
+        },
+        {
+          "cpuSliceCount" : 34,
+          "namedSliceCount" : 34,
+          "range" : {
+            "endNs" : 317,
+            "startNs" : 310
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 215,
+            "longSliceNs" : 215,
+            "total" : 3000430
+          }
+        },
+        {
+          "cpuSliceCount" : 28,
+          "namedSliceCount" : 28,
+          "range" : {
+            "endNs" : 220,
+            "startNs" : 212
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 209,
+            "longSliceNs" : 209,
+            "total" : 3000418
+          }
+        },
+        {
+          "cpuSliceCount" : 22,
+          "namedSliceCount" : 22,
+          "range" : {
+            "endNs" : 180,
+            "startNs" : 172
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 163,
+            "longSliceNs" : 163,
+            "total" : 3000326
+          }
+        },
+        {
+          "cpuSliceCount" : 32,
+          "namedSliceCount" : 32,
+          "range" : {
+            "endNs" : 244,
+            "startNs" : 236
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 242,
+            "longSliceNs" : 242,
+            "total" : 2000484
+          }
+        },
+        {
+          "cpuSliceCount" : 32,
+          "namedSliceCount" : 32,
+          "range" : {
+            "endNs" : 345,
+            "startNs" : 338
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 218,
+            "longSliceNs" : 218,
+            "total" : 2000436
+          }
+        },
+        {
+          "cpuSliceCount" : 32,
+          "namedSliceCount" : 32,
+          "range" : {
+            "endNs" : 282,
+            "startNs" : 275
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 215,
+            "longSliceNs" : 215,
+            "total" : 2000430
+          }
+        },
+        {
+          "cpuSliceCount" : 32,
+          "namedSliceCount" : 32,
+          "range" : {
+            "endNs" : 373,
+            "startNs" : 366
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 215,
+            "longSliceNs" : 215,
+            "total" : 2000430
+          }
+        },
+        {
+          "cpuSliceCount" : 31,
+          "namedSliceCount" : 31,
+          "range" : {
+            "endNs" : 429,
+            "startNs" : 422
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 199,
+            "longSliceNs" : 199,
+            "total" : 2000398
+          }
+        },
+        {
+          "cpuSliceCount" : 26,
+          "namedSliceCount" : 26,
+          "range" : {
+            "endNs" : 212,
+            "startNs" : 204
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 198,
+            "longSliceNs" : 198,
+            "total" : 2000396
+          }
+        },
+        {
+          "cpuSliceCount" : 25,
+          "namedSliceCount" : 25,
+          "range" : {
+            "endNs" : 204,
+            "startNs" : 196
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 194,
+            "longSliceNs" : 194,
+            "total" : 2000388
+          }
+        },
+        {
+          "cpuSliceCount" : 24,
+          "namedSliceCount" : 24,
+          "range" : {
+            "endNs" : 188,
+            "startNs" : 180
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 179,
+            "longSliceNs" : 179,
+            "total" : 2000358
+          }
+        },
+        {
+          "cpuSliceCount" : 19,
+          "namedSliceCount" : 19,
+          "range" : {
+            "endNs" : 164,
+            "startNs" : 156
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 148,
+            "longSliceNs" : 148,
+            "total" : 2000296
+          }
+        },
+        {
+          "cpuSliceCount" : 17,
+          "namedSliceCount" : 17,
+          "range" : {
+            "endNs" : 156,
+            "startNs" : 148
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 129,
+            "longSliceNs" : 129,
+            "total" : 2000258
+          }
+        },
+        {
+          "cpuSliceCount" : 15,
+          "namedSliceCount" : 15,
+          "range" : {
+            "endNs" : 148,
+            "startNs" : 140
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 111,
+            "longSliceNs" : 111,
+            "total" : 2000222
+          }
+        },
+        {
+          "cpuSliceCount" : 15,
+          "namedSliceCount" : 15,
+          "range" : {
+            "endNs" : 124,
+            "startNs" : 116
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 104,
+            "longSliceNs" : 104,
+            "total" : 2000208
+          }
+        },
+        {
+          "cpuSliceCount" : 34,
+          "namedSliceCount" : 34,
+          "range" : {
+            "endNs" : 387,
+            "startNs" : 380
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 236,
+            "longSliceNs" : 236,
+            "total" : 1000472
+          }
+        },
+        {
+          "cpuSliceCount" : 33,
+          "namedSliceCount" : 33,
+          "range" : {
+            "endNs" : 296,
+            "startNs" : 289
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 230,
+            "longSliceNs" : 230,
+            "total" : 1000460
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 97,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 28,
+        "maximumHotEvents" : 70,
+        "maximumNamedSlices" : 70,
+        "maximumProcessSlices" : 21,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 24,
+        "maximumThreadSlices" : 56,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 20,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 21,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 7,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 170,
+          "intervalCount" : 2,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.24285714285714285,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 443,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.6328571428571429,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 206,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.29428571428571426,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 71,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.10142857142857142,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 183,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.26142857142857145,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 361,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.51571428571428568,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 420,
+          "intervalCount" : 2,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.59999999999999998,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 115,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.16428571428571428,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 251,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.3585714285714286,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 323,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.46142857142857141,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 7,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.01,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 546,
+          "intervalCount" : 2,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.78000000000000003,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 127,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.18142857142857144,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 296,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.42285714285714288,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 356,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.50857142857142856,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 34,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.048571428571428571,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 16
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 365,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.52142857142857146,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 16
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 267,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.38142857142857145,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 81,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.11571428571428571,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 0,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 418,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.5971428571428572,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 1828,
+          "shareOfOneCPU" : 2.6114285714285712,
+          "sliceCount" : 8
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "runningNs" : 1515,
+          "shareOfOneCPU" : 2.1642857142857141,
+          "sliceCount" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "runningNs" : 1110,
+          "shareOfOneCPU" : 1.5857142857142856,
+          "sliceCount" : 4
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 277,
+          "shareOfOneCPU" : 0.39571428571428574,
+          "sliceCount" : 2
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 3387,
+          "shareOfOneCPU" : 4.838571428571429,
+          "sliceCount" : 15,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 2101,
+          "shareOfOneCPU" : 3.0014285714285713,
+          "sliceCount" : 9,
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 1619,
+          "shareOfOneCPU" : 2.3128571428571427,
+          "sliceCount" : 6,
+          "threadKey" : {
+            "itid" : 16
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 1442,
+          "shareOfOneCPU" : 2.0600000000000001,
+          "sliceCount" : 11,
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "processName" : null,
+          "runningNs" : 1272,
+          "shareOfOneCPU" : 1.8171428571428572,
+          "sliceCount" : 6,
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 660,
+          "shareOfOneCPU" : 0.94285714285714284,
+          "sliceCount" : 3,
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 540,
+          "shareOfOneCPU" : 0.77142857142857146,
+          "sliceCount" : 6,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-4",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 63,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 11,
+        "maximumHotEvents" : 71,
+        "maximumNamedSlices" : 71,
+        "maximumProcessSlices" : 13,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20,
+        "maximumThreadSlices" : 5,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-5",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 3,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 65,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 28,
+        "maximumHotEvents" : 38,
+        "maximumNamedSlices" : 38,
+        "maximumProcessSlices" : 45,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 40,
+        "maximumThreadSlices" : 16,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-6",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2304,
+          "sliceCount" : 12,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 1,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 4677,
+          "sliceCount" : 18,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 3834,
+          "sliceCount" : 19,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 4292,
+          "sliceCount" : 20,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 4,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 90,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 69,
+        "maximumHotEvents" : 28,
+        "maximumNamedSlices" : 28,
+        "maximumProcessSlices" : 30,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 32,
+        "maximumThreadSlices" : 12,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 2,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 2504,
+          "shareOfOneCPU" : 3.577142857142857,
+          "sliceCount" : 11
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 1915,
+          "shareOfOneCPU" : 2.7357142857142858,
+          "sliceCount" : 8
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "runningNs" : 1237,
+          "shareOfOneCPU" : 1.7671428571428571,
+          "sliceCount" : 5
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "runningNs" : 955,
+          "shareOfOneCPU" : 1.3642857142857143,
+          "sliceCount" : 6
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "processName" : null,
+          "runningNs" : 880,
+          "shareOfOneCPU" : 1.2571428571428571,
+          "sliceCount" : 4,
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 692,
+          "shareOfOneCPU" : 0.98857142857142855,
+          "sliceCount" : 3,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-7",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 3,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 52,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 42,
+        "maximumHotEvents" : 35,
+        "maximumNamedSlices" : 35,
+        "maximumProcessSlices" : 33,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 76,
+        "maximumThreadSlices" : 12,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-8",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 2,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 88,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 17,
+        "maximumHotEvents" : 66,
+        "maximumNamedSlices" : 66,
+        "maximumProcessSlices" : 35,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 70,
+        "maximumThreadSlices" : 56,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-9",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2567,
+          "sliceCount" : 10,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 1,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2006,
+          "sliceCount" : 8,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2887,
+          "sliceCount" : 11,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 1698,
+          "sliceCount" : 9,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 4,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 23,
+          "namedSliceCount" : 23,
+          "range" : {
+            "endNs" : 478,
+            "startNs" : 471
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 153,
+            "longSliceNs" : 153,
+            "total" : 3000306
+          }
+        },
+        {
+          "cpuSliceCount" : 10,
+          "namedSliceCount" : 10,
+          "range" : {
+            "endNs" : 124,
+            "startNs" : 116
+          },
+          "score" : {
+            "contextSwitchCount" : 3,
+            "contextSwitchScoreNs" : 3000000,
+            "cpuBusyNs" : 59,
+            "longSliceNs" : 59,
+            "total" : 3000118
+          }
+        },
+        {
+          "cpuSliceCount" : 26,
+          "namedSliceCount" : 26,
+          "range" : {
+            "endNs" : 492,
+            "startNs" : 485
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 178,
+            "longSliceNs" : 178,
+            "total" : 2000356
+          }
+        },
+        {
+          "cpuSliceCount" : 24,
+          "namedSliceCount" : 24,
+          "range" : {
+            "endNs" : 387,
+            "startNs" : 380
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 168,
+            "longSliceNs" : 168,
+            "total" : 2000336
+          }
+        },
+        {
+          "cpuSliceCount" : 22,
+          "namedSliceCount" : 22,
+          "range" : {
+            "endNs" : 380,
+            "startNs" : 373
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 152,
+            "longSliceNs" : 152,
+            "total" : 2000304
+          }
+        },
+        {
+          "cpuSliceCount" : 18,
+          "namedSliceCount" : 18,
+          "range" : {
+            "endNs" : 268,
+            "startNs" : 260
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 133,
+            "longSliceNs" : 133,
+            "total" : 2000266
+          }
+        },
+        {
+          "cpuSliceCount" : 20,
+          "namedSliceCount" : 20,
+          "range" : {
+            "endNs" : 275,
+            "startNs" : 268
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 132,
+            "longSliceNs" : 132,
+            "total" : 2000264
+          }
+        },
+        {
+          "cpuSliceCount" : 16,
+          "namedSliceCount" : 16,
+          "range" : {
+            "endNs" : 260,
+            "startNs" : 252
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 125,
+            "longSliceNs" : 125,
+            "total" : 2000250
+          }
+        },
+        {
+          "cpuSliceCount" : 15,
+          "namedSliceCount" : 15,
+          "range" : {
+            "endNs" : 236,
+            "startNs" : 228
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 113,
+            "longSliceNs" : 113,
+            "total" : 2000226
+          }
+        },
+        {
+          "cpuSliceCount" : 11,
+          "namedSliceCount" : 11,
+          "range" : {
+            "endNs" : 148,
+            "startNs" : 140
+          },
+          "score" : {
+            "contextSwitchCount" : 2,
+            "contextSwitchScoreNs" : 2000000,
+            "cpuBusyNs" : 81,
+            "longSliceNs" : 81,
+            "total" : 2000162
+          }
+        },
+        {
+          "cpuSliceCount" : 26,
+          "namedSliceCount" : 26,
+          "range" : {
+            "endNs" : 408,
+            "startNs" : 401
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 181,
+            "longSliceNs" : 181,
+            "total" : 1000362
+          }
+        },
+        {
+          "cpuSliceCount" : 25,
+          "namedSliceCount" : 25,
+          "range" : {
+            "endNs" : 394,
+            "startNs" : 387
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 174,
+            "longSliceNs" : 174,
+            "total" : 1000348
+          }
+        },
+        {
+          "cpuSliceCount" : 25,
+          "namedSliceCount" : 25,
+          "range" : {
+            "endNs" : 401,
+            "startNs" : 394
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 174,
+            "longSliceNs" : 174,
+            "total" : 1000348
+          }
+        },
+        {
+          "cpuSliceCount" : 24,
+          "namedSliceCount" : 24,
+          "range" : {
+            "endNs" : 485,
+            "startNs" : 478
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 168,
+            "longSliceNs" : 168,
+            "total" : 1000336
+          }
+        },
+        {
+          "cpuSliceCount" : 24,
+          "namedSliceCount" : 24,
+          "range" : {
+            "endNs" : 422,
+            "startNs" : 415
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 162,
+            "longSliceNs" : 162,
+            "total" : 1000324
+          }
+        },
+        {
+          "cpuSliceCount" : 22,
+          "namedSliceCount" : 22,
+          "range" : {
+            "endNs" : 457,
+            "startNs" : 450
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 146,
+            "longSliceNs" : 146,
+            "total" : 1000292
+          }
+        },
+        {
+          "cpuSliceCount" : 20,
+          "namedSliceCount" : 20,
+          "range" : {
+            "endNs" : 338,
+            "startNs" : 331
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 140,
+            "longSliceNs" : 140,
+            "total" : 1000280
+          }
+        },
+        {
+          "cpuSliceCount" : 20,
+          "namedSliceCount" : 20,
+          "range" : {
+            "endNs" : 373,
+            "startNs" : 366
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 140,
+            "longSliceNs" : 140,
+            "total" : 1000280
+          }
+        },
+        {
+          "cpuSliceCount" : 20,
+          "namedSliceCount" : 20,
+          "range" : {
+            "endNs" : 359,
+            "startNs" : 352
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 138,
+            "longSliceNs" : 138,
+            "total" : 1000276
+          }
+        },
+        {
+          "cpuSliceCount" : 13,
+          "namedSliceCount" : 13,
+          "range" : {
+            "endNs" : 212,
+            "startNs" : 204
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 103,
+            "longSliceNs" : 103,
+            "total" : 1000206
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 97,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 38,
+        "maximumHotEvents" : 44,
+        "maximumNamedSlices" : 44,
+        "maximumProcessSlices" : 60,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 23,
+        "maximumThreadSlices" : 2,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 1,
+        "percentiles" : {
+          "maxNs" : 20,
+          "p50Ns" : 20,
+          "p90Ns" : 20,
+          "p95Ns" : 20,
+          "p99Ns" : 20
+        },
+        "supported" : true,
+        "topSamples" : [
+          {
+            "latencyNs" : 20,
+            "runnableEndNs" : 185,
+            "runnableEventKey" : {
+              "rowID" : 33,
+              "table" : "thread_state"
+            },
+            "runningEventKey" : {
+              "rowID" : 29,
+              "table" : "sched_slice"
+            },
+            "runningStartNs" : 185,
+            "threadKey" : {
+              "itid" : 14
+            }
+          }
+        ],
+        "truncated" : false,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 20,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 23,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 2,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 213,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.30428571428571427,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 99,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.14142857142857143,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 240,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.34285714285714286,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 168,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.23999999999999999,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 322,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.46000000000000002,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 241,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.34428571428571431,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 312,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.44571428571428573,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 32,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.045714285714285714,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 395,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.56428571428571428,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 270,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.38571428571428573,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 13
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 53,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.07571428571428572,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 224,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.32000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 14
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 315,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.45000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 372,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.53142857142857147,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "S",
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 256,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.36571428571428571,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 15
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 216,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.30857142857142855,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 16
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 12,
+          "intervalCount" : 1,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.017142857142857144,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 369,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.52714285714285714,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 259,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.37,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "未知",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 330,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.47142857142857142,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 143,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.20428571428571429,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 46,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.065714285714285711,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        },
+        {
+          "durationNs" : 323,
+          "intervalCount" : 1,
+          "normalizedState" : "sleeping",
+          "percentageOfRange" : 0.46142857142857141,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "rawState" : "X",
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "runningNs" : 4345,
+          "shareOfOneCPU" : 6.2071428571428573,
+          "sliceCount" : 18
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 4020,
+          "shareOfOneCPU" : 5.7428571428571429,
+          "sliceCount" : 16
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 3683,
+          "shareOfOneCPU" : 5.2614285714285716,
+          "sliceCount" : 14
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "runningNs" : 2340,
+          "shareOfOneCPU" : 3.342857142857143,
+          "sliceCount" : 12
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "processName" : null,
+          "runningNs" : 372,
+          "shareOfOneCPU" : 0.53142857142857147,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "processName" : null,
+          "runningNs" : 312,
+          "shareOfOneCPU" : 0.44571428571428573,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 17
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-10",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 3218,
+          "sliceCount" : 17,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 1,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2651,
+          "sliceCount" : 14,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 2,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 2751,
+          "sliceCount" : 11,
+          "utilization" : 1
+        },
+        {
+          "cpu" : 3,
+          "occupiedNs" : 700,
+          "rawRunningNs" : 1615,
+          "sliceCount" : 10,
+          "utilization" : 1
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 4,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 62,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 52,
+        "maximumHotEvents" : 31,
+        "maximumNamedSlices" : 31,
+        "maximumProcessSlices" : 79,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 10,
+        "maximumThreadSlices" : 39,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 4,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : 4,
+          "returnedCount" : 4,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 2,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 5715,
+          "shareOfOneCPU" : 8.1642857142857146,
+          "sliceCount" : 26
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "runningNs" : 3967,
+          "shareOfOneCPU" : 5.6671428571428573,
+          "sliceCount" : 18
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 4
+          },
+          "runningNs" : 3516,
+          "shareOfOneCPU" : 5.0228571428571431,
+          "sliceCount" : 18
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "runningNs" : 2852,
+          "shareOfOneCPU" : 4.0742857142857138,
+          "sliceCount" : 15
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "runningNs" : 1650,
+          "shareOfOneCPU" : 2.3571428571428572,
+          "sliceCount" : 8,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        },
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 3
+          },
+          "processName" : null,
+          "runningNs" : 1390,
+          "shareOfOneCPU" : 1.9857142857142858,
+          "sliceCount" : 8,
+          "threadKey" : {
+            "itid" : 12
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "seed-9009-11",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+          {
+            "category" : "invalidValue",
+            "count" : 3,
+            "message" : "Raw scheduled time exceeded the selected range",
+            "scope" : "sched_slice.overlap"
+          }
+        ],
+        "status" : "warnings",
+        "warnings" : [
+          "Raw scheduled time exceeded the selected range"
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 63,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 27,
+        "maximumHotEvents" : 15,
+        "maximumNamedSlices" : 15,
+        "maximumProcessSlices" : 60,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 9,
+        "maximumThreadSlices" : 42,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 800,
+        "startNs" : 100
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "hotIntervals" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topProcesses" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        },
+        "topThreads" : {
+          "matchedCount" : null,
+          "returnedCount" : 0,
+          "truncated" : true
+        }
+      },
+      "threadStateDistribution" : [
+
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  }
+]

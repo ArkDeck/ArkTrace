@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/arktrace-contract", "crates/arktrace-platform", "crates/arktrace-store"]
+members = ["crates/arktrace-contract", "crates/arktrace-platform", "crates/arktrace-store", "crates/arktrace-analysis"]
 resolver = "3"
 
 [workspace.package]

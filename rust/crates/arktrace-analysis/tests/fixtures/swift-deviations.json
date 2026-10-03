@@ -1,0 +1,341 @@
+[
+  {
+    "name" : "open-ended-runnable-boundary-not-observed",
+    "result" : {
+      "cpuUtilization" : [
+        {
+          "cpu" : 0,
+          "occupiedNs" : 100,
+          "rawRunningNs" : 100,
+          "sliceCount" : 1,
+          "utilization" : 0.10000000000000001
+        }
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 143,
+            "startNs" : 0
+          },
+          "score" : {
+            "contextSwitchCount" : 1,
+            "contextSwitchScoreNs" : 1000000,
+            "cpuBusyNs" : 43,
+            "longSliceNs" : 0,
+            "total" : 1000043
+          }
+        },
+        {
+          "cpuSliceCount" : 1,
+          "namedSliceCount" : 0,
+          "range" : {
+            "endNs" : 286,
+            "startNs" : 143
+          },
+          "score" : {
+            "contextSwitchCount" : 0,
+            "contextSwitchScoreNs" : 0,
+            "cpuBusyNs" : 57,
+            "longSliceNs" : 0,
+            "total" : 57
+          }
+        }
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 7,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 1000,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 1,
+        "percentiles" : {
+          "maxNs" : 100,
+          "p50Ns" : 100,
+          "p90Ns" : 100,
+          "p95Ns" : 100,
+          "p99Ns" : 100
+        },
+        "supported" : true,
+        "topSamples" : [
+          {
+            "latencyNs" : 100,
+            "runnableEndNs" : 100,
+            "runnableEventKey" : {
+              "rowID" : 1,
+              "table" : "thread_state"
+            },
+            "runningEventKey" : {
+              "rowID" : 1,
+              "table" : "sched_slice"
+            },
+            "runningStartNs" : 100,
+            "threadKey" : {
+              "itid" : 11
+            }
+          }
+        ],
+        "truncated" : false,
+        "unsupportedReason" : null
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 2,
+          "returnedCount" : 2,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 1,
+          "returnedCount" : 1,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 100,
+          "intervalCount" : 1,
+          "normalizedState" : "runnable",
+          "percentageOfRange" : 0.10000000000000001,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "R",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "runningNs" : 100,
+          "shareOfOneCPU" : 0.10000000000000001,
+          "sliceCount" : 1
+        }
+      ],
+      "topThreads" : [
+        {
+          "name" : null,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : null,
+          "runningNs" : 100,
+          "shareOfOneCPU" : 0.10000000000000001,
+          "sliceCount" : 1,
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ]
+    }
+  },
+  {
+    "name" : "canonical-unicode-raw-state",
+    "result" : {
+      "cpuUtilization" : [
+
+      ],
+      "dataQuality" : {
+        "issues" : [
+
+        ],
+        "status" : "ok",
+        "warnings" : [
+
+        ]
+      },
+      "hotIntervals" : [
+
+      ],
+      "kind" : "deterministicBatch",
+      "longSlices" : [
+
+      ],
+      "parameters" : {
+        "filters" : {
+          "counterFilterID" : null,
+          "cpu" : null,
+          "depth" : null,
+          "minimumDurationNs" : null,
+          "name" : null,
+          "nameMatch" : "exact",
+          "normalizedState" : null,
+          "pid" : null,
+          "processKey" : null,
+          "rawState" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "hotBucketCount" : 7,
+        "hotIntervalLimit" : 20,
+        "longSliceLimit" : 1,
+        "maximumCPUSlices" : 20000,
+        "maximumHotEvents" : 20000,
+        "maximumNamedSlices" : 20000,
+        "maximumProcessSlices" : 20000,
+        "maximumSchedulingEvents" : 20000,
+        "maximumStateIntervals" : 20000,
+        "maximumThreadSlices" : 20000,
+        "minimumLongSliceDurationNs" : 0,
+        "schedulingSampleLimit" : 20,
+        "timeoutAttoseconds" : 0,
+        "timeoutSeconds" : 30,
+        "topProcessLimit" : 10,
+        "topThreadLimit" : 10
+      },
+      "range" : {
+        "endNs" : 1000,
+        "startNs" : 0
+      },
+      "schedulingLatency" : {
+        "count" : 0,
+        "percentiles" : null,
+        "supported" : false,
+        "topSamples" : [
+
+        ],
+        "truncated" : false,
+        "unsupportedReason" : "noProvableRunnableTransitions"
+      },
+      "sections" : {
+        "cpuUtilization" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "hotIntervals" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "longSlices" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "schedulingLatency" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "threadStateDistribution" : {
+          "matchedCount" : 2,
+          "returnedCount" : 1,
+          "truncated" : false
+        },
+        "topProcesses" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        },
+        "topThreads" : {
+          "matchedCount" : 0,
+          "returnedCount" : 0,
+          "truncated" : false
+        }
+      },
+      "threadStateDistribution" : [
+        {
+          "durationNs" : 60,
+          "intervalCount" : 2,
+          "normalizedState" : null,
+          "percentageOfRange" : 0.059999999999999998,
+          "pid" : 42,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "rawState" : "é",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "tid" : 7
+        }
+      ],
+      "topProcesses" : [
+
+      ],
+      "topThreads" : [
+
+      ]
+    }
+  }
+]

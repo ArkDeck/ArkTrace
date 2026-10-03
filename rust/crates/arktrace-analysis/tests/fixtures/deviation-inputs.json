@@ -1,0 +1,159 @@
+[
+  {
+    "name": "open-ended-runnable-boundary-not-observed",
+    "request": {
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "maximumCPUSlices": 20000,
+      "maximumProcessSlices": 20000,
+      "maximumThreadSlices": 20000,
+      "maximumStateIntervals": 20000,
+      "maximumSchedulingEvents": 20000,
+      "maximumHotEvents": 20000,
+      "topProcessLimit": 10,
+      "topThreadLimit": 10,
+      "schedulingSampleLimit": 20,
+      "hotIntervalLimit": 20,
+      "hotBucketCount": 7,
+      "minimumLongSliceDurationNs": 0,
+      "maximumOutputRows": 100000
+    },
+    "durationNs": 1000,
+    "cpuAvailable": true,
+    "stateAvailable": true,
+    "namedAvailable": true,
+    "cpuRows": [
+      {
+        "key": {
+          "table": "sched_slice",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 100,
+          "endNs": 200
+        },
+        "cpu": 0,
+        "processKey": {
+          "ipid": 1
+        },
+        "threadKey": {
+          "itid": 11
+        },
+        "pid": 42,
+        "tid": 7,
+        "threadName": null,
+        "processName": null,
+        "endState": null,
+        "priority": null,
+        "isOpenEnded": false
+      }
+    ],
+    "stateRows": [
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 0,
+          "endNs": 100
+        },
+        "processKey": {
+          "ipid": 1
+        },
+        "threadKey": {
+          "itid": 11
+        },
+        "pid": 42,
+        "tid": 7,
+        "state": "R",
+        "normalizedState": "runnable",
+        "cpu": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": true
+      }
+    ],
+    "namedRows": []
+  },
+  {
+    "name": "canonical-unicode-raw-state",
+    "request": {
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "maximumCPUSlices": 20000,
+      "maximumProcessSlices": 20000,
+      "maximumThreadSlices": 20000,
+      "maximumStateIntervals": 20000,
+      "maximumSchedulingEvents": 20000,
+      "maximumHotEvents": 20000,
+      "topProcessLimit": 10,
+      "topThreadLimit": 10,
+      "schedulingSampleLimit": 20,
+      "hotIntervalLimit": 20,
+      "hotBucketCount": 7,
+      "minimumLongSliceDurationNs": 0,
+      "maximumOutputRows": 100000
+    },
+    "durationNs": 1000,
+    "cpuAvailable": true,
+    "stateAvailable": true,
+    "namedAvailable": true,
+    "cpuRows": [],
+    "stateRows": [
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 0,
+          "endNs": 30
+        },
+        "processKey": {
+          "ipid": 1
+        },
+        "threadKey": {
+          "itid": 11
+        },
+        "pid": 42,
+        "tid": 7,
+        "state": "é",
+        "normalizedState": null,
+        "cpu": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 2
+        },
+        "range": {
+          "startNs": 30,
+          "endNs": 60
+        },
+        "processKey": {
+          "ipid": 1
+        },
+        "threadKey": {
+          "itid": 11
+        },
+        "pid": 42,
+        "tid": 7,
+        "state": "é",
+        "normalizedState": null,
+        "cpu": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      }
+    ],
+    "namedRows": []
+  }
+]
