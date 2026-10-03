@@ -76,6 +76,8 @@ impl EngineError {
                 StoreError::DeadlineExceeded => make(Code::QueryTimeout),
                 StoreError::CleanupFailed => cleanup(),
                 StoreError::InvalidQuery => make(Code::InvalidArgument),
+                StoreError::DecodedBudgetExceeded => make(Code::QueryLimitExceeded),
+                StoreError::WorkerFailed => make(Code::InternalError),
                 StoreError::SchemaUnsupported | StoreError::SchemaBudgetExceeded => {
                     make(Code::TraceSchemaUnsupported)
                 }

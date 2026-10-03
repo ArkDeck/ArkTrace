@@ -1,5 +1,6 @@
 //! Platform-independent migration contracts. No filesystem, SQL or device IO.
 mod arguments;
+mod batch;
 mod cache;
 mod counters;
 mod density;
@@ -14,6 +15,9 @@ mod slices;
 mod time;
 
 pub use arguments::{TraceArgumentQuery, TraceEventArgument};
+pub use batch::{
+    TraceRepositoryEventBatch, TraceRepositoryEventBatchResult, TraceRepositoryThread,
+};
 pub use cache::{TraceCacheKey, WINDOWS_LEASE_LENGTH, WINDOWS_LEASE_OFFSET};
 pub use counters::{
     CounterQuery, CounterSample, CounterScope, CounterSeries, CounterSeriesDescriptor,

@@ -9,6 +9,9 @@ pub use arktrace_analysis::{
 };
 use arktrace_contract::{ContractError, TraceTimeRange};
 use arktrace_platform::{NativeHost, native_host};
+pub use arktrace_store::ReadPoolLimits;
+#[cfg(target_os = "macos")]
+pub use arktrace_store::{ReadPoolOutput, ReadPoolStatistics};
 pub use metadata::CacheMetadata;
 #[cfg(target_os = "macos")]
 pub use no_cache::{

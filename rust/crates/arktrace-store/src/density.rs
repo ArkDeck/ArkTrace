@@ -45,6 +45,13 @@ pub(crate) fn density(
     if !available {
         return result(Vec::new(), false, Vec::new());
     }
+    // Buckets are assembled outside the row mapper. Account for their typed
+    // Vec and identity-map overhead before allocating either.
+    db.reserve_decoded(
+        (query.bucket_count as u64)
+            .checked_mul((std::mem::size_of::<TraceDensityBucket>() as u64 + 128) * 4)
+            .ok_or(StoreError::DecodedBudgetExceeded)?,
+    )?;
     let mut bindings = Vec::new();
     let source_sql = match query.source {
         TraceDensitySource::CpuCounter { filter_id, cpu } => counter_source(

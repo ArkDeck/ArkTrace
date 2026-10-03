@@ -26,23 +26,48 @@ pub struct StoreReader {
     frames: FrameSchema,
     arguments: ArgumentSchema,
     _worker: PhantomData<Rc<()>>,
+    resources: Option<Arc<crate::query_resources::QueryResources>>,
 }
 impl StoreReader {
+    #[cfg(test)]
+    pub(crate) fn snapshot_for_test(&self) -> Arc<HeldFile> {
+        self.snapshot.clone()
+    }
     pub fn open(snapshot: Arc<HeldFile>, budget: &ValidationBudget) -> Result<Self, StoreError> {
+        Self::open_bounded(snapshot, budget, None)
+    }
+    pub(crate) fn open_bounded(
+        snapshot: Arc<HeldFile>,
+        budget: &ValidationBudget,
+        resources: Option<Arc<crate::query_resources::QueryResources>>,
+    ) -> Result<Self, StoreError> {
         let connection = open_snapshot_connection(&snapshot, budget)?;
-        let db = Database::borrow_readonly(&connection, budget)?;
-        let inspection = IndexedDatabaseInspection {
-            inspection: db.inspect()?,
-            applicable_index_names: indexes::validate(&db)?,
+        let prepared = (|| {
+            let db =
+                Database::borrow_readonly(&connection, budget)?.with_resources(resources.clone());
+            let inspection = IndexedDatabaseInspection {
+                inspection: db.inspect()?,
+                applicable_index_names: indexes::validate(&db)?,
+            };
+            let directory = DirectorySchema::read(&db)?;
+            let events = EventSchema::read(&db)?;
+            let slices = SliceSchema::read(&db)?;
+            let counters = CounterSchema::read(&db, &inspection.inspection)?;
+            let frames = FrameSchema::read(&db)?;
+            let arguments = ArgumentSchema::read(&db)?;
+            snapshot.readonly_database_path()?;
+            budget.check()?;
+            Ok((
+                inspection, directory, events, slices, counters, frames, arguments,
+            ))
+        })();
+        let (inspection, directory, events, slices, counters, frames, arguments) = match prepared {
+            Ok(value) => value,
+            Err(error) => {
+                connection.close().map_err(|_| StoreError::CleanupFailed)?;
+                return Err(error);
+            }
         };
-        let directory = DirectorySchema::read(&db)?;
-        let events = EventSchema::read(&db)?;
-        let slices = SliceSchema::read(&db)?;
-        let counters = CounterSchema::read(&db, &inspection.inspection)?;
-        let frames = FrameSchema::read(&db)?;
-        let arguments = ArgumentSchema::read(&db)?;
-        snapshot.readonly_database_path()?;
-        budget.check()?;
         Ok(Self {
             connection,
             snapshot,
@@ -54,6 +79,7 @@ impl StoreReader {
             frames,
             arguments,
             _worker: PhantomData,
+            resources,
         })
     }
     pub fn inspection(&self) -> &DatabaseInspection {
@@ -160,7 +186,28 @@ impl StoreReader {
             crate::density::density(db, self.inspection(), &self.counters, self.frames, query)
         })
     }
-    fn with_database<T>(
+    /// Request-scoped bounded pool. Its connections are created, reused for
+    /// this batch and explicitly closed on their owning worker threads. All
+    /// workers drain before either a complete result or an error is returned.
+    pub fn event_batch(
+        &self,
+        batch: &arktrace_contract::TraceRepositoryEventBatch,
+        budget: &ValidationBudget,
+        limits: crate::ReadPoolLimits,
+    ) -> Result<crate::ReadPoolOutput, StoreError> {
+        batch.validate().map_err(|_| StoreError::InvalidQuery)?;
+        limits.validate()?;
+        self.with_database(budget, |_| {
+            crate::read_pool::run(
+                self.snapshot.clone(),
+                &self.inspection,
+                batch,
+                budget,
+                limits,
+            )
+        })
+    }
+    pub(crate) fn with_database<T>(
         &self,
         budget: &ValidationBudget,
         body: impl FnOnce(&Database<'_>) -> Result<T, StoreError>,
@@ -172,9 +219,20 @@ impl StoreReader {
             ));
         }
         self.snapshot.readonly_database_path()?;
-        let db = Database::borrow_readonly(&self.connection, budget)?;
+        let db = Database::borrow_readonly(&self.connection, budget)?
+            .with_resources(self.resources.clone());
         let result = body(&db);
-        self.snapshot.readonly_database_path()?;
+        let revalidation = self.snapshot.readonly_database_path();
+        // A concurrent caller cancellation must not hide a fatal worker or
+        // cleanup failure from Engine's Session state. Still revalidate the
+        // held snapshot on every exit, including these terminal failures.
+        if matches!(
+            result,
+            Err(StoreError::CleanupFailed | StoreError::WorkerFailed)
+        ) {
+            return result;
+        }
+        revalidation?;
         budget.check()?;
         result
     }

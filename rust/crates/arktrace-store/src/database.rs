@@ -14,14 +14,30 @@ const PROGRESS_INTERVAL: i32 = 100;
 pub(crate) const DEFAULT_VM_BUDGET: u64 = 2_000_000;
 
 #[cfg(target_os = "macos")]
-pub(crate) fn open_readonly(path: &std::path::Path) -> Result<Connection, StoreError> {
+pub(crate) struct ReadonlyOpenError {
+    pub(crate) error: StoreError,
+    pub(crate) transient_descriptor_failure: bool,
+}
+#[cfg(target_os = "macos")]
+pub(crate) fn open_readonly(path: &std::path::Path) -> Result<Connection, ReadonlyOpenError> {
     Connection::open_with_flags(
         path,
         OpenFlags::SQLITE_OPEN_READ_ONLY
             | OpenFlags::SQLITE_OPEN_NO_MUTEX
             | OpenFlags::SQLITE_OPEN_NOFOLLOW,
     )
-    .map_err(sqlite_error)
+    .map_err(|error| {
+        // Capture errno before any further native call. macOS fdescfs lstat
+        // can transiently report EBADF during other threads' fd churn while
+        // the held descriptor itself remains valid.
+        let bad_descriptor = std::io::Error::last_os_error().raw_os_error() == Some(9);
+        let error = sqlite_error(error);
+        ReadonlyOpenError {
+            transient_descriptor_failure: bad_descriptor
+                && error == StoreError::SQLite { code: 14 },
+            error,
+        }
+    })
 }
 
 pub(crate) fn sqlite_error(error: rusqlite::Error) -> StoreError {
@@ -36,6 +52,7 @@ pub(crate) fn sqlite_error(error: rusqlite::Error) -> StoreError {
 pub(crate) struct Database<'a> {
     connection: ConnectionOwner<'a>,
     budget: &'a ValidationBudget,
+    resources: Option<Arc<crate::query_resources::QueryResources>>,
     #[cfg(target_os = "macos")]
     writable: Option<Arc<arktrace_platform::WritableFile>>,
 }
@@ -113,6 +130,7 @@ impl<'a> Database<'a> {
         let result = Self {
             connection,
             budget,
+            resources: None,
             #[cfg(target_os = "macos")]
             writable: None,
         };
@@ -227,6 +245,7 @@ impl<'a> Database<'a> {
         Database {
             connection: ConnectionOwner::Borrowed(&self.connection),
             budget,
+            resources: None,
             #[cfg(target_os = "macos")]
             writable: self.writable.clone(),
         }
@@ -262,9 +281,25 @@ impl<'a> Database<'a> {
 
     pub(crate) fn check(&self) -> Result<(), StoreError> {
         self.budget.check()?;
+        if let Some(resources) = &self.resources {
+            resources.check()?;
+        }
         #[cfg(target_os = "macos")]
         if let Some(file) = &self.writable {
             file.verify_sqlite_connection(&self.connection, &self.io_budget())?;
+        }
+        Ok(())
+    }
+    pub(crate) fn with_resources(
+        mut self,
+        resources: Option<Arc<crate::query_resources::QueryResources>>,
+    ) -> Self {
+        self.resources = resources;
+        self
+    }
+    pub(crate) fn reserve_decoded(&self, bytes: u64) -> Result<(), StoreError> {
+        if let Some(resources) = &self.resources {
+            resources.reserve(bytes)?;
         }
         Ok(())
     }
@@ -331,6 +366,7 @@ impl<'a> Database<'a> {
         let reason = Arc::new(AtomicU8::new(0));
         let callback_reason = reason.clone();
         let cancellation = self.budget.cancellation.clone();
+        let resources = self.resources.clone();
         let deadline = self.budget.deadline;
         let mut callbacks = vm_budget.div_ceil(PROGRESS_INTERVAL as u64);
         #[cfg(target_os = "macos")]
@@ -346,7 +382,9 @@ impl<'a> Database<'a> {
             .progress_handler(
                 PROGRESS_INTERVAL,
                 Some(move || {
-                    let why = if cancellation.is_cancelled() {
+                    let why = if cancellation.is_cancelled()
+                        || resources.as_ref().is_some_and(|r| r.abort.is_cancelled())
+                    {
                         1
                     } else if Instant::now() >= deadline {
                         2
@@ -387,6 +425,29 @@ impl<'a> Database<'a> {
                 self.budget.check()?;
                 if result.len() == maximum_rows {
                     return Err(StoreError::SchemaBudgetExceeded);
+                }
+                if self.resources.is_some() {
+                    // Credit before the mapper can copy input strings. Four
+                    // copies cover Vec growth and typed-page/group conversion.
+                    let mut bytes = (std::mem::size_of::<T>() as u64)
+                        .checked_add(64)
+                        .ok_or(StoreError::DecodedBudgetExceeded)?;
+                    for index in 0..row.as_ref().column_count() {
+                        let value = row.get_ref(index).map_err(sqlite_error)?;
+                        let dynamic = match value {
+                            ValueRef::Text(v) | ValueRef::Blob(v) => v.len() as u64,
+                            _ => 0,
+                        };
+                        bytes = bytes
+                            .checked_add(dynamic)
+                            .and_then(|b| b.checked_add(32))
+                            .ok_or(StoreError::DecodedBudgetExceeded)?;
+                    }
+                    self.reserve_decoded(
+                        bytes
+                            .checked_mul(4)
+                            .ok_or(StoreError::DecodedBudgetExceeded)?,
+                    )?;
                 }
                 result.push(map(row)?);
             }

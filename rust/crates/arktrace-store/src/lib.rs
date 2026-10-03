@@ -17,12 +17,18 @@ mod events;
 mod frames;
 #[cfg(any(target_os = "macos", test))]
 mod indexes;
+mod query_resources;
+#[cfg(target_os = "macos")]
+mod read_pool;
 #[cfg(target_os = "macos")]
 mod reader;
 #[cfg(any(target_os = "macos", test))]
 mod schema;
 #[cfg(any(target_os = "macos", test))]
 mod slices;
+pub use query_resources::ReadPoolLimits;
+#[cfg(target_os = "macos")]
+pub use read_pool::{ReadPoolOutput, ReadPoolStatistics};
 #[cfg(target_os = "macos")]
 pub use reader::StoreReader;
 #[cfg(test)]
@@ -107,6 +113,8 @@ pub enum StoreError {
     InvalidIndexContract,
     InvalidReadyIndexes,
     CleanupFailed,
+    DecodedBudgetExceeded,
+    WorkerFailed,
 }
 impl From<HostError> for StoreError {
     fn from(value: HostError) -> Self {
@@ -292,7 +300,25 @@ fn open_snapshot_connection(
     {
         return Err(StoreError::InvalidDatabase);
     }
-    let connection = database::open_readonly(&path)?;
+    // Retry only the observed macOS fdescfs EBADF/CANTOPEN combination, never
+    // an arbitrary SQLite failure or another pathname. Every attempt retains
+    // and revalidates this same private immutable file and the caller's budget.
+    let mut attempt = 0;
+    let connection = loop {
+        budget.check()?;
+        source.readonly_database_path()?;
+        match database::open_readonly(&path) {
+            Ok(connection) => break connection,
+            Err(error) => {
+                source.readonly_database_path()?;
+                if !error.transient_descriptor_failure || attempt == 7 {
+                    return Err(error.error);
+                }
+                attempt += 1;
+                std::thread::yield_now();
+            }
+        }
+    };
     // The HeldFile borrow outlives the connection. Check binding after SQLite's
     // native open and again after all work, including failed validation.
     source.readonly_database_path()?;

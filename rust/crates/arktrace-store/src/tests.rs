@@ -268,6 +268,83 @@ fn active_sqlite_statement_observes_external_cancellation() {
     );
     thread.join().unwrap();
 }
+
+#[test]
+fn batch_memory_is_charged_before_row_mapping_and_resets_for_the_next_request() {
+    use crate::query_resources::QueryResources;
+    use std::{cell::Cell, sync::Arc};
+    let request = budget();
+    let connection = fixture("");
+    let resources = Arc::new(
+        QueryResources::new(ReadPoolLimits {
+            maximum_workers: 1,
+            maximum_decoded_bytes: 1000,
+        })
+        .unwrap(),
+    );
+    let mapped = Cell::new(false);
+    let db = Database::borrow_readonly(&connection, &request)
+        .unwrap()
+        .with_resources(Some(resources.clone()));
+    assert_eq!(
+        db.query(
+            "SELECT printf('%1000s','x')",
+            [],
+            1,
+            DEFAULT_VM_BUDGET,
+            |_| {
+                mapped.set(true);
+                Ok(())
+            }
+        ),
+        Err(StoreError::DecodedBudgetExceeded)
+    );
+    assert!(
+        !mapped.get(),
+        "budget rejection must precede copying input strings"
+    );
+    assert_eq!(resources.used(), 0);
+    drop(db);
+    let normal = Database::borrow_readonly(&connection, &request).unwrap();
+    assert_eq!(
+        normal
+            .query("SELECT 7", [], 1, DEFAULT_VM_BUDGET, |r| integer(r, 0))
+            .unwrap(),
+        [7]
+    );
+}
+
+#[test]
+fn batch_abort_interrupts_active_sql_without_cancelling_the_parent_or_next_request() {
+    use crate::query_resources::QueryResources;
+    use std::sync::Arc;
+    let request = budget();
+    let connection = fixture("");
+    let resources = Arc::new(QueryResources::new(ReadPoolLimits::default()).unwrap());
+    let db = Database::borrow_readonly(&connection, &request)
+        .unwrap()
+        .with_resources(Some(resources.clone()));
+    let stop = resources.clone();
+    let worker = std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(5));
+        stop.abort.cancel();
+    });
+    let sql = "WITH RECURSIVE n(x) AS (VALUES(1) UNION ALL SELECT x+1 FROM n WHERE x<100000000) SELECT SUM(x) FROM n";
+    assert_eq!(
+        db.query(sql, [], 1, u64::MAX, |row| integer(row, 0)),
+        Err(StoreError::Cancelled)
+    );
+    worker.join().unwrap();
+    assert!(!request.cancellation.is_cancelled());
+    drop(db);
+    let normal = Database::borrow_readonly(&connection, &request).unwrap();
+    assert_eq!(
+        normal
+            .query("SELECT 7", [], 1, DEFAULT_VM_BUDGET, |r| integer(r, 0))
+            .unwrap(),
+        [7]
+    );
+}
 #[test]
 fn public_errors_contain_no_sqlite_prose_or_user_path() {
     let request = budget();
@@ -620,6 +697,273 @@ mod native_indexing {
         fn drop(&mut self) {
             fs::remove_dir_all(&self.0).unwrap();
         }
+    }
+    fn batch() -> arktrace_contract::TraceRepositoryEventBatch {
+        use arktrace_contract::*;
+        let range = TraceTimeRange::query(0, 900).unwrap();
+        TraceRepositoryEventBatch {
+            cpu_slices: (0..20)
+                .map(|i| CpuSliceQuery {
+                    range,
+                    cpu: Some(i % 2),
+                    process_key: None,
+                    pid: None,
+                    thread_key: None,
+                    tid: None,
+                    limit: 8,
+                })
+                .collect(),
+            densities: (0..8)
+                .map(|i| TraceDensityQuery {
+                    range,
+                    source: TraceDensitySource::Cpu { cpu: i % 2 },
+                    bucket_count: 8,
+                })
+                .collect(),
+            threads: (0..4)
+                .map(|_| ThreadQuery {
+                    process_key: None,
+                    pid: None,
+                    thread_key: None,
+                    tid: None,
+                    name: None,
+                    name_match: DirectoryNameMatch::Exact,
+                    limit: 8,
+                })
+                .collect(),
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn native_descriptor_reopens_are_stable_under_concurrent_worker_churn() {
+        use std::sync::{Arc, Barrier};
+        let fixture = Fixture::new("");
+        let source = Arc::new(fixture.root().open_file("source.db").unwrap());
+        let request = budget();
+        let before = source.facts(&Fixture::io(&request)).unwrap();
+        let start = Barrier::new(3);
+        let errors = std::thread::scope(|scope| {
+            let mut handles = Vec::new();
+            for _ in 0..3 {
+                let source = source.clone();
+                let start = &start;
+                handles.push(scope.spawn(move || {
+                    start.wait();
+                    let mut errors = Vec::new();
+                    for _ in 0..512 {
+                        let result = (|| {
+                            let conn = open_snapshot_connection(&source, &budget())?;
+                            let value: i64 = conn
+                                .query_row("SELECT count(*) FROM trace_range", [], |row| row.get(0))
+                                .map_err(crate::database::sqlite_error)?;
+                            conn.close().map_err(|_| StoreError::CleanupFailed)?;
+                            if value != 1 {
+                                return Err(StoreError::InvalidDatabase);
+                            }
+                            source.verify()?;
+                            Ok(())
+                        })();
+                        if let Err(error) = result {
+                            errors.push(error);
+                        }
+                    }
+                    errors
+                }));
+            }
+            handles
+                .into_iter()
+                .flat_map(|handle| handle.join().unwrap())
+                .collect::<Vec<_>>()
+        });
+        assert!(errors.is_empty(), "descriptor reopens failed: {errors:?}");
+        assert_eq!(source.facts(&Fixture::io(&request)).unwrap(), before);
+    }
+    #[test]
+    fn native_read_pool_preserves_all_32_positions_and_closes_on_success_and_panic() {
+        use std::sync::Arc;
+        let fixture = Fixture::new(
+            "INSERT INTO process VALUES(1,10,'p',100);
+            INSERT INTO thread VALUES(1,11,'t',100,1);
+            INSERT INTO sched_slice VALUES(1,100,20,0,1,1),(2,200,20,1,1,1);",
+        );
+        let root = fixture.root();
+        let source = root.open_file("source.db").unwrap();
+        let request = budget();
+        let prepared = prepare_snapshot(
+            &source,
+            &root.create_private_child("stage").unwrap(),
+            "ready.db",
+            &request,
+            |_| {},
+        )
+        .unwrap();
+        let snapshot = Arc::new(prepared.snapshot);
+        let reader = StoreReader::open(snapshot.clone(), &request).unwrap();
+        let before = snapshot.facts(&Fixture::io(&request)).unwrap();
+        let batch = batch();
+        let serial = reader
+            .event_batch(
+                &batch,
+                &request,
+                ReadPoolLimits {
+                    maximum_workers: 1,
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        let parallel = reader
+            .event_batch(&batch, &request, ReadPoolLimits::default())
+            .unwrap();
+        assert_eq!(serial.result, parallel.result);
+        assert_eq!(parallel.statistics.workers_opened, 3);
+        assert_eq!(parallel.statistics.connections_closed, 3);
+        assert_eq!(parallel.statistics.completed_queries, 32);
+        assert!((1..=3).contains(&parallel.statistics.peak_active_queries));
+        for (i, page) in parallel.result.cpu_slices.iter().enumerate() {
+            assert_eq!(
+                page.items.iter().map(|v| v.key.row_id).collect::<Vec<_>>(),
+                [1 + i as i64 % 2]
+            );
+        }
+        assert_eq!(
+            crate::read_pool::run_inner(
+                snapshot.clone(),
+                reader.indexed_inspection(),
+                &batch,
+                &request,
+                ReadPoolLimits::default(),
+                &|index| {
+                    if index == 0 {
+                        panic!("deliberate worker fault after opening owned connection");
+                    }
+                }
+            )
+            .unwrap_err(),
+            StoreError::WorkerFailed
+        );
+        // The same request token and primary connection are still usable.
+        assert!(!request.cancellation.is_cancelled());
+        let cancelled_panic = budget();
+        assert_eq!(
+            reader
+                .with_database(&cancelled_panic, |_| crate::read_pool::run_inner(
+                    snapshot.clone(),
+                    reader.indexed_inspection(),
+                    &batch,
+                    &cancelled_panic,
+                    ReadPoolLimits::default(),
+                    &|index| {
+                        if index == 0 {
+                            cancelled_panic.cancellation.cancel();
+                            panic!("worker fault racing caller cancellation");
+                        }
+                    }
+                ))
+                .unwrap_err(),
+            StoreError::WorkerFailed
+        );
+        let cancelled_cleanup = budget();
+        assert_eq!(
+            reader.with_database(&cancelled_cleanup, |_| {
+                cancelled_cleanup.cancellation.cancel();
+                Err::<(), _>(StoreError::CleanupFailed)
+            }),
+            Err(StoreError::CleanupFailed)
+        );
+        assert_eq!(
+            reader
+                .event_batch(&batch, &request, ReadPoolLimits::default())
+                .unwrap()
+                .result,
+            serial.result
+        );
+        assert_eq!(snapshot.facts(&Fixture::io(&request)).unwrap(), before);
+        reader.close().unwrap();
+    }
+
+    #[test]
+    fn native_read_pool_memory_and_cancellation_failures_leave_next_request_unchanged() {
+        use std::sync::Arc;
+        let fixture = Fixture::new("");
+        let root = fixture.root();
+        let request = budget();
+        let source = root.open_file("source.db").unwrap();
+        let prepared = prepare_snapshot(
+            &source,
+            &root.create_private_child("stage").unwrap(),
+            "ready.db",
+            &request,
+            |_| {},
+        )
+        .unwrap();
+        let reader = StoreReader::open(Arc::new(prepared.snapshot), &request).unwrap();
+        let batch = batch();
+        let before = reader
+            .event_batch(&batch, &request, ReadPoolLimits::default())
+            .unwrap()
+            .result;
+        assert_eq!(
+            reader
+                .event_batch(
+                    &batch,
+                    &request,
+                    ReadPoolLimits {
+                        maximum_workers: 3,
+                        maximum_decoded_bytes: 1
+                    }
+                )
+                .unwrap_err(),
+            StoreError::DecodedBudgetExceeded
+        );
+        assert_eq!(
+            reader
+                .event_batch(&batch, &request, ReadPoolLimits::default())
+                .unwrap()
+                .result,
+            before
+        );
+        let cancelled = budget();
+        cancelled.cancellation.cancel();
+        assert_eq!(
+            reader
+                .event_batch(&batch, &cancelled, ReadPoolLimits::default())
+                .unwrap_err(),
+            StoreError::Cancelled
+        );
+        assert_eq!(
+            reader
+                .event_batch(&batch, &request, ReadPoolLimits::default())
+                .unwrap()
+                .result,
+            before
+        );
+        // Cancel after a worker has entered a real typed query, before SQL
+        // steps; the pool drains every other worker before returning.
+        let active = budget();
+        assert_eq!(
+            crate::read_pool::run_inner(
+                reader.snapshot_for_test(),
+                reader.indexed_inspection(),
+                &batch,
+                &active,
+                ReadPoolLimits::default(),
+                &|index| {
+                    if index == 0 {
+                        active.cancellation.cancel();
+                    }
+                }
+            )
+            .unwrap_err(),
+            StoreError::Cancelled
+        );
+        assert_eq!(
+            reader
+                .event_batch(&batch, &request, ReadPoolLimits::default())
+                .unwrap()
+                .result,
+            before
+        );
+        reader.close().unwrap();
     }
     #[test]
     fn real_disk_preparation_preserves_source_closes_sqlite_and_seals_readonly() {

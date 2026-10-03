@@ -19,6 +19,7 @@ use arktrace_store::{
 };
 use serde::Serialize;
 use std::{
+    cell::Cell,
     ffi::OsString,
     sync::Arc,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
@@ -219,6 +220,7 @@ pub struct NoCacheSession {
     metadata: CacheMetadata,
     inspection: DatabaseInspection,
     cleanup_bytes: u64,
+    query_worker_failed: Cell<bool>,
 }
 impl NoCacheSession {
     /// Shared Viewer search over this immutable session's bounded raw queries.
@@ -266,6 +268,12 @@ impl NoCacheSession {
         &self.inspection
     }
     pub fn verify(&self, budget: &EngineBudget) -> Result<(), EngineError> {
+        if self.query_worker_failed.get() {
+            return Err(failure(
+                EngineStage::Validating,
+                EngineFailure::Store(StoreError::WorkerFailed),
+            ));
+        }
         self.lease
             .revalidate()
             .map_err(|e| host(EngineStage::Validating, e))?;
@@ -408,6 +416,30 @@ impl NoCacheSession {
             .map_err(|e| failure(EngineStage::Querying, EngineFailure::Store(e)));
         self.query_reader(budget)?;
         result
+    }
+    /// Blocking repository operation for the host's background executor.
+    /// Borrowing this worker-owned session retains Ready/lease authority until
+    /// the bounded read pool has drained and closed every connection.
+    pub fn event_batch(
+        &self,
+        batch: &arktrace_contract::TraceRepositoryEventBatch,
+        budget: &EngineBudget,
+        limits: crate::ReadPoolLimits,
+    ) -> Result<crate::ReadPoolOutput, EngineError> {
+        let result = self
+            .query_reader(budget)?
+            .event_batch(batch, &budget.validation(), limits);
+        if matches!(result, Err(StoreError::WorkerFailed)) {
+            self.query_worker_failed.set(true);
+        }
+        if matches!(result, Err(StoreError::CleanupFailed)) {
+            return Err(failure(
+                EngineStage::Querying,
+                EngineFailure::Store(StoreError::CleanupFailed),
+            ));
+        }
+        self.query_reader(budget)?;
+        result.map_err(|error| failure(EngineStage::Querying, EngineFailure::Store(error)))
     }
     pub fn query_counters(
         &self,
@@ -640,6 +672,12 @@ impl NoCacheSession {
         result
     }
     fn query_reader(&self, budget: &EngineBudget) -> Result<&StoreReader, EngineError> {
+        if self.query_worker_failed.get() {
+            return Err(failure(
+                EngineStage::Querying,
+                EngineFailure::Store(StoreError::WorkerFailed),
+            ));
+        }
         budget
             .check()
             .map_err(|e| failure(EngineStage::Querying, e.failure))?;
@@ -1695,6 +1733,7 @@ pub fn open_no_cache(
             metadata,
             inspection: inspection.inspection,
             cleanup_bytes: aggregate,
+            query_worker_failed: Cell::new(false),
         })
     })();
     match result {
