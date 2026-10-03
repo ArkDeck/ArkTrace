@@ -1,0 +1,5677 @@
+[
+  {
+    "id": "search-full/search/00",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        },
+        {
+          "eventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 3,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 50
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 250,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/01",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/02",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/03",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":-42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":-42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/04",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/05",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/06",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 7
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 5 · ipid 7",
+          "title": "é"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": 7
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "TID 5 · itid 21",
+          "threadKey": {
+            "itid": 21
+          },
+          "title": "é"
+        },
+        {
+          "eventKey": {
+            "rowID": 7,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": 7
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 200
+          },
+          "threadKey": {
+            "itid": 21
+          },
+          "title": "é"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":1000,\"key\":{\"ipid\":7},\"name\":\"é\",\"pid\":5,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":1000,\"isMainThread\":null,\"key\":{\"itid\":21},\"name\":\"é\",\"pid\":5,\"processKey\":{\"ipid\":7},\"processName\":\"é\",\"startNs\":0,\"tid\":5}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":7,\"table\":\"callstack\"},\"name\":\"é\",\"parentEventKey\":null,\"pid\":5,\"processKey\":{\"ipid\":7},\"processName\":\"é\",\"range\":{\"endNs\":1000,\"startNs\":200},\"threadKey\":{\"itid\":21},\"threadName\":\"é\",\"tid\":5}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/07",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 8
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 5 · ipid 8",
+          "title": "é"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": 8
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "TID 5 · itid 22",
+          "threadKey": {
+            "itid": 22
+          },
+          "title": "é"
+        },
+        {
+          "eventKey": {
+            "rowID": 8,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": 8
+          },
+          "range": {
+            "endNs": 400,
+            "startNs": 300
+          },
+          "threadKey": {
+            "itid": 22
+          },
+          "title": "é"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":1000,\"key\":{\"ipid\":8},\"name\":\"é\",\"pid\":5,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":1000,\"isMainThread\":null,\"key\":{\"itid\":22},\"name\":\"é\",\"pid\":5,\"processKey\":{\"ipid\":8},\"processName\":\"é\",\"startNs\":0,\"tid\":5}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":8,\"table\":\"callstack\"},\"name\":\"é\",\"parentEventKey\":null,\"pid\":5,\"processKey\":{\"ipid\":8},\"processName\":\"é\",\"range\":{\"endNs\":400,\"startNs\":300},\"threadKey\":{\"itid\":22},\"threadName\":\"é\",\"tid\":5}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/08",
+    "results": {
+      "items": [
+        {
+          "eventKey": {
+            "rowID": 10,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 401,
+            "startNs": 400
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "literal %_\\"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":10,\"table\":\"callstack\"},\"name\":\"literal %_\\\\\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":401,\"startNs\":400},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/09",
+    "results": {
+      "items": [
+        {
+          "eventKey": {
+            "rowID": 11,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 451,
+            "startNs": 450
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "quoted'name"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":11,\"table\":\"callstack\"},\"name\":\"quoted'name\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":451,\"startNs\":450},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/10",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/11",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/12",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/13",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":-11}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/14",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/15",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":-11}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/16",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/17",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/18",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/19",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/20",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -9223372036854775808
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 7 · ipid -9223372036854775808",
+          "title": "minimum"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-9223372036854775808}",
+        "result": "{\"items\":[{\"endNs\":1000,\"key\":{\"ipid\":-9223372036854775808},\"name\":\"minimum\",\"pid\":7,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/21",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": 9223372036854775807
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "TID 7 · itid 9223372036854775807",
+          "threadKey": {
+            "itid": 9223372036854775807
+          },
+          "title": "maximum"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":9223372036854775807}",
+        "result": "{\"items\":[{\"endNs\":1000,\"isMainThread\":null,\"key\":{\"itid\":9223372036854775807},\"name\":\"maximum\",\"pid\":7,\"processKey\":{\"ipid\":9223372036854775807},\"processName\":\"maximum\",\"startNs\":0,\"tid\":7}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/22",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/23",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "TID 8 · itid -40",
+          "threadKey": {
+            "itid": -40
+          },
+          "title": "optional source"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        },
+        {
+          "eventKey": {
+            "rowID": 10,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 401,
+            "startNs": 400
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "literal %_\\"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42},{\"endNs\":1000,\"isMainThread\":null,\"key\":{\"itid\":-40},\"name\":\"optional source\",\"pid\":null,\"processKey\":null,\"processName\":null,\"startNs\":0,\"tid\":8}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":10,\"table\":\"callstack\"},\"name\":\"literal %_\\\\\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":401,\"startNs\":400},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/24",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/25",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/26",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/27",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/28",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/29",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/30",
+    "results": {
+      "items": [
+        {
+          "eventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 3,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 50
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 250,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/31",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        },
+        {
+          "eventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 3,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 50
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 250,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/32",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/33",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        },
+        {
+          "eventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 3,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 50
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 250,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/34",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        }
+      ],
+      "truncated": true
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":2,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null}],\"truncated\":true}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":2,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42}],\"truncated\":true}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":true}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/35",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        }
+      ],
+      "truncated": true
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":3,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":true}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":3,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/36",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        }
+      ],
+      "truncated": true
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":4,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":true}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":4,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/37",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        }
+      ],
+      "truncated": true
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":6,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":6,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-full/search/38",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "PID 42 · ipid -30",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "PID 42 · ipid -20",
+          "title": "PID 42"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 11
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 11",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": 12
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid 12",
+          "title": "same"
+        },
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "PID 42 · ipid -10",
+          "title": "worker 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -30
+          },
+          "range": {
+            "endNs": 800,
+            "startNs": 800
+          },
+          "subtitle": "TID 42 · itid -31",
+          "threadKey": {
+            "itid": -31
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -20
+          },
+          "range": {
+            "endNs": 500,
+            "startNs": 500
+          },
+          "subtitle": "TID 42 · itid -21",
+          "threadKey": {
+            "itid": -21
+          },
+          "title": "TID 42"
+        },
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "subtitle": "TID 42 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker 42"
+        },
+        {
+          "eventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 3,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1000,
+            "startNs": 50
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        },
+        {
+          "eventKey": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 250,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "42"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":1001,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-30},\"name\":null,\"pid\":42,\"startNs\":800,\"threadCount\":null},{\"endNs\":null,\"key\":{\"ipid\":-20},\"name\":null,\"pid\":42,\"startNs\":500,\"threadCount\":null},{\"endNs\":200,\"key\":{\"ipid\":-10},\"name\":\"worker 42\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":11},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null},{\"endNs\":1000,\"key\":{\"ipid\":12},\"name\":\"same\",\"pid\":42,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":1001,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-31},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-30},\"processName\":null,\"startNs\":800,\"tid\":42},{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-21},\"name\":null,\"pid\":42,\"processKey\":{\"ipid\":-20},\"processName\":null,\"startNs\":500,\"tid\":42},{\"endNs\":200,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"worker 42\",\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"startNs\":0,\"tid\":42}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":4,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":250,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":true,\"key\":{\"rowID\":3,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":1000,\"startNs\":50},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":2,\"table\":\"callstack\"},\"name\":\"42\",\"parentEventKey\":null,\"pid\":42,\"processKey\":{\"ipid\":-10},\"processName\":\"worker 42\",\"range\":{\"endNs\":100,\"startNs\":100},\"threadKey\":{\"itid\":-11},\"threadName\":\"worker 42\",\"tid\":42}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-full/search/39",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-full/search/40",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-full/search/41",
+    "steps": []
+  },
+  {
+    "id": "search-full/search/42",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-full/search/43",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-full/search/44",
+    "steps": []
+  },
+  {
+    "id": "search-full/search/45",
+    "results": {
+      "items": [
+        {
+          "eventKey": {
+            "rowID": 51,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -9223372036854775808
+          },
+          "range": {
+            "endNs": 511,
+            "startNs": 510
+          },
+          "threadKey": {
+            "itid": -9223372036854775808
+          },
+          "title": "collision"
+        },
+        {
+          "eventKey": {
+            "rowID": 50,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "range": {
+            "endNs": 521,
+            "startNs": 520
+          },
+          "threadKey": {
+            "itid": -40
+          },
+          "title": "collision"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":51,\"table\":\"callstack\"},\"name\":\"collision\",\"parentEventKey\":null,\"pid\":7,\"processKey\":{\"ipid\":-9223372036854775808},\"processName\":\"minimum\",\"range\":{\"endNs\":511,\"startNs\":510},\"threadKey\":{\"itid\":-9223372036854775808},\"threadName\":\"minimum\",\"tid\":7},{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":50,\"table\":\"callstack\"},\"name\":\"collision\",\"parentEventKey\":null,\"pid\":null,\"processKey\":null,\"processName\":null,\"range\":{\"endNs\":521,\"startNs\":520},\"threadKey\":{\"itid\":-40},\"threadName\":\"optional source\",\"tid\":8}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/00",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/01",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/02",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/03",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":-42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":-42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/04",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/05",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/06",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/07",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/08",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/09",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/10",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/11",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/12",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/13",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":-11}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/14",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/15",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":-11}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/16",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/17",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/18",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/19",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/20",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-9223372036854775808}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/21",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":9223372036854775807}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/22",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/23",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/24",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/25",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/26",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/27",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/28",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/29",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/30",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/31",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/32",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/33",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/34",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":2,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":2,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/35",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":3,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":3,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/36",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":4,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":4,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/37",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":6,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":6,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-empty/search/38",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":1001,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":1001,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-empty/search/39",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-empty/search/40",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-empty/search/41",
+    "steps": []
+  },
+  {
+    "id": "search-empty/search/42",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-empty/search/43",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-empty/search/44",
+    "steps": []
+  },
+  {
+    "id": "search-empty/search/45",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":false,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/00",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/01",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"+42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/02",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"042\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/03",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":-42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":-42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"-42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/04",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/05",
+    "results": {
+      "items": [
+        {
+          "eventKey": {
+            "rowID": 1,
+            "table": "callstack"
+          },
+          "kind": "slice",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "worker"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"worker\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[{\"category\":null,\"depth\":null,\"isAsync\":false,\"isOpenEnded\":false,\"key\":{\"rowID\":1,\"table\":\"callstack\"},\"name\":\"worker\",\"parentEventKey\":null,\"pid\":900,\"processKey\":{\"ipid\":-10},\"processName\":\"process\",\"range\":{\"endNs\":0,\"startNs\":0},\"threadKey\":{\"itid\":-11},\"threadName\":\"thread\",\"tid\":901}],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/06",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/07",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"é\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/08",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"literal %_\\\\\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/09",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"quoted'name\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/10",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"same\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/11",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"missing\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/12",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "subtitle": "PID 900 · ipid -10",
+          "title": "process"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-10},\"name\":\"process\",\"pid\":900,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:-10\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/13",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "subtitle": "TID 901 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "thread"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":-11}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"thread\",\"pid\":900,\"processKey\":{\"ipid\":-10},\"processName\":\"process\",\"startNs\":0,\"tid\":901}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:-11\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/14",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "subtitle": "PID 900 · ipid -10",
+          "title": "process"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-10},\"name\":\"process\",\"pid\":900,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"IPID:-10\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/15",
+    "results": {
+      "items": [
+        {
+          "kind": "thread",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "subtitle": "TID 901 · itid -11",
+          "threadKey": {
+            "itid": -11
+          },
+          "title": "thread"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":-11}",
+        "result": "{\"items\":[{\"endNs\":null,\"isMainThread\":null,\"key\":{\"itid\":-11},\"name\":\"thread\",\"pid\":900,\"processKey\":{\"ipid\":-10},\"processName\":\"process\",\"startNs\":0,\"tid\":901}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"\\n ITID:-11​\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/16",
+    "results": {
+      "items": [
+        {
+          "kind": "process",
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "subtitle": "PID 900 · ipid -10",
+          "title": "process"
+        }
+      ],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-10}",
+        "result": "{\"items\":[{\"endNs\":null,\"key\":{\"ipid\":-10},\"name\":\"process\",\"pid\":900,\"startNs\":0,\"threadCount\":null}],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"​ipid:-10​\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/17",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"﻿ipid:-10﻿\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/18",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/19",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/20",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"processKey\":-9223372036854775808}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:-9223372036854775808\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/21",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"threadKey\":9223372036854775807}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"itid:9223372036854775807\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/22",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"ipid:9223372036854775808\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/23",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\" \",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/24",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42 \",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/25",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\" 42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/26",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"+\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/27",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":0}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"-0\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/28",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/29",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/30",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/31",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/32",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/33",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/34",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":2,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":2,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":2,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/35",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":3,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":3,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":3,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/36",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":4,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":4,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":4,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/37",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":6,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":6,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":6,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "id": "search-optional/search/38",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":1001,\"nameMatch\":\"exact\",\"pid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":1001,\"nameMatch\":\"exact\",\"tid\":42}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":1001,\"name\":\"42\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-optional/search/39",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-optional/search/40",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-optional/search/41",
+    "steps": []
+  },
+  {
+    "id": "search-optional/search/42",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-optional/search/43",
+    "steps": []
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "search-optional/search/44",
+    "steps": []
+  },
+  {
+    "id": "search-optional/search/45",
+    "results": {
+      "items": [],
+      "truncated": false
+    },
+    "steps": [
+      {
+        "kind": "metadata",
+        "query": "{}",
+        "result": "{\"durationNs\":1000}"
+      },
+      {
+        "kind": "processes",
+        "query": "{\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "threads",
+        "query": "{\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\"}",
+        "result": "{\"items\":[],\"truncated\":false}"
+      },
+      {
+        "kind": "slices",
+        "query": "{\"includesArgumentSet\":false,\"limit\":21,\"name\":\"collision\",\"nameMatch\":\"contains\",\"range\":{\"endNs\":1000,\"startNs\":0}}",
+        "result": "{\"capabilityAvailable\":true,\"items\":[],\"truncated\":false}"
+      }
+    ]
+  }
+]

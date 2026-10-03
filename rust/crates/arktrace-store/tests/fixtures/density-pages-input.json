@@ -1,0 +1,3193 @@
+{
+  "schemaSQL": "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);\nCREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);\nCREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);\nCREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);\nCREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);\nCREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur);\nCREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid,ts,dur);\nCREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid,ts,dur);\n",
+  "fixtures": [
+    {
+      "id": "density-full",
+      "sql": "\nINSERT INTO process VALUES(0,0,'zero',1000),(10,42,'other',1000);\nINSERT INTO thread VALUES(0,0,'zero',1000,0),(11,43,'other',1000,10);\nINSERT INTO sched_slice VALUES(5,900,300,0,-11,-10),(2,950,100,0,-11,-10),(3,1100,0,0,-11,-10),(4,1150,NULL,0,-11,-10),(6,1200,-1,0,-11,NULL),(7,1300,100,1,11,10),(8,1400,0,0,0,0),(9,2000,0,0,-11,-10),(10,1450,5000,0,-11,-10),(11,1500,30,0,-11,-10),(12,1500,30,0,11,10);\nINSERT INTO thread_state VALUES(5,900,300,-11,'R'),(2,950,100,-11,'S'),(3,1100,0,-11,'D'),(4,1150,NULL,-11,'R+'),(6,1200,-1,-11,''),(7,1300,100,11,'S'),(8,1400,0,-11,NULL),(9,2000,0,-11,'R'),(10,1450,5000,-11,CAST(x'80' AS TEXT)),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nINSERT INTO callstack VALUES(5,900,300,-11,'before'),(2,950,100,-11,'short'),(3,1100,0,-11,'instant'),(4,1150,NULL,-11,'open'),(6,1200,-1,0,'unassociated'),(7,1300,100,11,'other'),(8,1400,0,0,''),(9,2000,0,-11,'end'),(10,1450,5000,-11,'long'),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nCREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);INSERT INTO frame_slice VALUES(5,900,300,1,-10,0,1),(2,950,100,1,-10,0,2),(3,1100,0,2,-10,0,3),(4,1150,NULL,2,-10,0,-99),(6,1200,-1,3,NULL,0,NULL),(7,1300,100,3,10,9,1),(8,1400,0,4,0,0,2),(9,2000,0,4,-10,0,1),(10,1450,5000,5,-10,0,2);CREATE TABLE cpu_measure_filter(id INTEGER,cpu INTEGER,name TEXT);INSERT INTO cpu_measure_filter VALUES(3,0,'cpu'),(4,1,'other');\nCREATE TABLE process_measure_filter(id INTEGER,ipid INTEGER,name TEXT);INSERT INTO process_measure_filter VALUES(3,-10,'process'),(4,10,'other');CREATE TABLE measure(ts INTEGER,dur INTEGER,value REAL,filter_id INTEGER);INSERT INTO measure VALUES(900,300,1,3),(950,100,2,3),(1100,0,3,3),(1150,NULL,4,3),(1200,-1,5,3),(1300,100,6,4),(1400,'bad',7,3),(2000,0,8,3),(1450,5000,9,3),(1500,x'00',NULL,3),(1510,30,'bad',3);CREATE TABLE process_measure(ts INTEGER,dur INTEGER,value REAL,filter_id INTEGER);INSERT INTO process_measure VALUES(900,300,10,3),(1100,0,11,3),(1200,-1,12,3),(1400,1.5,13,3),(1500,9223372036854775807,14,3),(2000,0,15,3);"
+    },
+    {
+      "id": "density-empty",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);CREATE TABLE cpu_measure_filter(id INTEGER,cpu INTEGER,name TEXT);INSERT INTO cpu_measure_filter VALUES(3,0,'cpu'),(4,1,'other');\nCREATE TABLE process_measure_filter(id INTEGER,ipid INTEGER,name TEXT);INSERT INTO process_measure_filter VALUES(3,-10,'process'),(4,10,'other');CREATE TABLE measure(ts INTEGER,dur INTEGER,value REAL,filter_id INTEGER);CREATE TABLE process_measure(ts INTEGER,dur INTEGER,value REAL,filter_id INTEGER);"
+    },
+    {
+      "id": "density-missing",
+      "sql": "\nINSERT INTO process VALUES(0,0,'zero',1000),(10,42,'other',1000);\nINSERT INTO thread VALUES(0,0,'zero',1000,0),(11,43,'other',1000,10);\nINSERT INTO sched_slice VALUES(5,900,300,0,-11,-10),(2,950,100,0,-11,-10),(3,1100,0,0,-11,-10),(4,1150,NULL,0,-11,-10),(6,1200,-1,0,-11,NULL),(7,1300,100,1,11,10),(8,1400,0,0,0,0),(9,2000,0,0,-11,-10),(10,1450,5000,0,-11,-10),(11,1500,30,0,-11,-10),(12,1500,30,0,11,10);\nINSERT INTO thread_state VALUES(5,900,300,-11,'R'),(2,950,100,-11,'S'),(3,1100,0,-11,'D'),(4,1150,NULL,-11,'R+'),(6,1200,-1,-11,''),(7,1300,100,11,'S'),(8,1400,0,-11,NULL),(9,2000,0,-11,'R'),(10,1450,5000,-11,CAST(x'80' AS TEXT)),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nINSERT INTO callstack VALUES(5,900,300,-11,'before'),(2,950,100,-11,'short'),(3,1100,0,-11,'instant'),(4,1150,NULL,-11,'open'),(6,1200,-1,0,'unassociated'),(7,1300,100,11,'other'),(8,1400,0,0,''),(9,2000,0,-11,'end'),(10,1450,5000,-11,'long'),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\n"
+    },
+    {
+      "id": "density-no-duration",
+      "sql": "\nINSERT INTO process VALUES(0,0,'zero',1000),(10,42,'other',1000);\nINSERT INTO thread VALUES(0,0,'zero',1000,0),(11,43,'other',1000,10);\nINSERT INTO sched_slice VALUES(5,900,300,0,-11,-10),(2,950,100,0,-11,-10),(3,1100,0,0,-11,-10),(4,1150,NULL,0,-11,-10),(6,1200,-1,0,-11,NULL),(7,1300,100,1,11,10),(8,1400,0,0,0,0),(9,2000,0,0,-11,-10),(10,1450,5000,0,-11,-10),(11,1500,30,0,-11,-10),(12,1500,30,0,11,10);\nINSERT INTO thread_state VALUES(5,900,300,-11,'R'),(2,950,100,-11,'S'),(3,1100,0,-11,'D'),(4,1150,NULL,-11,'R+'),(6,1200,-1,-11,''),(7,1300,100,11,'S'),(8,1400,0,-11,NULL),(9,2000,0,-11,'R'),(10,1450,5000,-11,CAST(x'80' AS TEXT)),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nINSERT INTO callstack VALUES(5,900,300,-11,'before'),(2,950,100,-11,'short'),(3,1100,0,-11,'instant'),(4,1150,NULL,-11,'open'),(6,1200,-1,0,'unassociated'),(7,1300,100,11,'other'),(8,1400,0,0,''),(9,2000,0,-11,'end'),(10,1450,5000,-11,'long'),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nCREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);INSERT INTO frame_slice VALUES(5,900,300,1,-10,0,1),(2,950,100,1,-10,0,2),(3,1100,0,2,-10,0,3),(4,1150,NULL,2,-10,0,-99),(6,1200,-1,3,NULL,0,NULL),(7,1300,100,3,10,9,1),(8,1400,0,4,0,0,2),(9,2000,0,4,-10,0,1),(10,1450,5000,5,-10,0,2);CREATE TABLE cpu_measure_filter(id INTEGER,cpu INTEGER,name TEXT);INSERT INTO cpu_measure_filter VALUES(3,0,'cpu'),(4,1,'other');\nCREATE TABLE process_measure_filter(id INTEGER,ipid INTEGER,name TEXT);INSERT INTO process_measure_filter VALUES(3,-10,'process'),(4,10,'other');CREATE TABLE measure(ts INTEGER,value REAL,filter_id INTEGER);INSERT INTO measure VALUES(999,1,3),(1000,2,3),(1100,'bad',3),(1999,NULL,3),(2000,5,3);CREATE TABLE process_measure(ts INTEGER,value REAL,filter_id INTEGER);INSERT INTO process_measure VALUES(1000,1,3),(1200,2,3);"
+    },
+    {
+      "id": "density-many",
+      "sql": "WITH RECURSIVE n(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM n WHERE x<299) INSERT INTO sched_slice SELECT x,1000+x,1,0,-11,-10 FROM n;WITH RECURSIVE n(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM n WHERE x<299) INSERT INTO thread_state SELECT x,1000+x,1,-11,'R' FROM n;WITH RECURSIVE n(x) AS (VALUES(0) UNION ALL SELECT x+1 FROM n WHERE x<299) INSERT INTO callstack SELECT x,1000+x,1,-11,'name' FROM n;"
+    },
+    {
+      "id": "density-extreme",
+      "sql": "UPDATE trace_range SET start_ts=0,end_ts=9223372036854775807;INSERT INTO sched_slice VALUES(1,9223372036854775707,100,0,-11,-10);INSERT INTO thread_state VALUES(1,9223372036854775707,100,-11,'R');INSERT INTO callstack VALUES(1,9223372036854775707,100,-11,'huge');CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);INSERT INTO frame_slice VALUES(1,9223372036854775707,100,1,-10,0,-99);CREATE TABLE cpu_measure_filter(id INTEGER,cpu INTEGER,name TEXT);INSERT INTO cpu_measure_filter VALUES(3,0,'cpu'),(4,1,'other');\nCREATE TABLE process_measure_filter(id INTEGER,ipid INTEGER,name TEXT);INSERT INTO process_measure_filter VALUES(3,-10,'process'),(4,10,'other');CREATE TABLE measure(ts INTEGER,dur INTEGER,value REAL,filter_id INTEGER);INSERT INTO measure VALUES(9223372036854775707,9223372036854775807,1,3);\nINSERT INTO sched_slice VALUES(2,0,1,0,-11,-10),(3,1,1,0,-11,-10),(4,2,1,0,-11,-10);INSERT INTO thread_state VALUES(2,0,1,-11,'R'),(3,1,1,-11,'S'),(4,2,1,-11,'D');INSERT INTO callstack VALUES(2,0,1,-11,'low'),(3,1,1,-11,'low'),(4,2,1,-11,'low');"
+    },
+    {
+      "id": "density-invalid-identities",
+      "sql": "\nINSERT INTO process VALUES(0,0,'zero',1000),(10,42,'other',1000);\nINSERT INTO thread VALUES(0,0,'zero',1000,0),(11,43,'other',1000,10);\nINSERT INTO sched_slice VALUES(5,900,300,0,-11,-10),(2,950,100,0,-11,-10),(3,1100,0,0,-11,-10),(4,1150,NULL,0,-11,-10),(6,1200,-1,0,-11,NULL),(7,1300,100,1,11,10),(8,1400,0,0,0,0),(9,2000,0,0,-11,-10),(10,1450,5000,0,-11,-10),(11,1500,30,0,-11,-10),(12,1500,30,0,11,10);\nINSERT INTO thread_state VALUES(5,900,300,-11,'R'),(2,950,100,-11,'S'),(3,1100,0,-11,'D'),(4,1150,NULL,-11,'R+'),(6,1200,-1,-11,''),(7,1300,100,11,'S'),(8,1400,0,-11,NULL),(9,2000,0,-11,'R'),(10,1450,5000,-11,CAST(x'80' AS TEXT)),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nINSERT INTO callstack VALUES(5,900,300,-11,'before'),(2,950,100,-11,'short'),(3,1100,0,-11,'instant'),(4,1150,NULL,-11,'open'),(6,1200,-1,0,'unassociated'),(7,1300,100,11,'other'),(8,1400,0,0,''),(9,2000,0,-11,'end'),(10,1450,5000,-11,'long'),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nCREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);INSERT INTO frame_slice VALUES(5,900,300,1,-10,0,1),(2,950,100,1,-10,0,2),(3,1100,0,2,-10,0,3),(4,1150,NULL,2,-10,0,-99),(6,1200,-1,3,NULL,0,NULL),(7,1300,100,3,10,9,1),(8,1400,0,4,0,0,2),(9,2000,0,4,-10,0,1),(10,1450,5000,5,-10,0,2);UPDATE process SET pid=0 WHERE ipid=-10;UPDATE thread SET tid=-1 WHERE itid=-11;UPDATE thread_state SET state='' WHERE id=5;UPDATE callstack SET name=CAST(x'80' AS TEXT) WHERE id=5;UPDATE frame_slice SET flag='bad' WHERE id=5;"
+    },
+    {
+      "id": "density-long-text",
+      "sql": "\nINSERT INTO process VALUES(0,0,'zero',1000),(10,42,'other',1000);\nINSERT INTO thread VALUES(0,0,'zero',1000,0),(11,43,'other',1000,10);\nINSERT INTO sched_slice VALUES(5,900,300,0,-11,-10),(2,950,100,0,-11,-10),(3,1100,0,0,-11,-10),(4,1150,NULL,0,-11,-10),(6,1200,-1,0,-11,NULL),(7,1300,100,1,11,10),(8,1400,0,0,0,0),(9,2000,0,0,-11,-10),(10,1450,5000,0,-11,-10),(11,1500,30,0,-11,-10),(12,1500,30,0,11,10);\nINSERT INTO thread_state VALUES(5,900,300,-11,'R'),(2,950,100,-11,'S'),(3,1100,0,-11,'D'),(4,1150,NULL,-11,'R+'),(6,1200,-1,-11,''),(7,1300,100,11,'S'),(8,1400,0,-11,NULL),(9,2000,0,-11,'R'),(10,1450,5000,-11,CAST(x'80' AS TEXT)),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nINSERT INTO callstack VALUES(5,900,300,-11,'before'),(2,950,100,-11,'short'),(3,1100,0,-11,'instant'),(4,1150,NULL,-11,'open'),(6,1200,-1,0,'unassociated'),(7,1300,100,11,'other'),(8,1400,0,0,''),(9,2000,0,-11,'end'),(10,1450,5000,-11,'long'),(11,1500,30,-11,'winner1'),(12,1500,30,-11,'winner2');\nCREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);INSERT INTO frame_slice VALUES(5,900,300,1,-10,0,1),(2,950,100,1,-10,0,2),(3,1100,0,2,-10,0,3),(4,1150,NULL,2,-10,0,-99),(6,1200,-1,3,NULL,0,NULL),(7,1300,100,3,10,9,1),(8,1400,0,4,0,0,2),(9,2000,0,4,-10,0,1),(10,1450,5000,5,-10,0,2);UPDATE thread_state SET state=replace(hex(zeroblob(129)),'0','x') WHERE id=5;UPDATE callstack SET name=replace(hex(zeroblob(2049)),'0','x') WHERE id=5;"
+    }
+  ],
+  "cases": [
+    {
+      "id": "density-full/0/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/0/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/0/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/1/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/1/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/1/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/2/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/2/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/2/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/3/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/3/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/3/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/4/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/4/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/4/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/5/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/5/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/5/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/6/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/6/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/6/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/7/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/7/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/7/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/8/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/8/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/8/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-full/9/0",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/9/1",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 100,
+          "endNs": 501
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-full/9/2",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-empty/0/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/1/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/2/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/3/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/4/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/5/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/6/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/7/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/8/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-empty/9/0",
+      "fixture": "density-empty",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/0/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/1/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/2/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/3/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/4/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/5/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/6/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/7/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/8/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/9/0",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/0/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/1/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/2/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/3/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/4/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/5/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/6/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/7/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/8/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-no-duration/9/0",
+      "fixture": "density-no-duration",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-many/0/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/1/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/2/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/3/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/4/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/5/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/6/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/7/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/8/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-many/9/0",
+      "fixture": "density-many",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 40000
+      }
+    },
+    {
+      "id": "density-extreme/0/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/0/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/1/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/1/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/2/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/2/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/3/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/3/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/4/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/4/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/5/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/5/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/6/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/6/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/7/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/7/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/8/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/8/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-extreme/9/0",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 1
+      }
+    },
+    {
+      "id": "density-extreme/9/1",
+      "fixture": "density-extreme",
+      "query": {
+        "range": {
+          "startNs": 9223372036854775607,
+          "endNs": 9223372036854775807
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 3
+      }
+    },
+    {
+      "id": "density-invalid-identities/0/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/1/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/2/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/3/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/4/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/5/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/6/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/7/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/8/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-invalid-identities/9/0",
+      "fixture": "density-invalid-identities",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/0/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/1/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/2/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/3/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/4/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/5/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/6/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/7/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/8/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-long-text/9/0",
+      "fixture": "density-long-text",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/0/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/0/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/0/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/0/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/1/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/1/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/1/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/1/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/2/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/2/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/2/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/2/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/3/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/3/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/3/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/3/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/4/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/4/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/4/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/4/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/5/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/5/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/5/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/5/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/6/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/6/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/6/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/6/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/7/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/7/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/7/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/7/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/8/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/8/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/8/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/8/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/9/invalid-zero",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-full/9/invalid-over",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-full/9/invalid-instant",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-full/9/invalid-past",
+      "fixture": "density-full",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/0/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/0/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/0/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/0/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "cpu": {
+            "_0": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/1/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/1/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/1/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/1/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "threadState": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/2/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/2/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/2/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/2/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "namedSlice": {
+            "_0": {
+              "itid": -11
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/3/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/3/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/3/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/3/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "namedSlice": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/4/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/4/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/4/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/4/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/5/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/5/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/5/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/5/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "cpuCounter": {
+            "filterID": 3,
+            "cpu": 0
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/6/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/6/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/6/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/6/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/7/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/7/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/7/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/7/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "processCounter": {
+            "filterID": 3,
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/8/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/8/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/8/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/8/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "frame": {}
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/9/invalid-zero",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 0
+      }
+    },
+    {
+      "id": "density-missing/9/invalid-over",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 40001
+      }
+    },
+    {
+      "id": "density-missing/9/invalid-instant",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    },
+    {
+      "id": "density-missing/9/invalid-past",
+      "fixture": "density-missing",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "source": {
+          "frame": {
+            "processKey": {
+              "ipid": -10
+            }
+          }
+        },
+        "bucketCount": 4
+      }
+    }
+  ]
+}

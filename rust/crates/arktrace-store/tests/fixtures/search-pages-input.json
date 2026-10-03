@@ -1,0 +1,1261 @@
+{
+  "schemaSQL": "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);\nCREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);\nCREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);\nCREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);\nCREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);\nCREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);",
+  "fixtures": [
+    {
+      "id": "search-full",
+      "sql": "ALTER TABLE process ADD COLUMN end_ts INTEGER;ALTER TABLE thread ADD COLUMN end_ts INTEGER;\nALTER TABLE callstack ADD COLUMN category TEXT;\nDELETE FROM process;DELETE FROM thread;\nINSERT INTO process(ipid,pid,name,start_ts,end_ts) VALUES(-10,42,'worker 42',900,1200),(-20,42,NULL,1500,NULL),(-30,42,CAST(x'ff' AS TEXT),1800,1700),(7,5,'é',1000,2000),(8,5,'é',1000,2000),(11,42,'same',1000,2000),(12,42,'same',1000,2000),(-9223372036854775808,7,'minimum',1000,2000),(9223372036854775807,7,'maximum',1000,2000);\nINSERT INTO thread(itid,tid,name,start_ts,ipid,end_ts) VALUES(-11,42,'worker 42',900,-10,1200),(-21,42,NULL,1500,-20,NULL),(-31,42,CAST(x'ff' AS TEXT),1800,-30,1700),(21,5,'é',1000,7,2000),(22,5,'é',1000,8,2000),(-9223372036854775808,7,'minimum',1000,-9223372036854775808,2000),(9223372036854775807,7,'maximum',1000,9223372036854775807,2000);\nINSERT INTO callstack(id,ts,dur,callid,name,category) VALUES(4,950,300,-11,'42','cat'),(2,1100,0,-11,'42',NULL),(3,1050,-1,-11,'42','open'),(7,1200,NULL,21,'é',NULL),(8,1300,100,22,'é',''),(9,2000,0,-11,'42','excluded'),(10,1400,1,-11,'literal %_\\','escaped'),(11,1450,1,-11,'quoted''name','literal');\n\nINSERT INTO thread(itid,tid,name,start_ts,ipid,end_ts) VALUES(-40,8,'optional source',1000,0,2000);\nINSERT INTO callstack(id,ts,dur,callid,name,category) VALUES(50,1520,1,-40,'collision',NULL),(51,1510,1,-9223372036854775808,'collision',NULL);\n"
+    },
+    {
+      "id": "search-empty",
+      "sql": "DELETE FROM thread;DELETE FROM process;"
+    },
+    {
+      "id": "search-optional",
+      "sql": "INSERT INTO callstack VALUES(1,1000,0,-11,'worker');"
+    }
+  ],
+  "cases": [
+    {
+      "id": "search-full/search/00",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/01",
+      "fixture": "search-full",
+      "query": {
+        "text": "+42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/02",
+      "fixture": "search-full",
+      "query": {
+        "text": "042",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/03",
+      "fixture": "search-full",
+      "query": {
+        "text": "-42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/04",
+      "fixture": "search-full",
+      "query": {
+        "text": "0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/05",
+      "fixture": "search-full",
+      "query": {
+        "text": "worker",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/06",
+      "fixture": "search-full",
+      "query": {
+        "text": "é",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/07",
+      "fixture": "search-full",
+      "query": {
+        "text": "é",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/08",
+      "fixture": "search-full",
+      "query": {
+        "text": "literal %_\\",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/09",
+      "fixture": "search-full",
+      "query": {
+        "text": "quoted'name",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/10",
+      "fixture": "search-full",
+      "query": {
+        "text": "same",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/11",
+      "fixture": "search-full",
+      "query": {
+        "text": "missing",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/12",
+      "fixture": "search-full",
+      "query": {
+        "text": "ipid:-10",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/13",
+      "fixture": "search-full",
+      "query": {
+        "text": "itid:-11",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/14",
+      "fixture": "search-full",
+      "query": {
+        "text": "IPID:-10",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/15",
+      "fixture": "search-full",
+      "query": {
+        "text": "\n ITID:-11​",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/16",
+      "fixture": "search-full",
+      "query": {
+        "text": "​ipid:-10​",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/17",
+      "fixture": "search-full",
+      "query": {
+        "text": "﻿ipid:-10﻿",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/18",
+      "fixture": "search-full",
+      "query": {
+        "text": "ipid:0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/19",
+      "fixture": "search-full",
+      "query": {
+        "text": "itid:0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/20",
+      "fixture": "search-full",
+      "query": {
+        "text": "ipid:-9223372036854775808",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/21",
+      "fixture": "search-full",
+      "query": {
+        "text": "itid:9223372036854775807",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/22",
+      "fixture": "search-full",
+      "query": {
+        "text": "ipid:9223372036854775808",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/23",
+      "fixture": "search-full",
+      "query": {
+        "text": " ",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/24",
+      "fixture": "search-full",
+      "query": {
+        "text": "42 ",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/25",
+      "fixture": "search-full",
+      "query": {
+        "text": " 42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/26",
+      "fixture": "search-full",
+      "query": {
+        "text": "+",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/27",
+      "fixture": "search-full",
+      "query": {
+        "text": "-0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/28",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 1
+      }
+    },
+    {
+      "id": "search-full/search/29",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 2
+      }
+    },
+    {
+      "id": "search-full/search/30",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 4
+      }
+    },
+    {
+      "id": "search-full/search/31",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 6
+      }
+    },
+    {
+      "id": "search-full/search/32",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 8
+      }
+    },
+    {
+      "id": "search-full/search/33",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": -1
+      }
+    },
+    {
+      "id": "search-full/search/34",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 1,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/35",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 2,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/36",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 3,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/37",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 5,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/38",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 1000,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/39",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 0,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/40",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 1001,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/41",
+      "fixture": "search-full",
+      "query": {
+        "text": "",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/42",
+      "fixture": "search-full",
+      "query": {
+        "text": "中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/43",
+      "fixture": "search-full",
+      "query": {
+        "text": "中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中aa",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-full/search/44",
+      "fixture": "search-full",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 0
+      }
+    },
+    {
+      "id": "search-empty/search/00",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/01",
+      "fixture": "search-empty",
+      "query": {
+        "text": "+42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/02",
+      "fixture": "search-empty",
+      "query": {
+        "text": "042",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/03",
+      "fixture": "search-empty",
+      "query": {
+        "text": "-42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/04",
+      "fixture": "search-empty",
+      "query": {
+        "text": "0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/05",
+      "fixture": "search-empty",
+      "query": {
+        "text": "worker",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/06",
+      "fixture": "search-empty",
+      "query": {
+        "text": "é",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/07",
+      "fixture": "search-empty",
+      "query": {
+        "text": "é",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/08",
+      "fixture": "search-empty",
+      "query": {
+        "text": "literal %_\\",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/09",
+      "fixture": "search-empty",
+      "query": {
+        "text": "quoted'name",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/10",
+      "fixture": "search-empty",
+      "query": {
+        "text": "same",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/11",
+      "fixture": "search-empty",
+      "query": {
+        "text": "missing",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/12",
+      "fixture": "search-empty",
+      "query": {
+        "text": "ipid:-10",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/13",
+      "fixture": "search-empty",
+      "query": {
+        "text": "itid:-11",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/14",
+      "fixture": "search-empty",
+      "query": {
+        "text": "IPID:-10",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/15",
+      "fixture": "search-empty",
+      "query": {
+        "text": "\n ITID:-11​",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/16",
+      "fixture": "search-empty",
+      "query": {
+        "text": "​ipid:-10​",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/17",
+      "fixture": "search-empty",
+      "query": {
+        "text": "﻿ipid:-10﻿",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/18",
+      "fixture": "search-empty",
+      "query": {
+        "text": "ipid:0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/19",
+      "fixture": "search-empty",
+      "query": {
+        "text": "itid:0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/20",
+      "fixture": "search-empty",
+      "query": {
+        "text": "ipid:-9223372036854775808",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/21",
+      "fixture": "search-empty",
+      "query": {
+        "text": "itid:9223372036854775807",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/22",
+      "fixture": "search-empty",
+      "query": {
+        "text": "ipid:9223372036854775808",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/23",
+      "fixture": "search-empty",
+      "query": {
+        "text": " ",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/24",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42 ",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/25",
+      "fixture": "search-empty",
+      "query": {
+        "text": " 42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/26",
+      "fixture": "search-empty",
+      "query": {
+        "text": "+",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/27",
+      "fixture": "search-empty",
+      "query": {
+        "text": "-0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/28",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 1
+      }
+    },
+    {
+      "id": "search-empty/search/29",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 2
+      }
+    },
+    {
+      "id": "search-empty/search/30",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 4
+      }
+    },
+    {
+      "id": "search-empty/search/31",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 6
+      }
+    },
+    {
+      "id": "search-empty/search/32",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 8
+      }
+    },
+    {
+      "id": "search-empty/search/33",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": -1
+      }
+    },
+    {
+      "id": "search-empty/search/34",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 1,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/35",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 2,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/36",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 3,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/37",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 5,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/38",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 1000,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/39",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 0,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/40",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 1001,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/41",
+      "fixture": "search-empty",
+      "query": {
+        "text": "",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/42",
+      "fixture": "search-empty",
+      "query": {
+        "text": "中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/43",
+      "fixture": "search-empty",
+      "query": {
+        "text": "中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中aa",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/44",
+      "fixture": "search-empty",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 0
+      }
+    },
+    {
+      "id": "search-optional/search/00",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/01",
+      "fixture": "search-optional",
+      "query": {
+        "text": "+42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/02",
+      "fixture": "search-optional",
+      "query": {
+        "text": "042",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/03",
+      "fixture": "search-optional",
+      "query": {
+        "text": "-42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/04",
+      "fixture": "search-optional",
+      "query": {
+        "text": "0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/05",
+      "fixture": "search-optional",
+      "query": {
+        "text": "worker",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/06",
+      "fixture": "search-optional",
+      "query": {
+        "text": "é",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/07",
+      "fixture": "search-optional",
+      "query": {
+        "text": "é",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/08",
+      "fixture": "search-optional",
+      "query": {
+        "text": "literal %_\\",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/09",
+      "fixture": "search-optional",
+      "query": {
+        "text": "quoted'name",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/10",
+      "fixture": "search-optional",
+      "query": {
+        "text": "same",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/11",
+      "fixture": "search-optional",
+      "query": {
+        "text": "missing",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/12",
+      "fixture": "search-optional",
+      "query": {
+        "text": "ipid:-10",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/13",
+      "fixture": "search-optional",
+      "query": {
+        "text": "itid:-11",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/14",
+      "fixture": "search-optional",
+      "query": {
+        "text": "IPID:-10",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/15",
+      "fixture": "search-optional",
+      "query": {
+        "text": "\n ITID:-11​",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/16",
+      "fixture": "search-optional",
+      "query": {
+        "text": "​ipid:-10​",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/17",
+      "fixture": "search-optional",
+      "query": {
+        "text": "﻿ipid:-10﻿",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/18",
+      "fixture": "search-optional",
+      "query": {
+        "text": "ipid:0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/19",
+      "fixture": "search-optional",
+      "query": {
+        "text": "itid:0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/20",
+      "fixture": "search-optional",
+      "query": {
+        "text": "ipid:-9223372036854775808",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/21",
+      "fixture": "search-optional",
+      "query": {
+        "text": "itid:9223372036854775807",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/22",
+      "fixture": "search-optional",
+      "query": {
+        "text": "ipid:9223372036854775808",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/23",
+      "fixture": "search-optional",
+      "query": {
+        "text": " ",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/24",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42 ",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/25",
+      "fixture": "search-optional",
+      "query": {
+        "text": " 42",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/26",
+      "fixture": "search-optional",
+      "query": {
+        "text": "+",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/27",
+      "fixture": "search-optional",
+      "query": {
+        "text": "-0",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/28",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 1
+      }
+    },
+    {
+      "id": "search-optional/search/29",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 2
+      }
+    },
+    {
+      "id": "search-optional/search/30",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 4
+      }
+    },
+    {
+      "id": "search-optional/search/31",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 6
+      }
+    },
+    {
+      "id": "search-optional/search/32",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 8
+      }
+    },
+    {
+      "id": "search-optional/search/33",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": -1
+      }
+    },
+    {
+      "id": "search-optional/search/34",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 1,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/35",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 2,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/36",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 3,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/37",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 5,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/38",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 1000,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/39",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 0,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/40",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 1001,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/41",
+      "fixture": "search-optional",
+      "query": {
+        "text": "",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/42",
+      "fixture": "search-optional",
+      "query": {
+        "text": "中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中a",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/43",
+      "fixture": "search-optional",
+      "query": {
+        "text": "中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中aa",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/44",
+      "fixture": "search-optional",
+      "query": {
+        "text": "42",
+        "limit": 20,
+        "domains": 0
+      }
+    },
+    {
+      "id": "search-full/search/45",
+      "fixture": "search-full",
+      "query": {
+        "text": "collision",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-empty/search/45",
+      "fixture": "search-empty",
+      "query": {
+        "text": "collision",
+        "limit": 20,
+        "domains": 7
+      }
+    },
+    {
+      "id": "search-optional/search/45",
+      "fixture": "search-optional",
+      "query": {
+        "text": "collision",
+        "limit": 20,
+        "domains": 7
+      }
+    }
+  ]
+}

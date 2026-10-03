@@ -1,0 +1,853 @@
+{
+  "schemaSQL": "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);\nCREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);\nCREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);\nCREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);\nCREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);\nCREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);",
+  "fixtures": [
+    {
+      "id": "frame-full",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER,itid INTEGER);INSERT INTO frame_slice VALUES(5,900,300,900,-10,0,1,-11),(2,950,100,900,-10,1,2,-11),(3,1100,0,901,-10,0,3,-11),(4,1150,NULL,901,-10,0,-99,NULL),(6,1200,-1,902,NULL,1,NULL,NULL),(7,1300,100,903,-10,9,1,-11),(8,1400,0,904,0,0,2,0),(9,2000,0,905,-10,0,1,-11);"
+    },
+    {
+      "id": "frame-seven",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);INSERT INTO frame_slice VALUES(1,1100,100,9,-10,0,2);"
+    },
+    {
+      "id": "frame-empty",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER,itid INTEGER);"
+    },
+    {
+      "id": "frame-absent",
+      "sql": ""
+    },
+    {
+      "id": "frame-missing-flag",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER);INSERT INTO frame_slice VALUES(1,1100,100,9,-10,0);"
+    },
+    {
+      "id": "frame-unknown-first",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER,itid INTEGER);INSERT INTO frame_slice VALUES(1,1000,1,1,-10,8,2,-11),(2,1001,1,1,-10,0,2,-11);"
+    },
+    {
+      "id": "frame-invalid-id",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER,itid INTEGER);INSERT INTO frame_slice VALUES(1,1000,1,1,-10,0,2,-11),('bad',1001,1,1,-10,0,2,-11);"
+    },
+    {
+      "id": "frame-optional",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER,itid INTEGER);UPDATE process SET name=CAST(x'ff' AS TEXT);INSERT INTO frame_slice VALUES(0,1000,1,9223372036854775807,-10,0,1.5,0),(-1,1100,1,1,0,1,NULL,NULL);"
+    },
+    {
+      "id": "frame-extremes",
+      "sql": "CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER,itid INTEGER);INSERT INTO frame_slice VALUES(-9223372036854775808,1001,9223372036854775807,-9223372036854775808,-10,0,3,-11),(9223372036854775807,1000,0,9223372036854775807,-10,1,1,-11),(0,999,1,0,-10,0,0,-11);"
+    },
+    {
+      "id": "event-clamps",
+      "sql": "INSERT INTO sched_slice VALUES(5,900,300,0,-11,-10),(2,950,100,1,-11,-10);INSERT INTO thread_state VALUES(5,900,300,-11,'R'),(2,950,100,-11,'R');INSERT INTO callstack VALUES(5,900,300,-11,'first'),(2,950,100,-11,'second');"
+    }
+  ],
+  "cases": [
+    {
+      "id": "frame-full/frames/whole",
+      "fixture": "frame-full",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-full/frames/window",
+      "fixture": "frame-full",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-full/frames/limit-one",
+      "fixture": "frame-full",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-full/frames/process",
+      "fixture": "frame-full",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-seven/frames/whole",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-seven/frames/window",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-seven/frames/limit-one",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-seven/frames/process",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-empty/frames/whole",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-empty/frames/window",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-empty/frames/limit-one",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-empty/frames/process",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-absent/frames/whole",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-absent/frames/window",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-absent/frames/limit-one",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-absent/frames/process",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-missing-flag/frames/whole",
+      "fixture": "frame-missing-flag",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-missing-flag/frames/window",
+      "fixture": "frame-missing-flag",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-missing-flag/frames/limit-one",
+      "fixture": "frame-missing-flag",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-missing-flag/frames/process",
+      "fixture": "frame-missing-flag",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-unknown-first/frames/whole",
+      "fixture": "frame-unknown-first",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-unknown-first/frames/window",
+      "fixture": "frame-unknown-first",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-unknown-first/frames/limit-one",
+      "fixture": "frame-unknown-first",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-unknown-first/frames/process",
+      "fixture": "frame-unknown-first",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-invalid-id/frames/whole",
+      "fixture": "frame-invalid-id",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-invalid-id/frames/window",
+      "fixture": "frame-invalid-id",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-invalid-id/frames/limit-one",
+      "fixture": "frame-invalid-id",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-invalid-id/frames/process",
+      "fixture": "frame-invalid-id",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-optional/frames/whole",
+      "fixture": "frame-optional",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-optional/frames/window",
+      "fixture": "frame-optional",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-optional/frames/limit-one",
+      "fixture": "frame-optional",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-optional/frames/process",
+      "fixture": "frame-optional",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-extremes/frames/whole",
+      "fixture": "frame-extremes",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-extremes/frames/window",
+      "fixture": "frame-extremes",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 150,
+          "endNs": 200
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-extremes/frames/limit-one",
+      "fixture": "frame-extremes",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "frame-extremes/frames/process",
+      "fixture": "frame-extremes",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -10,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-empty/frames/instant",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-empty/frames/outside",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-empty/frames/zero-limit",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 0
+      }
+    },
+    {
+      "id": "frame-empty/frames/over-limit",
+      "fixture": "frame-empty",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 20001
+      }
+    },
+    {
+      "id": "frame-absent/frames/instant",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-absent/frames/outside",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-absent/frames/zero-limit",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 0
+      }
+    },
+    {
+      "id": "frame-absent/frames/over-limit",
+      "fixture": "frame-absent",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 20001
+      }
+    },
+    {
+      "id": "frame-seven/frames/instant",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-seven/frames/outside",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-seven/frames/zero-limit",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 0
+      }
+    },
+    {
+      "id": "frame-seven/frames/over-limit",
+      "fixture": "frame-seven",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 20001
+      }
+    },
+    {
+      "id": "frame-full/frames/zero-process",
+      "fixture": "frame-full",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": 0,
+        "limit": 128
+      }
+    },
+    {
+      "id": "frame-full/frames/negative-process",
+      "fixture": "frame-full",
+      "view": "frames",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -123,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/cpuSlices/whole",
+      "fixture": "event-clamps",
+      "view": "cpuSlices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/cpuSlices/window",
+      "fixture": "event-clamps",
+      "view": "cpuSlices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 50
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/cpuSlices/limit-one",
+      "fixture": "event-clamps",
+      "view": "cpuSlices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "event-clamps/cpuSlices/empty-scope",
+      "fixture": "event-clamps",
+      "view": "cpuSlices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -123,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/threadStates/whole",
+      "fixture": "event-clamps",
+      "view": "threadStates",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/threadStates/window",
+      "fixture": "event-clamps",
+      "view": "threadStates",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 50
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/threadStates/limit-one",
+      "fixture": "event-clamps",
+      "view": "threadStates",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "event-clamps/threadStates/empty-scope",
+      "fixture": "event-clamps",
+      "view": "threadStates",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -123,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/slices/whole",
+      "fixture": "event-clamps",
+      "view": "slices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/slices/window",
+      "fixture": "event-clamps",
+      "view": "slices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 50
+        },
+        "processKey": null,
+        "limit": 128
+      }
+    },
+    {
+      "id": "event-clamps/slices/limit-one",
+      "fixture": "event-clamps",
+      "view": "slices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": null,
+        "limit": 1
+      }
+    },
+    {
+      "id": "event-clamps/slices/empty-scope",
+      "fixture": "event-clamps",
+      "view": "slices",
+      "query": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "processKey": -123,
+        "limit": 128
+      }
+    }
+  ]
+}

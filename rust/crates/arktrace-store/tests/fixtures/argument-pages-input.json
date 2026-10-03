@@ -1,0 +1,859 @@
+{
+  "schemaSQL": "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);\nCREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);\nCREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);\nCREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);\nCREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);\nCREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);",
+  "fixtures": [
+    {
+      "id": "argument-full",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));INSERT INTO callstack VALUES(1,1000,1,-11,'selected',5);INSERT INTO args VALUES(10,10,1,13,5),(8,12,0,13,5),(5,10,3,0,5),(3,12,2,-45,5),(0,10,99,9223372036854775807,5),(-2,12,NULL,-9223372036854775808,5),(-3,10,1,14,5),(20,10,0,7,6),(21,16,4,0,5);"
+    },
+    {
+      "id": "argument-invalid-first",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));INSERT INTO args VALUES(1,11,0,1,5),(2,10,0,2,5),(3,10,0,3,5);"
+    },
+    {
+      "id": "argument-bad-values",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));INSERT INTO args VALUES(1,999,0,1,5),(2,15,0,1,5),(3,10,1,999,5),(4,10,1,15,5),(5,10,0,NULL,5),(6,10,0,1.5,5),(7,10,0,'not an integer',5),(8,10,1.0,13,5),(9,10,'1',13,5),(10,10,0,13,5),(11,10,1,14,5),(12,10,99,-1,5);"
+    },
+    {
+      "id": "argument-sets",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));INSERT INTO callstack VALUES(1,1000,1,-11,'zero',0),(2,1100,1,-11,'negative',-5),(3,1200,1,-11,'extreme',-9223372036854775808);INSERT INTO args VALUES(1,10,0,1,0),(2,10,0,2,-5),(3,10,0,3,-9223372036854775808),(4,10,0,4,9223372036854775807),(5,10,0,5,'5x'),(6,10,0,6,5.5);"
+    },
+    {
+      "id": "argument-absent",
+      "sql": ""
+    },
+    {
+      "id": "argument-no-handle-column",
+      "sql": "CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));"
+    },
+    {
+      "id": "argument-no-dictionary",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));"
+    },
+    {
+      "id": "argument-no-type-table",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');INSERT INTO args VALUES(1,10,0,3,5);"
+    },
+    {
+      "id": "argument-no-type-desc",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER);"
+    },
+    {
+      "id": "argument-no-id",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));CREATE TABLE args(key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);INSERT INTO args VALUES(12,0,3,5),(10,0,7,5),(10,1,13,5),(10,0,2,5);"
+    },
+    {
+      "id": "argument-without-rowid",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));CREATE TABLE args(key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER,PRIMARY KEY(key,datatype,value,argset)) WITHOUT ROWID;INSERT INTO args VALUES(12,0,3,5),(10,0,7,5),(10,1,13,5),(10,0,2,5);"
+    },
+    {
+      "id": "argument-compatible-empty",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));"
+    },
+    {
+      "id": "argument-missing-value",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,argset INTEGER);"
+    },
+    {
+      "id": "argument-many",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);INSERT INTO data_dict VALUES(10,'key'),(11,''),(12,'second key'),(13,'string value'),(14,''),(15,CAST(x'ff' AS TEXT)),(16,'界%_\\');CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_type VALUES(0,'int32_t'),(1,'string'),(2,'double'),(3,'boolean'),(4,CAST(x'ff' AS TEXT));WITH RECURSIVE n(v) AS (SELECT 1 UNION ALL SELECT v+1 FROM n WHERE v<65) INSERT INTO args SELECT v,10,0,v,5 FROM n;"
+    },
+    {
+      "id": "argument-joined-ties",
+      "sql": "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;CREATE TABLE args(key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);CREATE TABLE data_dict(id INTEGER,data TEXT);CREATE TABLE data_type(typeId INTEGER,desc TEXT);INSERT INTO data_dict VALUES(10,'z-key'),(10,'a-key'),(13,'z-value'),(13,'a-value');INSERT INTO data_type VALUES(1,'z-type'),(1,'a-type');INSERT INTO args VALUES(10,1,13,5);"
+    }
+  ],
+  "cases": [
+    {
+      "id": "argument-full/whole",
+      "fixture": "argument-full",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-full/limit-one",
+      "fixture": "argument-full",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-full/empty-set",
+      "fixture": "argument-full",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-full/invalid-limit",
+      "fixture": "argument-full",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-full/over-limit",
+      "fixture": "argument-full",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-invalid-first/whole",
+      "fixture": "argument-invalid-first",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-invalid-first/limit-one",
+      "fixture": "argument-invalid-first",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-invalid-first/empty-set",
+      "fixture": "argument-invalid-first",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-invalid-first/invalid-limit",
+      "fixture": "argument-invalid-first",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-invalid-first/over-limit",
+      "fixture": "argument-invalid-first",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-bad-values/whole",
+      "fixture": "argument-bad-values",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-bad-values/limit-one",
+      "fixture": "argument-bad-values",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-bad-values/empty-set",
+      "fixture": "argument-bad-values",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-bad-values/invalid-limit",
+      "fixture": "argument-bad-values",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-bad-values/over-limit",
+      "fixture": "argument-bad-values",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/whole",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/limit-one",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/empty-set",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/invalid-limit",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/over-limit",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-absent/whole",
+      "fixture": "argument-absent",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-absent/limit-one",
+      "fixture": "argument-absent",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-absent/empty-set",
+      "fixture": "argument-absent",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-absent/invalid-limit",
+      "fixture": "argument-absent",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-absent/over-limit",
+      "fixture": "argument-absent",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-handle-column/whole",
+      "fixture": "argument-no-handle-column",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-handle-column/limit-one",
+      "fixture": "argument-no-handle-column",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-handle-column/empty-set",
+      "fixture": "argument-no-handle-column",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-handle-column/invalid-limit",
+      "fixture": "argument-no-handle-column",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-handle-column/over-limit",
+      "fixture": "argument-no-handle-column",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-dictionary/whole",
+      "fixture": "argument-no-dictionary",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-dictionary/limit-one",
+      "fixture": "argument-no-dictionary",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-dictionary/empty-set",
+      "fixture": "argument-no-dictionary",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-dictionary/invalid-limit",
+      "fixture": "argument-no-dictionary",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-dictionary/over-limit",
+      "fixture": "argument-no-dictionary",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-table/whole",
+      "fixture": "argument-no-type-table",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-table/limit-one",
+      "fixture": "argument-no-type-table",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-table/empty-set",
+      "fixture": "argument-no-type-table",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-table/invalid-limit",
+      "fixture": "argument-no-type-table",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-table/over-limit",
+      "fixture": "argument-no-type-table",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-desc/whole",
+      "fixture": "argument-no-type-desc",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-desc/limit-one",
+      "fixture": "argument-no-type-desc",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-desc/empty-set",
+      "fixture": "argument-no-type-desc",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-desc/invalid-limit",
+      "fixture": "argument-no-type-desc",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-type-desc/over-limit",
+      "fixture": "argument-no-type-desc",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-id/whole",
+      "fixture": "argument-no-id",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-id/limit-one",
+      "fixture": "argument-no-id",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-id/empty-set",
+      "fixture": "argument-no-id",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-id/invalid-limit",
+      "fixture": "argument-no-id",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-no-id/over-limit",
+      "fixture": "argument-no-id",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-without-rowid/whole",
+      "fixture": "argument-without-rowid",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-without-rowid/limit-one",
+      "fixture": "argument-without-rowid",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-without-rowid/empty-set",
+      "fixture": "argument-without-rowid",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-without-rowid/invalid-limit",
+      "fixture": "argument-without-rowid",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-without-rowid/over-limit",
+      "fixture": "argument-without-rowid",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-compatible-empty/whole",
+      "fixture": "argument-compatible-empty",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-compatible-empty/limit-one",
+      "fixture": "argument-compatible-empty",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-compatible-empty/empty-set",
+      "fixture": "argument-compatible-empty",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-compatible-empty/invalid-limit",
+      "fixture": "argument-compatible-empty",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-compatible-empty/over-limit",
+      "fixture": "argument-compatible-empty",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-missing-value/whole",
+      "fixture": "argument-missing-value",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-missing-value/limit-one",
+      "fixture": "argument-missing-value",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-missing-value/empty-set",
+      "fixture": "argument-missing-value",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-missing-value/invalid-limit",
+      "fixture": "argument-missing-value",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-missing-value/over-limit",
+      "fixture": "argument-missing-value",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-many/whole",
+      "fixture": "argument-many",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-many/limit-one",
+      "fixture": "argument-many",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-many/empty-set",
+      "fixture": "argument-many",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-many/invalid-limit",
+      "fixture": "argument-many",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-many/over-limit",
+      "fixture": "argument-many",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-joined-ties/whole",
+      "fixture": "argument-joined-ties",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-joined-ties/limit-one",
+      "fixture": "argument-joined-ties",
+      "query": {
+        "argSetID": 5,
+        "limit": 1
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-joined-ties/empty-set",
+      "fixture": "argument-joined-ties",
+      "query": {
+        "argSetID": 999,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-joined-ties/invalid-limit",
+      "fixture": "argument-joined-ties",
+      "query": {
+        "argSetID": 5,
+        "limit": 0
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-joined-ties/over-limit",
+      "fixture": "argument-joined-ties",
+      "query": {
+        "argSetID": 5,
+        "limit": 65
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/set-0",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 0,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/set--5",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": -5,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/set--9223372036854775808",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": -9223372036854775808,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/set-9223372036854775807",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 9223372036854775807,
+        "limit": 64
+      },
+      "lookup": null
+    },
+    {
+      "id": "argument-sets/inspector-zero",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": 0,
+        "limit": 64
+      },
+      "lookup": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "eventKey": {
+          "table": "callstack",
+          "rowID": 1
+        }
+      }
+    },
+    {
+      "id": "argument-sets/inspector-negative",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": -5,
+        "limit": 64
+      },
+      "lookup": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "eventKey": {
+          "table": "callstack",
+          "rowID": 2
+        }
+      }
+    },
+    {
+      "id": "argument-sets/inspector-extreme",
+      "fixture": "argument-sets",
+      "query": {
+        "argSetID": -9223372036854775808,
+        "limit": 64
+      },
+      "lookup": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "eventKey": {
+          "table": "callstack",
+          "rowID": 3
+        }
+      }
+    },
+    {
+      "id": "argument-full/inspector",
+      "fixture": "argument-full",
+      "query": {
+        "argSetID": 5,
+        "limit": 64
+      },
+      "lookup": {
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "eventKey": {
+          "table": "callstack",
+          "rowID": 1
+        }
+      }
+    },
+    {
+      "id": "argument-invalid-first/lookahead-refills",
+      "fixture": "argument-invalid-first",
+      "query": {
+        "argSetID": 5,
+        "limit": 2
+      },
+      "lookup": null
+    }
+  ]
+}

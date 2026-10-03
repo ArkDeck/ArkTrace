@@ -1,0 +1,225 @@
+{
+  "oracle": "actual Swift SQLiteTraceRepository density (six sources)",
+  "scope": "controlled SQL query semantics; no real parser/corpus/Viewer acceptance",
+  "xcode": "Xcode 27.0\nBuild version 27A266a",
+  "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+  "vectors": 190,
+  "executableSHA256": "67d6e8dffede06caa502b95f350765f4a994fe680fb544e1f019df69268eabb4",
+  "databases": [
+    {
+      "fixture": "density-full",
+      "sha256": "331fb37eb5da68248dc49c74e893758780f1c9fc76de486e2b7aa7878971b761",
+      "byteCount": 61440,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-empty",
+      "sha256": "6da01d4891e45e94c6779cadb66e3681c66128e1512bab840c2f786988554af6",
+      "byteCount": 61440,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-missing",
+      "sha256": "2f9e3ee9961a06da88ef4fc048ae7868399d40c05a3b461c3b30435922f4aab0",
+      "byteCount": 40960,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-no-duration",
+      "sha256": "041de726140d0cfda36dbed22bb6dedafa393b390ab3305e1322abd591fd3c26",
+      "byteCount": 61440,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-many",
+      "sha256": "a05934139c0ed964683badba62df7a6ac1504717ae23dbfcbebe0b729c4f35dd",
+      "byteCount": 65536,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-extreme",
+      "sha256": "e73e84dc2e854b0b67a036fe50bee6f56bb647afbf34ac80f6b17335f059f65f",
+      "byteCount": 57344,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-invalid-identities",
+      "sha256": "b250c6d3021cd6694481ee73f5f05f7d594fc4de2a4247d879f319025adbc766",
+      "byteCount": 45056,
+      "bytesUnchanged": true
+    },
+    {
+      "fixture": "density-long-text",
+      "sha256": "c6af33f8d8506dbb75376b72cbadbcc3c700557333e30040842999aef5b12ff1",
+      "byteCount": 49152,
+      "bytesUnchanged": true
+    }
+  ],
+  "sourceDigests": [
+    {
+      "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+      "byteCount": 11275
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+      "byteCount": 4367
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+      "byteCount": 1042
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+      "byteCount": 375
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+      "byteCount": 862
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+      "byteCount": 17503
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+      "byteCount": 1526
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+      "sha256": "19ff38ae4dd0245cc19ccf23bff502094feeaed028e955ba10a249905a8302da",
+      "byteCount": 11790
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "byteCount": 5258
+    },
+    {
+      "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+      "byteCount": 8071
+    },
+    {
+      "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+      "byteCount": 3147
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+      "byteCount": 16011
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+      "byteCount": 1186
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+      "byteCount": 3873
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
+      "byteCount": 8888
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+      "byteCount": 863
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+      "byteCount": 16274
+    },
+    {
+      "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+      "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+      "byteCount": 2757
+    },
+    {
+      "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+      "sha256": "a5c021b13533aa5cdb036fb0f5740ff03eab1bdc03d516aa7716d1649bcdc594",
+      "byteCount": 160358
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+      "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+      "byteCount": 29935
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+      "byteCount": 32838
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+      "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+      "byteCount": 3269
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+      "byteCount": 49595
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+      "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+      "byteCount": 20622
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceContext.swift",
+      "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+      "byteCount": 68967
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+      "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+      "byteCount": 51087
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceSummary.swift",
+      "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+      "byteCount": 14839
+    },
+    {
+      "path": "Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+      "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+      "byteCount": 33088
+    },
+    {
+      "path": "rust/crates/arktrace-store/oracle/DensityOracle.swift",
+      "sha256": "1bee5725c278ac141420d667ed052f99a866a8af6ae41d72b676ac591b6a900d",
+      "byteCount": 3989
+    },
+    {
+      "path": "rust/crates/arktrace-store/oracle/run_density_oracle.py",
+      "sha256": "eac819f4a81bc8c77fd66da90537b9f660bfdbf79164bed72894006cf55fcfbf",
+      "byteCount": 5972
+    },
+    {
+      "path": "scripts/run-swiftpm.sh",
+      "sha256": "38c6cc1c75c264bf956606bb661f62cc10c9603a53d682e43e0e278ca5af3e77",
+      "byteCount": 7525
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/density-pages-input.json",
+      "sha256": "3ff51b31a873a50633aec0e114287283d6ff4953aee4e5ee07c67c57118d81bc",
+      "byteCount": 73341
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-density-pages.json",
+      "sha256": "965a08baea00d5b8491ee42312a5b814b36d8f5dec369b81e8adbd46142f6d3f",
+      "byteCount": 344338
+    }
+  ]
+}

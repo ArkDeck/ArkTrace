@@ -1,0 +1,1388 @@
+[
+  {
+    "id": "argument-full/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": ""
+        },
+        {
+          "key": "second key",
+          "value": "-9223372036854775808"
+        },
+        {
+          "key": "key",
+          "value": "9223372036854775807"
+        },
+        {
+          "key": "second key",
+          "typeName": "double",
+          "value": "-45"
+        },
+        {
+          "key": "key",
+          "typeName": "boolean",
+          "value": "0"
+        },
+        {
+          "key": "second key",
+          "typeName": "int32_t",
+          "value": "13"
+        },
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": "string value"
+        },
+        {
+          "key": "界%_\\",
+          "value": "0"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-full/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": ""
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "argument-full/empty-set",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-full/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-full/over-limit"
+  },
+  {
+    "id": "argument-full/inspector",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": ""
+        },
+        {
+          "key": "second key",
+          "value": "-9223372036854775808"
+        },
+        {
+          "key": "key",
+          "value": "9223372036854775807"
+        },
+        {
+          "key": "second key",
+          "typeName": "double",
+          "value": "-45"
+        },
+        {
+          "key": "key",
+          "typeName": "boolean",
+          "value": "0"
+        },
+        {
+          "key": "second key",
+          "typeName": "int32_t",
+          "value": "13"
+        },
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": "string value"
+        },
+        {
+          "key": "界%_\\",
+          "value": "0"
+        }
+      ],
+      "truncated": false
+    },
+    "requestedHandles": [
+      5
+    ],
+    "unrequestedHandles": [
+      null
+    ]
+  },
+  {
+    "id": "argument-invalid-first/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "2"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "3"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-invalid-first/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "2"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "argument-invalid-first/empty-set",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-invalid-first/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-invalid-first/over-limit"
+  },
+  {
+    "id": "argument-invalid-first/lookahead-refills",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "2"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "3"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "argument-bad-values/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": "string value"
+        },
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": "string value"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "13"
+        },
+        {
+          "key": "key",
+          "typeName": "string",
+          "value": ""
+        },
+        {
+          "key": "key",
+          "value": "-1"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-bad-values/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": true
+    }
+  },
+  {
+    "id": "argument-bad-values/empty-set",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-bad-values/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-bad-values/over-limit"
+  },
+  {
+    "id": "argument-sets/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-sets/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-sets/empty-set",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-sets/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-sets/over-limit"
+  },
+  {
+    "id": "argument-sets/set-0",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "1"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-sets/set--5",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "2"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-sets/set--9223372036854775808",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "3"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-sets/set-9223372036854775807",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "4"
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-sets/inspector-zero",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "1"
+        }
+      ],
+      "truncated": false
+    },
+    "requestedHandles": [
+      0
+    ],
+    "unrequestedHandles": [
+      null
+    ]
+  },
+  {
+    "id": "argument-sets/inspector-negative",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "2"
+        }
+      ],
+      "truncated": false
+    },
+    "requestedHandles": [
+      -5
+    ],
+    "unrequestedHandles": [
+      null
+    ]
+  },
+  {
+    "id": "argument-sets/inspector-extreme",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "3"
+        }
+      ],
+      "truncated": false
+    },
+    "requestedHandles": [
+      -9223372036854775808
+    ],
+    "unrequestedHandles": [
+      null
+    ]
+  },
+  {
+    "id": "argument-absent/whole",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-absent/limit-one",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-absent/empty-set",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-absent/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-absent/over-limit"
+  },
+  {
+    "id": "argument-no-handle-column/whole",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-no-handle-column/limit-one",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-no-handle-column/empty-set",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-handle-column/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-handle-column/over-limit"
+  },
+  {
+    "id": "argument-no-dictionary/whole",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-no-dictionary/limit-one",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-no-dictionary/empty-set",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-dictionary/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-dictionary/over-limit"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-type-table/whole"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-type-table/limit-one"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-type-table/empty-set"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-type-table/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-type-table/over-limit"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-type-desc/whole"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-type-desc/limit-one"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-type-desc/empty-set"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-type-desc/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-type-desc/over-limit"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-id/whole"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-id/limit-one"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-no-id/empty-set"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-id/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-no-id/over-limit"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-without-rowid/whole"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-without-rowid/limit-one"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-without-rowid/empty-set"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-without-rowid/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-without-rowid/over-limit"
+  },
+  {
+    "id": "argument-compatible-empty/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-compatible-empty/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-compatible-empty/empty-set",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-compatible-empty/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-compatible-empty/over-limit"
+  },
+  {
+    "id": "argument-missing-value/whole",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-missing-value/limit-one",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "argument-missing-value/empty-set",
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-missing-value/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-missing-value/over-limit"
+  },
+  {
+    "id": "argument-many/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "1"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "2"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "3"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "4"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "5"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "6"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "7"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "8"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "9"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "10"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "11"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "12"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "13"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "14"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "15"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "16"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "17"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "18"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "19"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "20"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "21"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "22"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "23"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "24"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "25"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "26"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "27"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "28"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "29"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "30"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "31"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "32"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "33"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "34"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "35"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "36"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "37"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "38"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "39"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "40"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "41"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "42"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "43"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "44"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "45"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "46"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "47"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "48"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "49"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "50"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "51"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "52"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "53"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "54"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "55"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "56"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "57"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "58"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "59"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "60"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "61"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "62"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "63"
+        },
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "64"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "argument-many/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "key": "key",
+          "typeName": "int32_t",
+          "value": "1"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "argument-many/empty-set",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-many/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-many/over-limit"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-joined-ties/whole"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-joined-ties/limit-one"
+  },
+  {
+    "error": {
+      "code": "QUERY_FAILED",
+      "details": {
+        "sqliteCode": "1"
+      },
+      "stage": "querying"
+    },
+    "id": "argument-joined-ties/empty-set"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-joined-ties/invalid-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "argument-joined-ties/over-limit"
+  }
+]

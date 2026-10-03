@@ -1,0 +1,3182 @@
+[
+  {
+    "id": "frame-full/frames/whole",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      },
+      {
+        "isJank": true,
+        "jankTag": 3
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "frame_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "frame_slice.ts"
+          },
+          {
+            "category": "droppedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.value"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 900
+        },
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 900
+        },
+        {
+          "flag": 3,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 3,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 901
+        },
+        {
+          "flag": -99,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 4,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "vsync": 901
+        },
+        {
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 6,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "range": {
+            "endNs": 1000,
+            "startNs": 200
+          },
+          "vsync": 902
+        },
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 8,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "processKey": {
+            "ipid": 0
+          },
+          "range": {
+            "endNs": 400,
+            "startNs": 400
+          },
+          "threadKey": {
+            "itid": 0
+          },
+          "vsync": 904
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-full/frames/window",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 900
+        },
+        {
+          "flag": -99,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 4,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "vsync": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-full/frames/limit-one",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 900
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-full/frames/process",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      },
+      {
+        "isJank": true,
+        "jankTag": 3
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "frame_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "frame_slice.ts"
+          },
+          {
+            "category": "droppedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.value"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 900
+        },
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 900
+        },
+        {
+          "flag": 3,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 3,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 100,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 901
+        },
+        {
+          "flag": -99,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 4,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "vsync": 901
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-full/frames/zero-process",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 8,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "processKey": {
+            "ipid": 0
+          },
+          "range": {
+            "endNs": 400,
+            "startNs": 400
+          },
+          "threadKey": {
+            "itid": 0
+          },
+          "vsync": 904
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-full/frames/negative-process",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-seven/frames/whole",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 100
+          },
+          "vsync": 9
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-seven/frames/window",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 100
+          },
+          "vsync": 9
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-seven/frames/limit-one",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 100
+          },
+          "vsync": 9
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-seven/frames/process",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 100
+          },
+          "vsync": 9
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-seven/frames/instant"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-seven/frames/outside"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-seven/frames/zero-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-seven/frames/over-limit"
+  },
+  {
+    "id": "frame-empty/frames/whole",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-empty/frames/window",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-empty/frames/limit-one",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-empty/frames/process",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-empty/frames/instant"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-empty/frames/outside"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-empty/frames/zero-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-empty/frames/over-limit"
+  },
+  {
+    "id": "frame-absent/frames/whole",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-absent/frames/window",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-absent/frames/limit-one",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-absent/frames/process",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-absent/frames/instant",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-absent/frames/outside",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-absent/frames/zero-limit"
+  },
+  {
+    "error": {
+      "code": "INVALID_ARGUMENT",
+      "details": {},
+      "stage": "request"
+    },
+    "id": "frame-absent/frames/over-limit"
+  },
+  {
+    "id": "frame-missing-flag/frames/whole",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-missing-flag/frames/window",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-missing-flag/frames/limit-one",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-missing-flag/frames/process",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": false,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-unknown-first/frames/whole",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "droppedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.value"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 2,
+            "startNs": 1
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 1
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-unknown-first/frames/window",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-unknown-first/frames/limit-one",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "droppedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.value"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-unknown-first/frames/process",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "droppedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.value"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 2,
+            "startNs": 1
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 1
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "error": {
+      "code": "TRACE_DATABASE_INVALID",
+      "details": {
+        "table": "frame_slice"
+      },
+      "stage": "querying"
+    },
+    "id": "frame-invalid-id/frames/whole"
+  },
+  {
+    "id": "frame-invalid-id/frames/window",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-invalid-id/frames/limit-one",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 2,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 1
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "error": {
+      "code": "TRACE_DATABASE_INVALID",
+      "details": {
+        "table": "frame_slice"
+      },
+      "stage": "querying"
+    },
+    "id": "frame-invalid-id/frames/process"
+  },
+  {
+    "id": "frame-optional/frames/whole",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      },
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 0,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": 0
+          },
+          "vsync": 9223372036854775807
+        },
+        {
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -1,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "processKey": {
+            "ipid": 0
+          },
+          "range": {
+            "endNs": 101,
+            "startNs": 100
+          },
+          "vsync": 1
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-optional/frames/window",
+    "jank": [],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-optional/frames/limit-one",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 0,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": 0
+          },
+          "vsync": 9223372036854775807
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-optional/frames/process",
+    "jank": [
+      {
+        "isJank": false,
+        "jankTag": 0
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 0,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "range": {
+            "endNs": 1,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": 0
+          },
+          "vsync": 9223372036854775807
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-extremes/frames/whole",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      },
+      {
+        "isJank": true,
+        "jankTag": 3
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.dur"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9223372036854775807,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 9223372036854775807
+        },
+        {
+          "flag": 3,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -9223372036854775808,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1000,
+            "startNs": 1
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": -9223372036854775808
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-extremes/frames/window",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 3
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.dur"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 3,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -9223372036854775808,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1000,
+            "startNs": 1
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": -9223372036854775808
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "id": "frame-extremes/frames/limit-one",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9223372036854775807,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 9223372036854775807
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "id": "frame-extremes/frames/process",
+    "jank": [
+      {
+        "isJank": true,
+        "jankTag": 1
+      },
+      {
+        "isJank": true,
+        "jankTag": 3
+      }
+    ],
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "frame_slice.dur"
+          }
+        ]
+      },
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9223372036854775807,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 0,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": 9223372036854775807
+        },
+        {
+          "flag": 3,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -9223372036854775808,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 1000,
+            "startNs": 1
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "vsync": -9223372036854775808
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": 1,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    },
+    "id": "event-clamps/cpuSlices/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": 1,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": 1,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    },
+    "id": "event-clamps/cpuSlices/window",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": 1,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    },
+    "id": "event-clamps/cpuSlices/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 900,
+          "priority": null,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": false
+    },
+    "id": "event-clamps/cpuSlices/empty-scope",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    },
+    "id": "event-clamps/threadStates/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    },
+    "id": "event-clamps/threadStates/window",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "thread_state.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "thread_state.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    },
+    "id": "event-clamps/threadStates/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "thread_state.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "thread_state.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": false
+    },
+    "id": "event-clamps/threadStates/empty-scope",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "second",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    },
+    "id": "event-clamps/slices/whole",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "second",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "second",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    },
+    "id": "event-clamps/slices/window",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "second",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 50,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": false
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "callstack.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    },
+    "id": "event-clamps/slices/limit-one",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "callstack.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "agentPage": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": false
+    },
+    "id": "event-clamps/slices/empty-scope",
+    "page": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "callstack.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "sched_slice.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 2,
+            "message": null,
+            "scope": "thread_state.ts"
+          }
+        ]
+      },
+      "items": [],
+      "truncated": false
+    }
+  }
+]
