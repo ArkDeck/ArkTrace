@@ -75,7 +75,7 @@ pub struct AnalysisScope {
     pub tid: Option<i64>,
 }
 impl AnalysisScope {
-    fn validate(self) -> Result<(), EngineError> {
+    pub(crate) fn validate(self) -> Result<(), EngineError> {
         if self.process_key == Some(0)
             || self.thread_key == Some(0)
             || self.pid.is_some_and(|v| v < 0)

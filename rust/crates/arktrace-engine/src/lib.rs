@@ -1,5 +1,19 @@
 //! Shared composition root. Native lifecycle remains behind host ports.
+#[cfg(target_os = "macos")]
+mod async_runtime;
 mod metadata;
+#[cfg(target_os = "macos")]
+pub use async_runtime::{
+    AsyncEngine, DrainStatus, OpenTicket, RepositoryRequest, RequestState, RequestStatus,
+    RuntimeConfiguration, RuntimeFailure, RuntimeLimits, SessionState, SessionStatus,
+    WorkerBoundary,
+};
+mod handles;
+#[cfg(any(target_os = "macos", test))]
+mod owned_result;
+pub use handles::{HandleError, RuntimeHandle};
+#[cfg(target_os = "macos")]
+pub use owned_result::OwnedResult;
 #[cfg(target_os = "macos")]
 mod no_cache;
 #[cfg(target_os = "macos")]

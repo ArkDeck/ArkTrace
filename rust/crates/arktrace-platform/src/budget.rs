@@ -9,6 +9,21 @@ use std::{
 pub struct CancellationToken(Arc<Mutex<bool>>);
 
 impl CancellationToken {
+    /// Nonblocking SDK control operation. False means publication currently
+    /// owns the linearization lock; the caller may retry without waiting on UI.
+    pub fn try_cancel(&self) -> bool {
+        match self.0.try_lock() {
+            Ok(mut cancelled) => {
+                *cancelled = true;
+                true
+            }
+            Err(std::sync::TryLockError::WouldBlock) => false,
+            Err(std::sync::TryLockError::Poisoned(poison)) => {
+                *poison.into_inner() = true;
+                true
+            }
+        }
+    }
     pub fn cancel(&self) {
         *self.0.lock().unwrap_or_else(|poison| poison.into_inner()) = true;
     }
@@ -27,6 +42,22 @@ impl CancellationToken {
             return Err(HostError::Cancelled);
         }
         action()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn sdk_cancel_does_not_wait_or_cross_an_active_publication() {
+        let token = CancellationToken::default();
+        let publishing = token.0.lock().unwrap();
+        assert!(!token.try_cancel());
+        assert!(!*publishing);
+        drop(publishing);
+        assert!(token.try_cancel());
+        assert!(token.try_cancel());
+        assert!(token.is_cancelled());
     }
 }
 
