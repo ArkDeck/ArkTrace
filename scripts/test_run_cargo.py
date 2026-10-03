@@ -126,6 +126,19 @@ class CargoRunnerTests(unittest.TestCase):
                 self.invoke("build",environment={"MACOSX_DEPLOYMENT_TARGET":"11.0"})
             self.assertFalse(self.calls)
 
+    def test_staticlib_capture_is_exact_fresh_and_native_release_only(self):
+        with patch.object(RUNNER.platform, "system", return_value="Darwin"), patch.object(RUNNER.platform, "machine", return_value="arm64"):
+            archive = self.cache / "target/release/libarktrace_ffi.a"
+            archive.parent.mkdir(parents=True)
+            archive.write_bytes(b"exact output under runner lock")
+            captured = self.base / "captured.a"
+            self.assertEqual(self.invoke("build", "-p", "arktrace-ffi", "--release", environment={"ARKTRACE_CARGO_CAPTURE_STATICLIB": str(captured)}), 0)
+            self.assertEqual(captured.read_bytes(), archive.read_bytes())
+            with self.assertRaisesRegex(SystemExit, "fresh absolute external"):
+                self.invoke("build", "-p", "arktrace-ffi", "--release", environment={"ARKTRACE_CARGO_CAPTURE_STATICLIB": str(captured)})
+            with self.assertRaisesRegex(SystemExit, "explicit native SDK release"):
+                self.invoke("build", "--workspace", environment={"ARKTRACE_CARGO_CAPTURE_STATICLIB": str(self.base / "other.a")})
+
 
 if __name__ == "__main__":
     unittest.main()

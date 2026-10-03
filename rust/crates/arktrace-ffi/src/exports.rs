@@ -468,6 +468,38 @@ pub unsafe extern "C" fn arktrace_result_acquire(
     })
 }
 /// # Safety
+/// Output is a valid exact record. Its retained bytes live until owner release.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn arktrace_session_error_acquire(
+    engine: u64,
+    session: u64,
+    out: *mut ResultView,
+    bytes: u64,
+) -> u32 {
+    guard(engine, || {
+        let out = unsafe { output(out, bytes) }?;
+        let host = registry::host(engine)?;
+        #[cfg(target_os = "macos")]
+        {
+            let result = registry::ResultOwner {
+                kind: RESULT_FAILURE,
+                data: host
+                    .engine
+                    .acquire_session_error_result(RuntimeHandle::from_raw(session))
+                    .map_err(registry::failure)?,
+            };
+            let id = registry::retain(result.clone())?;
+            *out = view(id, &result);
+            Ok(())
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (out, host, session);
+            Err(STATUS_UNSUPPORTED_HOST)
+        }
+    })
+}
+/// # Safety
 /// Keep owner live while reading the view; output is a valid exact record.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn arktrace_result_view(owner: u64, out: *mut ResultView, bytes: u64) -> u32 {

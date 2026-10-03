@@ -133,6 +133,14 @@ def main():
     environment = os.environ.copy()
     environment.update(CARGO_HOME=str(dependency), CARGO_TARGET_DIR=str(cache / "target"), ARKTRACE_EXPECT_NATIVE_HOST=host)
     environment["LIBSQLITE3_FLAGS"] = "-DSQLITE_ENABLE_FILESTAT=1"
+    capture = os.environ.get("ARKTRACE_CARGO_CAPTURE_STATICLIB")
+    if capture:
+        capture = Path(capture)
+        permitted = [["-p", "arktrace-ffi", "--release"], ["-p", "arktrace-ffi", "--release", "--features", "process-fixtures"]]
+        if host != "macos-arm64" or command != "build" or options not in permitted:
+            fail("staticlib capture requires an explicit native SDK release build")
+        if not capture.is_absolute() or capture.resolve().is_relative_to(ROOT) or capture.exists() or capture.is_symlink():
+            fail("staticlib capture requires a fresh absolute external file")
     if host == "macos-arm64":
         environment["MACOSX_DEPLOYMENT_TARGET"] = "26.0"
     with cache_lock(cache / "runner.lock"):
@@ -142,6 +150,10 @@ def main():
             invocation.append("--locked")
         invocation.extend(options)
         result = subprocess.run(invocation, cwd=workspace / "rust", env=environment)
+        if result.returncode == 0 and capture:
+            # Keep the build lock through the copy: another invocation cannot
+            # replace this output with a different feature set in between.
+            shutil.copyfile(cache / "target/release/libarktrace_ffi.a", capture)
         if result.returncode == 0 and command == "generate-lockfile":
             shutil.copyfile(workspace / "rust/Cargo.lock", ROOT / "rust/Cargo.lock")
         if result.returncode == 0 and command == "fmt" and "--check" not in options:

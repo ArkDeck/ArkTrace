@@ -1,0 +1,6 @@
+import ArkTraceRustRuntime
+func invalidBorrowCapture(_ owner: RustSnapshot) {
+    _ = owner.withRecords { _, primitives, _, _ in
+        Task { _ = primitives.count }
+    }
+}

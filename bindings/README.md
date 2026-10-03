@@ -20,7 +20,8 @@ and release only after `DRAIN_DRAINED`. A host must keep polling during shutdown
 or another listed typed operation. Query payloads use the existing Contract,
 Viewer and Analysis serde types with unknown fields rejected. Requests cannot
 change Engine configuration, signing policy or parser identity. This JSON
-operation schema still needs its published SDK schema and wrappers.
+operation schema has typed Swift request factories; its published SDK schema
+and C# wrappers remain pending.
 
 `result_acquire` retains immutable UTF-8; failed requests expose the closed,
 path-free public error envelope. `snapshot_acquire` retains arrays of tracks,
@@ -66,7 +67,34 @@ Verification:
   arrays/UTF-8 ownership, cancellation of stale generations, last-owner budget
   refund, cleanup, FD/raw-source checks and controlled export panic isolation.
 
-Async Swift wrappers, C# SafeHandle owners, event/metric batches, 1,000 complete
-native open/query/cancel/close cycles, immutable XCFramework/NuGet distribution
-and App cutover are pending. Neither consumer smoke nor this C ABI slice marks
+- `scripts/test_macos_rust_sdk.py`: package-external async Swift consumer,
+  actual parser/Swift parity, ARC owners and observable cleanup failures,
+  concurrent sessions/cancellation, MainActor borrowed records, last-owner
+  refund, and compiler rejection of escaping/capturing borrowed spans.
+
+The development `ArkTraceRustRuntime` product is opt-in. Build an immutable local
+artifact with `scripts/build_macos_rust_sdk.py`, set `ARKTRACE_RUST_XCFRAMEWORK`
+to its absolute path, then use `scripts/run-swiftpm.sh`. The runner verifies the
+entire receipt and stages a relative content-addressed binary target in its
+external package mirror. The source checkout never receives native binaries.
+Fixture artifacts require `--fixtures` and `ARKTRACE_RUST_SDK_FIXTURES=1`;
+production creation still requires the fixed publisher and separate signed
+helper/parser identities. Neither artifact is a published release.
+
+`RustEngine` provides async admission/poll/cancel/close/drain; immutable
+`RustResult`/`RustSnapshot` values share ARC leases. `withBytes`/`withRecords`
+expose synchronous borrowed spans, without a hot-path copy or JSON decode.
+Cold JSON decoding runs on the concurrent executor; explicit temporary byte
+copies share a 64 MiB process-wide credit pool. Decoder scratch, retained
+decoded values and consumer copies are outside this counter. `RustCleanup.flush`
+waits for already-scheduled ARC cleanup and reports its first bounded canonical
+failure. A session cleanup error can be retained before releasing its handle
+through `session_error_acquire`.
+
+All sixteen Swift request factories compile; this SDK run executes CPU,
+viewport and density-resolution operations. Remaining work includes complete
+Swift response/schema adaptation and decoded-owner budgeting, C# SafeHandle
+owners, event/metric batches, 1,000 complete native open/query/cancel/close
+cycles, immutable XCFramework/NuGet distribution and App cutover. Neither
+consumer smoke nor these development slices mark
 AT-RUST-012 or macOS cross-platform acceptance complete.

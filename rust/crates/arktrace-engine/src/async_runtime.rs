@@ -692,6 +692,34 @@ impl AsyncEngine {
             _ => Err(RuntimeFailure::InvalidHandle),
         }
     }
+    /// A close failure has no request handle. Preserve its complete closed
+    /// cleanup reason in an independently retained ABI result before release.
+    pub fn acquire_session_error_result(
+        &self,
+        session: RuntimeHandle,
+    ) -> Result<OwnedResult, RuntimeFailure> {
+        let registry = self.registry()?;
+        let Record::Session(record) = registry.table.get(session)? else {
+            return Err(RuntimeFailure::InvalidHandle);
+        };
+        let error = record
+            .status
+            .close_failure
+            .ok_or(RuntimeFailure::Busy)?
+            .public_error()
+            .ok_or(RuntimeFailure::InvalidRequest)?;
+        owned_result::encode(
+            &Envelope {
+                format_version: 1,
+                session,
+                request: RuntimeHandle::from_raw(0),
+                body: &error,
+            },
+            self.shared.result_budget.clone(),
+            self.limits.maximum_result_bytes,
+        )
+        .map_err(|_| RuntimeFailure::OutputLimit)
+    }
     /// Schedules resource cleanup using reserved control capacity. No request
     /// handle or result allocation is needed. Poll `session_status` until
     /// `resources_closed`; inspect `close_failure` before releasing the handle.
@@ -1424,6 +1452,74 @@ fn run_worker(
 mod tests {
     use super::*;
     mod viewport;
+    #[test]
+    fn retained_session_cleanup_error_preserves_reason_after_handle_release() {
+        let limits = RuntimeLimits::default();
+        let shared = Arc::new(Shared {
+            registry: Mutex::new(Registry {
+                table: HandleTable::new(1).unwrap(),
+                queued: vec![0],
+                next_worker: 0,
+            }),
+            stopping: AtomicBool::new(false),
+            alive: AtomicUsize::new(0),
+            result_budget: ResultBudget::new(4096),
+        });
+        let engine = AsyncEngine {
+            shared: shared.clone(),
+            senders: Vec::new(),
+            limits,
+        };
+        let session = background_registry(&shared)
+            .table
+            .insert(Record::Session(SessionRecord {
+                latest_viewport_generation: 0,
+                worker: 0,
+                close_queued: false,
+                status: SessionStatus {
+                    state: SessionState::Closed,
+                    resources_closed: true,
+                    close_failure: None,
+                    residue_owner: None,
+                },
+            }))
+            .unwrap();
+        assert!(matches!(
+            engine.acquire_session_error_result(session),
+            Err(RuntimeFailure::Busy)
+        ));
+        if let Record::Session(record) =
+            background_registry(&shared).table.get_mut(session).unwrap()
+        {
+            record.status.close_failure = Some(engine_failure(
+                EngineStage::Closing,
+                EngineFailure::CleanupFailed,
+            ));
+        }
+        let result = engine.acquire_session_error_result(session).unwrap();
+        let clone = result.clone();
+        let value: serde_json::Value = serde_json::from_slice(result.bytes()).unwrap();
+        assert_eq!(value["formatVersion"], 1);
+        assert_eq!(value["request"], 0);
+        assert_eq!(value["body"]["code"], "TRACE_PARSE_FAILED");
+        assert_eq!(value["body"]["stage"], "openingDatabase");
+        assert_eq!(value["body"]["retryable"], true);
+        assert_eq!(value["body"]["details"]["reason"], "sessionCleanupFailed");
+        engine.release_session(session).unwrap();
+        assert!(matches!(
+            engine.acquire_session_error_result(session),
+            Err(RuntimeFailure::InvalidHandle)
+        ));
+        assert_eq!(shared.result_budget.used(), result.retained_bytes());
+        drop(result);
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(clone.bytes()).unwrap(),
+            value
+        );
+        assert!(shared.result_budget.used() > 0);
+        drop(clone);
+        assert_eq!(shared.result_budget.used(), 0);
+    }
     #[test]
     fn viewer_frontend_rejects_invalid_bounds_before_worker_dispatch() {
         use arktrace_contract::{TraceDensitySource, TraceTimeRange};

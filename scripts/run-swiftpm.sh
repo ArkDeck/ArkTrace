@@ -24,6 +24,8 @@ Default cache root:
 Environment overrides:
   ARKTRACE_SWIFTPM_CACHE_ROOT  Absolute cache root owned by this runner.
   ARKTRACE_SWIFT_EXECUTABLE    Absolute Swift executable path.
+  ARKTRACE_RUST_XCFRAMEWORK    Explicit immutable local native SDK artifact.
+  ARKTRACE_RUST_SDK_FIXTURES   1 only for a matching development artifact.
 
 The runner owns --package-path, --scratch-path and --cache-path. Its stable
 source mirror contains tracked and non-ignored untracked files. A local pinned
@@ -171,11 +173,21 @@ if [ "$workspace_ready" = false ] || ! cmp -s "$source_state" "$source_state_can
         mv -f "$ignored_paths.anchored" "$ignored_paths"
     fi
     /usr/bin/rsync -ac --no-times --delete --delete-excluded --from0 \
+        --filter='P /.arktrace-native/' --exclude=/.arktrace-native/ \
         --exclude=.git --exclude-from="$ignored_paths" \
         "$repository_root/" "$workspace_path/"
     mv -f "$source_state_candidate" "$source_state"
 else
     rm -f "$source_state_candidate"
+fi
+
+# SwiftPM requires local binary targets to be relative to the package root.
+# Verify the complete receipt before staging at a content-addressed mirror path.
+# Never select a native artifact implicitly or change the source checkout.
+if [ -n "${ARKTRACE_RUST_XCFRAMEWORK:-}" ]; then
+    native_relative=$(python3 "$repository_root/scripts/stage_macos_rust_sdk.py" \
+        "$ARKTRACE_RUST_XCFRAMEWORK" "$workspace_path")
+    export ARKTRACE_RUST_XCFRAMEWORK=$native_relative
 fi
 
 # The parser is intentionally gitignored. Never let stale or unverified bytes

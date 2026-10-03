@@ -2,10 +2,10 @@
 use arktrace_viewer::{PrimitiveRecord, QualityRecord, TrackRecord, ViewportRecord};
 pub const ABI_VERSION: u32 = 1;
 pub const CONTRACT_DIGEST_HEX: &str =
-    "5c64c94cb0981e4e209ff6c2808964d8ee26062ca04cf0e2b810d945f491a9bc";
+    "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e";
 pub const CONTRACT_DIGEST: [u8; 32] = [
-    92, 100, 201, 76, 176, 152, 30, 78, 32, 159, 246, 194, 128, 137, 100, 216, 238, 38, 6, 44, 160,
-    76, 240, 226, 184, 16, 217, 69, 244, 145, 169, 188,
+    60, 27, 41, 110, 167, 237, 102, 41, 50, 153, 91, 174, 80, 84, 38, 61, 123, 146, 209, 188, 63,
+    255, 93, 135, 185, 118, 186, 60, 64, 148, 132, 78,
 ];
 pub const STATUS_OK: u32 = 0;
 pub const STATUS_BUSY: u32 = 1;

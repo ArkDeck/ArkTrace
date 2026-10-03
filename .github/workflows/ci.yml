@@ -416,6 +416,7 @@ jobs:
           python3 scripts/test_run_swiftpm.py
           python3 scripts/test_run_xcodebuild.py
           python3 scripts/test_run_cargo.py
+          python3 scripts/test_stage_macos_rust_sdk.py
           python3 scripts/verify_migration_contracts.py
 
   rust-macos:
@@ -453,6 +454,30 @@ jobs:
           python3 scripts/run-cargo.py run --bin arktrace-migration-smoke
           python3 scripts/test_viewer_json_roundtrip.py
           python3 scripts/test_ffi_contract.py
+
+      - name: Compile package-external async Swift SDK consumer
+        env:
+          ARKTRACE_RUST_SDK_CACHE_ROOT: ${{ runner.temp }}/arktrace-sdk-artifacts
+          ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT: ${{ runner.temp }}/arktrace-sdk-consumer
+        run: |
+          python3 scripts/build_macos_rust_sdk.py --fixtures > sdk-artifact.json
+          export ARKTRACE_RUST_XCFRAMEWORK="$(python3 -c 'import json; print(json.load(open("sdk-artifact.json"))["xcframework"])')"
+          python3 scripts/test_macos_rust_sdk.py --build-only > sdk-consumer.json
+          echo 'SDK compile-only; real parser lifecycle/parity acceptance is a separate native gate.'
+
+      - name: Upload Swift SDK compile receipts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: swift-sdk-compile-receipts
+          path: |
+            sdk-artifact.json
+            sdk-consumer.json
+            ${{ runner.temp }}/arktrace-sdk-consumer/sdk-build.log
+            ${{ runner.temp }}/arktrace-sdk-consumer/consumer-build.log
+            ${{ runner.temp }}/arktrace-sdk-consumer/*.invalid.log
+          if-no-files-found: ignore
+          retention-days: 7
 
   rust-windows:
     name: Rust Windows native

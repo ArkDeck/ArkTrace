@@ -5,7 +5,7 @@ namespace ArkTrace.Native;
 public static unsafe partial class NativeMethods
 {
     public const uint ABI_VERSION = 1;
-    public const string CONTRACT_DIGEST = "5c64c94cb0981e4e209ff6c2808964d8ee26062ca04cf0e2b810d945f491a9bc";
+    public const string CONTRACT_DIGEST = "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e";
     public const uint STATUS_OK = 0;
     public const uint STATUS_BUSY = 1;
     public const uint STATUS_CAPACITY = 2;
@@ -190,6 +190,9 @@ public static unsafe partial class NativeMethods
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_engine_retained_result_bytes")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_engine_retained_result_bytes(ulong engine, ulong* output, ulong output_bytes);
+    [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_session_error_acquire")]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static partial uint arktrace_session_error_acquire(ulong engine, ulong session, ResultView* output, ulong output_bytes);
 }
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct AbiIdentity

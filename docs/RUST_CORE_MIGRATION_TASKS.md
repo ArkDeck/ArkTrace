@@ -675,11 +675,20 @@ SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
   用 baseline 与计数证明，不用固定 sleep 掩盖竞态。
 - 包外 `test_api_baseline.sh` 通过，并提供 C# 消费程序集的正向验证。
 
-本轮已落地 provisional C ABI、Rust-owned JSON/snapshot records、生成 C/Swift-layout/C#
+2026-10-04 的首轮已落地 provisional C ABI、Rust-owned JSON/snapshot records、生成 C/Swift-layout/C#
 声明与真实 macOS owner/Swift parity 验证。22 exports、10 records/95 offsets、336 Rust
 测试及 1,000 valid-allocation byte cases 通过。async Swift SDK、C# SafeHandle、完整
 生命周期压力、event/metric batches、SDK 分发与 App 切换仍未通过，见
 [C ABI owner 记录](migration-runs/AT-RUST-012-2026-10-04-c-abi-owner.md)。
+
+后续同日推进已落地显式本地不可变 XCFramework、包外 async Swift SDK consumer、ARC
+result/snapshot owners、同步 Span 借用与取消/关闭/排空，并新增第 23 个 export 保留完整
+session cleanup 错误。真实三条 trace 的 33 个 viewport 与 42 个 density resolution
+对照新运行的实际 Swift oracle 通过，编译器拒绝借用逃逸和 Task 捕获；337 Rust 测试、
+607 Swift 测试（601 通过、6 项既有跳过）、包外 API baseline 和旧 App 构建通过。
+生产 SDK 严格内存安全编译通过；完整 SDK/发布签名/1000 生命周期压力和 App 切换仍未
+验收。临时 JSON 字节复制已有独立预算，decoded DTO 所有权预算仍待完成。见
+[Swift SDK 开发记录](migration-runs/AT-RUST-012-2026-10-04-swift-sdk.md)。
 
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 

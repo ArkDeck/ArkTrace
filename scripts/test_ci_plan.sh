@@ -180,6 +180,15 @@ expect "Rust documentation does not build" "$docs_only" 'rust/README.md'
 
 expect "cargo runner change fails closed" "$all_lanes" 'scripts/run-cargo.py'
 
+expect "Swift native SDK selects macOS artifact and contract gates" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'Sources/ArkTraceRustRuntime/RustEngine.swift
+scripts/swift-sdk-conformance/Consumer.swift
+scripts/test_macos_rust_sdk.py'
+
 expect "native APFS harness selects the macOS Rust lane" \
     'lane_swiftpm=false
 lane_app=false

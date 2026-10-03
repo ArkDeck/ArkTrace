@@ -1,0 +1,5 @@
+import ArkTraceRustRuntime
+func invalidBorrowEscape(_ owner: RustResult) {
+    let escaped: Span<UInt8> = owner.withBytes { bytes in return bytes }
+    _ = escaped.count
+}

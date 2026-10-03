@@ -1,5 +1,6 @@
 // swift-tools-version: 6.3
 import PackageDescription
+import Foundation
 
 // Swift 6.0 language mode on the Swift 6.4 toolchain (Xcode 27.0). Strict memory safety is
 // a per-target opt-in (SE-0458): enabled on every first-party target that owns
@@ -15,6 +16,22 @@ import PackageDescription
 let firstPartySwiftSettings: [SwiftSetting] = [
     .strictMemorySafety()
 ]
+
+// AT-RUST-012 development override. The published immutable URL/checksum is
+// frozen with the release artifact; there is no floating network fallback.
+let nativeSDKPath = ProcessInfo.processInfo.environment["ARKTRACE_RUST_XCFRAMEWORK"]
+let nativeSDKFixtures = ProcessInfo.processInfo.environment["ARKTRACE_RUST_SDK_FIXTURES"] == "1"
+let nativeProducts: [Product] = nativeSDKPath == nil ? [] : [
+    .library(name: "ArkTraceRustRuntime", targets: ["ArkTraceRustRuntime"])
+]
+let nativeTargets: [Target] = if let nativeSDKPath {
+    [
+        .binaryTarget(name: "CArkTrace", path: nativeSDKPath),
+        .target(name: "ArkTraceRustRuntime", dependencies: ["ArkTraceCore", "CArkTrace"],
+            swiftSettings: firstPartySwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : []),
+            linkerSettings: [.linkedFramework("Security"), .linkedFramework("CoreFoundation")]),
+    ]
+} else { [] }
 
 let package = Package(
     name: "ArkTrace",
@@ -32,7 +49,7 @@ let package = Package(
         .library(name: "ArkTraceCapture", targets: ["ArkTraceCapture"]),
         .library(name: "ArkTraceCLI", targets: ["ArkTraceCLI"]),
         .executable(name: "arktrace", targets: ["arktrace"]),
-    ],
+    ] + nativeProducts,
     targets: [
         .target(name: "ArkTraceCore", swiftSettings: firstPartySwiftSettings),
         .target(
@@ -144,6 +161,6 @@ let package = Package(
                 "ArkTraceAnalysis", "ArkTraceRendering", "ArkTraceAppSupport",
             ]
         ),
-    ],
+    ] + nativeTargets,
     swiftLanguageModes: [.v6]
 )

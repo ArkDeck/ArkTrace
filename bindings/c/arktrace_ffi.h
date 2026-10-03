@@ -11,7 +11,7 @@ extern "C" {
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
 #define ARKTRACE_ABI_VERSION 1u
-#define ARKTRACE_CONTRACT_DIGEST "5c64c94cb0981e4e209ff6c2808964d8ee26062ca04cf0e2b810d945f491a9bc"
+#define ARKTRACE_CONTRACT_DIGEST "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_STATUS_OK 0u
@@ -374,6 +374,7 @@ uint32_t arktrace_snapshot_acquire(uint64_t engine, uint64_t request, ArkTraceSn
 uint32_t arktrace_snapshot_view(uint64_t owner, ArkTraceSnapshotView * output, uint64_t output_bytes);
 uint32_t arktrace_fixture_panic(uint64_t engine);
 uint32_t arktrace_engine_retained_result_bytes(uint64_t engine, uint64_t * output, uint64_t output_bytes);
+uint32_t arktrace_session_error_acquire(uint64_t engine, uint64_t session, ArkTraceResultView * output, uint64_t output_bytes);
 #undef ARKTRACE_LAYOUT_ASSERT
 #ifdef __cplusplus
 }

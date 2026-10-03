@@ -217,6 +217,7 @@ exec env \
     SYMROOT="$output_root" \
     OBJROOT="$object_root" \
     SHARED_PRECOMPS_DIR="$precompiled_headers" \
+    INDEX_DATA_STORE_DIR="$cache_root/Index.noindex/DataStore" \
     CODE_SIGNING_ALLOWED=NO \
     CODE_SIGN_IDENTITY= \
     ARCHS=arm64 \

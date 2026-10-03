@@ -953,6 +953,28 @@
         }
       ],
       "returns": "u32"
+    },
+    {
+      "name": "arktrace_session_error_acquire",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "ResultView*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
     }
   ],
   "requestOperations": [

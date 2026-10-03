@@ -103,6 +103,7 @@ class RunXcodebuildTests(unittest.TestCase):
         arguments = [line.removeprefix("ARG:") for line in lines if line.startswith("ARG:")]
         self.assertEqual(arguments[0:2], ["-project", str(canonical / "workspace/ArkTrace.xcodeproj")])
         self.assertIn(f"OBJROOT={canonical / 'Objects'}", arguments)
+        self.assertIn(f"INDEX_DATA_STORE_DIR={canonical / 'Index.noindex/DataStore'}", arguments)
         self.assertIn(str(canonical / "SourcePackages"), arguments)
         self.assertIn(str(canonical / "PackageCache"), arguments)
         self.assertIn("SWIFT_OPTIMIZATION_LEVEL=-Onone", arguments)
