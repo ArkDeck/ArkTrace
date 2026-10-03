@@ -169,7 +169,30 @@ fn replay_13_actual_swift_loader_query_and_snapshot_vectors_exactly() {
             json!({"trackID":t.descriptor.id(),"y":t.y,"height":t.height,"depthRowCount":t.depth_row_count,"primitives":primitives})
         }).collect();
         let result = json!({"name":v.name,"maximumPrimitives":plan.maximum_primitives,"densityCalls":actual_densities,"detailCalls":actual_details,
-            "batches":plan.density_batches.iter().map(Vec::len).collect::<Vec<_>>(),"tracks":tracks,"qualityFacts":assembled.quality_facts,"sourceFacts":assembled.snapshot.data_quality().warnings.iter().map(|i|json!({"category":i.category,"scope":i.scope,"count":i.count})).collect::<Vec<_>>()});
+            "batches":plan.density_batches.iter().map(Vec::len).collect::<Vec<_>>(),"tracks":tracks,"qualityFacts":assembled.quality_facts,"sourceFacts":assembled.snapshot.data_quality().warnings.iter().filter(|i| !i.scope.as_deref().is_some_and(|s| s.starts_with("timeline."))).map(|i|json!({"category":i.category,"scope":i.scope,"count":i.count})).collect::<Vec<_>>()});
+        let mut full_expected: Vec<QualityIssue> = ["sourceFacts", "qualityFacts"]
+            .into_iter()
+            .flat_map(|name| e[name].as_array().unwrap())
+            .map(|fact| QualityIssue {
+                category: serde_json::from_value(fact["category"].clone()).unwrap(),
+                scope: fact["scope"].as_str().map(str::to_owned),
+                count: fact["count"].as_i64(),
+                message: None,
+            })
+            .collect();
+        let status = if full_expected.is_empty() {
+            QualityStatus::Ok
+        } else {
+            QualityStatus::Warnings
+        };
+        let expected_quality =
+            DataQuality::machine(status, std::mem::take(&mut full_expected)).unwrap();
+        assert_eq!(
+            assembled.snapshot.data_quality(),
+            &expected_quality,
+            "{} complete quality envelope",
+            v.name
+        );
         common::compare(&result, e, &v.name);
     }
 }

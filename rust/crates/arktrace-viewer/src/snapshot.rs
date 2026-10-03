@@ -519,6 +519,26 @@ pub fn assemble(
     // TraceDataQuality keeps the first occurrence of an identical issue.
     let mut seen_facts = std::collections::BTreeSet::new();
     quality_facts.retain(|fact| seen_facts.insert(fact.clone()));
+    if !quality_facts.is_empty() {
+        let derived_quality = DataQuality {
+            status: QualityStatus::Warnings,
+            warnings: quality_facts
+                .iter()
+                .map(|fact| arktrace_contract::QualityIssue {
+                    category: fact.category,
+                    scope: Some(fact.scope.as_str().into()),
+                    count: fact.count,
+                    message: None,
+                })
+                .collect(),
+        };
+        crate::merge_quality(
+            &mut issues,
+            &mut seen_source_issues,
+            &derived_quality,
+            check,
+        )?;
+    }
     let status = if issues.is_empty() {
         QualityStatus::Ok
     } else {
@@ -543,9 +563,8 @@ pub fn assemble(
     })
 }
 
-/// Derived Viewer facts whose Swift scopes are not all registered in the
-/// shared machine quality vocabulary yet. Preserve them as closed typed facts;
-/// do not bypass DataQuality::machine or silently drop truncation evidence.
+/// Derived Viewer facts also contribute to the snapshot's machine quality.
+/// Their scopes use the shared closed vocabulary, with the same total budget.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Serialize)]
 pub enum ViewerQualityScope {
     #[serde(rename = "timeline.cpu")]
@@ -560,6 +579,18 @@ pub enum ViewerQualityScope {
     Counter,
     #[serde(rename = "timeline.namedSlice.depth")]
     NamedSliceDepth,
+}
+impl ViewerQualityScope {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Cpu => "timeline.cpu",
+            Self::ThreadState => "timeline.threadState",
+            Self::NamedSlice => "timeline.namedSlice",
+            Self::Frame => "timeline.frame",
+            Self::Counter => "timeline.counter",
+            Self::NamedSliceDepth => "timeline.namedSlice.depth",
+        }
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Serialize)]
 pub struct ViewerQualityFact {

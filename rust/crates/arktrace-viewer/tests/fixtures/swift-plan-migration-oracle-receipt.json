@@ -72,8 +72,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "sha256": "19ff38ae4dd0245cc19ccf23bff502094feeaed028e955ba10a249905a8302da",
-      "byteCount": 11790
+      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+      "byteCount": 11916
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",

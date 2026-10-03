@@ -619,6 +619,11 @@ Store/SDK 接线仍待完成，不能据纯模块完成 011。详见[主线 View
 保留。当前 302 项 Rust tests、28 项 Swift 回归和 Xcode 27 实际 App 构建通过；尚未
 Rust SDK 切换，详见[离屏 detail 记录](migration-runs/AT-RUST-011-2026-10-04-offscreen-detail.md)。
 
+同日已把 Viewer derived facts 合入完整 snapshot quality，注册五个缺失 scope，来源与
+派生事实共用 4,096 项上限及原始身份去重。当前 304 项 Rust tests、111 项完整 Rendering
+tests、一项 CLI quality 测试及当前 App 构建通过；重新实测六份 Swift oracle，520 组完整
+输出字节不变，见[质量状态记录](migration-runs/AT-RUST-011-2026-10-04-quality-envelope.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：planned；开工依赖：001、002；完成依赖：008、009、011。

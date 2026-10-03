@@ -123,6 +123,8 @@ package enum TraceDataQualityScope {
         // budget; the Store reports this typed degradation at the boundary.
         "schema.counterSource",
         "timeline.density.occupancy", "timeline.density.dominantThread",
+        "timeline.cpu", "timeline.threadState", "timeline.frame",
+        "timeline.namedSlice", "timeline.namedSlice.depth",
         "timeline.counter",
         "timeline.counter.duration",
     ]

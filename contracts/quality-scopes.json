@@ -57,6 +57,11 @@
   "thread_state.value",
   "timeline.counter",
   "timeline.counter.duration",
+  "timeline.cpu",
   "timeline.density.dominantThread",
-  "timeline.density.occupancy"
+  "timeline.density.occupancy",
+  "timeline.frame",
+  "timeline.namedSlice",
+  "timeline.namedSlice.depth",
+  "timeline.threadState"
 ]

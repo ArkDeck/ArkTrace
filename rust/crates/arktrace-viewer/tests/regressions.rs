@@ -435,12 +435,145 @@ fn source_truncation_and_depth_facts_survive_flattening_rules() {
     let a = assemble(&r, &[], &pages, 2.0, &mut || Ok(())).unwrap();
     assert_eq!(a.snapshot.tracks()[0].depth_row_count, 32);
     assert_eq!(a.quality_facts.len(), 2);
+    assert_eq!(a.snapshot.data_quality().status, QualityStatus::Warnings);
+    assert_eq!(a.snapshot.data_quality().warnings.len(), 2);
     assert_eq!(a.snapshot.tracks()[0].primitives.len(), 1);
     r.tracks[0].shows_nested_depth = false;
     let a = assemble(&r, &[], &pages, 2.0, &mut || Ok(())).unwrap();
     assert_eq!(a.snapshot.tracks()[0].depth_row_count, 1);
     assert_eq!(a.quality_facts.len(), 1);
     assert_eq!(a.quality_facts[0].scope, ViewerQualityScope::NamedSlice);
+    assert_eq!(a.snapshot.data_quality().warnings.len(), 1);
+}
+#[test]
+fn all_viewer_degradations_contribute_to_the_complete_snapshot_quality() {
+    let mut r = request(6, 2000, DetailPreference::Detail);
+    r.viewport = Viewport::new(range(0, 1000), 200.0, 2000.0, 0.0, 1).unwrap();
+    let sources = [
+        TraceDensitySource::Cpu { cpu: 0 },
+        TraceDensitySource::ThreadState {
+            thread: ThreadKey { itid: 1 },
+        },
+        TraceDensitySource::NamedSlice { thread: None },
+        TraceDensitySource::Frame { process_key: None },
+        TraceDensitySource::CpuCounter {
+            filter_id: 1,
+            cpu: Some(0),
+        },
+        TraceDensitySource::ProcessCounter {
+            filter_id: 2,
+            process_key: None,
+        },
+    ];
+    for (track, source) in r.tracks.iter_mut().zip(sources) {
+        track.source = source;
+    }
+    let detail_pages: Vec<_> = (0..6)
+        .map(|i| EventPage {
+            items: vec![detail(
+                i,
+                0,
+                10,
+                if i == 2 { 99 } else { 0 },
+                DetailStyle::Accent,
+            )],
+            truncated: true,
+            capability_available: true,
+            data_quality: quality(),
+        })
+        .collect();
+    let pages: Vec<_> = detail_pages
+        .iter()
+        .enumerate()
+        .map(|(i, page)| LanePages {
+            expanded_index: i,
+            detail: Some(page),
+            density: None,
+        })
+        .collect();
+    let a = assemble(&r, &[], &pages, 2.0, &mut || Ok(())).unwrap();
+    let q = a.snapshot.data_quality();
+    assert_eq!(q.status, QualityStatus::Warnings);
+    assert_eq!(
+        q.warnings.len(),
+        6,
+        "counter lanes share one identical quality fact"
+    );
+    assert_eq!(
+        q.warnings
+            .iter()
+            .map(|i| i.scope.as_deref().unwrap())
+            .collect::<Vec<_>>(),
+        vec![
+            "timeline.counter",
+            "timeline.cpu",
+            "timeline.frame",
+            "timeline.namedSlice",
+            "timeline.namedSlice.depth",
+            "timeline.threadState"
+        ]
+    );
+    assert!(
+        q.warnings
+            .iter()
+            .all(|i| i.category == QualityCategory::ProbeTruncated && i.message.is_none())
+    );
+}
+#[test]
+fn source_and_derived_quality_share_one_cap_and_full_identity_deduplication() {
+    let r = request(1, 10, DetailPreference::Detail);
+    let mut page = EventPage {
+        items: vec![],
+        truncated: true,
+        capability_available: true,
+        data_quality: DataQuality::machine(
+            QualityStatus::Warnings,
+            (0..4096)
+                .map(|count| QualityIssue {
+                    category: QualityCategory::InvalidValue,
+                    scope: Some("sched_slice.value".into()),
+                    count: Some(count),
+                    message: None,
+                })
+                .collect(),
+        )
+        .unwrap(),
+    };
+    let run = |page: &EventPage<DetailInput>| {
+        assemble(
+            &r,
+            &[],
+            &[LanePages {
+                expanded_index: 0,
+                detail: Some(page),
+                density: None,
+            }],
+            2.0,
+            &mut || Ok(()),
+        )
+    };
+    assert_eq!(
+        run(&page),
+        Err(ViewerError::Quality(
+            ContractError::QualityItemBudgetExceeded
+        ))
+    );
+    page.data_quality.warnings[0] = QualityIssue {
+        category: QualityCategory::ProbeTruncated,
+        scope: Some("timeline.cpu".into()),
+        count: None,
+        message: None,
+    };
+    let accepted = run(&page).unwrap();
+    assert_eq!(accepted.snapshot.data_quality().warnings.len(), 4096);
+    page.data_quality.warnings[0].message = Some("/private/source.htrace".into());
+    assert_eq!(
+        run(&page),
+        Err(ViewerError::Quality(
+            ContractError::QualityItemBudgetExceeded
+        )),
+        "different diagnostic identities cannot be collapsed after redaction to evade the cap"
+    );
 }
 #[test]
 fn assembly_requires_selected_pages_and_enforces_output_budget() {
@@ -514,7 +647,7 @@ fn source_machine_quality_strips_diagnostics_and_rejects_unknown_scopes() {
     let s = project(&viewport(), 1, &[], 2.0, &raw, &mut || Ok(())).unwrap();
     assert!(s.data_quality().warnings[0].message.is_none());
     let mut unknown = raw;
-    unknown.warnings[0].scope = Some("timeline.namedSlice.depth".into());
+    unknown.warnings[0].scope = Some("timeline.namedSlice.typo".into());
     assert_eq!(
         project(&viewport(), 1, &[], 2.0, &unknown, &mut || Ok(())),
         Err(ViewerError::Quality(

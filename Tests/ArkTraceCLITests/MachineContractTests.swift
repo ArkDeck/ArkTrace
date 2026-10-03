@@ -1001,6 +1001,8 @@ final class MachineContractTests: XCTestCase {
             "thread_state.value", "thread_state.identity", "thread_state.state",
             "callstack.value", "callstack.identity", "measure.optional",
             "timeline.density.occupancy", "timeline.density.dominantThread",
+            "timeline.cpu", "timeline.threadState", "timeline.frame",
+            "timeline.namedSlice", "timeline.namedSlice.depth",
             "timeline.counter",
             "timeline.counter.duration",
         ] {

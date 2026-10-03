@@ -1,0 +1,220 @@
+{
+  "task": "AT-RUST-011 complete Viewer machine quality envelope",
+  "status": "in-progress; Store adapter and SDK/App migration pending",
+  "recordedAtUtc": "2026-10-03T17:35:08.877697+00:00",
+  "baselineCommit": "ebee178787130a5419ef09210c0cb0c33b3ca91a",
+  "validation": {
+    "rustWorkspacePassed": 304,
+    "rustViewerPassed": 32,
+    "failures": 0,
+    "ignored": 0,
+    "compilerWarnings": 0,
+    "strictClippy": "passed",
+    "fmt": "passed",
+    "currentMacAppBuild": "passed; existing Swift App",
+    "actualRenderingTestsPassed": 111,
+    "actualCLIMachineScopeTestPassed": 1,
+    "swiftSandboxRedrawFailure": "two existing NSView display tests failed inside sandbox; identical complete suite passed with actual WindowServer access; no skips",
+    "contracts": "passed; 65 closed scopes",
+    "plannerCases": 44,
+    "actualRegeneratedOracleVectors": 520,
+    "allSixCompleteOutputsByteIdentical": true
+  },
+  "qualityContract": {
+    "addedScopes": [
+      "timeline.cpu",
+      "timeline.threadState",
+      "timeline.frame",
+      "timeline.namedSlice",
+      "timeline.namedSlice.depth"
+    ],
+    "sourceAndDerivedMaximumUniqueIssues": 4096,
+    "deduplicateBeforeMessageRedaction": true,
+    "snapshotQualityIncludesDerivedFacts": true,
+    "newQualityVectors": 6,
+    "unknownViewerScopeRejected": true,
+    "schemaVersion": "1.0; additive known scope vocabulary only; no parser/schema/index identity change"
+  },
+  "unchangedActualSwiftOutputs": [
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-mainline.json",
+      "byteCount": 180208,
+      "sha256": "01d29b8c925d598ee58731c81e178bfc169bec980e3b9b223d8040def1be1415"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle.json",
+      "byteCount": 105784,
+      "sha256": "9b8d0a7f0de2f5ad1eb677c3b3e52bc50ba781744c3544e713bf1b62799f287c"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-event-pages.json",
+      "byteCount": 69318,
+      "sha256": "1f7e964df63aa9852522266a6ca27d2aa67c31e403e8a23095a826869aac6709"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-argument-pages.json",
+      "byteCount": 29560,
+      "sha256": "125329e819267c32b54da6b5dba49543b33da14bf45063deb04f0e196cf8f7bf"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-search-pages.json",
+      "byteCount": 188374,
+      "sha256": "44145d2caefcaf00cc1b12c0f572be1b2db69fb0ead03f4616d07b0d4d316014"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-density-pages.json",
+      "byteCount": 344338,
+      "sha256": "965a08baea00d5b8491ee42312a5b814b36d8f5dec369b81e8adbd46142f6d3f"
+    }
+  ],
+  "sourceDigests": [
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+      "byteCount": 11916,
+      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/MachineContractTests.swift",
+      "byteCount": 56575,
+      "sha256": "f2180c7436778f670edb46d1bf9992de9c328573019dba32c35e1a3ed6db094f"
+    },
+    {
+      "path": "contracts/quality-scopes.json",
+      "byteCount": 1525,
+      "sha256": "29f3518e975432f056440833398ab3434fe508efc69e6bee8eb747d0805a4c50"
+    },
+    {
+      "path": "contracts/quality-vectors.json",
+      "byteCount": 4785,
+      "sha256": "f1b67b335c5f9cf637d6203aa4cc735c7cbe46d15b01b8758dacf125505795c0"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-mainline-receipt.json",
+      "byteCount": 5482,
+      "sha256": "9ef0a83c2171ae83fd392c9f571032f255e743bef656c4792f86be6eb5557466"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-argument-pages-receipt.json",
+      "byteCount": 9597,
+      "sha256": "a3449eee978c2434509755651a4e36783511cd11bf0530555e67085fff0d2753"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-density-pages-receipt.json",
+      "byteCount": 8190,
+      "sha256": "c2f1c1fdb5cab230b2dcda612b77eba2b76f22d0e4b21b5b6a3df6dfa5ba30e0"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-event-pages-receipt.json",
+      "byteCount": 8572,
+      "sha256": "3b7308ba79bda357cd8f5e0180c62400b45ebc35b170d20b813b7e84ac20b1ea"
+    },
+    {
+      "path": "rust/crates/arktrace-store/tests/fixtures/swift-search-pages-receipt.json",
+      "byteCount": 7303,
+      "sha256": "83c9f94a20443e0c0177ff03b30bdbe3c2cbfb7443741ae24b09da81c69c6bbe"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/snapshot.rs",
+      "byteCount": 21554,
+      "sha256": "fe91a329c562a0b07bb6483f6813bab35801a708b63359cf3d55e513772e72cd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle-receipt.json",
+      "byteCount": 5680,
+      "sha256": "b58d119c26d6cf508bd230545502f965f115cbdb847d8ffa77c64ded2b4f98a4"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/regressions.rs",
+      "byteCount": 24998,
+      "sha256": "04eda904678dce33c2536b3d2ee9ec07c4df96efcc7d2d0c4515be9b30397035"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_plan_oracle.rs",
+      "byteCount": 9212,
+      "sha256": "f44196db9b2b3fb4dfb2247d6bf985444eef516d1c209e860f8cd7f236f21e53"
+    }
+  ],
+  "retainedEvidence": [
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-workspace-20261004.log",
+      "byteCount": 34513,
+      "sha256": "82e5fbdf61e094f4bd1943d4ea5a4bd77f9825802dc672aefb8c002648f16b63"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-clippy-20261004.log",
+      "byteCount": 756,
+      "sha256": "8950c5585d06f6e2765dda0a573a8c37c428995f83c279c23f979c686d08eecd"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-swift-20261004.log",
+      "byteCount": 35344,
+      "sha256": "2a40f29dcfdc56ef20bb96bd4cfbef4d5542536785b2367b1f1f241cf22481b3"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-swift-sandbox-failure-20261004.log",
+      "byteCount": 38587,
+      "sha256": "ee33a7d0d85b2744b38416b4738a0b3ef6a0ce694c8c004e1ebfe32c5d8e4998"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-app-20261004.log",
+      "byteCount": 123606,
+      "sha256": "15ad893494c86bc8597103b8341d2e9d6d9b4501d3ea93cc0b2aeea2ab165272"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-contracts-20261004.log",
+      "byteCount": 454,
+      "sha256": "4c820a37d96698e49697276ffc9cc6ba2abc270f83946b5670f85b459f40bab0"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-planner-20261004.log",
+      "byteCount": 2854,
+      "sha256": "e90cd1f160e5541f7cd2768dd2acb2e59c9db51157ff7570a6e80c89ac928917"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-dependencies-20261004.log",
+      "byteCount": 109,
+      "sha256": "c2275c0b20648353dfc85742aa7a8ac7688b5aa0231ad5ad55814bcf92ceb2f3"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-fmt-20261004.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-event-oracle-20261004.log",
+      "byteCount": 125,
+      "sha256": "b98ecc1116a045ad0e9bd407f7537a7f2428e8a026fd4b4c21c35fde0809a220"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-argument-oracle-20261004.log",
+      "byteCount": 128,
+      "sha256": "fcefbf37689e9b6013ae7f67e08a048b34d8afccc47c658b638bf739133c45b1"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-search-oracle-20261004.log",
+      "byteCount": 127,
+      "sha256": "f41abb9fe6eb2ba7c4e53cc7df80f9d4fa9985e7ea3502b7c7de3aa2832d84de"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-density-oracle-20261004.log",
+      "byteCount": 128,
+      "sha256": "13b6350e892da1370082c7ec3f1b6fee0db2dc13fbb3a58a6a030f6cb90aa235"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-analysis-oracle-20261004.log",
+      "byteCount": 183,
+      "sha256": "0cef5f559efc13b9a692b15dda313841406e2b987a618481c68a1f4e374979d0"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-quality-20261004-evidence/arktrace-viewer-quality-plan-oracle-20261004.log",
+      "byteCount": 194,
+      "sha256": "e2ae13a4297b70d5517466d2ad18f18b6c0ab01f4d83bd9e92d0e99a50206e24"
+    }
+  ],
+  "remaining": [
+    "real Store detail adapter, focused event and density resolution",
+    "generation/cache, labels/palette/tree/navigation/annotations",
+    "C ABI/SDK and macOS App cutover",
+    "performance, resource and release gates"
+  ]
+}

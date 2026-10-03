@@ -110,6 +110,96 @@
         "count": null,
         "message": null
       }
+    },
+    {
+      "id": "viewer-timeline.cpu",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "timeline.cpu",
+        "count": null,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "timeline.cpu",
+        "count": null,
+        "message": null
+      }
+    },
+    {
+      "id": "viewer-timeline.threadState",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "timeline.threadState",
+        "count": null,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "timeline.threadState",
+        "count": null,
+        "message": null
+      }
+    },
+    {
+      "id": "viewer-timeline.frame",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "timeline.frame",
+        "count": null,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "timeline.frame",
+        "count": null,
+        "message": null
+      }
+    },
+    {
+      "id": "viewer-timeline.namedSlice",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "timeline.namedSlice",
+        "count": null,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "timeline.namedSlice",
+        "count": null,
+        "message": null
+      }
+    },
+    {
+      "id": "viewer-timeline.namedSlice.depth",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "timeline.namedSlice.depth",
+        "count": null,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "timeline.namedSlice.depth",
+        "count": null,
+        "message": null
+      }
+    },
+    {
+      "id": "unknown-viewer-scope",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "timeline.namedSlice.typo",
+        "count": null,
+        "message": null
+      },
+      "valid": false
     }
   ]
 }

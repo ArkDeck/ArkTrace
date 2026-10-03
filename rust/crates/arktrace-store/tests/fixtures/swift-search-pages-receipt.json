@@ -5,7 +5,7 @@
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
   "vectors": 138,
   "recordedSourceCalls": 570,
-  "executableSHA256": "8da972e6a67e81697253db778ea5f6f819def9b94904501593625548844925eb",
+  "executableSHA256": "adfcae187c8dd0d45c6b7ec81ef8e2891e13b53388ceff8d02980bd8654f2b7b",
   "databases": [
     {
       "fixture": "search-full",
@@ -64,8 +64,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "sha256": "19ff38ae4dd0245cc19ccf23bff502094feeaed028e955ba10a249905a8302da",
-      "byteCount": 11790
+      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+      "byteCount": 11916
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
