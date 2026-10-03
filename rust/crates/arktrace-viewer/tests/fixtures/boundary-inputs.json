@@ -1,0 +1,5 @@
+[
+  {"name":"endpoint-crossing-and-collapse","viewport":{"range":{"startNs":0,"endNs":1000},"widthPoints":200,"heightPoints":80,"verticalOffsetPoints":0,"generation":1},"selection":{"startNs":250,"endNs":500},"pressX":50,"anchorNs":500,"mode":"endpoint","dragXs":[20,100,150,100,201]},
+  {"name":"new-range-committed-zero-clears","viewport":{"range":{"startNs":0,"endNs":1000},"widthPoints":200,"heightPoints":80,"verticalOffsetPoints":0,"generation":1},"selection":{"startNs":250,"endNs":500},"pressX":75,"anchorNs":375,"mode":"newRange","dragXs":[90,75,60,-5]},
+  {"name":"one-nanosecond-new-range-floor-degeneracy","viewport":{"range":{"startNs":100,"endNs":101},"widthPoints":200,"heightPoints":80,"verticalOffsetPoints":0,"generation":1},"selection":null,"pressX":0,"anchorNs":100,"mode":"newRange","dragXs":[10,199,200,10]}
+]

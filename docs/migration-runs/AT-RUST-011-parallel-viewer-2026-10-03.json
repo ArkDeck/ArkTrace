@@ -1,0 +1,414 @@
+{
+  "task": "AT-RUST-011 parallel pure viewer phase 1",
+  "status": "reviewable-pure-module; AT-RUST-011 and macOS acceptance incomplete",
+  "recordedAtUtc": "2026-10-03T15:15:14.717333+00:00",
+  "workingDirectory": "/private/tmp/arktrace-parallel-viewer-20261003",
+  "sourceSnapshot": {
+    "baseRevision": "acea06f40491af6265f1fa7885fafd4ff8e25b32",
+    "createdAtUtc": "2026-10-03T14:17:57.422616+00:00",
+    "sourceWasClean": true,
+    "snapshotManifestSha256": "e45581e78124c26c75de10f466607fde5e4d9792154bf8d85f6b538955278ea1",
+    "baselineFileCount": 679,
+    "unchangedFileCount": 679,
+    "changedFiles": [],
+    "deletedFiles": [],
+    "gitStatusUnavailable": "isolated snapshot has no .git; git status --short exited 128",
+    "cargoWorkspace": {
+      "path": "rust/Cargo.toml",
+      "byteCount": 841,
+      "sha256": "de38091efc696ba89d78a3fb64eb13cbe6c7d3096aa725bcd4b9d54b5e16bb60"
+    },
+    "cargoLock": {
+      "path": "rust/Cargo.lock",
+      "byteCount": 8721,
+      "sha256": "ea81800ddf0aa0fe0234b628334f5a3ad62690f3a031826ed4cd71e7645d3cb6"
+    }
+  },
+  "addedPaths": [
+    "docs/migration-runs/AT-RUST-011-parallel-viewer-2026-10-03.json",
+    "docs/migration-runs/AT-RUST-011-parallel-viewer-2026-10-03.md",
+    "docs/migration-runs/AT-RUST-011-parallel-viewer-2026-10-03.sha256",
+    "rust/crates/arktrace-viewer/Cargo.toml",
+    "rust/crates/arktrace-viewer/oracle/OracleHarness.swift",
+    "rust/crates/arktrace-viewer/oracle/generate_inputs.py",
+    "rust/crates/arktrace-viewer/oracle/run_cargo_validation.py",
+    "rust/crates/arktrace-viewer/oracle/run_swift_oracle.py",
+    "rust/crates/arktrace-viewer/src/geometry.rs",
+    "rust/crates/arktrace-viewer/src/interaction.rs",
+    "rust/crates/arktrace-viewer/src/lib.rs",
+    "rust/crates/arktrace-viewer/src/plan.rs",
+    "rust/crates/arktrace-viewer/src/snapshot.rs",
+    "rust/crates/arktrace-viewer/src/types.rs",
+    "rust/crates/arktrace-viewer/tests/common/mod.rs",
+    "rust/crates/arktrace-viewer/tests/fixtures/boundary-inputs.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/geometry-inputs.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/plan-inputs.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle.json",
+    "rust/crates/arktrace-viewer/tests/regressions.rs",
+    "rust/crates/arktrace-viewer/tests/swift_boundary_oracle.rs",
+    "rust/crates/arktrace-viewer/tests/swift_geometry_oracle.rs",
+    "rust/crates/arktrace-viewer/tests/swift_plan_oracle.rs"
+  ],
+  "fileDigests": [
+    {
+      "path": "rust/crates/arktrace-viewer/Cargo.toml",
+      "byteCount": 351,
+      "sha256": "31077d2034838465fc5359c855f6c06db4052ef034fc6d7a9c3e670cc497cc1b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/OracleHarness.swift",
+      "byteCount": 19286,
+      "sha256": "96ff8ac8dc3130f483d8c3305a8159ab629717d28504673733cc3c9235ef76dd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/generate_inputs.py",
+      "byteCount": 7954,
+      "sha256": "e3eb5afc93c805f2b1c101d04e523983351073ada37bc1f2369d8ccb8fd2af4e"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/run_cargo_validation.py",
+      "byteCount": 2803,
+      "sha256": "44733dc5bdf9a791010d5b61a6c4c2d6c5f9a1abc147199c679cf91a273f995a"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/run_swift_oracle.py",
+      "byteCount": 6031,
+      "sha256": "69d970effa825d0aa72538c0e3ce33b9ec8e4c7ab2a7d0a7fde72f9352b20f4b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/geometry.rs",
+      "byteCount": 6353,
+      "sha256": "4358060ba3ba6b3b7b41bb231cba9dc2ba3148ea07f296f409ae5afb41773f55"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/interaction.rs",
+      "byteCount": 3391,
+      "sha256": "641857a11ba96be0505c8008620fe735e3ab367159a173d71ac22c1a2915760b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "byteCount": 3079,
+      "sha256": "9247626bae00af31e08190aaca52b17b31ebd8ff07bccf5f9679630d277421d2"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/plan.rs",
+      "byteCount": 10071,
+      "sha256": "1999d20338237c26a6063449f3b9e5173160635cd1f85637dc17a141af34e132"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/snapshot.rs",
+      "byteCount": 20567,
+      "sha256": "0840c1b2aeb704b2cbb70c4ded5d5814d6e4336661134e85714b8c0c54b00959"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/types.rs",
+      "byteCount": 8236,
+      "sha256": "e1f432106021442c8ca32992a4a9f4d34cf31fb44dd9d0262202f2a3f6270928"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/common/mod.rs",
+      "byteCount": 3276,
+      "sha256": "91689b0731108773f5f2ae2dca7ccc82f67e937fd28df87d0209b2bc188fc139"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/boundary-inputs.json",
+      "byteCount": 832,
+      "sha256": "8e63aee5abd0b7b235e693f26a0b1624027ed0183ba451ea0f9f99f7f66c5eb8"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/geometry-inputs.json",
+      "byteCount": 304469,
+      "sha256": "35dc59b0616955e58f1b29af397daff4cfc771d5c0fffd36b4f284bfbc0f9889"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/plan-inputs.json",
+      "byteCount": 74498,
+      "sha256": "01e76fcc00118baaa8ba5dd3caf728cdfcf33e2867557fd6f5012b7d82467fbd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle-receipt.json",
+      "byteCount": 5692,
+      "sha256": "438ac2e7e7a386a60a5c6b160689e9d17ea130759b47bba974ac6021b9b5b4d7"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle.json",
+      "byteCount": 1330,
+      "sha256": "8a86a13bb51d8d062977c5b69c8c1e9e25f1be9b6c04a3a54dc8dd026b554ebc"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle-receipt.json",
+      "byteCount": 5693,
+      "sha256": "65e95a3f2a08cda09ebd5de9abff19f1b08ea8dc90fa4659ee2d1128b6a031f9"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle.json",
+      "byteCount": 149596,
+      "sha256": "63c5c245fe004a0192170e3dd7949cd0e1dfcbe8d490ebe94e0c25eb6740df31"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle-receipt.json",
+      "byteCount": 5670,
+      "sha256": "5b3254b37065438ad4f8da8da235ac8479537498fe46e6cfb9dc23aed74780fa"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle.json",
+      "byteCount": 113089,
+      "sha256": "cf9f881793ad76501f3294cf5857be38c510de73f27056b6ba7b4de0912aaa97"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/regressions.rs",
+      "byteCount": 20672,
+      "sha256": "8a404f3a5e42cb6b58783e39af1a11e039ceced3aafc2eaa8d09b9b5bdadcf14"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_boundary_oracle.rs",
+      "byteCount": 2245,
+      "sha256": "49b677bf3b2107c8047d6b4393a46b0d67e700ffca18cc3aec37bc5530df3563"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_geometry_oracle.rs",
+      "byteCount": 4233,
+      "sha256": "b91157276326c3d201c907724e213caa2cfc693b6fcfc2d91a8c5f7b75667553"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_plan_oracle.rs",
+      "byteCount": 6532,
+      "sha256": "ea1a254bbed589c8f25f77a836b37835fcb60c763dd23b72d261b016781554b0"
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-011-parallel-viewer-2026-10-03.md",
+      "byteCount": 14876,
+      "sha256": "62e7595321bb165b7b2bc2ebc79ffab8719c2bba5d472cb28a013993dd63a6d9"
+    }
+  ],
+  "apiVersion": 1,
+  "productionDependencies": [
+    "std",
+    "arktrace-contract",
+    "serde"
+  ],
+  "newThirdPartyPackages": [],
+  "unsafeAdded": false,
+  "ioSqlOrGuiPlatformTypesAdded": false,
+  "validation": {
+    "rustTests": {
+      "passed": 29,
+      "regressions": 26,
+      "replayTests": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "actualSwiftVectors": {
+      "geometry": 25,
+      "loader": 13,
+      "selectionEventSequences": 3,
+      "total": 41,
+      "floatComparison": "binary64 bits; no epsilon; integer identities/times exact"
+    },
+    "swiftExistingRegressions": {
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0
+    },
+    "fmt": "passed",
+    "clippy": "passed with -D warnings",
+    "workspaceVerifier": {
+      "passed": true,
+      "firstPartyCrates": 7,
+      "frozenThirdPartyPackages": 35
+    },
+    "oracleReceipts": [
+      {
+        "kind": "geometry",
+        "vectors": 25,
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle-receipt.json",
+        "byteCount": 5693,
+        "sha256": "65e95a3f2a08cda09ebd5de9abff19f1b08ea8dc90fa4659ee2d1128b6a031f9",
+        "allRecordedDigestsVerified": true
+      },
+      {
+        "kind": "plan",
+        "vectors": 13,
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle-receipt.json",
+        "byteCount": 5670,
+        "sha256": "5b3254b37065438ad4f8da8da235ac8479537498fe46e6cfb9dc23aed74780fa",
+        "allRecordedDigestsVerified": true
+      },
+      {
+        "kind": "boundary",
+        "vectors": 3,
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle-receipt.json",
+        "byteCount": 5692,
+        "sha256": "438ac2e7e7a386a60a5c6b160689e9d17ea130759b47bba974ac6021b9b5b4d7",
+        "allRecordedDigestsVerified": true
+      }
+    ],
+    "logs": [
+      {
+        "name": "rust-test",
+        "path": "/private/tmp/arktrace-parallel-viewer-cargo/final-test.log",
+        "byteCount": 3818,
+        "sha256": "78fa585b3976cd9202eabdfe2572611a62c131d58c432f6b2505bef8a7ed633a",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "rust-fmt",
+        "path": "/private/tmp/arktrace-parallel-viewer-cargo/final-fmt.log",
+        "byteCount": 66,
+        "sha256": "295f1a8e56ea31cf471f5633a1b3b8c22c77c832ef0a84e050409368dc8ce2f5",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "rust-clippy",
+        "path": "/private/tmp/arktrace-parallel-viewer-cargo/final-clippy.log",
+        "byteCount": 258,
+        "sha256": "cb58c51bd10b301adcf0341c8925252017d0dbbd89c43de362cc75edf1d170e1",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "rust-verify",
+        "path": "/private/tmp/arktrace-parallel-viewer-cargo/final-verify.log",
+        "byteCount": 175,
+        "sha256": "3442fce76e771d5ab08eb88d4e0aedaaedbf38feb0821280d56307b11f1ef2d2",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "swift-geometry-oracle",
+        "path": "/private/tmp/arktrace-parallel-viewer-swiftpm/swift-geometry-oracle.log",
+        "byteCount": 1213,
+        "sha256": "40f805596c47cd10ceb79dd4102083f4f947d902bbe64f0e5bbaa5f3a407d053",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "swift-plan-oracle",
+        "path": "/private/tmp/arktrace-parallel-viewer-swiftpm/swift-plan-oracle.log",
+        "byteCount": 1074,
+        "sha256": "e171f74a0ff6dd644c0a6b83eb16b083a36ab52e2882f7ad3bb10e1921b4a911",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "swift-boundary-oracle",
+        "path": "/private/tmp/arktrace-parallel-viewer-swiftpm/swift-boundary-oracle.log",
+        "byteCount": 1082,
+        "sha256": "abd3f44c34f0c33b918e9135d5630dd4a80a68b16bca078ae38caf18f83b4da6",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      },
+      {
+        "name": "swift-regressions",
+        "path": "/private/tmp/arktrace-parallel-viewer-swiftpm/swift-regressions.log",
+        "byteCount": 8472,
+        "sha256": "e7ca15e70f175c474b267aa7faaf171be99984a89f4ac7b01f6fcc965de3fa37",
+        "exitCode": 0,
+        "warningOrSkipLines": []
+      }
+    ]
+  },
+  "toolchain": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "edition": 2024,
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "macOSDeploymentTarget": "26.0"
+  },
+  "cacheRoots": {
+    "rust": "/private/tmp/arktrace-parallel-viewer-cargo",
+    "swift": "/private/tmp/arktrace-parallel-viewer-swiftpm"
+  },
+  "rootLockIntegration": {
+    "snapshotLockChanged": false,
+    "privateValidationLockAddedPackages": [
+      {
+        "name": "arktrace-viewer",
+        "version": "0.1.0",
+        "dependencies": [
+          "arktrace-contract",
+          "serde",
+          "serde_json"
+        ]
+      }
+    ],
+    "allExistingPackageRecordsUnchanged": true,
+    "mainCoordinatorMustGenerateRootLock": true
+  },
+  "measuredDifference": {
+    "nonFinitePan": {
+      "swift": {
+        "nan": 0,
+        "positiveInfinity": 9223372036854775807,
+        "negativeInfinity": -9223372036854775808
+      },
+      "rust": "InvalidGeometry for all three inputs",
+      "receipt": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle-receipt.json"
+    }
+  },
+  "frozenSwiftBehavior": {
+    "explicitDetailQueriesAllExpandedLanesIncludingOffscreen": true,
+    "visualVisibilityAndDensityBucketResolutionUseClosedEndpoints": true,
+    "detailHitUsesStyleThenLaterInput": "running/runnable/blocked/sleeping/counter/accent",
+    "emptyQueriedFrameResetsRowsToOne": true,
+    "unusedFairBudgetDoesNotExpandFinalLane": true
+  },
+  "qualityIntegration": {
+    "sourceQuality": "DataQuality::machine; original issue identity dedup before message redaction; merged unique cap 4096",
+    "derivedFacts": "closed ViewerQualityFact enum, preserved separately; snapshot.data_quality does not include derived facts",
+    "missingSharedScopes": [
+      "timeline.cpu",
+      "timeline.threadState",
+      "timeline.frame",
+      "timeline.namedSlice",
+      "timeline.namedSlice.depth"
+    ],
+    "sharedContractChanged": false
+  },
+  "limits": {
+    "tracks": 10000,
+    "pixelWidth": [
+      1,
+      100000
+    ],
+    "primitives": 20000,
+    "assemblyCombinedCandidateInputs": 40000,
+    "depthRows": 32,
+    "densityBatchQueries": 32,
+    "resolutionPrimaryLimit": 64,
+    "resolutionFallbackLimit": 512,
+    "sourceQualityUniqueIssues": 4096,
+    "scanCheckpointInterval": 256
+  },
+  "notImplementedOrNotVerified": [
+    "real Store/Engine detail adapters and query execution",
+    "complete Viewer envelope/SDK/FFI",
+    "focused-event query, track tree/group/filter/favorite",
+    "palette/color slots/label facts/event stepping/search/annotations",
+    "generation arbitration, density cache, hover overlay/color batches",
+    "full pointer slop/click gesture state machine",
+    "physical raster intensity/color/text/font",
+    "full workspace tests and complete diff CI lanes",
+    "real DB/parser/native probes",
+    "macOS App build or acceptance",
+    "Windows x64 native",
+    "performance, signing or release acceptance",
+    "Swift Int.max depth trap input was not executed",
+    "parity for illegal/nonfinite coordinates and invalid zoom scales; Rust rejects them at the boundary"
+  ],
+  "gitOrCoordinationActions": {
+    "commit": false,
+    "push": false,
+    "pullRequest": false,
+    "newThread": false,
+    "subagent": false,
+    "messageToOtherChat": false
+  }
+}

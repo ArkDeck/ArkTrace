@@ -1,0 +1,72 @@
+[
+  {
+    "name" : "endpoint-crossing-and-collapse",
+    "nonFinitePanDeltas" : {
+      "nan" : 0,
+      "negativeInfinity" : -9223372036854775808,
+      "positiveInfinity" : 9223372036854775807
+    },
+    "selections" : [
+      {
+        "endNs" : 500,
+        "startNs" : 100
+      },
+      {
+        "endNs" : 500,
+        "startNs" : 100
+      },
+      {
+        "endNs" : 750,
+        "startNs" : 500
+      },
+      {
+        "endNs" : 750,
+        "startNs" : 500
+      },
+      {
+        "endNs" : 1000,
+        "startNs" : 500
+      }
+    ]
+  },
+  {
+    "name" : "new-range-committed-zero-clears",
+    "nonFinitePanDeltas" : {
+      "nan" : 0,
+      "negativeInfinity" : -9223372036854775808,
+      "positiveInfinity" : 9223372036854775807
+    },
+    "selections" : [
+      {
+        "endNs" : 450,
+        "startNs" : 375
+      },
+      null,
+      {
+        "endNs" : 375,
+        "startNs" : 300
+      },
+      {
+        "endNs" : 375,
+        "startNs" : 0
+      }
+    ]
+  },
+  {
+    "name" : "one-nanosecond-new-range-floor-degeneracy",
+    "nonFinitePanDeltas" : {
+      "nan" : 0,
+      "negativeInfinity" : -9223372036854775808,
+      "positiveInfinity" : 9223372036854775807
+    },
+    "selections" : [
+      null,
+      null,
+      {
+        "endNs" : 101,
+        "startNs" : 100
+      },
+      null
+    ]
+  }
+]
