@@ -183,22 +183,41 @@ buckets, raw dominant colour identities, capability and quality match 190 actual
 Swift controlled requests and 60 real parser/Ready results; 21 failed requests
 leave the next query unchanged. Identity reads use batches of at most 128
 bindings. Occupancy and utilization remain unavailable, as in Swift. Real
-nonempty CPU counters and frames, density caching/read pools and Viewer/SDK/App
-integration remain open. See the [density record](../docs/migration-runs/AT-RUST-007-2026-10-03-density-queries.md).
+nonempty CPU counters and frames, SDK/App integration and acceptance remain
+open. The later owner/viewport work adds bounded read pools and density caching. See the [density record](../docs/migration-runs/AT-RUST-007-2026-10-03-density-queries.md).
 
 Bounded Viewer details now execute through `NoCacheSession::viewer_details` and
 `RepositoryRequest::ViewerDetails` on the existing async Store owner. Typed lane
 queries select unattributed slices and CPU/process counter families before
 LIMIT; omitted scope fields preserve general-query wire compatibility. Three
 real traces pass 21 full async/blocking Rust response comparisons with owned
-result lifetime and resource cleanup checks. Complete viewport orchestration,
-generation/cache and SDK/App integration remain open.
+result lifetime and resource cleanup checks. SDK/App integration and complete
+presentation/acceptance remain open.
 
 ```sh
 python3 scripts/test_macos_viewer_owner.py
 ```
 
 See [scoped owner evidence](../docs/migration-runs/AT-RUST-011-2026-10-04-scoped-owner.md).
+
+The session-owned `ViewportLoader` now composes real Store density batches,
+LOD/detail/focus, overscan and cached depth on async owner workers. Density cache
+limits are 64 entries, 200,000 buckets and 64 MiB of retained payload capacity;
+this is not a whole-process RSS bound. Cache misses batch at 32; old viewport
+generations are cancelled and cannot publish again, while acquired immutable
+results survive supersession/release/close/drain. Density presses query at most
+64 covering and 512 fallback candidates; hover remains pure snapshot geometry.
+Three freshly parsed real traces pass 33 independent actual Swift viewport
+projections and 42 selected-event comparisons, plus full blocking/async Rust
+UTF-8 equality. Full original Swift snapshots/inspectors are retained. Labels,
+inspector contents, palette/jank facts, tree/navigation/annotations, persistent
+cache and SDK/App/release/performance gates remain incomplete.
+
+```sh
+python3 scripts/test_macos_viewport_owner.py
+```
+
+See [viewport owner evidence](../docs/migration-runs/AT-RUST-011-2026-10-04-viewport-owner.md).
 
 The shared CLI library consumes a no-cache session for inspect/processes/threads/query,
 validates Machine JSON values and provenance, serializes within the output byte

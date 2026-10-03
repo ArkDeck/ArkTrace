@@ -330,8 +330,9 @@ pub struct AssembledSnapshot {
     pub source_truncated: Vec<bool>,
     pub quality_facts: Vec<ViewerQualityFact>,
 }
-/// Pure sequential LOD/layout assembly. Cache persistence, query execution and
-/// generation arbitration stay with the host. Final output uses one snapshot.
+/// Pure sequential LOD/layout assembly. `ViewportLoader` supplies cached
+/// depths and typed host query pages; Engine arbitrates async publication.
+/// Final output uses one immutable snapshot.
 pub fn assemble(
     request: &crate::ViewportRequest,
     cached_depths: &[crate::CachedDepth],

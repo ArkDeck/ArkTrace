@@ -264,6 +264,11 @@ pub enum RepositoryRequest {
         range: arktrace_contract::TraceTimeRange,
         limit: usize,
     },
+    ViewerViewport {
+        request: Box<arktrace_viewer::ViewportRequest>,
+        backing_scale: f64,
+    },
+    ViewerResolveDensity(arktrace_viewer::DensityResolutionRequest),
     Batch(TraceRepositoryEventBatch),
     Search(TraceSearchRequest),
     Analyze {
@@ -272,6 +277,12 @@ pub enum RepositoryRequest {
     },
 }
 impl RepositoryRequest {
+    fn viewport_generation(&self) -> Option<u64> {
+        match self {
+            Self::ViewerViewport { request, .. } => Some(request.generation),
+            _ => None,
+        }
+    }
     fn validate(&self) -> Result<(), RuntimeFailure> {
         let value = match self {
             Self::Processes(q) => q.validate(),
@@ -293,6 +304,26 @@ impl RepositoryRequest {
                     .map(|_| ())
                     .map_err(|_| RuntimeFailure::InvalidRequest);
             }
+            Self::ViewerViewport {
+                request,
+                backing_scale,
+            } => {
+                return request
+                    .effective_budget()
+                    .and_then(|_| {
+                        if backing_scale.is_finite() && *backing_scale > 0.0 {
+                            Ok(())
+                        } else {
+                            Err(arktrace_viewer::ViewerError::InvalidGeometry)
+                        }
+                    })
+                    .map_err(|_| RuntimeFailure::InvalidRequest);
+            }
+            Self::ViewerResolveDensity(request) => {
+                return request
+                    .validate()
+                    .map_err(|_| RuntimeFailure::InvalidRequest);
+            }
             Self::Batch(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::Analyze { request, scope } => {
@@ -309,11 +340,13 @@ struct SessionRecord {
     worker: usize,
     status: SessionStatus,
     close_queued: bool,
+    latest_viewport_generation: u64,
 }
 struct RequestRecord {
     status: RequestStatus,
     token: CancellationToken,
     result: Option<OwnedResult>,
+    viewport_generation: Option<u64>,
 }
 enum Record {
     Session(SessionRecord),
@@ -449,6 +482,7 @@ impl AsyncEngine {
                 residue_owner: None,
             },
             close_queued: false,
+            latest_viewport_generation: 0,
         }))?;
         let request = match self.enqueue(
             &mut registry,
@@ -492,6 +526,10 @@ impl AsyncEngine {
             },
             token: budget.cancellation.clone(),
             result: None,
+            viewport_generation: match &operation {
+                Operation::Query(q) => q.viewport_generation(),
+                _ => None,
+            },
         }))?;
         match self.senders[worker].try_send(Command {
             session,
@@ -531,13 +569,49 @@ impl AsyncEngine {
         if registry.queued[worker] >= self.limits.queue_per_worker {
             return Err(RuntimeFailure::Capacity);
         }
-        self.enqueue(
+        let generation = request.viewport_generation();
+        if let Some(generation) = generation {
+            if matches!(registry.table.get(session)?, Record::Session(s) if generation < s.latest_viewport_generation)
+            {
+                return Err(RuntimeFailure::Cancelled);
+            }
+            // Query admission is nonblocking, including cancellation of older
+            // viewport work. Other query/analysis operations are unaffected.
+            if registry
+                .table
+                .values()
+                .filter(|r| matches!(r, Record::Request(_)))
+                .count()
+                >= self.limits.requests
+            {
+                return Err(RuntimeFailure::Capacity);
+            }
+            for record in registry.table.values_mut() {
+                if let Record::Request(r) = record
+                    && r.status.session == session
+                    && !r.status.state.terminal()
+                    && r.viewport_generation.is_some_and(|old| old < generation)
+                {
+                    if !r.token.try_cancel() {
+                        return Err(RuntimeFailure::Busy);
+                    }
+                    r.status.state = RequestState::Cancelling;
+                }
+            }
+        }
+        let handle = self.enqueue(
             &mut registry,
             worker,
             session,
             budget,
             Operation::Query(Box::new(request)),
-        )
+        )?;
+        if let Some(generation) = generation
+            && let Record::Session(s) = registry.table.get_mut(session)?
+        {
+            s.latest_viewport_generation = generation;
+        }
+        Ok(handle)
     }
     pub fn poll(&self, request: RuntimeHandle) -> Result<RequestStatus, RuntimeFailure> {
         let registry = self.registry()?;
@@ -556,10 +630,19 @@ impl AsyncEngine {
     pub fn acquire_result(&self, request: RuntimeHandle) -> Result<OwnedResult, RuntimeFailure> {
         let registry = self.registry()?;
         match registry.table.get(request)? {
-            Record::Request(r) => r
-                .result
-                .clone()
-                .ok_or_else(|| r.status.failure.unwrap_or(RuntimeFailure::Busy)),
+            Record::Request(r) => {
+                // Supersession must not hide a poisoned worker or failed
+                // cleanup. These retain the same precedence as publication.
+                if let Some(failure) = r.status.failure
+                    && fatal(failure)
+                {
+                    return Err(failure);
+                }
+                if r.viewport_generation.is_some_and(|generation| matches!(registry.table.get(r.status.session), Ok(Record::Session(s)) if generation < s.latest_viewport_generation)) { return Err(RuntimeFailure::Cancelled); }
+                r.result
+                    .clone()
+                    .ok_or_else(|| r.status.failure.unwrap_or(RuntimeFailure::Busy))
+            }
             _ => Err(RuntimeFailure::InvalidHandle),
         }
     }
@@ -823,6 +906,13 @@ fn query(
             range,
             limit,
         } => read!(session.viewer_details(source, *range, *limit, b)),
+        RepositoryRequest::ViewerViewport {
+            request,
+            backing_scale,
+        } => read!(session.viewer_viewport(request, *backing_scale, b)),
+        RepositoryRequest::ViewerResolveDensity(request) => {
+            read!(session.viewer_resolve_density(request, b))
+        }
         RepositoryRequest::Batch(q) => read!(
             session
                 .event_batch(q, b, ReadPoolLimits::default())
@@ -1072,7 +1162,11 @@ fn finish_command(
     let cancelled = shared.stopping.load(Ordering::Acquire)
         || matches!(registry.table.get(command.session),Ok(Record::Session(s)) if matches!(s.status.state,SessionState::Cancelling|SessionState::Closing|SessionState::Closed))
         || command.budget.cancellation.is_cancelled();
-    let mut result = cancelled_result(result, cancelled);
+    let superseded = match &command.operation {
+        Operation::Query(query) => query.viewport_generation().is_some_and(|generation| matches!(registry.table.get(command.session), Ok(Record::Session(s)) if generation < s.latest_viewport_generation)),
+        _ => false,
+    };
+    let mut result = cancelled_result(result, cancelled || superseded);
     if matches!(command.operation, Operation::Open { .. }) && result.is_err() {
         // Cleanup precedes terminal opening state; close/drain must not report
         // success while a parser, staging owner, lease or DB is still held.
@@ -1251,6 +1345,7 @@ fn run_worker(
 #[cfg(test)]
 mod tests {
     use super::*;
+    mod viewport;
     #[test]
     fn viewer_frontend_rejects_invalid_bounds_before_worker_dispatch() {
         use arktrace_contract::{TraceDensitySource, TraceTimeRange};
@@ -1349,6 +1444,7 @@ mod tests {
         let session = background_registry(&shared)
             .table
             .insert(Record::Session(SessionRecord {
+                latest_viewport_generation: 0,
                 worker: 0,
                 status: SessionStatus {
                     state: SessionState::Closed,
@@ -1406,6 +1502,7 @@ mod tests {
             session = registry
                 .table
                 .insert(Record::Session(SessionRecord {
+                    latest_viewport_generation: 0,
                     worker: 0,
                     status: SessionStatus {
                         state: SessionState::Ready,
@@ -1419,6 +1516,7 @@ mod tests {
             request = registry
                 .table
                 .insert(Record::Request(RequestRecord {
+                    viewport_generation: None,
                     status: RequestStatus {
                         session,
                         state: RequestState::Queued,

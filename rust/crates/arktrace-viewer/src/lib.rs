@@ -1,9 +1,11 @@
 //! Pure Viewer geometry, bounded query planning and immutable hit projection.
-//! No renderer, repository, clock, IO, asynchronous generation/cache or palette.
+//! No renderer, database, clock or IO. Session-owned loading uses typed host
+//! query callbacks; asynchronous admission and generation publication stay in Engine.
 //! Coordinates are logical points; only minimum visual width uses backing scale.
 mod detail;
 mod geometry;
 mod interaction;
+mod loader;
 mod plan;
 mod snapshot;
 mod types;
@@ -11,6 +13,7 @@ mod types;
 pub use detail::*;
 pub use geometry::*;
 pub use interaction::*;
+pub use loader::*;
 pub use plan::*;
 pub use snapshot::*;
 pub use types::*;

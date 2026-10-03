@@ -19,11 +19,12 @@ use arktrace_store::{
 };
 use serde::Serialize;
 use std::{
-    cell::Cell,
+    cell::{Cell, RefCell},
     ffi::OsString,
     sync::Arc,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+mod viewer;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 pub enum EngineStage {
@@ -229,6 +230,7 @@ pub struct NoCacheSession {
     inspection: DatabaseInspection,
     cleanup_bytes: u64,
     query_worker_failed: Cell<bool>,
+    viewer: RefCell<arktrace_viewer::ViewportLoader>,
 }
 impl NoCacheSession {
     /// Worker-owned bounded Store-to-Viewer detail operation. Focused-event
@@ -1794,6 +1796,7 @@ pub fn open_no_cache(
             inspection: inspection.inspection,
             cleanup_bytes: aggregate,
             query_worker_failed: Cell::new(false),
+            viewer: RefCell::default(),
         })
     })();
     match result {

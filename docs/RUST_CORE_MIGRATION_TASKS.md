@@ -635,6 +635,16 @@ namedSlice 和 counter physical-family 的 pre-limit 范围。保留六组实际
 Xcode 27 App build 通过；七份既有 Swift oracle 的 528 组输出字节不变。完整 viewport、
 generation/cache、SDK/App 与验收仍待完成，见[owner 接线记录](migration-runs/AT-RUST-011-2026-10-04-scoped-owner.md)。
 
+随后接入 session-owned viewport loader、bounded density LRU、cached depth、focused
+inclusion 与 64/512 density resolution；async worker 按 generation 取消旧 viewport 并
+拒绝其发布/再次获取，保留 held bytes、普通查询及 fatal error。三份新解析 trace 的
+33 个 viewport 和 42 个点击结果与独立 actual Swift repository/loader/geometry 对照通过，
+Rust blocking/async 完整 UTF-8 相同，worker gate、FD/owner/raw-byte 检查通过。
+332 Rust tests、strict clippy/fmt、十项 offline gate 与 46 planner cases 通过。完整原始
+Swift snapshot/inspector 保留；labels/inspector/palette/jank、tree/navigation/annotations、
+SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
+[viewport owner 记录](migration-runs/AT-RUST-011-2026-10-04-viewport-owner.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：planned；开工依赖：001、002；完成依赖：008、009、011。

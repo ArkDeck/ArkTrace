@@ -14,6 +14,94 @@ struct Vector {
     truncated: Vec<bool>,
     source_issues: Option<Vec<QualityIssue>>,
 }
+struct Repository<'a> {
+    vector: &'a Vector,
+    density_calls: Vec<TraceDensityQuery>,
+    detail_calls: Vec<Value>,
+    batches: Vec<usize>,
+}
+impl Repository<'_> {
+    fn index(&self, source: &TraceDensitySource) -> usize {
+        self.vector
+            .request
+            .tracks
+            .iter()
+            .position(|t| t.source == *source)
+            .unwrap()
+    }
+    fn density_page(&self, query: &TraceDensityQuery) -> TraceDensityResult {
+        TraceDensityResult {
+            buckets: vec![TraceDensityBucket {
+                range: query.range,
+                event_count: self.vector.event_counts[self.index(&query.source)],
+                occupied_ns: None,
+                utilization: None,
+                dominant: None,
+            }],
+            capability_available: true,
+            data_quality: common::quality(),
+        }
+    }
+}
+impl ViewportQueries for Repository<'_> {
+    type Error = ViewerError;
+    fn density_batch(
+        &mut self,
+        queries: &[TraceDensityQuery],
+    ) -> Result<Vec<TraceDensityResult>, ViewerError> {
+        self.batches.push(queries.len());
+        self.density_calls.extend_from_slice(queries);
+        Ok(queries.iter().map(|q| self.density_page(q)).collect())
+    }
+    fn density(&mut self, query: &TraceDensityQuery) -> Result<TraceDensityResult, ViewerError> {
+        self.density_calls.push(query.clone());
+        Ok(self.density_page(query))
+    }
+    fn details(
+        &mut self,
+        source: &TraceDensitySource,
+        _range: TraceTimeRange,
+        limit: usize,
+        _focused: Option<EventKey>,
+    ) -> Result<EventPage<DetailInput>, ViewerError> {
+        self.detail_calls
+            .push(json!({"source":source,"limit":limit}));
+        let index = self.index(source);
+        let mut page = EventPage {
+            items: vec![],
+            truncated: false,
+            capability_available: false,
+            data_quality: common::quality(),
+        };
+        if matches!(source, TraceDensitySource::NamedSlice { .. }) {
+            page.capability_available = true;
+            if let Some(issues) = &self.vector.source_issues {
+                page.data_quality = DataQuality {
+                    status: QualityStatus::Warnings,
+                    warnings: issues.clone(),
+                };
+            }
+            let depths = &self.vector.detail_depths[index];
+            page.truncated = self.vector.truncated[index] || depths.len() > limit;
+            page.items = depths
+                .iter()
+                .take(limit)
+                .enumerate()
+                .map(|(j, depth)| DetailInput {
+                    event_key: EventKey {
+                        table: EventTable::Callstack,
+                        row_id: (index * 100 + j + 1) as i64,
+                    },
+                    range: common::range((j * 10) as i64, (j * 10 + 5) as i64),
+                    depth: *depth,
+                    style: DetailStyle::Accent,
+                    is_open_ended: false,
+                })
+                .collect();
+        }
+        Ok(page)
+    }
+}
 #[test]
 fn retain_measured_swift_difference_only_for_explicit_detail_offscreen_queries() {
     let before: Vec<Value> =
@@ -60,107 +148,16 @@ fn replay_13_actual_swift_loader_query_and_snapshot_vectors_exactly() {
     for (v, e) in inputs.iter().zip(&expected) {
         let mut check = || Ok(());
         let plan = plan(&v.request, &[], &mut check).unwrap();
-        // Adapter supplies the same independent bounded repository pages.
-        // Expected LOD/layout/budgets come only from the actual Swift loader.
-        let densities: Vec<_> = plan
-            .lanes
-            .iter()
-            .map(|l| TraceDensityResult {
-                buckets: vec![TraceDensityBucket {
-                    range: v.request.viewport.range(),
-                    event_count: v.event_counts[l.request_index],
-                    occupied_ns: None,
-                    utilization: None,
-                    dominant: None,
-                }],
-                capability_available: true,
-                data_quality: common::quality(),
-            })
-            .collect();
-        let mut detail_pages = Vec::new();
-        let mut actual_details = Vec::new();
-        let mut actual_densities = plan.density_prefetch.clone();
-        let mut remaining = plan.maximum_primitives;
-        let mut queried_remaining = plan.queried_indices.len();
-        for (l, density) in plan.lanes.iter().zip(&densities) {
-            let budget = if l.queried {
-                plan.lane_budget(remaining, queried_remaining).unwrap()
-            } else {
-                0
-            };
-            let mut page = EventPage {
-                items: vec![],
-                truncated: false,
-                capability_available: false,
-                data_quality: common::quality(),
-            };
-            let mut output_count = 0;
-            if budget > 0 {
-                if plan.fair_budget == 0 && v.request.preference != DetailPreference::Detail {
-                    actual_densities.push(TraceDensityQuery {
-                        range: v.request.viewport.range(),
-                        source: l.source.clone(),
-                        bucket_count: density_bucket_limit(v.request.pixel_width, budget).unwrap(),
-                    });
-                }
-                let decision = choose_lod(
-                    v.request.preference,
-                    v.request.pixel_width,
-                    budget,
-                    Some(density),
-                    &mut check,
-                )
-                .unwrap();
-                if decision.lod == Lod::Detail {
-                    actual_details.push(json!({"source":l.source,"limit":budget}));
-                    if matches!(l.source, TraceDensitySource::NamedSlice { .. }) {
-                        let depths = &v.detail_depths[l.request_index];
-                        page.capability_available = true;
-                        if let Some(issues) = &v.source_issues {
-                            page.data_quality = DataQuality {
-                                status: QualityStatus::Warnings,
-                                warnings: issues.clone(),
-                            };
-                        }
-                        page.truncated = v.truncated[l.request_index] || depths.len() > budget;
-                        page.items = depths
-                            .iter()
-                            .take(budget)
-                            .enumerate()
-                            .map(|(j, depth)| DetailInput {
-                                event_key: EventKey {
-                                    table: EventTable::Callstack,
-                                    row_id: (l.request_index * 100 + j + 1) as i64,
-                                },
-                                range: common::range((j * 10) as i64, (j * 10 + 5) as i64),
-                                depth: *depth,
-                                style: DetailStyle::Accent,
-                                is_open_ended: false,
-                            })
-                            .collect();
-                        output_count = page.items.len();
-                    }
-                } else if decision.lod == Lod::Density {
-                    output_count = density.buckets.len().min(decision.bucket_limit);
-                }
-            }
-            remaining -= output_count;
-            if l.queried {
-                queried_remaining -= 1;
-            }
-            detail_pages.push(page);
-        }
-        let pages: Vec<_> = detail_pages
-            .iter()
-            .zip(&densities)
-            .enumerate()
-            .map(|(i, (d, n))| LanePages {
-                expanded_index: i,
-                detail: Some(d),
-                density: Some(n),
-            })
-            .collect();
-        let assembled = assemble(&v.request, &[], &pages, 2.0, &mut check).unwrap();
+        let mut repository = Repository {
+            vector: v,
+            density_calls: Vec::new(),
+            detail_calls: Vec::new(),
+            batches: Vec::new(),
+        };
+        let assembled = ViewportLoader::default()
+            .load(&v.request, 2.0, &mut repository, &mut check)
+            .unwrap()
+            .unwrap();
         let tracks:Vec<Value>=assembled.snapshot.tracks().iter().map(|t| {
             let primitives:Vec<Value>=t.primitives.iter().map(|p|match &p.input {
                 PrimitiveInput::Detail{detail}=>json!({"kind":"detail","eventKey":detail.event_key,"range":detail.range,"depth":detail.depth}),
@@ -168,8 +165,8 @@ fn replay_13_actual_swift_loader_query_and_snapshot_vectors_exactly() {
             }).collect();
             json!({"trackID":t.descriptor.id(),"y":t.y,"height":t.height,"depthRowCount":t.depth_row_count,"primitives":primitives})
         }).collect();
-        let result = json!({"name":v.name,"maximumPrimitives":plan.maximum_primitives,"densityCalls":actual_densities,"detailCalls":actual_details,
-            "batches":plan.density_batches.iter().map(Vec::len).collect::<Vec<_>>(),"tracks":tracks,"qualityFacts":assembled.quality_facts,"sourceFacts":assembled.snapshot.data_quality().warnings.iter().filter(|i| !i.scope.as_deref().is_some_and(|s| s.starts_with("timeline."))).map(|i|json!({"category":i.category,"scope":i.scope,"count":i.count})).collect::<Vec<_>>()});
+        let result = json!({"name":v.name,"maximumPrimitives":plan.maximum_primitives,"densityCalls":repository.density_calls,"detailCalls":repository.detail_calls,
+            "batches":repository.batches,"tracks":tracks,"qualityFacts":assembled.quality_facts,"sourceFacts":assembled.snapshot.data_quality().warnings.iter().filter(|i| !i.scope.as_deref().is_some_and(|s| s.starts_with("timeline."))).map(|i|json!({"category":i.category,"scope":i.scope,"count":i.count})).collect::<Vec<_>>()});
         let mut full_expected: Vec<QualityIssue> = ["sourceFacts", "qualityFacts"]
             .into_iter()
             .flat_map(|name| e[name].as_array().unwrap())
