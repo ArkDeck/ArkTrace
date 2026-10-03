@@ -450,6 +450,7 @@ jobs:
           python3 scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
           python3 scripts/run-cargo.py test --workspace --all-features
           python3 scripts/run-cargo.py run --bin arktrace-migration-smoke
+          python3 scripts/test_viewer_json_roundtrip.py
 
   rust-windows:
     name: Rust Windows native
@@ -480,6 +481,7 @@ jobs:
           python scripts/run-cargo.py clippy --workspace --all-targets --all-features -- -D warnings
           python scripts/run-cargo.py test --workspace --all-features
           python scripts/run-cargo.py run --bin arktrace-migration-smoke
+          python scripts/test_viewer_json_roundtrip.py
 
   # The single required check for branch protection. It runs always, and it
   # fails when a planned lane failed, was cancelled, or was skipped despite

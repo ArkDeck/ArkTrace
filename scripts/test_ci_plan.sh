@@ -169,6 +169,13 @@ lane_contracts=true
 lane_rust_macos=false
 lane_rust_windows=true' 'windows/SDK/Engine.cs'
 
+expect "production Viewer JSON consumer runs on both native platforms" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=false
+lane_rust_macos=true
+lane_rust_windows=true' 'scripts/test_viewer_json_roundtrip.py'
+
 expect "Rust documentation does not build" "$docs_only" 'rust/README.md'
 
 expect "cargo runner change fails closed" "$all_lanes" 'scripts/run-cargo.py'

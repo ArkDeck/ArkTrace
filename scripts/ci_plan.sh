@@ -44,6 +44,10 @@ while IFS= read -r path; do
             ;;
         rust/*.md|rust/*/*.md|contracts/*.md|bindings/*.md|windows/*.md)
             ;;
+        scripts/test_viewer_json_roundtrip.py)
+            rust_macos=true
+            rust_windows=true
+            ;;
         rust/*)
             rust_macos=true
             rust_windows=true
