@@ -13,6 +13,36 @@ def main():
     verify_analysis_oracles()
     from verify_store_oracles import main as verify_store_oracles
     verify_store_oracles()
+    viewer = "rust/crates/arktrace-viewer/tests/fixtures/"
+    for stem, inputs, count, current in [
+        ("swift-geometry-oracle", "geometry-inputs", 25, False),
+        ("swift-boundary-oracle", "boundary-inputs", 3, False),
+        ("swift-plan-oracle", "plan-inputs", 13, False),
+        ("swift-plan-migration-oracle", "plan-inputs", 13, True),
+        ("swift-detail-oracle", "detail-inputs", 8, True),
+    ]:
+        receipt = json.loads((ROOT / viewer / f"{stem}-receipt.json").read_text())
+        required = {viewer + inputs + ".json", viewer + stem + ".json"}
+        seen = set()
+        for entry in receipt["sourceDigests"]:
+            relative = entry["path"]
+            assert relative not in seen
+            seen.add(relative)
+            path = ROOT / relative
+            assert not path.is_symlink() and path.resolve().is_relative_to(ROOT)
+            if current or relative in required:
+                data = path.read_bytes()
+                assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
+        assert required <= seen
+        if current:
+            for name in ("ArkTraceCore", "ArkTraceRendering"):
+                assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in seen if p.startswith(f"Sources/{name}/")}
+        inputs_json = json.loads((ROOT / viewer / f"{inputs}.json").read_text())
+        outputs_json = json.loads((ROOT / viewer / f"{stem}.json").read_text())
+        names = [v["name"] for v in inputs_json]
+        assert len(names) == len(set(names)) == len(outputs_json) == receipt["vectors"] == count
+        assert names == [v["name"] for v in outputs_json]
+    print("Viewer oracles: retained geometry/boundary/old plan; 13 current loader and 8 actual detail/style vectors with source identities")
     source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
     scope_block = source.split("machineAllowed: Set<String> = [", 1)[1].split("\n    ]", 1)[0]
     scopes = sorted(re.findall(r'"([^"\n]+)"', scope_block))

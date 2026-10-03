@@ -1,0 +1,430 @@
+[
+  {
+    "depthRowCount" : 1,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "sched_slice"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 1300,
+          "startNs" : 0
+        },
+        "style" : "running"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "sched_slice"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 500,
+          "startNs" : 500
+        },
+        "style" : "running"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "sched_slice"
+        },
+        "isOpenEnded" : true,
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 700
+        },
+        "style" : "running"
+      }
+    ],
+    "height" : 28,
+    "name" : "cpu-full-instant-open",
+    "qualityFacts" : [
+
+    ]
+  },
+  {
+    "depthRowCount" : 1,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "thread_state"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 5,
+          "startNs" : 0
+        },
+        "style" : "running"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "thread_state"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 15,
+          "startNs" : 10
+        },
+        "style" : "runnable"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "thread_state"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 25,
+          "startNs" : 20
+        },
+        "style" : "blocked"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 4,
+          "table" : "thread_state"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 35,
+          "startNs" : 30
+        },
+        "style" : "sleeping"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 5,
+          "table" : "thread_state"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 45,
+          "startNs" : 40
+        },
+        "style" : "accent"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 6,
+          "table" : "thread_state"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 55,
+          "startNs" : 50
+        },
+        "style" : "accent"
+      }
+    ],
+    "height" : 28,
+    "name" : "state-normalized-and-unknown",
+    "qualityFacts" : [
+
+    ]
+  },
+  {
+    "depthRowCount" : 32,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "callstack"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 5,
+          "startNs" : 0
+        },
+        "style" : "accent"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "callstack"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 15,
+          "startNs" : 10
+        },
+        "style" : "running"
+      },
+      {
+        "depth" : 99,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "callstack"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 25,
+          "startNs" : 20
+        },
+        "style" : "sleeping"
+      }
+    ],
+    "height" : 710,
+    "name" : "slice-depth-null-negative-and-overflow",
+    "qualityFacts" : [
+      {
+        "category" : "probeTruncated",
+        "count" : null,
+        "scope" : "timeline.namedSlice"
+      },
+      {
+        "category" : "probeTruncated",
+        "count" : null,
+        "scope" : "timeline.namedSlice.depth"
+      }
+    ]
+  },
+  {
+    "depthRowCount" : 1,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "callstack"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 5,
+          "startNs" : 0
+        },
+        "style" : "accent"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "callstack"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 15,
+          "startNs" : 10
+        },
+        "style" : "running"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "callstack"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 25,
+          "startNs" : 20
+        },
+        "style" : "sleeping"
+      }
+    ],
+    "height" : 28,
+    "name" : "slice-flattening",
+    "qualityFacts" : [
+
+    ]
+  },
+  {
+    "depthRowCount" : 1,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "measure"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 10,
+          "startNs" : 10
+        },
+        "style" : "counter"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "measure"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 1400,
+          "startNs" : 100
+        },
+        "style" : "counter"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "measure"
+        },
+        "isOpenEnded" : true,
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 700
+        },
+        "style" : "counter"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 4,
+          "table" : "measure"
+        },
+        "isOpenEnded" : true,
+        "range" : {
+          "endNs" : 1300,
+          "startNs" : 1300
+        },
+        "style" : "counter"
+      }
+    ],
+    "height" : 28,
+    "name" : "cpu-counter-instant-full-open",
+    "qualityFacts" : [
+
+    ]
+  },
+  {
+    "depthRowCount" : 1,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "process_measure"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 10,
+          "startNs" : 10
+        },
+        "style" : "counter"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "process_measure"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 1400,
+          "startNs" : 100
+        },
+        "style" : "counter"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "process_measure"
+        },
+        "isOpenEnded" : true,
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 700
+        },
+        "style" : "counter"
+      },
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 4,
+          "table" : "process_measure"
+        },
+        "isOpenEnded" : true,
+        "range" : {
+          "endNs" : 1300,
+          "startNs" : 1300
+        },
+        "style" : "counter"
+      }
+    ],
+    "height" : 28,
+    "name" : "process-counter-instant-full-open",
+    "qualityFacts" : [
+
+    ]
+  },
+  {
+    "depthRowCount" : 2,
+    "details" : [
+      {
+        "depth" : 0,
+        "eventKey" : {
+          "rowID" : 1,
+          "table" : "frame_slice"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 100,
+          "startNs" : 50
+        },
+        "style" : "accent"
+      },
+      {
+        "depth" : 1,
+        "eventKey" : {
+          "rowID" : 2,
+          "table" : "frame_slice"
+        },
+        "isOpenEnded" : false,
+        "range" : {
+          "endNs" : 100,
+          "startNs" : 50
+        },
+        "style" : "accent"
+      },
+      {
+        "depth" : 1,
+        "eventKey" : {
+          "rowID" : 3,
+          "table" : "frame_slice"
+        },
+        "isOpenEnded" : true,
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 300
+        },
+        "style" : "accent"
+      }
+    ],
+    "height" : 50,
+    "name" : "frame-expected-actual-open",
+    "qualityFacts" : [
+
+    ]
+  },
+  {
+    "depthRowCount" : 1,
+    "details" : [
+
+    ],
+    "height" : 28,
+    "name" : "unavailable-cpu",
+    "qualityFacts" : [
+
+    ]
+  }
+]

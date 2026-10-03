@@ -1,0 +1,652 @@
+[
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [
+      {
+        "key": {
+          "table": "sched_slice",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 0,
+          "endNs": 1300
+        },
+        "cpu": 3,
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "tid": 42,
+        "pid": null,
+        "threadName": "work",
+        "processName": null,
+        "endState": null,
+        "priority": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "sched_slice",
+          "rowID": 2
+        },
+        "range": {
+          "startNs": 500,
+          "endNs": 500
+        },
+        "cpu": 3,
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "tid": 42,
+        "pid": null,
+        "threadName": "work",
+        "processName": null,
+        "endState": null,
+        "priority": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "sched_slice",
+          "rowID": 3
+        },
+        "range": {
+          "startNs": 700,
+          "endNs": 1000
+        },
+        "cpu": 3,
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "tid": 42,
+        "pid": null,
+        "threadName": "work",
+        "processName": null,
+        "endState": null,
+        "priority": null,
+        "isOpenEnded": true
+      }
+    ],
+    "threadStates": [],
+    "slices": [],
+    "counters": [],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true,
+    "name": "cpu-full-instant-open",
+    "source": {
+      "cpu": {
+        "_0": 3
+      }
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [],
+    "threadStates": [
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 0,
+          "endNs": 5
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "state": "running",
+        "normalizedState": "running",
+        "cpu": null,
+        "tid": 42,
+        "pid": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 2
+        },
+        "range": {
+          "startNs": 10,
+          "endNs": 15
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "state": "runnable",
+        "normalizedState": "runnable",
+        "cpu": null,
+        "tid": 42,
+        "pid": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 3
+        },
+        "range": {
+          "startNs": 20,
+          "endNs": 25
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "state": "blocked",
+        "normalizedState": "blocked",
+        "cpu": null,
+        "tid": 42,
+        "pid": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 4
+        },
+        "range": {
+          "startNs": 30,
+          "endNs": 35
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "state": "sleeping",
+        "normalizedState": "sleeping",
+        "cpu": null,
+        "tid": 42,
+        "pid": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 5
+        },
+        "range": {
+          "startNs": 40,
+          "endNs": 45
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "state": "stopped",
+        "normalizedState": "stopped",
+        "cpu": null,
+        "tid": 42,
+        "pid": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "thread_state",
+          "rowID": 6
+        },
+        "range": {
+          "startNs": 50,
+          "endNs": 55
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "state": "unknown raw",
+        "normalizedState": null,
+        "cpu": null,
+        "tid": 42,
+        "pid": null,
+        "processName": null,
+        "threadName": null,
+        "isOpenEnded": false
+      }
+    ],
+    "slices": [],
+    "counters": [],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true,
+    "name": "state-normalized-and-unknown",
+    "source": {
+      "threadState": {
+        "_0": {
+          "itid": 7
+        }
+      }
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [
+      {
+        "key": {
+          "table": "callstack",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 0,
+          "endNs": 5
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "pid": null,
+        "tid": 42,
+        "processName": null,
+        "threadName": null,
+        "name": "slice",
+        "category": null,
+        "depth": null,
+        "parentEventKey": null,
+        "isAsync": false,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "callstack",
+          "rowID": 2
+        },
+        "range": {
+          "startNs": 10,
+          "endNs": 15
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "pid": null,
+        "tid": 42,
+        "processName": null,
+        "threadName": null,
+        "name": "slice",
+        "category": "running",
+        "depth": -9,
+        "parentEventKey": null,
+        "isAsync": false,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "callstack",
+          "rowID": 3
+        },
+        "range": {
+          "startNs": 20,
+          "endNs": 25
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "pid": null,
+        "tid": 42,
+        "processName": null,
+        "threadName": null,
+        "name": "slice",
+        "category": "sleeping",
+        "depth": 99,
+        "parentEventKey": null,
+        "isAsync": false,
+        "isOpenEnded": false
+      }
+    ],
+    "counters": [],
+    "frames": [],
+    "truncated": true,
+    "capabilityAvailable": true,
+    "name": "slice-depth-null-negative-and-overflow",
+    "source": {
+      "namedSlice": {
+        "_0": {
+          "itid": 7
+        }
+      }
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [
+      {
+        "key": {
+          "table": "callstack",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 0,
+          "endNs": 5
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "pid": null,
+        "tid": 42,
+        "processName": null,
+        "threadName": null,
+        "name": "slice",
+        "category": null,
+        "depth": null,
+        "parentEventKey": null,
+        "isAsync": false,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "callstack",
+          "rowID": 2
+        },
+        "range": {
+          "startNs": 10,
+          "endNs": 15
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "pid": null,
+        "tid": 42,
+        "processName": null,
+        "threadName": null,
+        "name": "slice",
+        "category": "running",
+        "depth": -9,
+        "parentEventKey": null,
+        "isAsync": false,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "callstack",
+          "rowID": 3
+        },
+        "range": {
+          "startNs": 20,
+          "endNs": 25
+        },
+        "threadKey": {
+          "itid": 7
+        },
+        "processKey": null,
+        "pid": null,
+        "tid": 42,
+        "processName": null,
+        "threadName": null,
+        "name": "slice",
+        "category": "sleeping",
+        "depth": 99,
+        "parentEventKey": null,
+        "isAsync": false,
+        "isOpenEnded": false
+      }
+    ],
+    "counters": [],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true,
+    "name": "slice-flattening",
+    "source": {
+      "namedSlice": {
+        "_0": {
+          "itid": 7
+        }
+      }
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "filterID": 3,
+        "name": "counter",
+        "scope": "cpu",
+        "cpu": 3,
+        "processKey": null,
+        "pid": null,
+        "processName": null,
+        "unit": null,
+        "samples": [
+          {
+            "key": {
+              "table": "measure",
+              "rowID": 1
+            },
+            "timestampNs": 10,
+            "value": -9223372036854775808,
+            "durationNs": 0
+          },
+          {
+            "key": {
+              "table": "measure",
+              "rowID": 2
+            },
+            "timestampNs": 100,
+            "value": 9223372036854775807,
+            "durationNs": 1300
+          },
+          {
+            "key": {
+              "table": "measure",
+              "rowID": 3
+            },
+            "timestampNs": 700,
+            "value": 1,
+            "durationNs": null
+          },
+          {
+            "key": {
+              "table": "measure",
+              "rowID": 4
+            },
+            "timestampNs": 1300,
+            "value": 1,
+            "durationNs": null
+          }
+        ]
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true,
+    "name": "cpu-counter-instant-full-open",
+    "source": {
+      "cpuCounter": {
+        "filterID": 3,
+        "cpu": 3
+      }
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "filterID": 3,
+        "name": "counter",
+        "scope": "process",
+        "cpu": null,
+        "processKey": null,
+        "pid": null,
+        "processName": null,
+        "unit": null,
+        "samples": [
+          {
+            "key": {
+              "table": "process_measure",
+              "rowID": 1
+            },
+            "timestampNs": 10,
+            "value": -9223372036854775808,
+            "durationNs": 0
+          },
+          {
+            "key": {
+              "table": "process_measure",
+              "rowID": 2
+            },
+            "timestampNs": 100,
+            "value": 9223372036854775807,
+            "durationNs": 1300
+          },
+          {
+            "key": {
+              "table": "process_measure",
+              "rowID": 3
+            },
+            "timestampNs": 700,
+            "value": 1,
+            "durationNs": null
+          },
+          {
+            "key": {
+              "table": "process_measure",
+              "rowID": 4
+            },
+            "timestampNs": 1300,
+            "value": 1,
+            "durationNs": null
+          }
+        ]
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true,
+    "name": "process-counter-instant-full-open",
+    "source": {
+      "processCounter": {
+        "filterID": 3
+      }
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [],
+    "frames": [
+      {
+        "key": {
+          "table": "frame_slice",
+          "rowID": 1
+        },
+        "range": {
+          "startNs": 50,
+          "endNs": 100
+        },
+        "kind": 1,
+        "vsync": 1,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "frame_slice",
+          "rowID": 2
+        },
+        "range": {
+          "startNs": 50,
+          "endNs": 100
+        },
+        "kind": 0,
+        "vsync": 1,
+        "flag": 1,
+        "isOpenEnded": false
+      },
+      {
+        "key": {
+          "table": "frame_slice",
+          "rowID": 3
+        },
+        "range": {
+          "startNs": 300,
+          "endNs": 1000
+        },
+        "kind": 0,
+        "vsync": 2,
+        "isOpenEnded": true
+      }
+    ],
+    "truncated": false,
+    "capabilityAvailable": true,
+    "name": "frame-expected-actual-open",
+    "source": {
+      "frame": {}
+    }
+  },
+  {
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "showsNestedDepth": true,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": false,
+    "name": "unavailable-cpu",
+    "source": {
+      "cpu": {
+        "_0": 3
+      }
+    }
+  }
+]

@@ -1,12 +1,14 @@
 //! Pure Viewer geometry, bounded query planning and immutable hit projection.
 //! No renderer, repository, clock, IO, asynchronous generation/cache or palette.
 //! Coordinates are logical points; only minimum visual width uses backing scale.
+mod detail;
 mod geometry;
 mod interaction;
 mod plan;
 mod snapshot;
 mod types;
 
+pub use detail::*;
 pub use geometry::*;
 pub use interaction::*;
 pub use plan::*;

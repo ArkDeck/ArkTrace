@@ -624,6 +624,10 @@ Rust SDK 切换，详见[离屏 detail 记录](migration-runs/AT-RUST-011-2026-1
 tests、一项 CLI quality 测试及当前 App 构建通过；重新实测六份 Swift oracle，520 组完整
 输出字节不变，见[质量状态记录](migration-runs/AT-RUST-011-2026-10-04-quality-envelope.md)。
 
+typed DTO 适配器已覆盖六类 source，并精确重放 8 组独立 actual Swift detail/style
+向量；当前 308 项 Rust tests 通过。尚未接入真实 Store owner，nil namedSlice 的 detail/
+density 范围差异须在接线时解决，见[事件页投影记录](migration-runs/AT-RUST-011-2026-10-04-detail-adapter.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：planned；开工依赖：001、002；完成依赖：008、009、011。
