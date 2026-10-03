@@ -15,11 +15,46 @@ struct Vector {
     source_issues: Option<Vec<QualityIssue>>,
 }
 #[test]
+fn retain_measured_swift_difference_only_for_explicit_detail_offscreen_queries() {
+    let before: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/swift-plan-oracle.json")).unwrap();
+    let after: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/swift-plan-migration-oracle.json")).unwrap();
+    assert_eq!(before.len(), 13);
+    assert_eq!(after.len(), before.len());
+    for (before, after) in before.iter().zip(&after) {
+        if before["name"] == "explicit-detail-queries-all-expanded" {
+            let expected_before: Vec<_> = (0..60)
+                .map(|cpu| json!({"source": TraceDensitySource::Cpu { cpu }, "limit": 33}))
+                .collect();
+            common::compare(
+                &before["detailCalls"],
+                &json!(expected_before),
+                "before detail calls",
+            );
+            common::compare(
+                &after["detailCalls"],
+                &json!([{"source": TraceDensitySource::Cpu { cpu: 0 }, "limit": 2000}]),
+                "after detail calls",
+            );
+            // This is an explicit comparison of independently executed Swift
+            // versions. Full Rust replay below compares every field unchanged.
+            let mut before_other = before.clone();
+            let mut after_other = after.clone();
+            before_other.as_object_mut().unwrap().remove("detailCalls");
+            after_other.as_object_mut().unwrap().remove("detailCalls");
+            common::compare(&before_other, &after_other, "preserved layout and quality");
+        } else {
+            common::compare(before, after, "unaffected actual Swift vector");
+        }
+    }
+}
+#[test]
 fn replay_13_actual_swift_loader_query_and_snapshot_vectors_exactly() {
     let inputs: Vec<Vector> =
         serde_json::from_str(include_str!("fixtures/plan-inputs.json")).unwrap();
     let expected: Vec<Value> =
-        serde_json::from_str(include_str!("fixtures/swift-plan-oracle.json")).unwrap();
+        serde_json::from_str(include_str!("fixtures/swift-plan-migration-oracle.json")).unwrap();
     assert_eq!(inputs.len(), 13);
     assert_eq!(inputs.len(), expected.len());
     for (v, e) in inputs.iter().zip(&expected) {

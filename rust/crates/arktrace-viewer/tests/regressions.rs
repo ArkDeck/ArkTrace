@@ -306,15 +306,17 @@ fn request_caps_generation_and_budget_are_enforced() {
     assert!(plan(&r, &[], &mut || Ok(())).is_err());
 }
 #[test]
-fn automatic_overscan_and_explicit_detail_all_lanes_are_distinct() {
+fn explicit_detail_keeps_overscan_without_querying_offscreen_lanes() {
     let a = request(100, 2000, DetailPreference::Automatic);
     let automatic = plan(&a, &[], &mut || Ok(())).unwrap();
     assert!(automatic.queried_indices.len() < 100);
     let mut d = a.clone();
     d.preference = DetailPreference::Detail;
-    let all = plan(&d, &[], &mut || Ok(())).unwrap();
-    assert_eq!(all.queried_indices.len(), 100);
-    assert!(all.density_prefetch.is_empty());
+    let detail = plan(&d, &[], &mut || Ok(())).unwrap();
+    assert_eq!(detail.queried_indices, automatic.queried_indices);
+    assert_eq!(detail.lanes.len(), 100);
+    assert_eq!(detail.fair_budget, automatic.fair_budget);
+    assert!(detail.density_prefetch.is_empty());
     d.tracks[0].is_collapsed = true;
     assert_eq!(plan(&d, &[], &mut || Ok(())).unwrap().lanes.len(), 99);
 }

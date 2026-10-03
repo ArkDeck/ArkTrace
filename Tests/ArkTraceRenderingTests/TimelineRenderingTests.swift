@@ -26,6 +26,7 @@ final class TimelineRenderingTests: XCTestCase {
         let traceSHA256: String
         let identifiesSources: Bool
         private var requestedDensitySources: [TraceDensitySource] = []
+        private var requestedCounterQueries: [CounterQuery] = []
 
         init(
             eventCount: Int64,
@@ -117,7 +118,11 @@ final class TimelineRenderingTests: XCTestCase {
             requestedDensitySources
         }
         func counters(_ query: CounterQuery) async throws -> TraceEventPage<CounterSeries> {
-            counterPage ?? .unavailable
+            requestedCounterQueries.append(query)
+            return counterPage ?? .unavailable
+        }
+        func counterQueries() -> [CounterQuery] {
+            requestedCounterQueries
         }
         func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice> {
             guard let slicePage else { return .unavailable }
@@ -1975,6 +1980,40 @@ final class TimelineRenderingTests: XCTestCase {
         XCTAssertFalse(snapshot.tracks[40].primitives.isEmpty)
         XCTAssertEqual(snapshot.tracks[0].y, 0)
         XCTAssertEqual(snapshot.tracks[99].y, 99 * 28)
+    }
+
+    func testExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan() async throws {
+        let repository = DensityRepository(eventCount: 1_000_000)
+        let viewport = try TimelineViewport(
+            range: TraceTimeRange.query(startNs: 0, endNs: 1_000_000),
+            widthPoints: 400,
+            heightPoints: 280,
+            verticalOffsetPoints: 1_120,
+            generation: 8
+        )
+        let request = try ViewportRequest(
+            viewport: viewport,
+            tracks: (0..<100).map {
+                TrackDescriptor(
+                    title: "counter \($0)",
+                    source: .processCounter(filterID: Int64($0), processKey: ProcessKey(ipid: 1))
+                )
+            },
+            pixelWidth: 800,
+            generation: 8,
+            preference: .detail,
+            deadline: ContinuousClock.now.advanced(by: .seconds(5))
+        )
+        let loaded = try await TimelineSnapshotLoader().load(request, repository: repository)
+        let snapshot = try XCTUnwrap(loaded)
+        let detailQueries = await repository.counterQueries()
+        let densitySources = await repository.densitySources()
+        XCTAssertEqual(detailQueries.map(\.filterID), (34...54).map { Optional(Int64($0)) })
+        XCTAssertTrue(densitySources.isEmpty, "explicit detail skips density prefetch")
+        XCTAssertEqual(snapshot.tracks.count, 100, "offscreen lanes retain layout placeholders")
+        XCTAssertEqual(snapshot.tracks[0].y, 0)
+        XCTAssertEqual(snapshot.tracks[99].y, 99 * 28)
+        XCTAssertTrue(detailQueries.allSatisfy { $0.limit == 304 })
     }
 
     func testResetLayoutCachePreventsCrossTraceDepthReuse() async throws {

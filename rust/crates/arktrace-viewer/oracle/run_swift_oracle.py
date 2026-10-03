@@ -17,9 +17,10 @@ ROOT = Path(__file__).resolve().parents[4]
 CRATE = ROOT / "rust/crates/arktrace-viewer"
 CACHE = Path(os.environ.get("ARKTRACE_SWIFTPM_CACHE_ROOT", "/private/tmp/arktrace-parallel-viewer-swiftpm"))
 SOURCE = CACHE / "oracle-source"
-PLAN = "--plan" in sys.argv
+PLAN = "--plan" in sys.argv or "--migration-plan" in sys.argv
 BOUNDARIES = "--boundaries" in sys.argv
-STEM = "swift-boundary-oracle" if BOUNDARIES else "swift-plan-oracle" if PLAN else "swift-geometry-oracle"
+# Original pre-migration plan output is retained as independent history.
+STEM = "swift-boundary-oracle" if BOUNDARIES else "swift-plan-migration-oracle" if PLAN else "swift-geometry-oracle"
 INPUT = CRATE / ("tests/fixtures/boundary-inputs.json" if BOUNDARIES else "tests/fixtures/plan-inputs.json" if PLAN else "tests/fixtures/geometry-inputs.json")
 OUTPUT = CRATE / f"tests/fixtures/{STEM}.json"
 
@@ -68,7 +69,7 @@ let package = Package(name: "ArkTrace", platforms: [.macOS(.v26)], targets: [
     (CRATE / f"tests/fixtures/{STEM}-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"Swift oracle: {receipt['vectors']} actual engine results; {OUTPUT}")
     if "--regressions" in sys.argv:
-        selected = "TimelineRenderingTests.test(DetailBudgetContract|GeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey|OverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing|PrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested|InstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel|ExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap|PanDeltaSaturatesAndRejectsNonFinitePointDeltas|ViewportRejectsNonFiniteNanosecondsPerPoint|PanAndCursorAnchoredZoomAreOverflowSafe|PrimitiveBudgetIsGlobalAcrossTracks|AutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack|DensityPrefetchChunksBeyondTheEventBatchQueryCap|LoaderQueriesOnlyVerticallyVisibleTracksWithOverscan|NestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame|LoaderBuildsDepthRowsAndFlatteningReturnsToOneBand|DepthBeyondReservedRowsClampsInsideTheTrack)|TimelineDensitySelectionTests|TimelinePointerGestureTests.test(EndpointHitAreasAreLargeEnoughAndNeverOverlap|DraggingAnEndpointMovesOnlyThatEndpoint|PressingAwayFromAHandleStillSweepsANewRange)"
+        selected = "TimelineRenderingTests.test(DetailBudgetContract|GeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey|OverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing|PrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested|InstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel|ExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap|PanDeltaSaturatesAndRejectsNonFinitePointDeltas|ViewportRejectsNonFiniteNanosecondsPerPoint|PanAndCursorAnchoredZoomAreOverflowSafe|PrimitiveBudgetIsGlobalAcrossTracks|AutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack|DensityPrefetchChunksBeyondTheEventBatchQueryCap|LoaderQueriesOnlyVerticallyVisibleTracksWithOverscan|ExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan|NestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame|LoaderBuildsDepthRowsAndFlatteningReturnsToOneBand|DepthBeyondReservedRowsClampsInsideTheTrack)|TimelineDensitySelectionTests|TimelinePointerGestureTests.test(EndpointHitAreasAreLargeEnoughAndNeverOverlap|DraggingAnEndpointMovesOnlyThatEndpoint|PressingAwayFromAHandleStillSweepsANewRange)"
         with (CACHE / "swift-regressions.log").open("w") as log:
             result = subprocess.run(["sh", "scripts/run-swiftpm.sh", "test", "--disable-sandbox", "--config-path", str(CACHE / "configuration"), "--security-path", str(CACHE / "security"), "--filter", selected], cwd=SOURCE, env=environment, stdout=log, stderr=subprocess.STDOUT)
         print((CACHE / "swift-regressions.log").read_text()[-7000:])

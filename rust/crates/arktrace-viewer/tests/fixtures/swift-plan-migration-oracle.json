@@ -1,0 +1,5396 @@
+[
+  {
+    "batches" : [
+      21
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 35
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 36
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 37
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 38
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 39
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 40
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 41
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 42
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 43
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 44
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 45
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 46
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 47
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 48
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 49
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 50
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 51
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 52
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 53
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 54
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 55
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+
+    ],
+    "maximumPrimitives" : 2000,
+    "name" : "visible-overscan-100-lanes",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:1",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:2",
+        "y" : 28
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:3",
+        "y" : 56
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:4",
+        "y" : 84
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:5",
+        "y" : 112
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:6",
+        "y" : 140
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:7",
+        "y" : 168
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:8",
+        "y" : 196
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:9",
+        "y" : 224
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:10",
+        "y" : 252
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:11",
+        "y" : 280
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:12",
+        "y" : 308
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:13",
+        "y" : 336
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:14",
+        "y" : 364
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:15",
+        "y" : 392
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:16",
+        "y" : 420
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:17",
+        "y" : 448
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:18",
+        "y" : 476
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:19",
+        "y" : 504
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:20",
+        "y" : 532
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:21",
+        "y" : 560
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:22",
+        "y" : 588
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:23",
+        "y" : 616
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:24",
+        "y" : 644
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:25",
+        "y" : 672
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:26",
+        "y" : 700
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:27",
+        "y" : 728
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:28",
+        "y" : 756
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:29",
+        "y" : 784
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:30",
+        "y" : 812
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:31",
+        "y" : 840
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:32",
+        "y" : 868
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:33",
+        "y" : 896
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:34",
+        "y" : 924
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:35",
+        "y" : 952
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:36",
+        "y" : 980
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:37",
+        "y" : 1008
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:38",
+        "y" : 1036
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:39",
+        "y" : 1064
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:40",
+        "y" : 1092
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:41",
+        "y" : 1120
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:42",
+        "y" : 1148
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:43",
+        "y" : 1176
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:44",
+        "y" : 1204
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:45",
+        "y" : 1232
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:46",
+        "y" : 1260
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:47",
+        "y" : 1288
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:48",
+        "y" : 1316
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:49",
+        "y" : 1344
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:50",
+        "y" : 1372
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:51",
+        "y" : 1400
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:52",
+        "y" : 1428
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:53",
+        "y" : 1456
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:54",
+        "y" : 1484
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:55",
+        "y" : 1512
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:56",
+        "y" : 1540
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:57",
+        "y" : 1568
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:58",
+        "y" : 1596
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:59",
+        "y" : 1624
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:60",
+        "y" : 1652
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:61",
+        "y" : 1680
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:62",
+        "y" : 1708
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:63",
+        "y" : 1736
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:64",
+        "y" : 1764
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:65",
+        "y" : 1792
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:66",
+        "y" : 1820
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:67",
+        "y" : 1848
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:68",
+        "y" : 1876
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:69",
+        "y" : 1904
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:70",
+        "y" : 1932
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:71",
+        "y" : 1960
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:72",
+        "y" : 1988
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:73",
+        "y" : 2016
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:74",
+        "y" : 2044
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:75",
+        "y" : 2072
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:76",
+        "y" : 2100
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:77",
+        "y" : 2128
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:78",
+        "y" : 2156
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:79",
+        "y" : 2184
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:80",
+        "y" : 2212
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:81",
+        "y" : 2240
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:82",
+        "y" : 2268
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:83",
+        "y" : 2296
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:84",
+        "y" : 2324
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:85",
+        "y" : 2352
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:86",
+        "y" : 2380
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:87",
+        "y" : 2408
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:88",
+        "y" : 2436
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:89",
+        "y" : 2464
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:90",
+        "y" : 2492
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:91",
+        "y" : 2520
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:92",
+        "y" : 2548
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:93",
+        "y" : 2576
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:94",
+        "y" : 2604
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:95",
+        "y" : 2632
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:96",
+        "y" : 2660
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:97",
+        "y" : 2688
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:98",
+        "y" : 2716
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:99",
+        "y" : 2744
+      }
+    ]
+  },
+  {
+    "batches" : [
+
+    ],
+    "densityCalls" : [
+
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 2000,
+        "source" : {
+          "cpu" : {
+            "_0" : 0
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 2000,
+    "name" : "explicit-detail-queries-all-expanded",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:1",
+        "y" : 28
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:2",
+        "y" : 56
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:3",
+        "y" : 84
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:4",
+        "y" : 112
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:5",
+        "y" : 140
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:6",
+        "y" : 168
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:7",
+        "y" : 196
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:8",
+        "y" : 224
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:9",
+        "y" : 252
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:10",
+        "y" : 280
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:11",
+        "y" : 308
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:12",
+        "y" : 336
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:13",
+        "y" : 364
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:14",
+        "y" : 392
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:15",
+        "y" : 420
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:16",
+        "y" : 448
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:17",
+        "y" : 476
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:18",
+        "y" : 504
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:19",
+        "y" : 532
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:20",
+        "y" : 560
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:21",
+        "y" : 588
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:22",
+        "y" : 616
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:23",
+        "y" : 644
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:24",
+        "y" : 672
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:25",
+        "y" : 700
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:26",
+        "y" : 728
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:27",
+        "y" : 756
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:28",
+        "y" : 784
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:29",
+        "y" : 812
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:30",
+        "y" : 840
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:31",
+        "y" : 868
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:32",
+        "y" : 896
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:33",
+        "y" : 924
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:34",
+        "y" : 952
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:35",
+        "y" : 980
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:36",
+        "y" : 1008
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:37",
+        "y" : 1036
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:38",
+        "y" : 1064
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:39",
+        "y" : 1092
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:40",
+        "y" : 1120
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:41",
+        "y" : 1148
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:42",
+        "y" : 1176
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:43",
+        "y" : 1204
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:44",
+        "y" : 1232
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:45",
+        "y" : 1260
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:46",
+        "y" : 1288
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:47",
+        "y" : 1316
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:48",
+        "y" : 1344
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:49",
+        "y" : 1372
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:50",
+        "y" : 1400
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:51",
+        "y" : 1428
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:52",
+        "y" : 1456
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:53",
+        "y" : 1484
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:54",
+        "y" : 1512
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:55",
+        "y" : 1540
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:56",
+        "y" : 1568
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:57",
+        "y" : 1596
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:58",
+        "y" : 1624
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:59",
+        "y" : 1652
+      }
+    ]
+  },
+  {
+    "batches" : [
+      32,
+      32,
+      1
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 0,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 1,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 2,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 3,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 4,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 5,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 6,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 7,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 8,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 9,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 10,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 11,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 12,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 13,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 14,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 15,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 16,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 17,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 18,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 19,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 20,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 21,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 22,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 23,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 24,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 25,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 26,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 27,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 28,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 29,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 30,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 31,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 32,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 33,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 34,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 35,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 36,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 37,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 38,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 39,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 40,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 41,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 42,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 43,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 44,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 45,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 46,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 47,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 48,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 49,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 50,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 51,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 52,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 53,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 54,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 55,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 56,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 57,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 58,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 59,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 60,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 61,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 62,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 63,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "processCounter" : {
+            "filterID" : 64,
+            "processKey" : {
+              "ipid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+
+    ],
+    "maximumPrimitives" : 260,
+    "name" : "density-prefetch-batches-65",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:0:1",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:1:1",
+        "y" : 28
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:2:1",
+        "y" : 56
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:3:1",
+        "y" : 84
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:4:1",
+        "y" : 112
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:5:1",
+        "y" : 140
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:6:1",
+        "y" : 168
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:7:1",
+        "y" : 196
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:8:1",
+        "y" : 224
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:9:1",
+        "y" : 252
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:10:1",
+        "y" : 280
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:11:1",
+        "y" : 308
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:12:1",
+        "y" : 336
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:13:1",
+        "y" : 364
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:14:1",
+        "y" : 392
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:15:1",
+        "y" : 420
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:16:1",
+        "y" : 448
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:17:1",
+        "y" : 476
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:18:1",
+        "y" : 504
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:19:1",
+        "y" : 532
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:20:1",
+        "y" : 560
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:21:1",
+        "y" : 588
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:22:1",
+        "y" : 616
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:23:1",
+        "y" : 644
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:24:1",
+        "y" : 672
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:25:1",
+        "y" : 700
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:26:1",
+        "y" : 728
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:27:1",
+        "y" : 756
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:28:1",
+        "y" : 784
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:29:1",
+        "y" : 812
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:30:1",
+        "y" : 840
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:31:1",
+        "y" : 868
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:32:1",
+        "y" : 896
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:33:1",
+        "y" : 924
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:34:1",
+        "y" : 952
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:35:1",
+        "y" : 980
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:36:1",
+        "y" : 1008
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:37:1",
+        "y" : 1036
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:38:1",
+        "y" : 1064
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:39:1",
+        "y" : 1092
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:40:1",
+        "y" : 1120
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:41:1",
+        "y" : 1148
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:42:1",
+        "y" : 1176
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:43:1",
+        "y" : 1204
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:44:1",
+        "y" : 1232
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:45:1",
+        "y" : 1260
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:46:1",
+        "y" : 1288
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:47:1",
+        "y" : 1316
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:48:1",
+        "y" : 1344
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:49:1",
+        "y" : 1372
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:50:1",
+        "y" : 1400
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:51:1",
+        "y" : 1428
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:52:1",
+        "y" : 1456
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:53:1",
+        "y" : 1484
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:54:1",
+        "y" : 1512
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:55:1",
+        "y" : 1540
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:56:1",
+        "y" : 1568
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:57:1",
+        "y" : 1596
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:58:1",
+        "y" : 1624
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:59:1",
+        "y" : 1652
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:60:1",
+        "y" : 1680
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:61:1",
+        "y" : 1708
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:62:1",
+        "y" : 1736
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:63:1",
+        "y" : 1764
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "process-counter:64:1",
+        "y" : 1792
+      }
+    ]
+  },
+  {
+    "batches" : [
+
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 1,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 0
+          }
+        }
+      },
+      {
+        "bucketCount" : 1,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 1
+          }
+        }
+      },
+      {
+        "bucketCount" : 1,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 2
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+
+    ],
+    "maximumPrimitives" : 3,
+    "name" : "fair-zero-global-3-over-4-lanes",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:1",
+        "y" : 28
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:2",
+        "y" : 56
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:3",
+        "y" : 84
+      }
+    ]
+  },
+  {
+    "batches" : [
+
+    ],
+    "densityCalls" : [
+
+    ],
+    "detailCalls" : [
+
+    ],
+    "maximumPrimitives" : 6400,
+    "name" : "no-queried-lanes",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:1",
+        "y" : 28
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:2",
+        "y" : 56
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:3",
+        "y" : 84
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:4",
+        "y" : 112
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:5",
+        "y" : 140
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:6",
+        "y" : 168
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "cpu:7",
+        "y" : 196
+      }
+    ]
+  },
+  {
+    "batches" : [
+      2
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 1,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 0
+          }
+        }
+      },
+      {
+        "bucketCount" : 1,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "cpu" : {
+            "_0" : 1
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+
+    ],
+    "maximumPrimitives" : 2000,
+    "name" : "default-budget-clips-explicit",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "cpu:1",
+        "y" : 28
+      }
+    ]
+  },
+  {
+    "batches" : [
+
+    ],
+    "densityCalls" : [
+
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 10,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "limit" : 10,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 20,
+    "name" : "named-detail-depth-overflow",
+    "qualityFacts" : [
+      {
+        "category" : "probeTruncated",
+        "count" : null,
+        "scope" : "timeline.namedSlice.depth"
+      }
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 32,
+        "height" : 710,
+        "primitives" : [
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 1,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          },
+          {
+            "depth" : 1,
+            "eventKey" : {
+              "rowID" : 2,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 15,
+              "startNs" : 10
+            }
+          },
+          {
+            "depth" : 31,
+            "eventKey" : {
+              "rowID" : 3,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 25,
+              "startNs" : 20
+            }
+          },
+          {
+            "depth" : 32,
+            "eventKey" : {
+              "rowID" : 4,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 35,
+              "startNs" : 30
+            }
+          },
+          {
+            "depth" : 99,
+            "eventKey" : {
+              "rowID" : 5,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 45,
+              "startNs" : 40
+            }
+          }
+        ],
+        "trackID" : "named-slice:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 8,
+        "height" : 182,
+        "primitives" : [
+          {
+            "depth" : 4,
+            "eventKey" : {
+              "rowID" : 101,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          },
+          {
+            "depth" : 7,
+            "eventKey" : {
+              "rowID" : 102,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 15,
+              "startNs" : 10
+            }
+          }
+        ],
+        "trackID" : "named-slice:1",
+        "y" : 710
+      }
+    ]
+  },
+  {
+    "batches" : [
+
+    ],
+    "densityCalls" : [
+
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 10,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "limit" : 10,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 20,
+    "name" : "named-flattening",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 1,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          },
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 2,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 15,
+              "startNs" : 10
+            }
+          },
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 3,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 25,
+              "startNs" : 20
+            }
+          },
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 4,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 35,
+              "startNs" : 30
+            }
+          },
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 5,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 45,
+              "startNs" : 40
+            }
+          }
+        ],
+        "trackID" : "named-slice:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 101,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          },
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 102,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 15,
+              "startNs" : 10
+            }
+          }
+        ],
+        "trackID" : "named-slice:1",
+        "y" : 28
+      }
+    ]
+  },
+  {
+    "batches" : [
+      2
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 4,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "limit" : 4,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 8,
+    "name" : "automatic-estimate-equals-fair-budget",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 3,
+        "height" : 72,
+        "primitives" : [
+          {
+            "depth" : 2,
+            "eventKey" : {
+              "rowID" : 1,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          }
+        ],
+        "trackID" : "named-slice:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 4,
+        "height" : 94,
+        "primitives" : [
+          {
+            "depth" : 3,
+            "eventKey" : {
+              "rowID" : 101,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          }
+        ],
+        "trackID" : "named-slice:1",
+        "y" : 72
+      }
+    ]
+  },
+  {
+    "batches" : [
+      2
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 4,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 4,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 8,
+    "name" : "automatic-estimate-over-budget",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 5,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "named-slice:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 4,
+        "height" : 94,
+        "primitives" : [
+          {
+            "depth" : 3,
+            "eventKey" : {
+              "rowID" : 101,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          }
+        ],
+        "trackID" : "named-slice:1",
+        "y" : 28
+      }
+    ]
+  },
+  {
+    "batches" : [
+      2
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 5,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 5,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 5,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 10,
+    "name" : "unused-fair-share-does-not-expand-final-lane",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+
+        ],
+        "trackID" : "named-slice:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 6,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "named-slice:1",
+        "y" : 28
+      }
+    ]
+  },
+  {
+    "batches" : [
+      4
+    ],
+    "densityCalls" : [
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "frame" : {
+            "processKey" : {
+              "ipid" : 4
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "frame" : {
+            "processKey" : {
+              "ipid" : 5
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "frame" : {
+            "processKey" : {
+              "ipid" : 6
+            }
+          }
+        }
+      },
+      {
+        "bucketCount" : 50,
+        "range" : {
+          "endNs" : 1000000,
+          "startNs" : 0
+        },
+        "source" : {
+          "frame" : {
+            "processKey" : {
+              "ipid" : 7
+            }
+          }
+        }
+      }
+    ],
+    "detailCalls" : [
+
+    ],
+    "maximumPrimitives" : 500,
+    "name" : "frame-placeholder-vs-queried-empty-rows",
+    "qualityFacts" : [
+
+    ],
+    "sourceFacts" : [
+
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:1",
+        "y" : 50
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:2",
+        "y" : 100
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:3",
+        "y" : 150
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "frame:4",
+        "y" : 200
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "frame:5",
+        "y" : 228
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "frame:6",
+        "y" : 256
+      },
+      {
+        "depthRowCount" : 1,
+        "height" : 28,
+        "primitives" : [
+          {
+            "bucket" : {
+              "eventCount" : 1000000,
+              "range" : {
+                "endNs" : 1000000,
+                "startNs" : 0
+              }
+            },
+            "kind" : "density"
+          }
+        ],
+        "trackID" : "frame:7",
+        "y" : 284
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:8",
+        "y" : 312
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:9",
+        "y" : 362
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:10",
+        "y" : 412
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:11",
+        "y" : 462
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:12",
+        "y" : 512
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:13",
+        "y" : 562
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:14",
+        "y" : 612
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:15",
+        "y" : 662
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:16",
+        "y" : 712
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:17",
+        "y" : 762
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:18",
+        "y" : 812
+      },
+      {
+        "depthRowCount" : 2,
+        "height" : 50,
+        "primitives" : [
+
+        ],
+        "trackID" : "frame:19",
+        "y" : 862
+      }
+    ]
+  },
+  {
+    "batches" : [
+
+    ],
+    "densityCalls" : [
+
+    ],
+    "detailCalls" : [
+      {
+        "limit" : 10,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 0
+            }
+          }
+        }
+      },
+      {
+        "limit" : 10,
+        "source" : {
+          "namedSlice" : {
+            "_0" : {
+              "itid" : 1
+            }
+          }
+        }
+      }
+    ],
+    "maximumPrimitives" : 20,
+    "name" : "named-page-truncation-and-depth-facts",
+    "qualityFacts" : [
+      {
+        "category" : "probeTruncated",
+        "count" : null,
+        "scope" : "timeline.namedSlice"
+      },
+      {
+        "category" : "probeTruncated",
+        "count" : null,
+        "scope" : "timeline.namedSlice.depth"
+      }
+    ],
+    "sourceFacts" : [
+      {
+        "category" : "probeTruncated",
+        "count" : 2,
+        "scope" : "callstack.depth"
+      }
+    ],
+    "tracks" : [
+      {
+        "depthRowCount" : 32,
+        "height" : 710,
+        "primitives" : [
+          {
+            "depth" : 0,
+            "eventKey" : {
+              "rowID" : 1,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          },
+          {
+            "depth" : 1,
+            "eventKey" : {
+              "rowID" : 2,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 15,
+              "startNs" : 10
+            }
+          },
+          {
+            "depth" : 31,
+            "eventKey" : {
+              "rowID" : 3,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 25,
+              "startNs" : 20
+            }
+          },
+          {
+            "depth" : 32,
+            "eventKey" : {
+              "rowID" : 4,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 35,
+              "startNs" : 30
+            }
+          },
+          {
+            "depth" : 99,
+            "eventKey" : {
+              "rowID" : 5,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 45,
+              "startNs" : 40
+            }
+          }
+        ],
+        "trackID" : "named-slice:0",
+        "y" : 0
+      },
+      {
+        "depthRowCount" : 8,
+        "height" : 182,
+        "primitives" : [
+          {
+            "depth" : 4,
+            "eventKey" : {
+              "rowID" : 101,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 5,
+              "startNs" : 0
+            }
+          },
+          {
+            "depth" : 7,
+            "eventKey" : {
+              "rowID" : 102,
+              "table" : "callstack"
+            },
+            "kind" : "detail",
+            "range" : {
+              "endNs" : 15,
+              "startNs" : 10
+            }
+          }
+        ],
+        "trackID" : "named-slice:1",
+        "y" : 710
+      }
+    ]
+  }
+]

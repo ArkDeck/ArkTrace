@@ -136,8 +136,7 @@ pub fn plan(
             .unwrap_or(track.default_depth_rows());
         let height = track_height(rows)?;
         let expanded_index = lanes.len();
-        let queried = request.preference == DetailPreference::Detail
-            || (y + height >= query_start && y <= query_end);
+        let queried = y + height >= query_start && y <= query_end;
         if queried {
             queried_indices.push(expanded_index);
         }

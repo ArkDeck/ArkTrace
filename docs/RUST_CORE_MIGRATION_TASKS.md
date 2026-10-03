@@ -614,6 +614,11 @@ strict clippy/fmt、七 crate/35 份 license 与契约通过。独立生产依�
 通过，并把该消费端检查接入两平台 CI。显式 detail 的离屏查询例外、quality scope 与真实
 Store/SDK 接线仍待完成，不能据纯模块完成 011。详见[主线 Viewer 记录](migration-runs/AT-RUST-011-2026-10-04-mainline-viewer.md)。
 
+随后已按 offscreen 要求同步修正 Swift/Rust 显式 detail：相同 13 组实际 Swift loader
+输入仅 1 组查询行为变化（60 lanes → 1），布局/质量及其它 12 组保持精确一致，原始向量
+保留。当前 302 项 Rust tests、28 项 Swift 回归和 Xcode 27 实际 App 构建通过；尚未
+Rust SDK 切换，详见[离屏 detail 记录](migration-runs/AT-RUST-011-2026-10-04-offscreen-detail.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：planned；开工依赖：001、002；完成依赖：008、009、011。

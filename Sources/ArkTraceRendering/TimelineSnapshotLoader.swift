@@ -48,8 +48,7 @@ package actor TimelineSnapshotLoader {
         let queriedIndices = Self.queriedTrackIndices(
             in: expanded,
             viewport: request.viewport,
-            cachedDepthRows: depthRowsByTrack,
-            queryAll: request.preference == .detail
+            cachedDepthRows: depthRowsByTrack
         )
         let queriedIndexSet = Set(queriedIndices)
         defer {
@@ -259,10 +258,8 @@ package actor TimelineSnapshotLoader {
     private static func queriedTrackIndices(
         in tracks: [TrackDescriptor],
         viewport: TimelineViewport,
-        cachedDepthRows: [TimelineTrackID: Int],
-        queryAll: Bool
+        cachedDepthRows: [TimelineTrackID: Int]
     ) -> [Int] {
-        guard !queryAll else { return Array(tracks.indices) }
         let rulerHeight = Double(TimelineGeometry.rulerHeight)
         let bodyStart = max(0, viewport.verticalOffsetPoints - rulerHeight)
         let bodyEnd = max(bodyStart, viewport.verticalOffsetPoints
