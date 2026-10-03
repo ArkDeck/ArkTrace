@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "sql": "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);\nCREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);\nCREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);\nCREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);INSERT INTO sched_slice VALUES(0,1000,1,0,-11,-10);\nCREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);INSERT INTO thread_state VALUES(0,1000,1,-11,'Running');\nCREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);\nINSERT INTO callstack VALUES(1,1010,10,-11,'assigned first'),(2,1020,10,-11,'assigned second'),(3,1030,10,-11,'assigned third'),(4,1040,10,999,'orphan identity'),(7,1100,10,0,'unattributed first'),(8,1200,0,0,'unattributed zero instant'),(9,1300,-1,0,'unattributed open');\nCREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur);\nCREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid,ts,dur);\nCREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid,ts,dur);\n\nCREATE TABLE cpu_measure_filter(id INTEGER,name TEXT,cpu INTEGER,unit TEXT);INSERT INTO cpu_measure_filter VALUES(0,'cpu',3,'Hz');\nCREATE TABLE process_measure_filter(id INTEGER,name TEXT,ipid INTEGER,unit TEXT);INSERT INTO process_measure_filter VALUES(1,'process',-10,'bytes');\nCREATE TABLE measure(ts INTEGER,value INTEGER,filter_id INTEGER,dur INTEGER);INSERT INTO measure(rowid,ts,value,filter_id,dur) VALUES(7,1100,70,0,10),(8,1200,80,0,0);\nCREATE TABLE process_measure(ts INTEGER,value INTEGER,filter_id INTEGER,dur INTEGER);INSERT INTO process_measure(rowid,ts,value,filter_id,dur) VALUES(1,1010,10,1,10),(2,1020,20,1,0);\n",
+  "cases": [
+    {
+      "name": "general-counter-keeps-both",
+      "view": "counter",
+      "scope": null,
+      "source": null,
+      "filterID": null,
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    },
+    {
+      "name": "cpu-counter-raw",
+      "view": "counter",
+      "scope": "cpu",
+      "source": null,
+      "filterID": null,
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    },
+    {
+      "name": "process-counter-raw",
+      "view": "counter",
+      "scope": "process",
+      "source": null,
+      "filterID": null,
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    },
+    {
+      "name": "cpu-counter-detail-owner-absent",
+      "view": "detail",
+      "scope": null,
+      "source": {
+        "cpuCounter": {
+          "filterID": 0
+        }
+      },
+      "filterID": null,
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    },
+    {
+      "name": "process-counter-detail-owner-absent",
+      "view": "detail",
+      "scope": null,
+      "source": {
+        "processCounter": {
+          "filterID": 1
+        }
+      },
+      "filterID": null,
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    },
+    {
+      "name": "cpu-counter-reject-process-filter",
+      "view": "detail",
+      "source": {
+        "cpuCounter": {
+          "filterID": 1
+        }
+      },
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    },
+    {
+      "name": "process-counter-reject-cpu-filter",
+      "view": "detail",
+      "source": {
+        "processCounter": {
+          "filterID": 0
+        }
+      },
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "limit": 1
+    }
+  ]
+}

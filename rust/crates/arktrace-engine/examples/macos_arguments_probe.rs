@@ -43,6 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let slice_query = |lookup: &Lookup, include| TraceSliceQuery {
         range: lookup.range,
         event_key: Some(lookup.event_key),
+        unattributed_only: false,
         includes_argument_set: include,
         process_key: None,
         pid: None,
@@ -140,6 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             name_match: DirectoryNameMatch::Exact,
             minimum_duration_ns: None,
             depth: None,
+            unattributed_only: false,
             includes_argument_set: true,
             limit: 128,
         };

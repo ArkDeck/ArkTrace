@@ -66,6 +66,9 @@ impl SliceSchema {
                 ("t.tid", query.tid),
             ],
         );
+        if query.unattributed_only {
+            conditions.push("(s.callid IS NULL OR s.callid=0)".into());
+        }
         name_filter(
             "s.name",
             query.name.as_deref(),

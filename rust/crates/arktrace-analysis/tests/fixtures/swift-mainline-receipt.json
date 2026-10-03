@@ -102,8 +102,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
-      "byteCount": 8888
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+      "byteCount": 9752
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",

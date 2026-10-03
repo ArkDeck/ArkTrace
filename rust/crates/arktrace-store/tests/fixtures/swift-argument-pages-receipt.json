@@ -5,7 +5,7 @@
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
   "vectors": 84,
   "inspectorLookups": 4,
-  "executableSHA256": "f56edb5f92c8a4a88f72916365b4c8fcdcd336246e85bddab21f2ad563573cce",
+  "executableSHA256": "e7750aa6bfd00fdb70f2744c9853a5cdc6c62e1948a6cffb0f3433cd786b48c9",
   "databases": [
     {
       "fixture": "argument-full",
@@ -171,8 +171,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
-      "byteCount": 8888
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+      "byteCount": 9752
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
@@ -191,8 +191,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
-      "sha256": "a5c021b13533aa5cdb036fb0f5740ff03eab1bdc03d516aa7716d1649bcdc594",
-      "byteCount": 160358
+      "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+      "byteCount": 160666
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabase.swift",

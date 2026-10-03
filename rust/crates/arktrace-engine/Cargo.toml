@@ -14,6 +14,7 @@ arktrace-contract.workspace = true
 arktrace-platform.workspace = true
 arktrace-store.workspace = true
 arktrace-analysis.workspace = true
+arktrace-viewer.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 

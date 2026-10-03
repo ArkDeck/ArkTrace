@@ -81,6 +81,8 @@ impl CounterSchema {
         if (!caps.cpu_counters && !caps.process_counters)
             || (query.cpu.is_some() && !caps.cpu_counters)
             || ((query.process_key.is_some() || query.pid.is_some()) && !caps.process_counters)
+            || (query.scope == Some(CounterScope::Cpu) && !caps.cpu_counters)
+            || (query.scope == Some(CounterScope::Process) && !caps.process_counters)
         {
             return unavailable();
         }
@@ -97,6 +99,14 @@ impl CounterSchema {
         for (order, tables, filter, scope, unit) in self.sources(inspection) {
             if (order == 0 && (query.process_key.is_some() || query.pid.is_some()))
                 || (order == 1 && query.cpu.is_some())
+                || query.scope.is_some_and(|requested| {
+                    requested
+                        != if order == 0 {
+                            CounterScope::Cpu
+                        } else {
+                            CounterScope::Process
+                        }
+                })
             {
                 continue;
             }
@@ -617,5 +627,7 @@ fn quality(issues: Vec<QualityIssue>) -> Result<DataQuality, StoreError> {
     .map_err(|_| StoreError::InvalidQualityContract)
 }
 
+#[cfg(test)]
+mod scoped_oracle_tests;
 #[cfg(test)]
 mod tests;

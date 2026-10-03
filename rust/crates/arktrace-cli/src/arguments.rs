@@ -464,6 +464,7 @@ pub fn parse(arguments: &[OsString]) -> Result<Invocation, CommandError> {
                         }
                         EventQuery::Counters(CounterQuery {
                             range,
+                            scope: None,
                             filter_id: counter_filter_id,
                             cpu,
                             process_key,
@@ -488,6 +489,7 @@ pub fn parse(arguments: &[OsString]) -> Result<Invocation, CommandError> {
                             name_match,
                             minimum_duration_ns: minimum_duration,
                             depth,
+                            unattributed_only: false,
                             includes_argument_set: false,
                             limit,
                         })

@@ -13,6 +13,100 @@ pub enum RepositoryDetailPage {
     Counter(EventPage<CounterSeries>),
     Frame(EventPage<TraceFrame>),
 }
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum RepositoryDetailQuery {
+    Cpu(CpuSliceQuery),
+    ThreadState(ThreadStateQuery),
+    NamedSlice(TraceSliceQuery),
+    Counter(CounterQuery),
+    Frame(TraceFrameQuery),
+}
+/// Constructs only typed repository filters, including the pre-limit scope
+/// for unattributed slices. No frontend supplies SQL or interpretation rules.
+pub fn detail_query(
+    source: &TraceDensitySource,
+    range: TraceTimeRange,
+    limit: usize,
+) -> Result<RepositoryDetailQuery, ViewerError> {
+    if range.is_instant() || !(1..=MAXIMUM_PRIMITIVES).contains(&limit) {
+        return Err(ViewerError::InvalidRequest);
+    }
+    Ok(match source {
+        TraceDensitySource::Cpu { cpu } => RepositoryDetailQuery::Cpu(CpuSliceQuery {
+            range,
+            cpu: Some(*cpu),
+            process_key: None,
+            pid: None,
+            thread_key: None,
+            tid: None,
+            limit,
+        }),
+        TraceDensitySource::ThreadState { thread } => {
+            RepositoryDetailQuery::ThreadState(ThreadStateQuery {
+                range,
+                cpu: None,
+                process_key: None,
+                pid: None,
+                thread_key: Some(thread.itid),
+                tid: None,
+                raw_state: None,
+                state: None,
+                limit,
+            })
+        }
+        TraceDensitySource::NamedSlice { thread } => {
+            RepositoryDetailQuery::NamedSlice(TraceSliceQuery {
+                range,
+                event_key: None,
+                process_key: None,
+                pid: None,
+                thread_key: thread.map(|t| t.itid),
+                tid: None,
+                unattributed_only: thread.is_none(),
+                name: None,
+                name_match: DirectoryNameMatch::Exact,
+                minimum_duration_ns: None,
+                depth: None,
+                includes_argument_set: false,
+                limit,
+            })
+        }
+        TraceDensitySource::Frame { process_key } => {
+            RepositoryDetailQuery::Frame(TraceFrameQuery {
+                range,
+                process_key: process_key.map(|p| p.ipid),
+                limit,
+            })
+        }
+        TraceDensitySource::CpuCounter { filter_id, cpu } => {
+            RepositoryDetailQuery::Counter(CounterQuery {
+                range,
+                scope: Some(CounterScope::Cpu),
+                filter_id: Some(*filter_id),
+                cpu: *cpu,
+                process_key: None,
+                pid: None,
+                name: None,
+                name_match: DirectoryNameMatch::Exact,
+                limit,
+            })
+        }
+        TraceDensitySource::ProcessCounter {
+            filter_id,
+            process_key,
+        } => RepositoryDetailQuery::Counter(CounterQuery {
+            range,
+            scope: Some(CounterScope::Process),
+            filter_id: Some(*filter_id),
+            cpu: None,
+            process_key: process_key.map(|p| p.ipid),
+            pid: None,
+            name: None,
+            name_match: DirectoryNameMatch::Exact,
+            limit,
+        }),
+    })
+}
 
 /// Preserve source quality and truncation for the later complete snapshot.
 /// Counter DTOs count samples, rather than series, against the input cap.
@@ -84,9 +178,7 @@ pub fn map_detail_page(
         }
         (TraceDensitySource::NamedSlice { thread }, RepositoryDetailPage::NamedSlice(page)) => {
             map!(page, |event: TraceSlice| {
-                // A nil thread is the existing general slices-query filter. The
-                // host decides which actual bounded page belongs to this lane.
-                if thread.is_some() && event.thread_key != *thread {
+                if event.thread_key != *thread {
                     return Err(ViewerError::InvalidEvidence);
                 }
                 input(
@@ -145,6 +237,20 @@ pub fn map_detail_page(
                 };
                 if series.filter_id != *filter_id || series.scope != expected.0 {
                     return Err(ViewerError::InvalidEvidence);
+                }
+                match source {
+                    TraceDensitySource::CpuCounter { cpu: Some(cpu), .. }
+                        if series.cpu != Some(*cpu) =>
+                    {
+                        return Err(ViewerError::InvalidEvidence);
+                    }
+                    TraceDensitySource::ProcessCounter {
+                        process_key: Some(process),
+                        ..
+                    } if series.process_key != Some(*process) => {
+                        return Err(ViewerError::InvalidEvidence);
+                    }
+                    _ => {}
                 }
                 for sample in series.samples {
                     checkpoint(items.len(), check)?;

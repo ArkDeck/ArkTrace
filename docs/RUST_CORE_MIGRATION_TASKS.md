@@ -628,6 +628,13 @@ typed DTO 适配器已覆盖六类 source，并精确重放 8 组独立 actual S
 向量；当前 308 项 Rust tests 通过。尚未接入真实 Store owner，nil namedSlice 的 detail/
 density 范围差异须在接线时解决，见[事件页投影记录](migration-runs/AT-RUST-011-2026-10-04-detail-adapter.md)。
 
+同日增加实际 NoCache/async owner 的 bounded detail 操作；同步修正 Swift/Rust nil
+namedSlice 和 counter physical-family 的 pre-limit 范围。保留六组实际 Swift scope 修复前后
+输出、七组 counter raw/loader 向量，三份真实 trace 的 21 个 async/blocking Rust 响应逐字节
+一致；FD 23 → 23，原始 trace 不变。315 Rust tests、113 Swift 回归、API baseline 和
+Xcode 27 App build 通过；七份既有 Swift oracle 的 528 组输出字节不变。完整 viewport、
+generation/cache、SDK/App 与验收仍待完成，见[owner 接线记录](migration-runs/AT-RUST-011-2026-10-04-scoped-owner.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：planned；开工依赖：001、002；完成依赖：008、009、011。

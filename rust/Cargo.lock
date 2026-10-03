@@ -40,6 +40,7 @@ dependencies = [
  "arktrace-contract",
  "arktrace-platform",
  "arktrace-store",
+ "arktrace-viewer",
  "serde",
  "serde_json",
 ]

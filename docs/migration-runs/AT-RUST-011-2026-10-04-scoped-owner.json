@@ -1,0 +1,2944 @@
+{
+  "scope": "AT-RUST-011 bounded typed Store-to-Viewer async owner operation; partial migration only",
+  "baseCommit": "afe67651e8471527e397b26dc126dfeaff268fe1",
+  "goalComplete": false,
+  "toolchain": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.1",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: aarch64-apple-darwin\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.90+curl-8.21.0 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Mac OS 27.0.0 [64-bit]",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428"
+  },
+  "controlledScopeOracles": [
+    {
+      "stem": "swift-scoped-slices-before",
+      "vectors": 6,
+      "receipt": {
+        "oracle": "actual Swift SQLiteTraceRepository + TimelineSnapshotLoader",
+        "scope": "controlled SQL; full typed page/snapshot; not parser or SDK/App acceptance",
+        "vectors": 6,
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+        "executableSHA256": "2d1f0484feb14ffcbc60fe7a2fe3d04efe224a5f457be0157c525a5f5aae199b",
+        "database": {
+          "byteCount": 40960,
+          "sha256": "9cc51daf713cd88936acf5e4f1d9db0d43a9ec9b5ce4d062a98b2aa9387a426e",
+          "bytesUnchanged": true
+        },
+        "sourceDigests": [
+          {
+            "path": "rust/crates/arktrace-viewer/oracle/ScopedSliceOracle.swift",
+            "sha256": "e17fa05d5940165fa953f80a473f1082ae766cb7b5bd3d11cebfbf0ec1d16971",
+            "byteCount": 3151
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py",
+            "sha256": "4bfb3c9e31b29388a35d29503cdb28e20163ddbda1d02ed47ec02738c4286d83",
+            "byteCount": 4984
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-slices-inputs.json",
+            "sha256": "a3a90ff0f271ba7ab4d6f31832d4752aecce5a1199bf844e9cd51d2b28610f14",
+            "byteCount": 2760
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices-before.json",
+            "sha256": "dbcf330cda94e271aadb26c54f2c4448745007cd6160d1e755b4ec5200961bd7",
+            "byteCount": 18830
+          },
+          {
+            "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+            "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+            "byteCount": 11275
+          },
+          {
+            "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+            "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+            "byteCount": 4367
+          },
+          {
+            "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+            "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+            "byteCount": 1042
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+            "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+            "byteCount": 375
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+            "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+            "byteCount": 862
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+            "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+            "byteCount": 17503
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+            "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+            "byteCount": 1526
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+            "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+            "byteCount": 11916
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+            "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+            "byteCount": 5258
+          },
+          {
+            "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+            "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+            "byteCount": 8071
+          },
+          {
+            "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+            "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+            "byteCount": 3147
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+            "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+            "byteCount": 16011
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+            "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+            "byteCount": 1186
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+            "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+            "byteCount": 3873
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+            "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
+            "byteCount": 8888
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+            "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+            "byteCount": 863
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+            "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+            "byteCount": 16274
+          },
+          {
+            "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+            "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+            "byteCount": 2757
+          },
+          {
+            "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+            "sha256": "a5c021b13533aa5cdb036fb0f5740ff03eab1bdc03d516aa7716d1649bcdc594",
+            "byteCount": 160358
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+            "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+            "byteCount": 29935
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+            "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+            "byteCount": 32838
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+            "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+            "byteCount": 3269
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+            "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+            "byteCount": 49595
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+            "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+            "byteCount": 6210
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+            "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+            "byteCount": 29018
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+            "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+            "byteCount": 8131
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+            "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+            "byteCount": 24339
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+            "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+            "byteCount": 101313
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+            "sha256": "70e59a93777099a49e27bd4dc778148a5950bb68cdf565cabac5fc579449af29",
+            "byteCount": 40352
+          }
+        ]
+      }
+    },
+    {
+      "stem": "swift-scoped-slices",
+      "vectors": 6,
+      "receipt": {
+        "oracle": "actual Swift SQLiteTraceRepository + TimelineSnapshotLoader",
+        "scope": "controlled SQL; full typed page/snapshot; not parser or SDK/App acceptance",
+        "vectors": 6,
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+        "executableSHA256": "4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b",
+        "database": {
+          "byteCount": 40960,
+          "sha256": "9cc51daf713cd88936acf5e4f1d9db0d43a9ec9b5ce4d062a98b2aa9387a426e",
+          "bytesUnchanged": true
+        },
+        "sourceDigests": [
+          {
+            "path": "rust/crates/arktrace-viewer/oracle/ScopedSliceOracle.swift",
+            "sha256": "8efc22cbbbead8ad8cf3490312e6da5b1c977d2b3320ed9c0eff6e1c08b4b85f",
+            "byteCount": 4013
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py",
+            "sha256": "dc5f6f4b68c2af87e06ebd09ac5735683c41350675b313d332923d8fbcabefae",
+            "byteCount": 5472
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-slices-inputs.json",
+            "sha256": "a3a90ff0f271ba7ab4d6f31832d4752aecce5a1199bf844e9cd51d2b28610f14",
+            "byteCount": 2760
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices.json",
+            "sha256": "1ac27b1de972f77b4b30bd5a9bb2b60806093e451e44822f45c025d7750d6e91",
+            "byteCount": 17217
+          },
+          {
+            "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+            "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+            "byteCount": 11275
+          },
+          {
+            "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+            "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+            "byteCount": 4367
+          },
+          {
+            "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+            "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+            "byteCount": 1042
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+            "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+            "byteCount": 375
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+            "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+            "byteCount": 862
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+            "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+            "byteCount": 17503
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+            "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+            "byteCount": 1526
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+            "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+            "byteCount": 11916
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+            "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+            "byteCount": 5258
+          },
+          {
+            "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+            "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+            "byteCount": 8071
+          },
+          {
+            "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+            "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+            "byteCount": 3147
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+            "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+            "byteCount": 16011
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+            "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+            "byteCount": 1186
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+            "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+            "byteCount": 3873
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+            "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+            "byteCount": 9752
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+            "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+            "byteCount": 863
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+            "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+            "byteCount": 16274
+          },
+          {
+            "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+            "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+            "byteCount": 2757
+          },
+          {
+            "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+            "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+            "byteCount": 160666
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+            "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+            "byteCount": 29935
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+            "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+            "byteCount": 32838
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+            "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+            "byteCount": 3269
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+            "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+            "byteCount": 49595
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+            "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+            "byteCount": 6210
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+            "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+            "byteCount": 29018
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+            "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+            "byteCount": 8131
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+            "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+            "byteCount": 24339
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+            "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+            "byteCount": 101313
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+            "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+            "byteCount": 40541
+          }
+        ],
+        "retainedExactRunArtifact": {
+          "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-slices-4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b.executable",
+          "sha256": "4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b",
+          "byteCount": 4802320
+        }
+      }
+    },
+    {
+      "stem": "swift-scoped-counters",
+      "vectors": 7,
+      "receipt": {
+        "oracle": "actual Swift SQLiteTraceRepository + TimelineSnapshotLoader",
+        "scope": "controlled SQL; full typed page/snapshot; not parser or SDK/App acceptance",
+        "vectors": 7,
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+        "executableSHA256": "4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b",
+        "database": {
+          "byteCount": 57344,
+          "sha256": "df37d645cd9c9062390ec1714945597e0ee86af46421adf6a0f7d861c3fb74d0",
+          "bytesUnchanged": true
+        },
+        "sourceDigests": [
+          {
+            "path": "rust/crates/arktrace-viewer/oracle/ScopedSliceOracle.swift",
+            "sha256": "8efc22cbbbead8ad8cf3490312e6da5b1c977d2b3320ed9c0eff6e1c08b4b85f",
+            "byteCount": 4013
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py",
+            "sha256": "dc5f6f4b68c2af87e06ebd09ac5735683c41350675b313d332923d8fbcabefae",
+            "byteCount": 5472
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-counters-inputs.json",
+            "sha256": "b390794df541449bd528316863ffa445d17dba01478ded591ae4b770719779e2",
+            "byteCount": 3779
+          },
+          {
+            "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-counters.json",
+            "sha256": "5ad9aa6533eaf1efc5bed86bbe93e13af47c53a255805ea1799492333c02423d",
+            "byteCount": 9354
+          },
+          {
+            "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+            "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+            "byteCount": 11275
+          },
+          {
+            "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+            "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+            "byteCount": 4367
+          },
+          {
+            "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+            "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+            "byteCount": 1042
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+            "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+            "byteCount": 375
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+            "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+            "byteCount": 862
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+            "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+            "byteCount": 17503
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+            "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+            "byteCount": 1526
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+            "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+            "byteCount": 11916
+          },
+          {
+            "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+            "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+            "byteCount": 5258
+          },
+          {
+            "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+            "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+            "byteCount": 8071
+          },
+          {
+            "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+            "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+            "byteCount": 3147
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+            "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+            "byteCount": 16011
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+            "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+            "byteCount": 1186
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+            "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+            "byteCount": 3873
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+            "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+            "byteCount": 9752
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+            "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+            "byteCount": 863
+          },
+          {
+            "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+            "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+            "byteCount": 16274
+          },
+          {
+            "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+            "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+            "byteCount": 2757
+          },
+          {
+            "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+            "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+            "byteCount": 160666
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+            "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+            "byteCount": 29935
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+            "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+            "byteCount": 32838
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+            "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+            "byteCount": 3269
+          },
+          {
+            "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+            "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+            "byteCount": 49595
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+            "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+            "byteCount": 6210
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+            "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+            "byteCount": 29018
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+            "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+            "byteCount": 8131
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+            "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+            "byteCount": 24339
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+            "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+            "byteCount": 101313
+          },
+          {
+            "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+            "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+            "byteCount": 40541
+          }
+        ],
+        "retainedExactRunArtifact": {
+          "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-counters-4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b.executable",
+          "sha256": "4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b",
+          "byteCount": 4802320
+        }
+      }
+    }
+  ],
+  "nativeOwner": {
+    "nativeRuntime": {
+      "independentSwiftNativeParity": false,
+      "persistentCacheAcceptance": false,
+      "sdkAcceptance": false,
+      "sources": [
+        {
+          "cancelledOwnerQueryRejected": true,
+          "cpuCounterSeedAvailable": false,
+          "cpuSeedHasRealEvent": false,
+          "descriptorsAfter": 23,
+          "descriptorsBefore": 23,
+          "fixture": "zlib.htrace",
+          "fullViewerDetailParity": true,
+          "inspection": {
+            "capabilities": {
+              "cpuCounters": false,
+              "cpuScheduling": false,
+              "namedSlices": true,
+              "processCounters": false,
+              "threadStates": false
+            },
+            "cpuCounterSampleTables": [],
+            "dataQuality": {
+              "status": "warnings",
+              "warnings": [
+                {
+                  "category": "droppedValue",
+                  "count": 416,
+                  "message": null,
+                  "scope": "stat.stat_type"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.cookie"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.depth"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.parent_id"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "callstack.ts"
+                }
+              ]
+            },
+            "durationNs": 32210627000,
+            "eventSourceCountsAvailable": true,
+            "processCounterSampleTables": [],
+            "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+            "traceEndTs": 535831985215000,
+            "traceStartTs": 535799774588000
+          },
+          "invalidFrontendBoundsRejected": true,
+          "ownedScopesRemoved": true,
+          "processCounterSeedAvailable": false,
+          "rawBytesUnchanged": true,
+          "responses": [
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967809,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "cpu": {
+                  "_0": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "35700022f918997a0d3fb8ab571d2830d1beb1d419e24b497c8c151666d09a65"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968065,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "threadState": {
+                  "_0": {
+                    "itid": 1
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "4baa994c8c1803dc78e48bf9a98e11aae5b7deb0d4933cbc5c39da8496725438"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 2,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968321,\"body\":{\"items\":[{\"eventKey\":{\"table\":\"callstack\",\"rowID\":0},\"range\":{\"startNs\":0,\"endNs\":798000},\"depth\":0,\"style\":\"accent\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"callstack\",\"rowID\":3},\"range\":{\"startNs\":4337000,\"endNs\":5916000},\"depth\":0,\"style\":\"accent\",\"isOpenEnded\":false}],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.cookie\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.depth\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.parent_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.ts\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "namedSlice": {
+                  "_0": {
+                    "itid": 1
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 939,
+                "sha256": "e3aa56c6d10f55237f4da73734c57d1fc50e996f4388977565b73968908dd3cb"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968577,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.cookie\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.depth\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.parent_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.ts\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "namedSlice": {}
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 675,
+                "sha256": "0199ca6a949276657ce3187bec820b42588df218ac9d9e7f58ccb59d9c6a52eb"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968833,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "cpuCounter": {
+                  "filterID": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "f0d4aa5413b913ce82a191d10dff21509426e5d4a58b44ce3c46f48f969bea29"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294969089,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "processCounter": {
+                  "filterID": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "39485bd9f5e5ef88e4f1d5311c15bb760224bf8a4b381726c0081b6ec4bde6be"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 32210627000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294969345,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.cookie\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.depth\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.parent_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"callstack.ts\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "frame": {}
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 675,
+                "sha256": "787a6c9f74c2f4b426c6f5fa25e824029cbbf8144af5a9b37d2174874d33c970"
+              }
+            }
+          ],
+          "resultSurvivesReleaseCloseDrain": true
+        },
+        {
+          "cancelledOwnerQueryRejected": true,
+          "cpuCounterSeedAvailable": false,
+          "cpuSeedHasRealEvent": false,
+          "descriptorsAfter": 23,
+          "descriptorsBefore": 23,
+          "fixture": "hiprofiler_data_ability.htrace",
+          "fullViewerDetailParity": true,
+          "inspection": {
+            "capabilities": {
+              "cpuCounters": false,
+              "cpuScheduling": false,
+              "namedSlices": false,
+              "processCounters": true,
+              "threadStates": false
+            },
+            "cpuCounterSampleTables": [],
+            "dataQuality": {
+              "status": "warnings",
+              "warnings": [
+                {
+                  "category": "droppedValue",
+                  "count": 416,
+                  "message": null,
+                  "scope": "stat.stat_type"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.filter_id"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.ts"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure.value"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure_filter.id"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure_filter.ipid"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "process_measure_filter.name"
+                }
+              ]
+            },
+            "durationNs": 48516841334,
+            "eventSourceCountsAvailable": true,
+            "processCounterSampleTables": [
+              "process_measure"
+            ],
+            "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+            "traceEndTs": 1502026350073755298,
+            "traceStartTs": 1502026301556913964
+          },
+          "invalidFrontendBoundsRejected": true,
+          "ownedScopesRemoved": true,
+          "processCounterSeedAvailable": true,
+          "rawBytesUnchanged": true,
+          "responses": [
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589935105,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "cpu": {
+                  "_0": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "995b8c9bf5daca36bd0da57083085f07d44b341a0bc84be4d097e47b703a0456"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589935361,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "threadState": {
+                  "_0": {
+                    "itid": 1
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "db29dfa04d49acae69f5ab7339cda9b8c3209c6c1cc259ebe17b49e1ff314877"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589935617,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "namedSlice": {
+                  "_0": {
+                    "itid": 1
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "80d3afabcdf6b46fdd39ba92e4ba327a3122517f36197aa3da1d20f742b4a784"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589935873,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "namedSlice": {}
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "38f0e225eb979c4c0b5fa9a965a03213cf3dff48c574a78b4929a731da27e0c3"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589936129,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "cpuCounter": {
+                  "filterID": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 171,
+                "sha256": "7c8e272e3e5be2c40cf2e91749476bfddf6b8a7d5ba664a0395557daf8184150"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 9,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589936385,\"body\":{\"items\":[{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":1},\"range\":{\"startNs\":4137882125,\"endNs\":9137254002},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":2242},\"range\":{\"startNs\":9137254002,\"endNs\":14135041546},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":4483},\"range\":{\"startNs\":14135041546,\"endNs\":19136566090},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":6724},\"range\":{\"startNs\":19136566090,\"endNs\":24135213800},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":8965},\"range\":{\"startNs\":24135213800,\"endNs\":29136307803},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":11215},\"range\":{\"startNs\":29136307803,\"endNs\":34135587847},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":13465},\"range\":{\"startNs\":34135587847,\"endNs\":39136895766},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":15715},\"range\":{\"startNs\":39136895766,\"endNs\":44137356310},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"process_measure\",\"rowID\":17965},\"range\":{\"startNs\":44137356310,\"endNs\":48516841334},\"depth\":0,\"style\":\"counter\",\"isOpenEnded\":true}],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.filter_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.value\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.ipid\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.name\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "processCounter": {
+                  "filterID": 0,
+                  "processKey": {
+                    "ipid": 1
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 2282,
+                "sha256": "bceabaddc2414aea99158f94ea35693136cfc82dd1de9c5c90a47506fdf7cf58"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 48516841334,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":8589934848,\"request\":8589936641,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.filter_id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure.value\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.id\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.ipid\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"process_measure_filter.name\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "frame": {}
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 900,
+                "sha256": "853050019af2caebbb94b78a7e95e118e924ba8d33b664b5c5b3277edb4721ae"
+              }
+            }
+          ],
+          "resultSurvivesReleaseCloseDrain": true
+        },
+        {
+          "cancelledOwnerQueryRejected": true,
+          "cpuCounterSeedAvailable": false,
+          "cpuSeedHasRealEvent": true,
+          "descriptorsAfter": 23,
+          "descriptorsBefore": 23,
+          "fixture": "trace_small_10.systrace",
+          "fullViewerDetailParity": true,
+          "inspection": {
+            "capabilities": {
+              "cpuCounters": false,
+              "cpuScheduling": true,
+              "namedSlices": false,
+              "processCounters": false,
+              "threadStates": true
+            },
+            "cpuCounterSampleTables": [],
+            "dataQuality": {
+              "status": "warnings",
+              "warnings": [
+                {
+                  "category": "droppedValue",
+                  "count": 416,
+                  "message": null,
+                  "scope": "stat.stat_type"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "sched_slice.cpu"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "sched_slice.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "sched_slice.ts"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "thread_state.cpu"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "thread_state.dur"
+                },
+                {
+                  "category": "probeTruncated",
+                  "count": null,
+                  "message": null,
+                  "scope": "thread_state.ts"
+                }
+              ]
+            },
+            "durationNs": 9127944000,
+            "eventSourceCountsAvailable": true,
+            "processCounterSampleTables": [],
+            "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+            "traceEndTs": 88035820831000,
+            "traceStartTs": 88026692887000
+          },
+          "invalidFrontendBoundsRejected": true,
+          "ownedScopesRemoved": true,
+          "processCounterSeedAvailable": false,
+          "rawBytesUnchanged": true,
+          "responses": [
+            {
+              "capabilityAvailable": true,
+              "itemCount": 16,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884902401,\"body\":{\"items\":[{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":0},\"range\":{\"startNs\":112000,\"endNs\":152000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":2},\"range\":{\"startNs\":152000,\"endNs\":453000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":4},\"range\":{\"startNs\":453000,\"endNs\":1163000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":17},\"range\":{\"startNs\":1163000,\"endNs\":1253000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":18},\"range\":{\"startNs\":1253000,\"endNs\":1276000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":19},\"range\":{\"startNs\":1276000,\"endNs\":1318000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":21},\"range\":{\"startNs\":1318000,\"endNs\":2399000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":24},\"range\":{\"startNs\":2399000,\"endNs\":2435000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":25},\"range\":{\"startNs\":2435000,\"endNs\":2919000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":28},\"range\":{\"startNs\":2919000,\"endNs\":3059000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":31},\"range\":{\"startNs\":3059000,\"endNs\":3522000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":36},\"range\":{\"startNs\":3522000,\"endNs\":3563000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":37},\"range\":{\"startNs\":3563000,\"endNs\":4637000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":40},\"range\":{\"startNs\":4637000,\"endNs\":4670000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":41},\"range\":{\"startNs\":4670000,\"endNs\":5752000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"sched_slice\",\"rowID\":46},\"range\":{\"startNs\":5752000,\"endNs\":5788000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false}],\"truncated\":true,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "cpu": {
+                  "_0": 3
+                }
+              },
+              "truncated": true,
+              "responseDigest": {
+                "byteCount": 2992,
+                "sha256": "7522fa123dae1c5499dc065197dfc470a97ff0c8473353a85ceb225e305840b7"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 6,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884902657,\"body\":{\"items\":[{\"eventKey\":{\"table\":\"thread_state\",\"rowID\":10146},\"range\":{\"startNs\":1084530000,\"endNs\":1084670000},\"depth\":0,\"style\":\"runnable\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"thread_state\",\"rowID\":10150},\"range\":{\"startNs\":1084670000,\"endNs\":1084939000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"thread_state\",\"rowID\":10153},\"range\":{\"startNs\":1084939000,\"endNs\":6210493000},\"depth\":0,\"style\":\"sleeping\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"thread_state\",\"rowID\":48027},\"range\":{\"startNs\":6210493000,\"endNs\":6210527000},\"depth\":0,\"style\":\"runnable\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"thread_state\",\"rowID\":48030},\"range\":{\"startNs\":6210527000,\"endNs\":6210862000},\"depth\":0,\"style\":\"running\",\"isOpenEnded\":false},{\"eventKey\":{\"table\":\"thread_state\",\"rowID\":48035},\"range\":{\"startNs\":6210862000,\"endNs\":9127944000},\"depth\":0,\"style\":\"sleeping\",\"isOpenEnded\":true}],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "threadState": {
+                  "_0": {
+                    "itid": 84
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 1664,
+                "sha256": "df8f526b135a4dd1715caaf13743e28bfa246d8eadb631840aa7841fe74ea336"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884902913,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "namedSlice": {
+                  "_0": {
+                    "itid": 84
+                  }
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 173,
+                "sha256": "a55fba97344cafb9a14cc30c6ab72136f51f8bbb519e37ad499c49ec1ba57b62"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884903169,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "namedSlice": {}
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 173,
+                "sha256": "582e6c938ea055267fb7940006c5a99e4d1c8cd413376955ee2308506019f354"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884903425,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "cpuCounter": {
+                  "filterID": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 173,
+                "sha256": "c3d9c8a1978be3e0085ce61a4770017802bdac99703dae7d5fb1afa38fa37d46"
+              }
+            },
+            {
+              "capabilityAvailable": false,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884903681,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]}}}",
+              "source": {
+                "processCounter": {
+                  "filterID": 0
+                }
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 173,
+                "sha256": "91f935d3e3af80e047a76535191de6d08fed8c816830a914d5539f42702fd794"
+              }
+            },
+            {
+              "capabilityAvailable": true,
+              "itemCount": 0,
+              "limit": 16,
+              "range": {
+                "endNs": 9127944000,
+                "startNs": 0
+              },
+              "responseUtf8": "{\"formatVersion\":1,\"session\":12884902144,\"request\":12884903937,\"body\":{\"items\":[],\"truncated\":false,\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"scope\":\"stat.stat_type\",\"count\":416,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"sched_slice.ts\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.cpu\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.dur\",\"count\":null,\"message\":null},{\"category\":\"probeTruncated\",\"scope\":\"thread_state.ts\",\"count\":null,\"message\":null}]}}}",
+              "source": {
+                "frame": {}
+              },
+              "truncated": false,
+              "responseDigest": {
+                "byteCount": 762,
+                "sha256": "2fc7618b89bf5b08f5be71265789aede37b22264f0b31ac16d9c9022941f9e27"
+              }
+            }
+          ],
+          "resultSurvivesReleaseCloseDrain": true
+        }
+      ]
+    },
+    "parser": {
+      "name": "trace_streamer",
+      "reportedVersion": "4.3.7",
+      "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+      "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+      "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+      "architecture": "arm64",
+      "adapterVersion": "1",
+      "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20"
+    },
+    "sourceDigests": [
+      {
+        "path": "rust/Cargo.toml",
+        "byteCount": 941,
+        "sha256": "07167503373f42d4d9f3e7776f8456c50966de337d4440a612c7c52581b7cd4a"
+      },
+      {
+        "path": "rust/Cargo.lock",
+        "byteCount": 8863,
+        "sha256": "020d55309540f5cd1a3b4e3af0e8e903d85d8cb1934f7a2f11022f0358fe2e70"
+      },
+      {
+        "path": "rust/rust-toolchain.toml",
+        "byteCount": 86,
+        "sha256": "2ad6f15416572b4836585087f1d4abc53b8fa2dbd616f8dacfaa587ed6714228"
+      },
+      {
+        "path": "scripts/run-cargo.py",
+        "byteCount": 7151,
+        "sha256": "89248867fbc827b68fefc9a766c8c02dce3641b2a81d68bb6834c5a911a16ecc"
+      },
+      {
+        "path": "scripts/test_macos_parser_process.py",
+        "byteCount": 19912,
+        "sha256": "e6284c90cb5216e6be8c38cb37feff53f8840af2191a65febfee5f4042fe6aa0"
+      },
+      {
+        "path": "scripts/test_macos_viewer_owner.py",
+        "byteCount": 5808,
+        "sha256": "ee7b370841bfa2d41521078d6b9e2bff76bddd9403f02e914b12b7268163d597"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/Cargo.toml",
+        "byteCount": 392,
+        "sha256": "688e29c2bb5418655fe68833da30a662c14d861cb3d6bbfbe939e8f02a204546"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/Cargo.toml",
+        "byteCount": 510,
+        "sha256": "d2fd77ffbfe19ab17cd146b46cb0215f281dcc1959389f04ccb1466224593e56"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/Cargo.toml",
+        "byteCount": 352,
+        "sha256": "3e964c4bb22c1663c79ae9304e90e2c81e15c82bdb038570dc4ebf536e32ac40"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/Cargo.toml",
+        "byteCount": 498,
+        "sha256": "464e17776e473a67bbf977b19e191767f7f1c537765a40bbab9734b183a5c060"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/Cargo.toml",
+        "byteCount": 920,
+        "sha256": "af77d99b2ad839b9341f913233f839810ecc020b67b0111ee330d7d3c874170f"
+      },
+      {
+        "path": "rust/crates/arktrace-store/Cargo.toml",
+        "byteCount": 423,
+        "sha256": "05393789f858db233d313a6e956b10d2b1b2982fd50b5de581725348bbd52273"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/Cargo.toml",
+        "byteCount": 351,
+        "sha256": "31077d2034838465fc5359c855f6c06db4052ef034fc6d7a9c3e670cc497cc1b"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/hot.rs",
+        "byteCount": 5425,
+        "sha256": "9be825b7ab23ead63135d5c2239f681ccd96aace27c8974f05ebcef4396d2113"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/lib.rs",
+        "byteCount": 13878,
+        "sha256": "fd29fe155cc539ae356f733d76761b238c274fb6fcd54fe9aaad4dad594cd194"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/reduce.rs",
+        "byteCount": 8005,
+        "sha256": "9b53650f8024f7b6f3400424722ec427a6f724aba77f011e3bbab6e86acc4a05"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/scheduling.rs",
+        "byteCount": 4215,
+        "sha256": "0ebc4e98963f6218ed055c7f771d1c2afac319dd3a47fa42c42eae5604d432d9"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/search/tests.rs",
+        "byteCount": 7645,
+        "sha256": "1ce994218dfe9fb72b56aa605993d36e8c4da3b2ba2a3b29c5f7d12e2bc903d4"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/search.rs",
+        "byteCount": 10188,
+        "sha256": "9e30205119fae000282f49eac6c856aa85c785475857457afefc9b9109432045"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/src/types.rs",
+        "byteCount": 10716,
+        "sha256": "c42ee7f56dc3a665f298e45fb0dd3f4a85b87d4fa7dd8198ab18d3a7046cc026"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/tests/regressions.rs",
+        "byteCount": 21544,
+        "sha256": "039990b4002bd3c351e49bfdd0ba40e3b865de35dbee2c8fac207a7830bad4fc"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/tests/swift_deviations.rs",
+        "byteCount": 2985,
+        "sha256": "1ebd6324063d438b7e1c5b031d2a3bad47e3a8baaf1b74d25b5d6f944296a9aa"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/tests/swift_oracle.rs",
+        "byteCount": 7135,
+        "sha256": "d37b3247d09ac344931dc3aa493b73f9b0c5bfadff239088cb52bf374b3cd9fc"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/examples/macos_commands_probe.rs",
+        "byteCount": 8145,
+        "sha256": "76367fe3042fd01271f445d98d656d92d54e4b8190eea4b3b7dc39e94ea89624"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/arguments.rs",
+        "byteCount": 31878,
+        "sha256": "6b9941f3af150a91b544eeaa33e709f94edd482fbc9054718b01ee6b1833696f"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/driver.rs",
+        "byteCount": 20066,
+        "sha256": "2bd183fa5c96408faaeefe95787bdb7d554d341d9c9a75de416ac87cc7d57c75"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/entry.rs",
+        "byteCount": 339,
+        "sha256": "0bca65ba602113bed9fd069e72c71b710545efc40c6d9325b925830333e8e543"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/event_query.rs",
+        "byteCount": 4428,
+        "sha256": "abda11c94d899926dd64890b29ec9aa3a436e61db86a5a98855b49017fec0543"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/lib.rs",
+        "byteCount": 432,
+        "sha256": "11a4845ea8c0d6ce447a67fa013d4b3407cc8bfff584af950358b70713a9c3d4"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/machine.rs",
+        "byteCount": 58961,
+        "sha256": "ff7fcc04bd77711a0041232d9adcf4d454ff3e703e91848a8c3986939fb472c2"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/main.rs",
+        "byteCount": 260,
+        "sha256": "7cce1ea94f6f40a020ffceeba4be8baa47f39ebe1eedd53aa41868c54f96c6e3"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/public_error.rs",
+        "byteCount": 1325,
+        "sha256": "0dc0865687114bf4eb7be69d25d1b2a67a01d01805922d4f7ac1d069d5d15aba"
+      },
+      {
+        "path": "rust/crates/arktrace-cli/src/resources.rs",
+        "byteCount": 7584,
+        "sha256": "4a1267edeab3e5862c04a16d344e075e81535d316c1133343223a663ad9f5039"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/build.rs",
+        "byteCount": 618,
+        "sha256": "519a4404229563056ed3f0c207260462cf7dde2e0ee3b316045c772cb504f67e"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/arguments.rs",
+        "byteCount": 2555,
+        "sha256": "1930c845b786ded211782bd6ba02d81ffb2d60ee02a0417467038b10991e803b"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/batch.rs",
+        "byteCount": 5314,
+        "sha256": "78d9f9e84176f0341442a6a47fd6f59d839f635dd1366fddea5de55e9b2d6d64"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/cache.rs",
+        "byteCount": 4016,
+        "sha256": "9620a3ef4a31186740a3dfa265a4662e5f47034102654b2bce8f8ba19676c76d"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/counters.rs",
+        "byteCount": 8418,
+        "sha256": "1bf79724465b4c42e31fa8d307972a72a31f2d0a2031a3a51045fbb9269adb18"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/density.rs",
+        "byteCount": 4672,
+        "sha256": "fe31fe83dde2169dd2caea88152d566180e97906d41af5593360beee008ba58b"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/directory.rs",
+        "byteCount": 2364,
+        "sha256": "238e555118f8fd9af4d709d30754c76467c7369a22770d833d0c68bd793b112f"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/error.rs",
+        "byteCount": 9040,
+        "sha256": "27efa768fd8c6f40efebb962b2bc6b546767c1210b188ad76a01b2dd111d4f7e"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/events.rs",
+        "byteCount": 4233,
+        "sha256": "17c48bb8ee56bb9e1f62991d6da74c33d5333aa08177c003f2e3ba241029659d"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/frames.rs",
+        "byteCount": 4351,
+        "sha256": "40ff4e89f383aed7a4fb13c8eb5958f755ca88df0d01302660505b24c7c85ea3"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/lib.rs",
+        "byteCount": 2301,
+        "sha256": "83922a3c178563f3818e4ed4eacf3d273a9fcccf37717ac3e0d1b1269401ae0f"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/parser.rs",
+        "byteCount": 1916,
+        "sha256": "d7094cd12538813a376db9a57a2bf4959d0a1e6193343b8c35030c8e508d10bb"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/quality.rs",
+        "byteCount": 3043,
+        "sha256": "a6ecab91105e396f649ea22c5cbdca1be211d3a43fb26f3efaf53ac28282ce17"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/search.rs",
+        "byteCount": 4144,
+        "sha256": "066ffd44ae1c86f9880a98b61f838d46e8e6b2be53b28a514ccfc3094d3de9fa"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/slices.rs",
+        "byteCount": 2643,
+        "sha256": "8277cffe4b821c4fe6ecb31a10a5ff674f7d0c7448692f10ddbca6a50140f613"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/src/time.rs",
+        "byteCount": 2015,
+        "sha256": "1beeba7d7630f2658f1764226e963d11f9aff772bb71d9ac36579a612aa4acbd"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/tests/events.rs",
+        "byteCount": 2918,
+        "sha256": "3467115f39f6464d1a5271f4fdef36517bee6ae6569208ea65aeabe7adc5f1e0"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/tests/slices.rs",
+        "byteCount": 3799,
+        "sha256": "a60e910cc4e9a8b8292d1ecc440d61c5fb0fb7c1bb155fd039cced891eecfbf2"
+      },
+      {
+        "path": "rust/crates/arktrace-contract/tests/vectors.rs",
+        "byteCount": 5714,
+        "sha256": "559d2a249aa1a95a0b81d8827653d1bcfa177bf5e39cc830380f982e263676a6"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_analysis_probe.rs",
+        "byteCount": 12222,
+        "sha256": "c75f330113ba5a750e6639bf6fb8527be698f7f0576ff95d205ad7817609f06c"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_arguments_probe.rs",
+        "byteCount": 13010,
+        "sha256": "ae53f7dab41dcc3a9e374d3eac2bf6ee1282e8c90566c765ff701d2f208400e5"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_batch_probe.rs",
+        "byteCount": 14099,
+        "sha256": "f4195991129926e233e163c97991da37a11b8470994977481c8c56194fc38c2a"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_counters_probe.rs",
+        "byteCount": 10197,
+        "sha256": "da015a4d6ee29c5ec1f0389395f5aaaf474d6890929e9cce9946ae202e9c774f"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_density_probe.rs",
+        "byteCount": 12383,
+        "sha256": "0deae6c4b404eb49ed19ebfa9377b5d66a90d381276b177b21480c9215e99b49"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_engine_probe.rs",
+        "byteCount": 18775,
+        "sha256": "7aaf7d4ee8a6199177d3834936b4579711e3eebebd458b4e2299d6497677c519"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_events_probe.rs",
+        "byteCount": 8534,
+        "sha256": "f5cb85462f5bcb6eb29f8ee20c778d3d32612c63e701668ba7dc4365000870ba"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_frames_probe.rs",
+        "byteCount": 11126,
+        "sha256": "43caa28fa8b66d2470059eb5d2edb65a55b347910450b547df41050ec54287cf"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_runtime_probe.rs",
+        "byteCount": 35806,
+        "sha256": "9c349c6bd326678897b117fa24a87ae1bb94ce3bcfa8c938b8554c9c3afb43a4"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_search_probe.rs",
+        "byteCount": 13253,
+        "sha256": "a9783ea799eea6f5996ce5532d625722108dc7c81af6faaf87d3656a5697b358"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_slices_probe.rs",
+        "byteCount": 9605,
+        "sha256": "915b1bc6c871bc63fa6730952f2ff0032044d9e5ea58cf5dd6b2bc8392c630e4"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_store_probe.rs",
+        "byteCount": 3673,
+        "sha256": "c64b327b95dc3e3f1d90c8b85ae989211da8a89e9cd9d402ed2b75f032d01e82"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/examples/macos_viewer_probe.rs",
+        "byteCount": 14876,
+        "sha256": "e36de967277fbc5f9668a2ece5fc75f094affec7a4412358dc43226918b0109e"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/async_runtime.rs",
+        "byteCount": 52894,
+        "sha256": "13f05b3407a21678fe0980c9d620b51cffe3938c405b13f1d4e6231ab1c451bb"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/handles.rs",
+        "byteCount": 4796,
+        "sha256": "b83fccd6bac1b7e0fcd87db59a5829fe4b6b2b3f110e9c6c749b9750370bed5a"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/lib.rs",
+        "byteCount": 1534,
+        "sha256": "746ef0096eda5208869be93cfae7c1088b9f9910b596bc0fd1c392aa34b9c90f"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/metadata.rs",
+        "byteCount": 10068,
+        "sha256": "62d54886af71af13b6b899d25bd659d5d908da46229a80d9df1ed9307cc3c8a8"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/no_cache.rs",
+        "byteCount": 69690,
+        "sha256": "6897c63918cc284a841a2c36e8ce993a0c21270b467b4a4621cb61dc76783525"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/owned_result.rs",
+        "byteCount": 4184,
+        "sha256": "c3e99ca99b8051c934509e168e953bfedd09d84a559ca0b51c54090f407ae56b"
+      },
+      {
+        "path": "rust/crates/arktrace-engine/src/public_error.rs",
+        "byteCount": 11732,
+        "sha256": "ed64de7cbbb4fd2e1e01a8bba7780d2b709831aa66c70fffa6fe3572cd715eff"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/examples/macos_cli_ports_probe.rs",
+        "byteCount": 1176,
+        "sha256": "2a4089ed04454150b8b682e8d2b551c70f8b854514b8a46b57c41ce0d7c3f616"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+        "byteCount": 12075,
+        "sha256": "9f0e2228d79058082ba246b9313356dc2fa768aea2d9979a4f8bfe5ae1fe3d0a"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+        "byteCount": 4936,
+        "sha256": "7ecc158fd794898350d7dbfd03b0e0672c6f3bd907e9db02b0f0f3b730613164"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+        "byteCount": 260,
+        "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/budget.rs",
+        "byteCount": 2487,
+        "sha256": "c9ab2d00c2f9e502b08f4b4bd0a1af7efad63ea6dda4f6fed9e4ef013d6a53b5"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/error.rs",
+        "byteCount": 1038,
+        "sha256": "3d909ae237980c1926d96ac332550da5d03ab5d9a541829c0ca73859103052c6"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/lib.rs",
+        "byteCount": 1787,
+        "sha256": "fa1a186f4f2bfe237260eabb4235bef2c2c4fa244bf0ae73b348bfa0dbae2fe0"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos.rs",
+        "byteCount": 46249,
+        "sha256": "e1e360084c52142453ea8076f00f986f9858bd7149f7512d2850a1139c34dced"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_cli.rs",
+        "byteCount": 17731,
+        "sha256": "f3813f04694390ac928db99cd95c34e8549373a9e84428f3eedb0513660f6e41"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_directory.rs",
+        "byteCount": 12385,
+        "sha256": "70304e12594bcb89bea0d0186e2b5a892121f9c851c134c9cec98fd4f5cadcd5"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_owner.rs",
+        "byteCount": 68401,
+        "sha256": "5a2da32a7261916e1ec5be03a059f044b717872cc2ee99931f8b0df671eea873"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+        "byteCount": 39372,
+        "sha256": "d27e1fb71cd15dd811f486e71b187ada94aaf97f96cac88c4789fe25537aaf00"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_process_outputs.rs",
+        "byteCount": 16643,
+        "sha256": "82090010a6e1545b6690cc680298389ceb6508213bfc346a82aafb6b5c506935"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+        "byteCount": 14979,
+        "sha256": "793c62086818f8d934b8db6cc6f2ad59caf51e1a0244858e49e88cd02c0156fd"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+        "byteCount": 9451,
+        "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/src/macos_writable.rs",
+        "byteCount": 10317,
+        "sha256": "5cf33714c39db4aaf956707b6e530452ccc2c6ddad0f91f265665c8e731b1c31"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+        "byteCount": 24987,
+        "sha256": "aee3e30c14273fa22afabb0207ce0cffd6d2fb9cded19105eea28a28e61ace9b"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/tests/macos_owners.rs",
+        "byteCount": 16046,
+        "sha256": "448b567440b0a21ab266269ab1662b4f22fa3e2e5721c4fcedb403077cba846e"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+        "byteCount": 20556,
+        "sha256": "0913972ee33e5855760a6311e6f8799316c6e4a9d9823accd7cd8d8082b2dd9e"
+      },
+      {
+        "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+        "byteCount": 10741,
+        "sha256": "d4db4d94c44e874ebf671d51b256a98a2dc885383dc85f862f2dd48b90f8a969"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/argument_oracle_tests.rs",
+        "byteCount": 5024,
+        "sha256": "be291716da161a485cb79b7cc3566ce408869f145453b8c7677b9c179790e2eb"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/arguments/tests.rs",
+        "byteCount": 7225,
+        "sha256": "8a2bcb1cb363fef6db51422d8814efbee4f3cd06be7c5c49df5fced5a85bce7f"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/arguments.rs",
+        "byteCount": 4064,
+        "sha256": "2af056fb71a9216a07533ee326217e8f0093795373771de693c2de8bb1582ec1"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/counters/scoped_oracle_tests.rs",
+        "byteCount": 3599,
+        "sha256": "5475b6460988335a2dea363ade24cf79181c5968987744b041d9e9c38caeb845"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/counters/tests.rs",
+        "byteCount": 17294,
+        "sha256": "6d33ec3eed7e8a9109ab17dc3448e9e3bdc56680d2fd165fafbfac00d32f7576"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/counters.rs",
+        "byteCount": 22934,
+        "sha256": "c001b206f2572b32fdfd1924e14d5bd7fccfdbd9520ec01999d0f1b640a9ae42"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/database.rs",
+        "byteCount": 18264,
+        "sha256": "3347e495a51b2e2277f320d8bfac17aa3411d25aed4272050fcf50a761bbac7b"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/density.rs",
+        "byteCount": 16560,
+        "sha256": "0343694a2d6d9b8065f6ca59b37da6ce93dbebb344e3913257a5062b09db7089"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/density_oracle_tests.rs",
+        "byteCount": 3549,
+        "sha256": "73f7188b2a254beef0bebd9a90ac3917d92e0ee852aa6458db078ec41f29f0e9"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/directory.rs",
+        "byteCount": 19633,
+        "sha256": "6b0e46f4e7d16c245167485748fc6f76f54e5fc2f411f5bbc73fb376c62850f8"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/event_oracle_tests.rs",
+        "byteCount": 6583,
+        "sha256": "ec22ef199540399e248c17c61cdcedb3448c67b05bc1bf22dbfc564d6d1eb953"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/events/tests.rs",
+        "byteCount": 18377,
+        "sha256": "c4eec2c99d3f9e103e1bdd795f541ed18c9c470c1e7c054c4e76209e557a8d1f"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/events.rs",
+        "byteCount": 20532,
+        "sha256": "e64a73a503105de9acfd89abfa177c7fd2dacdf499dae39689de7733e5f26f7c"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/frames/tests.rs",
+        "byteCount": 7350,
+        "sha256": "88d9841a6d8fc4bdb160550a89b0f575fd3a71b726a6e5200d426193c0362a77"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/frames.rs",
+        "byteCount": 5158,
+        "sha256": "a33618db68784d72e52d838513609a80a10ac3d6eb91ea9dd7cfa2eb59352ff2"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/indexes.rs",
+        "byteCount": 7925,
+        "sha256": "0c6daebb3aac91e351352d56b1d6e7d5ccc316aebdc4782805fd14951864220f"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/lib.rs",
+        "byteCount": 11004,
+        "sha256": "4429538a57000985262e4405d6bfb3d56a832670f4b2b10c631346c968d25bec"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/query_resources.rs",
+        "byteCount": 3863,
+        "sha256": "eb3ed8fb92b195c29fec735deca0bb179906b154cc6cb87887662c76011e7ccb"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/read_pool.rs",
+        "byteCount": 10068,
+        "sha256": "f89caf1771f3f2a34eab04670c754cc8a3cdae768e1a31c69899cbf5ca093c18"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/reader.rs",
+        "byteCount": 8908,
+        "sha256": "af3555b5ae17336f9298d8421a3897a4fde19e5ce8199397f7c92fa620e3c2cb"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/schema.rs",
+        "byteCount": 22411,
+        "sha256": "94ab170a9c26f2fecb2e2af8350b3c4bfebc9c1f9e0cb4e975065349c981c964"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/slices/tests.rs",
+        "byteCount": 17011,
+        "sha256": "d4db7f36c6a66224c8cfd0c8a9ab9b780a3f4339474040b760e23d59dd4e8295"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/slices.rs",
+        "byteCount": 9605,
+        "sha256": "5e59dc5f26662ffea85120c52cc24f44ed828d4304ae44633e42bfa9cf005e8a"
+      },
+      {
+        "path": "rust/crates/arktrace-store/src/tests.rs",
+        "byteCount": 45597,
+        "sha256": "abbc45549aaa7855cf9b111bf6b13060d577daf00ead9ce36555558641f4ae09"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/detail.rs",
+        "byteCount": 11687,
+        "sha256": "b04b224e51d1dfbe6e41f11628ce2afa1b98a19e3b15d15f56ed83d5b3bb87cb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/geometry.rs",
+        "byteCount": 6353,
+        "sha256": "4358060ba3ba6b3b7b41bb231cba9dc2ba3148ea07f296f409ae5afb41773f55"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/interaction.rs",
+        "byteCount": 3391,
+        "sha256": "641857a11ba96be0505c8008620fe735e3ab367159a173d71ac22c1a2915760b"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/lib.rs",
+        "byteCount": 3110,
+        "sha256": "ef36da5ab87fa5c710f3885c162ea214db348d904caf8c668f6372db53fca844"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/plan.rs",
+        "byteCount": 10007,
+        "sha256": "ff1a4cd6bb2827c925f59b6ab245b3bf264ccf22bc00cc6507acaa0c5f35faa5"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/snapshot.rs",
+        "byteCount": 21554,
+        "sha256": "fe91a329c562a0b07bb6483f6813bab35801a708b63359cf3d55e513772e72cd"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/types.rs",
+        "byteCount": 8236,
+        "sha256": "e1f432106021442c8ca32992a4a9f4d34cf31fb44dd9d0262202f2a3f6270928"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/common/mod.rs",
+        "byteCount": 3276,
+        "sha256": "91689b0731108773f5f2ae2dca7ccc82f67e937fd28df87d0209b2bc188fc139"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/detail_oracle.rs",
+        "byteCount": 7716,
+        "sha256": "54f0fca5678324623d33d947a0c005a29b7e82306e8e57e62521d2c91ba08902"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/detail_queries.rs",
+        "byteCount": 3193,
+        "sha256": "7284a31d008aa1d14598b9ea7e479b10dbdad76aeb743207f8d9305416982606"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/regressions.rs",
+        "byteCount": 24998,
+        "sha256": "04eda904678dce33c2536b3d2ee9ec07c4df96efcc7d2d0c4515be9b30397035"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/scoped_history.rs",
+        "byteCount": 1280,
+        "sha256": "e6c2293d116e2dc6aa021172643f3e18fca60d91179699a421af10e636598fc7"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/swift_boundary_oracle.rs",
+        "byteCount": 2245,
+        "sha256": "49b677bf3b2107c8047d6b4393a46b0d67e700ffca18cc3aec37bc5530df3563"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/swift_geometry_oracle.rs",
+        "byteCount": 4233,
+        "sha256": "b91157276326c3d201c907724e213caa2cfc693b6fcfc2d91a8c5f7b75667553"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/swift_plan_oracle.rs",
+        "byteCount": 9212,
+        "sha256": "f44196db9b2b3fb4dfb2247d6bf985444eef516d1c209e860f8cd7f236f21e53"
+      }
+    ],
+    "retainedExactRunArtifacts": [
+      {
+        "path": "/private/tmp/arktrace-viewer-owner-artifacts-pwzcmv8l/host-process",
+        "sha256": "9580d210fe4b4be245a983313d148cb6329558a9f5729808a9907463b6c9ee4f",
+        "byteCount": 2244136
+      },
+      {
+        "path": "/private/tmp/arktrace-viewer-owner-artifacts-pwzcmv8l/viewer-probe",
+        "sha256": "1cdf85aa342b3ce256e54f218347ccff898dedbb70aac8cf4d71653e1be0960b",
+        "byteCount": 14217232
+      }
+    ],
+    "toolchain": {
+      "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.1",
+      "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: aarch64-apple-darwin\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.7.1 (sys:0.4.90+curl-8.21.0 system ssl:(SecureTransport) LibreSSL/3.3.6)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Mac OS 27.0.0 [64-bit]",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+      "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428"
+    },
+    "ownedHarnessRootRemoved": true
+  },
+  "validation": {
+    "rustWorkspacePassed": 315,
+    "rustIgnored": 0,
+    "rustWarnings": 0,
+    "swiftRenderingPassed": 111,
+    "swiftCoreScopePassed": 2,
+    "swiftApiBaseline": "passed",
+    "xcodeAppBuild": "passed; existing 7 Clang flag and 1 AppIntents tool warnings retained",
+    "strictClippy": "passed",
+    "fmt": "passed",
+    "offlineWorkflowGates": "all 10 passed; Phase6 evidence verifier is offline only",
+    "ciPlan": "all five lanes; current commit CI follows push",
+    "existingActualSwiftOracleOutputsUnchanged": [
+      {
+        "path": "rust/crates/arktrace-store/tests/fixtures/swift-event-pages.json",
+        "byteCount": 69318,
+        "sha256": "1f7e964df63aa9852522266a6ca27d2aa67c31e403e8a23095a826869aac6709"
+      },
+      {
+        "path": "rust/crates/arktrace-store/tests/fixtures/swift-search-pages.json",
+        "byteCount": 188374,
+        "sha256": "44145d2caefcaf00cc1b12c0f572be1b2db69fb0ead03f4616d07b0d4d316014"
+      },
+      {
+        "path": "rust/crates/arktrace-store/tests/fixtures/swift-argument-pages.json",
+        "byteCount": 29560,
+        "sha256": "125329e819267c32b54da6b5dba49543b33da14bf45063deb04f0e196cf8f7bf"
+      },
+      {
+        "path": "rust/crates/arktrace-store/tests/fixtures/swift-density-pages.json",
+        "byteCount": 344338,
+        "sha256": "965a08baea00d5b8491ee42312a5b814b36d8f5dec369b81e8adbd46142f6d3f"
+      },
+      {
+        "path": "rust/crates/arktrace-analysis/tests/fixtures/swift-mainline.json",
+        "byteCount": 180208,
+        "sha256": "01d29b8c925d598ee58731c81e178bfc169bec980e3b9b223d8040def1be1415"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle.json",
+        "byteCount": 105784,
+        "sha256": "9b8d0a7f0de2f5ad1eb677c3b3e52bc50ba781744c3544e713bf1b62799f287c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-detail-oracle.json",
+        "byteCount": 8427,
+        "sha256": "15fe145fa7f84e4127cde06be1ce6e225f0e7bacd49732230065d9a362c23745"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/host-process",
+      "byteCount": 2244136,
+      "sha256": "9580d210fe4b4be245a983313d148cb6329558a9f5729808a9907463b6c9ee4f"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/viewer-probe",
+      "byteCount": 14217232,
+      "sha256": "1cdf85aa342b3ce256e54f218347ccff898dedbb70aac8cf4d71653e1be0960b"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-slices-before.json",
+      "byteCount": 18830,
+      "sha256": "dbcf330cda94e271aadb26c54f2c4448745007cd6160d1e755b4ec5200961bd7"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-slices-before-receipt.json",
+      "byteCount": 6869,
+      "sha256": "82a6ac120bd59ffb33d86699ab5ccdb347320560104410cb1a826732ff17f46c"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-slices-before-executable",
+      "byteCount": 4764992,
+      "sha256": "2d1f0484feb14ffcbc60fe7a2fe3d04efe224a5f457be0157c525a5f5aae199b"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-slices.json",
+      "byteCount": 17217,
+      "sha256": "1ac27b1de972f77b4b30bd5a9bb2b60806093e451e44822f45c025d7750d6e91"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-slices-receipt.json",
+      "byteCount": 7160,
+      "sha256": "87712a0b16a3b0cdfde5d0db7f7274ceef0008cfbb139507bd61f1433c46b390"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-slices-executable",
+      "byteCount": 4802320,
+      "sha256": "4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-counters.json",
+      "byteCount": 9354,
+      "sha256": "5ad9aa6533eaf1efc5bed86bbe93e13af47c53a255805ea1799492333c02423d"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-counters-receipt.json",
+      "byteCount": 7165,
+      "sha256": "05c9871fb89c5da8dfe23fc326fcb3c3ab35e17946f2a88a5d623a95629969cc"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/swift-scoped-counters-executable",
+      "byteCount": 4802320,
+      "sha256": "4ff3d8c030fe101fd023f96733090d24a6e451b6842295270c5ffb713005f47b"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-analysis-oracle-final-20261004.log",
+      "byteCount": 183,
+      "sha256": "0cef5f559efc13b9a692b15dda313841406e2b987a618481c68a1f4e374979d0"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-api-final-20261004.log",
+      "byteCount": 709,
+      "sha256": "52e87b908206386c8d2d967dbc1e56e431a99d233bf3d83f394b9a16fb7329a9"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-app-final-20261004.log",
+      "byteCount": 153819,
+      "sha256": "e8ef511e51d590a6b67d779d9965ae79a24698ccf2da473b017fdf0fc6129c61"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-argument-oracle-final-20261004.log",
+      "byteCount": 128,
+      "sha256": "fcefbf37689e9b6013ae7f67e08a048b34d8afccc47c658b638bf739133c45b1"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-clippy-final-20261004.log",
+      "byteCount": 638,
+      "sha256": "7cf757660b06bac43b262a7ff6b2b1fe5983d891599cbdd413e0900a935ab010"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-density-oracle-final-20261004.log",
+      "byteCount": 128,
+      "sha256": "13b6350e892da1370082c7ec3f1b6fee0db2dc13fbb3a58a6a030f6cb90aa235"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-event-oracle-final-20261004.log",
+      "byteCount": 125,
+      "sha256": "b98ecc1116a045ad0e9bd407f7537a7f2428e8a026fd4b4c21c35fde0809a220"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-search-oracle-final-20261004.log",
+      "byteCount": 127,
+      "sha256": "f41abb9fe6eb2ba7c4e53cc7df80f9d4fa9985e7ea3502b7c7de3aa2832d84de"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-swift-final-20261004.log",
+      "byteCount": 36921,
+      "sha256": "d88966ca8e1bb4d3012a1f19b13795ce6ee1d8fa0143daf5560d6f48724dcb09"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-viewer-oracle-final-20261004.log",
+      "byteCount": 379,
+      "sha256": "ab1af3391a23dd10a81ceb0ac2cee22e7dd04b75e7f4c078d295979d4341d5ab"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-final-oracles-20261004.log",
+      "byteCount": 224,
+      "sha256": "811a62755c723fc17505ddc2435b0ac98b72706b88790a9ab642c1bc364b0ecb"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-final-rust-20261004.log",
+      "byteCount": 36082,
+      "sha256": "afcb13de5fab99479c9eb6c37a598960a43d4e890730be5e2d4de5b222a092a6"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-cargo-runner-gate-20261004.log",
+      "byteCount": 109,
+      "sha256": "2d99faa05b0f36882c9ce51519365b18528daf5120fe203dd9d5db0305eb727f"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-ci-plan-gate-20261004.log",
+      "byteCount": 2922,
+      "sha256": "59d9e5e94c6d10a5814ab2c84e364d4d74c2c3781cfe7fb8c6d292764d98fa38"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-licenses-gate-20261004.log",
+      "byteCount": 102,
+      "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-migration-contracts-gate-20261004.log",
+      "byteCount": 636,
+      "sha256": "fa9cbb5d360d5ac057370768a22e6ff23587257453c461a6c1ffa8909ed83104"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-palette-gate-20261004.log",
+      "byteCount": 3450,
+      "sha256": "5b513cdcede959bc5372e81faea29b98994f6a8f78dff20589f0dd03e0efe7a3"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-palette-tests-gate-20261004.log",
+      "byteCount": 120,
+      "sha256": "57069b672242cfef54081a618f36810b5895c59d6e65044b1d0b9d0cd1947760"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-parser-lock-gate-20261004.log",
+      "byteCount": 120,
+      "sha256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-phase6-offline-gate-20261004.log",
+      "byteCount": 676,
+      "sha256": "00ca77f6ce36abee9b86d82a5c0563c393ba3ce847cf7029c15e46dfc181ddd0"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-swiftpm-runner-gate-20261004.log",
+      "byteCount": 503,
+      "sha256": "a1e40423f29791fb3e0c99ba69d1db32d1caedca131159bb8523c5dbf164a556"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-xcode-runner-gate-20261004.log",
+      "byteCount": 496,
+      "sha256": "124cbdc7fccd1c293a03d79f14845f8def946e1b068da2414e50da15826c6e66"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-scoped-ci-plan-20261004.log",
+      "byteCount": 96,
+      "sha256": "a41e416f562ad54be2bca4f3f476e13ceb0a4fdd3116c7f3f1ee2896fe3fd267"
+    },
+    {
+      "path": "/private/tmp/arktrace-viewer-scoped-owner-20261004-evidence/arktrace-viewer-owner-20261004.log",
+      "byteCount": 811,
+      "sha256": "379553a83efd3ef8cc72727baaa3f98de77b7e62291d0ce541e982369c76c6b2"
+    }
+  ],
+  "sourceDigests": [
+    {
+      "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "byteCount": 11275,
+      "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "byteCount": 4367,
+      "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "byteCount": 1042,
+      "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "byteCount": 375,
+      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "byteCount": 862,
+      "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "byteCount": 17503,
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "byteCount": 1526,
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+      "byteCount": 11916,
+      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "byteCount": 5258,
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "byteCount": 8071,
+      "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "byteCount": 3147,
+      "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "byteCount": 16011,
+      "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "byteCount": 1186,
+      "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "byteCount": 3873,
+      "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "byteCount": 9752,
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "byteCount": 863,
+      "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "byteCount": 16274,
+      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+    },
+    {
+      "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+      "byteCount": 2757,
+      "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+      "byteCount": 6210,
+      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "byteCount": 29018,
+      "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+      "byteCount": 8131,
+      "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+      "byteCount": 24339,
+      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+      "byteCount": 101313,
+      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+      "byteCount": 40541,
+      "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e"
+    },
+    {
+      "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+      "byteCount": 160666,
+      "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4"
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+      "byteCount": 29935,
+      "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631"
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+      "byteCount": 32838,
+      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+      "byteCount": 3269,
+      "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8"
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "byteCount": 49595,
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "byteCount": 8863,
+      "sha256": "020d55309540f5cd1a3b4e3af0e8e903d85d8cb1934f7a2f11022f0358fe2e70"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "byteCount": 941,
+      "sha256": "07167503373f42d4d9f3e7776f8456c50966de337d4440a612c7c52581b7cd4a"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/hot.rs",
+      "byteCount": 5425,
+      "sha256": "9be825b7ab23ead63135d5c2239f681ccd96aace27c8974f05ebcef4396d2113"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/lib.rs",
+      "byteCount": 13878,
+      "sha256": "fd29fe155cc539ae356f733d76761b238c274fb6fcd54fe9aaad4dad594cd194"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/reduce.rs",
+      "byteCount": 8005,
+      "sha256": "9b53650f8024f7b6f3400424722ec427a6f724aba77f011e3bbab6e86acc4a05"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/scheduling.rs",
+      "byteCount": 4215,
+      "sha256": "0ebc4e98963f6218ed055c7f771d1c2afac319dd3a47fa42c42eae5604d432d9"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/search/tests.rs",
+      "byteCount": 7645,
+      "sha256": "1ce994218dfe9fb72b56aa605993d36e8c4da3b2ba2a3b29c5f7d12e2bc903d4"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/search.rs",
+      "byteCount": 10188,
+      "sha256": "9e30205119fae000282f49eac6c856aa85c785475857457afefc9b9109432045"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/src/types.rs",
+      "byteCount": 10716,
+      "sha256": "c42ee7f56dc3a665f298e45fb0dd3f4a85b87d4fa7dd8198ab18d3a7046cc026"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/regressions.rs",
+      "byteCount": 21544,
+      "sha256": "039990b4002bd3c351e49bfdd0ba40e3b865de35dbee2c8fac207a7830bad4fc"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/swift_deviations.rs",
+      "byteCount": 2985,
+      "sha256": "1ebd6324063d438b7e1c5b031d2a3bad47e3a8baaf1b74d25b5d6f944296a9aa"
+    },
+    {
+      "path": "rust/crates/arktrace-analysis/tests/swift_oracle.rs",
+      "byteCount": 7135,
+      "sha256": "d37b3247d09ac344931dc3aa493b73f9b0c5bfadff239088cb52bf374b3cd9fc"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/examples/macos_commands_probe.rs",
+      "byteCount": 8145,
+      "sha256": "76367fe3042fd01271f445d98d656d92d54e4b8190eea4b3b7dc39e94ea89624"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/arguments.rs",
+      "byteCount": 31878,
+      "sha256": "6b9941f3af150a91b544eeaa33e709f94edd482fbc9054718b01ee6b1833696f"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/driver.rs",
+      "byteCount": 20066,
+      "sha256": "2bd183fa5c96408faaeefe95787bdb7d554d341d9c9a75de416ac87cc7d57c75"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/entry.rs",
+      "byteCount": 339,
+      "sha256": "0bca65ba602113bed9fd069e72c71b710545efc40c6d9325b925830333e8e543"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/event_query.rs",
+      "byteCount": 4428,
+      "sha256": "abda11c94d899926dd64890b29ec9aa3a436e61db86a5a98855b49017fec0543"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/lib.rs",
+      "byteCount": 432,
+      "sha256": "11a4845ea8c0d6ce447a67fa013d4b3407cc8bfff584af950358b70713a9c3d4"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/machine.rs",
+      "byteCount": 58961,
+      "sha256": "ff7fcc04bd77711a0041232d9adcf4d454ff3e703e91848a8c3986939fb472c2"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/main.rs",
+      "byteCount": 260,
+      "sha256": "7cce1ea94f6f40a020ffceeba4be8baa47f39ebe1eedd53aa41868c54f96c6e3"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/public_error.rs",
+      "byteCount": 1325,
+      "sha256": "0dc0865687114bf4eb7be69d25d1b2a67a01d01805922d4f7ac1d069d5d15aba"
+    },
+    {
+      "path": "rust/crates/arktrace-cli/src/resources.rs",
+      "byteCount": 7584,
+      "sha256": "4a1267edeab3e5862c04a16d344e075e81535d316c1133343223a663ad9f5039"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/build.rs",
+      "byteCount": 618,
+      "sha256": "519a4404229563056ed3f0c207260462cf7dde2e0ee3b316045c772cb504f67e"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/arguments.rs",
+      "byteCount": 2555,
+      "sha256": "1930c845b786ded211782bd6ba02d81ffb2d60ee02a0417467038b10991e803b"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/batch.rs",
+      "byteCount": 5314,
+      "sha256": "78d9f9e84176f0341442a6a47fd6f59d839f635dd1366fddea5de55e9b2d6d64"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/cache.rs",
+      "byteCount": 4016,
+      "sha256": "9620a3ef4a31186740a3dfa265a4662e5f47034102654b2bce8f8ba19676c76d"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/counters.rs",
+      "byteCount": 8418,
+      "sha256": "1bf79724465b4c42e31fa8d307972a72a31f2d0a2031a3a51045fbb9269adb18"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/density.rs",
+      "byteCount": 4672,
+      "sha256": "fe31fe83dde2169dd2caea88152d566180e97906d41af5593360beee008ba58b"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/directory.rs",
+      "byteCount": 2364,
+      "sha256": "238e555118f8fd9af4d709d30754c76467c7369a22770d833d0c68bd793b112f"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/error.rs",
+      "byteCount": 9040,
+      "sha256": "27efa768fd8c6f40efebb962b2bc6b546767c1210b188ad76a01b2dd111d4f7e"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/events.rs",
+      "byteCount": 4233,
+      "sha256": "17c48bb8ee56bb9e1f62991d6da74c33d5333aa08177c003f2e3ba241029659d"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/frames.rs",
+      "byteCount": 4351,
+      "sha256": "40ff4e89f383aed7a4fb13c8eb5958f755ca88df0d01302660505b24c7c85ea3"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/lib.rs",
+      "byteCount": 2301,
+      "sha256": "83922a3c178563f3818e4ed4eacf3d273a9fcccf37717ac3e0d1b1269401ae0f"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/parser.rs",
+      "byteCount": 1916,
+      "sha256": "d7094cd12538813a376db9a57a2bf4959d0a1e6193343b8c35030c8e508d10bb"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/quality.rs",
+      "byteCount": 3043,
+      "sha256": "a6ecab91105e396f649ea22c5cbdca1be211d3a43fb26f3efaf53ac28282ce17"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/search.rs",
+      "byteCount": 4144,
+      "sha256": "066ffd44ae1c86f9880a98b61f838d46e8e6b2be53b28a514ccfc3094d3de9fa"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/slices.rs",
+      "byteCount": 2643,
+      "sha256": "8277cffe4b821c4fe6ecb31a10a5ff674f7d0c7448692f10ddbca6a50140f613"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/src/time.rs",
+      "byteCount": 2015,
+      "sha256": "1beeba7d7630f2658f1764226e963d11f9aff772bb71d9ac36579a612aa4acbd"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/events.rs",
+      "byteCount": 2918,
+      "sha256": "3467115f39f6464d1a5271f4fdef36517bee6ae6569208ea65aeabe7adc5f1e0"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/slices.rs",
+      "byteCount": 3799,
+      "sha256": "a60e910cc4e9a8b8292d1ecc440d61c5fb0fb7c1bb155fd039cced891eecfbf2"
+    },
+    {
+      "path": "rust/crates/arktrace-contract/tests/vectors.rs",
+      "byteCount": 5714,
+      "sha256": "559d2a249aa1a95a0b81d8827653d1bcfa177bf5e39cc830380f982e263676a6"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_analysis_probe.rs",
+      "byteCount": 12222,
+      "sha256": "c75f330113ba5a750e6639bf6fb8527be698f7f0576ff95d205ad7817609f06c"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_arguments_probe.rs",
+      "byteCount": 13010,
+      "sha256": "ae53f7dab41dcc3a9e374d3eac2bf6ee1282e8c90566c765ff701d2f208400e5"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_batch_probe.rs",
+      "byteCount": 14099,
+      "sha256": "f4195991129926e233e163c97991da37a11b8470994977481c8c56194fc38c2a"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_counters_probe.rs",
+      "byteCount": 10197,
+      "sha256": "da015a4d6ee29c5ec1f0389395f5aaaf474d6890929e9cce9946ae202e9c774f"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_density_probe.rs",
+      "byteCount": 12383,
+      "sha256": "0deae6c4b404eb49ed19ebfa9377b5d66a90d381276b177b21480c9215e99b49"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_engine_probe.rs",
+      "byteCount": 18775,
+      "sha256": "7aaf7d4ee8a6199177d3834936b4579711e3eebebd458b4e2299d6497677c519"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_events_probe.rs",
+      "byteCount": 8534,
+      "sha256": "f5cb85462f5bcb6eb29f8ee20c778d3d32612c63e701668ba7dc4365000870ba"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_frames_probe.rs",
+      "byteCount": 11126,
+      "sha256": "43caa28fa8b66d2470059eb5d2edb65a55b347910450b547df41050ec54287cf"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_runtime_probe.rs",
+      "byteCount": 35806,
+      "sha256": "9c349c6bd326678897b117fa24a87ae1bb94ce3bcfa8c938b8554c9c3afb43a4"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_search_probe.rs",
+      "byteCount": 13253,
+      "sha256": "a9783ea799eea6f5996ce5532d625722108dc7c81af6faaf87d3656a5697b358"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_slices_probe.rs",
+      "byteCount": 9605,
+      "sha256": "915b1bc6c871bc63fa6730952f2ff0032044d9e5ea58cf5dd6b2bc8392c630e4"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_store_probe.rs",
+      "byteCount": 3673,
+      "sha256": "c64b327b95dc3e3f1d90c8b85ae989211da8a89e9cd9d402ed2b75f032d01e82"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_viewer_probe.rs",
+      "byteCount": 14876,
+      "sha256": "e36de967277fbc5f9668a2ece5fc75f094affec7a4412358dc43226918b0109e"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/async_runtime.rs",
+      "byteCount": 52894,
+      "sha256": "13f05b3407a21678fe0980c9d620b51cffe3938c405b13f1d4e6231ab1c451bb"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/handles.rs",
+      "byteCount": 4796,
+      "sha256": "b83fccd6bac1b7e0fcd87db59a5829fe4b6b2b3f110e9c6c749b9750370bed5a"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/lib.rs",
+      "byteCount": 1534,
+      "sha256": "746ef0096eda5208869be93cfae7c1088b9f9910b596bc0fd1c392aa34b9c90f"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/metadata.rs",
+      "byteCount": 10068,
+      "sha256": "62d54886af71af13b6b899d25bd659d5d908da46229a80d9df1ed9307cc3c8a8"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/no_cache.rs",
+      "byteCount": 69690,
+      "sha256": "6897c63918cc284a841a2c36e8ce993a0c21270b467b4a4621cb61dc76783525"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/owned_result.rs",
+      "byteCount": 4184,
+      "sha256": "c3e99ca99b8051c934509e168e953bfedd09d84a559ca0b51c54090f407ae56b"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/public_error.rs",
+      "byteCount": 11732,
+      "sha256": "ed64de7cbbb4fd2e1e01a8bba7780d2b709831aa66c70fffa6fe3572cd715eff"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_cli_ports_probe.rs",
+      "byteCount": 1176,
+      "sha256": "2a4089ed04454150b8b682e8d2b551c70f8b854514b8a46b57c41ce0d7c3f616"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_parser_process_probe.rs",
+      "byteCount": 12075,
+      "sha256": "9f0e2228d79058082ba246b9313356dc2fa768aea2d9979a4f8bfe5ae1fe3d0a"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/examples/macos_volume_probe.rs",
+      "byteCount": 4936,
+      "sha256": "7ecc158fd794898350d7dbfd03b0e0672c6f3bd907e9db02b0f0f3b730613164"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/bin/arktrace-host-process.rs",
+      "byteCount": 260,
+      "sha256": "92ec4ed49d1e5c4c4be9470a4d1e9a2c34012044c94bfb34053215598b5d4b1e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/budget.rs",
+      "byteCount": 2487,
+      "sha256": "c9ab2d00c2f9e502b08f4b4bd0a1af7efad63ea6dda4f6fed9e4ef013d6a53b5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/error.rs",
+      "byteCount": 1038,
+      "sha256": "3d909ae237980c1926d96ac332550da5d03ab5d9a541829c0ca73859103052c6"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/lib.rs",
+      "byteCount": 1787,
+      "sha256": "fa1a186f4f2bfe237260eabb4235bef2c2c4fa244bf0ae73b348bfa0dbae2fe0"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos.rs",
+      "byteCount": 46249,
+      "sha256": "e1e360084c52142453ea8076f00f986f9858bd7149f7512d2850a1139c34dced"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_cli.rs",
+      "byteCount": 17731,
+      "sha256": "f3813f04694390ac928db99cd95c34e8549373a9e84428f3eedb0513660f6e41"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_directory.rs",
+      "byteCount": 12385,
+      "sha256": "70304e12594bcb89bea0d0186e2b5a892121f9c851c134c9cec98fd4f5cadcd5"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_owner.rs",
+      "byteCount": 68401,
+      "sha256": "5a2da32a7261916e1ec5be03a059f044b717872cc2ee99931f8b0df671eea873"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process.rs",
+      "byteCount": 39372,
+      "sha256": "d27e1fb71cd15dd811f486e71b187ada94aaf97f96cac88c4789fe25537aaf00"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_process_outputs.rs",
+      "byteCount": 16643,
+      "sha256": "82090010a6e1545b6690cc680298389ceb6508213bfc346a82aafb6b5c506935"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_tests.rs",
+      "byteCount": 14979,
+      "sha256": "793c62086818f8d934b8db6cc6f2ad59caf51e1a0244858e49e88cd02c0156fd"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_trust.rs",
+      "byteCount": 9451,
+      "sha256": "8a9c3ebf84fc905ff471a49d3a71601062c45816503af9d608de109412f8e3e2"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/src/macos_writable.rs",
+      "byteCount": 10317,
+      "sha256": "5cf33714c39db4aaf956707b6e530452ccc2c6ddad0f91f265665c8e731b1c31"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_files.rs",
+      "byteCount": 24987,
+      "sha256": "aee3e30c14273fa22afabb0207ce0cffd6d2fb9cded19105eea28a28e61ace9b"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_owners.rs",
+      "byteCount": 16046,
+      "sha256": "448b567440b0a21ab266269ab1662b4f22fa3e2e5721c4fcedb403077cba846e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/macos_process.rs",
+      "byteCount": 20556,
+      "sha256": "0913972ee33e5855760a6311e6f8799316c6e4a9d9823accd7cd8d8082b2dd9e"
+    },
+    {
+      "path": "rust/crates/arktrace-platform/tests/support/process_fixture.rs",
+      "byteCount": 10741,
+      "sha256": "d4db4d94c44e874ebf671d51b256a98a2dc885383dc85f862f2dd48b90f8a969"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/argument_oracle_tests.rs",
+      "byteCount": 5024,
+      "sha256": "be291716da161a485cb79b7cc3566ce408869f145453b8c7677b9c179790e2eb"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/arguments/tests.rs",
+      "byteCount": 7225,
+      "sha256": "8a2bcb1cb363fef6db51422d8814efbee4f3cd06be7c5c49df5fced5a85bce7f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/arguments.rs",
+      "byteCount": 4064,
+      "sha256": "2af056fb71a9216a07533ee326217e8f0093795373771de693c2de8bb1582ec1"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/counters/scoped_oracle_tests.rs",
+      "byteCount": 3599,
+      "sha256": "5475b6460988335a2dea363ade24cf79181c5968987744b041d9e9c38caeb845"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/counters/tests.rs",
+      "byteCount": 17294,
+      "sha256": "6d33ec3eed7e8a9109ab17dc3448e9e3bdc56680d2fd165fafbfac00d32f7576"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/counters.rs",
+      "byteCount": 22934,
+      "sha256": "c001b206f2572b32fdfd1924e14d5bd7fccfdbd9520ec01999d0f1b640a9ae42"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/database.rs",
+      "byteCount": 18264,
+      "sha256": "3347e495a51b2e2277f320d8bfac17aa3411d25aed4272050fcf50a761bbac7b"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/density.rs",
+      "byteCount": 16560,
+      "sha256": "0343694a2d6d9b8065f6ca59b37da6ce93dbebb344e3913257a5062b09db7089"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/density_oracle_tests.rs",
+      "byteCount": 3549,
+      "sha256": "73f7188b2a254beef0bebd9a90ac3917d92e0ee852aa6458db078ec41f29f0e9"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/directory.rs",
+      "byteCount": 19633,
+      "sha256": "6b0e46f4e7d16c245167485748fc6f76f54e5fc2f411f5bbc73fb376c62850f8"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/event_oracle_tests.rs",
+      "byteCount": 6583,
+      "sha256": "ec22ef199540399e248c17c61cdcedb3448c67b05bc1bf22dbfc564d6d1eb953"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/events/tests.rs",
+      "byteCount": 18377,
+      "sha256": "c4eec2c99d3f9e103e1bdd795f541ed18c9c470c1e7c054c4e76209e557a8d1f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/events.rs",
+      "byteCount": 20532,
+      "sha256": "e64a73a503105de9acfd89abfa177c7fd2dacdf499dae39689de7733e5f26f7c"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/frames/tests.rs",
+      "byteCount": 7350,
+      "sha256": "88d9841a6d8fc4bdb160550a89b0f575fd3a71b726a6e5200d426193c0362a77"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/frames.rs",
+      "byteCount": 5158,
+      "sha256": "a33618db68784d72e52d838513609a80a10ac3d6eb91ea9dd7cfa2eb59352ff2"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/indexes.rs",
+      "byteCount": 7925,
+      "sha256": "0c6daebb3aac91e351352d56b1d6e7d5ccc316aebdc4782805fd14951864220f"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/lib.rs",
+      "byteCount": 11004,
+      "sha256": "4429538a57000985262e4405d6bfb3d56a832670f4b2b10c631346c968d25bec"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/query_resources.rs",
+      "byteCount": 3863,
+      "sha256": "eb3ed8fb92b195c29fec735deca0bb179906b154cc6cb87887662c76011e7ccb"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/read_pool.rs",
+      "byteCount": 10068,
+      "sha256": "f89caf1771f3f2a34eab04670c754cc8a3cdae768e1a31c69899cbf5ca093c18"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/reader.rs",
+      "byteCount": 8908,
+      "sha256": "af3555b5ae17336f9298d8421a3897a4fde19e5ce8199397f7c92fa620e3c2cb"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/schema.rs",
+      "byteCount": 22411,
+      "sha256": "94ab170a9c26f2fecb2e2af8350b3c4bfebc9c1f9e0cb4e975065349c981c964"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/slices/tests.rs",
+      "byteCount": 17011,
+      "sha256": "d4db7f36c6a66224c8cfd0c8a9ab9b780a3f4339474040b760e23d59dd4e8295"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/slices.rs",
+      "byteCount": 9605,
+      "sha256": "5e59dc5f26662ffea85120c52cc24f44ed828d4304ae44633e42bfa9cf005e8a"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/tests.rs",
+      "byteCount": 45597,
+      "sha256": "abbc45549aaa7855cf9b111bf6b13060d577daf00ead9ce36555558641f4ae09"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/detail.rs",
+      "byteCount": 11687,
+      "sha256": "b04b224e51d1dfbe6e41f11628ce2afa1b98a19e3b15d15f56ed83d5b3bb87cb"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/geometry.rs",
+      "byteCount": 6353,
+      "sha256": "4358060ba3ba6b3b7b41bb231cba9dc2ba3148ea07f296f409ae5afb41773f55"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/interaction.rs",
+      "byteCount": 3391,
+      "sha256": "641857a11ba96be0505c8008620fe735e3ab367159a173d71ac22c1a2915760b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "byteCount": 3110,
+      "sha256": "ef36da5ab87fa5c710f3885c162ea214db348d904caf8c668f6372db53fca844"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/plan.rs",
+      "byteCount": 10007,
+      "sha256": "ff1a4cd6bb2827c925f59b6ab245b3bf264ccf22bc00cc6507acaa0c5f35faa5"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/snapshot.rs",
+      "byteCount": 21554,
+      "sha256": "fe91a329c562a0b07bb6483f6813bab35801a708b63359cf3d55e513772e72cd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/types.rs",
+      "byteCount": 8236,
+      "sha256": "e1f432106021442c8ca32992a4a9f4d34cf31fb44dd9d0262202f2a3f6270928"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/common/mod.rs",
+      "byteCount": 3276,
+      "sha256": "91689b0731108773f5f2ae2dca7ccc82f67e937fd28df87d0209b2bc188fc139"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/detail_oracle.rs",
+      "byteCount": 7716,
+      "sha256": "54f0fca5678324623d33d947a0c005a29b7e82306e8e57e62521d2c91ba08902"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/detail_queries.rs",
+      "byteCount": 3193,
+      "sha256": "7284a31d008aa1d14598b9ea7e479b10dbdad76aeb743207f8d9305416982606"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/regressions.rs",
+      "byteCount": 24998,
+      "sha256": "04eda904678dce33c2536b3d2ee9ec07c4df96efcc7d2d0c4515be9b30397035"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/scoped_history.rs",
+      "byteCount": 1280,
+      "sha256": "e6c2293d116e2dc6aa021172643f3e18fca60d91179699a421af10e636598fc7"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_boundary_oracle.rs",
+      "byteCount": 2245,
+      "sha256": "49b677bf3b2107c8047d6b4393a46b0d67e700ffca18cc3aec37bc5530df3563"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_geometry_oracle.rs",
+      "byteCount": 4233,
+      "sha256": "b91157276326c3d201c907724e213caa2cfc693b6fcfc2d91a8c5f7b75667553"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/swift_plan_oracle.rs",
+      "byteCount": 9212,
+      "sha256": "f44196db9b2b3fb4dfb2247d6bf985444eef516d1c209e860f8cd7f236f21e53"
+    },
+    {
+      "path": "scripts/ci_plan.sh",
+      "byteCount": 6295,
+      "sha256": "b0c74aea3745e406c302d7fbae599ea5565d9fbefe96045372c0bd190c0cfe7f"
+    },
+    {
+      "path": "scripts/test_ci_plan.sh",
+      "byteCount": 6688,
+      "sha256": "500cf0ac9756ab7739baf60256bb190fe8e6d1ed14cb8f0bff47663ee948d118"
+    },
+    {
+      "path": "scripts/test_macos_viewer_owner.py",
+      "byteCount": 5808,
+      "sha256": "ee7b370841bfa2d41521078d6b9e2bff76bddd9403f02e914b12b7268163d597"
+    },
+    {
+      "path": "scripts/verify_migration_contracts.py",
+      "byteCount": 7488,
+      "sha256": "cf3594bde21be76e798d0962ef01bd4af288be7ea9c5c0a149c7f7dae7385fee"
+    }
+  ],
+  "remaining": [
+    "full viewport owner orchestration including density/focus/selection",
+    "generation/caches/tree/navigation/color/annotation shared semantics",
+    "C ABI and Swift SDK integration and macOS App switch",
+    "SDK/App lifecycle/performance/distribution/signing acceptance",
+    "native positive CPU counter, frame and unattributed-slice corpus coverage",
+    "independent Swift comparison of all native Viewer responses"
+  ],
+  "limitations": [
+    "native 21 response equality compares actual async composition to blocking Rust owner; not an independent Swift native oracle",
+    "actual scoped Swift controlled SQLite corpus and original before snapshot retained separately",
+    "NULL callid and duplicate filter IDs across families are rejected by existing validators; no validator weakened",
+    "development-pinned parser/helper artifacts are not Developer ID release evidence"
+  ]
+}

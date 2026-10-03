@@ -111,6 +111,34 @@ fn replay_eight_actual_swift_loader_dto_mapping_vectors_exactly() {
 }
 #[test]
 fn detail_mapping_rejects_wrong_family_lane_and_table_identity() {
+    let cpu_counter = &vectors()[4];
+    assert_eq!(
+        map_detail_page(
+            &TraceDensitySource::CpuCounter {
+                filter_id: 3,
+                cpu: Some(4)
+            },
+            cpu_counter.range,
+            10,
+            cpu_counter.page(),
+            &mut || Ok(())
+        ),
+        Err(ViewerError::InvalidEvidence)
+    );
+    let process_counter = &vectors()[5];
+    assert_eq!(
+        map_detail_page(
+            &TraceDensitySource::ProcessCounter {
+                filter_id: 3,
+                process_key: Some(ProcessKey { ipid: 999 })
+            },
+            process_counter.range,
+            10,
+            process_counter.page(),
+            &mut || Ok(())
+        ),
+        Err(ViewerError::InvalidEvidence)
+    );
     let v = &vectors()[0];
     assert_eq!(
         map_detail_page(
@@ -140,6 +168,18 @@ fn detail_mapping_rejects_wrong_family_lane_and_table_identity() {
     assert_eq!(
         map_detail_page(&v.source, v.range, 10, page, &mut || Ok(())),
         Err(ViewerError::InvalidEvidence)
+    );
+    let named = &vectors()[2];
+    assert_eq!(
+        map_detail_page(
+            &TraceDensitySource::NamedSlice { thread: None },
+            named.range,
+            10,
+            named.page(),
+            &mut || Ok(())
+        ),
+        Err(ViewerError::InvalidEvidence),
+        "unattributed lanes cannot publish an assigned-thread page"
     );
 }
 #[test]

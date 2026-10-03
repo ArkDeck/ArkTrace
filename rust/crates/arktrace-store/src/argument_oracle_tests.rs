@@ -57,6 +57,7 @@ fn actual_swift_argument_pages_match_all_controlled_rows_handles_and_closed_erro
                 name_match: DirectoryNameMatch::Exact,
                 minimum_duration_ns: None,
                 depth: None,
+                unattributed_only: false,
                 includes_argument_set: false,
                 limit: 1,
             };

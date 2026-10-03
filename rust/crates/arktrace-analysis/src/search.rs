@@ -194,6 +194,7 @@ pub fn search<R: SearchRepository>(
                 name_match: DirectoryNameMatch::Contains,
                 minimum_duration_ns: None,
                 depth: None,
+                unattributed_only: false,
                 includes_argument_set: false,
                 limit,
             })

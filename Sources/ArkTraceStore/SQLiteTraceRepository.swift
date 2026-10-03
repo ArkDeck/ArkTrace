@@ -1215,6 +1215,9 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
             conditions.append("s.callid = ?")
             bindings.append(.int64(value.itid))
         }
+        if query.unattributedOnly {
+            conditions.append("(s.callid IS NULL OR s.callid = 0)")
+        }
         if let value = query.tid {
             conditions.append("t.tid = ?")
             bindings.append(.int64(value))
@@ -1554,6 +1557,8 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         guard cpuAvailable || processAvailable else { return .unavailable }
         if query.cpu != nil, !cpuAvailable { return .unavailable }
         if query.processKey != nil || query.pid != nil, !processAvailable { return .unavailable }
+        if query.scope == .cpu, !cpuAvailable { return .unavailable }
+        if query.scope == .process, !processAvailable { return .unavailable }
         let range = try validatedAbsoluteRange(query.range)
         // Row identity is per physical table, so each source resolves its own
         // unshadowed alias. Resolving them up front keeps a schema without a
@@ -1580,7 +1585,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         }
         var samples: [CounterResultRow] = []
         var sourceTruncated = false
-        if cpuAvailable, query.processKey == nil, query.pid == nil {
+        if cpuAvailable, query.scope != .process, query.processKey == nil, query.pid == nil {
             for sampleTable in validation.cpuCounterSampleTables {
                 let result = try counterRows(
                     sampleTable: sampleTable,
@@ -1596,7 +1601,7 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
                 sourceTruncated = sourceTruncated || result.truncated
             }
         }
-        if processAvailable, query.cpu == nil {
+        if processAvailable, query.scope != .cpu, query.cpu == nil {
             for sampleTable in validation.processCounterSampleTables {
                 let result = try counterRows(
                     sampleTable: sampleTable,

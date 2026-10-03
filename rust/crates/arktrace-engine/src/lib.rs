@@ -31,7 +31,7 @@ pub use metadata::CacheMetadata;
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
     EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession, ParserTools,
-    SourceFormat, open_no_cache, recover_no_cache,
+    SourceFormat, ViewerFailure, open_no_cache, recover_no_cache,
 };
 
 pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {

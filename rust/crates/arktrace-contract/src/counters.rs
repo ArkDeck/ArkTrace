@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CounterQuery {
     pub range: TraceTimeRange,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope: Option<CounterScope>,
     #[serde(rename = "filterID")]
     pub filter_id: Option<i64>,
     pub cpu: Option<i64>,
@@ -19,6 +21,9 @@ impl CounterQuery {
         if self.range.is_instant()
             || !(1..=100_000).contains(&self.limit)
             || (self.cpu.is_some() && (self.process_key.is_some() || self.pid.is_some()))
+            || (self.scope == Some(CounterScope::Cpu)
+                && (self.process_key.is_some() || self.pid.is_some()))
+            || (self.scope == Some(CounterScope::Process) && self.cpu.is_some())
             || self
                 .name
                 .as_ref()
@@ -177,6 +182,7 @@ mod tests {
     fn counter_query_bounds_scope_and_utf8_are_closed() {
         let q = CounterQuery {
             range: TraceTimeRange::event(0, 1).unwrap(),
+            scope: None,
             filter_id: Some(-1),
             cpu: Some(-1),
             process_key: None,
@@ -186,6 +192,29 @@ mod tests {
             limit: 100_000,
         };
         q.validate().unwrap();
+        let wire = serde_json::to_value(&q).unwrap();
+        assert!(wire.get("scope").is_none());
+        assert_eq!(serde_json::from_value::<CounterQuery>(wire).unwrap(), q);
+        for bad in [
+            CounterQuery {
+                scope: Some(CounterScope::Process),
+                ..q.clone()
+            },
+            CounterQuery {
+                scope: Some(CounterScope::Cpu),
+                cpu: None,
+                process_key: Some(1),
+                ..q.clone()
+            },
+            CounterQuery {
+                scope: Some(CounterScope::Cpu),
+                cpu: None,
+                pid: Some(1),
+                ..q.clone()
+            },
+        ] {
+            assert!(bad.validate().is_err());
+        }
         for bad in [
             CounterQuery {
                 name: Some(format!("{}aa", "界".repeat(85))),

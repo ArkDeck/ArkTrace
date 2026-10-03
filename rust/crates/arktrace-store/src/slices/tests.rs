@@ -40,6 +40,7 @@ fn query(start: i64, end: i64, limit: usize) -> TraceSliceQuery {
         name_match: DirectoryNameMatch::Exact,
         minimum_duration_ns: None,
         depth: None,
+        unattributed_only: false,
         includes_argument_set: false,
         limit,
     }
@@ -59,6 +60,108 @@ fn count(p: &EventPage<TraceSlice>, category: QualityCategory, scope: &str) -> O
         .iter()
         .find(|w| w.category == category && w.scope.as_deref() == Some(scope))
         .and_then(|w| w.count)
+}
+#[test]
+fn unattributed_scope_selects_before_limit_and_focus_cannot_cross_lanes() {
+    let input: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../arktrace-viewer/tests/fixtures/scoped-slices-inputs.json"
+    ))
+    .unwrap();
+    let conn = Connection::open_in_memory().unwrap();
+    conn.execute_batch(input["sql"].as_str().unwrap()).unwrap();
+    let inspection = Database::borrow_readonly(&conn, &budget())
+        .unwrap()
+        .inspect()
+        .unwrap();
+    let general = query(0, 1000, 2);
+    let swift: Vec<serde_json::Value> = serde_json::from_str(include_str!(
+        "../../../arktrace-viewer/tests/fixtures/swift-scoped-slices.json"
+    ))
+    .unwrap();
+    // Complete general page stays identical to the independent actual Swift
+    // repository. The Viewer output below retains full Swift snapshots.
+    let mut general_expected = swift[0]["result"].clone();
+    assert_eq!(
+        general_expected["dataQuality"],
+        serde_json::json!({"issues":[],"warnings":[],"status":"ok"})
+    );
+    // Swift's human Codable quality has an additional issues field. Verify
+    // its complete empty envelope before comparing the closed machine shape.
+    general_expected["dataQuality"] = serde_json::to_value(
+        arktrace_contract::DataQuality::machine(arktrace_contract::QualityStatus::Ok, vec![])
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        serde_json::to_value(slices(&conn, &inspection, &general).unwrap()).unwrap(),
+        general_expected
+    );
+    assert_eq!(
+        slices(&conn, &inspection, &general)
+            .unwrap()
+            .items
+            .iter()
+            .map(|v| v.key.row_id)
+            .collect::<Vec<_>>(),
+        [1, 2]
+    );
+    let mut scoped = general;
+    scoped.unattributed_only = true;
+    let page = slices(&conn, &inspection, &scoped).unwrap();
+    assert_eq!(
+        page.items.iter().map(|v| v.key.row_id).collect::<Vec<_>>(),
+        [7, 8]
+    );
+    assert!(page.truncated);
+    assert!(page.items.iter().all(|v| v.thread_key.is_none()));
+    let compare_details = |page: &EventPage<TraceSlice>, vector: usize| {
+        let expected = swift[vector]["result"]["tracks"][0]["primitives"]
+            .as_array()
+            .unwrap();
+        assert_eq!(page.items.len(), expected.len());
+        for (item, expected) in page.items.iter().zip(expected) {
+            let detail = &expected["detail"]["_0"];
+            assert_eq!(serde_json::to_value(item.key).unwrap(), detail["eventKey"]);
+            assert_eq!(serde_json::to_value(item.range).unwrap(), detail["range"]);
+            assert_eq!(item.is_open_ended, detail["inspector"]["isOpenEnded"]);
+            assert_eq!(item.name, detail["inspector"]["name"].as_str().unwrap());
+        }
+    };
+    compare_details(&page, 1);
+    compare_details(&page, 5);
+    let mut assigned = scoped.clone();
+    assigned.unattributed_only = false;
+    assigned.thread_key = Some(-11);
+    compare_details(&slices(&conn, &inspection, &assigned).unwrap(), 2);
+    scoped.event_key = Some(EventKey {
+        table: EventTable::Callstack,
+        row_id: 1,
+    });
+    assert!(
+        slices(&conn, &inspection, &scoped)
+            .unwrap()
+            .items
+            .is_empty()
+    );
+    scoped.event_key = Some(EventKey {
+        table: EventTable::Callstack,
+        row_id: 9,
+    });
+    let focused = slices(&conn, &inspection, &scoped).unwrap();
+    assert_eq!(focused.items.len(), 1);
+    assert!(focused.items[0].is_open_ended);
+    assert_eq!(
+        focused.items[0].range,
+        TraceTimeRange::event(300, 1000).unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(focused.items[0].key).unwrap(),
+        swift[4]["result"]["tracks"][0]["primitives"][0]["detail"]["_0"]["eventKey"]
+    );
+    assert_eq!(
+        serde_json::to_value(focused.items[0].range).unwrap(),
+        swift[4]["result"]["tracks"][0]["primitives"][0]["detail"]["_0"]["range"]
+    );
 }
 
 #[test]

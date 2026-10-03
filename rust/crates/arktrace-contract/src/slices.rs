@@ -12,6 +12,10 @@ pub struct TraceSliceQuery {
     pub pid: Option<i64>,
     pub thread_key: Option<i64>,
     pub tid: Option<i64>,
+    /// Same absent/zero callid scope as an unattributed named-slice lane.
+    /// False preserves existing general queries and their serialized shape.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub unattributed_only: bool,
     pub name: Option<String>,
     pub name_match: DirectoryNameMatch,
     pub minimum_duration_ns: Option<i64>,
@@ -29,11 +33,18 @@ impl TraceSliceQuery {
             || self.minimum_duration_ns.is_some_and(|v| v < 0)
             || self.depth.is_some_and(|v| v < 0)
             || self.name.as_ref().is_some_and(|v| v.len() > 4096)
+            || (self.unattributed_only
+                && [self.process_key, self.pid, self.thread_key, self.tid]
+                    .iter()
+                    .any(Option::is_some))
         {
             return Err(ContractError::InvalidEventQuery);
         }
         Ok(())
     }
+}
+fn is_false(value: &bool) -> bool {
+    !value
 }
 
 /// Swift's complete slice coded shape. The inspector-only argument-set handle

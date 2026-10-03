@@ -1,0 +1,387 @@
+[
+  {
+    "name": "general-counter-keeps-both",
+    "result": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "issues": [],
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 1,
+          "name": "process",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "samples": [
+            {
+              "durationNs": 10,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 10,
+              "value": 10
+            }
+          ],
+          "scope": "process",
+          "unit": "bytes"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "name": "cpu-counter-raw",
+    "result": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "issues": [],
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "cpu": 3,
+          "filterID": 0,
+          "name": "cpu",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 10,
+              "key": {
+                "rowID": 7,
+                "table": "measure"
+              },
+              "timestampNs": 100,
+              "value": 70
+            }
+          ],
+          "scope": "cpu",
+          "unit": "Hz"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "name": "process-counter-raw",
+    "result": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "issues": [],
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 1,
+          "name": "process",
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "samples": [
+            {
+              "durationNs": 10,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 10,
+              "value": 10
+            }
+          ],
+          "scope": "process",
+          "unit": "bytes"
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "name": "cpu-counter-detail-owner-absent",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "probeTruncated",
+            "message": "Timeline detail primitives reached the viewport budget",
+            "scope": "timeline.counter"
+          }
+        ],
+        "status": "warnings",
+        "warnings": [
+          "Timeline detail primitives reached the viewport budget"
+        ]
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "cpu-counter:0:all"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "cpuCounter": {
+                "filterID": 0
+              }
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "detail": {
+                "_0": {
+                  "category": "counter",
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 7,
+                    "table": "measure"
+                  },
+                  "inspector": {
+                    "category": "cpu",
+                    "cpu": 3,
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 7,
+                      "table": "measure"
+                    },
+                    "name": "cpu",
+                    "range": {
+                      "endNs": 110,
+                      "startNs": 100
+                    },
+                    "semanticDurationNs": 10,
+                    "type": "counter",
+                    "unit": "Hz",
+                    "value": 70
+                  },
+                  "jankTag": 0,
+                  "label": "cpu",
+                  "range": {
+                    "endNs": 110,
+                    "startNs": 100
+                  },
+                  "trackID": {
+                    "rawValue": "cpu-counter:0:all"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "process-counter-detail-owner-absent",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "probeTruncated",
+            "message": "Timeline detail primitives reached the viewport budget",
+            "scope": "timeline.counter"
+          }
+        ],
+        "status": "warnings",
+        "warnings": [
+          "Timeline detail primitives reached the viewport budget"
+        ]
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "process-counter:1:all"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "processCounter": {
+                "filterID": 1
+              }
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "detail": {
+                "_0": {
+                  "category": "counter",
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 1,
+                    "table": "process_measure"
+                  },
+                  "inspector": {
+                    "category": "process",
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 1,
+                      "table": "process_measure"
+                    },
+                    "name": "process",
+                    "pid": 900,
+                    "processKey": {
+                      "ipid": -10
+                    },
+                    "processName": "process",
+                    "range": {
+                      "endNs": 20,
+                      "startNs": 10
+                    },
+                    "semanticDurationNs": 10,
+                    "type": "counter",
+                    "unit": "bytes",
+                    "value": 10
+                  },
+                  "jankTag": 0,
+                  "label": "process",
+                  "range": {
+                    "endNs": 20,
+                    "startNs": 10
+                  },
+                  "trackID": {
+                    "rawValue": "process-counter:1:all"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "cpu-counter-reject-process-filter",
+    "result": {
+      "dataQuality": {
+        "issues": [],
+        "status": "ok",
+        "warnings": []
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "cpu-counter:1:all"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "cpuCounter": {
+                "filterID": 1
+              }
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "process-counter-reject-cpu-filter",
+    "result": {
+      "dataQuality": {
+        "issues": [],
+        "status": "ok",
+        "warnings": []
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "process-counter:0:all"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "processCounter": {
+                "filterID": 0
+              }
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  }
+]

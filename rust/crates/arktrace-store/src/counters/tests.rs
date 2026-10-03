@@ -35,6 +35,7 @@ fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
 fn query(start: i64, end: i64, limit: usize) -> CounterQuery {
     CounterQuery {
         range: TraceTimeRange::event(start, end).unwrap(),
+        scope: None,
         filter_id: None,
         cpu: None,
         process_key: None,

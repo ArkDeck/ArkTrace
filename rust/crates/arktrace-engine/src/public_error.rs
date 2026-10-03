@@ -31,6 +31,13 @@ impl EngineError {
             _ => make(Code::TraceParseFailed),
         };
         match self.failure {
+            EngineFailure::Viewer(error) => match error {
+                crate::ViewerFailure::InvalidBounds => make(Code::InvalidArgument),
+                crate::ViewerFailure::InputBudgetExceeded => make(Code::QueryLimitExceeded),
+                crate::ViewerFailure::InvalidEvidence | crate::ViewerFailure::InvalidQuality => {
+                    make(Code::InternalError)
+                }
+            },
             EngineFailure::Analysis(error) => match error {
                 crate::AnalysisFailure::InvalidBounds => make(Code::InvalidArgument),
                 crate::AnalysisFailure::InputBudgetExceeded => make(Code::QueryLimitExceeded),
@@ -96,6 +103,34 @@ impl EngineError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn viewer_failures_publish_closed_path_free_codes() {
+        use crate::ViewerFailure::*;
+        for (failure, code) in [
+            (InvalidBounds, Code::InvalidArgument),
+            (InputBudgetExceeded, Code::QueryLimitExceeded),
+            (InvalidEvidence, Code::InternalError),
+            (InvalidQuality, Code::InternalError),
+        ] {
+            let error = EngineError {
+                stage: EngineStage::Querying,
+                failure: EngineFailure::Viewer(failure),
+            }
+            .public_error();
+            assert_eq!(error.code(), code);
+            assert_eq!(
+                error.stage(),
+                if failure == InvalidBounds {
+                    Stage::Request
+                } else {
+                    Stage::Querying
+                }
+            );
+            let value = serde_json::to_value(error).unwrap();
+            assert_eq!(value["details"], serde_json::json!({}));
+            assert_eq!(value["retryable"], code == Code::QueryLimitExceeded);
+        }
+    }
     #[test]
     fn malformed_admitted_frame_identity_keeps_swift_closed_table_details() {
         let value = serde_json::to_value(

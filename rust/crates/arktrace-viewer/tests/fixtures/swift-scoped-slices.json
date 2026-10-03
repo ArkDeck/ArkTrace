@@ -1,0 +1,636 @@
+[
+  {
+    "name": "general-keeps-all",
+    "result": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "issues": [],
+        "status": "ok",
+        "warnings": []
+      },
+      "items": [
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "callstack"
+          },
+          "name": "assigned first",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 20,
+            "startNs": 10
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        },
+        {
+          "category": null,
+          "depth": null,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "assigned second",
+          "parentEventKey": null,
+          "pid": 900,
+          "processKey": {
+            "ipid": -10
+          },
+          "processName": "process",
+          "range": {
+            "endNs": 30,
+            "startNs": 20
+          },
+          "threadKey": {
+            "itid": -11
+          },
+          "threadName": "thread",
+          "tid": 901
+        }
+      ],
+      "truncated": true
+    }
+  },
+  {
+    "name": "unattributed-detail",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "probeTruncated",
+            "message": "Timeline detail primitives reached the viewport budget",
+            "scope": "timeline.namedSlice"
+          }
+        ],
+        "status": "warnings",
+        "warnings": [
+          "Timeline detail primitives reached the viewport budget"
+        ]
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "named-slice:unattributed"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "namedSlice": {}
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 7,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 7,
+                      "table": "callstack"
+                    },
+                    "name": "unattributed first",
+                    "range": {
+                      "endNs": 110,
+                      "startNs": 100
+                    },
+                    "semanticDurationNs": 10,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "unattributed first",
+                  "range": {
+                    "endNs": 110,
+                    "startNs": 100
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            },
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 8,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 8,
+                      "table": "callstack"
+                    },
+                    "name": "unattributed zero instant",
+                    "range": {
+                      "endNs": 200,
+                      "startNs": 200
+                    },
+                    "semanticDurationNs": 0,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "unattributed zero instant",
+                  "range": {
+                    "endNs": 200,
+                    "startNs": 200
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "thread-detail",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "probeTruncated",
+            "message": "Timeline detail primitives reached the viewport budget",
+            "scope": "timeline.namedSlice"
+          }
+        ],
+        "status": "warnings",
+        "warnings": [
+          "Timeline detail primitives reached the viewport budget"
+        ]
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "named-slice:-11"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "namedSlice": {
+                "_0": {
+                  "itid": -11
+                }
+              }
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 1,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 1,
+                      "table": "callstack"
+                    },
+                    "name": "assigned first",
+                    "pid": 900,
+                    "processKey": {
+                      "ipid": -10
+                    },
+                    "processName": "process",
+                    "range": {
+                      "endNs": 20,
+                      "startNs": 10
+                    },
+                    "semanticDurationNs": 10,
+                    "threadKey": {
+                      "itid": -11
+                    },
+                    "threadName": "thread",
+                    "tid": 901,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "assigned first",
+                  "range": {
+                    "endNs": 20,
+                    "startNs": 10
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:-11"
+                  }
+                }
+              }
+            },
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 2,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 2,
+                      "table": "callstack"
+                    },
+                    "name": "assigned second",
+                    "pid": 900,
+                    "processKey": {
+                      "ipid": -10
+                    },
+                    "processName": "process",
+                    "range": {
+                      "endNs": 30,
+                      "startNs": 20
+                    },
+                    "semanticDurationNs": 10,
+                    "threadKey": {
+                      "itid": -11
+                    },
+                    "threadName": "thread",
+                    "tid": 901,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "assigned second",
+                  "range": {
+                    "endNs": 30,
+                    "startNs": 20
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:-11"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "unattributed-density",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "unavailableValue",
+            "scope": "timeline.density.occupancy"
+          }
+        ],
+        "status": "warnings",
+        "warnings": []
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "named-slice:unattributed"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "namedSlice": {}
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "density": {
+                "_0": {
+                  "bucket": {
+                    "dominant": {
+                      "name": {
+                        "_0": "unattributed first"
+                      }
+                    },
+                    "eventCount": 3,
+                    "range": {
+                      "endNs": 500,
+                      "startNs": 0
+                    }
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "unattributed-focus-own-event",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "probeTruncated",
+            "message": "Timeline detail primitives reached the viewport budget",
+            "scope": "timeline.namedSlice"
+          }
+        ],
+        "status": "warnings",
+        "warnings": [
+          "Timeline detail primitives reached the viewport budget"
+        ]
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "named-slice:unattributed"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "namedSlice": {}
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 9,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": true,
+                    "key": {
+                      "rowID": 9,
+                      "table": "callstack"
+                    },
+                    "name": "unattributed open",
+                    "range": {
+                      "endNs": 1000,
+                      "startNs": 300
+                    },
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "unattributed open",
+                  "range": {
+                    "endNs": 1000,
+                    "startNs": 300
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            },
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 7,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 7,
+                      "table": "callstack"
+                    },
+                    "name": "unattributed first",
+                    "range": {
+                      "endNs": 110,
+                      "startNs": 100
+                    },
+                    "semanticDurationNs": 10,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "unattributed first",
+                  "range": {
+                    "endNs": 110,
+                    "startNs": 100
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  },
+  {
+    "name": "unattributed-focus-other-thread",
+    "result": {
+      "dataQuality": {
+        "issues": [
+          {
+            "category": "probeTruncated",
+            "message": "Timeline detail primitives reached the viewport budget",
+            "scope": "timeline.namedSlice"
+          }
+        ],
+        "status": "warnings",
+        "warnings": [
+          "Timeline detail primitives reached the viewport budget"
+        ]
+      },
+      "generation": 1,
+      "isLoading": false,
+      "tracks": [
+        {
+          "depthRowCount": 1,
+          "descriptor": {
+            "id": {
+              "rawValue": "named-slice:unattributed"
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": true,
+            "source": {
+              "namedSlice": {}
+            },
+            "title": "scope oracle"
+          },
+          "height": 28,
+          "primitives": [
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 7,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 7,
+                      "table": "callstack"
+                    },
+                    "name": "unattributed first",
+                    "range": {
+                      "endNs": 110,
+                      "startNs": 100
+                    },
+                    "semanticDurationNs": 10,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "unattributed first",
+                  "range": {
+                    "endNs": 110,
+                    "startNs": 100
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            },
+            {
+              "detail": {
+                "_0": {
+                  "depth": 0,
+                  "eventKey": {
+                    "rowID": 8,
+                    "table": "callstack"
+                  },
+                  "inspector": {
+                    "isOpenEnded": false,
+                    "key": {
+                      "rowID": 8,
+                      "table": "callstack"
+                    },
+                    "name": "unattributed zero instant",
+                    "range": {
+                      "endNs": 200,
+                      "startNs": 200
+                    },
+                    "semanticDurationNs": 0,
+                    "type": "namedSlice"
+                  },
+                  "jankTag": 0,
+                  "label": "unattributed zero instant",
+                  "range": {
+                    "endNs": 200,
+                    "startNs": 200
+                  },
+                  "trackID": {
+                    "rawValue": "named-slice:unattributed"
+                  }
+                }
+              }
+            }
+          ],
+          "y": 0
+        }
+      ],
+      "viewport": {
+        "generation": 1,
+        "heightPoints": 200,
+        "nsPerPoint": 5,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "verticalOffsetPoints": 0,
+        "widthPoints": 200
+      }
+    }
+  }
+]

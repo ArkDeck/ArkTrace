@@ -657,7 +657,8 @@ package actor TimelineSnapshotLoader {
         case .namedSlice(let threadKey):
             let page = try await repository.slices(
                 TraceSliceQuery(
-                    range: range, threadKey: threadKey, limit: limit, deadline: deadline
+                    range: range, threadKey: threadKey, unattributedOnly: threadKey == nil,
+                    limit: limit, deadline: deadline
                 )
             )
             let focused: [TraceSlice]
@@ -667,6 +668,7 @@ package actor TimelineSnapshotLoader {
                         range: range,
                         eventKey: focusedEventKey,
                         threadKey: threadKey,
+                        unattributedOnly: threadKey == nil,
                         limit: 1,
                         deadline: deadline
                     )
@@ -716,13 +718,13 @@ package actor TimelineSnapshotLoader {
         case .cpuCounter(let filterID, let cpu):
             return try await counterPrimitives(
                 track: track, range: range, filterID: filterID, cpu: cpu,
-                processKey: nil, limit: limit, deadline: deadline,
+                processKey: nil, scope: .cpu, limit: limit, deadline: deadline,
                 repository: repository, qualityIssues: &qualityIssues
             )
         case .processCounter(let filterID, let processKey):
             return try await counterPrimitives(
                 track: track, range: range, filterID: filterID, cpu: nil,
-                processKey: processKey, limit: limit, deadline: deadline,
+                processKey: processKey, scope: .process, limit: limit, deadline: deadline,
                 repository: repository, qualityIssues: &qualityIssues
             )
         }
@@ -734,6 +736,7 @@ package actor TimelineSnapshotLoader {
         filterID: Int64,
         cpu: Int64?,
         processKey: ProcessKey?,
+        scope: CounterScope,
         limit: Int,
         deadline: ContinuousClock.Instant,
         repository: any TraceRepositoryProtocol,
@@ -741,7 +744,7 @@ package actor TimelineSnapshotLoader {
     ) async throws -> [TimelinePrimitive] {
         let page = try await repository.counters(
             CounterQuery(
-                range: range, filterID: filterID, cpu: cpu, processKey: processKey,
+                range: range, scope: scope, filterID: filterID, cpu: cpu, processKey: processKey,
                 limit: limit, deadline: deadline
             )
         )

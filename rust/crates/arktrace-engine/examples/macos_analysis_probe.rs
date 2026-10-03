@@ -159,6 +159,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     name_match: DirectoryNameMatch::Exact,
                     minimum_duration_ns: Some(case.request.minimum_long_slice_duration_ns),
                     depth: None,
+                    unattributed_only: false,
                     includes_argument_set: false,
                     limit: case.request.maximum_hot_events,
                 },

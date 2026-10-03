@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "sql": "CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER);INSERT INTO trace_range VALUES(1000,2000);\nCREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER);INSERT INTO process VALUES(-10,900,'process',1000);\nCREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER);INSERT INTO thread VALUES(-11,901,'thread',1000,-10);\nCREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);INSERT INTO sched_slice VALUES(0,1000,1,0,-11,-10);\nCREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);INSERT INTO thread_state VALUES(0,1000,1,-11,'Running');\nCREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);\nINSERT INTO callstack VALUES(1,1010,10,-11,'assigned first'),(2,1020,10,-11,'assigned second'),(3,1030,10,-11,'assigned third'),(4,1040,10,999,'orphan identity'),(7,1100,10,0,'unattributed first'),(8,1200,0,0,'unattributed zero instant'),(9,1300,-1,0,'unattributed open');\nCREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur);\nCREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid,ts,dur);\nCREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid,ts,dur);\n",
+  "cases": [
+    {
+      "name": "general-keeps-all",
+      "view": "general",
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "threadKey": null,
+      "focusedEventKey": null,
+      "limit": 2
+    },
+    {
+      "name": "unattributed-detail",
+      "view": "detail",
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "threadKey": null,
+      "focusedEventKey": null,
+      "limit": 2
+    },
+    {
+      "name": "thread-detail",
+      "view": "detail",
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "threadKey": {
+        "itid": -11
+      },
+      "focusedEventKey": null,
+      "limit": 2
+    },
+    {
+      "name": "unattributed-density",
+      "view": "density",
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "threadKey": null,
+      "focusedEventKey": null,
+      "limit": 2
+    },
+    {
+      "name": "unattributed-focus-own-event",
+      "view": "detail",
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "threadKey": null,
+      "focusedEventKey": {
+        "table": "callstack",
+        "rowID": 9
+      },
+      "limit": 2
+    },
+    {
+      "name": "unattributed-focus-other-thread",
+      "view": "detail",
+      "range": {
+        "startNs": 0,
+        "endNs": 1000
+      },
+      "threadKey": null,
+      "focusedEventKey": {
+        "table": "callstack",
+        "rowID": 1
+      },
+      "limit": 2
+    }
+  ]
+}

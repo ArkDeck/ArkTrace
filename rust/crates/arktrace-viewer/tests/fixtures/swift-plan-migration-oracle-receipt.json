@@ -32,8 +32,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
-      "sha256": "70e59a93777099a49e27bd4dc778148a5950bb68cdf565cabac5fc579449af29",
-      "byteCount": 40352
+      "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+      "byteCount": 40541
     },
     {
       "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
@@ -107,8 +107,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
-      "byteCount": 8888
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+      "byteCount": 9752
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
@@ -127,8 +127,8 @@
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
-      "sha256": "c14705c40277cdb2b0748e66c5fed69fc70e60bbd72dca406a6640816965a5e9",
-      "byteCount": 108845
+      "sha256": "6a76e3993b57623e2f7ba93c05a2e51edb868772288f6092dceeffc1d34532e9",
+      "byteCount": 108917
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/OracleHarness.swift",

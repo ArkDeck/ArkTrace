@@ -112,6 +112,9 @@ package struct TraceSliceQuery: Sendable {
     public let pid: Int64?
     public let threadKey: ThreadKey?
     public let tid: Int64?
+    /// Restricts the query to the same absent/zero callid scope as a named
+    /// slice density lane. The default keeps general queries unfiltered.
+    public let unattributedOnly: Bool
     public let name: TraceSliceNameFilter?
     public let minimumDurationNs: Int64?
     public let depth: Int64?
@@ -135,6 +138,7 @@ package struct TraceSliceQuery: Sendable {
         pid: Int64? = nil,
         threadKey: ThreadKey? = nil,
         tid: Int64? = nil,
+        unattributedOnly: Bool = false,
         name: TraceSliceNameFilter? = nil,
         minimumDurationNs: Int64? = nil,
         depth: Int64? = nil,
@@ -144,6 +148,10 @@ package struct TraceSliceQuery: Sendable {
     ) throws {
         try TraceEventQueryValidation.range(range)
         try TraceEventQueryValidation.limit(limit)
+        guard !unattributedOnly || (threadKey == nil && tid == nil && processKey == nil && pid == nil) else {
+            throw ArkTraceError(code: .invalidArgument, stage: .request,
+                message: "Unattributed slices cannot use process or thread identity filters")
+        }
         if let eventKey, eventKey.table != .callstack {
             throw ArkTraceError(
                 code: .invalidArgument,
@@ -184,6 +192,7 @@ package struct TraceSliceQuery: Sendable {
         self.pid = pid
         self.threadKey = threadKey
         self.tid = tid
+        self.unattributedOnly = unattributedOnly
         self.name = name
         self.minimumDurationNs = minimumDurationNs
         self.depth = depth
@@ -217,6 +226,8 @@ package struct CounterSeriesQuery: Sendable {
 
 package struct CounterQuery: Sendable {
     public let range: TraceTimeRange
+    /// Selects a physical counter family even when its optional owner is absent.
+    public let scope: CounterScope?
     public let filterID: Int64?
     public let cpu: Int64?
     public let processKey: ProcessKey?
@@ -227,6 +238,7 @@ package struct CounterQuery: Sendable {
 
     public init(
         range: TraceTimeRange,
+        scope: CounterScope? = nil,
         filterID: Int64? = nil,
         cpu: Int64? = nil,
         processKey: ProcessKey? = nil,
@@ -237,7 +249,9 @@ package struct CounterQuery: Sendable {
     ) throws {
         try TraceEventQueryValidation.range(range)
         try TraceEventQueryValidation.limit(limit)
-        guard cpu == nil || (processKey == nil && pid == nil) else {
+        guard (cpu == nil || (processKey == nil && pid == nil)),
+              (scope != .cpu || (processKey == nil && pid == nil)),
+              (scope != .process || cpu == nil) else {
             throw ArkTraceError(
                 code: .invalidArgument,
                 stage: .request,
@@ -258,6 +272,7 @@ package struct CounterQuery: Sendable {
             }
         }
         self.range = range
+        self.scope = scope
         self.filterID = filterID
         self.cpu = cpu
         self.processKey = processKey

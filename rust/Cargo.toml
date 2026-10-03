@@ -21,6 +21,7 @@ arktrace-platform = { path = "crates/arktrace-platform" }
 arktrace-engine = { path = "crates/arktrace-engine" }
 arktrace-store = { path = "crates/arktrace-store" }
 arktrace-analysis = { path = "crates/arktrace-analysis" }
+arktrace-viewer = { path = "crates/arktrace-viewer" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -129,6 +129,7 @@ final class TimelineRenderingTests: XCTestCase {
             let filtered = slicePage.items.filter {
                 (query.eventKey == nil || $0.key == query.eventKey)
                     && (query.threadKey == nil || $0.threadKey == query.threadKey)
+                    && (!query.unattributedOnly || $0.threadKey == nil)
             }
             return TraceEventPage(
                 items: Array(filtered.prefix(query.limit)),

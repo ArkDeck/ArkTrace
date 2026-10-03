@@ -141,6 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 name_match: DirectoryNameMatch::Exact,
                 minimum_duration_ns: None,
                 depth: None,
+                unattributed_only: false,
                 includes_argument_set: false,
                 limit: 16,
             },

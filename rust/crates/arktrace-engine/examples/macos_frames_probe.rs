@@ -185,6 +185,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         name_match: DirectoryNameMatch::Exact,
                         minimum_duration_ns: None,
                         depth: None,
+                        unattributed_only: false,
                         includes_argument_set: false,
                     };
                     serde_json::json!({"id":case.id,"fixture":fixture,"query":q,"page":session.slices(&q,&budget())?,"agentPage":session.query_slices(&q,&budget())?})

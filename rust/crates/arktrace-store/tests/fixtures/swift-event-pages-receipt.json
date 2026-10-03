@@ -6,7 +6,7 @@
   "vectors": 62,
   "frames": 50,
   "agentViews": 12,
-  "executableSHA256": "cce4ce995504e9cc5824c377380c1838edc3aaa3974ba26aa316c8b4617f2b38",
+  "executableSHA256": "62517e608b0eeb0cc62b6a417f62c4c17e6b8d412121c5f2f924e709efdcd85c",
   "databases": [
     {
       "fixture": "frame-full",
@@ -142,8 +142,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "sha256": "64e9dce79e3bb74534539e360750a0ef1fed4403ea1abc040c732b44f16d01d8",
-      "byteCount": 8888
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+      "byteCount": 9752
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
@@ -162,8 +162,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
-      "sha256": "a5c021b13533aa5cdb036fb0f5740ff03eab1bdc03d516aa7716d1649bcdc594",
-      "byteCount": 160358
+      "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+      "byteCount": 160666
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabase.swift",

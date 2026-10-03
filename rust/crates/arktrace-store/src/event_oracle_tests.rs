@@ -121,6 +121,7 @@ fn actual_swift_event_pages_match_all_controlled_rows_quality_and_closed_errors(
                             name_match: DirectoryNameMatch::Exact,
                             minimum_duration_ns: None,
                             depth: None,
+                            unattributed_only: false,
                             includes_argument_set: false,
                         },
                     )

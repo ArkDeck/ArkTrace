@@ -52,6 +52,7 @@ pub enum EngineFailure {
     Process(ProcessError),
     Store(StoreError),
     Analysis(AnalysisFailure),
+    Viewer(ViewerFailure),
     CleanupFailed,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -61,6 +62,13 @@ pub struct EngineError {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 pub enum AnalysisFailure {
+    InvalidBounds,
+    InputBudgetExceeded,
+    InvalidEvidence,
+    InvalidQuality,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+pub enum ViewerFailure {
     InvalidBounds,
     InputBudgetExceeded,
     InvalidEvidence,
@@ -223,6 +231,40 @@ pub struct NoCacheSession {
     query_worker_failed: Cell<bool>,
 }
 impl NoCacheSession {
+    /// Worker-owned bounded Store-to-Viewer detail operation. Focused-event
+    /// inclusion, snapshot planning and cache/generation stay separate.
+    pub fn viewer_details(
+        &self,
+        source: &arktrace_contract::TraceDensitySource,
+        range: arktrace_contract::TraceTimeRange,
+        limit: usize,
+        budget: &EngineBudget,
+    ) -> Result<EventPage<arktrace_viewer::DetailInput>, EngineError> {
+        use arktrace_viewer::{RepositoryDetailPage as P, RepositoryDetailQuery as Q};
+        let query = arktrace_viewer::detail_query(source, range, limit).map_err(viewer_error)?;
+        let raw = match query {
+            Q::Cpu(q) => P::Cpu(self.cpu_slices(&q, budget)?),
+            Q::ThreadState(q) => P::ThreadState(self.thread_states(&q, budget)?),
+            Q::NamedSlice(q) => P::NamedSlice(self.slices(&q, budget)?),
+            Q::Counter(q) => P::Counter(self.counters(&q, budget)?),
+            Q::Frame(q) => P::Frame(self.frames(&q, budget)?),
+        };
+        let mut check = || {
+            budget.check().map_err(|e| match e.failure {
+                EngineFailure::Host(HostError::Cancelled) => {
+                    arktrace_viewer::ViewerError::Cancelled
+                }
+                EngineFailure::Host(HostError::DeadlineExceeded) => {
+                    arktrace_viewer::ViewerError::DeadlineReached
+                }
+                _ => arktrace_viewer::ViewerError::InvalidRequest,
+            })
+        };
+        let result = arktrace_viewer::map_detail_page(source, range, limit, raw, &mut check)
+            .map_err(viewer_error);
+        self.query_reader(budget)?;
+        result
+    }
     /// Shared Viewer search over this immutable session's bounded raw queries.
     /// The caller supplies its deadline; thirty seconds is the upper bound.
     pub fn search(
@@ -605,6 +647,7 @@ impl NoCacheSession {
                 name_match: arktrace_contract::DirectoryNameMatch::Exact,
                 minimum_duration_ns: Some(request.minimum_long_slice_duration_ns),
                 depth: None,
+                unattributed_only: false,
                 includes_argument_set: false,
                 limit: request.maximum_hot_events,
             },
@@ -716,6 +759,22 @@ impl NoCacheSession {
             .finish_ephemeral_cleanup(self.lease, &budget)
             .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))
     }
+}
+fn viewer_error(error: arktrace_viewer::ViewerError) -> EngineError {
+    use arktrace_viewer::ViewerError::*;
+    let cause = match error {
+        Cancelled => EngineFailure::Host(HostError::Cancelled),
+        DeadlineReached => EngineFailure::Host(HostError::DeadlineExceeded),
+        InvalidViewport | InvalidGeometry | InvalidRequest => {
+            EngineFailure::Viewer(ViewerFailure::InvalidBounds)
+        }
+        InputBudgetExceeded => EngineFailure::Viewer(ViewerFailure::InputBudgetExceeded),
+        InvalidEvidence | ArithmeticOverflow => {
+            EngineFailure::Viewer(ViewerFailure::InvalidEvidence)
+        }
+        Quality(_) => EngineFailure::Viewer(ViewerFailure::InvalidQuality),
+    };
+    failure(EngineStage::Querying, cause)
 }
 struct SessionSearch<'a> {
     session: &'a NoCacheSession,
@@ -1047,6 +1106,7 @@ mod event_composition_tests {
             name_match: arktrace_contract::DirectoryNameMatch::Contains,
             minimum_duration_ns: None,
             depth: None,
+            unattributed_only: false,
             includes_argument_set: false,
             limit: 1,
         };

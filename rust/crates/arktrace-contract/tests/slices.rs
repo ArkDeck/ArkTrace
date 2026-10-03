@@ -12,6 +12,7 @@ fn query() -> TraceSliceQuery {
         name_match: DirectoryNameMatch::Exact,
         minimum_duration_ns: None,
         depth: None,
+        unattributed_only: false,
         includes_argument_set: false,
         limit: 100_000,
     }
@@ -50,6 +51,30 @@ fn named_query_keeps_int64_identity_and_closes_bounds_and_fields() {
     let mut v = serde_json::to_value(query()).unwrap();
     v["sql"] = serde_json::json!("SELECT");
     assert!(serde_json::from_value::<TraceSliceQuery>(v).is_err());
+}
+#[test]
+fn unattributed_scope_is_opt_in_and_rejects_conflicting_identity_filters() {
+    let q = query();
+    let wire = serde_json::to_value(&q).unwrap();
+    assert!(!wire.as_object().unwrap().contains_key("unattributedOnly"));
+    assert_eq!(serde_json::from_value::<TraceSliceQuery>(wire).unwrap(), q);
+    let mut scoped = q;
+    scoped.unattributed_only = true;
+    scoped.validate().unwrap();
+    assert_eq!(
+        serde_json::to_value(&scoped).unwrap()["unattributedOnly"],
+        true
+    );
+    for field in 0..4 {
+        let mut invalid = scoped.clone();
+        match field {
+            0 => invalid.process_key = Some(1),
+            1 => invalid.pid = Some(1),
+            2 => invalid.thread_key = Some(1),
+            _ => invalid.tid = Some(1),
+        }
+        assert_eq!(invalid.validate(), Err(ContractError::InvalidEventQuery));
+    }
 }
 #[test]
 fn slice_coded_shape_preserves_nulls_parent_identity_and_omits_argument_handle() {

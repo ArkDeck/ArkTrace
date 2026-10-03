@@ -259,6 +259,11 @@ pub enum RepositoryRequest {
     Frames(TraceFrameQuery),
     Arguments(TraceArgumentQuery),
     Density(TraceDensityQuery),
+    ViewerDetails {
+        source: arktrace_contract::TraceDensitySource,
+        range: arktrace_contract::TraceTimeRange,
+        limit: usize,
+    },
     Batch(TraceRepositoryEventBatch),
     Search(TraceSearchRequest),
     Analyze {
@@ -279,6 +284,15 @@ impl RepositoryRequest {
             Self::Frames(q) => q.validate(),
             Self::Arguments(q) => q.validate(),
             Self::Density(q) => q.validate(),
+            Self::ViewerDetails {
+                source,
+                range,
+                limit,
+            } => {
+                return arktrace_viewer::detail_query(source, *range, *limit)
+                    .map(|_| ())
+                    .map_err(|_| RuntimeFailure::InvalidRequest);
+            }
             Self::Batch(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::Analyze { request, scope } => {
@@ -804,6 +818,11 @@ fn query(
         RepositoryRequest::Frames(q) => read!(session.frames(q, b)),
         RepositoryRequest::Arguments(q) => read!(session.arguments(q, b)),
         RepositoryRequest::Density(q) => read!(session.density(q, b)),
+        RepositoryRequest::ViewerDetails {
+            source,
+            range,
+            limit,
+        } => read!(session.viewer_details(source, *range, *limit, b)),
         RepositoryRequest::Batch(q) => read!(
             session
                 .event_batch(q, b, ReadPoolLimits::default())
@@ -1232,6 +1251,32 @@ fn run_worker(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn viewer_frontend_rejects_invalid_bounds_before_worker_dispatch() {
+        use arktrace_contract::{TraceDensitySource, TraceTimeRange};
+        let source = TraceDensitySource::NamedSlice { thread: None };
+        let range = TraceTimeRange::query(0, 10).unwrap();
+        for limit in [0, 20_001, usize::MAX] {
+            assert_eq!(
+                RepositoryRequest::ViewerDetails {
+                    source: source.clone(),
+                    range,
+                    limit
+                }
+                .validate(),
+                Err(RuntimeFailure::InvalidRequest)
+            );
+        }
+        assert_eq!(
+            RepositoryRequest::ViewerDetails {
+                source,
+                range: TraceTimeRange::event(0, 0).unwrap(),
+                limit: 1
+            }
+            .validate(),
+            Err(RuntimeFailure::InvalidRequest)
+        );
+    }
     #[test]
     fn cancellation_cannot_hide_fatal_worker_or_cleanup_failures() {
         let failures = [
