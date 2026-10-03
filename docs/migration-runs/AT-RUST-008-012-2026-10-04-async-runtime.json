@@ -1051,5 +1051,632 @@
     "Developer ID/signing/distribution and ArkDeck consumption"
   ],
   "gitBaseline": "d7d8ec3c8e8b8ce1eb8da2fa903fb531f3702303",
-  "implementationCommit": "06575da9f5ff357deae2f681c71154dd5076a267"
+  "implementationCommit": "06575da9f5ff357deae2f681c71154dd5076a267",
+  "mainDelivery": {
+    "head": "2226ee345b2896f84eb87d977c616f55e842f475",
+    "implementationCommit": "06575da9f5ff357deae2f681c71154dd5076a267",
+    "evidenceCommit": "2226ee345b2896f84eb87d977c616f55e842f475",
+    "normalPushReadBackMatched": true,
+    "mainWorktreeWasClean": true,
+    "nativeRunSourcePinsMatchedActualMain": 113,
+    "actualMainFmtWorkspaceContractsPlanner": "passed",
+    "ci": {
+      "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224",
+      "status": "completed",
+      "conclusion": "success",
+      "rustNative": {
+        "Rust macOS native": {
+          "testsPassed": 272,
+          "testsFailed": 0,
+          "testsIgnored": 0,
+          "warnings": 0,
+          "buildFmtStrictClippyContracts": "passed"
+        },
+        "Rust Windows native": {
+          "testsPassed": 153,
+          "testsFailed": 0,
+          "testsIgnored": 0,
+          "warnings": 0,
+          "buildFmtStrictClippyContracts": "passed"
+        }
+      },
+      "swift": {
+        "started": 597,
+        "passed": 517,
+        "allowedRuntimeGuardSkips": 80,
+        "workflowExplicitParserDependentExclusions": 7,
+        "buildWarnings": 0,
+        "apiBaseline": "passed",
+        "skipAudit": "passed"
+      },
+      "appJob": "success",
+      "actualAppBuild": "skipped: pinned parser absent on hosted runner",
+      "actualAppDocumentTypes": "skipped: pinned parser absent on hosted runner",
+      "mediumSlowLane": "skipped: ordinary push",
+      "jobs": [
+        {
+          "completedAt": "2026-10-03T16:25:54Z",
+          "conclusion": "success",
+          "databaseId": 111242904094,
+          "name": "Plan lanes",
+          "startedAt": "2026-10-03T16:25:49Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:25:50Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:25:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:25:51Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-03T16:25:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:25:51Z",
+              "conclusion": "success",
+              "name": "Planner self-test",
+              "number": 3,
+              "startedAt": "2026-10-03T16:25:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:25:52Z",
+              "conclusion": "success",
+              "name": "Compute changed paths and lanes",
+              "number": 4,
+              "startedAt": "2026-10-03T16:25:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:25:52Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 8,
+              "startedAt": "2026-10-03T16:25:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:25:52Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-10-03T16:25:52Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242904094"
+        },
+        {
+          "completedAt": "2026-10-03T16:25:46Z",
+          "conclusion": "skipped",
+          "databaseId": 111242905067,
+          "name": "Medium benchmark (slow lane)",
+          "startedAt": "2026-10-03T16:25:46Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242905067"
+        },
+        {
+          "completedAt": "2026-10-03T16:27:07Z",
+          "conclusion": "success",
+          "databaseId": 111242929414,
+          "name": "Rust macOS native",
+          "startedAt": "2026-10-03T16:26:01Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:26:01Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:26:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:04Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-03T16:26:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:04Z",
+              "conclusion": "success",
+              "name": "Select pinned Xcode",
+              "number": 3,
+              "startedAt": "2026-10-03T16:26:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:11Z",
+              "conclusion": "success",
+              "name": "Install exact Rust toolchain",
+              "number": 4,
+              "startedAt": "2026-10-03T16:26:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:11Z",
+              "conclusion": "success",
+              "name": "Set external Cargo cache",
+              "number": 5,
+              "startedAt": "2026-10-03T16:26:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:15Z",
+              "conclusion": "success",
+              "name": "Format, architecture, licenses and contract checks",
+              "number": 6,
+              "startedAt": "2026-10-03T16:26:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:04Z",
+              "conclusion": "success",
+              "name": "Build, lint and native tests",
+              "number": 7,
+              "startedAt": "2026-10-03T16:26:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:05Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 14,
+              "startedAt": "2026-10-03T16:27:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:05Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-10-03T16:27:05Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242929414"
+        },
+        {
+          "completedAt": "2026-10-03T16:26:11Z",
+          "conclusion": "success",
+          "databaseId": 111242929437,
+          "name": "App build and bundle checks",
+          "startedAt": "2026-10-03T16:26:02Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:26:04Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:26:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:07Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-03T16:26:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:07Z",
+              "conclusion": "success",
+              "name": "Pin Xcode 27.0 (fail closed)",
+              "number": 3,
+              "startedAt": "2026-10-03T16:26:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:07Z",
+              "conclusion": "success",
+              "name": "Verify any present parser against the pinned manifest",
+              "number": 4,
+              "startedAt": "2026-10-03T16:26:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "success",
+              "name": "Restore Xcode object cache",
+              "number": 5,
+              "startedAt": "2026-10-03T16:26:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "skipped",
+              "name": "Build app target (unsigned)",
+              "number": 6,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "skipped",
+              "name": "Verify app document types",
+              "number": 7,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "success",
+              "name": "Note skipped app checks",
+              "number": 8,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "skipped",
+              "name": "Save Xcode object cache (protected main only)",
+              "number": 9,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "success",
+              "name": "Upload logs",
+              "number": 10,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 20,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:09Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 21,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242929437"
+        },
+        {
+          "completedAt": "2026-10-03T16:28:18Z",
+          "conclusion": "success",
+          "databaseId": 111242929459,
+          "name": "SwiftPM build, test and skip audit",
+          "startedAt": "2026-10-03T16:26:03Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:26:05Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:26:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-03T16:26:05Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:08Z",
+              "conclusion": "success",
+              "name": "Pin Xcode 27.0 (fail closed)",
+              "number": 3,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:15Z",
+              "conclusion": "success",
+              "name": "Record toolchain",
+              "number": 4,
+              "startedAt": "2026-10-03T16:26:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:24Z",
+              "conclusion": "success",
+              "name": "Restore SwiftPM build cache",
+              "number": 5,
+              "startedAt": "2026-10-03T16:26:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:51Z",
+              "conclusion": "success",
+              "name": "Build (warnings are failures)",
+              "number": 6,
+              "startedAt": "2026-10-03T16:26:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:22Z",
+              "conclusion": "success",
+              "name": "Test",
+              "number": 7,
+              "startedAt": "2026-10-03T16:26:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:05Z",
+              "conclusion": "success",
+              "name": "API baseline (out-of-package consumer)",
+              "number": 8,
+              "startedAt": "2026-10-03T16:27:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:05Z",
+              "conclusion": "success",
+              "name": "Reject unexpected skips",
+              "number": 9,
+              "startedAt": "2026-10-03T16:28:05Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:14Z",
+              "conclusion": "success",
+              "name": "Save SwiftPM build cache (protected main only)",
+              "number": 10,
+              "startedAt": "2026-10-03T16:28:05Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:15Z",
+              "conclusion": "success",
+              "name": "Upload logs",
+              "number": 11,
+              "startedAt": "2026-10-03T16:28:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:16Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 22,
+              "startedAt": "2026-10-03T16:28:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:16Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 23,
+              "startedAt": "2026-10-03T16:28:16Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242929459"
+        },
+        {
+          "completedAt": "2026-10-03T16:27:07Z",
+          "conclusion": "success",
+          "databaseId": 111242929500,
+          "name": "Rust Windows native",
+          "startedAt": "2026-10-03T16:25:57Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:25:58Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:25:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:04Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-03T16:25:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:14Z",
+              "conclusion": "success",
+              "name": "Install exact Rust toolchain",
+              "number": 3,
+              "startedAt": "2026-10-03T16:26:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:15Z",
+              "conclusion": "success",
+              "name": "Set external Cargo cache",
+              "number": 4,
+              "startedAt": "2026-10-03T16:26:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:22Z",
+              "conclusion": "success",
+              "name": "Format, architecture, licenses and contract checks",
+              "number": 5,
+              "startedAt": "2026-10-03T16:26:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:04Z",
+              "conclusion": "success",
+              "name": "Build, lint and native tests",
+              "number": 6,
+              "startedAt": "2026-10-03T16:26:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:06Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 12,
+              "startedAt": "2026-10-03T16:27:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:27:06Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 13,
+              "startedAt": "2026-10-03T16:27:06Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242929500"
+        },
+        {
+          "completedAt": "2026-10-03T16:26:27Z",
+          "conclusion": "success",
+          "databaseId": 111242929538,
+          "name": "Offline release gates",
+          "startedAt": "2026-10-03T16:26:02Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:26:04Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:26:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:07Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-03T16:26:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:24Z",
+              "conclusion": "success",
+              "name": "Offline release gates",
+              "number": 3,
+              "startedAt": "2026-10-03T16:26:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:25Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 6,
+              "startedAt": "2026-10-03T16:26:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:26:25Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 7,
+              "startedAt": "2026-10-03T16:26:25Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111242929538"
+        },
+        {
+          "completedAt": "2026-10-03T16:28:30Z",
+          "conclusion": "success",
+          "databaseId": 111243358328,
+          "name": "CI required",
+          "startedAt": "2026-10-03T16:28:27Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-03T16:28:28Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-03T16:28:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:28Z",
+              "conclusion": "success",
+              "name": "Evaluate lane results against the plan",
+              "number": 2,
+              "startedAt": "2026-10-03T16:28:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-03T16:28:28Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 3,
+              "startedAt": "2026-10-03T16:28:28Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224/job/111243358328"
+        }
+      ],
+      "immutableLogs": [
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/arktrace-runtime-main-contracts-20261004.log",
+          "byteCount": 454,
+          "sha256": "b2c815f374688fabf808f9315491e8414f8dd67b9b83da339b48e28f096f09d6"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/arktrace-runtime-main-fmt-20261004.log",
+          "byteCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/arktrace-runtime-main-planner-20261004.log",
+          "byteCount": 2778,
+          "sha256": "ca2aa2826ce67e65098b4720fccea1986d79a6b3641b52e3b498cc6b948595f3"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/arktrace-runtime-main-workspace-20261004.log",
+          "byteCount": 109,
+          "sha256": "b67fd8c7171062aab8ea875e7b6deda4e5f1b1d439cd369073393967b57a97b1"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/artifacts.json",
+          "byteCount": 703,
+          "sha256": "6df4b8a41625406102064d43855172407b8e3ff694a80b6b4539f94d50fdc36b"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/run.json",
+          "byteCount": 11446,
+          "sha256": "0f531d89cbf5be61e4830587a067e0ff5d0c9c769ac8fd4b8950d2c6cd2279b1"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/run.log",
+          "byteCount": 660262,
+          "sha256": "052da0e833fcfe39e324388cf795afc1acee7f0c98aecd3a82012f9c285950bc"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/swiftpm/build.log",
+          "byteCount": 251,
+          "sha256": "57ce6f90a822b79ed332e3b4473f5a1eaada50cd3ff825c6cc8d4392bd658b1a"
+        },
+        {
+          "path": "/private/tmp/arktrace-runtime-ci-20261004-evidence/swiftpm/test.log",
+          "byteCount": 192122,
+          "sha256": "e72f3a0baecb02108a74cbecca024ac206a924e084c4754c15ac1bb34b334843"
+        }
+      ]
+    }
+  }
 }

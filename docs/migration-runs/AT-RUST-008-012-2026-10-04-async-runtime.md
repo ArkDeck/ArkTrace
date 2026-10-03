@@ -61,5 +61,15 @@ binary64 与重新解码 JSON 的数值比较，暴露 serde_json 默认解码�
 113 项源 digest、完整九份 response、真实 executable 与只读日志身份；成功 harness 根已
 删除，初次诊断失败的 harness 留存。这里不把失败运行写成资源清理通过。
 
-实现提交 `06575da9f5ff357deae2f681c71154dd5076a267`。机器记录 107931 bytes，SHA-256
-`252d7790aae60fd235e4d043cbe127542ce9680381299161c6fb7e47fe411cf4`。
+实现提交 `06575da9f5ff357deae2f681c71154dd5076a267`。机器记录 130684 bytes，SHA-256
+`0989194acaf5d33d041982a094420fd2c0353833451d670f42e50b2bedf307c4`。
+
+已将实现及证据提交快进合入 main，正常推送并读回 `2226ee345b2896f84eb87d977c616f55e842f475`。
+实际 main 的 113 项源与固定 parser SHA 和原生运行一致，fmt/workspace/license/contract/planner
+检查通过。[CI run 37136812224](https://github.com/ArkDeck/ArkTrace/actions/runs/37136812224)
+在该 head 上 completed/success：macOS Rust 272、Windows Rust 153 项通过，零失败/忽略/
+warning；两端 build/fmt/strict clippy 与契约通过。SwiftPM 开始 597 项、517 通过、80 项允许
+runtime guard skips，另有 workflow 明列的七项 parser-dependent exclusion；API baseline、
+skip audit 及零 warning build 通过。App job success，但实际 build/document type 步骤缺固定
+parser 而 skipped，ordinary-push medium slow lane 同样未执行；不把这些 job 状态记成新一轮
+GUI/性能/签名通过。原始 job facts、CI 日志和实际 Swift test/build artifacts 留存并冻结。
