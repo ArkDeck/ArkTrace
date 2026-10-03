@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "vectors": [
+    {
+      "id": "diagnostic-path",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "thread.start_ts",
+        "count": 7,
+        "message": "/Users/private/source.htrace: bounded probe"
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "thread.start_ts",
+        "count": 7,
+        "message": null
+      }
+    },
+    {
+      "id": "null-facts",
+      "issue": {
+        "category": "unavailableValue",
+        "scope": null,
+        "count": null,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "unavailableValue",
+        "scope": null,
+        "count": null,
+        "message": null
+      }
+    },
+    {
+      "id": "int64-count",
+      "issue": {
+        "category": "droppedValue",
+        "scope": "stat.count",
+        "count": 9223372036854775807,
+        "message": "diagnostic"
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "droppedValue",
+        "scope": "stat.count",
+        "count": 9223372036854775807,
+        "message": null
+      }
+    },
+    {
+      "id": "unclassified",
+      "issue": {
+        "category": "unclassified",
+        "scope": null,
+        "count": null,
+        "message": "diagnostic"
+      },
+      "valid": false
+    },
+    {
+      "id": "unknown-scope",
+      "issue": {
+        "category": "invalidValue",
+        "scope": "/private/source.htrace",
+        "count": 1,
+        "message": "diagnostic"
+      },
+      "valid": false
+    },
+    {
+      "id": "negative-count",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "thread.start_ts",
+        "count": -1,
+        "message": "diagnostic"
+      },
+      "valid": false
+    },
+    {
+      "id": "zero-count",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "thread.start_ts",
+        "count": 0,
+        "message": null
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "thread.start_ts",
+        "count": 0,
+        "message": null
+      }
+    },
+    {
+      "id": "unproven-counter-source",
+      "issue": {
+        "category": "probeTruncated",
+        "scope": "schema.counterSource",
+        "count": null,
+        "message": "measure.filter_id->process_measure_filter.id could not be decided within the validation budget; that source is not read"
+      },
+      "valid": true,
+      "machineIssue": {
+        "category": "probeTruncated",
+        "scope": "schema.counterSource",
+        "count": null,
+        "message": null
+      }
+    }
+  ]
+}

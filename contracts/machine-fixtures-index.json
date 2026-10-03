@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "sourceRevision": "a0dea7b99237dd5ecba9755c5aa9300631009272",
+  "sourceDirectory": "Tests/ArkTraceCLITests/Fixtures/MachineJSON",
+  "fixtures": [
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/analyze-empty.json",
+      "sha256": "66cfa3618ac7ee85ece5922a495cfcadca553d22bcb1254bdac05458914946cc"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/analyze-error.json",
+      "sha256": "a3af4250ec45a69676b45d5532e8fd2aabae6d8dcfcb9b46dff691a8266b17ab"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/analyze-success.json",
+      "sha256": "8dc4af1fe88db83118bda9384dd62aadd683850e2547bacb3828fbb287fd7964"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/analyze-truncated.json",
+      "sha256": "220055c2bf52bcfeaa7d572005144da7087d2a3f503441d9a4708690a1aacc34"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/context-empty.json",
+      "sha256": "d04b07642a8b12dcc0a4cd749e022dd83f44a5273996fdfd469f12e1e17c7f6e"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/context-error.json",
+      "sha256": "fce2597f4cbe6c0d7c8d410889902d16e5f28bdb4e0e604fe6c957731c3c8574"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/context-success.json",
+      "sha256": "762e4c5b5647b0f330c30058381176a94bc5895c2db5672f60749156f26b797c"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/context-truncated.json",
+      "sha256": "3fa5d60f02ba4d5cfcaf21596bfc25fcf5382d88d9417ef6dca975811a711526"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/doctor-empty.json",
+      "sha256": "68452dcf927e09b1c02852f1737b78af56677ca34f5864b1dfe7ccc03ac13791"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/doctor-error.json",
+      "sha256": "ffefcd46a089577cb03dc7b443444f4576793b5df3288b0e143853d49bd777af"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/doctor-success.json",
+      "sha256": "60497ca54414d58a6acf103b2a155c3fe4b6eb9dcdc249e9db8e5ffd6b16ee05"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/doctor-truncated.json",
+      "sha256": "cfc4569ce855be183ab268aab9e26173c36922136df1e293facd6710206621ed"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/inspect-empty.json",
+      "sha256": "9db52a704de075bced51bd97560a168b359ebe1151a3c5ac1085cca31c79d4b4"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/inspect-error.json",
+      "sha256": "b55d1d4e9d8c4e5a1f6da95473f665060c647895d53fc74750354d0737b7dc2c"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/inspect-success.json",
+      "sha256": "a163f5e8d74a426ff81524fbee72832fb20694e258cad1bfd6dd7044c156455c"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/inspect-truncated.json",
+      "sha256": "e2b921893bef7aea451547f6106d35bba8d2df671afa5191ae53aabf8606ecc5"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/licenses-error.json",
+      "sha256": "505a716b62d026ba036dff0e48b585a98a3cd05f07f5f54522c6c24c322e21bb"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/licenses-success.json",
+      "sha256": "89d5dc4e1663f718714e250346eddd44988532e3da35582d00e77f9081b802d0"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/processes-empty.json",
+      "sha256": "20ca860c843dd830d266e98f7390d20ef0df305cef97fc29bcb418a06711381c"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/processes-error.json",
+      "sha256": "208363ecbe492ecec5e4c7a2dcf462184e2de2dc7c2b431363ad8f7ff88f551c"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/processes-success.json",
+      "sha256": "3c2f879e79e15c6edec1c68c129202f22aad693d3bc0c54a1e3bb1e4baad2b94"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/processes-truncated.json",
+      "sha256": "21f43c801dcd7b99790ad4d645694f86bf7a91e76d68aa8850f398188a14a005"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/query-empty.json",
+      "sha256": "3ffdf7979b9975af6fe25c7d417ef862a054a1c230ad6a1cebba5cc1b542f8db"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/query-error.json",
+      "sha256": "8455fd748fb902cddc7e5f2174f700f285f3c80376b12cc9c5bd7a5448c3b186"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/query-success.json",
+      "sha256": "04cfdca2f9c34a80159fc7dd398c6c8066f169b03c190da293110d6b9c100f8a"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/query-truncated.json",
+      "sha256": "ee6e31f45973a5f06fb92fe3ee1f85a83f551f1568405916ad6f80c904f0166f"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/summary-empty.json",
+      "sha256": "bd102cf45eedb5a6e3da0a859b60f6ddba9064920ea68b908b70e5279b68a0f0"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/summary-error.json",
+      "sha256": "3839d663664c747e9d027acc6d1a8430b21131e803643c80cec654dcf14f136d"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/summary-success.json",
+      "sha256": "61a93627f86a478fa8bb94501b432cb9cd8de4f9d327324f6e2eeacb3ad120f6"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/summary-truncated.json",
+      "sha256": "25f3820d38cfd3627b62511118c302a240c7378032d99a659837a1e2ae478cbb"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/threads-empty.json",
+      "sha256": "36abd60245aef26377750fa53028894e15d675d1cd81134a9cc20cf28ad244c3"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/threads-error.json",
+      "sha256": "490340c2993dbeaaf0eabb0184ef2b8a93eadf08ed7e47ac39d1b4ba959db4dc"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/threads-success.json",
+      "sha256": "9ed864b4e522186aa4bbdc3d2bcfc61100a90be63de938869befc6673641f969"
+    },
+    {
+      "path": "Tests/ArkTraceCLITests/Fixtures/MachineJSON/threads-truncated.json",
+      "sha256": "31aeebb8c4898ba1d5a47fddd8b158159ed1d211d84a86e3a43262a18290c156"
+    }
+  ]
+}

@@ -1,0 +1,325 @@
+{
+  "version": 1,
+  "indexSchemaVersion": 3,
+  "definitions": [
+    {
+      "name": "arktrace_v1_process_pid",
+      "table": "process",
+      "columns": [
+        "pid"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_process_ipid",
+      "table": "process",
+      "columns": [
+        "ipid"
+      ],
+      "bootstrap": true,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_process_ipid_pid_name",
+      "table": "process",
+      "columns": [
+        "ipid",
+        "pid",
+        "name"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_thread_tid_ipid",
+      "table": "thread",
+      "columns": [
+        "tid",
+        "ipid"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_thread_itid",
+      "table": "thread",
+      "columns": [
+        "itid"
+      ],
+      "bootstrap": true,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_thread_itid_tid_name_ipid",
+      "table": "thread",
+      "columns": [
+        "itid",
+        "tid",
+        "name",
+        "ipid"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_sched_slice_ts_cpu",
+      "table": "sched_slice",
+      "columns": [
+        "ts",
+        "cpu"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "table": "sched_slice",
+      "columns": [
+        "cpu",
+        "ts",
+        "id",
+        "dur",
+        "itid",
+        "ipid"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "table": "sched_slice",
+      "columns": [
+        "cpu",
+        "ts",
+        "id",
+        "dur",
+        "itid",
+        "ipid",
+        "end_state",
+        "priority"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v3_sched_slice_cpu_ts_dur",
+      "table": "sched_slice",
+      "columns": [
+        "cpu",
+        "ts",
+        "dur"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_sched_slice_itid_ts",
+      "table": "sched_slice",
+      "columns": [
+        "itid",
+        "ts"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_thread_state_ts_cpu",
+      "table": "thread_state",
+      "columns": [
+        "ts",
+        "cpu"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_thread_state_itid_ts",
+      "table": "thread_state",
+      "columns": [
+        "itid",
+        "ts"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_thread_state_itid_ts_id_dur",
+      "table": "thread_state",
+      "columns": [
+        "itid",
+        "ts",
+        "id",
+        "dur",
+        "state"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "table": "thread_state",
+      "columns": [
+        "itid",
+        "ts",
+        "id",
+        "dur",
+        "state",
+        "cpu"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v3_thread_state_itid_ts_dur",
+      "table": "thread_state",
+      "columns": [
+        "itid",
+        "ts",
+        "dur"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_callstack_callid_ts",
+      "table": "callstack",
+      "columns": [
+        "callid",
+        "ts"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_callstack_callid_ts_id_dur",
+      "table": "callstack",
+      "columns": [
+        "callid",
+        "ts",
+        "id",
+        "dur",
+        "name"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_callstack_callid_ts_cover_optional",
+      "table": "callstack",
+      "columns": [
+        "callid",
+        "ts",
+        "id",
+        "dur",
+        "name",
+        "cat",
+        "depth",
+        "parent_id",
+        "cookie"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v3_callstack_ts_id_dur_callid",
+      "table": "callstack",
+      "columns": [
+        "ts",
+        "id",
+        "dur",
+        "callid",
+        "name"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v3_callstack_callid_ts_dur",
+      "table": "callstack",
+      "columns": [
+        "callid",
+        "ts",
+        "dur"
+      ],
+      "bootstrap": false,
+      "required": true,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v1_measure_filter_id_ts",
+      "table": "measure",
+      "columns": [
+        "filter_id",
+        "ts"
+      ],
+      "bootstrap": true,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_cpu_measure_filter_id",
+      "table": "cpu_measure_filter",
+      "columns": [
+        "id"
+      ],
+      "bootstrap": true,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v2_process_measure_filter_id",
+      "table": "process_measure_filter",
+      "columns": [
+        "id"
+      ],
+      "bootstrap": true,
+      "required": false,
+      "unique": false,
+      "partial": false
+    }
+  ]
+}

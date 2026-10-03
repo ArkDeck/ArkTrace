@@ -25,3 +25,6 @@ scripts/api-baseline/.build/
 # Python bytecode from the scripts/ verifiers
 __pycache__/
 *.pyc
+
+# Cargo artifacts are managed outside the worktree by run-cargo.py.
+/rust/target/

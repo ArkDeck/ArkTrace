@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "protocol": {
+    "macOS": {
+      "primitive": "flock",
+      "shared": "LOCK_SH",
+      "exclusive": "LOCK_EX",
+      "nonblocking": "LOCK_NB"
+    },
+    "windows": {
+      "primitive": "LockFileEx",
+      "offsetDecimal": "18446744073709551614",
+      "lengthBytes": 1
+    },
+    "lockOrder": [
+      "keyLock",
+      "exclusiveEntryLease",
+      "ownerLock"
+    ],
+    "initialLeaseByteCount": 0,
+    "existingPermissions": "validate_without_chmod",
+    "missingOrUnknownOwner": "preserve_and_skip"
+  },
+  "vectors": [
+    {
+      "id": "baseline",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "1b907290e89688e258209b770572138c6e9f66bfadd928e6a9dafe05c580bd8a",
+      "entryIdentifier": "846bbf46b48dbe858c77cd09cd33a70c05f03468fb18463d6fd975ad740d64d4",
+      "lockRelativePath": ".locks/846bbf46b48dbe858c77cd09cd33a70c05f03468fb18463d6fd975ad740d64d4.lock",
+      "leaseRelativePath": ".leases/846bbf46b48dbe858c77cd09cd33a70c05f03468fb18463d6fd975ad740d64d4.lease"
+    },
+    {
+      "id": "different-trace",
+      "input": {
+        "traceSHA256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "1b907290e89688e258209b770572138c6e9f66bfadd928e6a9dafe05c580bd8a",
+      "entryIdentifier": "da113723f5e8e6f3af897b7ae8f44ef7aa3ba0553a4064c8992c3f001ad7987f",
+      "lockRelativePath": ".locks/da113723f5e8e6f3af897b7ae8f44ef7aa3ba0553a4064c8992c3f001ad7987f.lock",
+      "leaseRelativePath": ".leases/da113723f5e8e6f3af897b7ae8f44ef7aa3ba0553a4064c8992c3f001ad7987f.lease"
+    },
+    {
+      "id": "different-parser",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "6d4626e7ae3508649b149e1add71870801038499618eba396c44b966d56bb9c3",
+      "entryIdentifier": "c675b59b41c6b870b9f694fe08aec93e58e94b9984d64bfb04e62d541d59bb51",
+      "lockRelativePath": ".locks/c675b59b41c6b870b9f694fe08aec93e58e94b9984d64bfb04e62d541d59bb51.lock",
+      "leaseRelativePath": ".leases/c675b59b41c6b870b9f694fe08aec93e58e94b9984d64bfb04e62d541d59bb51.lease"
+    },
+    {
+      "id": "index-zero",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 0
+      },
+      "valid": true,
+      "parserKey": "e2f758f0afc92bdffdaae8cd7faab477c4e5d9c96d9f31553ec9beba906b8c3f",
+      "entryIdentifier": "b830eb2344bcb0a0f66c823b05cfdcd3e1ea6a6d7c615b383ca5132f1dc3239b",
+      "lockRelativePath": ".locks/b830eb2344bcb0a0f66c823b05cfdcd3e1ea6a6d7c615b383ca5132f1dc3239b.lock",
+      "leaseRelativePath": ".leases/b830eb2344bcb0a0f66c823b05cfdcd3e1ea6a6d7c615b383ca5132f1dc3239b.lease"
+    },
+    {
+      "id": "index-int64-max",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 9223372036854775807
+      },
+      "valid": true,
+      "parserKey": "cff956f877feb19b6fbc885d97c04aea10e255e265cb00e9a0afd79272ebbc25",
+      "entryIdentifier": "596a9af250a527fd90553cf02ac6c2194ee4b2052bcaf768406efb90c2345300",
+      "lockRelativePath": ".locks/596a9af250a527fd90553cf02ac6c2194ee4b2052bcaf768406efb90c2345300.lock",
+      "leaseRelativePath": ".leases/596a9af250a527fd90553cf02ac6c2194ee4b2052bcaf768406efb90c2345300.lease"
+    },
+    {
+      "id": "length-prefix-a",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "a:b",
+        "schemaAdapterVersion": "c",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "d56a799452067709e3dca7b144665e1115309a876cd39533befa0cbbdfe4b122",
+      "entryIdentifier": "d56c91ff4190a20af6b19e9fc88ae26e5c5369fbfd526d287e07f9e97b384240",
+      "lockRelativePath": ".locks/d56c91ff4190a20af6b19e9fc88ae26e5c5369fbfd526d287e07f9e97b384240.lock",
+      "leaseRelativePath": ".leases/d56c91ff4190a20af6b19e9fc88ae26e5c5369fbfd526d287e07f9e97b384240.lease"
+    },
+    {
+      "id": "length-prefix-b",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "a",
+        "schemaAdapterVersion": "b:c",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "8e89eb2bac58ee07c8727345032489773dfc3a6ade3a21c67ce1ed2bd8bc1ca0",
+      "entryIdentifier": "87635767c08ec9c97e61ee9a503d68c0eb2d28d5254aa9ceb51587483b0e64dc",
+      "lockRelativePath": ".locks/87635767c08ec9c97e61ee9a503d68c0eb2d28d5254aa9ceb51587483b0e64dc.lock",
+      "leaseRelativePath": ".leases/87635767c08ec9c97e61ee9a503d68c0eb2d28d5254aa9ceb51587483b0e64dc.lease"
+    },
+    {
+      "id": "revision-utf8-boundary",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "486f8416b93fa1151dc32e6328c71565f32a2375dfcf82eb7b24aa8f520d0433",
+      "entryIdentifier": "e8a43f02fd9be37e20121c84c75e6c9184412f00f328d6ba126259c393a0da4c",
+      "lockRelativePath": ".locks/e8a43f02fd9be37e20121c84c75e6c9184412f00f328d6ba126259c393a0da4c.lock",
+      "leaseRelativePath": ".leases/e8a43f02fd9be37e20121c84c75e6c9184412f00f328d6ba126259c393a0da4c.lease"
+    },
+    {
+      "id": "adapter-utf8-boundary",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "éééééééééééééééééééééééééééééééé",
+        "indexSchemaVersion": 3
+      },
+      "valid": true,
+      "parserKey": "fb04e12430d549a1db270476070b8dbc8c288b33704927160996effecfb49d28",
+      "entryIdentifier": "daa432941e9567dec569a6ac75ab5ed563f46fc70c7b4fce1a60cbee2a266651",
+      "lockRelativePath": ".locks/daa432941e9567dec569a6ac75ab5ed563f46fc70c7b4fce1a60cbee2a266651.lock",
+      "leaseRelativePath": ".leases/daa432941e9567dec569a6ac75ab5ed563f46fc70c7b4fce1a60cbee2a266651.lease"
+    },
+    {
+      "id": "revision-too-long",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "adapter-too-long",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "ééééééééééééééééééééééééééééééééé",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "revision-empty",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "adapter-empty",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "hash-uppercase",
+      "input": {
+        "traceSHA256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "hash-short",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "hash-path",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "../bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": 3
+      },
+      "valid": false
+    },
+    {
+      "id": "negative-index",
+      "input": {
+        "traceSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "parserBinarySHA256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "upstreamRevision": "447a0a49fc75d68ca689061036846dbc375a6a9c",
+        "schemaAdapterVersion": "2",
+        "indexSchemaVersion": -1
+      },
+      "valid": false
+    }
+  ]
+}

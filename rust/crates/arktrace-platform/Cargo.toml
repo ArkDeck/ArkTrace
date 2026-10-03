@@ -1,0 +1,43 @@
+[package]
+name = "arktrace-platform"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+process-fixtures = []
+
+[[bin]]
+name = "arktrace-process-fixture"
+path = "tests/support/process_fixture.rs"
+required-features = ["process-fixtures"]
+
+[[test]]
+name = "macos_process"
+required-features = ["process-fixtures"]
+
+[[test]]
+name = "macos_owners"
+required-features = ["process-fixtures"]
+
+[dependencies]
+sha2.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+libc.workspace = true
+rusqlite.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+# Syscalls are confined to the macOS module. All other platform code denies
+# unsafe; every non-platform first-party crate keeps workspace forbid.
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = "deny"

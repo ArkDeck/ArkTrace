@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "vectors": [
+    {
+      "id": "whole-int64",
+      "event": [
+        0,
+        9223372036854775807
+      ],
+      "query": [
+        0,
+        9223372036854775807
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": true,
+      "overlapNs": 9223372036854775807
+    },
+    {
+      "id": "instant-start",
+      "event": [
+        10,
+        10
+      ],
+      "query": [
+        10,
+        20
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": true,
+      "overlapNs": 0
+    },
+    {
+      "id": "instant-end",
+      "event": [
+        20,
+        20
+      ],
+      "query": [
+        10,
+        20
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": false,
+      "overlapNs": 0
+    },
+    {
+      "id": "adjacent",
+      "event": [
+        0,
+        10
+      ],
+      "query": [
+        10,
+        20
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": false,
+      "overlapNs": 0
+    },
+    {
+      "id": "clipped",
+      "event": [
+        5,
+        15
+      ],
+      "query": [
+        10,
+        20
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": true,
+      "overlapNs": 5
+    },
+    {
+      "id": "last-nanosecond",
+      "event": [
+        9223372036854775806,
+        9223372036854775807
+      ],
+      "query": [
+        9223372036854775806,
+        9223372036854775807
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": true,
+      "overlapNs": 1
+    },
+    {
+      "id": "negative",
+      "event": [
+        -1,
+        0
+      ],
+      "query": [
+        0,
+        1
+      ],
+      "eventValid": false,
+      "queryValid": true
+    },
+    {
+      "id": "reversed",
+      "event": [
+        2,
+        1
+      ],
+      "query": [
+        0,
+        3
+      ],
+      "eventValid": false,
+      "queryValid": true
+    },
+    {
+      "id": "empty-query",
+      "event": [
+        0,
+        1
+      ],
+      "query": [
+        0,
+        0
+      ],
+      "eventValid": true,
+      "queryValid": false
+    },
+    {
+      "id": "negative-query",
+      "event": [
+        0,
+        1
+      ],
+      "query": [
+        -1,
+        1
+      ],
+      "eventValid": true,
+      "queryValid": false
+    },
+    {
+      "id": "int64-min",
+      "event": [
+        -9223372036854775808,
+        -9223372036854775808
+      ],
+      "query": [
+        0,
+        1
+      ],
+      "eventValid": false,
+      "queryValid": true
+    },
+    {
+      "id": "zero-instant",
+      "event": [
+        0,
+        0
+      ],
+      "query": [
+        0,
+        1
+      ],
+      "eventValid": true,
+      "queryValid": true,
+      "intersects": true,
+      "overlapNs": 0
+    }
+  ]
+}
