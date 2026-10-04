@@ -27,6 +27,9 @@ def consumer(artifact):
     assert cache.is_absolute() and not cache.resolve().is_relative_to(ROOT)
     package=cache/'consumer';sources=package/'Sources/Consumer';sources.mkdir(parents=True,exist_ok=True)
     for p in (ROOT/'scripts/swift-sdk-conformance').glob('*.swift'):shutil.copyfile(p,sources/p.name)
+    lifecycle_sources=package/'Sources/Lifecycle';lifecycle_sources.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(ROOT/'scripts/swift-sdk-lifecycle/Lifecycle.swift',lifecycle_sources/'Lifecycle.swift')
+    shutil.copyfile(ROOT/'scripts/swift-sdk-conformance/GeneratedRecords.swift',lifecycle_sources/'GeneratedRecords.swift')
     mirror=cache/'arktrace/workspace'
     env=os.environ.copy();env.update(ARKTRACE_SWIFTPM_CACHE_ROOT=str(cache/'arktrace'),ARKTRACE_RUST_XCFRAMEWORK=str(artifact),ARKTRACE_RUST_SDK_FIXTURES='1')
     log=cache/'sdk-build.log'
@@ -38,7 +41,8 @@ def consumer(artifact):
     (package/'Package.swift').write_text('''// swift-tools-version: 6.3
 import PackageDescription
 let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], dependencies: [.package(name: "ArkTrace", path: %s)], targets: [
- .executableTarget(name: "Consumer", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()])
+ .executableTarget(name: "Consumer", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()]),
+ .executableTarget(name: "Lifecycle", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()])
 ], swiftLanguageModes: [.v6])
 ''' % json.dumps(str(mirror)))
     invocation=['swift','build','--package-path',str(package),'--scratch-path',str(cache/'build'),'--cache-path',str(cache/'dependencies'),'--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'-Xswiftc','-warnings-as-errors']
@@ -55,7 +59,8 @@ let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], de
             rejected.append({'case':case.name,'exitCode':failed.returncode,'logSHA256':sha(cache/(case.name+'.log'))})
         finally:invalid.unlink()
     executable=cache/'build/out/Products/Debug/Consumer'
-    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'borrowCompileRejections':rejected}
+    lifecycle=cache/'build/out/Products/Debug/Lifecycle'
+    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'borrowCompileRejections':rejected}
 
 def projection(records):
     def array(name, values):

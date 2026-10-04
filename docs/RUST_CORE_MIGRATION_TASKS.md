@@ -690,6 +690,17 @@ session cleanup 错误。真实三条 trace 的 33 个 viewport 与 42 个 densi
 验收。临时 JSON 字节复制已有独立预算，decoded DTO 所有权预算仍待完成。见
 [Swift SDK 开发记录](migration-runs/AT-RUST-012-2026-10-04-swift-sdk.md)。
 
+随后实际 package-external SDK 的 **1,000 轮完整生命周期压力 gate 通过**：每轮成功
+固定 parser open、slice query、非空 native snapshot、另一次已获 native admission 的
+open 取消及并发重复 close。完整结果关闭后不变，最后 ARC owner 释放后 retained bytes、
+SDK sessions/requests 均归零。21 个检查点 FD 保持 22、direct children 为零，RSS
+基线 20,430,848 bytes、检查点最大 20,856,832、最终 shutdown 前 20,480,000；原始
+hash 不变、无 Ready 残留。10 warmups 不计入这 1,000 轮，取消 admission 不冒充解析
+中途取消；Rust Release + Swift Debug 开发 artifact 不冒充 Release App SLO。完整机器
+记录和未覆盖范围见[SDK 生命周期记录](migration-runs/AT-RUST-012-2026-10-04-sdk-lifecycle.md)。
+typed response/decoded-owner budget、C# owners、event/metric、生产签名和 SDK 分发仍待
+完成，012 与 macOS 整体验收继续保持 in-progress。
+
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 
 - 状态：planned；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。

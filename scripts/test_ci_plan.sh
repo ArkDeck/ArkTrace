@@ -187,7 +187,9 @@ lane_contracts=true
 lane_rust_macos=true
 lane_rust_windows=false' 'Sources/ArkTraceRustRuntime/RustEngine.swift
 scripts/swift-sdk-conformance/Consumer.swift
-scripts/test_macos_rust_sdk.py'
+scripts/swift-sdk-lifecycle/Lifecycle.swift
+scripts/test_macos_rust_sdk.py
+scripts/test_macos_rust_lifecycle.py'
 
 expect "native APFS harness selects the macOS Rust lane" \
     'lane_swiftpm=false

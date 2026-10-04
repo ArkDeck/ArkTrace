@@ -72,6 +72,25 @@ Verification:
   concurrent sessions/cancellation, MainActor borrowed records, last-owner
   refund, and compiler rejection of escaping/capturing borrowed spans.
 
+- `scripts/test_macos_rust_lifecycle.py`: actual package-external SDK
+  open/query/snapshot/admitted-cancel/concurrent-close pressure. Ten warmup
+  cycles precede 1,000 measured cycles. Final ARC owners refund native bytes
+  every cycle; actual FD/RSS/direct-child and namespace/raw-hash checkpoints
+  use explicit acknowledgements rather than cleanup sleeps. `--cycles 5`
+  supplies development feedback only. With a verified fixture XCFramework:
+
+  ```sh
+  ARKTRACE_RUST_XCFRAMEWORK=/absolute/path/CArkTrace.xcframework \
+  ARKTRACE_CARGO_CACHE_ROOT=/absolute/writable/cargo-cache \
+  python3 scripts/test_macos_rust_lifecycle.py
+  ```
+
+  The [1,000-cycle record](../docs/migration-runs/AT-RUST-012-2026-10-04-sdk-lifecycle.md)
+  passed using the fixed parser and pinned toolchains. Its resource allowances
+  are small-corpus development bounds, not a Release App performance SLO.
+  CI's existing `--build-only` consumer step compiles this probe without
+  executing its native lifecycle.
+
 The development `ArkTraceRustRuntime` product is opt-in. Build an immutable local
 artifact with `scripts/build_macos_rust_sdk.py`, set `ARKTRACE_RUST_XCFRAMEWORK`
 to its absolute path, then use `scripts/run-swiftpm.sh`. The runner verifies the
@@ -91,10 +110,9 @@ waits for already-scheduled ARC cleanup and reports its first bounded canonical
 failure. A session cleanup error can be retained before releasing its handle
 through `session_error_acquire`.
 
-All sixteen Swift request factories compile; this SDK run executes CPU,
-viewport and density-resolution operations. Remaining work includes complete
+All sixteen Swift request factories compile; native SDK checks execute CPU,
+slice, viewport and density-resolution operations. Remaining work includes complete
 Swift response/schema adaptation and decoded-owner budgeting, C# SafeHandle
-owners, event/metric batches, 1,000 complete native open/query/cancel/close
-cycles, immutable XCFramework/NuGet distribution and App cutover. Neither
+owners, event/metric batches, immutable XCFramework/NuGet distribution and App cutover. Neither
 consumer smoke nor these development slices mark
 AT-RUST-012 or macOS cross-platform acceptance complete.
