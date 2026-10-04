@@ -69,7 +69,7 @@ struct RustPackedCounterSample: RustColdRecord, Sendable {
     }
 }
 
-private struct EventWireQuality: Decodable {
+struct EventWireQuality: Decodable {
     let issues: [RustPackedQuality]
     private enum CodingKeys: String, CodingKey { case status, warnings }
     init(from decoder: any Decoder) throws {

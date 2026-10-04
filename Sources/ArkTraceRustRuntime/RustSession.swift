@@ -75,6 +75,11 @@ public final class RustSession: Sendable {
                                           limit: query.limit, maximumItems: 100000, type: RustPackedCounter.self,
                                           record: { RustCounterRecord(lease: $0, index: $1) })
     }
+    public func density(_ query: RustDensityQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustDensityResult {
+        let result = try await engine.query(handle, request: .density(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.densityResult(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                              bucketCount: query.bucketCount)
+    }
     public func close() async throws { try await engine.closeSession(handle) }
     deinit {
         let engine = engine, handle = handle

@@ -90,6 +90,15 @@ public struct RustResult: Sendable {
         return try await RustEventDecoder.decode(data, type: type, identity: identity, request: requestIdentity,
                                                 limit: limit, maximumItems: maximumItems, validate: validate, record: record)
     }
+    @concurrent
+    func densityResult(identity: RustSessionIdentity, bucketCount: Int) async throws -> RustDensityResult {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustDensityDecoder.decode(data, identity: identity, request: requestIdentity, bucketCount: bucketCount)
+    }
     /// Caller-directed materialization. Returned DTOs and allocations made by
     /// the caller's Decodable implementation are caller-owned; only the
     /// explicit temporary JSON copy is charged here. Product typed query paths

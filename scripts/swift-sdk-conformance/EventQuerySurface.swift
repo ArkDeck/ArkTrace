@@ -10,6 +10,7 @@ import ArkTraceRustRuntime
     let descriptors: RustCounterSeriesPage = try await session.counterSeries(RustCounterSeriesQuery(range: range))
     let counters: RustCounterPage = try await session.counters(RustCounterQuery(range: range))
     let arguments: RustArgumentPage = try await session.arguments(RustArgumentQuery(argSetID: 0))
+    let density: RustDensityResult = try await session.density(RustDensityQuery(range: range, source: .cpu(0), bucketCount: 100))
     for index in 0..<cpu.count { _ = cpu[index].key; _ = cpu[index].isInstant }
     for index in 0..<state.count { _ = state[index].normalizedState; _ = state[index].isOpenEnded }
     for index in 0..<slices.count { _ = slices[index].argSetID; _ = slices[index].parentEventKey }
@@ -17,4 +18,12 @@ import ArkTraceRustRuntime
     for index in 0..<descriptors.count { _ = descriptors[index].scope; _ = descriptors[index].filterID }
     for index in 0..<counters.count { let samples = counters[index].samples; for i in 0..<samples.count { _ = samples[i].value; _ = samples[i].durationNs } }
     for index in 0..<arguments.count { _ = await arguments[index].value.copyString() }
+    for index in 0..<density.count {
+        _ = density[index].range; _ = density[index].eventCount; _ = density[index].occupiedNs; _ = density[index].utilization
+        switch density[index].dominant {
+        case .name(let text), .threadState(let text): _ = await text.copyString()
+        case .processOrThread(let value), .jank(let value): _ = value
+        case nil: break
+        }
+    }
 }

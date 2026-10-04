@@ -6,13 +6,17 @@ import Foundation
 /// Key admission is bounded logical storage, not a Foundation allocator/RSS
 /// measurement. The typed decoder remains responsible for values and schema.
 enum RustJSONShape {
+    enum FloatingField { case densityUtilization }
+
     static func validate(_ data: Data, staging: RustRetainedStorage, integerNumbersOnly: Bool = false,
+                         floatingField: FloatingField? = nil,
                          maximumInputBytes: Int = 16 * 1024 * 1024, maximumArrayElements: Int = 100_000) throws {
         guard (1...(64 * 1024 * 1024)).contains(maximumInputBytes), (1...1_000_000).contains(maximumArrayElements),
               (1...maximumInputBytes).contains(data.count) else { throw RustAdmission.invalidBuffer }
         let credit = try staging.reserve(min(data.count, 16 * 1024) * 2 + 4096)
         defer { withExtendedLifetime(credit) {} }
-        let scanner = Scanner(data, integerNumbersOnly: integerNumbersOnly, maximumArrayElements: maximumArrayElements)
+        let scanner = Scanner(data, integerNumbersOnly: integerNumbersOnly, floatingField: floatingField,
+                              maximumArrayElements: maximumArrayElements)
         try scanner.value(depth: 0)
         try scanner.whitespace()
         guard scanner.offset == data.count else { throw RustAdmission.invalidBuffer }
@@ -23,9 +27,12 @@ enum RustJSONShape {
         var offset = 0
         private var activeKeyBytes = 0
         private let integerNumbersOnly: Bool
+        private let floatingField: FloatingField?
+        private var path: [String] = []
         private let maximumArrayElements: Int
-        init(_ data: Data, integerNumbersOnly: Bool, maximumArrayElements: Int) {
-            self.data = data; self.integerNumbersOnly = integerNumbersOnly; self.maximumArrayElements = maximumArrayElements
+        init(_ data: Data, integerNumbersOnly: Bool, floatingField: FloatingField?, maximumArrayElements: Int) {
+            self.data = data; self.integerNumbersOnly = integerNumbersOnly; self.floatingField = floatingField
+            self.maximumArrayElements = maximumArrayElements
         }
         private var next: UInt8? { offset < data.count ? data[data.startIndex + offset] : nil }
 
@@ -69,7 +76,11 @@ enum RustJSONShape {
                 guard count <= 16 * 1024 - activeKeyBytes else { throw RustAdmission.outputLimit }
                 guard keys.insert(key).inserted else { throw RustAdmission.invalidBuffer }
                 activeKeyBytes += count; ownKeyBytes += count
-                try whitespace(); try take(58); try value(depth: depth); try whitespace()
+                try whitespace(); try take(58)
+                if floatingField != nil { path.append(key) }
+                try value(depth: depth)
+                if floatingField != nil { path.removeLast() }
+                try whitespace()
                 if next == 125 { try advance(); return }
                 try take(44); try whitespace()
             }
@@ -80,7 +91,10 @@ enum RustJSONShape {
             var count = 0
             while true {
                 guard count < maximumArrayElements else { throw RustAdmission.outputLimit }
-                try value(depth: depth); count += 1; try whitespace()
+                if floatingField != nil { path.append("*") }
+                try value(depth: depth)
+                if floatingField != nil { path.removeLast() }
+                count += 1; try whitespace()
                 if next == 93 { try advance(); return }
                 try take(44); try whitespace()
             }
@@ -126,9 +140,12 @@ enum RustJSONShape {
             let start = offset
             if next == 45 { try advance() }
             if next == 48 { try advance() } else { try digits() }
-            // These typed cold schemas have no floating fields.
-            // Foundation would otherwise accept 1.0/1e0 as an integer.
-            if integerNumbersOnly, next == 46 || next == 101 || next == 69 { throw RustAdmission.invalidBuffer }
+            // Only the admitted density utilization slot is floating point.
+            // Foundation would otherwise also accept 1.0/1e0 as an Int64.
+            let floatingAllowed = floatingField == .densityUtilization && path == ["body", "buckets", "*", "utilization"]
+            if integerNumbersOnly && !floatingAllowed, next == 46 || next == 101 || next == 69 {
+                throw RustAdmission.invalidBuffer
+            }
             if next == 46 { try advance(); try digits() }
             if next == 101 || next == 69 {
                 try advance()

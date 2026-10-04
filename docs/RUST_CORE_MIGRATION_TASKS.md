@@ -1048,3 +1048,5 @@ CI
 缺某个发布输入时继续可独立推进的软件，最终 020 保留其验收缺口。
 
 2026-10-04 typed event SDK 增量：七类 cold page 与 Core 兼容复制已接入 retained owner；SDK `sliceDetails` 保留 nullable Inspector handle，旧机器输出保持原形状。50 SDK tests、三份真实 Trace 42 次同 Ready DB 原 Swift 对照、457 Rust all-features tests、production SDK/API/default Swift/App 构建通过。实际语料的非空 frames/arguments 与非 null Inspector handle、App cutover 和整体 macOS 验收仍未通过。实际告警、失败与 CI 状态见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-event-sdk.md)；goal 保持 active。
+
+2026-10-04 density SDK 增量：retained sparse bucket/color identity/quality 与 Core 复制已接通；56 SDK tests、110 独立原 Swift 成功向量、最小真实 Trace 14 次同 Ready DB 对照及关闭后读取通过。逐 query deadline/batch、共享 repository、App cutover 和 macOS 总验收仍未完成。新增私有 immutable Ready supplement；工具告警、输入边界与实际 CI 状态见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-density-sdk.md)，goal 保持 active。
