@@ -11,6 +11,10 @@ import ArkTraceRustRuntime
     let counters: RustCounterPage = try await session.counters(RustCounterQuery(range: range))
     let arguments: RustArgumentPage = try await session.arguments(RustArgumentQuery(argSetID: 0))
     let density: RustDensityResult = try await session.density(RustDensityQuery(range: range, source: .cpu(0), bucketCount: 100))
+    let batch: RustBatchResult = try await session.eventBatch(RustBatchQuery(cpuSlices: [RustCPUQuery(range: range, limit: 1)],
+        threads: [RustThreadQuery(limit: 1)]))
+    _ = batch.queryCount; _ = batch.retainedStorageBytes; _ = batch.cpuSlices[0][0].sessionIdentity
+    _ = batch.threadStates; _ = batch.slices; _ = batch.counters; _ = batch.counterSeries; _ = batch.densities; _ = batch.threads
     for index in 0..<cpu.count { _ = cpu[index].key; _ = cpu[index].isInstant }
     for index in 0..<state.count { _ = state[index].normalizedState; _ = state[index].isOpenEnded }
     for index in 0..<slices.count { _ = slices[index].argSetID; _ = slices[index].parentEventKey }

@@ -17,8 +17,8 @@ from test_macos_rust_sdk import ROOT
 
 
 def build_reference(kind="event"):
-    assert kind in ("event", "density")
-    name = "EventOriginalOracle" if kind == "event" else "DensityOriginalOracle"
+    assert kind in ("event", "density", "batch")
+    name = kind.title() + "OriginalOracle"
     cache = Path(os.environ.get("ARKTRACE_EVENT_ORACLE_CACHE_ROOT", "/private/tmp/arktrace-" + kind + "-reference"))
     assert cache.is_absolute() and not cache.resolve().is_relative_to(ROOT) and not cache.is_symlink()
     source = cache / "oracle-source"
@@ -30,9 +30,11 @@ def build_reference(kind="event"):
     target = source / "Sources" / name
     target.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / "scripts/swift-sdk-core/EventProofModel.swift", target / "EventProofModel.swift")
-    if kind == "density":
+    if kind in ("density", "batch"):
         shutil.copyfile(ROOT / "scripts/swift-sdk-core/DensityProofModel.swift", target / "DensityProofModel.swift")
-    main = "EventSDKOriginal.swift" if kind == "event" else "DensitySDKOriginal.swift"
+    if kind == "batch":
+        shutil.copyfile(ROOT / "scripts/swift-sdk-core/BatchProofModel.swift", target / "BatchProofModel.swift")
+    main = kind.title() + "SDKOriginal.swift"
     shutil.copyfile(ROOT / "rust/crates/arktrace-store/oracle" / main, target / main)
     shutil.copytree(ROOT / "scripts", source / "scripts", dirs_exist_ok=True)
     (source / "Package.swift").write_text('''// swift-tools-version: 6.3

@@ -24,8 +24,13 @@ extension RustPackedThread: RustColdRecord {
         let context = try rustColdContext(decoder)
         try rustColdKeys(decoder, ["key", "processKey", "tid", "pid", "name", "processName", "startNs", "endNs", "isMainThread"])
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        key = try values.decode(Int64.self, forKey: .key)
-        processKey = try values.decodeIfPresent(Int64.self, forKey: .processKey)
+        if context.batchThreads {
+            key = try values.decode(RustWireThreadKey.self, forKey: .key).value.itid
+            processKey = try values.decodeIfPresent(RustWireProcessKey.self, forKey: .processKey)?.value.ipid
+        } else {
+            key = try values.decode(Int64.self, forKey: .key)
+            processKey = try values.decodeIfPresent(Int64.self, forKey: .processKey)
+        }
         tid = try values.decode(Int64.self, forKey: .tid)
         pid = try values.decodeIfPresent(Int64.self, forKey: .pid)
         name = try context.text(values.decodeIfPresent(String.self, forKey: .name))
@@ -36,7 +41,7 @@ extension RustPackedThread: RustColdRecord {
     }
 }
 
-private struct DirectoryWirePage<Record: RustColdRecord>: Decodable {
+struct DirectoryWirePage<Record: RustColdRecord & Sendable>: Decodable, Sendable {
     let items: [Record]
     let quality: [RustPackedQuality]
     let truncated: Bool

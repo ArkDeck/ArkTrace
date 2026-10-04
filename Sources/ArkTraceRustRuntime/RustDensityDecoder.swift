@@ -42,7 +42,7 @@ struct RustPackedDensityBucket: RustColdRecord, Sendable {
     }
 }
 
-struct DensityWireResult: Decodable {
+struct DensityWireResult: Decodable, Sendable {
     let buckets: [RustPackedDensityBucket]
     let quality: [RustPackedQuality]
     let capabilityAvailable: Bool

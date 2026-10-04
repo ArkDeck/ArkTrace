@@ -81,6 +81,13 @@ public final class RustSession: Sendable {
                                               bucketCount: query.bucketCount)
     }
     public func close() async throws { try await engine.closeSession(handle) }
+    /// Native read-pool batch with a whole-operation timeout. Core per-query
+    /// absolute deadlines are a separate adapter contract; none are inferred
+    /// from this timeout or collapsed into the earliest query deadline.
+    public func eventBatch(_ query: RustBatchQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustBatchResult {
+        let result = try await engine.query(handle, request: .batchDetails(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.batchResult(identity: RustSessionIdentity(engine: engine.identity, session: handle), query: query)
+    }
     deinit {
         let engine = engine, handle = handle
         RustCleanup.schedule { try await engine.closeSession(handle) }

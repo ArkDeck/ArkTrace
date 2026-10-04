@@ -6,7 +6,7 @@ import Foundation
 /// Key admission is bounded logical storage, not a Foundation allocator/RSS
 /// measurement. The typed decoder remains responsible for values and schema.
 enum RustJSONShape {
-    enum FloatingField { case densityUtilization }
+    enum FloatingField { case densityUtilization, batchDensityUtilization }
 
     static func validate(_ data: Data, staging: RustRetainedStorage, integerNumbersOnly: Bool = false,
                          floatingField: FloatingField? = nil,
@@ -142,7 +142,8 @@ enum RustJSONShape {
             if next == 48 { try advance() } else { try digits() }
             // Only the admitted density utilization slot is floating point.
             // Foundation would otherwise also accept 1.0/1e0 as an Int64.
-            let floatingAllowed = floatingField == .densityUtilization && path == ["body", "buckets", "*", "utilization"]
+            let floatingAllowed = (floatingField == .densityUtilization && path == ["body", "buckets", "*", "utilization"])
+                || (floatingField == .batchDensityUtilization && path == ["body", "densities", "*", "buckets", "*", "utilization"])
             if integerNumbersOnly && !floatingAllowed, next == 46 || next == 101 || next == 69 {
                 throw RustAdmission.invalidBuffer
             }

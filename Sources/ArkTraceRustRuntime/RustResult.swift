@@ -99,6 +99,15 @@ public struct RustResult: Sendable {
         let data = unsafe Data(bytes: lease.pointer, count: count)
         return try await RustDensityDecoder.decode(data, identity: identity, request: requestIdentity, bucketCount: bucketCount)
     }
+    @concurrent
+    func batchResult(identity: RustSessionIdentity, query: RustBatchQuery) async throws -> RustBatchResult {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustBatchDecoder.decode(data, identity: identity, request: requestIdentity, query: query)
+    }
     /// Caller-directed materialization. Returned DTOs and allocations made by
     /// the caller's Decodable implementation are caller-owned; only the
     /// explicit temporary JSON copy is charged here. Product typed query paths

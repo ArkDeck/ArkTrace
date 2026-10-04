@@ -81,7 +81,7 @@ struct EventWireQuality: Decodable {
     }
 }
 
-private struct EventWirePage<Record: RustEventColdRecord>: Decodable {
+struct EventWirePage<Record: RustEventColdRecord>: Decodable, Sendable {
     let items: [Record]
     let quality: [RustPackedQuality]
     let truncated: Bool

@@ -182,6 +182,7 @@ pub(crate) enum Operation {
     Viewport(ViewportInput),
     ResolveDensity(arktrace_viewer::DensityResolutionRequest),
     Batch(TraceRepositoryEventBatch),
+    BatchDetails(TraceRepositoryEventBatch),
     Search(TraceSearchRequest),
     Analyze(Analyze),
 }
@@ -227,7 +228,7 @@ impl Operation {
             Self::Frames(q) => q.validate(),
             Self::Arguments(q) => q.validate(),
             Self::Density(q) => q.validate(),
-            Self::Batch(q) => q.validate(),
+            Self::Batch(q) | Self::BatchDetails(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::ViewerDetails(q) => {
                 return arktrace_viewer::detail_query(&q.source, q.range, q.limit)
@@ -292,6 +293,7 @@ impl Operation {
             },
             Self::ResolveDensity(q) => Q::ViewerResolveDensity(q),
             Self::Batch(q) => Q::Batch(q),
+            Self::BatchDetails(q) => Q::BatchDetails(q),
             Self::Search(q) => Q::Search(q),
             Self::Analyze(q) => Q::Analyze {
                 request: q.request,
@@ -312,6 +314,27 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
+
+    #[test]
+    fn detail_batch_keeps_legacy_batch_bounds_and_closed_queries() {
+        let thread = serde_json::json!({"processKey":null,"pid":null,"threadKey":null,"tid":null,"name":null,"nameMatch":"exact","limit":1});
+        for name in ["batchDetails", "batch"] {
+            for count in [1, 32] {
+                let input = serde_json::json!({"operation":name,"query":{"threads":vec![thread.clone();count]}});
+                let valid: Operation = decode(&serde_json::to_vec(&input).unwrap()).unwrap();
+                valid.validate().unwrap();
+            }
+            for count in [0, 33] {
+                let input = serde_json::json!({"operation":name,"query":{"threads":vec![thread.clone();count]}});
+                let invalid: Operation = decode(&serde_json::to_vec(&input).unwrap()).unwrap();
+                assert_eq!(invalid.validate(), Err(STATUS_INVALID_INPUT));
+            }
+            let mut input =
+                serde_json::json!({"operation":name,"query":{"threads":[thread.clone()]}});
+            input["query"]["threads"][0]["sql"] = "SELECT 1".into();
+            assert!(decode::<Operation>(&serde_json::to_vec(&input).unwrap()).is_err());
+        }
+    }
 
     #[test]
     fn detail_operation_reuses_slice_admission_and_keeps_legacy_operation() {

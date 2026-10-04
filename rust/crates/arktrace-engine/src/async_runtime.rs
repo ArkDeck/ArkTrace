@@ -275,6 +275,7 @@ pub enum RepositoryRequest {
     },
     ViewerResolveDensity(arktrace_viewer::DensityResolutionRequest),
     Batch(TraceRepositoryEventBatch),
+    BatchDetails(TraceRepositoryEventBatch),
     Search(TraceSearchRequest),
     Analyze {
         request: crate::BoundedAnalysisRequest,
@@ -330,7 +331,7 @@ impl RepositoryRequest {
                     .validate()
                     .map_err(|_| RuntimeFailure::InvalidRequest);
             }
-            Self::Batch(q) => q.validate(),
+            Self::Batch(q) | Self::BatchDetails(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::Analyze { request, scope } => {
                 return request
@@ -1032,6 +1033,12 @@ fn query(
                 .event_batch(q, b, ReadPoolLimits::default())
                 .map(|r| r.result)
         ),
+        RepositoryRequest::BatchDetails(q) => {
+            let output = session
+                .event_batch(q, b, ReadPoolLimits::default())
+                .map_err(RuntimeFailure::Engine)?;
+            response(&BatchDetailResult(&output.result), command, shared, config)
+        }
         RepositoryRequest::Search(q) => read!(session.search(q, b)),
         RepositoryRequest::Analyze { request, scope } => {
             read!(session.analyze_bounded(request, *scope, b))
@@ -1073,6 +1080,34 @@ impl Serialize for SliceDetailItems<'_> {
             })?;
         }
         items.end()
+    }
+}
+/// Same seven-family native read-pool result, with SDK-only slice handles.
+/// Borrow serialization adds no record vector and preserves legacy batch JSON.
+struct BatchDetailResult<'a>(&'a arktrace_contract::TraceRepositoryEventBatchResult);
+impl Serialize for BatchDetailResult<'_> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeStruct;
+        let mut value = serializer.serialize_struct("BatchDetailResult", 7)?;
+        value.serialize_field("cpuSlices", &self.0.cpu_slices)?;
+        value.serialize_field("threadStates", &self.0.thread_states)?;
+        value.serialize_field("slices", &BatchSliceDetailPages(&self.0.slices))?;
+        value.serialize_field("counters", &self.0.counters)?;
+        value.serialize_field("counterSeries", &self.0.counter_series)?;
+        value.serialize_field("densities", &self.0.densities)?;
+        value.serialize_field("threads", &self.0.threads)?;
+        value.end()
+    }
+}
+struct BatchSliceDetailPages<'a>(&'a [EventPage<TraceSlice>]);
+impl Serialize for BatchSliceDetailPages<'_> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeSeq;
+        let mut pages = serializer.serialize_seq(Some(self.0.len()))?;
+        for page in self.0 {
+            pages.serialize_element(&SliceDetailPage(page))?;
+        }
+        pages.end()
     }
 }
 fn close_actor(
@@ -1538,6 +1573,20 @@ mod tests {
                 .unwrap()
                 .remove("argSetID");
             assert_eq!(detail, machine);
+            let batch = TraceRepositoryEventBatchResult {
+                slices: vec![page.clone(), page.clone()],
+                ..TraceRepositoryEventBatchResult::default()
+            };
+            let legacy = serde_json::to_value(&batch).unwrap();
+            let mut sdk = serde_json::to_value(BatchDetailResult(&batch)).unwrap();
+            for page in sdk["slices"].as_array_mut().unwrap() {
+                assert_eq!(
+                    page["items"][0]["argSetID"],
+                    serde_json::to_value(id).unwrap()
+                );
+                page["items"][0].as_object_mut().unwrap().remove("argSetID");
+            }
+            assert_eq!(sdk, legacy);
         }
     }
     mod viewport;

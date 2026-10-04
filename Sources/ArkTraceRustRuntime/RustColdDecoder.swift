@@ -8,45 +8,26 @@ let rustColdContextKey = CodingUserInfoKey(rawValue: "ArkTrace.coldContext")!
 /// are bounded by input size but are not measured by these storage credits.
 let rustColdStaging = RustRetainedStorage(maximumBytes: 128 * 1024 * 1024, maximumOwners: 768)
 
-final class RustColdContext: Sendable {
+private final class RustColdPool: Sendable {
     private struct State: Sendable {
         var bytes: [UInt8] = []
         var credits: [RustStorageCredit]
-        var samples = 0
     }
     private let state: Mutex<State>
-    let limit: Int
-    let session: UInt64
-    let request: UInt64
     let maximumTextBytes: Int
     let staging: RustRetainedStorage
     var bytes: [UInt8] { state.withLock { $0.bytes } }
-
-    init(limit: Int, session: UInt64, request: UInt64, inputBytes: Int, staging: RustRetainedStorage,
-         maximumItems: Int = 100_000, maximumInputBytes: Int = 16 * 1024 * 1024) throws {
-        guard (1...1_000_000).contains(maximumItems), (1...(64 * 1024 * 1024)).contains(maximumInputBytes),
-              (1...maximumItems).contains(limit), (1...maximumInputBytes).contains(inputBytes) else {
-            throw RustAdmission.invalidBuffer
-        }
-        self.limit = limit
-        self.session = session
-        self.request = request
-        self.maximumTextBytes = inputBytes
-        self.staging = staging
-        // Geometric Array growth is checked against this reservation after
-        // every append; this is an admission policy, not allocator/RSS proof.
-        state = Mutex(State(credits: [try staging.reserve(inputBytes * 2 + 4096)]))
+    init(inputBytes: Int, staging: RustRetainedStorage, contextCount: Int) throws {
+        maximumTextBytes = inputBytes; self.staging = staging
+        state = Mutex(State(credits: [try staging.reserve(inputBytes * 2 + 4096 + contextCount * 512)]))
     }
-
     func reserveArray<T>(_ type: T.Type, count: Int) throws -> Int {
-        let byteCount = count * MemoryLayout<T>.stride
-        let reservation = max(128, byteCount * 2 + 128)
+        let reservation = max(128, count * MemoryLayout<T>.stride * 2 + 128)
         let credit = try staging.reserve(reservation)
         state.withLock { $0.credits.append(credit) }
         return reservation
     }
-
-    func text(_ string: String?, maximum: Int = 4096, allowEmpty: Bool = false) throws -> Range<Int>? {
+    func text(_ string: String?, maximum: Int, allowEmpty: Bool) throws -> Range<Int>? {
         guard let string else { return nil }
         let count = string.utf8.count
         return try state.withLock { state in
@@ -59,11 +40,77 @@ final class RustColdContext: Sendable {
             return start..<state.bytes.count
         }
     }
+}
+
+final class RustColdContext: Sendable {
+    private let pool: RustColdPool
+    private let samples = Mutex(0)
+    private let children: [String: [RustColdContext]]
+    let batchThreads: Bool
+    let limit: Int
+    let session: UInt64
+    let request: UInt64
+    let maximumTextBytes: Int
+    let staging: RustRetainedStorage
+    var bytes: [UInt8] { pool.bytes }
+
+    init(limit: Int, session: UInt64, request: UInt64, inputBytes: Int, staging: RustRetainedStorage,
+         maximumItems: Int = 100_000, maximumInputBytes: Int = 16 * 1024 * 1024,
+         pageLimits: [String: [Int]] = [:]) throws {
+        guard (1...1_000_000).contains(maximumItems), (1...(64 * 1024 * 1024)).contains(maximumInputBytes),
+              (1...maximumItems).contains(limit), (1...maximumInputBytes).contains(inputBytes) else {
+            throw RustAdmission.invalidBuffer
+        }
+        self.limit = limit
+        self.session = session
+        self.request = request
+        self.maximumTextBytes = inputBytes
+        self.staging = staging
+        let count = pageLimits.values.reduce(0) { $0 + $1.count }
+        guard count <= 32, pageLimits.values.allSatisfy({ $0.allSatisfy({ (1...100_000).contains($0) }) }) else {
+            throw RustAdmission.invalidBuffer
+        }
+        let sharedPool = try RustColdPool(inputBytes: inputBytes, staging: staging, contextCount: count)
+        pool = sharedPool
+        batchThreads = false
+        var contexts: [String: [RustColdContext]] = [:]
+        for (family, limits) in pageLimits {
+            contexts[family] = limits.map { RustColdContext(limit: $0, session: session, request: request,
+                pool: sharedPool, batchThreads: family == "threads") }
+        }
+        children = contexts
+    }
+
+    private init(limit: Int, session: UInt64, request: UInt64, pool: RustColdPool, batchThreads: Bool) {
+        self.limit = limit; self.session = session; self.request = request; self.pool = pool
+        maximumTextBytes = pool.maximumTextBytes; staging = pool.staging
+        self.batchThreads = batchThreads; children = [:]
+    }
+
+    func context(for path: [any CodingKey]) throws -> RustColdContext {
+        guard !children.isEmpty, path.count >= 3, path[0].stringValue == "body" else { return self }
+        guard let family = children[path[1].stringValue], let index = path[2].intValue,
+              family.indices.contains(index) else { throw RustAdmission.invalidBuffer }
+        return family[index]
+    }
+
+    func pageCount(for family: String) throws -> Int {
+        guard let contexts = children[family] else { throw RustAdmission.invalidBuffer }
+        return contexts.count
+    }
+
+    func reserveArray<T>(_ type: T.Type, count: Int) throws -> Int {
+        try pool.reserveArray(type, count: count)
+    }
+
+    func text(_ string: String?, maximum: Int = 4096, allowEmpty: Bool = false) throws -> Range<Int>? {
+        try pool.text(string, maximum: maximum, allowEmpty: allowEmpty)
+    }
 
     func consumeSample() throws {
-        try state.withLock { state in
-            guard state.samples < limit else { throw RustAdmission.outputLimit }
-            state.samples += 1
+        try samples.withLock { samples in
+            guard samples < limit else { throw RustAdmission.outputLimit }
+            samples += 1
         }
     }
 }
@@ -84,7 +131,7 @@ func rustColdKeys(_ decoder: any Decoder, _ expected: Set<String>, optional: Set
 func rustColdContext(_ decoder: any Decoder) throws -> RustColdContext {
     guard let context = decoder.userInfo[rustColdContextKey] as? RustColdContext else { throw RustAdmission.internalFailure }
     try Task.checkCancellation()
-    return context
+    return try context.context(for: decoder.codingPath)
 }
 
 protocol RustColdRecord: Decodable {
