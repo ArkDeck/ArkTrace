@@ -73,8 +73,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
-      "byteCount": 7691,
-      "sha256": "074b2649ae6a2131ee1714f7fb73190449474802d8439cef947d15fb6dda12bc"
+      "byteCount": 7762,
+      "sha256": "e43b38f67943edf93ce4bbfc7b9a67cf91d8bdd05378fad0013570a37629d1a0"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",

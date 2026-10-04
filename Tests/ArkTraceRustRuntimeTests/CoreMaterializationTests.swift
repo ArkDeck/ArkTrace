@@ -65,6 +65,23 @@ final class CoreMaterializationTests: XCTestCase {
         XCTAssertEqual(metadata.sourceFormat, "htrace"); XCTAssertEqual(metadata.dataQuality.issues.count, 2)
     }
 
+    func testHostSourceFormatHintPreservesAliasesCaseAndAbsenceWithoutChangingNativeFacts() async throws {
+        let storage = pool()
+        let view = try await RustOpenDecoder.decode(openingFixture(), identity: identity, request: 9, storage: storage)
+        let canonical = try await view.copyTraceMetadata(sourceFormat: .htrace)
+        let hints: [String?] = ["htrace", "ftrace", "trace", "HTRACE", "Systrace", "记录", nil]
+        for hint in hints {
+            let copied = try await view.copyTraceMetadata(sourceFormatHint: hint)
+            XCTAssertEqual(copied.sourceFormat, hint)
+            XCTAssertEqual(copied.traceSHA256, canonical.traceSHA256)
+            XCTAssertEqual(copied.sourceByteCount, canonical.sourceByteCount)
+            XCTAssertEqual(copied.parser, canonical.parser)
+            XCTAssertEqual(copied.schemaFingerprint, canonical.schemaFingerprint)
+            XCTAssertEqual(copied.capabilities, canonical.capabilities)
+            XCTAssertEqual(copied.dataQuality, canonical.dataQuality)
+        }
+    }
+
     func testDirectoryCopiesKeepScalarExtremaUTF8NullBooleanAndMachineOrder() async throws {
         let storage = pool()
         let process: [String: Any] = ["key": Int64.max, "pid": Int64.min, "name": "进程\0😀", "startNs": NSNull(), "endNs": Int64.max, "threadCount": Int64.max]

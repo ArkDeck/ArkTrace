@@ -91,7 +91,8 @@ public final class TraceRustProductRuntime: Sendable {
         catch { throw Self.mapped(error, stage: .openingDatabase) }
         do {
             let opening = try await session.openingView()
-            let repository = try await RustTraceRepository.create(session: session, opening: opening, sourceFormat: format,
+            let repository = try await RustTraceRepository.create(session: session, opening: opening,
+                sourceFormatHint: source.pathExtension.isEmpty ? nil : source.pathExtension,
                 operationTimeoutMilliseconds: queryTimeoutMilliseconds)
             let trace = await opening.metadata.cacheKey.traceSHA256.copyString()
             let parser = await opening.metadata.cacheKey.parserKey.copyString()

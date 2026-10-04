@@ -61,6 +61,21 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     try native.write(to: root.appending(path: "product-native-metadata.json"))
     try legacy.write(to: root.appending(path: "product-swift-metadata.json"))
 }
+@concurrent private func productSourceAliases(_ source: URL, input: ProductInput) async throws -> [URL] {
+    let root = URL(filePath: input.cacheDirectory).deletingLastPathComponent().appending(path: "source-aliases")
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false, attributes: [.posixPermissions: 0o700])
+    return try ["ftrace", "trace", "HTRACE", ""].map { hint in
+        let alias = root.appending(path: hint.isEmpty ? "source" : "source.\(hint)")
+        try FileManager.default.copyItem(at: source, to: alias)
+        try FileManager.default.setAttributes([.posixPermissions: 0o400], ofItemAtPath: alias.path)
+        return alias
+    }
+}
+@concurrent private func preserveProductAliasMetadata(_ native: Data, _ legacy: Data, alias: URL) async throws {
+    let name = alias.lastPathComponent
+    try native.write(to: alias.deletingLastPathComponent().appending(path: "\(name)-native.json"))
+    try legacy.write(to: alias.deletingLastPathComponent().appending(path: "\(name)-swift.json"))
+}
 @concurrent private func preserveProductSidecar(_ root: URL, input: ProductInput) async throws {
     let manager = FileManager.default
     let entries = manager.enumerator(at: root, includingPropertiesForKeys: nil)!
@@ -118,6 +133,19 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     second.open(source); try await waitForProduct(second)
     let secondMetadata = try await productMetadata(second.metadata)
     precondition(second.cacheHit && secondMetadata == nativeMetadata)
+    for alias in try await productSourceAliases(source, input: input) {
+        second.open(alias); try await waitForProduct(second)
+        legacy.open(alias); try await waitForProduct(legacy)
+        let aliasNative = try await productMetadata(second.metadata), aliasLegacy = try await productMetadata(legacy.metadata)
+        try await preserveProductAliasMetadata(productRaw(second.metadata), productRaw(legacy.metadata), alias: alias)
+        precondition(second.cacheHit && legacy.cacheHit && aliasNative == aliasLegacy)
+        precondition(second.metadata?.sourceFormat == (alias.pathExtension.isEmpty ? nil : alias.pathExtension))
+        precondition(second.trackGroups == legacy.trackGroups)
+        let aliasNativeSnapshot = try productSnapshot(second.snapshot), aliasLegacySnapshot = try productSnapshot(legacy.snapshot)
+        precondition(aliasNativeSnapshot == aliasLegacySnapshot)
+    }
+    second.open(source); try await waitForProduct(second)
+    precondition(second.cacheHit)
     await first.refreshCacheInventory()
     precondition(first.cacheInventory?.entryCount == 1 && first.cacheInventory?.activeEntryCount == 1)
     await first.purgeUnusedCache()
@@ -154,6 +182,7 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     let storage = RustEngine.developmentColdStorageCounts()
     precondition(storage.bytes == 0 && storage.owners == 0 && storage.stagingBytes == 0 && storage.stagingOwners == 0)
     try await productEmit(["productRuntimeConnected": true, "controllerMachineModelsEqualToSwift": true,
+        "sourceFormatAliasMetadataEqualToSwift": true,
         "cacheMaintenanceBeforeOpen": true, "cacheMaintenanceActiveProtected": true,
         "cacheMaintenanceOneReaderProtected": true, "controllerSettingsPurgeAndReparse": true,
         "annotationsAndFavoritesRoundTrip": true, "persistenceDrainedBeforeClose": true,

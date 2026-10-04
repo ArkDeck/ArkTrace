@@ -34,6 +34,14 @@ public extension RustOpenView {
     /// caller owns all copied strings and Core quality facts.
     @concurrent
     func copyTraceMetadata(sourceFormat: RustSourceFormat) async throws -> TraceMetadata {
+        try await copyTraceMetadata(sourceFormatHint: sourceFormat == .htrace ? "htrace" : "systrace")
+    }
+
+    /// The host's display hint is independent of the native parser input type.
+    /// Preserve the original extension, including case and absence, just as
+    /// TraceSession does. It grants no filesystem or parser authority.
+    @concurrent
+    package func copyTraceMetadata(sourceFormatHint: String?) async throws -> TraceMetadata {
         precondition(!Thread.isMainThread)
         try Task.checkCancellation()
         let parser = metadata.parser
@@ -43,7 +51,7 @@ public extension RustOpenView {
             adapterVersion: parser.adapterVersion.copyString(), buildRecipeVersion: parser.buildRecipeVersion.copyString())
         let quality = try await coreQuality(inspection.qualityIssueCount) { inspection.qualityIssue(at: $0) }
         let copied = await TraceMetadata(traceSHA256: metadata.traceSHA256.copyString(), sourceByteCount: metadata.sourceByteCount,
-            durationNs: inspection.durationNs, sourceFormat: sourceFormat == .htrace ? "htrace" : "systrace", parser: identity,
+            durationNs: inspection.durationNs, sourceFormat: sourceFormatHint, parser: identity,
             schemaFingerprint: inspection.schemaFingerprint.copyString(), capabilities: inspection.capabilities, dataQuality: quality)
         try Task.checkCancellation()
         return copied
