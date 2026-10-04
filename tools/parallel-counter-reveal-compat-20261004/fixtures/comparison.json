@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "meaningfulNewCombinations": 14,
+  "maximumCombinations": 16,
+  "nativeFlows": 6,
+  "wrongTableRejections": 5,
+  "shapeOnlyCases": 3,
+  "legalAnchorPasses": 3,
+  "legalAnchorFailures": 3,
+  "actualProducerCompatibilityPassed": false,
+  "baselineFilesUnchanged": 946,
+  "priorFrozenOwnedChecksumEntriesVerified": 99,
+  "priorProducerFilesModified": false,
+  "databaseBytesUnchanged": true,
+  "failures": [
+    "legacy-measure-counter-anchor",
+    "merged-measure-row1",
+    "process-source-all-preserved"
+  ],
+  "intents": [
+    {
+      "id": "legacy-measure-counter-anchor",
+      "expectedContract": "legal",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "merged-measure-row1",
+      "expectedContract": "legal",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "merged-process-measure-row1",
+      "expectedContract": "legal",
+      "actualError": null,
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "cpu-real-measure-predecessor",
+      "expectedContract": "legal",
+      "actualError": null,
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "process-source-all-preserved",
+      "expectedContract": "legal",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "cpu-source-all-preserved",
+      "expectedContract": "legal",
+      "actualError": null,
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "reject-process-sched_slice",
+      "expectedContract": "invalidEvidence",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "reject-process-thread_state",
+      "expectedContract": "invalidEvidence",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "reject-process-callstack",
+      "expectedContract": "invalidEvidence",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "reject-process-frame_slice",
+      "expectedContract": "invalidEvidence",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "reject-cpu-process-measure",
+      "expectedContract": "invalidEvidence",
+      "actualError": "InvalidEvidence",
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "filter-ownership-not-provable-by-intent",
+      "expectedContract": "shapeOnly",
+      "actualError": null,
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "process-ownership-not-provable-by-intent",
+      "expectedContract": "shapeOnly",
+      "actualError": null,
+      "sourceAndEventKeyPreserved": true
+    },
+    {
+      "id": "no-after-event-does-not-invent-counter-key",
+      "expectedContract": "shapeOnly",
+      "actualError": null,
+      "sourceAndEventKeyPreserved": true
+    }
+  ],
+  "flows": [
+    {
+      "id": "legacy-measure-counter-anchor",
+      "displayedNavigationNativeParity": true,
+      "controllerSelectedKey": {
+        "rowID": 1,
+        "table": "measure"
+      },
+      "selectedValue": 999,
+      "sourcePreserved": true,
+      "rangeRevealParity": true,
+      "rangeOnlyIntentHasNoCounterEventKey": true
+    },
+    {
+      "id": "merged-measure-row1",
+      "displayedNavigationNativeParity": true,
+      "controllerSelectedKey": {
+        "rowID": 1,
+        "table": "measure"
+      },
+      "selectedValue": 999,
+      "sourcePreserved": true,
+      "rangeRevealParity": true,
+      "rangeOnlyIntentHasNoCounterEventKey": true
+    },
+    {
+      "id": "merged-process-measure-row1",
+      "displayedNavigationNativeParity": true,
+      "controllerSelectedKey": {
+        "rowID": 1,
+        "table": "process_measure"
+      },
+      "selectedValue": 99,
+      "sourcePreserved": true,
+      "rangeRevealParity": true,
+      "rangeOnlyIntentHasNoCounterEventKey": true
+    },
+    {
+      "id": "cpu-real-measure-predecessor",
+      "displayedNavigationNativeParity": true,
+      "controllerSelectedKey": {
+        "rowID": 10,
+        "table": "measure"
+      },
+      "selectedValue": 7,
+      "sourcePreserved": true,
+      "rangeRevealParity": true,
+      "rangeOnlyIntentHasNoCounterEventKey": true
+    },
+    {
+      "id": "process-source-all-preserved",
+      "displayedNavigationNativeParity": true,
+      "controllerSelectedKey": {
+        "rowID": 1,
+        "table": "measure"
+      },
+      "selectedValue": 999,
+      "sourcePreserved": true,
+      "rangeRevealParity": true,
+      "rangeOnlyIntentHasNoCounterEventKey": true
+    },
+    {
+      "id": "cpu-source-all-preserved",
+      "displayedNavigationNativeParity": true,
+      "controllerSelectedKey": {
+        "rowID": 10,
+        "table": "measure"
+      },
+      "selectedValue": 7,
+      "sourcePreserved": true,
+      "rangeRevealParity": true,
+      "rangeOnlyIntentHasNoCounterEventKey": true
+    }
+  ],
+  "apiLimits": [
+    "EventNavigationQueryIntent does not execute repository adjacency or prove filter/process ownership",
+    "RevealRange has range only; ViewAction has no SelectCounter or RevealCounterEvent case",
+    "Swift public reveal takes TraceSearchResult; its slice branch admits a namedSlice lane",
+    "New native evidence uses frozen real Inspector facts and real SQLite catalog; not a complete document-open/SDK/App acceptance"
+  ]
+}

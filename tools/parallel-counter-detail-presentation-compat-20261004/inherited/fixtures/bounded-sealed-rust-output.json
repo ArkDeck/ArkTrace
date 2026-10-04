@@ -1,0 +1,3347 @@
+[
+  {
+    "actualQuery": {
+      "cpu": 0,
+      "limit": 3,
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": null,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "cpu-normal-instant-open",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "sched_slice"
+          },
+          "kind": "cpuSlice",
+          "name": "A\u0000B🚀",
+          "pid": 700,
+          "priority": 8,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": "R",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "sched_slice"
+          },
+          "kind": "cpuSlice",
+          "name": "A\u0000B🚀",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 3,
+            "table": "sched_slice"
+          },
+          "kind": "cpuSlice",
+          "name": "A\u0000B🚀",
+          "pid": 700,
+          "priority": 9,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "semanticDurationNs": null,
+          "state": "S",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 53,
+      "retainedBytes": 1166
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "endState": "R",
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "sched_slice"
+          },
+          "pid": 700,
+          "priority": 8,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "cpu": 0,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "sched_slice"
+          },
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "cpu": 0,
+          "endState": "S",
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 3,
+            "table": "sched_slice"
+          },
+          "pid": 700,
+          "priority": 9,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": 0,
+      "limit": 1,
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 140,
+        "startNs": 100
+      },
+      "threadKey": null,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "cpu-limit-halfopen",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "sched_slice"
+          },
+          "kind": "cpuSlice",
+          "name": "A\u0000B🚀",
+          "pid": 700,
+          "priority": 8,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": "R",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 18,
+      "retainedBytes": 445
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "endState": "R",
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "sched_slice"
+          },
+          "pid": 700,
+          "priority": 8,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": 0,
+      "limit": 1,
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 25,
+        "startNs": 0
+      },
+      "threadKey": null,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "cpu-trace-start-clamp",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 6,
+            "table": "sched_slice"
+          },
+          "kind": "cpuSlice",
+          "name": "A\u0000B🚀",
+          "pid": 700,
+          "priority": 1,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 20,
+            "startNs": 0
+          },
+          "semanticDurationNs": 20,
+          "state": "R",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 18,
+      "retainedBytes": 445
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "endState": "R",
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 6,
+            "table": "sched_slice"
+          },
+          "pid": 700,
+          "priority": 1,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 20,
+            "startNs": 0
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.dur"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": 1,
+      "limit": 1,
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": null,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "cpu-reused-pid-tid",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "cpu",
+          "cpu": 1,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "kind": "cpuSlice",
+          "name": "",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "semanticDurationNs": 30,
+          "state": null,
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": "",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 0,
+      "retainedBytes": 427
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 1,
+          "endState": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "sched_slice"
+          },
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": "",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": null,
+      "limit": 3,
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "rawState": null,
+      "state": null,
+      "threadKey": 11,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "thread-state-utf8-nullable-open",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "runnable",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "thread_state"
+          },
+          "kind": "threadState",
+          "name": null,
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": "R",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "thread_state"
+          },
+          "kind": "threadState",
+          "name": null,
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": "mystery🧪",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": "sleeping",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 3,
+            "table": "thread_state"
+          },
+          "kind": "threadState",
+          "name": null,
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "semanticDurationNs": null,
+          "state": "S",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 64,
+      "retainedBytes": 1190
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "thread_state"
+          },
+          "normalizedState": "runnable",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "state": "R",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "cpu": null,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "thread_state"
+          },
+          "normalizedState": null,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "state": "mystery🧪",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "cpu": null,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 3,
+            "table": "thread_state"
+          },
+          "normalizedState": "sleeping",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "state": "S",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        },
+        {
+          "category": "invalidValue",
+          "count": 1,
+          "message": null,
+          "scope": "thread_state.state"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": null,
+      "limit": 1,
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "rawState": null,
+      "state": null,
+      "threadKey": 12,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "thread-state-reused-tid",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "running",
+          "cpu": 1,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "thread_state"
+          },
+          "kind": "threadState",
+          "name": null,
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "semanticDurationNs": 30,
+          "state": "Running",
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": "",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 7,
+      "retainedBytes": 438
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "thread_state"
+          },
+          "normalizedState": "running",
+          "pid": 700,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "state": "Running",
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": "",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "depth": null,
+      "eventKey": null,
+      "includesArgumentSet": false,
+      "limit": 2,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": 11,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "named-stable-prefix-limit",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "同刻🧪",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": "",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "semanticDurationNs": 30,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 44,
+      "retainedBytes": 811
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "同刻🧪",
+          "parentEventKey": null,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "category": "",
+          "depth": 1,
+          "isAsync": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "name": "",
+          "parentEventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": true
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "depth": null,
+      "eventKey": null,
+      "includesArgumentSet": false,
+      "limit": 2,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": 11,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": "",
+          "depth": 1,
+          "isAsync": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "name": "",
+          "parentEventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "focusedQuery": {
+      "depth": null,
+      "eventKey": {
+        "rowID": 9,
+        "table": "callstack"
+      },
+      "includesArgumentSet": false,
+      "limit": 1,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": 11,
+      "tid": null
+    },
+    "id": "named-focus-in-page-dedup",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "semanticDurationNs": 30,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "同刻🧪",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 44,
+      "retainedBytes": 811
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "同刻🧪",
+          "parentEventKey": null,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "category": "",
+          "depth": 1,
+          "isAsync": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "name": "",
+          "parentEventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": true
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "depth": null,
+      "eventKey": null,
+      "includesArgumentSet": false,
+      "limit": 2,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": 11,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 2,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "name": "焦点",
+          "parentEventKey": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "focusedQuery": {
+      "depth": null,
+      "eventKey": {
+        "rowID": 4,
+        "table": "callstack"
+      },
+      "includesArgumentSet": false,
+      "limit": 1,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": 11,
+      "tid": null
+    },
+    "id": "named-focus-outside-prefix",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "焦点",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "同刻🧪",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 50,
+      "retainedBytes": 817
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "name": "同刻🧪",
+          "parentEventKey": null,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "category": "",
+          "depth": 1,
+          "isAsync": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "name": "",
+          "parentEventKey": {
+            "rowID": 2,
+            "table": "callstack"
+          },
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 130,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": true
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "depth": null,
+      "eventKey": null,
+      "includesArgumentSet": false,
+      "limit": 2,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": null,
+      "tid": null,
+      "unattributedOnly": true
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "named-unattributed-integer-zero",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 7,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "无归属",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": "",
+          "cpu": null,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 8,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "unattributed instant",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 29,
+      "retainedBytes": 813
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 7,
+            "table": "callstack"
+          },
+          "name": "无归属",
+          "parentEventKey": null,
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": null,
+          "threadName": null,
+          "tid": null
+        },
+        {
+          "category": "",
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 8,
+            "table": "callstack"
+          },
+          "name": "unattributed instant",
+          "parentEventKey": null,
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "threadKey": null,
+          "threadName": null,
+          "tid": null
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "depth": null,
+      "eventKey": null,
+      "includesArgumentSet": false,
+      "limit": 1,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "threadKey": 12,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "named-reused-tid",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 10,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "reused TID",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": "",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 10,
+      "retainedBytes": 434
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 10,
+            "table": "callstack"
+          },
+          "name": "reused TID",
+          "parentEventKey": null,
+          "pid": 700,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": "",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "depth": null,
+      "eventKey": null,
+      "includesArgumentSet": false,
+      "limit": 2,
+      "minimumDurationNs": null,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 140
+      },
+      "threadKey": 11,
+      "tid": null
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "named-instant-open-halfopen",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "焦点",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        },
+        {
+          "category": null,
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "kind": "namedSlice",
+          "name": "open",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "semanticDurationNs": null,
+          "state": null,
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701,
+          "unit": null,
+          "value": null
+        }
+      ],
+      "inputStringBytes": 44,
+      "retainedBytes": 811
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "category": null,
+          "depth": 2,
+          "isAsync": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "callstack"
+          },
+          "name": "焦点",
+          "parentEventKey": {
+            "rowID": 9,
+            "table": "callstack"
+          },
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        },
+        {
+          "category": null,
+          "depth": 0,
+          "isAsync": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 5,
+            "table": "callstack"
+          },
+          "name": "open",
+          "parentEventKey": null,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": "A\u0000B🚀",
+          "tid": 701
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "limit": 3,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      }
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "frame-label-instant-open",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "frame",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "frame_slice"
+          },
+          "kind": "frame",
+          "name": "vsync 3 actual · jank",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": "jank",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": null,
+          "tid": null,
+          "unit": "vsync",
+          "value": 3
+        },
+        {
+          "category": "frame",
+          "cpu": null,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "frame_slice"
+          },
+          "kind": "frame",
+          "name": "vsync 4 expected",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": "on time",
+          "threadKey": {
+            "itid": 11
+          },
+          "threadName": null,
+          "tid": null,
+          "unit": "vsync",
+          "value": 4
+        },
+        {
+          "category": "frame",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 3,
+            "table": "frame_slice"
+          },
+          "kind": "frame",
+          "name": "vsync 5 expected",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "semanticDurationNs": null,
+          "state": "on time",
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "vsync",
+          "value": 5
+        }
+      ],
+      "inputStringBytes": 30,
+      "retainedBytes": 1229
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "flag": 1,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": -4,
+            "table": "frame_slice"
+          },
+          "kind": 0,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "vsync": 3
+        },
+        {
+          "flag": 0,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 2,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "threadKey": {
+            "itid": 11
+          },
+          "vsync": 4
+        },
+        {
+          "flag": 2,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 3,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 1000,
+            "startNs": 150
+          },
+          "vsync": 5
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "limit": 1,
+      "processKey": 2,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      }
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "frame-reused-pid",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "frame",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "frame_slice"
+          },
+          "kind": "frame",
+          "name": "vsync 3 expected",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": "on time",
+          "threadKey": {
+            "itid": 12
+          },
+          "threadName": null,
+          "tid": null,
+          "unit": "vsync",
+          "value": 3
+        }
+      ],
+      "inputStringBytes": 0,
+      "retainedBytes": 457
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "flag": 0,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 5,
+            "table": "frame_slice"
+          },
+          "kind": 1,
+          "pid": 700,
+          "processKey": {
+            "ipid": 2
+          },
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "threadKey": {
+            "itid": 12
+          },
+          "vsync": 3
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": 0,
+      "filterID": 10,
+      "limit": 3,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "cpu"
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "cpu-counter-predecessor-nil-duration",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "name": "频率🚀",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "semanticDurationNs": 200,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "MHz",
+          "value": 7
+        },
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 11,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "name": "频率🚀",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "MHz",
+          "value": 8
+        },
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 12,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "name": "频率🚀",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "semanticDurationNs": null,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "MHz",
+          "value": 9
+        }
+      ],
+      "inputStringBytes": 39,
+      "retainedBytes": 1160
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "filterID": 10,
+          "name": "频率🚀",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 200,
+              "key": {
+                "rowID": 10,
+                "table": "measure"
+              },
+              "timestampNs": 0,
+              "value": 7
+            },
+            {
+              "durationNs": 0,
+              "key": {
+                "rowID": 11,
+                "table": "measure"
+              },
+              "timestampNs": 140,
+              "value": 8
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 12,
+                "table": "measure"
+              },
+              "timestampNs": 150,
+              "value": 9
+            }
+          ],
+          "scope": "cpu",
+          "unit": "MHz"
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.dur"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": 0,
+      "filterID": 10,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 150,
+        "startNs": 140
+      },
+      "scope": "cpu"
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "cpu-counter-left-bound-instant",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "name": "频率🚀",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "semanticDurationNs": 200,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "MHz",
+          "value": 7
+        },
+        {
+          "category": "cpu",
+          "cpu": 0,
+          "isInstant": true,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 11,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "name": "频率🚀",
+          "pid": null,
+          "priority": null,
+          "processKey": null,
+          "processName": null,
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "semanticDurationNs": 0,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "MHz",
+          "value": 8
+        }
+      ],
+      "inputStringBytes": 26,
+      "retainedBytes": 800
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "filterID": 10,
+          "name": "频率🚀",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 200,
+              "key": {
+                "rowID": 10,
+                "table": "measure"
+              },
+              "timestampNs": 0,
+              "value": 7
+            },
+            {
+              "durationNs": 0,
+              "key": {
+                "rowID": 11,
+                "table": "measure"
+              },
+              "timestampNs": 140,
+              "value": 8
+            }
+          ],
+          "scope": "cpu",
+          "unit": "MHz"
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.dur"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "native-process-counter-nil-duration",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "process",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "name": "legacy",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": null,
+          "value": 99
+        },
+        {
+          "category": "process",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": true,
+          "key": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "name": "legacy",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "semanticDurationNs": null,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": null,
+          "value": 100
+        }
+      ],
+      "inputStringBytes": 32,
+      "retainedBytes": 807
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 2,
+                "table": "process_measure"
+              },
+              "timestampNs": 150,
+              "value": 100
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": null,
+      "filterID": 21,
+      "limit": 1,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 2,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": null,
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "native-process-counter-nullable-metadata",
+    "projection": {
+      "error": null,
+      "facts": [
+        {
+          "category": "process",
+          "cpu": null,
+          "isInstant": false,
+          "isOpenEnded": false,
+          "key": {
+            "rowID": 4,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "name": "process2",
+          "pid": 700,
+          "priority": null,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "semanticDurationNs": 20,
+          "state": null,
+          "threadKey": null,
+          "threadName": null,
+          "tid": null,
+          "unit": "",
+          "value": 99
+        }
+      ],
+      "inputStringBytes": 8,
+      "retainedBytes": 439
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 21,
+          "name": "process2",
+          "pid": 700,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 4,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            }
+          ],
+          "scope": "process",
+          "unit": ""
+        }
+      ],
+      "truncated": false
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  },
+  {
+    "actualQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "applicableIndexes": [
+      "arktrace_v1_callstack_callid_ts",
+      "arktrace_v1_measure_filter_id_ts",
+      "arktrace_v1_process_ipid",
+      "arktrace_v1_process_pid",
+      "arktrace_v1_sched_slice_itid_ts",
+      "arktrace_v1_sched_slice_ts_cpu",
+      "arktrace_v1_thread_itid",
+      "arktrace_v1_thread_state_itid_ts",
+      "arktrace_v1_thread_state_ts_cpu",
+      "arktrace_v1_thread_tid_ipid",
+      "arktrace_v2_callstack_callid_ts_cover_optional",
+      "arktrace_v2_callstack_callid_ts_id_dur",
+      "arktrace_v2_cpu_measure_filter_id",
+      "arktrace_v2_process_ipid_pid_name",
+      "arktrace_v2_process_measure_filter_id",
+      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+      "arktrace_v2_thread_itid_tid_name_ipid",
+      "arktrace_v2_thread_state_itid_ts_cover_cpu",
+      "arktrace_v2_thread_state_itid_ts_id_dur",
+      "arktrace_v3_callstack_callid_ts_dur",
+      "arktrace_v3_callstack_ts_id_dur_callid",
+      "arktrace_v3_sched_slice_cpu_ts_dur",
+      "arktrace_v3_thread_state_itid_ts_dur"
+    ],
+    "detailAdapterError": "InvalidEvidence",
+    "focusedPage": null,
+    "focusedQuery": null,
+    "id": "merged-physical-table-rowid-collision",
+    "projection": {
+      "error": "invalidEventKey",
+      "facts": null
+    },
+    "repositoryPage": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "measure"
+              },
+              "timestampNs": 100,
+              "value": 999
+            },
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": true
+    },
+    "repositoryQuality": {
+      "status": "warnings",
+      "warnings": [
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "measure.ts"
+        },
+        {
+          "category": "clampedValue",
+          "count": 1,
+          "message": null,
+          "scope": "sched_slice.ts"
+        }
+      ]
+    }
+  }
+]

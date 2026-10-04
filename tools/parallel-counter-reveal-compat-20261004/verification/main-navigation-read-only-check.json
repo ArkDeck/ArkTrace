@@ -1,0 +1,42 @@
+{
+  "sourceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+  "records": [
+    {
+      "path": "rust/crates/arktrace-viewer/src/navigation.rs",
+      "mainSHA256": "482abd59baa65f38fa3dc022f09b9f301a4865a6a42e334bc0f0c96196b0021b",
+      "baselineSHA256": "482abd59baa65f38fa3dc022f09b9f301a4865a6a42e334bc0f0c96196b0021b",
+      "matches": true
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/view_actions.rs",
+      "mainSHA256": "0eb53ab72497aa4b57a71322bcc5fc1a539d4d1a4837b5d04086200e67fa5382",
+      "baselineSHA256": "0eb53ab72497aa4b57a71322bcc5fc1a539d4d1a4837b5d04086200e67fa5382",
+      "matches": true
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/navigation_regressions.rs",
+      "mainSHA256": "040dc5e79d98a0d34d349a0153dc48cb4eddf97f63172e75d2b9c7befd8de19d",
+      "baselineSHA256": "040dc5e79d98a0d34d349a0153dc48cb4eddf97f63172e75d2b9c7befd8de19d",
+      "matches": true
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/navigation_oracle.rs",
+      "mainSHA256": "fe660ea2df050da25932efcfd8c0c9db5044c4fadb45ff5f739f5c6473d29b04",
+      "baselineSHA256": "fe660ea2df050da25932efcfd8c0c9db5044c4fadb45ff5f739f5c6473d29b04",
+      "matches": true
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json",
+      "mainSHA256": "f5e440de3ee8b5bb92e93608f0fadb9464ed0a87db20465d046c0107ef67379c",
+      "baselineSHA256": "f5e440de3ee8b5bb92e93608f0fadb9464ed0a87db20465d046c0107ef67379c",
+      "matches": true
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json",
+      "mainSHA256": "741e13810c42e610b0f89adf151c7790570471d2e4c08e38615062507869aef8",
+      "baselineSHA256": "741e13810c42e610b0f89adf151c7790570471d2e4c08e38615062507869aef8",
+      "matches": true
+    }
+  ],
+  "note": "Existing intent regression covers NamedSlice bounds; no process Measure anchor. Prior canonical renders synthetic detail facts; new flow reuses actual frozen counter Inspectors and real SQLite catalog."
+}

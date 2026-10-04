@@ -1,0 +1,39 @@
+--- a/rust/crates/arktrace-viewer/src/detail.rs
++++ b/rust/crates/arktrace-viewer/src/detail.rs
+@@ -264,9 +264,15 @@
+                     };
+                     let range = TraceTimeRange::event(sample.timestamp_ns, end)
+                         .map_err(|_| ViewerError::InvalidEvidence)?;
++                    if sample.key.table != expected.1
++                        && !(series.scope == CounterScope::Process
++                            && sample.key.table == EventTable::Measure)
++                    {
++                        return Err(ViewerError::InvalidEvidence);
++                    }
+                     items.push(input(
+                         sample.key,
+-                        expected.1,
++                        sample.key.table,
+                         range,
+                         0,
+                         DetailStyle::Counter,
+--- a/rust/crates/arktrace-viewer/src/presentation.rs
++++ b/rust/crates/arktrace-viewer/src/presentation.rs
+@@ -552,10 +552,16 @@
+                 } else {
+                     EventTable::ProcessMeasure
+                 };
++                if sample.key.table != table
++                    && !(series.scope == CounterScope::Process
++                        && sample.key.table == EventTable::Measure)
++                {
++                    return Err(ViewerError::InvalidEvidence);
++                }
+                 builder.detail(
+                     primitive(
+                         sample.key,
+-                        table,
++                        sample.key.table,
+                         range,
+                         0,
+                         DetailStyle::Counter,

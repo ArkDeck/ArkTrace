@@ -1,0 +1,679 @@
+[
+  {
+    "id": "legacy-measure-counter-anchor",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "rowID": 1,
+      "table": "measure"
+    },
+    "expected": "legal",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1,
+    "fixture": "minimal",
+    "inspectors": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": null,
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 999
+      }
+    ],
+    "targetOrdinal": 0,
+    "title": "legacy"
+  },
+  {
+    "id": "merged-measure-row1",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "rowID": 1,
+      "table": "measure"
+    },
+    "expected": "legal",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1,
+    "fixture": "merged",
+    "inspectors": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 999
+      },
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 99
+      }
+    ],
+    "targetOrdinal": 0,
+    "title": "legacy"
+  },
+  {
+    "id": "merged-process-measure-row1",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "rowID": 1,
+      "table": "process_measure"
+    },
+    "expected": "legal",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1,
+    "fixture": "merged",
+    "inspectors": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 999
+      },
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 99
+      }
+    ],
+    "targetOrdinal": 1,
+    "title": "legacy"
+  },
+  {
+    "id": "cpu-real-measure-predecessor",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "afterEvent": {
+      "rowID": 10,
+      "table": "measure"
+    },
+    "expected": "legal",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 0,
+    "direction": "next",
+    "limit": 1,
+    "fixture": "native",
+    "inspectors": [
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 0
+        },
+        "semanticDurationNs": 200,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 7
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": true,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 11,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 140,
+          "startNs": 140
+        },
+        "semanticDurationNs": 0,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 8
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": true,
+        "key": {
+          "rowID": 12,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 150
+        },
+        "semanticDurationNs": null,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 9
+      }
+    ],
+    "targetOrdinal": 0,
+    "title": "频率🚀"
+  },
+  {
+    "id": "process-source-all-preserved",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": null
+      }
+    },
+    "afterEvent": {
+      "rowID": 1,
+      "table": "measure"
+    },
+    "expected": "legal",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1,
+    "fixture": "minimal",
+    "inspectors": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": null,
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 999
+      }
+    ],
+    "targetOrdinal": 0,
+    "title": "legacy"
+  },
+  {
+    "id": "cpu-source-all-preserved",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": null
+      }
+    },
+    "afterEvent": {
+      "rowID": 10,
+      "table": "measure"
+    },
+    "expected": "legal",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 0,
+    "direction": "next",
+    "limit": 1,
+    "fixture": "native",
+    "inspectors": [
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 0
+        },
+        "semanticDurationNs": 200,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 7
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": true,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 11,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 140,
+          "startNs": 140
+        },
+        "semanticDurationNs": 0,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 8
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": true,
+        "key": {
+          "rowID": 12,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 150
+        },
+        "semanticDurationNs": null,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 9
+      }
+    ],
+    "targetOrdinal": 0,
+    "title": "频率🚀"
+  },
+  {
+    "id": "reject-process-sched_slice",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "sched_slice",
+      "rowID": 1
+    },
+    "expected": "invalidEvidence",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "reject-process-thread_state",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "thread_state",
+      "rowID": 1
+    },
+    "expected": "invalidEvidence",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "reject-process-callstack",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "callstack",
+      "rowID": 1
+    },
+    "expected": "invalidEvidence",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "reject-process-frame_slice",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "frame_slice",
+      "rowID": 1
+    },
+    "expected": "invalidEvidence",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "reject-cpu-process-measure",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "afterEvent": {
+      "table": "process_measure",
+      "rowID": 1
+    },
+    "expected": "invalidEvidence",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "filter-ownership-not-provable-by-intent",
+    "source": {
+      "processCounter": {
+        "filterID": 999,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "process_measure",
+      "rowID": 1
+    },
+    "expected": "shapeOnly",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "process-ownership-not-provable-by-intent",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 2
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "process_measure",
+      "rowID": 1
+    },
+    "expected": "shapeOnly",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  },
+  {
+    "id": "no-after-event-does-not-invent-counter-key",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": null,
+    "expected": "shapeOnly",
+    "identity": {
+      "sessionId": 71,
+      "generation": 8
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1
+  }
+]

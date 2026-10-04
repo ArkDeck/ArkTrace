@@ -1,0 +1,42 @@
+[
+  {
+    "command": [
+      "swift",
+      "--version"
+    ],
+    "exitCode": 0,
+    "output": "swift-driver version: 1.168.6 Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0\n"
+  },
+  {
+    "command": [
+      "rustc",
+      "+1.99.0",
+      "--version"
+    ],
+    "exitCode": 0,
+    "output": "rustc 1.99.0 (b940084d7 2026-09-28)\n"
+  },
+  {
+    "command": [
+      "xcodebuild",
+      "-version"
+    ],
+    "exitCode": 0,
+    "output": "Xcode 27.0\nBuild version 27A266a\n"
+  },
+  {
+    "command": [
+      "sw_vers"
+    ],
+    "exitCode": 0,
+    "output": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428\n"
+  },
+  {
+    "command": [
+      "uname",
+      "-m"
+    ],
+    "exitCode": 0,
+    "output": "arm64\n"
+  }
+]

@@ -1,0 +1,168 @@
+{
+  "newCombinations": 12,
+  "actualDTOGroups": 6,
+  "actualSwiftSamples": 11,
+  "matchedAcceptedActualGroups": 4,
+  "matchedAcceptedActualSamples": 8,
+  "legalRejectedGroups": 2,
+  "legalRejectedFunctionCalls": 4,
+  "derivedControlsPassed": 6,
+  "failures": [
+    {
+      "id": "legacy-process-measure-single",
+      "functions": [
+        "map_detail_page",
+        "present"
+      ],
+      "errors": [
+        "InvalidEvidence",
+        "InvalidEvidence"
+      ],
+      "canonicalSamples": 1
+    },
+    {
+      "id": "merged-physical-table-rowid-collision",
+      "functions": [
+        "map_detail_page",
+        "present"
+      ],
+      "errors": [
+        "InvalidEvidence",
+        "InvalidEvidence"
+      ],
+      "canonicalSamples": 2
+    }
+  ],
+  "cases": [
+    {
+      "id": "legacy-process-measure-single",
+      "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+      "detailError": "InvalidEvidence",
+      "presentationError": "InvalidEvidence",
+      "actualSwiftSamples": 1,
+      "blockedFunctions": [
+        "map_detail_page",
+        "present"
+      ]
+    },
+    {
+      "id": "cpu-counter-predecessor-nil-duration",
+      "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+      "detailError": null,
+      "presentationError": null,
+      "actualSwiftSamples": 3,
+      "blockedFunctions": []
+    },
+    {
+      "id": "cpu-counter-left-bound-instant",
+      "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+      "detailError": null,
+      "presentationError": null,
+      "actualSwiftSamples": 2,
+      "blockedFunctions": []
+    },
+    {
+      "id": "native-process-counter-nil-duration",
+      "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+      "detailError": null,
+      "presentationError": null,
+      "actualSwiftSamples": 2,
+      "blockedFunctions": []
+    },
+    {
+      "id": "native-process-counter-nullable-metadata",
+      "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+      "detailError": null,
+      "presentationError": null,
+      "actualSwiftSamples": 1,
+      "blockedFunctions": []
+    },
+    {
+      "id": "merged-physical-table-rowid-collision",
+      "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+      "detailError": "InvalidEvidence",
+      "presentationError": "InvalidEvidence",
+      "actualSwiftSamples": 2,
+      "blockedFunctions": [
+        "map_detail_page",
+        "present"
+      ]
+    },
+    {
+      "id": "cpu-wrong-process-measure",
+      "origin": "explicit-derived-control",
+      "detailError": "InvalidEvidence",
+      "presentationError": "InvalidEvidence",
+      "controlContractPassed": true
+    },
+    {
+      "id": "process-wrong-callstack",
+      "origin": "explicit-derived-control",
+      "detailError": "InvalidEvidence",
+      "presentationError": "InvalidEvidence",
+      "controlContractPassed": true
+    },
+    {
+      "id": "process-filter-mismatch",
+      "origin": "explicit-derived-control",
+      "detailError": "InvalidEvidence",
+      "presentationError": null,
+      "controlContractPassed": true
+    },
+    {
+      "id": "process-ipid-mismatch-same-pid",
+      "origin": "explicit-derived-control",
+      "detailError": "InvalidEvidence",
+      "presentationError": null,
+      "controlContractPassed": true
+    },
+    {
+      "id": "native-truncated-retains-machine-quality",
+      "origin": "explicit-derived-control",
+      "detailError": null,
+      "presentationError": null,
+      "controlContractPassed": true
+    },
+    {
+      "id": "cpu-total-sample-budget-two-for-three",
+      "origin": "explicit-derived-control",
+      "detailError": "InputBudgetExceeded",
+      "presentationError": "InputBudgetExceeded",
+      "controlContractPassed": true
+    }
+  ],
+  "comparison": {
+    "detailFields": [
+      "eventKey",
+      "range",
+      "depth",
+      "style",
+      "isOpenEnded"
+    ],
+    "presentationFieldCount": 13,
+    "presentationFields": [
+      "category",
+      "color",
+      "depth",
+      "identity",
+      "isInstant",
+      "isOpenEnded",
+      "jankTag",
+      "key",
+      "kind",
+      "label",
+      "range",
+      "state",
+      "style"
+    ],
+    "pageFields": [
+      "capabilityAvailable",
+      "truncated",
+      "dataQuality"
+    ],
+    "integerFacts": "exact JSON integer equality in Rust; only declared CGColor RGBA uses exact f64 comparison",
+    "copiedExpectedAlgorithm": false
+  },
+  "publicEntryLimitation": "present consumes raw CounterSeries and cannot consume DetailInput or retain page quality/truncation",
+  "formalAT_RUST_011_orMacOSAcceptance": false
+}

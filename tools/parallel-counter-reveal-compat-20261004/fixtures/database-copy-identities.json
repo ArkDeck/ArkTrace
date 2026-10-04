@@ -1,0 +1,23 @@
+[
+  {
+    "fixture": "native",
+    "source": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/native/fixture.sqlite",
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/native/fixture.sqlite",
+    "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+    "byteCount": 155648
+  },
+  {
+    "fixture": "merged",
+    "source": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/merged/fixture.sqlite",
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/merged/fixture.sqlite",
+    "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+    "byteCount": 155648
+  },
+  {
+    "fixture": "minimal",
+    "source": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/minimal/fixture.sqlite",
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/minimal/fixture.sqlite",
+    "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+    "byteCount": 122880
+  }
+]

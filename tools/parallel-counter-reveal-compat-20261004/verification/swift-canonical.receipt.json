@@ -1,0 +1,119 @@
+{
+  "label": "swift-canonical",
+  "command": [
+    "sh",
+    "scripts/run-swiftpm.sh",
+    "test",
+    "--disable-sandbox",
+    "--config-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/config",
+    "--security-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/security",
+    "--filter",
+    "CounterRevealCompatibilityOracleTests"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/oracle-source",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "log": "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.log",
+  "sha256": "2eab62d09c3caec3934edfbe483952fd1fed98e9991f5c5c175df7cf1d3e3ca4",
+  "byteCount": 9940,
+  "databaseBefore": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "databaseAfter": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "environment": {
+    "ARKTRACE_SWIFTPM_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/stable-cache",
+    "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+    "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004/tools/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json",
+    "COUNTER_REVEAL_DATABASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases",
+    "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
+  },
+  "sourceIdentities": [
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+      "byteCount": 92567
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+      "byteCount": 101313
+    },
+    {
+      "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+      "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+      "byteCount": 160666
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+      "byteCount": 49595
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "byteCount": 5258
+    }
+  ],
+  "cacheControllerIdentity": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/stable-cache/workspace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+    "sha256": "c97d8b69f781a6ed4ee0b296098d2c6663130cdf2dece62e3ad1fec7aa13e758"
+  },
+  "seam": {
+    "path": "tools/parallel-counter-reveal-compat-20261004/swift/ControllerAccess.swift",
+    "sha256": "d3f58699174005d1086c8c81c5f024951834312d1f80543224ea01c5c99d03b0"
+  },
+  "harness": {
+    "path": "tools/parallel-counter-reveal-compat-20261004/swift/CounterRevealCompatibilityOracleTests.swift",
+    "sha256": "dddefa150a92a05dafc0cc8ce2642623e3c9a211b3eb18efcf587da13c57bfa3"
+  },
+  "input": {
+    "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+    "sha256": "cebf85e2b8eb0831803c041afefedc07725e2362fbe018f029b1a0519292d289"
+  },
+  "output": {
+    "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json",
+    "sha256": "47c7da4e18ba3a7207957452a5fce0740c6dbc879259be6cd7ed09bcafd5f293"
+  },
+  "nativeFlowCount": 6,
+  "repositoryStubUsed": false,
+  "inspectorAlgorithmCopied": false,
+  "newRepositoryInspectorMatrixRerun": false
+}

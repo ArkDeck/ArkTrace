@@ -665,6 +665,12 @@ actual Swift canonical 与 88 项相关回归通过；四份新 oracle 输出逐
 deferred editor 身份。host 总预算、持久化接线和 Engine/FFI/SDK/App 未完成；原始
 历史报告未重写。见[主线标注记录](migration-runs/AT-RUST-011-2026-10-04-mainline-annotations.md)。
 
+当前 counter 兼容修复允许合法 process counter 保留 `measure` 或
+`process_measure` 的真实 EventKey；CPU counter 仍只接受 `measure`。
+主 workspace 增加 5 项永久回归，当前实际 Swift loader/style 与原生选择/reveal
+输出逐字节一致。生产 wire、SDK/App 接线和完整验收仍未完成，见
+[主线 counter 兼容记录](migration-runs/AT-RUST-011-2026-10-04-mainline-counter-compat.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：008、009、011。

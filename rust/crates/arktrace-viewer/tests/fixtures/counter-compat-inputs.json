@@ -1,0 +1,913 @@
+[
+  {
+    "id": "legacy-process-measure-single",
+    "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 1,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "measure"
+              },
+              "timestampNs": 100,
+              "value": 999
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "cpu-counter-predecessor-nil-duration",
+    "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 3,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "filterID": 10,
+          "name": "频率🚀",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 200,
+              "key": {
+                "rowID": 10,
+                "table": "measure"
+              },
+              "timestampNs": 0,
+              "value": 7
+            },
+            {
+              "durationNs": 0,
+              "key": {
+                "rowID": 11,
+                "table": "measure"
+              },
+              "timestampNs": 140,
+              "value": 8
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 12,
+                "table": "measure"
+              },
+              "timestampNs": 150,
+              "value": 9
+            }
+          ],
+          "scope": "cpu",
+          "unit": "MHz"
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "cpu-counter-left-bound-instant",
+    "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "range": {
+      "endNs": 150,
+      "startNs": 140
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "filterID": 10,
+          "name": "频率🚀",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 200,
+              "key": {
+                "rowID": 10,
+                "table": "measure"
+              },
+              "timestampNs": 0,
+              "value": 7
+            },
+            {
+              "durationNs": 0,
+              "key": {
+                "rowID": 11,
+                "table": "measure"
+              },
+              "timestampNs": 140,
+              "value": 8
+            }
+          ],
+          "scope": "cpu",
+          "unit": "MHz"
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "native-process-counter-nil-duration",
+    "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 2,
+                "table": "process_measure"
+              },
+              "timestampNs": 150,
+              "value": 100
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "native-process-counter-nullable-metadata",
+    "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+    "source": {
+      "processCounter": {
+        "filterID": 21,
+        "processKey": {
+          "ipid": 2
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 1,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 21,
+          "name": "process2",
+          "pid": 700,
+          "processKey": {
+            "ipid": 2
+          },
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 4,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            }
+          ],
+          "scope": "process",
+          "unit": ""
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "merged-physical-table-rowid-collision",
+    "origin": "inherited-actual-Rust-and-Swift-repository-DTO",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "measure"
+              },
+              "timestampNs": 100,
+              "value": 999
+            },
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "cpu-wrong-process-measure",
+    "origin": "explicit-derived-control",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 3,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "filterID": 10,
+          "name": "频率🚀",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 200,
+              "key": {
+                "rowID": 10,
+                "table": "process_measure"
+              },
+              "timestampNs": 0,
+              "value": 7
+            },
+            {
+              "durationNs": 0,
+              "key": {
+                "rowID": 11,
+                "table": "measure"
+              },
+              "timestampNs": 140,
+              "value": 8
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 12,
+                "table": "measure"
+              },
+              "timestampNs": 150,
+              "value": 9
+            }
+          ],
+          "scope": "cpu",
+          "unit": "MHz"
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    },
+    "parent": "cpu-counter-predecessor-nil-duration"
+  },
+  {
+    "id": "process-wrong-callstack",
+    "origin": "explicit-derived-control",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "callstack"
+              },
+              "timestampNs": 100,
+              "value": 99
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 2,
+                "table": "process_measure"
+              },
+              "timestampNs": 150,
+              "value": 100
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    },
+    "parent": "native-process-counter-nil-duration"
+  },
+  {
+    "id": "process-filter-mismatch",
+    "origin": "explicit-derived-control",
+    "source": {
+      "processCounter": {
+        "filterID": 999,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 2,
+                "table": "process_measure"
+              },
+              "timestampNs": 150,
+              "value": 100
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    },
+    "parent": "native-process-counter-nil-duration"
+  },
+  {
+    "id": "process-ipid-mismatch-same-pid",
+    "origin": "explicit-derived-control",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 2
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 2,
+                "table": "process_measure"
+              },
+              "timestampNs": 150,
+              "value": 100
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    },
+    "parent": "native-process-counter-nil-duration"
+  },
+  {
+    "id": "native-truncated-retains-machine-quality",
+    "origin": "explicit-derived-control",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": null,
+          "filterID": 20,
+          "name": "legacy",
+          "pid": 700,
+          "processKey": {
+            "ipid": 1
+          },
+          "processName": "进程🚀",
+          "samples": [
+            {
+              "durationNs": 20,
+              "key": {
+                "rowID": 1,
+                "table": "process_measure"
+              },
+              "timestampNs": 100,
+              "value": 99
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 2,
+                "table": "process_measure"
+              },
+              "timestampNs": 150,
+              "value": 100
+            }
+          ],
+          "scope": "process",
+          "unit": null
+        }
+      ],
+      "truncated": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    },
+    "parent": "native-process-counter-nil-duration"
+  },
+  {
+    "id": "cpu-total-sample-budget-two-for-three",
+    "origin": "explicit-derived-control",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "limit": 2,
+    "page": {
+      "capabilityAvailable": true,
+      "items": [
+        {
+          "cpu": 0,
+          "filterID": 10,
+          "name": "频率🚀",
+          "pid": null,
+          "processKey": null,
+          "processName": null,
+          "samples": [
+            {
+              "durationNs": 200,
+              "key": {
+                "rowID": 10,
+                "table": "measure"
+              },
+              "timestampNs": 0,
+              "value": 7
+            },
+            {
+              "durationNs": 0,
+              "key": {
+                "rowID": 11,
+                "table": "measure"
+              },
+              "timestampNs": 140,
+              "value": 8
+            },
+            {
+              "durationNs": null,
+              "key": {
+                "rowID": 12,
+                "table": "measure"
+              },
+              "timestampNs": 150,
+              "value": 9
+            }
+          ],
+          "scope": "cpu",
+          "unit": "MHz"
+        }
+      ],
+      "truncated": false,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      }
+    },
+    "parent": "cpu-counter-predecessor-nil-duration"
+  }
+]

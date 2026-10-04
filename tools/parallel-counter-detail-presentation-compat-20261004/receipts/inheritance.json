@@ -1,0 +1,595 @@
+{
+  "priorManifest": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/docs/migration-runs/AT-RUST-011-parallel-repository-inspector-parity-2026-10-04.sha256",
+    "byteCount": 15088,
+    "sha256": "475a1d0df79838d47286c56f53f80b35e987d6b08409371acda9fe330457584a"
+  },
+  "allFrozenPriorChecksums": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/docs/migration-runs/AT-RUST-011-parallel-repository-inspector-parity-2026-10-04.json",
+      "byteCount": 69709,
+      "sha256": "db96f66fadf5255f53b65cc24adaafb24338edb9577852b857164459204867a6"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/docs/migration-runs/AT-RUST-011-parallel-repository-inspector-parity-2026-10-04.md",
+      "byteCount": 7836,
+      "sha256": "93ba6f72cee7116fc296ef987b8f8e96973ec3a2cdd81e153bc374480156282c"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/Cargo.lock",
+      "byteCount": 7880,
+      "sha256": "66f67fed27780125cdb41db27080e62db0ec6ba450762a52f5c5526fc6daa193"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/Cargo.toml",
+      "byteCount": 721,
+      "sha256": "9212acc244b782fddbaf14e02a13021623944095995784adf127134bfda5ac25"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/counter-physical-source-proposal.patch",
+      "byteCount": 2176,
+      "sha256": "a51617ce35afdc4326155bd5542967f118f4384832fec500df3b8b5dcec6d46f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/base.sql",
+      "byteCount": 2722,
+      "sha256": "2b74743dffded647f150691fc7a3044c7322832297cc87d71bc69bddac0188c2"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-cases.json",
+      "byteCount": 3946,
+      "sha256": "55f26fa630e179b0e330adefe4b892bcd54dc7fdee9714edb61ba2603efb4663"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-sealed-cases.json",
+      "byteCount": 3946,
+      "sha256": "55f26fa630e179b0e330adefe4b892bcd54dc7fdee9714edb61ba2603efb4663"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-sealed-rust-output.json",
+      "byteCount": 85515,
+      "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-swift-output.json",
+      "byteCount": 72355,
+      "sha256": "3c0914000a62406e85a2b956ee334945a0a229b907cc0b19e52cca8ed3559f43"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/database-generation.json",
+      "byteCount": 6154,
+      "sha256": "f54579446d636bead183272245c36b03b05a57ec7fd31bb16650014af0851671"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/legacy.sql",
+      "byteCount": 144,
+      "sha256": "77e4fb6f7281ee3885d59eb95f3477f4a22f0d5095d1dc07752e4d93deb9e6c5"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/lock-root-pin-match.json",
+      "byteCount": 8736,
+      "sha256": "f7eee9f755417cdb7f52c719b5f33688020cf24bb9abf4fc7904b8e9f2b20762"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/merged.sql",
+      "byteCount": 151,
+      "sha256": "ff6d36597a78e1cd35185c05960101822c9057339674c483440c45ba7f9cf8e0"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-cases.json",
+      "byteCount": 229,
+      "sha256": "645e77f485adee11b54a7276b2f217101fdab2e00d52488dce39f6bd8555662b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-database-generation.json",
+      "byteCount": 1554,
+      "sha256": "912390583cfa5b8692ab0a688b79660418ab0eecbaeff1931dbbd4886857c1c9"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-cases.json",
+      "byteCount": 229,
+      "sha256": "645e77f485adee11b54a7276b2f217101fdab2e00d52488dce39f6bd8555662b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-rust-output.json",
+      "byteCount": 2618,
+      "sha256": "2ec03fbd2c2ec30a63cd9eb37e834be02ffd7f4e969b7822c3c8a9402a202233"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-swift-output.json",
+      "byteCount": 2586,
+      "sha256": "991e1470a346b22a8e104ea9732e0f941c3e1d7021b4c5ac9ea60e181d3cb2cd"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal.sql",
+      "byteCount": 1233,
+      "sha256": "e609cc423990a97e74fc1d426c00ad54222c989753a262ec5e357917bb4f5bb3"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/native.sql",
+      "byteCount": 253,
+      "sha256": "7e71c6e947be0213067b205797a5883607015ca61d2e8b54f3431ef59db4fa92"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/parity-comparison.json",
+      "byteCount": 9369,
+      "sha256": "b6c45abdf42a09670acef39ea6b8a8b4fbd9aa381c5200e37ef33343e9853e36"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/parser-identity.json",
+      "byteCount": 448,
+      "sha256": "5474f95b299db51764f3bf5e1a34dc32b0a26008bac77406453d4725bc7ae839"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/smallest-cases.json",
+      "byteCount": 232,
+      "sha256": "f3f105703f27ccec512f338813851a44abc9c98a130235c54d23ef838969169b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/smallest-sealed-cases.json",
+      "byteCount": 232,
+      "sha256": "f3f105703f27ccec512f338813851a44abc9c98a130235c54d23ef838969169b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/smallest-sealed-rust-output.json",
+      "byteCount": 2069,
+      "sha256": "ecb0cbd16b12dd68244ab3dc008e03606b25eda892e4523db57fdc03c9b854f1"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/smallest-swift-output.json",
+      "byteCount": 1588,
+      "sha256": "c303453dcb59f1b8090f6f6f6d5138564598fe4b135d46a752a889906689936f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/generate.py",
+      "byteCount": 2716,
+      "sha256": "248822b0bf92105ac7e9a621ed78b6124022f1144cca569c6d62147b0de77deb"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/prepare.py",
+      "byteCount": 3297,
+      "sha256": "88ca49190e976a7d1856bc3390a82358b893223e69d20236e03880348d70b163"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/run.py",
+      "byteCount": 8144,
+      "sha256": "c7982cca41d5cd203cb43ada248d02fc323059ac522c9bd4799d4a69feec042b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/src/lib.rs",
+      "byteCount": 10496,
+      "sha256": "260c85fe39dd548a1a1147c391861c1a8387e8de0d67de847f639ad78061fa27"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/src/main.rs",
+      "byteCount": 545,
+      "sha256": "287101ee5fa0abe8f7c6ea907bef4faf85b3317bd332b5093340dccb8fb27265"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/swift/LoaderAccess.swift",
+      "byteCount": 835,
+      "sha256": "4a51771d96701738ed71b4368adfd2a3316f35f7724623ce66f50deb95a04c92"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/swift/RepositoryInspectorOracleTests.swift",
+      "byteCount": 6575,
+      "sha256": "09ad66c037d112d1c6f86bcf9378a33f77ad9aaeaeb4e90bef320c77121ae330"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/tests/parity.rs",
+      "byteCount": 1650,
+      "sha256": "c2b0ae1a0faf8e3acf20c62d1a35e56520a0104ab64a2f475a891fc212a720ad"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/bounded-positive-regression.log",
+      "byteCount": 504,
+      "sha256": "6cc5c9a33f742d520a77257549e8c2db9013cef3d2dc3c4df7fe8dd980e55392"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/bounded-positive-regression.receipt.json",
+      "byteCount": 5323,
+      "sha256": "7619587b9f617346c503681efbc28bc4d5d3e9482ed60eae44cfe8271a9821ee"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/build.log",
+      "byteCount": 2151,
+      "sha256": "c68665a652783c3d5eb8b61665389123a2f620d13de8fa3bc01af98bc913f775"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/build.receipt.json",
+      "byteCount": 1233,
+      "sha256": "083d70e82bff9529ff46c7e717b4101e5cc27659df171082c8c60ed1f12d423f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/ci-paths.txt",
+      "byteCount": 8641,
+      "sha256": "dd552b68f7d46efba0207c224b92c21c95b208a270c614da950f9923f99b052b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/ci-plan.log",
+      "byteCount": 96,
+      "sha256": "a41e416f562ad54be2bca4f3f476e13ceb0a4fdd3116c7f3f1ee2896fe3fd267"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/doc-tests.log",
+      "byteCount": 236,
+      "sha256": "90d9ecb1ae3a760f0ed1fefe8da3112adfe92dd208a06ea0e3d620bac8a763ad"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/doc-tests.receipt.json",
+      "byteCount": 4281,
+      "sha256": "cffa159593821831bfa2bbf6541b341648102bf9f267963faff0305d8e67a2b0"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/fmt-check.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/fmt-check.receipt.json",
+      "byteCount": 4247,
+      "sha256": "def59f85186c5213c26258d8990ba5f291d03edbfc288f71db0f7dade3bb7725"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/format.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/format.receipt.json",
+      "byteCount": 1197,
+      "sha256": "40c4971fbcb6d1e58ee8d4119088d6dfa1b5ab80c3c4719b6de264de09112da5"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/historical-event-index-clippy-note.json",
+      "byteCount": 8654,
+      "sha256": "1c8e959e140048fdecf8fff71326fbf9a3e53d5505b47b73054adb2e602090b5"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/initial-invalid-base.sql",
+      "byteCount": 2716,
+      "sha256": "370163fb2f489ef6876c385ea6bc4fb81820b3fb086116ef3220d9a08b943297"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/initial-invalid-database-generation.json",
+      "byteCount": 6136,
+      "sha256": "f426ed1f74a17dc6a6e2a5ec044aa895f44d346ba826dddeac8bc6e02d621a67"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/license-verifier.log",
+      "byteCount": 102,
+      "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/license-verifier.receipt.json",
+      "byteCount": 4056,
+      "sha256": "ec2b168987876eed43485586faa2d80ea75be8ed865248bc0b00d899ad931ec1"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/lock.log",
+      "byteCount": 115,
+      "sha256": "a1d14c7968471f653d16510fd4759320a42fdc6c3e9c69766bb6690022422e33"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/lock.receipt.json",
+      "byteCount": 1226,
+      "sha256": "0c7bb3d1b1eaf689f093b249371a1b7eec234ea9053509cfd0849a5950ceb3e7"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/merged-regression.log",
+      "byteCount": 2817,
+      "sha256": "91302a6e9f52b880ce162a1f18b694a1308feef63eb22d3dc8ee9273266a887d"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/merged-regression.receipt.json",
+      "byteCount": 5312,
+      "sha256": "5e24a830e77be554806b4e595658e8b2625fac29d7a32c996bfc8d7528f75c42"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/migration-contract-verifier.log",
+      "byteCount": 1033,
+      "sha256": "78c6668100fcf6c0dee91563941012b7f36adb00314e68a0fb6a1df7060a542b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/migration-contract-verifier.receipt.json",
+      "byteCount": 4095,
+      "sha256": "329cfdb0e20e502430cfd793d3b5b07b5bc99b2dc94b4974d61e00963ae9bf65"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/minimal-regression-valid.log",
+      "byteCount": 2338,
+      "sha256": "39d11892f4a52b1e5676a2a18781e1c80c201bd3a4a117a813bf1c3251a60545"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/minimal-regression-valid.receipt.json",
+      "byteCount": 5328,
+      "sha256": "ae023fe0eda272c07991789583226b6333c94c6ed3dff8c529cc44b28052a961"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/minimal-regression.log",
+      "byteCount": 1126,
+      "sha256": "f1fb927323ec191a4b07e4fd9bf5211a273422a9d4442cc92f19a0d96d1b5d60"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/minimal-regression.receipt.json",
+      "byteCount": 2287,
+      "sha256": "1c86ad9ab2cef2d5305a909062778b4e5a4bfa4557ee5b60dfabc59b727e1a03"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.log",
+      "byteCount": 85515,
+      "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.receipt.json",
+      "byteCount": 4561,
+      "sha256": "bd05043fc24cea72fdc7f70110b1a1f6962cb5b9c212ed0b4eefca4792d82cb8"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded.log",
+      "byteCount": 196,
+      "sha256": "6d7d96617b6e178c5da8bbe4ac043a02711caec1338504f992732da9faa264e9"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded.receipt.json",
+      "byteCount": 1511,
+      "sha256": "d8a22657f53a5784cbd363bf20559c370c9649ee02063e8cceea3523ea81ca1d"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal-valid.log",
+      "byteCount": 2618,
+      "sha256": "2ec03fbd2c2ec30a63cd9eb37e834be02ffd7f4e969b7822c3c8a9402a202233"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal-valid.receipt.json",
+      "byteCount": 1528,
+      "sha256": "567c80d73fefd0768c56b6306eb577a82ace132119e6b80730bb5ed23874312a"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal.log",
+      "byteCount": 195,
+      "sha256": "db619ec52e0d16b58ab3e95732426e8803968ef97cd2ae7bd9c7e0ba91a6db89"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal.receipt.json",
+      "byteCount": 1505,
+      "sha256": "63fa952d8281567c0b169fd008c21dd5e6b890fe5c6cfe39e316784d206ffd20"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-smallest-sealed.log",
+      "byteCount": 2069,
+      "sha256": "ecb0cbd16b12dd68244ab3dc008e03606b25eda892e4523db57fdc03c9b854f1"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-smallest-sealed.receipt.json",
+      "byteCount": 4563,
+      "sha256": "4de35beecdfb29fcfb5978cffe587162bb9bd42a17c8f8ed9639d824e5ee4a91"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-smallest.log",
+      "byteCount": 196,
+      "sha256": "a4d323b82f843251a127aebbf47a87cb60f5f213ceaa035e6a56d5396239336c"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-smallest.receipt.json",
+      "byteCount": 1514,
+      "sha256": "b7022262582962f763a50e443ca5210f4de0e1ecb803ee631089d9db487be6fa"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/related-swift-tests.log",
+      "byteCount": 6797,
+      "sha256": "200d53fabc9c70be33b9e8eb696e6ee2629f2c017e53800a771dd888a5f901af"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/related-swift-tests.receipt.json",
+      "byteCount": 4512,
+      "sha256": "c38083d5c9038f0d8980dbe2bda9f3c10358988bc6a1ddda8b7690716813566b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/root-fmt-check.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/root-fmt-check.receipt.json",
+      "byteCount": 4098,
+      "sha256": "4e08faa2653a736bb77059cd3133d83c02582e40421233beb1b20223b8922f57"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/rust-refresh-build.log",
+      "byteCount": 324,
+      "sha256": "306fbdabbafe4b1d9d5f3fff25e56b1dd461038cee69dc3b0b4617f0d101505e"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/rust-refresh-build.receipt.json",
+      "byteCount": 1258,
+      "sha256": "4011df8c61daaabd40f2411e9b4b69d21c7d3887be50166352c8916f8ab87dee"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/rust-refresh-format.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/rust-refresh-format.receipt.json",
+      "byteCount": 1223,
+      "sha256": "2e8462a7afe56e48fe5baefe84a0abd9bdc011eef460053ae1af7a9490f016bf"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/rust-source-identities.json",
+      "byteCount": 96926,
+      "sha256": "36e566ea930af18865e66e8ee3fbe57b46f8566f461def6e0bdf85df5ca57e3a"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/strict-clippy.log",
+      "byteCount": 1816,
+      "sha256": "e9046651da9bac37c64419181a434634f76d476ddc113b2a026a5de09a927f31"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/strict-clippy.receipt.json",
+      "byteCount": 4358,
+      "sha256": "1b030d39c42fee9824c9ee68cf508269b045eb8d7082b353922203d065794da5"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.log",
+      "byteCount": 5341,
+      "sha256": "5dde0d5bf7ab93c9fef6fb0baf1c3ac84d0e6924c4809c9cde211cfc5a2f9b4f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.receipt.json",
+      "byteCount": 2017,
+      "sha256": "e34b35878a21850c42e7f0546e3be2ff16719296944bd9691c99d68d2ce1890f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.log",
+      "byteCount": 5344,
+      "sha256": "3290e06d930adbfbfee76ebada74048c0cafdcdfd6b0d204009e3f6193a19eee"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.receipt.json",
+      "byteCount": 2041,
+      "sha256": "2dbb57a8b53e7bbb163652eca9d2d6741acaf3404a5101d3c987140b56cba672"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal.log",
+      "byteCount": 11624,
+      "sha256": "9ffa9ba22f0ccf7cd1def0336873efe1a893973152095235ddecc6fcee05db46"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal.receipt.json",
+      "byteCount": 2012,
+      "sha256": "c148c6943f59677b62cddaef386607fd4c3c2f376777a2ece90fc60e27b9145b"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-smallest.log",
+      "byteCount": 5339,
+      "sha256": "112b9490eae6c22859436cd46fa2593b8eaf69658cc309576a2553fec69c047a"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-smallest.receipt.json",
+      "byteCount": 2021,
+      "sha256": "41ff8b2d52b0c610166163f9cb76a079cb366d7b0acca94449d6ae48390bc401"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-source-identities.json",
+      "byteCount": 62523,
+      "sha256": "5e52d5a43a5e1ed47c29418b111d54b57284b853ea50c75b8f338b13589414cd"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/toolchain.json",
+      "byteCount": 792,
+      "sha256": "9f90b5cedfbec74859fb15f1d1b0dfb7b8b80dea04010b126799e1227d74b311"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/warning-audit.json",
+      "byteCount": 38,
+      "sha256": "e8c7314fcd4dacc674ee2c098207c1ea57ca14adeea9420e0c44a25bb91469ab"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/workspace-license-verifier.log",
+      "byteCount": 125,
+      "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/workspace-license-verifier.receipt.json",
+      "byteCount": 4087,
+      "sha256": "f048bf107a8db1e6b23886742c6a3112a5d6926a48c606f216b75a1d594ad756"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verify.py",
+      "byteCount": 4222,
+      "sha256": "71190f5ed9124cc26176258c48a1511129823df849a0bce959d13dbf73bb61e2"
+    }
+  ],
+  "selectedCopies": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-rust-output.json",
+      "byteCount": 2618,
+      "sha256": "2ec03fbd2c2ec30a63cd9eb37e834be02ffd7f4e969b7822c3c8a9402a202233",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/fixtures/minimal-valid-rust-output.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-swift-output.json",
+      "byteCount": 2586,
+      "sha256": "991e1470a346b22a8e104ea9732e0f941c3e1d7021b4c5ac9ea60e181d3cb2cd",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/fixtures/minimal-valid-swift-output.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-sealed-rust-output.json",
+      "byteCount": 85515,
+      "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/fixtures/bounded-sealed-rust-output.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-swift-output.json",
+      "byteCount": 72355,
+      "sha256": "3c0914000a62406e85a2b956ee334945a0a229b907cc0b19e52cca8ed3559f43",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/fixtures/bounded-swift-output.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal-valid.receipt.json",
+      "byteCount": 1528,
+      "sha256": "567c80d73fefd0768c56b6306eb577a82ace132119e6b80730bb5ed23874312a",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/observe-minimal-valid.receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal-valid.log",
+      "byteCount": 2618,
+      "sha256": "2ec03fbd2c2ec30a63cd9eb37e834be02ffd7f4e969b7822c3c8a9402a202233",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/observe-minimal-valid.log"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.receipt.json",
+      "byteCount": 2041,
+      "sha256": "2dbb57a8b53e7bbb163652eca9d2d6741acaf3404a5101d3c987140b56cba672",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/swift-minimal-valid.receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.log",
+      "byteCount": 5344,
+      "sha256": "3290e06d930adbfbfee76ebada74048c0cafdcdfd6b0d204009e3f6193a19eee",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/swift-minimal-valid.log"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.receipt.json",
+      "byteCount": 4561,
+      "sha256": "bd05043fc24cea72fdc7f70110b1a1f6962cb5b9c212ed0b4eefca4792d82cb8",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/observe-bounded-sealed.receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.log",
+      "byteCount": 85515,
+      "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/observe-bounded-sealed.log"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.receipt.json",
+      "byteCount": 2017,
+      "sha256": "e34b35878a21850c42e7f0546e3be2ff16719296944bd9691c99d68d2ce1890f",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/swift-bounded.receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.log",
+      "byteCount": 5341,
+      "sha256": "5dde0d5bf7ab93c9fef6fb0baf1c3ac84d0e6924c4809c9cde211cfc5a2f9b4f",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/swift-bounded.log"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/swift-source-identities.json",
+      "byteCount": 62523,
+      "sha256": "5e52d5a43a5e1ed47c29418b111d54b57284b853ea50c75b8f338b13589414cd",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/swift-source-identities.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/verification/rust-source-identities.json",
+      "byteCount": 96926,
+      "sha256": "36e566ea930af18865e66e8ee3fbe57b46f8566f461def6e0bdf85df5ca57e3a",
+      "copy": "tools/parallel-counter-detail-presentation-compat-20261004/inherited/verification/rust-source-identities.json"
+    }
+  ],
+  "actualDTOGroups": 6,
+  "actualSamples": 11,
+  "newFunctionCombinations": 12,
+  "derivedControls": 6,
+  "reranRepositoryOrParser": false
+}

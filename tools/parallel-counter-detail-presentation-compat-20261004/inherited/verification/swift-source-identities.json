@@ -1,0 +1,1458 @@
+[
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+    "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+    "baselineSHA256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAnalysis/TraceContext.swift",
+    "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+    "baselineSHA256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+    "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+    "baselineSHA256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAnalysis/TraceSummary.swift",
+    "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+    "baselineSHA256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+    "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+    "baselineSHA256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
+    "sha256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830",
+    "baselineSHA256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift",
+    "sha256": "c396bc0de76f9e1c7645153364648a99be144c0f3262bf0e1f2c59e5e0b76ef3",
+    "baselineSHA256": "c396bc0de76f9e1c7645153364648a99be144c0f3262bf0e1f2c59e5e0b76ef3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+    "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+    "baselineSHA256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
+    "sha256": "920022106a05279b837965702562662a27c9cd0fe748799f5c0175086ee28569",
+    "baselineSHA256": "920022106a05279b837965702562662a27c9cd0fe748799f5c0175086ee28569",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
+    "sha256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39",
+    "baselineSHA256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
+    "sha256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622",
+    "baselineSHA256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
+    "sha256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e",
+    "baselineSHA256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
+    "sha256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
+    "baselineSHA256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIApplication.swift",
+    "sha256": "868843d5f4d0dce6c0253e5948a9d87add7fb4d87c4050028a89b087dca48f31",
+    "baselineSHA256": "868843d5f4d0dce6c0253e5948a9d87add7fb4d87c4050028a89b087dca48f31",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIExecutableIdentity.swift",
+    "sha256": "8b2dd64c4806204d227fb117df421177f94b0745c61261f5005990dfbcebe839",
+    "baselineSHA256": "8b2dd64c4806204d227fb117df421177f94b0745c61261f5005990dfbcebe839",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLILicenseResources.swift",
+    "sha256": "09ae936aa81644fd545caa61154e2df20668485f800fe0d23915a9c519e5b897",
+    "baselineSHA256": "09ae936aa81644fd545caa61154e2df20668485f800fe0d23915a9c519e5b897",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIModels.swift",
+    "sha256": "8c7dd63b96f2c463dfe69c1a6eecd663a2a4e4f0b9a9bc1ff25b102edd6cea3b",
+    "baselineSHA256": "8c7dd63b96f2c463dfe69c1a6eecd663a2a4e4f0b9a9bc1ff25b102edd6cea3b",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIOperationDeadline.swift",
+    "sha256": "1cb3b952a043d5ea65a118a2ceb2b3d0bbd524ee856f3cb9a0af79e6a4da46aa",
+    "baselineSHA256": "1cb3b952a043d5ea65a118a2ceb2b3d0bbd524ee856f3cb9a0af79e6a4da46aa",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIParser.swift",
+    "sha256": "0612f8fd23f5bbb4f009f391b11612914df46997826170d78870f4f56e510d67",
+    "baselineSHA256": "0612f8fd23f5bbb4f009f391b11612914df46997826170d78870f4f56e510d67",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIPresentation.swift",
+    "sha256": "7e8fcc3bf5a6cdaaf383635434137828d1352b3885b0d8ac2b702acb7ab629c6",
+    "baselineSHA256": "7e8fcc3bf5a6cdaaf383635434137828d1352b3885b0d8ac2b702acb7ab629c6",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIProductionCommandExecutor.swift",
+    "sha256": "b62b76ded6fda42baa918e5a46cc1c8c8265544612b8f8a316198beafbeb16a2",
+    "baselineSHA256": "b62b76ded6fda42baa918e5a46cc1c8c8265544612b8f8a316198beafbeb16a2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLIResourceLocator.swift",
+    "sha256": "4a2a81d878576fa585a3c21e698aff0feb2f9bb9a284ccc2dc49761523c6be6f",
+    "baselineSHA256": "4a2a81d878576fa585a3c21e698aff0feb2f9bb9a284ccc2dc49761523c6be6f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/CLISignalMonitor.swift",
+    "sha256": "64aa47a2d4fef167084b60f46aef4c122136dec183e7691e5bcecbf360f48a59",
+    "baselineSHA256": "64aa47a2d4fef167084b60f46aef4c122136dec183e7691e5bcecbf360f48a59",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLI/MachineContract.swift",
+    "sha256": "029a6b3dd3bece0b78f34d2890f63ae785f4c6cedc89665f58de5638aa2c7df2",
+    "baselineSHA256": "029a6b3dd3bece0b78f34d2890f63ae785f4c6cedc89665f58de5638aa2c7df2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCLIResourceFixtures/ArkTraceCLIResourceFixtures.swift",
+    "sha256": "4732007f7b1127d8b8aa4a1c48a9816357d8fb47cb7efca6c165351372fb29ed",
+    "baselineSHA256": "4732007f7b1127d8b8aa4a1c48a9816357d8fb47cb7efca6c165351372fb29ed",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCapture/TraceCapture.swift",
+    "sha256": "e28244a3fb1fcebe580858b7fb3065c0a0d3eeb2b771f127b2d9637758900967",
+    "baselineSHA256": "e28244a3fb1fcebe580858b7fb3065c0a0d3eeb2b771f127b2d9637758900967",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+    "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+    "baselineSHA256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+    "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+    "baselineSHA256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+    "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+    "baselineSHA256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+    "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+    "baselineSHA256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+    "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+    "baselineSHA256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+    "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+    "baselineSHA256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+    "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+    "baselineSHA256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+    "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+    "baselineSHA256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+    "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+    "baselineSHA256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+    "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+    "baselineSHA256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+    "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+    "baselineSHA256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+    "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+    "baselineSHA256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+    "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+    "baselineSHA256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+    "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+    "baselineSHA256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+    "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+    "baselineSHA256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+    "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+    "baselineSHA256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+    "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+    "baselineSHA256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+    "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+    "baselineSHA256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
+    "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866",
+    "baselineSHA256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
+    "sha256": "afa5fb19a7dbd4730a280f01671d0edc541cb3795e71304a15d593c4fb9279b9",
+    "baselineSHA256": "afa5fb19a7dbd4730a280f01671d0edc541cb3795e71304a15d593c4fb9279b9",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
+    "sha256": "5d58e6a308ad39286c2e112c0b9ac95998c21d61cd5ba67848d5fdb1bba4e36f",
+    "baselineSHA256": "5d58e6a308ad39286c2e112c0b9ac95998c21d61cd5ba67848d5fdb1bba4e36f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+    "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+    "baselineSHA256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+    "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+    "baselineSHA256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+    "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+    "baselineSHA256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+    "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+    "baselineSHA256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+    "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+    "baselineSHA256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+    "sha256": "d1e702ae131b57acc88678d13bbbf82e5a20124d8db347a55ab7f1f65e4c6ff4",
+    "baselineSHA256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+    "cacheOnlyAppend": true
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRuntime/BoundedSnapshotReader.swift",
+    "sha256": "8e5da37961111f86f12b77baac397e05e19feb9ad31e8c9e1294349de8bed23f",
+    "baselineSHA256": "8e5da37961111f86f12b77baac397e05e19feb9ad31e8c9e1294349de8bed23f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRuntime/TraceCache.swift",
+    "sha256": "a399ba16153fe9c906c407ffcdbe722d7e132194d1a7de749a1f17f1ea2cda81",
+    "baselineSHA256": "a399ba16153fe9c906c407ffcdbe722d7e132194d1a7de749a1f17f1ea2cda81",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRuntime/TraceSession.swift",
+    "sha256": "f224f67738fad58dc87e0b4baa05fa510677c891b5c657e9b2ebecfa1a16f4df",
+    "baselineSHA256": "f224f67738fad58dc87e0b4baa05fa510677c891b5c657e9b2ebecfa1a16f4df",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+    "sha256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18",
+    "baselineSHA256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+    "sha256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050",
+    "baselineSHA256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+    "sha256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848",
+    "baselineSHA256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+    "sha256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493",
+    "baselineSHA256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+    "sha256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298",
+    "baselineSHA256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+    "sha256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8",
+    "baselineSHA256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+    "sha256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126",
+    "baselineSHA256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+    "sha256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4",
+    "baselineSHA256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCleanup.swift",
+    "sha256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307",
+    "baselineSHA256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+    "sha256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214",
+    "baselineSHA256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+    "sha256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5",
+    "baselineSHA256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+    "sha256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309",
+    "baselineSHA256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+    "sha256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e",
+    "baselineSHA256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+    "sha256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23",
+    "baselineSHA256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+    "sha256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1",
+    "baselineSHA256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+    "sha256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8",
+    "baselineSHA256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+    "sha256": "025830b60057409e9c7f80e2e29b325668ea794c93b001af64ed96304f414f20",
+    "baselineSHA256": "025830b60057409e9c7f80e2e29b325668ea794c93b001af64ed96304f414f20",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+    "sha256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd",
+    "baselineSHA256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+    "sha256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8",
+    "baselineSHA256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+    "sha256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72",
+    "baselineSHA256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustEngine.swift",
+    "sha256": "88fc64347bd5187d84e4fd5a7b340b977a1c8609c98b7f97890d4b4061a6ee81",
+    "baselineSHA256": "88fc64347bd5187d84e4fd5a7b340b977a1c8609c98b7f97890d4b4061a6ee81",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustError.swift",
+    "sha256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9",
+    "baselineSHA256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+    "sha256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b",
+    "baselineSHA256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustInspection.swift",
+    "sha256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c",
+    "baselineSHA256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+    "sha256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f",
+    "baselineSHA256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+    "sha256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264",
+    "baselineSHA256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+    "sha256": "513056adc6b708ba2e020d00d56557a05479c42d46ae943a7c29f557a99b2e8a",
+    "baselineSHA256": "513056adc6b708ba2e020d00d56557a05479c42d46ae943a7c29f557a99b2e8a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+    "sha256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75",
+    "baselineSHA256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+    "sha256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123",
+    "baselineSHA256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustRequest.swift",
+    "sha256": "8006b408314f8469142b17c5d6bff5705cf5fc7bb1bf6481ada1b05e8a6ebae3",
+    "baselineSHA256": "8006b408314f8469142b17c5d6bff5705cf5fc7bb1bf6481ada1b05e8a6ebae3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+    "sha256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39",
+    "baselineSHA256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustResult.swift",
+    "sha256": "0101000aa165dfde6a16e5d264c86ae24249fd43ea99d9f59f70e72adde0cdd2",
+    "baselineSHA256": "0101000aa165dfde6a16e5d264c86ae24249fd43ea99d9f59f70e72adde0cdd2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustRetry.swift",
+    "sha256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7",
+    "baselineSHA256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+    "sha256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7",
+    "baselineSHA256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustSession.swift",
+    "sha256": "9cf60b74357236c56512d5318eb0c7a7f45c13c38ee2d788106110a7264f9922",
+    "baselineSHA256": "9cf60b74357236c56512d5318eb0c7a7f45c13c38ee2d788106110a7264f9922",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+    "sha256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce",
+    "baselineSHA256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+    "sha256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2",
+    "baselineSHA256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+    "sha256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805",
+    "baselineSHA256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+    "sha256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3",
+    "baselineSHA256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+    "sha256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979",
+    "baselineSHA256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceSignalShim/ArkTraceSignalShim.c",
+    "sha256": "ff0dffa0ce9db79ed08e0c22c4559a94cd2900a6fe5a25a463a76c22e523c8f4",
+    "baselineSHA256": "ff0dffa0ce9db79ed08e0c22c4559a94cd2900a6fe5a25a463a76c22e523c8f4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceSignalShim/include/ArkTraceSignalShim.h",
+    "sha256": "8427abaff715c6541083f9b2311787ef8ef0bd229e5bd15e7c5adab2e3077334",
+    "baselineSHA256": "8427abaff715c6541083f9b2311787ef8ef0bd229e5bd15e7c5adab2e3077334",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+    "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+    "baselineSHA256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+    "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+    "baselineSHA256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+    "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+    "baselineSHA256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+    "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+    "baselineSHA256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+    "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+    "baselineSHA256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "prepared",
+    "path": "Sources/arktrace/ArkTraceMain.swift",
+    "sha256": "dd46445a1de813b96990cfb985ec6cac0faa1d11f141194f4769b8813a04cbb0",
+    "baselineSHA256": "dd46445a1de813b96990cfb985ec6cac0faa1d11f141194f4769b8813a04cbb0",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+    "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+    "baselineSHA256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAnalysis/TraceContext.swift",
+    "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+    "baselineSHA256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+    "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+    "baselineSHA256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAnalysis/TraceSummary.swift",
+    "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+    "baselineSHA256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+    "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+    "baselineSHA256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
+    "sha256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830",
+    "baselineSHA256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift",
+    "sha256": "c396bc0de76f9e1c7645153364648a99be144c0f3262bf0e1f2c59e5e0b76ef3",
+    "baselineSHA256": "c396bc0de76f9e1c7645153364648a99be144c0f3262bf0e1f2c59e5e0b76ef3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+    "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+    "baselineSHA256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
+    "sha256": "920022106a05279b837965702562662a27c9cd0fe748799f5c0175086ee28569",
+    "baselineSHA256": "920022106a05279b837965702562662a27c9cd0fe748799f5c0175086ee28569",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
+    "sha256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39",
+    "baselineSHA256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
+    "sha256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622",
+    "baselineSHA256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
+    "sha256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e",
+    "baselineSHA256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
+    "sha256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
+    "baselineSHA256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIApplication.swift",
+    "sha256": "868843d5f4d0dce6c0253e5948a9d87add7fb4d87c4050028a89b087dca48f31",
+    "baselineSHA256": "868843d5f4d0dce6c0253e5948a9d87add7fb4d87c4050028a89b087dca48f31",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIExecutableIdentity.swift",
+    "sha256": "8b2dd64c4806204d227fb117df421177f94b0745c61261f5005990dfbcebe839",
+    "baselineSHA256": "8b2dd64c4806204d227fb117df421177f94b0745c61261f5005990dfbcebe839",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLILicenseResources.swift",
+    "sha256": "09ae936aa81644fd545caa61154e2df20668485f800fe0d23915a9c519e5b897",
+    "baselineSHA256": "09ae936aa81644fd545caa61154e2df20668485f800fe0d23915a9c519e5b897",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIModels.swift",
+    "sha256": "8c7dd63b96f2c463dfe69c1a6eecd663a2a4e4f0b9a9bc1ff25b102edd6cea3b",
+    "baselineSHA256": "8c7dd63b96f2c463dfe69c1a6eecd663a2a4e4f0b9a9bc1ff25b102edd6cea3b",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIOperationDeadline.swift",
+    "sha256": "1cb3b952a043d5ea65a118a2ceb2b3d0bbd524ee856f3cb9a0af79e6a4da46aa",
+    "baselineSHA256": "1cb3b952a043d5ea65a118a2ceb2b3d0bbd524ee856f3cb9a0af79e6a4da46aa",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIParser.swift",
+    "sha256": "0612f8fd23f5bbb4f009f391b11612914df46997826170d78870f4f56e510d67",
+    "baselineSHA256": "0612f8fd23f5bbb4f009f391b11612914df46997826170d78870f4f56e510d67",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIPresentation.swift",
+    "sha256": "7e8fcc3bf5a6cdaaf383635434137828d1352b3885b0d8ac2b702acb7ab629c6",
+    "baselineSHA256": "7e8fcc3bf5a6cdaaf383635434137828d1352b3885b0d8ac2b702acb7ab629c6",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIProductionCommandExecutor.swift",
+    "sha256": "b62b76ded6fda42baa918e5a46cc1c8c8265544612b8f8a316198beafbeb16a2",
+    "baselineSHA256": "b62b76ded6fda42baa918e5a46cc1c8c8265544612b8f8a316198beafbeb16a2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLIResourceLocator.swift",
+    "sha256": "4a2a81d878576fa585a3c21e698aff0feb2f9bb9a284ccc2dc49761523c6be6f",
+    "baselineSHA256": "4a2a81d878576fa585a3c21e698aff0feb2f9bb9a284ccc2dc49761523c6be6f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/CLISignalMonitor.swift",
+    "sha256": "64aa47a2d4fef167084b60f46aef4c122136dec183e7691e5bcecbf360f48a59",
+    "baselineSHA256": "64aa47a2d4fef167084b60f46aef4c122136dec183e7691e5bcecbf360f48a59",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLI/MachineContract.swift",
+    "sha256": "029a6b3dd3bece0b78f34d2890f63ae785f4c6cedc89665f58de5638aa2c7df2",
+    "baselineSHA256": "029a6b3dd3bece0b78f34d2890f63ae785f4c6cedc89665f58de5638aa2c7df2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCLIResourceFixtures/ArkTraceCLIResourceFixtures.swift",
+    "sha256": "4732007f7b1127d8b8aa4a1c48a9816357d8fb47cb7efca6c165351372fb29ed",
+    "baselineSHA256": "4732007f7b1127d8b8aa4a1c48a9816357d8fb47cb7efca6c165351372fb29ed",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCapture/TraceCapture.swift",
+    "sha256": "e28244a3fb1fcebe580858b7fb3065c0a0d3eeb2b771f127b2d9637758900967",
+    "baselineSHA256": "e28244a3fb1fcebe580858b7fb3065c0a0d3eeb2b771f127b2d9637758900967",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+    "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+    "baselineSHA256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+    "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+    "baselineSHA256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+    "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+    "baselineSHA256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+    "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+    "baselineSHA256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+    "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+    "baselineSHA256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+    "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+    "baselineSHA256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+    "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+    "baselineSHA256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+    "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+    "baselineSHA256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+    "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+    "baselineSHA256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+    "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+    "baselineSHA256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+    "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+    "baselineSHA256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+    "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+    "baselineSHA256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+    "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+    "baselineSHA256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+    "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+    "baselineSHA256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+    "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+    "baselineSHA256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+    "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+    "baselineSHA256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+    "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+    "baselineSHA256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+    "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+    "baselineSHA256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
+    "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866",
+    "baselineSHA256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
+    "sha256": "afa5fb19a7dbd4730a280f01671d0edc541cb3795e71304a15d593c4fb9279b9",
+    "baselineSHA256": "afa5fb19a7dbd4730a280f01671d0edc541cb3795e71304a15d593c4fb9279b9",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
+    "sha256": "5d58e6a308ad39286c2e112c0b9ac95998c21d61cd5ba67848d5fdb1bba4e36f",
+    "baselineSHA256": "5d58e6a308ad39286c2e112c0b9ac95998c21d61cd5ba67848d5fdb1bba4e36f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+    "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+    "baselineSHA256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+    "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+    "baselineSHA256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+    "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+    "baselineSHA256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+    "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+    "baselineSHA256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+    "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+    "baselineSHA256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+    "sha256": "d1e702ae131b57acc88678d13bbbf82e5a20124d8db347a55ab7f1f65e4c6ff4",
+    "baselineSHA256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+    "cacheOnlyAppend": true
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRuntime/BoundedSnapshotReader.swift",
+    "sha256": "8e5da37961111f86f12b77baac397e05e19feb9ad31e8c9e1294349de8bed23f",
+    "baselineSHA256": "8e5da37961111f86f12b77baac397e05e19feb9ad31e8c9e1294349de8bed23f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRuntime/TraceCache.swift",
+    "sha256": "a399ba16153fe9c906c407ffcdbe722d7e132194d1a7de749a1f17f1ea2cda81",
+    "baselineSHA256": "a399ba16153fe9c906c407ffcdbe722d7e132194d1a7de749a1f17f1ea2cda81",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRuntime/TraceSession.swift",
+    "sha256": "f224f67738fad58dc87e0b4baa05fa510677c891b5c657e9b2ebecfa1a16f4df",
+    "baselineSHA256": "f224f67738fad58dc87e0b4baa05fa510677c891b5c657e9b2ebecfa1a16f4df",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+    "sha256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18",
+    "baselineSHA256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+    "sha256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050",
+    "baselineSHA256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+    "sha256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848",
+    "baselineSHA256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+    "sha256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493",
+    "baselineSHA256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+    "sha256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298",
+    "baselineSHA256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+    "sha256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8",
+    "baselineSHA256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+    "sha256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126",
+    "baselineSHA256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+    "sha256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4",
+    "baselineSHA256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCleanup.swift",
+    "sha256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307",
+    "baselineSHA256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+    "sha256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214",
+    "baselineSHA256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+    "sha256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5",
+    "baselineSHA256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+    "sha256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309",
+    "baselineSHA256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+    "sha256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e",
+    "baselineSHA256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+    "sha256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23",
+    "baselineSHA256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+    "sha256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1",
+    "baselineSHA256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+    "sha256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8",
+    "baselineSHA256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+    "sha256": "025830b60057409e9c7f80e2e29b325668ea794c93b001af64ed96304f414f20",
+    "baselineSHA256": "025830b60057409e9c7f80e2e29b325668ea794c93b001af64ed96304f414f20",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+    "sha256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd",
+    "baselineSHA256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+    "sha256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8",
+    "baselineSHA256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+    "sha256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72",
+    "baselineSHA256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustEngine.swift",
+    "sha256": "88fc64347bd5187d84e4fd5a7b340b977a1c8609c98b7f97890d4b4061a6ee81",
+    "baselineSHA256": "88fc64347bd5187d84e4fd5a7b340b977a1c8609c98b7f97890d4b4061a6ee81",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustError.swift",
+    "sha256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9",
+    "baselineSHA256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+    "sha256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b",
+    "baselineSHA256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustInspection.swift",
+    "sha256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c",
+    "baselineSHA256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+    "sha256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f",
+    "baselineSHA256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+    "sha256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264",
+    "baselineSHA256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+    "sha256": "513056adc6b708ba2e020d00d56557a05479c42d46ae943a7c29f557a99b2e8a",
+    "baselineSHA256": "513056adc6b708ba2e020d00d56557a05479c42d46ae943a7c29f557a99b2e8a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+    "sha256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75",
+    "baselineSHA256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+    "sha256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123",
+    "baselineSHA256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustRequest.swift",
+    "sha256": "8006b408314f8469142b17c5d6bff5705cf5fc7bb1bf6481ada1b05e8a6ebae3",
+    "baselineSHA256": "8006b408314f8469142b17c5d6bff5705cf5fc7bb1bf6481ada1b05e8a6ebae3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+    "sha256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39",
+    "baselineSHA256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustResult.swift",
+    "sha256": "0101000aa165dfde6a16e5d264c86ae24249fd43ea99d9f59f70e72adde0cdd2",
+    "baselineSHA256": "0101000aa165dfde6a16e5d264c86ae24249fd43ea99d9f59f70e72adde0cdd2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustRetry.swift",
+    "sha256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7",
+    "baselineSHA256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+    "sha256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7",
+    "baselineSHA256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustSession.swift",
+    "sha256": "9cf60b74357236c56512d5318eb0c7a7f45c13c38ee2d788106110a7264f9922",
+    "baselineSHA256": "9cf60b74357236c56512d5318eb0c7a7f45c13c38ee2d788106110a7264f9922",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+    "sha256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce",
+    "baselineSHA256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+    "sha256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2",
+    "baselineSHA256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+    "sha256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805",
+    "baselineSHA256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+    "sha256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3",
+    "baselineSHA256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+    "sha256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979",
+    "baselineSHA256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceSignalShim/ArkTraceSignalShim.c",
+    "sha256": "ff0dffa0ce9db79ed08e0c22c4559a94cd2900a6fe5a25a463a76c22e523c8f4",
+    "baselineSHA256": "ff0dffa0ce9db79ed08e0c22c4559a94cd2900a6fe5a25a463a76c22e523c8f4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceSignalShim/include/ArkTraceSignalShim.h",
+    "sha256": "8427abaff715c6541083f9b2311787ef8ef0bd229e5bd15e7c5adab2e3077334",
+    "baselineSHA256": "8427abaff715c6541083f9b2311787ef8ef0bd229e5bd15e7c5adab2e3077334",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+    "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+    "baselineSHA256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+    "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+    "baselineSHA256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+    "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+    "baselineSHA256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+    "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+    "baselineSHA256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+    "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+    "baselineSHA256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+    "cacheOnlyAppend": false
+  },
+  {
+    "surface": "runner",
+    "path": "Sources/arktrace/ArkTraceMain.swift",
+    "sha256": "dd46445a1de813b96990cfb985ec6cac0faa1d11f141194f4769b8813a04cbb0",
+    "baselineSHA256": "dd46445a1de813b96990cfb985ec6cac0faa1d11f141194f4769b8813a04cbb0",
+    "cacheOnlyAppend": false
+  }
+]

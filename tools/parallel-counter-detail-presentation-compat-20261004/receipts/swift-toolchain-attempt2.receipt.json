@@ -1,0 +1,22 @@
+{
+  "name": "swift-toolchain-attempt2",
+  "command": [
+    "swift",
+    "--version"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-swiftpm/source/ArkTrace",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "expectedExitObserved": true,
+  "elapsedSeconds": 0.13747191429138184,
+  "log": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/receipts/swift-toolchain-attempt2.log",
+    "byteCount": 128,
+    "sha256": "30bb0d72a580e8e936ab32e24cab2876f82fa6b06d66fef876fe21a47e828acc"
+  },
+  "environment": {
+    "ARKTRACE_SWIFTPM_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-swiftpm",
+    "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
+    "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/receipts/swift-canonical.json"
+  }
+}

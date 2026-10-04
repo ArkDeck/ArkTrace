@@ -117,6 +117,41 @@ def main():
         "restore": 3, "whitespaceScalars": 26,
     }
     print("Navigation oracle: 8 catalogs, 55 actions, 161 recorded host filters, 64 native focus/anchor and 3 restore vectors with current Swift source/output identities")
+    counter_receipt = json.loads((ROOT / viewer / "counter-compat-swift-receipt.json").read_text(encoding="utf-8"))
+    assert counter_receipt["exitCode"] == counter_receipt["commandReceipt"]["exitCode"] == 0
+    assert counter_receipt["copiedAlgorithms"] is False
+    counter_seen = set()
+    for entry in counter_receipt["sourceDigests"]:
+        relative = entry["path"]
+        assert relative not in counter_seen
+        counter_seen.add(relative)
+        path = ROOT / relative
+        assert not path.is_symlink() and path.resolve().is_relative_to(ROOT)
+        data = path.read_bytes()
+        assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
+    assert counter_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceStore", "ArkTraceRendering", "ArkTraceAppSupport"]
+    for name in counter_receipt["sourceModules"]:
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in counter_seen if p.startswith(f"Sources/{name}/")}
+    detail_tool = "tools/parallel-counter-detail-presentation-compat-20261004/"
+    navigation_tool = "tools/parallel-counter-reveal-compat-20261004/"
+    for local, inherited in (
+        ("counter-compat-inputs.json", detail_tool + "fixtures/cases.json"),
+        ("counter-compat-swift-oracle.json", detail_tool + "receipts/swift-canonical.json"),
+        ("counter-navigation-compat-inputs.json", navigation_tool + "fixtures/cases.json"),
+    ):
+        assert {viewer + local, inherited} <= counter_seen
+        assert (ROOT / viewer / local).read_bytes() == (ROOT / inherited).read_bytes()
+    counter_inputs = json.loads((ROOT / viewer / "counter-compat-inputs.json").read_text(encoding="utf-8"))
+    counter_outputs = json.loads((ROOT / viewer / "counter-compat-swift-oracle.json").read_text(encoding="utf-8"))
+    assert len(counter_inputs) == 12 and len(counter_outputs) == 6
+    assert [v["id"] for v in counter_inputs[:6]] == [v["name"] for v in counter_outputs]
+    assert sum(len(v["facts"]) for v in counter_outputs) == 11
+    assert counter_receipt["counts"] == {
+        "legalDTOGroups": 6, "actualSamples": 11, "detailControls": 6,
+        "navigationAnchors": 6, "invalidNavigationTables": 5,
+        "shapeOnlyNavigation": 3, "nativeFocusSelectionRevealFlows": 6, "swiftTests": 4,
+    }
+    print("Counter compatibility oracle: six actual DTO groups, eleven samples, table-qualified navigation and six actual native selection/reveal flows")
     annotation_receipt = json.loads((ROOT / viewer / "annotation-mainline-swift-receipt.json").read_text(encoding="utf-8"))
     assert annotation_receipt["copiedExpectedStateAlgorithms"] is False and annotation_receipt["exitCode"] == 0
     annotation_seen = set()

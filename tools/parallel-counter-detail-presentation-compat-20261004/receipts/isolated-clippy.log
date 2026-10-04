@@ -1,0 +1,19 @@
+    Checking typenum v1.20.1
+   Compiling zmij v1.0.23
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+    Checking libc v0.2.189
+    Checking serde_core v1.0.229
+    Checking cfg-if v1.0.5
+   Compiling serde_json v1.0.151
+    Checking cpufeatures v0.2.17
+    Checking generic-array v0.14.7
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+    Checking digest v0.10.7
+   Compiling arktrace-contract v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/rust/crates/arktrace-contract)
+    Checking sha2 v0.10.9
+    Checking serde v1.0.229
+    Checking arktrace-viewer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/rust/crates/arktrace-viewer)
+    Checking counter-detail-presentation-public-consumer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/probe)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.63s

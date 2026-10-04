@@ -1,0 +1,517 @@
+[
+  {
+    "facts" : [
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 140,
+            "green" : 133,
+            "red" : 34
+          },
+          "rgba" : [
+            0.13333333333333333,
+            0.52156862745098043,
+            0.5490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 1,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "legacy",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "state" : null,
+        "style" : "counter"
+      }
+    ],
+    "name" : "legacy-process-measure-single"
+  },
+  {
+    "facts" : [
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 167,
+            "green" : 126,
+            "red" : 55
+          },
+          "rgba" : [
+            0.21568627450980393,
+            0.49411764705882355,
+            0.65490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : null,
+          "processKey" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 10,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "频率🚀",
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 0
+        },
+        "state" : null,
+        "style" : "counter"
+      },
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 167,
+            "green" : 126,
+            "red" : 55
+          },
+          "rgba" : [
+            0.21568627450980393,
+            0.49411764705882355,
+            0.65490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : null,
+          "processKey" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 11,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "频率🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "state" : null,
+        "style" : "counter"
+      },
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 167,
+            "green" : 126,
+            "red" : 55
+          },
+          "rgba" : [
+            0.21568627450980393,
+            0.49411764705882355,
+            0.65490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : null,
+          "processKey" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 12,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "频率🚀",
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 150
+        },
+        "state" : null,
+        "style" : "counter"
+      }
+    ],
+    "name" : "cpu-counter-predecessor-nil-duration"
+  },
+  {
+    "facts" : [
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 167,
+            "green" : 126,
+            "red" : 55
+          },
+          "rgba" : [
+            0.21568627450980393,
+            0.49411764705882355,
+            0.65490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : null,
+          "processKey" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 10,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "频率🚀",
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 0
+        },
+        "state" : null,
+        "style" : "counter"
+      },
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 167,
+            "green" : 126,
+            "red" : 55
+          },
+          "rgba" : [
+            0.21568627450980393,
+            0.49411764705882355,
+            0.65490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : null,
+          "processKey" : null,
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 11,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "频率🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "state" : null,
+        "style" : "counter"
+      }
+    ],
+    "name" : "cpu-counter-left-bound-instant"
+  },
+  {
+    "facts" : [
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 140,
+            "green" : 133,
+            "red" : 34
+          },
+          "rgba" : [
+            0.13333333333333333,
+            0.52156862745098043,
+            0.5490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 1,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "label" : "legacy",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "state" : null,
+        "style" : "counter"
+      },
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 140,
+            "green" : 133,
+            "red" : 34
+          },
+          "rgba" : [
+            0.13333333333333333,
+            0.52156862745098043,
+            0.5490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 2,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "label" : "legacy",
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 150
+        },
+        "state" : null,
+        "style" : "counter"
+      }
+    ],
+    "name" : "native-process-counter-nil-duration"
+  },
+  {
+    "facts" : [
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 104,
+            "green" : 97,
+            "red" : 170
+          },
+          "rgba" : [
+            0.66666666666666663,
+            0.38039215686274508,
+            0.40784313725490196,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 4,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "label" : "process2",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "state" : null,
+        "style" : "counter"
+      }
+    ],
+    "name" : "native-process-counter-nullable-metadata"
+  },
+  {
+    "facts" : [
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 140,
+            "green" : 133,
+            "red" : 34
+          },
+          "rgba" : [
+            0.13333333333333333,
+            0.52156862745098043,
+            0.5490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 1,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "label" : "legacy",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "state" : null,
+        "style" : "counter"
+      },
+      {
+        "category" : "counter",
+        "color" : {
+          "foreground" : {
+            "blue" : 0,
+            "green" : 0,
+            "red" : 0
+          },
+          "rgb" : {
+            "blue" : 140,
+            "green" : 133,
+            "red" : 34
+          },
+          "rgba" : [
+            0.13333333333333333,
+            0.52156862745098043,
+            0.5490196078431373,
+            1
+          ]
+        },
+        "depth" : 0,
+        "identity" : {
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "threadKey" : null,
+          "tid" : null
+        },
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "jankTag" : 0,
+        "key" : {
+          "rowID" : 1,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "label" : "legacy",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "state" : null,
+        "style" : "counter"
+      }
+    ],
+    "name" : "merged-physical-table-rowid-collision"
+  }
+]

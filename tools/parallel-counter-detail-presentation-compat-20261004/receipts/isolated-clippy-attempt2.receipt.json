@@ -1,0 +1,35 @@
+{
+  "name": "isolated-clippy-attempt2",
+  "command": [
+    "cargo",
+    "+1.99.0",
+    "clippy",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/probe/Cargo.toml",
+    "--all-targets",
+    "--all-features",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "expectedExitObserved": true,
+  "elapsedSeconds": 0.21912002563476562,
+  "log": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/receipts/isolated-clippy-attempt2.log",
+    "byteCount": 337,
+    "sha256": "0d4cbd2ba990ae3de93f774c96848aada838f17763787509df1f06d8f171f94d"
+  },
+  "environment": {
+    "CARGO_HOME": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/dependencies",
+    "CARGO_TARGET_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/target",
+    "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo",
+    "ARKTRACE_CARGO_HOME": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/dependencies",
+    "MACOSX_DEPLOYMENT_TARGET": "26.0",
+    "COUNTER_SWIFT_CANONICAL": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/receipts/swift-canonical.json"
+  }
+}

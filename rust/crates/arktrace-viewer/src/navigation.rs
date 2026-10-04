@@ -249,16 +249,15 @@ impl EventNavigationQueryIntent {
     pub fn validate(&self) -> Result<(), ViewerError> {
         if self.anchor_ns < 0 || !(1..=1_000).contains(&self.limit) {
             Err(ViewerError::InvalidRequest)
-        } else if self.after_event.is_some_and(|key| {
-            key.table
-                != match self.source {
-                    TraceDensitySource::Cpu { .. } => EventTable::SchedSlice,
-                    TraceDensitySource::ThreadState { .. } => EventTable::ThreadState,
-                    TraceDensitySource::NamedSlice { .. } => EventTable::Callstack,
-                    TraceDensitySource::CpuCounter { .. } => EventTable::Measure,
-                    TraceDensitySource::ProcessCounter { .. } => EventTable::ProcessMeasure,
-                    TraceDensitySource::Frame { .. } => EventTable::FrameSlice,
-                }
+        } else if self.after_event.is_some_and(|key| match self.source {
+            TraceDensitySource::Cpu { .. } => key.table != EventTable::SchedSlice,
+            TraceDensitySource::ThreadState { .. } => key.table != EventTable::ThreadState,
+            TraceDensitySource::NamedSlice { .. } => key.table != EventTable::Callstack,
+            TraceDensitySource::CpuCounter { .. } => key.table != EventTable::Measure,
+            TraceDensitySource::ProcessCounter { .. } => {
+                !matches!(key.table, EventTable::Measure | EventTable::ProcessMeasure)
+            }
+            TraceDensitySource::Frame { .. } => key.table != EventTable::FrameSlice,
         }) {
             Err(ViewerError::InvalidEvidence)
         } else {

@@ -264,9 +264,15 @@ pub fn map_detail_page(
                     };
                     let range = TraceTimeRange::event(sample.timestamp_ns, end)
                         .map_err(|_| ViewerError::InvalidEvidence)?;
+                    if sample.key.table != expected.1
+                        && !(series.scope == CounterScope::Process
+                            && sample.key.table == EventTable::Measure)
+                    {
+                        return Err(ViewerError::InvalidEvidence);
+                    }
                     items.push(input(
                         sample.key,
-                        expected.1,
+                        sample.key.table,
                         range,
                         0,
                         DetailStyle::Counter,

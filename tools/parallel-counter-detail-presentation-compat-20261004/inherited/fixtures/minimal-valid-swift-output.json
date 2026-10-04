@@ -1,0 +1,101 @@
+[
+  {
+    "facts" : [
+      {
+        "category" : "process",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 1,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "legacy",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : 999
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "legacy-process-measure-single",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : null,
+          "filterID" : 20,
+          "name" : "legacy",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "samples" : [
+            {
+              "durationNs" : 20,
+              "key" : {
+                "rowID" : 1,
+                "table" : "measure"
+              },
+              "timestampNs" : 100,
+              "value" : 999
+            }
+          ],
+          "scope" : "process",
+          "unit" : null
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  }
+]

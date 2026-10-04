@@ -1,0 +1,5 @@
+lane_swiftpm=true
+lane_app=true
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=true

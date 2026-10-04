@@ -1,0 +1,84 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/stable-cache
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/oracle-source
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 3] ArkTraceAppSupportTests-product
+[2 / 4] ArkTraceCLITests-product
+[4 / 5] ArkTraceCLITests-product
+[4 / 5] ArkTraceCLI-product
+Build complete! (3.13秒)
+Test Suite 'Selected tests' started at 2026-10-04 12:56:42.471.
+Test Suite 'CounterRevealCompatibilityOracleTests.xctest' started at 2026-10-04 12:56:42.475.
+Test Suite 'CounterRevealCompatibilityOracleTests.xctest' passed at 2026-10-04 12:56:42.475.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:42.475.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.003) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:42.739.
+Test Suite 'ArkTraceStoreTests.xctest' started at 2026-10-04 12:56:42.741.
+Test Suite 'ArkTraceStoreTests.xctest' passed at 2026-10-04 12:56:42.741.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:42.741.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:42.980.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 12:56:42.981.
+Test Suite 'TimelineRenderingTests' started at 2026-10-04 12:56:42.981.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents]' passed (0.021 seconds).
+Test Suite 'TimelineRenderingTests' passed at 2026-10-04 12:56:43.003.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.021 (0.022) seconds
+Test Suite 'ArkTraceRenderingTests.xctest' passed at 2026-10-04 12:56:43.003.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.021 (0.022) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:43.003.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.021 (0.023) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:43.255.
+Test Suite 'ArkTraceParserTests.xctest' started at 2026-10-04 12:56:43.257.
+Test Suite 'ArkTraceParserTests.xctest' passed at 2026-10-04 12:56:43.257.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:43.258.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:43.468.
+Test Suite 'ArkTraceIntegrationTests.xctest' started at 2026-10-04 12:56:43.469.
+Test Suite 'ArkTraceIntegrationTests.xctest' passed at 2026-10-04 12:56:43.469.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:43.469.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:43.678.
+Test Suite 'ArkTraceCoreTests.xctest' started at 2026-10-04 12:56:43.680.
+Test Suite 'ArkTraceCoreTests.xctest' passed at 2026-10-04 12:56:43.680.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:43.680.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:43.880.
+Test Suite 'ArkTraceCaptureTests.xctest' started at 2026-10-04 12:56:43.881.
+Test Suite 'ArkTraceCaptureTests.xctest' passed at 2026-10-04 12:56:43.881.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:43.882.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:44.127.
+Test Suite 'ArkTraceCLITests.xctest' started at 2026-10-04 12:56:44.133.
+Test Suite 'ArkTraceCLITests.xctest' passed at 2026-10-04 12:56:44.133.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:44.133.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.006) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:44.386.
+Test Suite 'ArkTraceAppSupportTests.xctest' started at 2026-10-04 12:56:44.387.
+Test Suite 'TraceDocumentControllerTests' started at 2026-10-04 12:56:44.387.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchResultSteppingRevealsWithoutStealingKeyboardFocus]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-stepping-9EAB290C-1CF3-4DE3-ADEF-455F7BFB0411.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-stepping-9EAB290C-1CF3-4DE3-ADEF-455F7BFB0411.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchResultSteppingRevealsWithoutStealingKeyboardFocus]' passed (0.047 seconds).
+Test Suite 'TraceDocumentControllerTests' passed at 2026-10-04 12:56:44.435.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.047 (0.047) seconds
+Test Suite 'ArkTraceAppSupportTests.xctest' passed at 2026-10-04 12:56:44.435.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.047 (0.048) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:44.435.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.047 (0.049) seconds
+Test Suite 'Selected tests' started at 2026-10-04 12:56:44.720.
+Test Suite 'ArkTraceAnalysisTests.xctest' started at 2026-10-04 12:56:44.722.
+Test Suite 'ArkTraceAnalysisTests.xctest' passed at 2026-10-04 12:56:44.722.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 12:56:44.722.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds

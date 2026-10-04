@@ -1,0 +1,1192 @@
+[
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 1,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "error": "InvalidEvidence"
+    },
+    "id": "legacy-process-measure-single",
+    "presentation": {
+      "error": "InvalidEvidence"
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": 0,
+      "filterID": 10,
+      "limit": 3,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "cpu"
+    },
+    "detail": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      },
+      "error": null,
+      "items": [
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "style": "counter"
+        },
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 11,
+            "table": "measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "style": "counter"
+        },
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 12,
+            "table": "measure"
+          },
+          "isOpenEnded": true,
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "style": "counter"
+        }
+      ],
+      "truncated": false
+    },
+    "id": "cpu-counter-predecessor-nil-duration",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 167,
+              "green": 126,
+              "red": 55
+            },
+            "rgba": [
+              0.21568627450980393,
+              0.49411764705882355,
+              0.6549019607843137,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": null,
+            "processKey": null,
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "label": "频率🚀",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 167,
+              "green": 126,
+              "red": 55
+            },
+            "rgba": [
+              0.21568627450980393,
+              0.49411764705882355,
+              0.6549019607843137,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": null,
+            "processKey": null,
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": true,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 11,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "label": "频率🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 167,
+              "green": 126,
+              "red": 55
+            },
+            "rgba": [
+              0.21568627450980393,
+              0.49411764705882355,
+              0.6549019607843137,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": null,
+            "processKey": null,
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": true,
+          "jankTag": 0,
+          "key": {
+            "rowID": 12,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "label": "频率🚀",
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 39,
+      "retainedBytes": 689,
+      "retainedStringBytes": 17
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": 0,
+      "filterID": 10,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 150,
+        "startNs": 140
+      },
+      "scope": "cpu"
+    },
+    "detail": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.dur"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      },
+      "error": null,
+      "items": [
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "style": "counter"
+        },
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 11,
+            "table": "measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "style": "counter"
+        }
+      ],
+      "truncated": false
+    },
+    "id": "cpu-counter-left-bound-instant",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 167,
+              "green": 126,
+              "red": 55
+            },
+            "rgba": [
+              0.21568627450980393,
+              0.49411764705882355,
+              0.6549019607843137,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": null,
+            "processKey": null,
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "label": "频率🚀",
+          "range": {
+            "endNs": 200,
+            "startNs": 0
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 167,
+              "green": 126,
+              "red": 55
+            },
+            "rgba": [
+              0.21568627450980393,
+              0.49411764705882355,
+              0.6549019607843137,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": null,
+            "processKey": null,
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": true,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 11,
+            "table": "measure"
+          },
+          "kind": "counter",
+          "label": "频率🚀",
+          "range": {
+            "endNs": 140,
+            "startNs": 140
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 26,
+      "retainedBytes": 505,
+      "retainedStringBytes": 17
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      },
+      "error": null,
+      "items": [
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "style": "counter"
+        },
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "isOpenEnded": true,
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "style": "counter"
+        }
+      ],
+      "truncated": false
+    },
+    "id": "native-process-counter-nil-duration",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": true,
+          "jankTag": 0,
+          "key": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 32,
+      "retainedBytes": 501,
+      "retainedStringBytes": 13
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 21,
+      "limit": 1,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 2,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      },
+      "error": null,
+      "items": [
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 4,
+            "table": "process_measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "style": "counter"
+        }
+      ],
+      "truncated": false
+    },
+    "id": "native-process-counter-nullable-metadata",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 104,
+              "green": 97,
+              "red": 170
+            },
+            "rgba": [
+              0.6666666666666666,
+              0.3803921568627451,
+              0.40784313725490196,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 2
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 4,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "process2",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 8,
+      "retainedBytes": 319,
+      "retainedStringBytes": 15
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "error": "InvalidEvidence"
+    },
+    "id": "merged-physical-table-rowid-collision",
+    "presentation": {
+      "error": "InvalidEvidence"
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": 0,
+      "filterID": 10,
+      "limit": 3,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "cpu"
+    },
+    "detail": {
+      "error": "InvalidEvidence"
+    },
+    "id": "cpu-wrong-process-measure",
+    "presentation": {
+      "error": "InvalidEvidence"
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "error": "InvalidEvidence"
+    },
+    "id": "process-wrong-callstack",
+    "presentation": {
+      "error": "InvalidEvidence"
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 999,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "error": "InvalidEvidence"
+    },
+    "id": "process-filter-mismatch",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": true,
+          "jankTag": 0,
+          "key": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 32,
+      "retainedBytes": 501,
+      "retainedStringBytes": 13
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 2,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "error": "InvalidEvidence"
+    },
+    "id": "process-ipid-mismatch-same-pid",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": true,
+          "jankTag": 0,
+          "key": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 32,
+      "retainedBytes": 501,
+      "retainedStringBytes": 13
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": null,
+      "filterID": 20,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": 1,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "process"
+    },
+    "detail": {
+      "capabilityAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "measure.ts"
+          },
+          {
+            "category": "clampedValue",
+            "count": 1,
+            "message": null,
+            "scope": "sched_slice.ts"
+          }
+        ]
+      },
+      "error": null,
+      "items": [
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "isOpenEnded": false,
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "style": "counter"
+        },
+        {
+          "depth": 0,
+          "eventKey": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "isOpenEnded": true,
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "style": "counter"
+        }
+      ],
+      "truncated": true
+    },
+    "id": "native-truncated-retains-machine-quality",
+    "presentation": {
+      "error": null,
+      "facts": [
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": false,
+          "jankTag": 0,
+          "key": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 120,
+            "startNs": 100
+          },
+          "state": null,
+          "style": "counter"
+        },
+        {
+          "category": "counter",
+          "color": {
+            "foreground": {
+              "blue": 0,
+              "green": 0,
+              "red": 0
+            },
+            "rgb": {
+              "blue": 140,
+              "green": 133,
+              "red": 34
+            },
+            "rgba": [
+              0.13333333333333333,
+              0.5215686274509804,
+              0.5490196078431373,
+              1.0
+            ]
+          },
+          "depth": 0,
+          "identity": {
+            "pid": 700,
+            "processKey": {
+              "ipid": 1
+            },
+            "threadKey": null,
+            "tid": null
+          },
+          "isInstant": false,
+          "isOpenEnded": true,
+          "jankTag": 0,
+          "key": {
+            "rowID": 2,
+            "table": "process_measure"
+          },
+          "kind": "counter",
+          "label": "legacy",
+          "range": {
+            "endNs": 200,
+            "startNs": 150
+          },
+          "state": null,
+          "style": "counter"
+        }
+      ],
+      "inputStringBytes": 32,
+      "retainedBytes": 501,
+      "retainedStringBytes": 13
+    }
+  },
+  {
+    "actualTypedQuery": {
+      "cpu": 0,
+      "filterID": 10,
+      "limit": 2,
+      "name": null,
+      "nameMatch": "exact",
+      "pid": null,
+      "processKey": null,
+      "range": {
+        "endNs": 200,
+        "startNs": 100
+      },
+      "scope": "cpu"
+    },
+    "detail": {
+      "error": "InputBudgetExceeded"
+    },
+    "id": "cpu-total-sample-budget-two-for-three",
+    "presentation": {
+      "error": "InputBudgetExceeded"
+    }
+  }
+]

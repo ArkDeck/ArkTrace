@@ -1,0 +1,341 @@
+[
+  {
+    "id": "legacy-process-measure-single",
+    "facts": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 999
+      }
+    ]
+  },
+  {
+    "id": "cpu-counter-predecessor-nil-duration",
+    "facts": [
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 0
+        },
+        "semanticDurationNs": 200,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 7
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": true,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 11,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 140,
+          "startNs": 140
+        },
+        "semanticDurationNs": 0,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 8
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": true,
+        "key": {
+          "rowID": 12,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 150
+        },
+        "semanticDurationNs": null,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 9
+      }
+    ]
+  },
+  {
+    "id": "cpu-counter-left-bound-instant",
+    "facts": [
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 200,
+          "startNs": 0
+        },
+        "semanticDurationNs": 200,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 7
+      },
+      {
+        "category": "cpu",
+        "cpu": 0,
+        "isInstant": true,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 11,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "频率🚀",
+        "pid": null,
+        "priority": null,
+        "processKey": null,
+        "processName": null,
+        "range": {
+          "endNs": 140,
+          "startNs": 140
+        },
+        "semanticDurationNs": 0,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "MHz",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "id": "native-process-counter-nil-duration",
+    "facts": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 99
+      },
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": true,
+        "key": {
+          "rowID": 2,
+          "table": "process_measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 200,
+          "startNs": 150
+        },
+        "semanticDurationNs": null,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 100
+      }
+    ]
+  },
+  {
+    "id": "native-process-counter-nullable-metadata",
+    "facts": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 4,
+          "table": "process_measure"
+        },
+        "kind": "counter",
+        "name": "process2",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 2
+        },
+        "processName": null,
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": "",
+        "value": 99
+      }
+    ]
+  },
+  {
+    "id": "merged-physical-table-rowid-collision",
+    "facts": [
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 999
+      },
+      {
+        "category": "process",
+        "cpu": null,
+        "isInstant": false,
+        "isOpenEnded": false,
+        "key": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "kind": "counter",
+        "name": "legacy",
+        "pid": 700,
+        "priority": null,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "range": {
+          "endNs": 120,
+          "startNs": 100
+        },
+        "semanticDurationNs": 20,
+        "state": null,
+        "threadKey": null,
+        "threadName": null,
+        "tid": null,
+        "unit": null,
+        "value": 99
+      }
+    ]
+  }
+]

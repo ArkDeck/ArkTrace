@@ -552,10 +552,16 @@ pub fn present(
                 } else {
                     EventTable::ProcessMeasure
                 };
+                if sample.key.table != table
+                    && !(series.scope == CounterScope::Process
+                        && sample.key.table == EventTable::Measure)
+                {
+                    return Err(ViewerError::InvalidEvidence);
+                }
                 builder.detail(
                     primitive(
                         sample.key,
-                        table,
+                        sample.key.table,
                         range,
                         0,
                         DetailStyle::Counter,

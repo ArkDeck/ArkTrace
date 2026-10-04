@@ -1,0 +1,7 @@
+Analysis oracles: 23 historical parity + 2 retained differences; 33 current exact vectors and Swift source/output digests
+Store oracles: 62 frame/raw/Agent + 84 argument/Inspector + 138 search outputs and 570 exact source calls + 190 density results; current Swift source/input/output identities; retained before-fix argument output
+Viewer oracles: retained geometry/boundary/old plan/scope-before; 13 current loader, 8 actual detail/style, 6 actual SQLite slices and 7 counter scope vectors with source identities
+Palette/presentation oracle: 1,068 palette, 38 style and 62 DTO vectors with actual Swift source/output identities
+Navigation oracle: 8 catalogs, 55 actions, 161 recorded host filters, 64 native focus/anchor and 3 restore vectors with current Swift source/output identities
+Annotation oracle: 74 scenarios, 674 actions and 748 actual Swift states with source/output and deferred editor identities
+migration contracts: 34 existing Machine JSON fixtures; 65 closed scopes; 24 index definitions; 13 Ready metadata fields

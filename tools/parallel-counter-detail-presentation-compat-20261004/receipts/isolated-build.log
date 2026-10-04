@@ -1,0 +1,108 @@
+   Compiling version_check v0.9.5
+   Compiling zmij v1.0.23
+   Compiling proc-macro2 v1.0.107
+   Compiling serde_json v1.0.151
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling unicode-ident v1.0.26
+   Compiling memchr v2.8.3
+   Compiling generic-array v0.14.7
+   Compiling itoa v1.0.18
+   Compiling libc v0.2.189
+   Compiling serde v1.0.229
+   Compiling cfg-if v1.0.5
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling syn v3.0.6
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling serde_derive v1.0.229
+   Compiling arktrace-contract v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/rust/crates/arktrace-contract)
+   Compiling arktrace-viewer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/rust/crates/arktrace-viewer)
+   Compiling counter-detail-presentation-public-consumer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/tools/parallel-counter-detail-presentation-compat-20261004/probe)
+error[E0277]: the trait bound `arktrace_contract::EventPage<arktrace_contract::CounterSeries>: serde::Deserialize<'de>` is not satisfied
+    --> src/main.rs:14:11
+     |
+  14 |     page: EventPage<CounterSeries>,
+     |           ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Deserialize<'_>` is not implemented for `arktrace_contract::EventPage<arktrace_contract::CounterSeries>`
+     |
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `arktrace_contract::EventPage<arktrace_contract::CounterSeries>` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `Deserialize<'de>`:
+               &'a Path
+               &'a [u8]
+               &'a str
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+             and 226 others
+note: required by a bound in `next_element`
+    --> /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/dependencies/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229/src/de/mod.rs:1771:12
+     |
+1769 |     fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
+     |        ------------ required by a bound in this associated function
+1770 |     where
+1771 |         T: Deserialize<'de>,
+     |            ^^^^^^^^^^^^^^^^ required by this bound in `SeqAccess::next_element`
+
+error[E0277]: the trait bound `arktrace_contract::EventPage<arktrace_contract::CounterSeries>: serde::Deserialize<'de>` is not satisfied
+    --> src/main.rs:14:11
+     |
+  14 |     page: EventPage<CounterSeries>,
+     |           ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Deserialize<'_>` is not implemented for `arktrace_contract::EventPage<arktrace_contract::CounterSeries>`
+     |
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `arktrace_contract::EventPage<arktrace_contract::CounterSeries>` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `Deserialize<'de>`:
+               &'a Path
+               &'a [u8]
+               &'a str
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+             and 226 others
+note: required by a bound in `next_value`
+    --> /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/dependencies/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229/src/de/mod.rs:1916:12
+     |
+1914 |     fn next_value<V>(&mut self) -> Result<V, Self::Error>
+     |        ---------- required by a bound in this associated function
+1915 |     where
+1916 |         V: Deserialize<'de>,
+     |            ^^^^^^^^^^^^^^^^ required by this bound in `MapAccess::next_value`
+
+error[E0277]: the trait bound `arktrace_contract::EventPage<arktrace_contract::CounterSeries>: serde::Deserialize<'de>` is not satisfied
+  --> src/main.rs:7:10
+   |
+ 7 | #[derive(Deserialize)]
+   |          ^^^^^^^^^^^ the trait `Deserialize<'_>` is not implemented for `arktrace_contract::EventPage<arktrace_contract::CounterSeries>`
+   |
+   = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `arktrace_contract::EventPage<arktrace_contract::CounterSeries>` type
+   = note: for types from other crates check whether the crate offers a `serde` feature flag
+   = help: the following other types implement trait `Deserialize<'de>`:
+             &'a Path
+             &'a [u8]
+             &'a str
+             ()
+             (T,)
+             (T0, T1)
+             (T0, T1, T2)
+             (T0, T1, T2, T3)
+           and 226 others
+note: required by a bound in `_serde::__private229::de::missing_field`
+  --> /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/dependencies/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:26:8
+   |
+24 | pub fn missing_field<'de, V, E>(field: &'static str) -> Result<V, E>
+   |        ------------- required by a bound in this function
+25 | where
+26 |     V: Deserialize<'de>,
+   |        ^^^^^^^^^^^^^^^^ required by this bound in `missing_field`
+   = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `counter-detail-presentation-public-consumer` (bin "counter-detail-presentation-public-consumer") due to 3 previous errors

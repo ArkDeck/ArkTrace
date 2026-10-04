@@ -1,0 +1,22 @@
+[package]
+name = "arktrace-counter-reveal-compat"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+license = "MIT"
+publish = false
+
+[workspace]
+
+[dependencies]
+arktrace-contract = { path = "../../rust/crates/arktrace-contract" }
+arktrace-viewer = { path = "../../rust/crates/arktrace-viewer" }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }
+libc = "=0.2.189"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "deny"

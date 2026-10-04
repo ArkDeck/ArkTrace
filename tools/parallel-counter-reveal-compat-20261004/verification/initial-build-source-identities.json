@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/parallel-counter-reveal-compat-20261004/src/main.rs",
+    "initialSHA256": "8b5e3860afa94fefc4c75d41d07fd84417a3add7d6aa7862be8e60ff1597f5cb",
+    "preservedSource": "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-main.rs"
+  },
+  {
+    "path": "tools/parallel-counter-reveal-compat-20261004/src/lib.rs",
+    "initialSHA256": "3554c8ce13c2ae581da7d18723eafe982d95e097c6cf0e7cc9c2a3a434989fbe",
+    "preservedSource": "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-lib.rs"
+  }
+]

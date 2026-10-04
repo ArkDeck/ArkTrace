@@ -1,0 +1,255 @@
+//! Replay inherited actual repository DTOs and actual Swift loader/style facts.
+//! The six legal groups preserve physical table identity, including equal row IDs.
+use arktrace_contract::*;
+use arktrace_viewer::*;
+use serde_json::{Value, json};
+
+struct Case {
+    id: String,
+    source: TraceDensitySource,
+    range: TraceTimeRange,
+    limit: usize,
+    page: EventPage<CounterSeries>,
+}
+fn cases() -> Vec<Case> {
+    // EventPage has a public constructor surface, but no Deserialize impl.
+    // Decode only its actual public item/quality types, carry fixture headers.
+    let raw: Vec<Value> =
+        serde_json::from_str(include_str!("fixtures/counter-compat-inputs.json")).unwrap();
+    raw.into_iter()
+        .map(|v| Case {
+            id: v["id"].as_str().unwrap().to_owned(),
+            source: serde_json::from_value(v["source"].clone()).unwrap(),
+            range: serde_json::from_value(v["range"].clone()).unwrap(),
+            limit: usize::try_from(v["limit"].as_u64().unwrap()).unwrap(),
+            page: EventPage {
+                items: serde_json::from_value(v["page"]["items"].clone()).unwrap(),
+                truncated: v["page"]["truncated"].as_bool().unwrap(),
+                capability_available: v["page"]["capabilityAvailable"].as_bool().unwrap(),
+                data_quality: serde_json::from_value(v["page"]["dataQuality"].clone()).unwrap(),
+            },
+        })
+        .collect()
+}
+fn presentation(c: &Case) -> Result<PresentationBatch, ViewerError> {
+    let inputs = c
+        .page
+        .items
+        .iter()
+        .flat_map(|series| {
+            (0..series.samples.len()).map(|sample_index| PresentationInput::Counter {
+                series,
+                sample_index,
+                query_range: c.range,
+            })
+        })
+        .collect::<Vec<_>>();
+    present(
+        &inputs,
+        PresentationBudget {
+            maximum_primitives: c.limit,
+            ..Default::default()
+        },
+        &mut || Ok(()),
+    )
+}
+fn detail(c: &Case) -> Result<EventPage<DetailInput>, ViewerError> {
+    map_detail_page(
+        &c.source,
+        c.range,
+        c.limit,
+        RepositoryDetailPage::Counter(c.page.clone()),
+        &mut || Ok(()),
+    )
+}
+fn facts(batch: &PresentationBatch) -> Vec<Value> {
+    batch.primitives().iter().map(|p| {
+        let PrimitivePresentation::Detail { detail: d } = p else { panic!("counter detail") };
+        let color = d.color;
+        json!({"key": d.event_key, "kind": d.kind, "range": d.range,
+            "isOpenEnded": d.is_open_ended, "isInstant": d.is_instant,
+            "depth": d.depth, "jankTag": d.jank_tag, "identity": d.identity,
+            "label": batch.text(d.label), "category": batch.text(d.category),
+            "state": batch.text(d.state), "style": d.style,
+            "color": {"rgb": color.fill, "rgba": [color.rgba.red, color.rgba.green, color.rgba.blue, color.rgba.alpha], "foreground": color.label_foreground}})
+    }).collect()
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn compare_presentation(actual: Vec<Value>, expected: &Value, id: &str) {
+        let expected = expected.as_array().unwrap();
+        assert_eq!(actual.len(), expected.len(), "{id} count");
+        for (mut a, e) in actual.into_iter().zip(expected) {
+            let mut e = e.clone();
+            // Only CGColor's declared floating components permit JSON 1 vs
+            // 1.0 equivalence. All event/identity/time Int64s stay exact.
+            let ar = a["color"]["rgba"].take();
+            let er = e["color"]["rgba"].take();
+            assert_eq!(ar.as_array().unwrap().len(), 4);
+            assert_eq!(er.as_array().unwrap().len(), 4);
+            for (a, e) in ar.as_array().unwrap().iter().zip(er.as_array().unwrap()) {
+                assert_eq!(
+                    a.as_f64().unwrap(),
+                    e.as_f64().unwrap(),
+                    "{id} CGColor component"
+                );
+            }
+            assert_eq!(a, e, "{id} exact non-CGColor facts");
+        }
+    }
+
+    fn canonical() -> Value {
+        serde_json::from_str(include_str!("fixtures/counter-compat-swift-oracle.json")).unwrap()
+    }
+    #[test]
+    fn legal_counter_compatibility_contract() {
+        let expected = canonical();
+        let mut failures = Vec::new();
+        for c in cases().iter().take(6) {
+            let e = expected
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|e| e["name"] == c.id)
+                .unwrap();
+            match detail(c) {
+                Err(error) => failures.push(format!("{}::map_detail_page={error}", c.id)),
+                Ok(page) => {
+                    let f = e["facts"].as_array().unwrap();
+                    assert_eq!(page.items.len(), f.len(), "{} count", c.id);
+                    for (d, s) in page.items.iter().zip(f) {
+                        assert_eq!(serde_json::to_value(d.event_key).unwrap(), s["key"]);
+                        assert_eq!(serde_json::to_value(d.range).unwrap(), s["range"]);
+                        assert_eq!(json!(d.is_open_ended), s["isOpenEnded"]);
+                        assert_eq!(json!(d.depth), s["depth"]);
+                        assert_eq!(serde_json::to_value(d.style).unwrap(), s["style"]);
+                    }
+                    assert_eq!(page.truncated, c.page.truncated);
+                    assert_eq!(page.capability_available, c.page.capability_available);
+                    assert_eq!(page.data_quality, c.page.data_quality);
+                }
+            }
+            match presentation(c) {
+                Err(error) => failures.push(format!("{}::present={error}", c.id)),
+                Ok(batch) => compare_presentation(facts(&batch), &e["facts"], &c.id),
+            }
+        }
+        assert!(
+            failures.is_empty(),
+            "actual Swift accepts legal DTOs; Rust rejects: {failures:#?}"
+        );
+    }
+    #[test]
+    fn actual_native_and_cpu_success_matches_swift_labels_colors_time_keys() {
+        let expected = canonical();
+        for c in &cases()[1..5] {
+            let e = expected
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|e| e["name"] == c.id)
+                .unwrap();
+            let d = detail(c).unwrap();
+            let p = presentation(c).unwrap();
+            compare_presentation(facts(&p), &e["facts"], &c.id);
+            assert_eq!(d.items.len(), p.primitives().len());
+            for (d, p) in d.items.iter().zip(p.primitives()) {
+                let PrimitivePresentation::Detail { detail: p } = p else {
+                    panic!("detail")
+                };
+                assert_eq!(d.event_key, p.event_key);
+                assert_eq!(d.range, p.range);
+                assert_eq!(d.is_open_ended, p.is_open_ended);
+                assert_eq!(d.style, p.style);
+            }
+            assert_eq!(d.data_quality, c.page.data_quality);
+            assert_eq!(d.truncated, c.page.truncated);
+        }
+    }
+    #[test]
+    fn source_specific_checks_stay_in_detail_and_table_checks_in_both() {
+        let cases = cases();
+        for c in &cases[6..8] {
+            assert_eq!(detail(c), Err(ViewerError::InvalidEvidence), "{}", c.id);
+            assert_eq!(
+                presentation(c),
+                Err(ViewerError::InvalidEvidence),
+                "{}",
+                c.id
+            );
+        }
+        for c in &cases[8..10] {
+            assert_eq!(detail(c), Err(ViewerError::InvalidEvidence), "{}", c.id);
+            assert!(presentation(c).is_ok(), "source-free API: {}", c.id);
+        }
+        let q = detail_query(&cases[9].source, cases[9].range, cases[9].limit).unwrap();
+        let RepositoryDetailQuery::Counter(q) = q else {
+            panic!("counter")
+        };
+        assert_eq!(q.process_key, Some(2));
+        assert_eq!(q.pid, None);
+        assert_eq!(
+            cases[9].page.items[0].process_key,
+            Some(ProcessKey { ipid: 1 })
+        );
+        assert_eq!(cases[9].page.items[0].pid, Some(700));
+    }
+    #[test]
+    fn page_quality_truncation_and_total_sample_budget_are_distinct() {
+        let cases = cases();
+        let c = &cases[10];
+        let d = detail(c).unwrap();
+        assert!(d.truncated);
+        assert_eq!(d.data_quality, c.page.data_quality);
+        assert_eq!(d.data_quality.warnings.len(), 2);
+        assert!(presentation(c).is_ok());
+        let c = &cases[11];
+        assert_eq!(detail(c), Err(ViewerError::InputBudgetExceeded));
+        assert_eq!(presentation(c), Err(ViewerError::InputBudgetExceeded));
+    }
+}
+
+#[test]
+fn counter_navigation_accepts_actual_store_anchors_and_rejects_foreign_tables() {
+    let cases: Vec<Value> = serde_json::from_str(include_str!(
+        "fixtures/counter-navigation-compat-inputs.json"
+    ))
+    .unwrap();
+    let mut counts = [0_usize; 3];
+    for case in cases {
+        let intent = EventNavigationQueryIntent {
+            identity: serde_json::from_value(case["identity"].clone()).unwrap(),
+            source: serde_json::from_value(case["source"].clone()).unwrap(),
+            anchor_ns: case["anchorNs"].as_i64().unwrap(),
+            after_event: serde_json::from_value(case["afterEvent"].clone()).unwrap(),
+            direction: serde_json::from_value(case["direction"].clone()).unwrap(),
+            limit: usize::try_from(case["limit"].as_u64().unwrap()).unwrap(),
+        };
+        let encoded = serde_json::to_value(&intent).unwrap();
+        let decoded: EventNavigationQueryIntent = serde_json::from_value(encoded).unwrap();
+        assert_eq!(decoded, intent);
+        match case["expected"].as_str().unwrap() {
+            "invalidEvidence" => {
+                assert_eq!(
+                    decoded.validate(),
+                    Err(ViewerError::InvalidEvidence),
+                    "{}",
+                    case["id"]
+                );
+                counts[0] += 1;
+            }
+            "legal" => {
+                assert_eq!(decoded.validate(), Ok(()), "{}", case["id"]);
+                counts[1] += 1;
+            }
+            "shapeOnly" => {
+                assert_eq!(decoded.validate(), Ok(()), "{}", case["id"]);
+                counts[2] += 1;
+            }
+            other => panic!("unknown fixture expectation {other}"),
+        }
+    }
+    assert_eq!(counts, [5, 6, 3]);
+}

@@ -1,0 +1,44 @@
+   Compiling arktrace-contract v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/workspace/rust/crates/arktrace-contract)
+   Compiling arktrace-viewer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/workspace/rust/crates/arktrace-viewer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.29s
+     Running tests/detail_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/target/debug/deps/detail_oracle-bc9b780afde778b6)
+
+running 4 tests
+test unavailable_detail_pages_cannot_publish_rows_or_truncation_and_check_is_live ... ok
+test counter_mapping_rejects_overflow_negative_duration_and_total_sample_overrun ... ok
+test detail_mapping_rejects_wrong_family_lane_and_table_identity ... ok
+test replay_eight_actual_swift_loader_dto_mapping_vectors_exactly ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/detail_queries.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/target/debug/deps/detail_queries-81a671d5ab6238af)
+
+running 1 test
+test typed_detail_queries_keep_lane_identity_and_prelimit_unattributed_scope ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/presentation_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/target/debug/deps/presentation_oracle-09767a8858e57d99)
+
+running 1 test
+test actual_swift_loader_labels_classification_color_and_identity_from_store_dtos ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/presentation_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-cargo/target/debug/deps/presentation_regressions-d06995cf8fef0977)
+
+running 11 tests
+test pid_tid_color_identity_is_separate_from_internal_identity ... ok
+test label_nil_empty_and_tid_fallback_are_preserved ... ok
+test density_has_no_event_key_keeps_full_opacity_and_explicit_fallback_fact ... ok
+test depth_and_open_ended_survive_without_changing_name_color ... ok
+test invalid_source_key_or_counter_index_is_not_replaced_by_fake_key ... ok
+test batch_primitive_and_retained_fixed_memory_caps_reject ... ok
+test source_strings_are_bounded_before_projection_and_normal_request_recovers ... ok
+test string_pool_preserves_utf8_bytes_and_first_occurrence_order ... ok
+test counter_index_duration_and_open_ended_are_bounded_without_cloning_series ... ok
+test retained_limits_reject_atomically_while_interning_repeated_labels_once ... ok
+test cancellation_and_deadline_are_bounded_and_do_not_poison_next_request ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

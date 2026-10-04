@@ -1,0 +1,20 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-swiftpm
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-detail-presentation-swiftpm/source/ArkTrace
+Building for debugging...
+[1 / 13] ArkTraceRenderingTests-product
+[2 / 13] ArkTraceRenderingTests-product
+[4 / 15] ArkTraceRenderingTests-product
+[7 / 13] ArkTraceRenderingTests-product
+[9 / 13] ArkTraceRenderingTests-product
+Build complete! (3.29秒)
+Test Suite 'Selected tests' started at 2026-10-04 13:06:11.989.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 13:06:11.989.
+Test Suite 'TimelineRenderingTests' started at 2026-10-04 13:06:11.989.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testActualCounterCombinationOracle]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testActualCounterCombinationOracle]' passed (0.007 seconds).
+Test Suite 'TimelineRenderingTests' passed at 2026-10-04 13:06:11.996.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.007 (0.007) seconds
+Test Suite 'ArkTraceRenderingTests.xctest' passed at 2026-10-04 13:06:11.996.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.007 (0.007) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 13:06:11.996.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.007 (0.007) seconds

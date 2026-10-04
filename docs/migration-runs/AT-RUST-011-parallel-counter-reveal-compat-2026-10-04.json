@@ -1,0 +1,1033 @@
+{
+  "schemaVersion": 3,
+  "task": "AT-RUST-011/013 real counter EventKey navigation/reveal compatibility",
+  "frozen": true,
+  "completedAtUtc": "2026-10-04T05:00:35.414367+00:00",
+  "status": "validation-complete-navigation-anchor-guard-repair-required",
+  "sourceCommit": "44505359b10a27a8d33549c0e36f8ce7af5d3ee5",
+  "snapshotDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004",
+  "snapshotManifestSHA256": "e293efa4b8e1a64fe2e4a2b31f0968a5ada15878793261f87d2d758368288ea8",
+  "baselineFilesUnchanged": 946,
+  "productionFilesModified": false,
+  "oldFrozenFilesModified": false,
+  "productionReviewApproved": false,
+  "coverage": {
+    "schemaVersion": 1,
+    "meaningfulNewCombinations": 14,
+    "maximumCombinations": 16,
+    "nativeFlows": 6,
+    "wrongTableRejections": 5,
+    "shapeOnlyCases": 3,
+    "legalAnchorPasses": 3,
+    "legalAnchorFailures": 3,
+    "actualProducerCompatibilityPassed": false,
+    "baselineFilesUnchanged": 946,
+    "priorFrozenOwnedChecksumEntriesVerified": 99,
+    "priorProducerFilesModified": false,
+    "databaseBytesUnchanged": true,
+    "failures": [
+      "legacy-measure-counter-anchor",
+      "merged-measure-row1",
+      "process-source-all-preserved"
+    ],
+    "intents": [
+      {
+        "id": "legacy-measure-counter-anchor",
+        "expectedContract": "legal",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "merged-measure-row1",
+        "expectedContract": "legal",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "merged-process-measure-row1",
+        "expectedContract": "legal",
+        "actualError": null,
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "cpu-real-measure-predecessor",
+        "expectedContract": "legal",
+        "actualError": null,
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "process-source-all-preserved",
+        "expectedContract": "legal",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "cpu-source-all-preserved",
+        "expectedContract": "legal",
+        "actualError": null,
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "reject-process-sched_slice",
+        "expectedContract": "invalidEvidence",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "reject-process-thread_state",
+        "expectedContract": "invalidEvidence",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "reject-process-callstack",
+        "expectedContract": "invalidEvidence",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "reject-process-frame_slice",
+        "expectedContract": "invalidEvidence",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "reject-cpu-process-measure",
+        "expectedContract": "invalidEvidence",
+        "actualError": "InvalidEvidence",
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "filter-ownership-not-provable-by-intent",
+        "expectedContract": "shapeOnly",
+        "actualError": null,
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "process-ownership-not-provable-by-intent",
+        "expectedContract": "shapeOnly",
+        "actualError": null,
+        "sourceAndEventKeyPreserved": true
+      },
+      {
+        "id": "no-after-event-does-not-invent-counter-key",
+        "expectedContract": "shapeOnly",
+        "actualError": null,
+        "sourceAndEventKeyPreserved": true
+      }
+    ],
+    "flows": [
+      {
+        "id": "legacy-measure-counter-anchor",
+        "displayedNavigationNativeParity": true,
+        "controllerSelectedKey": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "selectedValue": 999,
+        "sourcePreserved": true,
+        "rangeRevealParity": true,
+        "rangeOnlyIntentHasNoCounterEventKey": true
+      },
+      {
+        "id": "merged-measure-row1",
+        "displayedNavigationNativeParity": true,
+        "controllerSelectedKey": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "selectedValue": 999,
+        "sourcePreserved": true,
+        "rangeRevealParity": true,
+        "rangeOnlyIntentHasNoCounterEventKey": true
+      },
+      {
+        "id": "merged-process-measure-row1",
+        "displayedNavigationNativeParity": true,
+        "controllerSelectedKey": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "selectedValue": 99,
+        "sourcePreserved": true,
+        "rangeRevealParity": true,
+        "rangeOnlyIntentHasNoCounterEventKey": true
+      },
+      {
+        "id": "cpu-real-measure-predecessor",
+        "displayedNavigationNativeParity": true,
+        "controllerSelectedKey": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "selectedValue": 7,
+        "sourcePreserved": true,
+        "rangeRevealParity": true,
+        "rangeOnlyIntentHasNoCounterEventKey": true
+      },
+      {
+        "id": "process-source-all-preserved",
+        "displayedNavigationNativeParity": true,
+        "controllerSelectedKey": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "selectedValue": 999,
+        "sourcePreserved": true,
+        "rangeRevealParity": true,
+        "rangeOnlyIntentHasNoCounterEventKey": true
+      },
+      {
+        "id": "cpu-source-all-preserved",
+        "displayedNavigationNativeParity": true,
+        "controllerSelectedKey": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "selectedValue": 7,
+        "sourcePreserved": true,
+        "rangeRevealParity": true,
+        "rangeOnlyIntentHasNoCounterEventKey": true
+      }
+    ],
+    "apiLimits": [
+      "EventNavigationQueryIntent does not execute repository adjacency or prove filter/process ownership",
+      "RevealRange has range only; ViewAction has no SelectCounter or RevealCounterEvent case",
+      "Swift public reveal takes TraceSearchResult; its slice branch admits a namedSlice lane",
+      "New native evidence uses frozen real Inspector facts and real SQLite catalog; not a complete document-open/SDK/App acceptance"
+    ]
+  },
+  "inheritedEvidence": {
+    "report": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/docs/migration-runs/AT-RUST-011-parallel-repository-inspector-parity-2026-10-04.json",
+    "reportSHA256": "db96f66fadf5255f53b65cc24adaafb24338edb9577852b857164459204867a6",
+    "oldChecksumEntriesVerified": 99,
+    "oldBaselineFilesVerified": 947,
+    "oldMatrixRerun": false,
+    "oldInspectorDetailPresentationRerun": false,
+    "oldHistoricalClippyLimitationPreserved": true
+  },
+  "minimalActualFailure": {
+    "input": "tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+    "caseId": "legacy-measure-counter-anchor",
+    "actualFunction": "EventNavigationQueryIntent::validate",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "afterEvent": {
+      "table": "measure",
+      "rowID": 1
+    },
+    "anchorNs": 100,
+    "direction": "next",
+    "limit": 1,
+    "returnError": "InvalidEvidence",
+    "regressionExitCode": 101,
+    "log": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.log"
+  },
+  "actualNativeEvidence": {
+    "repositoryStubUsed": false,
+    "catalogFromRealSQLite": true,
+    "inspectorFactsFromFrozenActualSQLiteCanonical": true,
+    "navigationAlgorithmsCopied": false,
+    "controllerSelectionOriginalPublicEntry": true,
+    "keyboardOriginalPackageEntry": true,
+    "rangeRevealOriginalPrivateWrapper": true,
+    "inspectorProducerRerun": false,
+    "flows": 6,
+    "swiftTestsPassed": 1,
+    "relatedExistingSwiftTestsPassed": 2,
+    "sourceSeamReceipt": "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.receipt.json",
+    "compiledSourceIdentityCount": 587
+  },
+  "apiBoundaries": [
+    "EventNavigationQueryIntent does not execute repository adjacency or prove filter/process ownership",
+    "RevealRange has range only; ViewAction has no SelectCounter or RevealCounterEvent case",
+    "Swift public reveal takes TraceSearchResult; its slice branch admits a namedSlice lane",
+    "New native evidence uses frozen real Inspector facts and real SQLite catalog; not a complete document-open/SDK/App acceptance"
+  ],
+  "proposal": {
+    "path": "tools/parallel-counter-reveal-compat-20261004/navigation-counter-table-proposal.patch",
+    "sha256": "a24351f5bc14fa57d917d9ee45c7390b95530219e590ef4b846866f800721c34",
+    "applied": false,
+    "producerPostRepairVerificationPerformed": false,
+    "scope": "process physical-table whitelist only",
+    "mainOwnsNavigationProductionRepair": true,
+    "otherSessionOwnsInspectorRepair": true
+  },
+  "sourceIdentities": [
+    {
+      "path": "rust/crates/arktrace-viewer/src/navigation.rs",
+      "sha256": "482abd59baa65f38fa3dc022f09b9f301a4865a6a42e334bc0f0c96196b0021b",
+      "lines": [
+        249,
+        259
+      ]
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/view_actions.rs",
+      "sha256": "0eb53ab72497aa4b57a71322bcc5fc1a539d4d1a4837b5d04086200e67fa5382",
+      "lines": [
+        195,
+        252,
+        628
+      ]
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/navigation_oracle.rs",
+      "sha256": "fe660ea2df050da25932efcfd8c0c9db5044c4fadb45ff5f739f5c6473d29b04",
+      "lines": [
+        15
+      ]
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/schema.rs",
+      "sha256": "94ab170a9c26f2fecb2e2af8350b3c4bfebc9c1f9e0cb4e975065349c981c964",
+      "lines": [
+        577,
+        587
+      ]
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+      "lines": [
+        229,
+        237
+      ]
+    },
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+      "lines": [
+        784,
+        1060,
+        1526,
+        1587,
+        1745,
+        1850
+      ]
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+      "lines": [
+        799,
+        825,
+        1651
+      ]
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-007-010-2026-10-03-counters.md",
+      "sha256": "98034a04795ce66fdf9d66bf06f383449ef1065336209d86f44b05349aeed63a",
+      "lines": [
+        10
+      ]
+    }
+  ],
+  "validation": {
+    "positiveRustTestsPassed": 2,
+    "intentionallyFailingLegalAnchorRegressionExitCode": 101,
+    "strictClippyPassed": true,
+    "fmtPassed": true,
+    "buildPassedAfterOwnedHarnessRepair": true,
+    "compilerWarnings": 0,
+    "workspaceLicenseVerifierPassed": true,
+    "commands": [
+      {
+        "label": "build",
+        "exitCode": 101,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/build.receipt.json",
+        "receiptSHA256": "efcf0a3628d143aee6d4dc47e5b81a1e44ed0b0e6f64203c16113be8062f1aa7",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/build.log",
+        "logSHA256": "c8ff5d209f97c4cd8fa67305d2074dd76d7dafcda48c1751aed5b8e140752b78"
+      },
+      {
+        "label": "checks-valid-fmt-check",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-fmt-check.receipt.json",
+        "receiptSHA256": "4d916089e50d5d7008c9842e47fa18c4da659efe571b80ee5b262dbe764714ee",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-fmt-check.log",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "checks-valid-strict-clippy",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-strict-clippy.receipt.json",
+        "receiptSHA256": "45565a3015e0a4f4503b8b75170eb40204d969a4bbeca3e1981d4150c01cf0cb",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-strict-clippy.log",
+        "logSHA256": "da0f1ebc2523c7671eaa613ed0309774de882ecd777b249f661462031293c9ba"
+      },
+      {
+        "label": "fmt-check",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/fmt-check.receipt.json",
+        "receiptSHA256": "c486743a7cac3a2e9985865a64e88e73cf3ba3271dd5ed870f59909bb9faa282",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/fmt-check.log",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "format",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/format.receipt.json",
+        "receiptSHA256": "d25265a261800c895638c5dbcb7db6e7a2418f411c9eaf5ec550568476cfe973",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/format.log",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "lock",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/lock.receipt.json",
+        "receiptSHA256": "aa9ba8f2066d493751d30d7c12a46dc58cac62c60b89b69b1ba1faf2a02d4c4f",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/lock.log",
+        "logSHA256": "0c5673459123097870cc83c00d7fd5c5c4cca4ff48177034c16807b49c6a4284"
+      },
+      {
+        "label": "native_controller_selection_and_range_reveal_preserve_real_counter_keys",
+        "exitCode": 101,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/native_controller_selection_and_range_reveal_preserve_real_counter_keys.receipt.json",
+        "receiptSHA256": "d1b2da6e7d26c1969f5f327193a124e31145b117ca0ff8b55a499c8921f996c6",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/native_controller_selection_and_range_reveal_preserve_real_counter_keys.log",
+        "logSHA256": "6e6780dcecc84d91cca574bb91a9ae95a563ffc7fa3ff5fd5d7eedffb76eda56"
+      },
+      {
+        "label": "observe-valid",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/observe-valid.receipt.json",
+        "receiptSHA256": "221d89c8403ae205b924c4333200ef73674824d1b35ac0c900f0ae48b67453da",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/observe-valid.log",
+        "logSHA256": "51ae690bea9c34279d1d05b5850c91dd24f9d19d03a3c0a346e0ba8f76fc093c"
+      },
+      {
+        "label": "observe",
+        "exitCode": 101,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/observe.receipt.json",
+        "receiptSHA256": "075121f865562895a61453229ee510a3db28645826895ef2c30dce15d11a6e10",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/observe.log",
+        "logSHA256": "7a10c4516fbb18fff4f7999df211165bf7d7a3e85d942199bb23785532540f5b"
+      },
+      {
+        "label": "prepare",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/prepare.receipt.json",
+        "receiptSHA256": "10254ca809b94172f437a825a178927976903bb18c763f2ab465537241b1b70e",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/prepare.log",
+        "logSHA256": "972f05400ad1b1d32b392fb3434d08751afc182760f573614be682d6a703d5c3"
+      },
+      {
+        "label": "repair-build",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/repair-build.receipt.json",
+        "receiptSHA256": "fbae268554a03ca04ca9721846066a18ce1dd01e18f256736472928adad5ff1a",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/repair-build.log",
+        "logSHA256": "7ee426a822d6c0706cda40d835a38ea5254143e5767230d319ec0cde3bd16704"
+      },
+      {
+        "label": "repair-format",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/repair-format.receipt.json",
+        "receiptSHA256": "0e7d33f2010b8ae0ebf09d5040b38cb5bf740380aab59716a18b27cd2a98eacc",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/repair-format.log",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "root-fmt-check",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/root-fmt-check.receipt.json",
+        "receiptSHA256": "de3ba8fd626925dda09d48e5078b395108f7c3fcc0ec08bcefa437dfde187aad",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/root-fmt-check.log",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "rust-frame-adapter-build",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.receipt.json",
+        "receiptSHA256": "96960cf1e96ae005411ba2992d835bd1fbdb46ba92c675186618a2053ee88358",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.log",
+        "logSHA256": "3ceff26a5c37db8a1d1756fba0c03be6bf45b6c70d6dd8cebbdc1cdb0cca098e"
+      },
+      {
+        "label": "rust-frame-adapter-format",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-format.receipt.json",
+        "receiptSHA256": "906f981ad9ead92c627cbcc96e5681636d9d8d5387e4381db5716d4cf98e9de8",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-format.log",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "strict-clippy",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/strict-clippy.receipt.json",
+        "receiptSHA256": "797c7df64099e829d08963a3eb7989d6929dbeab3990648d1cb70ff80d80832d",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/strict-clippy.log",
+        "logSHA256": "9b5b6151d2ff11726918f4e79b6be0230c6737c28f468f9211f6860bc4011dde"
+      },
+      {
+        "label": "swift-canonical",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.receipt.json",
+        "receiptSHA256": "779451f461c42081726898a6028794bc40ff48d12d518c7d886ee0e0a2ac59ae",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.log",
+        "logSHA256": "2eab62d09c3caec3934edfbe483952fd1fed98e9991f5c5c175df7cf1d3e3ca4"
+      },
+      {
+        "label": "swift-regressions",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/swift-regressions.receipt.json",
+        "receiptSHA256": "a0dbc9af05f2ffb0d51c3a23348d1339d8509e4dbe8e3fee877d28ee551b442d",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/swift-regressions.log",
+        "logSHA256": "af25b2789230fc8c27b534c87109ced5f6ae891c2e7d4830e38993e808875d17"
+      },
+      {
+        "label": "tests-valid-legal-anchor-regression",
+        "exitCode": 101,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.receipt.json",
+        "receiptSHA256": "95ff82062ee1f7e1d5e8f8e9a6e3ef94a1bbcfe957b2c0720bef624afc99803b",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.log",
+        "logSHA256": "89567630acaec3a8e70dd769a2f9202dc0de9c425feea57da36740b4c752f799"
+      },
+      {
+        "label": "tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys.receipt.json",
+        "receiptSHA256": "a7ef2e67ce19bbfbf0133dfbaf1c8e4f01afa26c0d2123f91015b14f489f0c81",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys.log",
+        "logSHA256": "63413bdd79b202bea57fe0a43a8a7a11c321744408fdae11cba71299cce53d39"
+      },
+      {
+        "label": "tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.receipt.json",
+        "receiptSHA256": "efec4d9d48dba9abff126e5029a3dce0f91e0ccac1509549076c2694249fc49f",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.log",
+        "logSHA256": "1ac39d2666f22027c14c4b10889fc32e3e0960494b7b9d20cf175a0ea70b3f72"
+      },
+      {
+        "label": "workspace-license-verifier",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/workspace-license-verifier.receipt.json",
+        "receiptSHA256": "9759728156cbc7b99c90ccaf9a8c1847c1afad53513e7c81c8e814c1a66d7726",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/workspace-license-verifier.log",
+        "logSHA256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      },
+      {
+        "label": "wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity",
+        "exitCode": 0,
+        "receipt": "tools/parallel-counter-reveal-compat-20261004/verification/wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.receipt.json",
+        "receiptSHA256": "f7467c660aa245a3fc55002873bca2ba31484c06b5b5a363506d49e08e0c1869",
+        "log": "tools/parallel-counter-reveal-compat-20261004/verification/wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.log",
+        "logSHA256": "3616747eb5af7228171357f4db6fdbe1e94dbc88f3f03fe87b127f4513eb9b17"
+      }
+    ]
+  },
+  "initialFailures": {
+    "producerDefect": false,
+    "build": "owned harness JSON Vec type inference; source preserved",
+    "flow": "missing existing Frame associated-label format adapter; source/log preserved"
+  },
+  "dependencyRegistryPins": {
+    "count": 21,
+    "versionSourceChecksumMatchesRootLock": true,
+    "receipt": "tools/parallel-counter-reveal-compat-20261004/fixtures/root-lock-pin-match.json"
+  },
+  "exclusiveCaches": [
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-cargo",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm"
+  ],
+  "ci": {
+    "input": "tools/parallel-counter-reveal-compat-20261004/verification/ci-paths.txt",
+    "selected": [
+      "swiftpm",
+      "app",
+      "contracts",
+      "rust_macos",
+      "rust_windows"
+    ],
+    "fullSelectedLanesRun": false
+  },
+  "notClaimed": [
+    "full repository adjacency execution",
+    "anchor or result filter/process ownership",
+    "public counter-event reveal API",
+    "Inspector/detail/presentation producer repair",
+    "SDK owner aggregate",
+    "full document open",
+    "App",
+    "Windows native",
+    "macOS26 runtime",
+    "quality or cold JSON wire",
+    "performance",
+    "AT-RUST-011/013 complete"
+  ],
+  "mainCheckoutModified": false,
+  "gitCommitPushPRPerformed": false,
+  "reverseThreadMessageSent": false,
+  "ownedFiles": [
+    "tools/parallel-counter-reveal-compat-20261004/Cargo.lock",
+    "tools/parallel-counter-reveal-compat-20261004/Cargo.toml",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/comparison.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/database-copy-identities.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/inherited-evidence.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/root-lock-pin-match.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/rust-output.json",
+    "tools/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json",
+    "tools/parallel-counter-reveal-compat-20261004/navigation-counter-table-proposal.patch",
+    "tools/parallel-counter-reveal-compat-20261004/prepare.py",
+    "tools/parallel-counter-reveal-compat-20261004/run.py",
+    "tools/parallel-counter-reveal-compat-20261004/src/lib.rs",
+    "tools/parallel-counter-reveal-compat-20261004/src/main.rs",
+    "tools/parallel-counter-reveal-compat-20261004/swift/ControllerAccess.swift",
+    "tools/parallel-counter-reveal-compat-20261004/swift/CounterRevealCompatibilityOracleTests.swift",
+    "tools/parallel-counter-reveal-compat-20261004/tests/compat.rs",
+    "tools/parallel-counter-reveal-compat-20261004/verification/build.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/build.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-fmt-check.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-fmt-check.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-strict-clippy.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-strict-clippy.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/ci-paths.txt",
+    "tools/parallel-counter-reveal-compat-20261004/verification/ci-plan.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/compiled-source-identities.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/fmt-check.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/fmt-check.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/format.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/format.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-lib.rs",
+    "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-main.rs",
+    "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-source-identities.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/initial-flow-lib.rs",
+    "tools/parallel-counter-reveal-compat-20261004/verification/lock.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/lock.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/main-navigation-read-only-check.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/native_controller_selection_and_range_reveal_preserve_real_counter_keys.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/native_controller_selection_and_range_reveal_preserve_real_counter_keys.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/observe-valid.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/observe-valid.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/observe.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/observe.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/prepare.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/prepare.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/repair-build.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/repair-build.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/repair-format.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/repair-format.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/root-fmt-check.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/root-fmt-check.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-format.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-format.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/strict-clippy.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/strict-clippy.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/swift-regressions.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/swift-regressions.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/toolchain.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/warning-audit.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/workspace-license-verifier.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/workspace-license-verifier.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verification/wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.log",
+    "tools/parallel-counter-reveal-compat-20261004/verification/wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.receipt.json",
+    "tools/parallel-counter-reveal-compat-20261004/verify.py",
+    "docs/migration-runs/AT-RUST-011-parallel-counter-reveal-compat-2026-10-04.md",
+    "docs/migration-runs/AT-RUST-011-parallel-counter-reveal-compat-2026-10-04.json",
+    "docs/migration-runs/AT-RUST-011-parallel-counter-reveal-compat-2026-10-04.sha256"
+  ],
+  "ownedFileCount": 78,
+  "checksumPath": "docs/migration-runs/AT-RUST-011-parallel-counter-reveal-compat-2026-10-04.sha256",
+  "checksumsRecordedInReport": [
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/Cargo.lock",
+      "sha256": "b505739c4b5aa7b57ee83251a16abc5d8570a94007fd1ceb4e9eee900bcc846a",
+      "byteCount": 5167
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/Cargo.toml",
+      "sha256": "f32887100febd40bbd101047d63fcd269b314f8e6ce7587206930022a707a62a",
+      "byteCount": 512
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+      "sha256": "cebf85e2b8eb0831803c041afefedc07725e2362fbe018f029b1a0519292d289",
+      "byteCount": 13893
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/comparison.json",
+      "sha256": "a65eaed4c04686f0ef698c16bff66ed213864265ed15dee84dc4ed28f730e525",
+      "byteCount": 5441
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/database-copy-identities.json",
+      "sha256": "4ef9aae81b4196bd6f23a8c91cff0af4329aaf24e7d55ae79f74d5b115381b3a",
+      "byteCount": 1506
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/inherited-evidence.json",
+      "sha256": "ad87876c237645a958c39d72122148230ed84c44808baf2c6196e085c872f8d6",
+      "byteCount": 29963
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json",
+      "sha256": "5474f95b299db51764f3bf5e1a34dc32b0a26008bac77406453d4725bc7ae839",
+      "byteCount": 448
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/root-lock-pin-match.json",
+      "sha256": "ad98f1f1f79a5705a77ea8c4012c674761c8b40c800766fd43e59078ac5fcbf0",
+      "byteCount": 5918
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/rust-output.json",
+      "sha256": "51ae690bea9c34279d1d05b5850c91dd24f9d19d03a3c0a346e0ba8f76fc093c",
+      "byteCount": 82105
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json",
+      "sha256": "47c7da4e18ba3a7207957452a5fce0740c6dbc879259be6cd7ed09bcafd5f293",
+      "byteCount": 94224
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/navigation-counter-table-proposal.patch",
+      "sha256": "a24351f5bc14fa57d917d9ee45c7390b95530219e590ef4b846866f800721c34",
+      "byteCount": 1674
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/prepare.py",
+      "sha256": "cfb0e9db15946d06165050223ddcb7aaa06cee60e68046ecca82ccf5c027b0a0",
+      "byteCount": 3844
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/run.py",
+      "sha256": "b6f06df6f5a32c1a4dbbd4786a4d1a962e39d3b4f2bcae4683714d853a90812b",
+      "byteCount": 6884
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/src/lib.rs",
+      "sha256": "334093a251a2413ba1d737e158790395a7a7e2c538e37db055e3114ab0593b5f",
+      "byteCount": 5895
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/src/main.rs",
+      "sha256": "22fc7791d21c2f11cd8091bbe5e3edcf1fef7c087582d4c83aae29d438132b95",
+      "byteCount": 492
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/swift/ControllerAccess.swift",
+      "sha256": "d3f58699174005d1086c8c81c5f024951834312d1f80543224ea01c5c99d03b0",
+      "byteCount": 828
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/swift/CounterRevealCompatibilityOracleTests.swift",
+      "sha256": "dddefa150a92a05dafc0cc8ce2642623e3c9a211b3eb18efcf587da13c57bfa3",
+      "byteCount": 7835
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/tests/compat.rs",
+      "sha256": "b9ae2a2964552284897ea42881ca08ce39f7ade70e16d4f853b9d35191129fcc",
+      "byteCount": 3077
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/build.log",
+      "sha256": "c8ff5d209f97c4cd8fa67305d2074dd76d7dafcda48c1751aed5b8e140752b78",
+      "byteCount": 3218
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/build.receipt.json",
+      "sha256": "efcf0a3628d143aee6d4dc47e5b81a1e44ed0b0e6f64203c16113be8062f1aa7",
+      "byteCount": 3573
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-fmt-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-fmt-check.receipt.json",
+      "sha256": "4d916089e50d5d7008c9842e47fa18c4da659efe571b80ee5b262dbe764714ee",
+      "byteCount": 3582
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-strict-clippy.log",
+      "sha256": "da0f1ebc2523c7671eaa613ed0309774de882ecd777b249f661462031293c9ba",
+      "byteCount": 306
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/checks-valid-strict-clippy.receipt.json",
+      "sha256": "45565a3015e0a4f4503b8b75170eb40204d969a4bbeca3e1981d4150c01cf0cb",
+      "byteCount": 3692
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/ci-paths.txt",
+      "sha256": "d2fc2e2d9939ce3a8bf3235b59383e9190e94f397661f90c3e879a1d410a3d7e",
+      "byteCount": 6759
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/ci-plan.log",
+      "sha256": "a41e416f562ad54be2bca4f3f476e13ceb0a4fdd3116c7f3f1ee2896fe3fd267",
+      "byteCount": 96
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/compiled-source-identities.json",
+      "sha256": "bf21d50b936590b7e17a9b5e4a843f2d5fd02fe62a33cfff9976dc7213df7e71",
+      "byteCount": 184857
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/fmt-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/fmt-check.receipt.json",
+      "sha256": "c486743a7cac3a2e9985865a64e88e73cf3ba3271dd5ed870f59909bb9faa282",
+      "byteCount": 3556
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/format.receipt.json",
+      "sha256": "d25265a261800c895638c5dbcb7db6e7a2418f411c9eaf5ec550568476cfe973",
+      "byteCount": 3535
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-lib.rs",
+      "sha256": "3554c8ce13c2ae581da7d18723eafe982d95e097c6cf0e7cc9c2a3a434989fbe",
+      "byteCount": 4718
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-main.rs",
+      "sha256": "8b5e3860afa94fefc4c75d41d07fd84417a3add7d6aa7862be8e60ff1597f5cb",
+      "byteCount": 460
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/initial-build-source-identities.json",
+      "sha256": "b758f68b34777c68b98ecec7331e95fa9d2232d79b2c3d25120c14361f0b5db4",
+      "byteCount": 555
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/initial-flow-lib.rs",
+      "sha256": "65b8fccca9b218d3bfd8968ca1434f3c28c3c5fed3c6b0031729b883b8b81987",
+      "byteCount": 4800
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/lock.log",
+      "sha256": "0c5673459123097870cc83c00d7fd5c5c4cca4ff48177034c16807b49c6a4284",
+      "byteCount": 115
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/lock.receipt.json",
+      "sha256": "aa9ba8f2066d493751d30d7c12a46dc58cac62c60b89b69b1ba1faf2a02d4c4f",
+      "byteCount": 3564
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/main-navigation-read-only-check.json",
+      "sha256": "22677e4ea555886c34f1c12e6ed0264926e98365847855408cf2018f73cacd18",
+      "byteCount": 2065
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/native_controller_selection_and_range_reveal_preserve_real_counter_keys.log",
+      "sha256": "6e6780dcecc84d91cca574bb91a9ae95a563ffc7fa3ff5fd5d7eedffb76eda56",
+      "byteCount": 948
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/native_controller_selection_and_range_reveal_preserve_real_counter_keys.receipt.json",
+      "sha256": "d1b2da6e7d26c1969f5f327193a124e31145b117ca0ff8b55a499c8921f996c6",
+      "byteCount": 3854
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/observe-valid.log",
+      "sha256": "51ae690bea9c34279d1d05b5850c91dd24f9d19d03a3c0a346e0ba8f76fc093c",
+      "byteCount": 82105
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/observe-valid.receipt.json",
+      "sha256": "221d89c8403ae205b924c4333200ef73674824d1b35ac0c900f0ae48b67453da",
+      "byteCount": 3883
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/observe.log",
+      "sha256": "7a10c4516fbb18fff4f7999df211165bf7d7a3e85d942199bb23785532540f5b",
+      "byteCount": 249
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/observe.receipt.json",
+      "sha256": "075121f865562895a61453229ee510a3db28645826895ef2c30dce15d11a6e10",
+      "byteCount": 3871
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/prepare.log",
+      "sha256": "972f05400ad1b1d32b392fb3434d08751afc182760f573614be682d6a703d5c3",
+      "byteCount": 332
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/prepare.receipt.json",
+      "sha256": "10254ca809b94172f437a825a178927976903bb18c763f2ab465537241b1b70e",
+      "byteCount": 1639
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/repair-build.log",
+      "sha256": "7ee426a822d6c0706cda40d835a38ea5254143e5767230d319ec0cde3bd16704",
+      "byteCount": 306
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/repair-build.receipt.json",
+      "sha256": "fbae268554a03ca04ca9721846066a18ce1dd01e18f256736472928adad5ff1a",
+      "byteCount": 3584
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/repair-format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/repair-format.receipt.json",
+      "sha256": "0e7d33f2010b8ae0ebf09d5040b38cb5bf740380aab59716a18b27cd2a98eacc",
+      "byteCount": 3549
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/root-fmt-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/root-fmt-check.receipt.json",
+      "sha256": "de3ba8fd626925dda09d48e5078b395108f7c3fcc0ec08bcefa437dfde187aad",
+      "byteCount": 3013
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.log",
+      "sha256": "3ceff26a5c37db8a1d1756fba0c03be6bf45b6c70d6dd8cebbdc1cdb0cca098e",
+      "byteCount": 306
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.receipt.json",
+      "sha256": "96960cf1e96ae005411ba2992d835bd1fbdb46ba92c675186618a2053ee88358",
+      "byteCount": 3608
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-format.receipt.json",
+      "sha256": "906f981ad9ead92c627cbcc96e5681636d9d8d5387e4381db5716d4cf98e9de8",
+      "byteCount": 3573
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/strict-clippy.log",
+      "sha256": "9b5b6151d2ff11726918f4e79b6be0230c6737c28f468f9211f6860bc4011dde",
+      "byteCount": 1158
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/strict-clippy.receipt.json",
+      "sha256": "797c7df64099e829d08963a3eb7989d6929dbeab3990648d1cb70ff80d80832d",
+      "byteCount": 3667
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.log",
+      "sha256": "2eab62d09c3caec3934edfbe483952fd1fed98e9991f5c5c175df7cf1d3e3ca4",
+      "byteCount": 9940
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/swift-canonical.receipt.json",
+      "sha256": "779451f461c42081726898a6028794bc40ff48d12d518c7d886ee0e0a2ac59ae",
+      "byteCount": 6178
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/swift-regressions.log",
+      "sha256": "af25b2789230fc8c27b534c87109ced5f6ae891c2e7d4830e38993e808875d17",
+      "byteCount": 6665
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/swift-regressions.receipt.json",
+      "sha256": "a0dbc9af05f2ffb0d51c3a23348d1339d8509e4dbe8e3fee877d28ee551b442d",
+      "byteCount": 3179
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.log",
+      "sha256": "89567630acaec3a8e70dd769a2f9202dc0de9c425feea57da36740b4c752f799",
+      "byteCount": 1420
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-legal-anchor-regression.receipt.json",
+      "sha256": "95ff82062ee1f7e1d5e8f8e9a6e3ef94a1bbcfe957b2c0720bef624afc99803b",
+      "byteCount": 3788
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys.log",
+      "sha256": "63413bdd79b202bea57fe0a43a8a7a11c321744408fdae11cba71299cce53d39",
+      "byteCount": 530
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-native_controller_selection_and_range_reveal_preserve_real_counter_keys.receipt.json",
+      "sha256": "a7ef2e67ce19bbfbf0133dfbaf1c8e4f01afa26c0d2123f91015b14f489f0c81",
+      "byteCount": 3876
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.log",
+      "sha256": "1ac39d2666f22027c14c4b10889fc32e3e0960494b7b9d20cf175a0ea70b3f72",
+      "byteCount": 716
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/tests-valid-wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.receipt.json",
+      "sha256": "efec4d9d48dba9abff126e5029a3dce0f91e0ccac1509549076c2694249fc49f",
+      "byteCount": 3894
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/toolchain.json",
+      "sha256": "9f90b5cedfbec74859fb15f1d1b0dfb7b8b80dea04010b126799e1227d74b311",
+      "byteCount": 792
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/warning-audit.json",
+      "sha256": "1c6ce864efd392b75bc2a013b15f075d8ba59659897fae90312a584e1b2acc5f",
+      "byteCount": 46
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/workspace-license-verifier.log",
+      "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+      "byteCount": 125
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/workspace-license-verifier.receipt.json",
+      "sha256": "9759728156cbc7b99c90ccaf9a8c1847c1afad53513e7c81c8e814c1a66d7726",
+      "byteCount": 3002
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.log",
+      "sha256": "3616747eb5af7228171357f4db6fdbe1e94dbc88f3f03fe87b127f4513eb9b17",
+      "byteCount": 716
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verification/wrong_physical_tables_are_rejected_and_shape_validation_keeps_source_identity.receipt.json",
+      "sha256": "f7467c660aa245a3fc55002873bca2ba31484c06b5b5a363506d49e08e0c1869",
+      "byteCount": 3870
+    },
+    {
+      "path": "tools/parallel-counter-reveal-compat-20261004/verify.py",
+      "sha256": "e2979fc044b810ef1bb547d295f85c9df4891e860b4578f6044eff35c6346a7f",
+      "byteCount": 4520
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-011-parallel-counter-reveal-compat-2026-10-04.md",
+      "sha256": "a852e4ff33abd2b90c253995dcc06912f3786cbe2c8227defba653c1eb3645c8",
+      "byteCount": 8734
+    }
+  ]
+}

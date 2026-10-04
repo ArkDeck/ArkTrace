@@ -1,0 +1,2868 @@
+[
+  {
+    "facts" : [
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : -4,
+          "table" : "sched_slice"
+        },
+        "kind" : "cpuSlice",
+        "name" : "A\u0000B🚀",
+        "pid" : 700,
+        "priority" : 8,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : "R",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 2,
+          "table" : "sched_slice"
+        },
+        "kind" : "cpuSlice",
+        "name" : "A\u0000B🚀",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "key" : {
+          "rowID" : 3,
+          "table" : "sched_slice"
+        },
+        "kind" : "cpuSlice",
+        "name" : "A\u0000B🚀",
+        "pid" : 700,
+        "priority" : 9,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 150
+        },
+        "semanticDurationNs" : null,
+        "state" : "S",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "cpu-normal-instant-open",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 0,
+          "endState" : "R",
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : -4,
+            "table" : "sched_slice"
+          },
+          "pid" : 700,
+          "priority" : 8,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "cpu" : 0,
+          "endState" : null,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 2,
+            "table" : "sched_slice"
+          },
+          "pid" : 700,
+          "priority" : null,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 140,
+            "startNs" : 140
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "cpu" : 0,
+          "endState" : "S",
+          "isOpenEnded" : true,
+          "key" : {
+            "rowID" : 3,
+            "table" : "sched_slice"
+          },
+          "pid" : 700,
+          "priority" : 9,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 1000,
+            "startNs" : 150
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : -4,
+          "table" : "sched_slice"
+        },
+        "kind" : "cpuSlice",
+        "name" : "A\u0000B🚀",
+        "pid" : 700,
+        "priority" : 8,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : "R",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "cpu-limit-halfopen",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 0,
+          "endState" : "R",
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : -4,
+            "table" : "sched_slice"
+          },
+          "pid" : 700,
+          "priority" : 8,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 6,
+          "table" : "sched_slice"
+        },
+        "kind" : "cpuSlice",
+        "name" : "A\u0000B🚀",
+        "pid" : 700,
+        "priority" : 1,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 20,
+          "startNs" : 0
+        },
+        "semanticDurationNs" : 20,
+        "state" : "R",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "cpu-trace-start-clamp",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "scope" : "sched_slice.dur"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 0,
+          "endState" : "R",
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 6,
+            "table" : "sched_slice"
+          },
+          "pid" : 700,
+          "priority" : 1,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 20,
+            "startNs" : 0
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "scope" : "sched_slice.dur"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "cpu",
+        "cpu" : 1,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 5,
+          "table" : "sched_slice"
+        },
+        "kind" : "cpuSlice",
+        "name" : "",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 2
+        },
+        "processName" : null,
+        "range" : {
+          "endNs" : 130,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 30,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 12
+        },
+        "threadName" : "",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "cpu-reused-pid-tid",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 1,
+          "endState" : null,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 5,
+            "table" : "sched_slice"
+          },
+          "pid" : 700,
+          "priority" : null,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "range" : {
+            "endNs" : 130,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 12
+          },
+          "threadName" : "",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "runnable",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : -4,
+          "table" : "thread_state"
+        },
+        "kind" : "threadState",
+        "name" : null,
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : "R",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 2,
+          "table" : "thread_state"
+        },
+        "kind" : "threadState",
+        "name" : null,
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : "mystery🧪",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : "sleeping",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "key" : {
+          "rowID" : 3,
+          "table" : "thread_state"
+        },
+        "kind" : "threadState",
+        "name" : null,
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 150
+        },
+        "semanticDurationNs" : null,
+        "state" : "S",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "thread-state-utf8-nullable-open",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "invalidValue",
+        "count" : 1,
+        "scope" : "thread_state.state"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 0,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : -4,
+            "table" : "thread_state"
+          },
+          "normalizedState" : "runnable",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "state" : "R",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "cpu" : null,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 2,
+            "table" : "thread_state"
+          },
+          "normalizedState" : null,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 140,
+            "startNs" : 140
+          },
+          "state" : "mystery🧪",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "cpu" : null,
+          "isOpenEnded" : true,
+          "key" : {
+            "rowID" : 3,
+            "table" : "thread_state"
+          },
+          "normalizedState" : "sleeping",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 1000,
+            "startNs" : 150
+          },
+          "state" : "S",
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        },
+        {
+          "category" : "invalidValue",
+          "count" : 1,
+          "scope" : "thread_state.state"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "running",
+        "cpu" : 1,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 4,
+          "table" : "thread_state"
+        },
+        "kind" : "threadState",
+        "name" : null,
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 2
+        },
+        "processName" : null,
+        "range" : {
+          "endNs" : 130,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 30,
+        "state" : "Running",
+        "threadKey" : {
+          "itid" : 12
+        },
+        "threadName" : "",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "thread-state-reused-tid",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 1,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 4,
+            "table" : "thread_state"
+          },
+          "normalizedState" : "running",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "range" : {
+            "endNs" : 130,
+            "startNs" : 100
+          },
+          "state" : "Running",
+          "threadKey" : {
+            "itid" : 12
+          },
+          "threadName" : "",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 2,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "同刻🧪",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : "",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 9,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 130,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 30,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "named-stable-prefix-limit",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "probeTruncated",
+        "message" : "Timeline detail primitives reached the viewport budget",
+        "scope" : "timeline.namedSlice"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "name" : "同刻🧪",
+          "parentEventKey" : null,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "category" : "",
+          "depth" : 1,
+          "isAsync" : true,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 9,
+            "table" : "callstack"
+          },
+          "name" : "",
+          "parentEventKey" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 130,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : true
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 9,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 130,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 30,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 2,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "同刻🧪",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : "",
+          "depth" : 1,
+          "isAsync" : true,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 9,
+            "table" : "callstack"
+          },
+          "name" : "",
+          "parentEventKey" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 130,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "id" : "named-focus-in-page-dedup",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "probeTruncated",
+        "message" : "Timeline detail primitives reached the viewport budget",
+        "scope" : "timeline.namedSlice"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "name" : "同刻🧪",
+          "parentEventKey" : null,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "category" : "",
+          "depth" : 1,
+          "isAsync" : true,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 9,
+            "table" : "callstack"
+          },
+          "name" : "",
+          "parentEventKey" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 130,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : true
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 4,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "焦点",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 2,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "同刻🧪",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 2,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 4,
+            "table" : "callstack"
+          },
+          "name" : "焦点",
+          "parentEventKey" : {
+            "rowID" : 9,
+            "table" : "callstack"
+          },
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 140,
+            "startNs" : 140
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "id" : "named-focus-outside-prefix",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "probeTruncated",
+        "message" : "Timeline detail primitives reached the viewport budget",
+        "scope" : "timeline.namedSlice"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "name" : "同刻🧪",
+          "parentEventKey" : null,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "category" : "",
+          "depth" : 1,
+          "isAsync" : true,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 9,
+            "table" : "callstack"
+          },
+          "name" : "",
+          "parentEventKey" : {
+            "rowID" : 2,
+            "table" : "callstack"
+          },
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 130,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : true
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 7,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "无归属",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : "",
+        "cpu" : null,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 8,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "unattributed instant",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "named-unattributed-integer-zero",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 7,
+            "table" : "callstack"
+          },
+          "name" : "无归属",
+          "parentEventKey" : null,
+          "pid" : null,
+          "processKey" : null,
+          "processName" : null,
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : null,
+          "threadName" : null,
+          "tid" : null
+        },
+        {
+          "category" : "",
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 8,
+            "table" : "callstack"
+          },
+          "name" : "unattributed instant",
+          "parentEventKey" : null,
+          "pid" : null,
+          "processKey" : null,
+          "processName" : null,
+          "range" : {
+            "endNs" : 140,
+            "startNs" : 140
+          },
+          "threadKey" : null,
+          "threadName" : null,
+          "tid" : null
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 10,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "reused TID",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 2
+        },
+        "processName" : null,
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 12
+        },
+        "threadName" : "",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "named-reused-tid",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 10,
+            "table" : "callstack"
+          },
+          "name" : "reused TID",
+          "parentEventKey" : null,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 12
+          },
+          "threadName" : "",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 4,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "焦点",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      },
+      {
+        "category" : null,
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "key" : {
+          "rowID" : 5,
+          "table" : "callstack"
+        },
+        "kind" : "namedSlice",
+        "name" : "open",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 150
+        },
+        "semanticDurationNs" : null,
+        "state" : null,
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : "A\u0000B🚀",
+        "tid" : 701,
+        "unit" : null,
+        "value" : null
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "named-instant-open-halfopen",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "category" : null,
+          "depth" : 2,
+          "isAsync" : false,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 4,
+            "table" : "callstack"
+          },
+          "name" : "焦点",
+          "parentEventKey" : {
+            "rowID" : 9,
+            "table" : "callstack"
+          },
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 140,
+            "startNs" : 140
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        },
+        {
+          "category" : null,
+          "depth" : 0,
+          "isAsync" : false,
+          "isOpenEnded" : true,
+          "key" : {
+            "rowID" : 5,
+            "table" : "callstack"
+          },
+          "name" : "open",
+          "parentEventKey" : null,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 1000,
+            "startNs" : 150
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "threadName" : "A\u0000B🚀",
+          "tid" : 701
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "frame",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : -4,
+          "table" : "frame_slice"
+        },
+        "kind" : "frame",
+        "name" : "vsync 3 actual · jank",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : "jank",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "vsync",
+        "value" : 3
+      },
+      {
+        "category" : "frame",
+        "cpu" : null,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 2,
+          "table" : "frame_slice"
+        },
+        "kind" : "frame",
+        "name" : "vsync 4 expected",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : "on time",
+        "threadKey" : {
+          "itid" : 11
+        },
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "vsync",
+        "value" : 4
+      },
+      {
+        "category" : "frame",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "key" : {
+          "rowID" : 3,
+          "table" : "frame_slice"
+        },
+        "kind" : "frame",
+        "name" : "vsync 5 expected",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 1000,
+          "startNs" : 150
+        },
+        "semanticDurationNs" : null,
+        "state" : "on time",
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "vsync",
+        "value" : 5
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "frame-label-instant-open",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "flag" : 1,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : -4,
+            "table" : "frame_slice"
+          },
+          "kind" : 0,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "vsync" : 3
+        },
+        {
+          "flag" : 0,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 2,
+            "table" : "frame_slice"
+          },
+          "kind" : 1,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 140,
+            "startNs" : 140
+          },
+          "threadKey" : {
+            "itid" : 11
+          },
+          "vsync" : 4
+        },
+        {
+          "flag" : 2,
+          "isOpenEnded" : true,
+          "key" : {
+            "rowID" : 3,
+            "table" : "frame_slice"
+          },
+          "kind" : 1,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "range" : {
+            "endNs" : 1000,
+            "startNs" : 150
+          },
+          "vsync" : 5
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "frame",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 5,
+          "table" : "frame_slice"
+        },
+        "kind" : "frame",
+        "name" : "vsync 3 expected",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 2
+        },
+        "processName" : null,
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : "on time",
+        "threadKey" : {
+          "itid" : 12
+        },
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "vsync",
+        "value" : 3
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "frame-reused-pid",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "flag" : 0,
+          "isOpenEnded" : false,
+          "key" : {
+            "rowID" : 5,
+            "table" : "frame_slice"
+          },
+          "kind" : 1,
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "range" : {
+            "endNs" : 120,
+            "startNs" : 100
+          },
+          "threadKey" : {
+            "itid" : 12
+          },
+          "vsync" : 3
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 10,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "频率🚀",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 0
+        },
+        "semanticDurationNs" : 200,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "MHz",
+        "value" : 7
+      },
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 11,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "频率🚀",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "MHz",
+        "value" : 8
+      },
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "key" : {
+          "rowID" : 12,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "频率🚀",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 150
+        },
+        "semanticDurationNs" : null,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "MHz",
+        "value" : 9
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "cpu-counter-predecessor-nil-duration",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "scope" : "measure.dur"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 0,
+          "filterID" : 10,
+          "name" : "频率🚀",
+          "pid" : null,
+          "processKey" : null,
+          "processName" : null,
+          "samples" : [
+            {
+              "durationNs" : 200,
+              "key" : {
+                "rowID" : 10,
+                "table" : "measure"
+              },
+              "timestampNs" : 0,
+              "value" : 7
+            },
+            {
+              "durationNs" : 0,
+              "key" : {
+                "rowID" : 11,
+                "table" : "measure"
+              },
+              "timestampNs" : 140,
+              "value" : 8
+            },
+            {
+              "durationNs" : null,
+              "key" : {
+                "rowID" : 12,
+                "table" : "measure"
+              },
+              "timestampNs" : 150,
+              "value" : 9
+            }
+          ],
+          "scope" : "cpu",
+          "unit" : "MHz"
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "scope" : "measure.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "scope" : "measure.dur"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 10,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "频率🚀",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 0
+        },
+        "semanticDurationNs" : 200,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "MHz",
+        "value" : 7
+      },
+      {
+        "category" : "cpu",
+        "cpu" : 0,
+        "isInstant" : true,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 11,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "频率🚀",
+        "pid" : null,
+        "priority" : null,
+        "processKey" : null,
+        "processName" : null,
+        "range" : {
+          "endNs" : 140,
+          "startNs" : 140
+        },
+        "semanticDurationNs" : 0,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "MHz",
+        "value" : 8
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "cpu-counter-left-bound-instant",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "scope" : "measure.dur"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : 0,
+          "filterID" : 10,
+          "name" : "频率🚀",
+          "pid" : null,
+          "processKey" : null,
+          "processName" : null,
+          "samples" : [
+            {
+              "durationNs" : 200,
+              "key" : {
+                "rowID" : 10,
+                "table" : "measure"
+              },
+              "timestampNs" : 0,
+              "value" : 7
+            },
+            {
+              "durationNs" : 0,
+              "key" : {
+                "rowID" : 11,
+                "table" : "measure"
+              },
+              "timestampNs" : 140,
+              "value" : 8
+            }
+          ],
+          "scope" : "cpu",
+          "unit" : "MHz"
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "scope" : "measure.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "scope" : "measure.dur"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "process",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 1,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "name" : "legacy",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : 99
+      },
+      {
+        "category" : "process",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : true,
+        "key" : {
+          "rowID" : 2,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "name" : "legacy",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 200,
+          "startNs" : 150
+        },
+        "semanticDurationNs" : null,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : 100
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "native-process-counter-nil-duration",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : null,
+          "filterID" : 20,
+          "name" : "legacy",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "samples" : [
+            {
+              "durationNs" : 20,
+              "key" : {
+                "rowID" : 1,
+                "table" : "process_measure"
+              },
+              "timestampNs" : 100,
+              "value" : 99
+            },
+            {
+              "durationNs" : null,
+              "key" : {
+                "rowID" : 2,
+                "table" : "process_measure"
+              },
+              "timestampNs" : 150,
+              "value" : 100
+            }
+          ],
+          "scope" : "process",
+          "unit" : null
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "process",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 4,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "name" : "process2",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 2
+        },
+        "processName" : null,
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : "",
+        "value" : 99
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "native-process-counter-nullable-metadata",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : null,
+          "filterID" : 21,
+          "name" : "process2",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 2
+          },
+          "processName" : null,
+          "samples" : [
+            {
+              "durationNs" : 20,
+              "key" : {
+                "rowID" : 4,
+                "table" : "process_measure"
+              },
+              "timestampNs" : 100,
+              "value" : 99
+            }
+          ],
+          "scope" : "process",
+          "unit" : ""
+        }
+      ],
+      "truncated" : false
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  },
+  {
+    "facts" : [
+      {
+        "category" : "process",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 1,
+          "table" : "measure"
+        },
+        "kind" : "counter",
+        "name" : "legacy",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : 999
+      },
+      {
+        "category" : "process",
+        "cpu" : null,
+        "isInstant" : false,
+        "isOpenEnded" : false,
+        "key" : {
+          "rowID" : 1,
+          "table" : "process_measure"
+        },
+        "kind" : "counter",
+        "name" : "legacy",
+        "pid" : 700,
+        "priority" : null,
+        "processKey" : {
+          "ipid" : 1
+        },
+        "processName" : "进程🚀",
+        "range" : {
+          "endNs" : 120,
+          "startNs" : 100
+        },
+        "semanticDurationNs" : 20,
+        "state" : null,
+        "threadKey" : null,
+        "threadName" : null,
+        "tid" : null,
+        "unit" : null,
+        "value" : 99
+      }
+    ],
+    "focusedPage" : null,
+    "id" : "merged-physical-table-rowid-collision",
+    "loaderQualityIssues" : [
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "sched_slice.ts"
+      },
+      {
+        "category" : "clampedValue",
+        "count" : 1,
+        "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+        "scope" : "measure.ts"
+      },
+      {
+        "category" : "probeTruncated",
+        "message" : "Timeline detail primitives reached the viewport budget",
+        "scope" : "timeline.counter"
+      }
+    ],
+    "repositoryPage" : {
+      "capabilityAvailable" : true,
+      "items" : [
+        {
+          "cpu" : null,
+          "filterID" : 20,
+          "name" : "legacy",
+          "pid" : 700,
+          "processKey" : {
+            "ipid" : 1
+          },
+          "processName" : "进程🚀",
+          "samples" : [
+            {
+              "durationNs" : 20,
+              "key" : {
+                "rowID" : 1,
+                "table" : "measure"
+              },
+              "timestampNs" : 100,
+              "value" : 999
+            },
+            {
+              "durationNs" : 20,
+              "key" : {
+                "rowID" : 1,
+                "table" : "process_measure"
+              },
+              "timestampNs" : 100,
+              "value" : 99
+            }
+          ],
+          "scope" : "process",
+          "unit" : null
+        }
+      ],
+      "truncated" : true
+    },
+    "repositoryQuality" : {
+      "issues" : [
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "sched_slice.ts"
+        },
+        {
+          "category" : "clampedValue",
+          "count" : 1,
+          "message" : "measure.ts: 1 sampled value(s) precede trace start and are clamped",
+          "scope" : "measure.ts"
+        }
+      ],
+      "status" : "warnings",
+      "warnings" : [
+        "sched_slice.ts: 1 sampled value(s) precede trace start and are clamped",
+        "measure.ts: 1 sampled value(s) precede trace start and are clamped"
+      ]
+    }
+  }
+]

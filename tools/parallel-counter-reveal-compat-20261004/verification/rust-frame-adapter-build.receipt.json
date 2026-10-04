@@ -1,0 +1,66 @@
+{
+  "label": "rust-frame-adapter-build",
+  "command": [
+    "cargo",
+    "+1.99.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--manifest-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-cargo/workspace/tools/parallel-counter-reveal-compat-20261004/Cargo.toml"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-cargo/workspace",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "log": "tools/parallel-counter-reveal-compat-20261004/verification/rust-frame-adapter-build.log",
+  "sha256": "3ceff26a5c37db8a1d1756fba0c03be6bf45b6c70d6dd8cebbdc1cdb0cca098e",
+  "byteCount": 306,
+  "databaseBefore": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "databaseAfter": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "environment": {
+    "CARGO_HOME": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-cargo/dependencies",
+    "CARGO_TARGET_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-cargo/consumer-target",
+    "CARGO_NET_OFFLINE": "true",
+    "MACOSX_DEPLOYMENT_TARGET": "26.0",
+    "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+    "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004/tools/parallel-counter-reveal-compat-20261004/fixtures/swift-controller-output.json"
+  }
+}

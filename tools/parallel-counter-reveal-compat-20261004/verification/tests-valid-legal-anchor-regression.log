@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/compat.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-cargo/consumer-target/debug/deps/compat-123d7eb316b663b5)
+
+running 1 test
+
+thread 'all_real_repository_counter_anchors_must_pass_navigation_intent_validation' (3025373) panicked at tests/compat.rs:84:9:
+legal real Store anchor rejected: legacy-measure-counter-anchor
+{"id":"legacy-measure-counter-anchor","intent":{"afterEvent":{"rowID":1,"table":"measure"},"anchorNs":100,"direction":"next","identity":{"generation":8,"sessionId":71},"limit":1,"source":{"processCounter":{"filterID":20,"processKey":{"ipid":1}}}},"roundtripPreserved":true,"sourceID":"process-counter:20:1","typedSourceQuery":{"cpu":null,"filterID":20,"limit":1,"name":null,"nameMatch":"exact","pid":null,"processKey":1,"range":{"endNs":1000,"startNs":0},"scope":"process"},"validationError":"InvalidEvidence"}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test all_real_repository_counter_anchors_must_pass_navigation_intent_validation ... FAILED
+
+failures:
+
+failures:
+    all_real_repository_counter_anchors_must_pass_navigation_intent_validation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test compat`

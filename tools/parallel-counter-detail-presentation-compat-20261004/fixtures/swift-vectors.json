@@ -1,0 +1,321 @@
+[
+  {
+    "name": "legacy-process-measure-single",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "cpu": null,
+        "filterID": 20,
+        "name": "legacy",
+        "pid": 700,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "samples": [
+          {
+            "durationNs": 20,
+            "key": {
+              "rowID": 1,
+              "table": "measure"
+            },
+            "timestampNs": 100,
+            "value": 999
+          }
+        ],
+        "scope": "process",
+        "unit": null
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true
+  },
+  {
+    "name": "cpu-counter-predecessor-nil-duration",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "cpu": 0,
+        "filterID": 10,
+        "name": "频率🚀",
+        "pid": null,
+        "processKey": null,
+        "processName": null,
+        "samples": [
+          {
+            "durationNs": 200,
+            "key": {
+              "rowID": 10,
+              "table": "measure"
+            },
+            "timestampNs": 0,
+            "value": 7
+          },
+          {
+            "durationNs": 0,
+            "key": {
+              "rowID": 11,
+              "table": "measure"
+            },
+            "timestampNs": 140,
+            "value": 8
+          },
+          {
+            "durationNs": null,
+            "key": {
+              "rowID": 12,
+              "table": "measure"
+            },
+            "timestampNs": 150,
+            "value": 9
+          }
+        ],
+        "scope": "cpu",
+        "unit": "MHz"
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true
+  },
+  {
+    "name": "cpu-counter-left-bound-instant",
+    "source": {
+      "cpuCounter": {
+        "filterID": 10,
+        "cpu": 0
+      }
+    },
+    "range": {
+      "endNs": 150,
+      "startNs": 140
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "cpu": 0,
+        "filterID": 10,
+        "name": "频率🚀",
+        "pid": null,
+        "processKey": null,
+        "processName": null,
+        "samples": [
+          {
+            "durationNs": 200,
+            "key": {
+              "rowID": 10,
+              "table": "measure"
+            },
+            "timestampNs": 0,
+            "value": 7
+          },
+          {
+            "durationNs": 0,
+            "key": {
+              "rowID": 11,
+              "table": "measure"
+            },
+            "timestampNs": 140,
+            "value": 8
+          }
+        ],
+        "scope": "cpu",
+        "unit": "MHz"
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true
+  },
+  {
+    "name": "native-process-counter-nil-duration",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "cpu": null,
+        "filterID": 20,
+        "name": "legacy",
+        "pid": 700,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "samples": [
+          {
+            "durationNs": 20,
+            "key": {
+              "rowID": 1,
+              "table": "process_measure"
+            },
+            "timestampNs": 100,
+            "value": 99
+          },
+          {
+            "durationNs": null,
+            "key": {
+              "rowID": 2,
+              "table": "process_measure"
+            },
+            "timestampNs": 150,
+            "value": 100
+          }
+        ],
+        "scope": "process",
+        "unit": null
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true
+  },
+  {
+    "name": "native-process-counter-nullable-metadata",
+    "source": {
+      "processCounter": {
+        "filterID": 21,
+        "processKey": {
+          "ipid": 2
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "cpu": null,
+        "filterID": 21,
+        "name": "process2",
+        "pid": 700,
+        "processKey": {
+          "ipid": 2
+        },
+        "processName": null,
+        "samples": [
+          {
+            "durationNs": 20,
+            "key": {
+              "rowID": 4,
+              "table": "process_measure"
+            },
+            "timestampNs": 100,
+            "value": 99
+          }
+        ],
+        "scope": "process",
+        "unit": ""
+      }
+    ],
+    "frames": [],
+    "truncated": false,
+    "capabilityAvailable": true
+  },
+  {
+    "name": "merged-physical-table-rowid-collision",
+    "source": {
+      "processCounter": {
+        "filterID": 20,
+        "processKey": {
+          "ipid": 1
+        }
+      }
+    },
+    "range": {
+      "endNs": 200,
+      "startNs": 100
+    },
+    "showsNestedDepth": false,
+    "cpu": [],
+    "threadStates": [],
+    "slices": [],
+    "counters": [
+      {
+        "cpu": null,
+        "filterID": 20,
+        "name": "legacy",
+        "pid": 700,
+        "processKey": {
+          "ipid": 1
+        },
+        "processName": "进程🚀",
+        "samples": [
+          {
+            "durationNs": 20,
+            "key": {
+              "rowID": 1,
+              "table": "measure"
+            },
+            "timestampNs": 100,
+            "value": 999
+          },
+          {
+            "durationNs": 20,
+            "key": {
+              "rowID": 1,
+              "table": "process_measure"
+            },
+            "timestampNs": 100,
+            "value": 99
+          }
+        ],
+        "scope": "process",
+        "unit": null
+      }
+    ],
+    "frames": [],
+    "truncated": true,
+    "capabilityAvailable": true
+  }
+]

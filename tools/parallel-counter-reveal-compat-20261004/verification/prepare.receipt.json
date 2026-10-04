@@ -1,0 +1,35 @@
+{
+  "label": "prepare",
+  "command": [
+    "python3",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004/tools/parallel-counter-reveal-compat-20261004/prepare.py"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-reveal-compat-20261004",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "log": "tools/parallel-counter-reveal-compat-20261004/verification/prepare.log",
+  "sha256": "972f05400ad1b1d32b392fb3434d08751afc182760f573614be682d6a703d5c3",
+  "byteCount": 332,
+  "databaseBefore": [],
+  "databaseAfter": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-counter-reveal-compat-swiftpm/databases/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "environment": {}
+}

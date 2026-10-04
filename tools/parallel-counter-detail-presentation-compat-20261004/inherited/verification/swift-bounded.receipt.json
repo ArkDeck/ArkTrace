@@ -1,0 +1,30 @@
+{
+  "label": "swift-bounded",
+  "command": [
+    "sh",
+    "scripts/run-swiftpm.sh",
+    "test",
+    "--disable-sandbox",
+    "--config-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/config",
+    "--security-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/security",
+    "--filter",
+    "RepositoryInspectorOracleTests"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/oracle-source",
+  "exitCode": 0,
+  "acceptedExitCodes": [
+    0
+  ],
+  "log": "tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.log",
+  "sha256": "5dde0d5bf7ab93c9fef6fb0baf1c3ac84d0e6924c4809c9cde211cfc5a2f9b4f",
+  "byteCount": 5341,
+  "environment": {
+    "PARITY_CASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-cases.json",
+    "PARITY_DATABASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid",
+    "PARITY_PARSER": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/parser-identity.json",
+    "PARITY_SWIFT_OUTPUT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-swift-output.json",
+    "ARKTRACE_SWIFTPM_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/stable-cache"
+  }
+}

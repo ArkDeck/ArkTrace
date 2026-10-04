@@ -1,0 +1,17 @@
+{
+  "files": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/rust/crates/arktrace-viewer/src/detail.rs",
+      "byteCount": 11687,
+      "sha256": "b04b224e51d1dfbe6e41f11628ce2afa1b98a19e3b15d15f56ed83d5b3bb87cb"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-counter-detail-presentation-compat-20261004/rust/crates/arktrace-viewer/src/presentation.rs",
+      "byteCount": 21474,
+      "sha256": "004b62e5593d7eb18e73f2cb8c621eefd8d75fff164169ef9100fdb363be2241"
+    }
+  ],
+  "productionFilesModified": false,
+  "proposalAppliedOrCompiled": false,
+  "onlyPolicyChange": "process Counter admits actual Measure as well as ProcessMeasure; CPU remains Measure only; original key preserved"
+}

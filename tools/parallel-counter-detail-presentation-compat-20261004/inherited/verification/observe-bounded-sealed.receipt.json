@@ -1,0 +1,83 @@
+{
+  "databaseBefore": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/legacy/fixture.sqlite",
+      "sha256": "4e50b97b252974221ff00197e9ba6fb21fadc2693736c2a9b4120a2da9611d33",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 151552
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "databaseAfter": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/legacy/fixture.sqlite",
+      "sha256": "4e50b97b252974221ff00197e9ba6fb21fadc2693736c2a9b4120a2da9611d33",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 151552
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/native/fixture.sqlite",
+      "sha256": "90d7fd3c5733433b2b111ebeda3ffe7675496557f2e78fda2d463e80d4109c19",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/merged/fixture.sqlite",
+      "sha256": "c8b0941e082de3197421c8fd8118fc52441fc1a2569f4485f4783bd743901049",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 155648
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid/minimal/fixture.sqlite",
+      "sha256": "577e46f068114714f6edf108ddd3f49d6252fa9743e6864e83d233a3f04bbe8f",
+      "modeBeforePreparation": "0o400",
+      "mode": "0o400",
+      "byteCount": 122880
+    }
+  ],
+  "label": "observe-bounded-sealed",
+  "command": [
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/consumer-target/debug/arktrace-repository-inspector-parity",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-sealed-cases.json"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/workspace",
+  "exitCode": 0,
+  "acceptedExitCodes": [
+    0
+  ],
+  "log": "tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.log",
+  "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4",
+  "byteCount": 85515,
+  "environment": {
+    "CARGO_HOME": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/dependencies",
+    "CARGO_TARGET_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/consumer-target",
+    "CARGO_NET_OFFLINE": "true",
+    "MACOSX_DEPLOYMENT_TARGET": "26.0",
+    "LIBSQLITE3_FLAGS": "-DSQLITE_ENABLE_FILESTAT=1"
+  }
+}

@@ -1,0 +1,3154 @@
+{
+  "flows": [
+    {
+      "admittedTree": {
+        "groups": [
+          {
+            "capabilityAvailable": false,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": false,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "eventSelectionAPIAvailableInViewAction": false,
+      "focusSteps": [
+        {
+          "key": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "trackID": "process-counter:20:1"
+        }
+      ],
+      "focused": {
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "trackID": "process-counter:20:1"
+      },
+      "id": "legacy-measure-counter-anchor",
+      "intent": {
+        "id": "legacy-measure-counter-anchor",
+        "intent": {
+          "afterEvent": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "anchorNs": 100,
+          "direction": "next",
+          "identity": {
+            "generation": 8,
+            "sessionId": 71
+          },
+          "limit": 1,
+          "source": {
+            "processCounter": {
+              "filterID": 20,
+              "processKey": {
+                "ipid": 1
+              }
+            }
+          }
+        },
+        "roundtripPreserved": true,
+        "sourceID": "process-counter:20:1",
+        "typedSourceQuery": {
+          "cpu": null,
+          "filterID": 20,
+          "limit": 1,
+          "name": null,
+          "nameMatch": "exact",
+          "pid": null,
+          "processKey": 1,
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "scope": "process"
+        },
+        "validationError": "InvalidEvidence"
+      },
+      "pendingKeyAfterRangeAction": null,
+      "rangeOnlyReveal": {
+        "endNs": 170,
+        "startNs": 50
+      },
+      "revealIntents": {
+        "focusTimeline": false,
+        "pendingEventKey": null,
+        "persistFavorites": false,
+        "scrollAfterSnapshot": false,
+        "scrollGroupId": null,
+        "snapshotPreference": "automatic",
+        "viewportRange": {
+          "endNs": 170,
+          "startNs": 50
+        }
+      },
+      "sourceAfterRoundtrip": {
+        "processCounter": {
+          "filterID": 20,
+          "processKey": {
+            "ipid": 1
+          }
+        }
+      },
+      "treeAfterReveal": {
+        "groups": [
+          {
+            "capabilityAvailable": false,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": false,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "viewportAfterReveal": {
+        "endNs": 170,
+        "startNs": 50
+      }
+    },
+    {
+      "admittedTree": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "eventSelectionAPIAvailableInViewAction": false,
+      "focusSteps": [
+        {
+          "key": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "trackID": "process-counter:20:1"
+        }
+      ],
+      "focused": {
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "trackID": "process-counter:20:1"
+      },
+      "id": "merged-measure-row1",
+      "intent": {
+        "id": "merged-measure-row1",
+        "intent": {
+          "afterEvent": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "anchorNs": 100,
+          "direction": "next",
+          "identity": {
+            "generation": 8,
+            "sessionId": 71
+          },
+          "limit": 1,
+          "source": {
+            "processCounter": {
+              "filterID": 20,
+              "processKey": {
+                "ipid": 1
+              }
+            }
+          }
+        },
+        "roundtripPreserved": true,
+        "sourceID": "process-counter:20:1",
+        "typedSourceQuery": {
+          "cpu": null,
+          "filterID": 20,
+          "limit": 1,
+          "name": null,
+          "nameMatch": "exact",
+          "pid": null,
+          "processKey": 1,
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "scope": "process"
+        },
+        "validationError": "InvalidEvidence"
+      },
+      "pendingKeyAfterRangeAction": null,
+      "rangeOnlyReveal": {
+        "endNs": 170,
+        "startNs": 50
+      },
+      "revealIntents": {
+        "focusTimeline": false,
+        "pendingEventKey": null,
+        "persistFavorites": false,
+        "scrollAfterSnapshot": false,
+        "scrollGroupId": null,
+        "snapshotPreference": "automatic",
+        "viewportRange": {
+          "endNs": 170,
+          "startNs": 50
+        }
+      },
+      "sourceAfterRoundtrip": {
+        "processCounter": {
+          "filterID": 20,
+          "processKey": {
+            "ipid": 1
+          }
+        }
+      },
+      "treeAfterReveal": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "viewportAfterReveal": {
+        "endNs": 170,
+        "startNs": 50
+      }
+    },
+    {
+      "admittedTree": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "eventSelectionAPIAvailableInViewAction": false,
+      "focusSteps": [
+        {
+          "key": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "trackID": "process-counter:20:1"
+        },
+        {
+          "key": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "trackID": "process-counter:20:1"
+        }
+      ],
+      "focused": {
+        "key": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "trackID": "process-counter:20:1"
+      },
+      "id": "merged-process-measure-row1",
+      "intent": {
+        "id": "merged-process-measure-row1",
+        "intent": {
+          "afterEvent": {
+            "rowID": 1,
+            "table": "process_measure"
+          },
+          "anchorNs": 100,
+          "direction": "next",
+          "identity": {
+            "generation": 8,
+            "sessionId": 71
+          },
+          "limit": 1,
+          "source": {
+            "processCounter": {
+              "filterID": 20,
+              "processKey": {
+                "ipid": 1
+              }
+            }
+          }
+        },
+        "roundtripPreserved": true,
+        "sourceID": "process-counter:20:1",
+        "typedSourceQuery": {
+          "cpu": null,
+          "filterID": 20,
+          "limit": 1,
+          "name": null,
+          "nameMatch": "exact",
+          "pid": null,
+          "processKey": 1,
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "scope": "process"
+        },
+        "validationError": null
+      },
+      "pendingKeyAfterRangeAction": null,
+      "rangeOnlyReveal": {
+        "endNs": 170,
+        "startNs": 50
+      },
+      "revealIntents": {
+        "focusTimeline": false,
+        "pendingEventKey": null,
+        "persistFavorites": false,
+        "scrollAfterSnapshot": false,
+        "scrollGroupId": null,
+        "snapshotPreference": "automatic",
+        "viewportRange": {
+          "endNs": 170,
+          "startNs": 50
+        }
+      },
+      "sourceAfterRoundtrip": {
+        "processCounter": {
+          "filterID": 20,
+          "processKey": {
+            "ipid": 1
+          }
+        }
+      },
+      "treeAfterReveal": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "viewportAfterReveal": {
+        "endNs": 170,
+        "startNs": 50
+      }
+    },
+    {
+      "admittedTree": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "eventSelectionAPIAvailableInViewAction": false,
+      "focusSteps": [
+        {
+          "key": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "trackID": "cpu-counter:10:0"
+        }
+      ],
+      "focused": {
+        "key": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "trackID": "cpu-counter:10:0"
+      },
+      "id": "cpu-real-measure-predecessor",
+      "intent": {
+        "id": "cpu-real-measure-predecessor",
+        "intent": {
+          "afterEvent": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "anchorNs": 0,
+          "direction": "next",
+          "identity": {
+            "generation": 8,
+            "sessionId": 71
+          },
+          "limit": 1,
+          "source": {
+            "cpuCounter": {
+              "cpu": 0,
+              "filterID": 10
+            }
+          }
+        },
+        "roundtripPreserved": true,
+        "sourceID": "cpu-counter:10:0",
+        "typedSourceQuery": {
+          "cpu": 0,
+          "filterID": 10,
+          "limit": 1,
+          "name": null,
+          "nameMatch": "exact",
+          "pid": null,
+          "processKey": null,
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "scope": "cpu"
+        },
+        "validationError": null
+      },
+      "pendingKeyAfterRangeAction": null,
+      "rangeOnlyReveal": {
+        "endNs": 250,
+        "startNs": 0
+      },
+      "revealIntents": {
+        "focusTimeline": false,
+        "pendingEventKey": null,
+        "persistFavorites": false,
+        "scrollAfterSnapshot": false,
+        "scrollGroupId": null,
+        "snapshotPreference": "automatic",
+        "viewportRange": {
+          "endNs": 250,
+          "startNs": 0
+        }
+      },
+      "sourceAfterRoundtrip": {
+        "cpuCounter": {
+          "cpu": 0,
+          "filterID": 10
+        }
+      },
+      "treeAfterReveal": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "typedSourceQuery": {
+        "cpu": 0,
+        "filterID": 10,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "cpu"
+      },
+      "viewportAfterReveal": {
+        "endNs": 250,
+        "startNs": 0
+      }
+    },
+    {
+      "admittedTree": {
+        "groups": [
+          {
+            "capabilityAvailable": false,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": false,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "eventSelectionAPIAvailableInViewAction": false,
+      "focusSteps": [
+        {
+          "key": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "trackID": "process-counter:20:all"
+        }
+      ],
+      "focused": {
+        "key": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "trackID": "process-counter:20:all"
+      },
+      "id": "process-source-all-preserved",
+      "intent": {
+        "id": "process-source-all-preserved",
+        "intent": {
+          "afterEvent": {
+            "rowID": 1,
+            "table": "measure"
+          },
+          "anchorNs": 100,
+          "direction": "next",
+          "identity": {
+            "generation": 8,
+            "sessionId": 71
+          },
+          "limit": 1,
+          "source": {
+            "processCounter": {
+              "filterID": 20
+            }
+          }
+        },
+        "roundtripPreserved": true,
+        "sourceID": "process-counter:20:all",
+        "typedSourceQuery": {
+          "cpu": null,
+          "filterID": 20,
+          "limit": 1,
+          "name": null,
+          "nameMatch": "exact",
+          "pid": null,
+          "processKey": null,
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "scope": "process"
+        },
+        "validationError": "InvalidEvidence"
+      },
+      "pendingKeyAfterRangeAction": null,
+      "rangeOnlyReveal": {
+        "endNs": 170,
+        "startNs": 50
+      },
+      "revealIntents": {
+        "focusTimeline": false,
+        "pendingEventKey": null,
+        "persistFavorites": false,
+        "scrollAfterSnapshot": false,
+        "scrollGroupId": null,
+        "snapshotPreference": "automatic",
+        "viewportRange": {
+          "endNs": 170,
+          "startNs": 50
+        }
+      },
+      "sourceAfterRoundtrip": {
+        "processCounter": {
+          "filterID": 20
+        }
+      },
+      "treeAfterReveal": {
+        "groups": [
+          {
+            "capabilityAvailable": false,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": false,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "viewportAfterReveal": {
+        "endNs": 170,
+        "startNs": 50
+      }
+    },
+    {
+      "admittedTree": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "eventSelectionAPIAvailableInViewAction": false,
+      "focusSteps": [
+        {
+          "key": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "trackID": "cpu-counter:10:all"
+        }
+      ],
+      "focused": {
+        "key": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "trackID": "cpu-counter:10:all"
+      },
+      "id": "cpu-source-all-preserved",
+      "intent": {
+        "id": "cpu-source-all-preserved",
+        "intent": {
+          "afterEvent": {
+            "rowID": 10,
+            "table": "measure"
+          },
+          "anchorNs": 0,
+          "direction": "next",
+          "identity": {
+            "generation": 8,
+            "sessionId": 71
+          },
+          "limit": 1,
+          "source": {
+            "cpuCounter": {
+              "filterID": 10
+            }
+          }
+        },
+        "roundtripPreserved": true,
+        "sourceID": "cpu-counter:10:all",
+        "typedSourceQuery": {
+          "cpu": null,
+          "filterID": 10,
+          "limit": 1,
+          "name": null,
+          "nameMatch": "exact",
+          "pid": null,
+          "processKey": null,
+          "range": {
+            "endNs": 1000,
+            "startNs": 0
+          },
+          "scope": "cpu"
+        },
+        "validationError": null
+      },
+      "pendingKeyAfterRangeAction": null,
+      "rangeOnlyReveal": {
+        "endNs": 250,
+        "startNs": 0
+      },
+      "revealIntents": {
+        "focusTimeline": false,
+        "pendingEventKey": null,
+        "persistFavorites": false,
+        "scrollAfterSnapshot": false,
+        "scrollGroupId": null,
+        "snapshotPreference": "automatic",
+        "viewportRange": {
+          "endNs": 250,
+          "startNs": 0
+        }
+      },
+      "sourceAfterRoundtrip": {
+        "cpuCounter": {
+          "filterID": 10
+        }
+      },
+      "treeAfterReveal": {
+        "groups": [
+          {
+            "capabilityAvailable": true,
+            "id": "cpu",
+            "kind": "cpu",
+            "processKey": null,
+            "title": "CPUs",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 0
+                    }
+                  }
+                },
+                "title": "CPU 0"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpu": {
+                      "_0": 1
+                    }
+                  }
+                },
+                "title": "CPU 1"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "cpu-counter",
+            "kind": "cpuCounter",
+            "processKey": null,
+            "title": "CPU Counters",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "cpu": 0,
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀 (MHz)"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "cpuCounter": {
+                      "filterID": 10
+                    }
+                  }
+                },
+                "title": "频率🚀"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:1",
+            "kind": "process",
+            "processKey": {
+              "ipid": 1
+            },
+            "title": "进程🚀 [700]",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 11
+                      }
+                    }
+                  }
+                },
+                "title": "进程🚀 · A\u0000B🚀"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 20,
+                      "processKey": {
+                        "ipid": 1
+                      }
+                    }
+                  }
+                },
+                "title": "legacy"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "process:2",
+            "kind": "process",
+            "processKey": {
+              "ipid": 2
+            },
+            "title": "PID 700",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "threadState": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {
+                      "_0": {
+                        "itid": 12
+                      }
+                    }
+                  }
+                },
+                "title": "TID 701"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "frame": {
+                      "_0": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "Frames"
+              },
+              {
+                "descriptor": {
+                  "isCollapsed": false,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "processCounter": {
+                      "filterID": 21,
+                      "processKey": {
+                        "ipid": 2
+                      }
+                    }
+                  }
+                },
+                "title": "process2 ()"
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "capabilityAvailable": true,
+            "id": "unattributed",
+            "kind": "unattributed",
+            "processKey": null,
+            "title": "Unattributed",
+            "tracks": [
+              {
+                "descriptor": {
+                  "isCollapsed": true,
+                  "showsNestedDepth": true,
+                  "source": {
+                    "namedSlice": {}
+                  }
+                },
+                "title": "Unattributed Slices"
+              }
+            ],
+            "truncated": false
+          }
+        ]
+      },
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 10,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "cpu"
+      },
+      "viewportAfterReveal": {
+        "endNs": 250,
+        "startNs": 0
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "legacy-measure-counter-anchor",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "merged-measure-row1",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "merged-process-measure-row1",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": null
+    },
+    {
+      "id": "cpu-real-measure-predecessor",
+      "intent": {
+        "afterEvent": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "anchorNs": 0,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "cpuCounter": {
+            "cpu": 0,
+            "filterID": 10
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "cpu-counter:10:0",
+      "typedSourceQuery": {
+        "cpu": 0,
+        "filterID": 10,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "cpu"
+      },
+      "validationError": null
+    },
+    {
+      "id": "process-source-all-preserved",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:all",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "cpu-source-all-preserved",
+      "intent": {
+        "afterEvent": {
+          "rowID": 10,
+          "table": "measure"
+        },
+        "anchorNs": 0,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "cpuCounter": {
+            "filterID": 10
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "cpu-counter:10:all",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 10,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "cpu"
+      },
+      "validationError": null
+    },
+    {
+      "id": "reject-process-sched_slice",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "sched_slice"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "reject-process-thread_state",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "thread_state"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "reject-process-callstack",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "callstack"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "reject-process-frame_slice",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "frame_slice"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "reject-cpu-process-measure",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "cpuCounter": {
+            "cpu": 0,
+            "filterID": 10
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "cpu-counter:10:0",
+      "typedSourceQuery": {
+        "cpu": 0,
+        "filterID": 10,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": null,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "cpu"
+      },
+      "validationError": "InvalidEvidence"
+    },
+    {
+      "id": "filter-ownership-not-provable-by-intent",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 999,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:999:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 999,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": null
+    },
+    {
+      "id": "process-ownership-not-provable-by-intent",
+      "intent": {
+        "afterEvent": {
+          "rowID": 1,
+          "table": "process_measure"
+        },
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 2
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:2",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 2,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": null
+    },
+    {
+      "id": "no-after-event-does-not-invent-counter-key",
+      "intent": {
+        "afterEvent": null,
+        "anchorNs": 100,
+        "direction": "next",
+        "identity": {
+          "generation": 8,
+          "sessionId": 71
+        },
+        "limit": 1,
+        "source": {
+          "processCounter": {
+            "filterID": 20,
+            "processKey": {
+              "ipid": 1
+            }
+          }
+        }
+      },
+      "roundtripPreserved": true,
+      "sourceID": "process-counter:20:1",
+      "typedSourceQuery": {
+        "cpu": null,
+        "filterID": 20,
+        "limit": 1,
+        "name": null,
+        "nameMatch": "exact",
+        "pid": null,
+        "processKey": 1,
+        "range": {
+          "endNs": 1000,
+          "startNs": 0
+        },
+        "scope": "process"
+      },
+      "validationError": null
+    }
+  ]
+}
