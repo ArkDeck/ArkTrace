@@ -1,0 +1,165 @@
+   Compiling arktrace-viewer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/workspace/rust/crates/arktrace-viewer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.97s
+     Running unittests src/lib.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/arktrace_viewer-37a8e3ba0b92fd30)
+
+running 2 tests
+test loader::tests::cache_bounds_charge_retained_vector_and_string_capacity_and_use_lru ... ok
+test loader::tests::cache_total_bucket_limit_applies_before_the_entry_limit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/detail_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/detail_oracle-bc9b780afde778b6)
+
+running 4 tests
+test unavailable_detail_pages_cannot_publish_rows_or_truncation_and_check_is_live ... ok
+test counter_mapping_rejects_overflow_negative_duration_and_total_sample_overrun ... ok
+test detail_mapping_rejects_wrong_family_lane_and_table_identity ... ok
+test replay_eight_actual_swift_loader_dto_mapping_vectors_exactly ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/detail_queries.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/detail_queries-81a671d5ab6238af)
+
+running 1 test
+test typed_detail_queries_keep_lane_identity_and_prelimit_unattributed_scope ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/hot_snapshot.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/hot_snapshot-c00c0835c2113913)
+
+running 3 tests
+test optional_sources_keep_zero_distinct_from_absence_and_filter_family ... ok
+test string_table_preserves_utf8_dominant_identity_and_complete_machine_quality ... ok
+test pack_actual_geometry_vectors_without_losing_ranges_keys_or_binary64_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/loader.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/loader-00b920ee023b8730)
+
+running 10 tests
+test focus_prefix_deduplicates_and_keeps_the_original_quality_and_truncation ... ok
+test density_press_prefers_covering_then_fallback_with_canonical_rank_and_query_caps ... ok
+test stale_generation_and_reset_preserve_generation_arbitration_without_queries ... ok
+test cancelled_batch_never_enters_cache_and_backend_failure_keeps_its_identity ... ok
+test density_press_at_int64_max_skips_overflowed_covering_query_and_rejects_bad_pages ... ok
+test short_batch_is_rejected_and_zero_fair_share_uses_bounded_scalar_queries ... ok
+test nested_depth_survives_offscreen_and_reset_removes_its_height ... ok
+test unsupported_density_is_cacheable_and_never_dispatches_detail ... ok
+test repeated_viewport_reuses_density_but_range_source_and_bucket_count_do_not_alias ... ok
+test warm_hits_are_removed_before_misses_are_chunked_and_lru_is_bounded ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/navigation_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/navigation_oracle-decf1cb50c8ebe22)
+
+running 4 tests
+test replay_actual_native_move_event_move_track_and_zoom_anchor_without_tolerance ... ok
+test replay_actual_controller_open_sidecar_restoration_without_copying_its_io ... ok
+test replay_actual_swift_catalog_action_order_identity_and_focus_exactly ... ok
+test trimming_matches_actual_foundation_character_set_over_all_unicode_scalars ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/navigation_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/navigation_regressions-e04b20934c240d94)
+
+running 6 tests
+test focus_anchor_chain_keeps_selection_midpoint_and_real_focus_start_at_large_time ... ok
+test repository_navigation_is_only_bounded_query_intent_and_has_no_invented_result ... ok
+test search_selection_empty_delta_extremes_and_invalid_cursor_never_wrap ... ok
+test displayed_event_step_uses_real_keys_first_lane_and_raw_table_order ... ok
+test track_step_skips_empty_lanes_and_nearest_ties_keep_sorted_real_event ... ok
+test reveal_instant_open_range_edges_and_overflow_are_integer_exact ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/regressions-5ca6bfea86190def)
+
+running 28 tests
+test density_row_hit_keeps_first_closed_boundary_and_real_resolution_intent ... ok
+test density_int64_max_has_no_overflowing_covering_query ... ok
+test density_prefetch_chunks_are_bounded_and_unused_share_stays_capped ... ok
+test depth_cap_preserves_event_and_extreme_depth_never_adds_overflow ... ok
+test assembly_requires_selected_pages_and_enforces_output_budget ... ok
+test cached_rows_affect_overscan_and_invalid_cache_is_rejected ... ok
+test all_viewer_degradations_contribute_to_the_complete_snapshot_quality ... ok
+test detail_hit_uses_style_then_later_input_not_duration_or_rowid ... ok
+test identical_derived_quality_facts_keep_first_occurrence_like_swift ... ok
+test inclusive_visual_edges_preserve_domain_halfopen_contract ... ok
+test instant_and_open_ended_keep_domain_identity_while_expanding_one_pixel ... ok
+test explicit_detail_keeps_overscan_without_querying_offscreen_lanes ... ok
+test invalid_scale_track_and_density_fail_without_partial_snapshot ... ok
+test local_subtraction_and_interior_floor_survive_int64_extremes ... ok
+test lod_threshold_unavailable_invalid_and_checked_count_sum_are_explicit ... ok
+test narrow_selection_midpoint_is_closed_and_start_wins ... ok
+test new_selection_zero_clears_endpoint_zero_preserves_and_crossing_reorders ... ok
+test nonfinite_requests_reject_and_finite_pan_overflow_saturates ... ok
+test pan_and_zoom_clamp_safely_while_preserving_anchor ... ok
+test resolver_is_nearest_then_longest_then_lowest_actual_rowid ... ok
+test source_issue_identity_deduplicates_before_human_message_redaction ... ok
+test source_machine_quality_strips_diagnostics_and_rejects_unknown_scopes ... ok
+test source_truncation_and_depth_facts_survive_flattening_rules ... ok
+test viewport_rejects_nonfinite_degenerate_and_inconsistent_scale ... ok
+test request_caps_generation_and_budget_are_enforced ... ok
+test cancellation_and_deadline_checkpoint_abort_then_allow_fresh_request ... ok
+test merged_source_quality_has_one_total_budget_before_allocating ... ok
+test source_and_derived_quality_share_one_cap_and_full_identity_deduplication ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/scoped_history.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/scoped_history-1c13565c3e1c140b)
+
+running 1 test
+test independent_swift_scope_fix_changes_only_the_three_unattributed_detail_cases ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/swift_boundary_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/swift_boundary_oracle-3720719e943989d5)
+
+running 1 test
+test replay_three_actual_swift_selection_event_sequences_and_measure_nonfinite_difference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/swift_geometry_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/swift_geometry_oracle-d459c5b09a2dc9f7)
+
+running 1 test
+test replay_25_actual_swift_geometry_hit_interaction_vectors_exactly ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/swift_plan_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/swift_plan_oracle-a36e3219e9a3e6fb)
+
+running 2 tests
+test retain_measured_swift_difference_only_for_explicit_detail_offscreen_queries ... ok
+test replay_13_actual_swift_loader_query_and_snapshot_vectors_exactly ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/track_tree_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/track_tree_regressions-b7881903ab4d9f3e)
+
+running 4 tests
+test sample_count_not_duration_orders_processes_and_reused_pid_never_merges ... ok
+test counter_cap_is_assigned_before_lexical_sort_and_cpu_cap_after_numeric_sort ... ok
+test catalogue_and_title_matching_cancellation_leave_next_request_usable ... ok
+test duplicate_internal_thread_identity_and_catalog_text_caps_fail_then_recover ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/view_actions_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-cargo/target/debug/deps/view_actions_regressions-251be505c30a7359)
+
+running 6 tests
+test malformed_wire_extra_fields_and_unbounded_inputs_are_rejected ... ok
+test stale_session_and_generation_actions_cannot_mutate_even_matching_track_ids ... ok
+test restoring_after_directory_change_uses_stable_identity_and_never_pid_or_title ... ok
+test restoration_skips_unknown_ids_preserves_duplicates_order_and_hidden_depth ... ok
+test cancellation_deadline_and_output_over_budget_are_transactional_and_recoverable ... ok
+test unknown_favorites_are_retained_by_toggle_but_do_not_count_as_visible_pins ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests arktrace_viewer
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

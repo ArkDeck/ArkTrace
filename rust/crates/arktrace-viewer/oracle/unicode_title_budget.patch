@@ -1,0 +1,357 @@
+--- a/rust/crates/arktrace-viewer/src/track_tree.rs
++++ b/rust/crates/arktrace-viewer/src/track_tree.rs
+@@ -16,7 +16,10 @@
+ pub const MAXIMUM_TREE_GROUPS: usize = 10_000;
+ pub const MAXIMUM_VIEW_TEXT_BYTES: usize = 4_096;
+ pub const MAXIMUM_TRACK_ID_BYTES: usize = 128;
++/// Owned inline records plus all nested Vec/String capacities; not allocator RSS.
+ pub const MAXIMUM_VIEW_RETAINED_BYTES: usize = 8 * 1_024 * 1_024;
++/// Borrowed input scan/payload cap, independent of owned output capacity.
++pub const MAXIMUM_VIEW_INPUT_LOGICAL_BYTES: usize = 8 * 1_024 * 1_024;
+ pub const MAXIMUM_FAVORITE_TRACKS: usize = 12;
+ pub const DEFAULT_EXPANDED_PROCESS_COUNT: usize = 8;
+ 
+@@ -92,13 +95,27 @@
+     *total = total
+         .checked_add(s.len())
+         .ok_or(ViewerError::InputBudgetExceeded)?;
+-    if *total > MAXIMUM_VIEW_RETAINED_BYTES {
++    if *total > MAXIMUM_VIEW_INPUT_LOGICAL_BYTES {
+         return Err(ViewerError::InputBudgetExceeded);
+     }
+     Ok(())
+ }
+-pub(crate) fn retained_budget<T>(count: usize, total: &mut usize) -> Result<(), ViewerError> {
++pub(crate) fn logical_budget<T>(count: usize, total: &mut usize) -> Result<(), ViewerError> {
+     let bytes = count
++        .checked_mul(std::mem::size_of::<T>())
++        .ok_or(ViewerError::InputBudgetExceeded)?;
++    *total = total
++        .checked_add(bytes)
++        .ok_or(ViewerError::InputBudgetExceeded)?;
++    if *total > MAXIMUM_VIEW_INPUT_LOGICAL_BYTES {
++        return Err(ViewerError::InputBudgetExceeded);
++    }
++    Ok(())
++}
++/// Add actual owned capacity, excluding allocator bookkeeping/alignment slack.
++/// Nested inline fields are already part of their enclosing record allocation.
++pub(crate) fn capacity_budget<T>(capacity: usize, total: &mut usize) -> Result<(), ViewerError> {
++    let bytes = capacity
+         .checked_mul(std::mem::size_of::<T>())
+         .ok_or(ViewerError::InputBudgetExceeded)?;
+     *total = total
+@@ -109,6 +126,23 @@
+     }
+     Ok(())
+ }
++pub(crate) fn string_capacity(s: &String, total: &mut usize) -> Result<(), ViewerError> {
++    capacity_budget::<u8>(s.capacity(), total)
++}
++pub(crate) fn thread_capacity(
++    threads: &Vec<TraceThread>,
++    total: &mut usize,
++    check: &mut Check<'_>,
++) -> Result<(), ViewerError> {
++    capacity_budget::<TraceThread>(threads.capacity(), total)?;
++    for (i, t) in threads.iter().enumerate() {
++        checkpoint(i, check)?;
++        for s in [&t.name, &t.process_name].into_iter().flatten() {
++            string_capacity(s, total)?;
++        }
++    }
++    Ok(())
++}
+ pub(crate) fn id_budget(s: &str, total: &mut usize) -> Result<(), ViewerError> {
+     if s.len() > MAXIMUM_TRACK_ID_BYTES {
+         return Err(ViewerError::InputBudgetExceeded);
+@@ -123,7 +157,7 @@
+     if threads.len() > MAXIMUM_CATALOG_THREADS {
+         return Err(ViewerError::InputBudgetExceeded);
+     }
+-    retained_budget::<TraceThread>(threads.len(), total)?;
++    logical_budget::<TraceThread>(threads.len(), total)?;
+     let mut ids = BTreeSet::new();
+     for (i, t) in threads.iter().enumerate() {
+         checkpoint(i, check)?;
+@@ -137,13 +171,40 @@
+     Ok(())
+ }
+ impl TrackTree {
++    /// Includes caller-supplied spare capacity because this tree is owned state.
++    /// Borrowed catalog facts are checked by logical length instead.
++    pub fn retained_bytes(&self, check: &mut Check<'_>) -> Result<usize, ViewerError> {
++        check()?;
++        let mut bytes = std::mem::size_of::<Self>();
++        self.heap_capacity(&mut bytes, check)?;
++        check()?;
++        Ok(bytes)
++    }
++    pub(crate) fn heap_capacity(
++        &self,
++        bytes: &mut usize,
++        check: &mut Check<'_>,
++    ) -> Result<(), ViewerError> {
++        capacity_budget::<TrackGroup>(self.groups.capacity(), bytes)?;
++        for (i, group) in self.groups.iter().enumerate() {
++            checkpoint(i, check)?;
++            string_capacity(&group.id, bytes)?;
++            string_capacity(&group.title, bytes)?;
++            capacity_budget::<SidebarTrack>(group.tracks.capacity(), bytes)?;
++            for (j, track) in group.tracks.iter().enumerate() {
++                checkpoint(j, check)?;
++                string_capacity(&track.title, bytes)?;
++            }
++        }
++        Ok(())
++    }
+     pub fn validate(&self, check: &mut Check<'_>) -> Result<(), ViewerError> {
+         check()?;
+         if self.groups.len() > MAXIMUM_TREE_GROUPS {
+             return Err(ViewerError::InputBudgetExceeded);
+         }
+         let mut retained = std::mem::size_of::<Self>();
+-        retained_budget::<TrackGroup>(self.groups.len(), &mut retained)?;
++        logical_budget::<TrackGroup>(self.groups.len(), &mut retained)?;
+         let mut count = 0;
+         let mut groups = BTreeSet::new();
+         let mut tracks = BTreeSet::new();
+@@ -169,13 +230,14 @@
+                 if count > MAXIMUM_TRACKS {
+                     return Err(ViewerError::InputBudgetExceeded);
+                 }
+-                retained_budget::<SidebarTrack>(1, &mut retained)?;
++                logical_budget::<SidebarTrack>(1, &mut retained)?;
+                 text_budget(&t.title, &mut retained)?;
+                 if !tracks.insert(t.id()) {
+                     return Err(ViewerError::InvalidEvidence);
+                 }
+             }
+         }
++        self.retained_bytes(check)?;
+         check()
+     }
+     pub fn track_list_truncated(&self) -> bool {
+@@ -302,9 +364,9 @@
+         return Err(ViewerError::InputBudgetExceeded);
+     }
+     let mut retained = std::mem::size_of::<TrackCatalogFacts>();
+-    retained_budget::<CatalogCpuFact>(facts.cpu_samples.len(), &mut retained)?;
+-    retained_budget::<CounterSeriesDescriptor>(facts.counters.len(), &mut retained)?;
+-    retained_budget::<ProcessKey>(facts.frame_process_keys.len(), &mut retained)?;
++    logical_budget::<CatalogCpuFact>(facts.cpu_samples.len(), &mut retained)?;
++    logical_budget::<CounterSeriesDescriptor>(facts.counters.len(), &mut retained)?;
++    logical_budget::<ProcessKey>(facts.frame_process_keys.len(), &mut retained)?;
+     validate_threads(&facts.threads, &mut retained, check)?;
+     for (i, s) in facts.counters.iter().enumerate() {
+         checkpoint(i, check)?;
+@@ -315,7 +377,7 @@
+     }
+     let cap = &facts.capabilities;
+     if facts.duration_ns == 0 {
+-        return Ok(TrackTree {
++        let tree = TrackTree {
+             groups: vec![
+                 group(
+                     "cpu",
+@@ -342,7 +404,9 @@
+                     vec![],
+                 ),
+             ],
+-        });
++        };
++        tree.validate(check)?;
++        return Ok(tree);
+     }
+     let mut cpus = BTreeSet::new();
+     let mut scheduled: BTreeMap<i64, usize> = BTreeMap::new();
+@@ -571,6 +635,8 @@
+             result.push(i);
+         }
+     }
++    let mut output_bytes = std::mem::size_of::<Vec<usize>>();
++    capacity_budget::<usize>(result.capacity(), &mut output_bytes)?;
+     check()?;
+     Ok(result)
+ }
+--- a/rust/crates/arktrace-viewer/src/view_actions.rs
++++ b/rust/crates/arktrace-viewer/src/view_actions.rs
+@@ -1,6 +1,9 @@
+ //! Transactional pure sidebar/search actions. Returned intents are executed
+ //! by the session owner and native UI; this module never persists sidecars.
+-use crate::track_tree::{id_budget, retained_budget, sidebar_track, text_budget, validate_threads};
++use crate::track_tree::{
++    capacity_budget, id_budget, logical_budget, sidebar_track, string_capacity, text_budget,
++    thread_capacity, validate_threads,
++};
+ use crate::{
+     Check, DetailPreference, MAXIMUM_FAVORITE_TRACKS, MAXIMUM_TRACKS, SidebarTrack, TrackGroup,
+     TrackGroupKind, TrackTree, ViewIdentity, ViewerError, checkpoint, process_group_id,
+@@ -34,13 +37,41 @@
+     pub pending_selection_key: Option<EventKey>,
+ }
+ impl ViewState {
++    /// Count one owned state, including every nested spare capacity. The
++    /// session owner separately budgets input+output and algorithm scratch peak.
++    pub fn retained_bytes(&self, check: &mut Check<'_>) -> Result<usize, ViewerError> {
++        check()?;
++        let mut bytes = std::mem::size_of::<Self>();
++        self.heap_capacity(&mut bytes, check)?;
++        check()?;
++        Ok(bytes)
++    }
++    fn heap_capacity(&self, bytes: &mut usize, check: &mut Check<'_>) -> Result<(), ViewerError> {
++        self.tree.heap_capacity(bytes, check)?;
++        thread_capacity(&self.catalog_threads, bytes, check)?;
++        string_capacity(&self.process_filter_text, bytes)?;
++        capacity_budget::<String>(self.favorite_track_ids.capacity(), bytes)?;
++        for (i, id) in self.favorite_track_ids.iter().enumerate() {
++            checkpoint(i, check)?;
++            string_capacity(id, bytes)?;
++        }
++        capacity_budget::<TraceSearchResult>(self.search_results.capacity(), bytes)?;
++        for (i, result) in self.search_results.iter().enumerate() {
++            checkpoint(i, check)?;
++            string_capacity(&result.title, bytes)?;
++            if let Some(subtitle) = &result.subtitle {
++                string_capacity(subtitle, bytes)?;
++            }
++        }
++        Ok(())
++    }
+     pub fn validate(&self, check: &mut Check<'_>) -> Result<(), ViewerError> {
+         self.tree.validate(check)?;
+         if self.viewport_range.is_some_and(|r| r.is_instant()) {
+             return Err(ViewerError::InvalidViewport);
+         }
+         let mut bytes = std::mem::size_of::<Self>();
+-        retained_budget::<TrackGroup>(self.tree.groups.len(), &mut bytes)?;
++        logical_budget::<TrackGroup>(self.tree.groups.len(), &mut bytes)?;
+         validate_threads(&self.catalog_threads, &mut bytes, check)?;
+         // Count every retained string including the tree, not independent caps.
+         for (i, g) in self.tree.groups.iter().enumerate() {
+@@ -52,7 +83,7 @@
+                 if group_id(&t.descriptor.source, &self.catalog_threads) != g.id {
+                     return Err(ViewerError::InvalidEvidence);
+                 }
+-                retained_budget::<SidebarTrack>(1, &mut bytes)?;
++                logical_budget::<SidebarTrack>(1, &mut bytes)?;
+                 text_budget(&t.title, &mut bytes)?;
+             }
+         }
+@@ -62,8 +93,8 @@
+         {
+             return Err(ViewerError::InputBudgetExceeded);
+         }
+-        retained_budget::<String>(self.favorite_track_ids.len(), &mut bytes)?;
+-        retained_budget::<TraceSearchResult>(self.search_results.len(), &mut bytes)?;
++        logical_budget::<String>(self.favorite_track_ids.len(), &mut bytes)?;
++        logical_budget::<TraceSearchResult>(self.search_results.len(), &mut bytes)?;
+         for (i, id) in self.favorite_track_ids.iter().enumerate() {
+             checkpoint(i, check)?;
+             id_budget(id, &mut bytes)?;
+@@ -72,6 +103,7 @@
+             checkpoint(i, check)?;
+             validate_result(r, &mut bytes)?;
+         }
++        self.retained_bytes(check)?;
+         // Cursor validity is handled by each action: persisted/stale cursors
+         // cannot index a different result set and do not invalidate the tree.
+         check()
+@@ -95,6 +127,8 @@
+                 tracks.push(*t);
+             }
+         }
++        let mut bytes = std::mem::size_of::<Vec<&SidebarTrack>>();
++        capacity_budget::<&SidebarTrack>(tracks.capacity(), &mut bytes)?;
+         check()?;
+         Ok(tracks)
+     }
+@@ -184,7 +218,7 @@
+                 if ids.len() > MAXIMUM_STORED_FAVORITE_IDS {
+                     return Err(ViewerError::InputBudgetExceeded);
+                 }
+-                retained_budget::<String>(ids.len(), &mut bytes)?;
++                logical_budget::<String>(ids.len(), &mut bytes)?;
+                 for (i, id) in ids.iter().enumerate() {
+                     checkpoint(i, check)?;
+                     id_budget(id, &mut bytes)?;
+@@ -195,7 +229,7 @@
+                 if items.len() > MAXIMUM_VIEW_SEARCH_RESULTS {
+                     return Err(ViewerError::InputBudgetExceeded);
+                 }
+-                retained_budget::<TraceSearchResult>(items.len(), &mut bytes)?;
++                logical_budget::<TraceSearchResult>(items.len(), &mut bytes)?;
+                 for (i, r) in items.iter().enumerate() {
+                     checkpoint(i, check)?;
+                     validate_result(r, &mut bytes)?;
+@@ -230,6 +264,20 @@
+     pub applied: bool,
+     pub stale: bool,
+     pub intents: ViewIntents,
++}
++
++impl ViewReduction {
++    /// Entire published result: state, action flags, intents, and intent text.
++    pub fn retained_bytes(&self, check: &mut Check<'_>) -> Result<usize, ViewerError> {
++        check()?;
++        let mut bytes = std::mem::size_of::<Self>();
++        self.state.heap_capacity(&mut bytes, check)?;
++        if let Some(id) = &self.intents.scroll_group_id {
++            string_capacity(id, &mut bytes)?;
++        }
++        check()?;
++        Ok(bytes)
++    }
+ }
+ 
+ fn group_id(source: &TraceDensitySource, threads: &[TraceThread]) -> String {
+@@ -405,6 +453,11 @@
+     Ok(())
+ }
+ 
++/// Validates owned input state (including spare capacity) before cloning.
++/// Borrowed request payload is scan/length bounded; its spare capacity remains
++/// with the caller. Every published reduction includes the entire owned output.
++/// Temporary BTree/sort allocations and simultaneous input+output are host
++/// aggregate budget responsibilities; this cap does not claim allocator RSS.
+ /// Validates all retained/action input before cloning. Failure/cancellation
+ /// never partially mutates the caller's state or poisons the next request.
+ pub fn reduce_view_action(
+@@ -422,6 +475,8 @@
+     };
+     check()?;
+     if reduction.stale {
++        reduction.retained_bytes(check)?;
++        check()?;
+         return Ok(reduction);
+     }
+     let next = &mut reduction.state;
+@@ -580,6 +635,7 @@
+         }
+     }
+     next.validate(check)?;
++    reduction.retained_bytes(check)?;
+     check()?;
+     Ok(reduction)
+ }
+--- a/rust/crates/arktrace-viewer/src/navigation.rs
++++ b/rust/crates/arktrace-viewer/src/navigation.rs
+@@ -99,7 +99,7 @@
+     if let Some(focused) = focused {
+         crate::track_tree::id_budget(&focused.track_id, &mut retained)?;
+     }
+-    crate::track_tree::retained_budget::<NavigationLane>(lanes.len(), &mut retained)?;
++    crate::track_tree::logical_budget::<NavigationLane>(lanes.len(), &mut retained)?;
+     let mut count = 0;
+     for (i, lane) in lanes.iter().enumerate() {
+         checkpoint(i, check)?;
+@@ -108,7 +108,7 @@
+         if count > MAXIMUM_PRIMITIVES {
+             return Err(ViewerError::InputBudgetExceeded);
+         }
+-        crate::track_tree::retained_budget::<NavigationEvent>(lane.events.len(), &mut retained)?;
++        crate::track_tree::logical_budget::<NavigationEvent>(lane.events.len(), &mut retained)?;
+         for j in 0..lane.events.len() {
+             checkpoint(j, check)?;
+         }

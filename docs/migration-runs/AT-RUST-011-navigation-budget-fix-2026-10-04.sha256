@@ -1,0 +1,15 @@
+1fc150b5ffcbfd20cc8f85f4245c5ad81b0641de971fae4db015262b9760c086  docs/migration-runs/AT-RUST-011-navigation-budget-fix-2026-10-04.json
+229c8bceb122a82588f67b7cc397d17498fe1da6e12b297be617ff587fb7fec9  docs/migration-runs/AT-RUST-011-navigation-budget-fix-2026-10-04.md
+12917998147f009fd8fc5af8b4d2bb9be393f2260da247461001c7b7375ae761  rust/crates/arktrace-viewer/oracle/unicode_title_budget.patch
+482abd59baa65f38fa3dc022f09b9f301a4865a6a42e334bc0f0c96196b0021b  rust/crates/arktrace-viewer/src/navigation.rs
+e66ebf130118a827b9005dc4afcf9f3677265ecd49f040036af3812e7878b998  rust/crates/arktrace-viewer/src/track_tree.rs
+0eb53ab72497aa4b57a71322bcc5fc1a539d4d1a4837b5d04086200e67fa5382  rust/crates/arktrace-viewer/src/view_actions.rs
+c5275de5f6658bf03d943278119620db9bd6e5fa109d9f2d2e8933f8b2e5c5a5  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/clippy.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/fmt.log
+750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/licenses.log
+1aaac555e5f801e0352bd888efc6a3ed64aee7554f0472abdc9d691222668460  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/receipt-initial.json
+2b38003675462e6e392c80503ce335015cc20084736b577ec65c66fbe152c10d  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/receipt.json
+d3c9aba2be5ce3f765ed4f9856e957e5ce59814a7af914793c199797a0c8bf56  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/tests-initial.log.gz
+b0c0fe64c19870192f41fab850175cbcd7e80fb451c41d779b237a868e118fab  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/tests.log
+57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c  rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/workspace.log
+585865951eb44924cc241220602cc693fbb141503cc324c66fb05968a42a54be  rust/crates/arktrace-viewer/tests/navigation_retained_budget.rs

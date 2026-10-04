@@ -1,0 +1,67 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "fmt",
+      "--all",
+      "--check"
+    ],
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/fmt.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "clippy",
+      "-p",
+      "arktrace-viewer",
+      "--all-targets",
+      "--offline",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/clippy.log",
+    "sha256": "6bd5ff4b6212cbc317eee848ee0568182955fcbcc362444a3d6033a1ceb44bc3"
+  },
+  {
+    "name": "tests",
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "test",
+      "-p",
+      "arktrace-viewer",
+      "--offline"
+    ],
+    "exitCode": 101,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/tests.log",
+    "sha256": "8edb4ec889a5e29adef5e052402b247a88163100e5b17ae450e406e0e2833562"
+  },
+  {
+    "name": "workspace",
+    "command": [
+      "python3",
+      "scripts/verify_rust_workspace.py"
+    ],
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/workspace.log",
+    "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+  },
+  {
+    "name": "licenses",
+    "command": [
+      "sh",
+      "scripts/verify_licenses.sh"
+    ],
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/licenses.log",
+    "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+  }
+]

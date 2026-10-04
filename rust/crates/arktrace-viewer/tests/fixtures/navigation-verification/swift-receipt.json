@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "command": [
+    "sh",
+    "scripts/run-swiftpm.sh",
+    "test",
+    "--disable-sandbox",
+    "--config-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/configuration",
+    "--security-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/security",
+    "--filter",
+    "TraceDocumentControllerTests|TraceViewStateStoreTests|TimelineNavigationKeyTests|TimelineRenderingTests"
+  ],
+  "restricted": {
+    "exitCode": 1,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/navigation-verification/swift-regression-restricted.log",
+    "assertionFailures": 6,
+    "failedTestCases": 2,
+    "appSupportPassed": 33,
+    "renderingExecuted": 55,
+    "sha256": "5233e8da3c8cbaa5a4db82a01e6607d87a1bb63f2f1a5461449c2ae70992e53c"
+  },
+  "nativeGraphicalSession": {
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/navigation-verification/swift-regression-native.log",
+    "appSupportPassed": 33,
+    "renderingPassed": 55,
+    "warnings": 0,
+    "sha256": "71b92c20ab5e52361faf658e20c744cf20e8e37cd9ee15b849dde73a00ef8e22"
+  },
+  "permissionProcess": "require_escalated approved for same bounded regression group; no skips or baseline Swift changes",
+  "environment": {
+    "swift": "Apple Swift 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)",
+    "xcode": "27.0 27A266a",
+    "rust": "1.99.0 (b940084d7 2026-09-28)"
+  },
+  "initialManifestFailure": {
+    "exitCode": 1,
+    "reason": "sandbox-exec sandbox_apply Operation not permitted; rerun with documented SwiftPM --disable-sandbox and private configuration/security paths"
+  },
+  "initialWorkspaceVerifierFailure": {
+    "exitCode": 1,
+    "reason": "offline cache lacked cc 1.5.1",
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/navigation-verification/workspace-first-offline.log"
+  },
+  "dependencyCacheRecovery": {
+    "exitCode": 0,
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "metadata",
+      "--format-version",
+      "1"
+    ],
+    "mode": "require_escalated, --locked remains supplied by runner",
+    "downloaded": [
+      "cc 1.5.1",
+      "find-msvc-tools 0.1.14",
+      "pkg-config 0.3.34",
+      "fallible-iterator 0.3.0",
+      "fallible-streaming-iterator 0.1.9",
+      "rusqlite 0.40.2",
+      "libsqlite3-sys 0.38.2"
+    ]
+  }
+}

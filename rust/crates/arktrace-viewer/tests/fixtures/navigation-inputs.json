@@ -1,0 +1,1346 @@
+[
+  {
+    "name": "mixed-reused-identity-and-actions",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [
+        {
+          "key": 100,
+          "processKey": 1,
+          "tid": 8,
+          "pid": 42,
+          "name": "worker",
+          "processName": "Renderer",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 101,
+          "processKey": 1,
+          "tid": 7,
+          "pid": 42,
+          "name": "",
+          "processName": "Renderer",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 200,
+          "processKey": 2,
+          "tid": 7,
+          "pid": 42,
+          "name": "worker",
+          "processName": "Renderer",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 201,
+          "processKey": 2,
+          "tid": 7,
+          "pid": 42,
+          "name": null,
+          "processName": "Renderer",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 999,
+          "processKey": null,
+          "tid": 3,
+          "pid": null,
+          "name": null,
+          "processName": null,
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": true,
+      "cpuSamples": [
+        {
+          "cpu": 9,
+          "processKey": {
+            "ipid": 2
+          }
+        },
+        {
+          "cpu": 0,
+          "processKey": {
+            "ipid": 2
+          }
+        },
+        {
+          "cpu": 9,
+          "processKey": {
+            "ipid": 1
+          }
+        },
+        {
+          "cpu": 1,
+          "processKey": null
+        }
+      ],
+      "cpuTruncated": true,
+      "counters": [
+        {
+          "filterID": 22,
+          "name": "cycles",
+          "scope": "process",
+          "processKey": {
+            "ipid": 1
+          },
+          "unit": "ns"
+        },
+        {
+          "filterID": 3,
+          "name": "count",
+          "scope": "process",
+          "processKey": {
+            "ipid": 1
+          }
+        },
+        {
+          "filterID": 3,
+          "name": "ignored duplicate",
+          "scope": "process",
+          "processKey": {
+            "ipid": 1
+          }
+        },
+        {
+          "filterID": 8,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 0
+        },
+        {
+          "filterID": 1,
+          "name": "count",
+          "scope": "cpu"
+        },
+        {
+          "filterID": 0,
+          "name": "count",
+          "scope": "process"
+        },
+        {
+          "filterID": 4,
+          "name": "count",
+          "scope": "process",
+          "processKey": {
+            "ipid": 77
+          },
+          "processName": "",
+          "pid": 42
+        }
+      ],
+      "countersTruncated": true,
+      "frameProcessKeys": [
+        {
+          "ipid": 1
+        },
+        {
+          "ipid": 2
+        },
+        {
+          "ipid": 88
+        }
+      ]
+    },
+    "actions": [
+      {
+        "kind": "toggleTrackDepth",
+        "id": "named-slice:100"
+      },
+      {
+        "kind": "toggleTrack",
+        "id": "named-slice:100"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "named-slice:100"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "missing"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:200"
+      },
+      {
+        "kind": "moveFavorite",
+        "source": 2,
+        "destination": 0
+      },
+      {
+        "kind": "moveFavorite",
+        "source": 0,
+        "destination": 3
+      },
+      {
+        "kind": "moveFavorite",
+        "source": -1,
+        "destination": 1
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "missing"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "named-slice:100"
+      },
+      {
+        "kind": "setSearchResults",
+        "items": [
+          {
+            "kind": "process",
+            "title": "Renderer",
+            "processKey": {
+              "ipid": 2
+            }
+          },
+          {
+            "kind": "thread",
+            "title": "not in directory",
+            "threadKey": {
+              "itid": 888
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "work",
+            "threadKey": {
+              "itid": 100
+            },
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 9223372036854775806
+            },
+            "range": {
+              "startNs": 200,
+              "endNs": 200
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "unowned",
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 3
+            },
+            "range": {
+              "startNs": 950,
+              "endNs": 1000
+            }
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "kind": "selectSearchResult",
+        "index": -1
+      },
+      {
+        "kind": "activateSearchResult"
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": 0
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": 1
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": 1
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": 1
+      },
+      {
+        "kind": "activateSearchResult"
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": 1
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": 1
+      },
+      {
+        "kind": "stepSearchResult",
+        "delta": -3
+      },
+      {
+        "kind": "selectSearchResult",
+        "index": 50
+      },
+      {
+        "kind": "revealSliceAggregate",
+        "name": "aggregate",
+        "firstThreadKey": {
+          "itid": 999
+        },
+        "firstEventKey": {
+          "table": "callstack",
+          "rowID": 9223372036854775806
+        },
+        "firstRange": {
+          "startNs": 0,
+          "endNs": 50
+        }
+      },
+      {
+        "kind": "revealSearchResult",
+        "result": {
+          "kind": "process",
+          "title": "no owner"
+        }
+      },
+      {
+        "kind": "revealSearchResult",
+        "result": {
+          "kind": "thread",
+          "title": "no thread"
+        }
+      },
+      {
+        "kind": "revealRange",
+        "range": {
+          "startNs": 1000,
+          "endNs": 1000
+        }
+      },
+      {
+        "kind": "revealTrackGroup",
+        "id": "process:1"
+      },
+      {
+        "kind": "revealTrackGroup",
+        "id": "does not exist"
+      },
+      {
+        "kind": "setSearchResults",
+        "items": [
+          {
+            "kind": "process",
+            "title": "Renderer",
+            "processKey": {
+              "ipid": 2
+            }
+          },
+          {
+            "kind": "thread",
+            "title": "not in directory",
+            "threadKey": {
+              "itid": 888
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "work",
+            "threadKey": {
+              "itid": 100
+            },
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 9223372036854775806
+            },
+            "range": {
+              "startNs": 200,
+              "endNs": 200
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "unowned",
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 3
+            },
+            "range": {
+              "startNs": 950,
+              "endNs": 1000
+            }
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "kind": "selectSearchResult",
+        "index": 2
+      },
+      {
+        "kind": "setSearchResults",
+        "items": [
+          {
+            "kind": "process",
+            "title": "Renderer",
+            "processKey": {
+              "ipid": 2
+            }
+          },
+          {
+            "kind": "thread",
+            "title": "not in directory",
+            "threadKey": {
+              "itid": 888
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "work",
+            "threadKey": {
+              "itid": 100
+            },
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 9223372036854775806
+            },
+            "range": {
+              "startNs": 200,
+              "endNs": 200
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "unowned",
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 3
+            },
+            "range": {
+              "startNs": 950,
+              "endNs": 1000
+            }
+          }
+        ],
+        "truncated": false
+      },
+      {
+        "kind": "setSearchResults",
+        "items": [
+          {
+            "kind": "process",
+            "title": "Renderer",
+            "processKey": {
+              "ipid": 2
+            }
+          },
+          {
+            "kind": "thread",
+            "title": "not in directory",
+            "threadKey": {
+              "itid": 888
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "work",
+            "threadKey": {
+              "itid": 100
+            },
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 9223372036854775806
+            },
+            "range": {
+              "startNs": 200,
+              "endNs": 200
+            }
+          },
+          {
+            "kind": "slice",
+            "title": "unowned",
+            "eventKey": {
+              "table": "callstack",
+              "rowID": 3
+            },
+            "range": {
+              "startNs": 950,
+              "endNs": 1000
+            }
+          }
+        ],
+        "truncated": true
+      }
+    ],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "process-cpu-and-counter-caps",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [
+        {
+          "key": 1000,
+          "processKey": 0,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P0",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1001,
+          "processKey": 1,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P1",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1002,
+          "processKey": 2,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P2",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1003,
+          "processKey": 3,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P3",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1004,
+          "processKey": 4,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P4",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1005,
+          "processKey": 5,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P5",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1006,
+          "processKey": 6,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P6",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1007,
+          "processKey": 7,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P7",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1008,
+          "processKey": 8,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P8",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1009,
+          "processKey": 9,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P9",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1010,
+          "processKey": 10,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P10",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1011,
+          "processKey": 11,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P11",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": false,
+      "cpuSamples": [
+        {
+          "cpu": 0,
+          "processKey": null
+        },
+        {
+          "cpu": 1,
+          "processKey": null
+        },
+        {
+          "cpu": 2,
+          "processKey": null
+        },
+        {
+          "cpu": 3,
+          "processKey": null
+        },
+        {
+          "cpu": 4,
+          "processKey": null
+        },
+        {
+          "cpu": 5,
+          "processKey": null
+        },
+        {
+          "cpu": 6,
+          "processKey": null
+        },
+        {
+          "cpu": 7,
+          "processKey": null
+        },
+        {
+          "cpu": 8,
+          "processKey": null
+        },
+        {
+          "cpu": 9,
+          "processKey": null
+        },
+        {
+          "cpu": 10,
+          "processKey": null
+        },
+        {
+          "cpu": 11,
+          "processKey": null
+        },
+        {
+          "cpu": 12,
+          "processKey": null
+        },
+        {
+          "cpu": 13,
+          "processKey": null
+        },
+        {
+          "cpu": 14,
+          "processKey": null
+        },
+        {
+          "cpu": 15,
+          "processKey": null
+        },
+        {
+          "cpu": 16,
+          "processKey": null
+        },
+        {
+          "cpu": 17,
+          "processKey": null
+        },
+        {
+          "cpu": 18,
+          "processKey": null
+        },
+        {
+          "cpu": 19,
+          "processKey": null
+        }
+      ],
+      "cpuTruncated": false,
+      "counters": [
+        {
+          "filterID": 19,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 19
+        },
+        {
+          "filterID": 18,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 18
+        },
+        {
+          "filterID": 17,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 17
+        },
+        {
+          "filterID": 16,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 16
+        },
+        {
+          "filterID": 15,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 15
+        },
+        {
+          "filterID": 14,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 14
+        },
+        {
+          "filterID": 13,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 13
+        },
+        {
+          "filterID": 12,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 12
+        },
+        {
+          "filterID": 11,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 11
+        },
+        {
+          "filterID": 10,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 10
+        },
+        {
+          "filterID": 9,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 9
+        },
+        {
+          "filterID": 8,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 8
+        },
+        {
+          "filterID": 7,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 7
+        },
+        {
+          "filterID": 6,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 6
+        },
+        {
+          "filterID": 5,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 5
+        },
+        {
+          "filterID": 4,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 4
+        },
+        {
+          "filterID": 3,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 3
+        },
+        {
+          "filterID": 2,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 2
+        },
+        {
+          "filterID": 1,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 1
+        },
+        {
+          "filterID": 0,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 0
+        }
+      ],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1000"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1001"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1002"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1003"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1004"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1005"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1006"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1007"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1008"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1009"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1010"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1011"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "named-slice:1000"
+      },
+      {
+        "kind": "moveFavorite",
+        "source": 11,
+        "destination": 0
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "thread-state:1000"
+      },
+      {
+        "kind": "toggleFavorite",
+        "id": "named-slice:1000"
+      },
+      {
+        "kind": "toggleTrackDepth",
+        "id": "named-slice:1008"
+      },
+      {
+        "kind": "revealTrackGroup",
+        "id": "process:8"
+      },
+      {
+        "kind": "revealTrackGroup",
+        "id": "process:8"
+      }
+    ],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "unicode-visible-title-filter",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [
+        {
+          "key": 1,
+          "processKey": 1,
+          "tid": 1,
+          "pid": 1,
+          "name": "",
+          "processName": "Straße",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 2,
+          "processKey": 2,
+          "tid": 1,
+          "pid": 2,
+          "name": "worker",
+          "processName": "É",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 3,
+          "processKey": 3,
+          "tid": 1,
+          "pid": 3,
+          "name": "worker",
+          "processName": "İ",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 4,
+          "processKey": 4,
+          "tid": 1,
+          "pid": 4,
+          "name": "worker",
+          "processName": "Σςσ",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 5,
+          "processKey": 5,
+          "tid": 1,
+          "pid": 5,
+          "name": "worker",
+          "processName": "ﬃ",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 6,
+          "processKey": 6,
+          "tid": 1,
+          "pid": 6,
+          "name": "worker",
+          "processName": "👩‍💻",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "empty-positive-duration",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [
+      {
+        "kind": "revealSearchResult",
+        "result": {
+          "kind": "slice",
+          "title": "unowned"
+        }
+      }
+    ],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "empty-zero-duration",
+    "facts": {
+      "durationNs": 0,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "all-unsupported",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": false,
+        "threadStates": false,
+        "namedSlices": false,
+        "cpuCounters": false,
+        "processCounters": false
+      },
+      "threads": [],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [
+      {
+        "kind": "revealSearchResult",
+        "result": {
+          "kind": "thread",
+          "title": "unknown",
+          "threadKey": {
+            "itid": 88
+          }
+        }
+      }
+    ],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "missing-process-group-admission",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": false,
+        "threadStates": false,
+        "namedSlices": false,
+        "cpuCounters": false,
+        "processCounters": false
+      },
+      "threads": [
+        {
+          "key": 11,
+          "processKey": 5,
+          "tid": 3,
+          "pid": 99,
+          "name": null,
+          "processName": "owner",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [
+      {
+        "kind": "admitTrack",
+        "track": {
+          "title": "admitted",
+          "descriptor": {
+            "source": {
+              "namedSlice": {
+                "_0": {
+                  "itid": 11
+                }
+              }
+            },
+            "isCollapsed": false,
+            "showsNestedDepth": false
+          }
+        }
+      }
+    ],
+    "filters": [
+      "",
+      " \n\t",
+      "renderer",
+      "  Renderer  ",
+      "[42]",
+      "42",
+      "worker",
+      "CPUs",
+      "cpu COUNTERS",
+      "unattributed",
+      "StraSSE",
+      "é",
+      "é",
+      "e",
+      "s",
+      "İ",
+      "i",
+      "Σ",
+      "ffi",
+      "f",
+      "👩",
+      "👩‍💻",
+      "​Renderer​"
+    ]
+  },
+  {
+    "name": "large-int64-valid-padding",
+    "facts": {
+      "durationNs": 9223372036854775807,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "actions": [
+      {
+        "kind": "revealRange",
+        "range": {
+          "startNs": 9223372036854775797,
+          "endNs": 9223372036854775807
+        }
+      }
+    ],
+    "filters": []
+  }
+]

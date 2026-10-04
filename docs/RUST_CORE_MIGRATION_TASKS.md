@@ -652,6 +652,13 @@ SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
 SDK 绘制和 App 尚未接通；density fallback 与 actual frame depth 的既有规格差异
 保持明确未裁决。见[主线呈现记录](migration-runs/AT-RUST-011-2026-10-04-mainline-presentation.md)。
 
+导航纯模块已按最终审查清单导入 49 个新增路径，三个生产源使用容量修复版本，
+保留原始历史记录及既有 palette 导出。当前主线 382 Rust tests（98 Viewer）、4 项
+actual Swift canonical 与 88 项相关回归通过；四份新 oracle 输出逐字节相同。
+迁移 verifier 覆盖当前 Swift 完整源集合和输入/输出身份。host Unicode matcher、
+相邻事件查询执行、session aggregate 预算和 Engine/SDK/App 接线仍未完成，不能据此
+关闭 011 或 macOS 验收。见[主线导航记录](migration-runs/AT-RUST-011-2026-10-04-mainline-navigation.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：008、009、011。

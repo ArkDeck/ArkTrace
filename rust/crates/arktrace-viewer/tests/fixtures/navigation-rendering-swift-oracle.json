@@ -1,0 +1,734 @@
+[
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-event--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-event--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-event-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-event-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-event-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-track--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 40,
+        "table" : "thread_state"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "none-track--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : null,
+    "name" : "none-track-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "none-track-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 40,
+        "table" : "thread_state"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "none-track-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-event--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-event--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 1,
+        "table" : "frame_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-event-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-event-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-event-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 1,
+        "table" : "frame_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-track--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 1,
+        "table" : "frame_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-track--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-track-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "focused-track-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 1,
+        "table" : "frame_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "focused-track-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "selected-event--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 1,
+        "table" : "frame_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "selected-event--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "selected-event-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "selected-event-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "selected-event-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : null,
+    "name" : "selected-track--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : null,
+    "name" : "selected-track--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "selected-track-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "selected-track-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : null,
+    "name" : "selected-track-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "duplicate-key-hint-event--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "duplicate-key-hint-event--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "duplicate-key-hint-event-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 1,
+        "table" : "frame_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "duplicate-key-hint-event-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "duplicate-key-hint-event-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "duplicate-key-hint-track--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "duplicate-key-hint-track--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "duplicate-key-hint-track-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "duplicate-key-hint-track-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "duplicate-key-hint-track-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-event--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-event--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-event-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-event-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-event-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-track--3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 40,
+        "table" : "thread_state"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "unknown-key-track--1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : {
+      "key" : {
+        "rowID" : 999,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "unknown-key-track-0"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 80,
+        "table" : "callstack"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "unknown-key-track-1"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : true,
+    "focus" : {
+      "key" : {
+        "rowID" : 40,
+        "table" : "thread_state"
+      },
+      "trackID" : "cpu:2"
+    },
+    "name" : "unknown-key-track-3"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : null,
+    "name" : "empty-event"
+  },
+  {
+    "anchorNs" : null,
+    "changed" : false,
+    "focus" : null,
+    "name" : "empty-track"
+  },
+  {
+    "anchorNs" : 100,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-False-None-None"
+  },
+  {
+    "anchorNs" : 100,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-False-None-80"
+  },
+  {
+    "anchorNs" : 100,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-False-None-400"
+  },
+  {
+    "anchorNs" : 250,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-False-{'startNs': 200, 'endNs': 300}-None"
+  },
+  {
+    "anchorNs" : 250,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-False-{'startNs': 200, 'endNs': 300}-80"
+  },
+  {
+    "anchorNs" : 250,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-False-{'startNs': 200, 'endNs': 300}-400"
+  },
+  {
+    "anchorNs" : 100,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-True-None-None"
+  },
+  {
+    "anchorNs" : 800,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-True-None-80"
+  },
+  {
+    "anchorNs" : 100,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-True-None-400"
+  },
+  {
+    "anchorNs" : 250,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-True-{'startNs': 200, 'endNs': 300}-None"
+  },
+  {
+    "anchorNs" : 800,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-True-{'startNs': 200, 'endNs': 300}-80"
+  },
+  {
+    "anchorNs" : 250,
+    "changed" : null,
+    "focus" : {
+      "key" : {
+        "rowID" : 99,
+        "table" : "sched_slice"
+      },
+      "trackID" : "cpu:0"
+    },
+    "name" : "anchor-True-{'startNs': 200, 'endNs': 300}-400"
+  }
+]

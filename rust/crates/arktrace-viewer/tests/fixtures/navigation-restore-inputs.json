@@ -1,0 +1,769 @@
+[
+  {
+    "name": "restore-known-unknown-and-duplicate",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [
+        {
+          "key": 1000,
+          "processKey": 0,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P0",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1001,
+          "processKey": 1,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P1",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1002,
+          "processKey": 2,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P2",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1003,
+          "processKey": 3,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P3",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1004,
+          "processKey": 4,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P4",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1005,
+          "processKey": 5,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P5",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1006,
+          "processKey": 6,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P6",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1007,
+          "processKey": 7,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P7",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1008,
+          "processKey": 8,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P8",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1009,
+          "processKey": 9,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P9",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1010,
+          "processKey": 10,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P10",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1011,
+          "processKey": 11,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P11",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": false,
+      "cpuSamples": [
+        {
+          "cpu": 0,
+          "processKey": null
+        },
+        {
+          "cpu": 1,
+          "processKey": null
+        },
+        {
+          "cpu": 2,
+          "processKey": null
+        },
+        {
+          "cpu": 3,
+          "processKey": null
+        },
+        {
+          "cpu": 4,
+          "processKey": null
+        },
+        {
+          "cpu": 5,
+          "processKey": null
+        },
+        {
+          "cpu": 6,
+          "processKey": null
+        },
+        {
+          "cpu": 7,
+          "processKey": null
+        },
+        {
+          "cpu": 8,
+          "processKey": null
+        },
+        {
+          "cpu": 9,
+          "processKey": null
+        },
+        {
+          "cpu": 10,
+          "processKey": null
+        },
+        {
+          "cpu": 11,
+          "processKey": null
+        },
+        {
+          "cpu": 12,
+          "processKey": null
+        },
+        {
+          "cpu": 13,
+          "processKey": null
+        },
+        {
+          "cpu": 14,
+          "processKey": null
+        },
+        {
+          "cpu": 15,
+          "processKey": null
+        },
+        {
+          "cpu": 16,
+          "processKey": null
+        },
+        {
+          "cpu": 17,
+          "processKey": null
+        },
+        {
+          "cpu": 18,
+          "processKey": null
+        },
+        {
+          "cpu": 19,
+          "processKey": null
+        }
+      ],
+      "cpuTruncated": false,
+      "counters": [
+        {
+          "filterID": 19,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 19
+        },
+        {
+          "filterID": 18,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 18
+        },
+        {
+          "filterID": 17,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 17
+        },
+        {
+          "filterID": 16,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 16
+        },
+        {
+          "filterID": 15,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 15
+        },
+        {
+          "filterID": 14,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 14
+        },
+        {
+          "filterID": 13,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 13
+        },
+        {
+          "filterID": 12,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 12
+        },
+        {
+          "filterID": 11,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 11
+        },
+        {
+          "filterID": 10,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 10
+        },
+        {
+          "filterID": 9,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 9
+        },
+        {
+          "filterID": 8,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 8
+        },
+        {
+          "filterID": 7,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 7
+        },
+        {
+          "filterID": 6,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 6
+        },
+        {
+          "filterID": 5,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 5
+        },
+        {
+          "filterID": 4,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 4
+        },
+        {
+          "filterID": 3,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 3
+        },
+        {
+          "filterID": 2,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 2
+        },
+        {
+          "filterID": 1,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 1
+        },
+        {
+          "filterID": 0,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 0
+        }
+      ],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "ids": [
+      "unknown",
+      "thread-state:1008",
+      "cpu:0",
+      "thread-state:1008"
+    ]
+  },
+  {
+    "name": "restore-more-than-twelve",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [
+        {
+          "key": 1000,
+          "processKey": 0,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P0",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1001,
+          "processKey": 1,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P1",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1002,
+          "processKey": 2,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P2",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1003,
+          "processKey": 3,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P3",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1004,
+          "processKey": 4,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P4",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1005,
+          "processKey": 5,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P5",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1006,
+          "processKey": 6,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P6",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1007,
+          "processKey": 7,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P7",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1008,
+          "processKey": 8,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P8",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1009,
+          "processKey": 9,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P9",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1010,
+          "processKey": 10,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P10",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        },
+        {
+          "key": 1011,
+          "processKey": 11,
+          "tid": 7,
+          "pid": 7,
+          "name": "worker",
+          "processName": "P11",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": false,
+      "cpuSamples": [
+        {
+          "cpu": 0,
+          "processKey": null
+        },
+        {
+          "cpu": 1,
+          "processKey": null
+        },
+        {
+          "cpu": 2,
+          "processKey": null
+        },
+        {
+          "cpu": 3,
+          "processKey": null
+        },
+        {
+          "cpu": 4,
+          "processKey": null
+        },
+        {
+          "cpu": 5,
+          "processKey": null
+        },
+        {
+          "cpu": 6,
+          "processKey": null
+        },
+        {
+          "cpu": 7,
+          "processKey": null
+        },
+        {
+          "cpu": 8,
+          "processKey": null
+        },
+        {
+          "cpu": 9,
+          "processKey": null
+        },
+        {
+          "cpu": 10,
+          "processKey": null
+        },
+        {
+          "cpu": 11,
+          "processKey": null
+        },
+        {
+          "cpu": 12,
+          "processKey": null
+        },
+        {
+          "cpu": 13,
+          "processKey": null
+        },
+        {
+          "cpu": 14,
+          "processKey": null
+        },
+        {
+          "cpu": 15,
+          "processKey": null
+        },
+        {
+          "cpu": 16,
+          "processKey": null
+        },
+        {
+          "cpu": 17,
+          "processKey": null
+        },
+        {
+          "cpu": 18,
+          "processKey": null
+        },
+        {
+          "cpu": 19,
+          "processKey": null
+        }
+      ],
+      "cpuTruncated": false,
+      "counters": [
+        {
+          "filterID": 19,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 19
+        },
+        {
+          "filterID": 18,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 18
+        },
+        {
+          "filterID": 17,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 17
+        },
+        {
+          "filterID": 16,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 16
+        },
+        {
+          "filterID": 15,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 15
+        },
+        {
+          "filterID": 14,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 14
+        },
+        {
+          "filterID": 13,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 13
+        },
+        {
+          "filterID": 12,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 12
+        },
+        {
+          "filterID": 11,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 11
+        },
+        {
+          "filterID": 10,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 10
+        },
+        {
+          "filterID": 9,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 9
+        },
+        {
+          "filterID": 8,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 8
+        },
+        {
+          "filterID": 7,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 7
+        },
+        {
+          "filterID": 6,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 6
+        },
+        {
+          "filterID": 5,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 5
+        },
+        {
+          "filterID": 4,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 4
+        },
+        {
+          "filterID": 3,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 3
+        },
+        {
+          "filterID": 2,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 2
+        },
+        {
+          "filterID": 1,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 1
+        },
+        {
+          "filterID": 0,
+          "name": "count",
+          "scope": "cpu",
+          "cpu": 0
+        }
+      ],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "ids": [
+      "thread-state:1000",
+      "thread-state:1001",
+      "thread-state:1002",
+      "thread-state:1003",
+      "thread-state:1004",
+      "thread-state:1005",
+      "thread-state:1006",
+      "thread-state:1007",
+      "thread-state:1008",
+      "thread-state:1009",
+      "thread-state:1010",
+      "thread-state:1011",
+      "cpu:0"
+    ]
+  },
+  {
+    "name": "restore-directory-removed-identity",
+    "facts": {
+      "durationNs": 1000,
+      "capabilities": {
+        "cpuScheduling": true,
+        "threadStates": true,
+        "namedSlices": true,
+        "cpuCounters": true,
+        "processCounters": true
+      },
+      "threads": [
+        {
+          "key": 1001,
+          "processKey": 1,
+          "tid": 7,
+          "pid": 7,
+          "name": "renamed",
+          "processName": "reused",
+          "startNs": null,
+          "endNs": null,
+          "isMainThread": null
+        }
+      ],
+      "threadsTruncated": false,
+      "cpuSamples": [],
+      "cpuTruncated": false,
+      "counters": [],
+      "countersTruncated": false,
+      "frameProcessKeys": []
+    },
+    "ids": [
+      "thread-state:1000",
+      "thread-state:1001"
+    ]
+  }
+]

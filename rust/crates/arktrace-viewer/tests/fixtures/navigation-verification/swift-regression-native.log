@@ -1,0 +1,263 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 5]
+[3 / 4] ArkTraceAnalysisTests-product
+[4 / 8] ArkTraceAppSupport
+[5 / 9] ArkTraceAppSupport
+[10 / 14] ArkTraceAppSupport
+[13 / 14] ArkTraceAppSupportTests-product
+[16 / 18] ArkTraceAppSupportTests-product
+[25 / 27] ArkTraceAppSupportTests-product
+[32 / 33] ArkTraceAppSupportTests-product
+[34 / 37] ArkTraceCLI
+[38 / 40] ArkTraceCLITests-product
+[40 / 41] ArkTraceCLITests-product
+[41 / 43] ArkTraceIntegrationTests-product
+[44 / 45] ArkTraceIntegrationTests-product
+[46 / 46] ArkTraceIntegrationTests-product
+Build complete! (16.69秒)
+Test Suite 'Selected tests' started at 2026-10-04 10:05:55.550.
+Test Suite 'ArkTraceStoreTests.xctest' started at 2026-10-04 10:05:55.554.
+Test Suite 'ArkTraceStoreTests.xctest' passed at 2026-10-04 10:05:55.554.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:55.554.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.004) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:55.748.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 10:05:55.749.
+Test Suite 'TimelineNavigationKeyTests' started at 2026-10-04 10:05:55.749.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testBracketKeysAliasZoomToSelection]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testBracketKeysAliasZoomToSelection]' passed (0.048 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testCommandModifiedLettersAreNotTimelineNavigation]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testCommandModifiedLettersAreNotTimelineNavigation]' passed (0.330 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPlusAndMinusKeepTheirExistingAnchor]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPlusAndMinusKeepTheirExistingAnchor]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerAnchorIsIgnoredWhenThePointerIsAway]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerAnchorIsIgnoredWhenThePointerIsAway]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerLeavingTheTimelineDropsTheAnchor]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerLeavingTheTimelineDropsTheAnchor]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerZoomIsRefusedWhenAlreadyAtTheBound]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerZoomIsRefusedWhenAlreadyAtTheBound]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testTheFocusIndicatorFollowsKeyboardUseRatherThanFocus]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testTheFocusIndicatorFollowsKeyboardUseRatherThanFocus]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testWasdKeysProduceBoundedZoomAndPanIntents]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testWasdKeysProduceBoundedZoomAndPanIntents]' passed (0.000 seconds).
+Test Suite 'TimelineNavigationKeyTests' passed at 2026-10-04 10:05:56.133.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.381 (0.383) seconds
+Test Suite 'TimelineRenderingTests' started at 2026-10-04 10:05:56.133.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAbsentDepthCollapsesToASingleBandWithoutGaps]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAbsentDepthCollapsesToASingleBandWithoutGaps]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAccessibilityActionsExposeOnlyCommandsThatCanChangeState]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAccessibilityActionsExposeOnlyCommandsThatCanChangeState]' passed (0.002 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]' passed (0.080 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAStripRedrawDrawsOnlyTheLabelsInsideIt]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAStripRedrawDrawsOnlyTheLabelsInsideIt]' passed (0.006 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticCounterLODReusesBoundedDensityCandidate]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticCounterLODReusesBoundedDensityCandidate]' passed (0.005 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCounterDetailUsesPositiveAndOpenEndedDurations]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCounterDetailUsesPositiveAndOpenEndedDurations]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCPUSliceLabelFallsBackThroughProcessThreadAndTID]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCPUSliceLabelFallsBackThroughProcessThreadAndTID]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDeepStackKeepsFillBatchesBoundedByThePalette]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDeepStackKeepsFillBatchesBoundedByThePalette]' passed (0.452 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsAreColoredPerTrack]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsAreColoredPerTrack]' passed (0.002 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsBorrowTheDominantEventsFill]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsBorrowTheDominantEventsFill]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityIntensityChangesHeightAndNotColor]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityIntensityChangesHeightAndNotColor]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityPrefetchChunksBeyondTheEventBatchQueryCap]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityPrefetchChunksBeyondTheEventBatchQueryCap]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDepthBeyondReservedRowsClampsInsideTheTrack]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDepthBeyondReservedRowsClampsInsideTheTrack]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailBudgetContract]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailBudgetContract]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailRenderingUsesClosedPaletteBucketsAndStableSnapshotCache]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailRenderingUsesClosedPaletteBucketsAndStableSnapshotCache]' passed (0.029 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testEventFillsFollowIdentityAcrossTracks]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testEventFillsFollowIdentityAcrossTracks]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailRequestSkipsTheDensityEstimateEntirely]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailRequestSkipsTheDensityEstimateEntirely]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testFocusedNamedSliceIsReservedBeyondOrdinaryDetailPrefix]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testFocusedNamedSliceIsReservedBeyondOrdinaryDetailPrefix]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testGeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testGeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey]' passed (0.002 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedSwiftUIControlsHaveNonOverlappingMinimumHitFrames]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedSwiftUIControlsHaveNonOverlappingMinimumHitFrames]' passed (0.340 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedTimelineRestoresRealWindowFirstResponderAndTabOrder]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedTimelineRestoresRealWindowFirstResponderAndTabOrder]' passed (0.287 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testInstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testInstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLabelLayoutIsSharedByNameAndSurvivesTheFrame]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLabelLayoutIsSharedByNameAndSurvivesTheFrame]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderBuildsDepthRowsAndFlatteningReturnsToOneBand]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderBuildsDepthRowsAndFlatteningReturnsToOneBand]' passed (0.040 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderQueriesOnlyVerticallyVisibleTracksWithOverscan]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderQueriesOnlyVerticallyVisibleTracksWithOverscan]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testNestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testNestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testOverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testOverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanAndCursorAnchoredZoomAreOverflowSafe]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanAndCursorAnchoredZoomAreOverflowSafe]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanDeltaSaturatesAndRejectsNonFinitePointDeltas]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanDeltaSaturatesAndRejectsNonFinitePointDeltas]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitiveBudgetIsGlobalAcrossTracks]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitiveBudgetIsGlobalAcrossTracks]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]' passed (0.009 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testResetLayoutCachePreventsCrossTraceDepthReuse]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testResetLayoutCachePreventsCrossTraceDepthReuse]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testRowsCrossingABandBoundaryAreDrawnFromBothSides]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testRowsCrossingABandBoundaryAreDrawnFromBothSides]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testScrollStripDrawsFarFewerFillsThanTheWholeDocument]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testScrollStripDrawsFarFewerFillsThanTheWholeDocument]' passed (0.019 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSingleDepthTrackGeometryIsUnchanged]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSingleDepthTrackGeometryIsUnchanged]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderCachesOnlyExactDensityWithinTheSameTrace]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderCachesOnlyExactDensityWithinTheSameTrace]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderReportsDensityBatchTrackAndTotalMetrics]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderReportsDensityBatchTrackAndTotalMetrics]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testStaleGenerationCompletionIsDiscarded]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testStaleGenerationCompletionIsDiscarded]' passed (0.051 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheHoverTrackingAreaIsBuiltOnceAndFollowsTheVisibleRect]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheHoverTrackingAreaIsBuiltOnceAndFollowsTheVisibleRect]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheViewPaintsEveryPixelItClaimsToOwn]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheViewPaintsEveryPixelItClaimsToOwn]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testViewportRejectsNonFiniteNanosecondsPerPoint]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testViewportRejectsNonFiniteNanosecondsPerPoint]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testZoomedOutLoaderUsesBoundedNonSelectableDensity]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testZoomedOutLoaderUsesBoundedNonSelectableDensity]' passed (0.003 seconds).
+Test Suite 'TimelineRenderingTests' passed at 2026-10-04 10:05:57.502.
+	 Executed 47 tests, with 0 failures (0 unexpected) in 1.362 (1.370) seconds
+Test Suite 'ArkTraceRenderingTests.xctest' passed at 2026-10-04 10:05:57.502.
+	 Executed 55 tests, with 0 failures (0 unexpected) in 1.743 (1.753) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:57.503.
+	 Executed 55 tests, with 0 failures (0 unexpected) in 1.743 (1.755) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:57.717.
+Test Suite 'ArkTraceParserTests.xctest' started at 2026-10-04 10:05:57.719.
+Test Suite 'ArkTraceParserTests.xctest' passed at 2026-10-04 10:05:57.719.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:57.719.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:57.925.
+Test Suite 'ArkTraceIntegrationTests.xctest' started at 2026-10-04 10:05:57.926.
+Test Suite 'ArkTraceIntegrationTests.xctest' passed at 2026-10-04 10:05:57.926.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:57.926.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:58.148.
+Test Suite 'ArkTraceCoreTests.xctest' started at 2026-10-04 10:05:58.150.
+Test Suite 'ArkTraceCoreTests.xctest' passed at 2026-10-04 10:05:58.150.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:58.150.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:58.424.
+Test Suite 'ArkTraceCaptureTests.xctest' started at 2026-10-04 10:05:58.426.
+Test Suite 'ArkTraceCaptureTests.xctest' passed at 2026-10-04 10:05:58.426.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:58.426.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:58.612.
+Test Suite 'ArkTraceCLITests.xctest' started at 2026-10-04 10:05:58.613.
+Test Suite 'ArkTraceCLITests.xctest' passed at 2026-10-04 10:05:58.613.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:58.613.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:58.825.
+Test Suite 'ArkTraceAppSupportTests.xctest' started at 2026-10-04 10:05:58.826.
+Test Suite 'TraceDocumentControllerTests' started at 2026-10-04 10:05:58.826.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAccessibilityAnnouncementsAreCoalescedAtMeaningfulBoundaries]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAccessibilityAnnouncementsAreCoalescedAtMeaningfulBoundaries]' passed (0.021 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testADensityBandPressSelectsTheRealEventUnderIt]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testADensityBandPressSelectsTheRealEventUnderIt]' passed (0.009 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAnnotationLifecycleAndSessionReplacement]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAnnotationLifecycleAndSessionReplacement]' passed (0.018 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCacheMaintenanceRunsAfterOpenRatherThanGatingIt]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCacheMaintenanceRunsAfterOpenRatherThanGatingIt]' passed (0.010 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCloseCleanupFailureRemainsVisibleAndRetryable]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCloseCleanupFailureRemainsVisibleAndRetryable]' passed (0.006 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testControllerRemovesAndRefreshesRecentDocuments]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testControllerRemovesAndRefreshesRecentDocuments]' passed (0.011 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testDeletedRecentStaysListedAsMissingUntilTheUserRemovesIt]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testDeletedRecentStaysListedAsMissingUntilTheUserRemovesIt]' passed (0.026 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testFocusRequestsAreDistinctAndRepeatable]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testFocusRequestsAreDistinctAndRepeatable]' passed (0.001 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testInspectorLayoutAndCollapseFocusPolicy]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testInspectorLayoutAndCollapseFocusPolicy]' passed (0.000 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testNewOpenGenerationPreventsOldResultFromReplacingDocument]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testNewOpenGenerationPreventsOldResultFromReplacingDocument]' passed (0.014 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOnlyTheBusiestProcessesStartExpanded]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOnlyTheBusiestProcessesStartExpanded]' passed (0.009 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOpeningATraceHandsTheKeyboardToTheTimeline]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOpeningATraceHandsTheKeyboardToTheTimeline]' passed (0.016 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testPinningGathersLanesFromDifferentProcessesAndKeepsOrder]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testPinningGathersLanesFromDifferentProcessesAndKeepsOrder]' passed (0.013 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testProcessFilterMatchesNameAndPIDAndNothingElse]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testProcessFilterMatchesNameAndPIDAndNothingElse]' passed (0.018 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRapidViewportBurstCoalescesIntoOneDensityReload]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRapidViewportBurstCoalescesIntoOneDensityReload]' passed (0.079 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRecentBookmarksAreBoundedDeduplicatedAndResolvable]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRecentBookmarksAreBoundedDeduplicatedAndResolvable]' passed (0.018 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testReplacementImmediatelyHidesOldGenerationWhileNewOpenWaits]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testReplacementImmediatelyHidesOldGenerationWhileNewOpenWaits]' passed (0.018 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRevealingATrackGroupShowsItsLanesAndScrollsToThem]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRevealingATrackGroupShowsItsLanesAndScrollsToThem]' passed (0.027 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchResultSteppingRevealsWithoutStealingKeyboardFocus]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchResultSteppingRevealsWithoutStealingKeyboardFocus]' passed (0.006 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem]' passed (0.015 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSliceAggregateRowRevealsItsFirstOccurrence]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSliceAggregateRowRevealsItsFirstOccurrence]' passed (0.007 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTheLoadingFractionIsPublishedAndResetPerDocument]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTheLoadingFractionIsPublishedAndResetPerDocument]' passed (0.009 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTracksGroupByProcessWithCPULanesLeftCrossProcess]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTracksGroupByProcessWithCPULanesLeftCrossProcess]' passed (0.007 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTypedErrorPresentationDoesNotExposeUnboundedDetails]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTypedErrorPresentationDoesNotExposeUnboundedDetails]' passed (0.001 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent]' passed (0.006 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testZeroDurationTraceBecomesReadyEmptyState]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testZeroDurationTraceBecomesReadyEmptyState]' passed (0.005 seconds).
+Test Suite 'TraceDocumentControllerTests' passed at 2026-10-04 10:05:59.199.
+	 Executed 26 tests, with 0 failures (0 unexpected) in 0.369 (0.373) seconds
+Test Suite 'TraceViewStateStoreTests' started at 2026-10-04 10:05:59.199.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testEmptyAnnotationsRemoveTheSidecar]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testEmptyAnnotationsRemoveTheSidecar]' passed (0.004 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testFavoritesRoundTripInOrder]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testFavoritesRoundTripInOrder]' passed (0.002 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testRoundTripKeepsFlagsAndPersistentMarksOnly]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testRoundTripKeepsFlagsAndPersistentMarksOnly]' passed (0.002 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarContainsNoUserPath]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarContainsNoUserPath]' passed (0.002 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarLivesInsideTheCacheEntryDirectory]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarLivesInsideTheCacheEntryDirectory]' passed (0.001 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarWithoutFavoritesStillDecodes]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarWithoutFavoritesStillDecodes]' passed (0.001 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testUnreadableOrMismatchedSidecarYieldsNoAnnotations]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testUnreadableOrMismatchedSidecarYieldsNoAnnotations]' passed (0.002 seconds).
+Test Suite 'TraceViewStateStoreTests' passed at 2026-10-04 10:05:59.214.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.014 (0.015) seconds
+Test Suite 'ArkTraceAppSupportTests.xctest' passed at 2026-10-04 10:05:59.214.
+	 Executed 33 tests, with 0 failures (0 unexpected) in 0.383 (0.388) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:59.214.
+	 Executed 33 tests, with 0 failures (0 unexpected) in 0.383 (0.389) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:05:59.380.
+Test Suite 'ArkTraceAnalysisTests.xctest' started at 2026-10-04 10:05:59.381.
+Test Suite 'ArkTraceAnalysisTests.xctest' passed at 2026-10-04 10:05:59.381.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:05:59.381.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds

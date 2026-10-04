@@ -7,9 +7,12 @@ mod geometry;
 mod hot_snapshot;
 mod interaction;
 mod loader;
+mod navigation;
 mod plan;
 mod snapshot;
+mod track_tree;
 mod types;
+mod view_actions;
 mod wire_records;
 
 pub use detail::*;
@@ -17,9 +20,12 @@ pub use geometry::*;
 pub use hot_snapshot::*;
 pub use interaction::*;
 pub use loader::*;
+pub use navigation::*;
 pub use plan::*;
 pub use snapshot::*;
+pub use track_tree::*;
 pub use types::*;
+pub use view_actions::*;
 pub use wire_records::*;
 
 use arktrace_contract::{ContractError, DataQuality};

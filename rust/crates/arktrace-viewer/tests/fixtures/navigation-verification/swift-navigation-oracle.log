@@ -1,0 +1,86 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-oracle-source
+Building for debugging...
+[Computing dependencies]
+[2 / 5] ArkTraceAppSupportTests-product
+[4 / 7] ArkTraceAppSupportTests-product
+[10 / 12] ArkTraceAppSupportTests-product
+[12 / 12] ArkTraceAppSupportTests-product
+Build complete! (3.59秒)
+Test Suite 'Selected tests' started at 2026-10-04 10:23:21.191.
+Test Suite 'ArkTraceStoreTests.xctest' started at 2026-10-04 10:23:21.192.
+Test Suite 'ArkTraceStoreTests.xctest' passed at 2026-10-04 10:23:21.192.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:21.192.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:21.332.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 10:23:21.333.
+Test Suite 'ArkTraceRenderingTests.xctest' passed at 2026-10-04 10:23:21.334.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:21.334.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:21.510.
+Test Suite 'ArkTraceParserTests.xctest' started at 2026-10-04 10:23:21.515.
+Test Suite 'ArkTraceParserTests.xctest' passed at 2026-10-04 10:23:21.515.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:21.515.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.005) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:21.648.
+Test Suite 'ArkTraceIntegrationTests.xctest' started at 2026-10-04 10:23:21.649.
+Test Suite 'ArkTraceIntegrationTests.xctest' passed at 2026-10-04 10:23:21.649.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:21.649.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:21.773.
+Test Suite 'ArkTraceCoreTests.xctest' started at 2026-10-04 10:23:21.774.
+Test Suite 'ArkTraceCoreTests.xctest' passed at 2026-10-04 10:23:21.774.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:21.774.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:21.891.
+Test Suite 'ArkTraceCaptureTests.xctest' started at 2026-10-04 10:23:21.892.
+Test Suite 'ArkTraceCaptureTests.xctest' passed at 2026-10-04 10:23:21.892.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:21.892.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:22.012.
+Test Suite 'ArkTraceCLITests.xctest' started at 2026-10-04 10:23:22.013.
+Test Suite 'ArkTraceCLITests.xctest' passed at 2026-10-04 10:23:22.013.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:22.013.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:22.105.
+Test Suite 'ArkTraceAppSupportTests.xctest' started at 2026-10-04 10:23:22.106.
+Test Suite 'NavigationCanonicalOracleTests' started at 2026-10-04 10:23:22.106.
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalDisplayedNavigation]' started.
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalDisplayedNavigation]' passed (0.024 seconds).
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalFavoriteRestore]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-test-fixtures/EB72BF1E-619F-41C3-99F1-E19F39E1FA7B/synthetic.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-test-fixtures/EB72BF1E-619F-41C3-99F1-E19F39E1FA7B/synthetic.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-test-fixtures/9BCA25BA-E34C-4F57-8D8B-ED94BDC78EA5/synthetic.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-test-fixtures/9BCA25BA-E34C-4F57-8D8B-ED94BDC78EA5/synthetic.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-test-fixtures/7557B8AD-033D-4BC0-9009-4000E2F18748/synthetic.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-test-fixtures/7557B8AD-033D-4BC0-9009-4000E2F18748/synthetic.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalFavoriteRestore]' passed (0.095 seconds).
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalTrackTreeAndActions]' started.
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalTrackTreeAndActions]' passed (0.052 seconds).
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalTrimmingScalars]' started.
+Test Case '-[ArkTraceAppSupportTests.NavigationCanonicalOracleTests testCanonicalTrimmingScalars]' passed (0.315 seconds).
+Test Suite 'NavigationCanonicalOracleTests' passed at 2026-10-04 10:23:22.594.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.487 (0.488) seconds
+Test Suite 'ArkTraceAppSupportTests.xctest' passed at 2026-10-04 10:23:22.594.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.487 (0.488) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:22.594.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.487 (0.489) seconds
+Test Suite 'Selected tests' started at 2026-10-04 10:23:22.721.
+Test Suite 'ArkTraceAnalysisTests.xctest' started at 2026-10-04 10:23:22.722.
+Test Suite 'ArkTraceAnalysisTests.xctest' passed at 2026-10-04 10:23:22.722.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 10:23:22.722.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds

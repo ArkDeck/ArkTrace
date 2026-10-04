@@ -1,0 +1,613 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004
+Building for debugging...
+[Computing dependencies]
+[Pre-planning 1 / 938]
+[Planning 938 / 938]
+[Planning deferred tasks]
+[Constructing 1186 / 2012]
+[49 / 438] ArkTraceStore
+[142 / 438] ArkTraceCLITests-product
+[196 / 438] ArkTrace_ArkTraceCLITests
+[197 / 438] ArkTrace_ArkTraceCLIResourceFixtures
+[202 / 438] ArkTrace_ArkTraceCLITests
+[202 / 438]
+[206 / 441] ArkTraceSignalShim
+[212 / 454]
+[213 / 454]
+[215 / 454]
+[224 / 493]
+[227 / 505]
+[229 / 505]
+[231 / 505]
+[234 / 505]
+[237 / 505]
+[238 / 505]
+[240 / 505] ArkTraceSignalShim
+[241 / 505]
+[244 / 505]
+[245 / 505]
+[246 / 505]
+[247 / 505]
+[248 / 505]
+[250 / 505]
+[251 / 505]
+[254 / 505]
+[255 / 505]
+[256 / 505]
+[257 / 505]
+[263 / 505]
+[267 / 505] ArkTraceCore
+[267 / 505] ArkTraceCapture
+[271 / 505] ArkTraceCapture
+[287 / 505] ArkTraceStore
+[288 / 505] ArkTraceCore
+[290 / 505] ArkTraceCore
+[290 / 505] ArkTraceCapture
+[293 / 506] ArkTraceCore
+[298 / 515]
+[300 / 517] ArkTraceCLIResourceFixtures
+[306 / 517] ArkTraceStore
+[308 / 527] ArkTraceAnalysis
+[309 / 563]
+[310 / 563]
+[325 / 563]
+[326 / 563]
+[327 / 563]
+[328 / 563]
+[329 / 563]
+[331 / 563]
+[333 / 563]
+[335 / 563]
+[337 / 563]
+[339 / 563] ArkTraceAnalysis
+[341 / 563] ArkTraceAnalysis
+[347 / 563] ArkTraceStore
+[349 / 563] ArkTraceStore-product
+[351 / 563] ArkTraceRuntime
+[352 / 563] ArkTraceRuntime
+[354 / 563]
+[355 / 563]
+[355 / 563] ArkTraceParserTests-product
+[357 / 563] ArkTraceCore
+[360 / 563] ArkTraceCapture
+[362 / 563] ArkTraceAnalysis
+[364 / 563]
+[365 / 563] ArkTraceAnalysis
+[366 / 563] ArkTraceAnalysis
+[367 / 563] ArkTraceAnalysisTests-product
+[368 / 563] ArkTraceAnalysisTests-product
+[373 / 564]
+[377 / 565] ArkTraceCapture
+[379 / 569] ArkTraceRuntime
+[379 / 569] ArkTraceCoreTests-product
+[381 / 583]
+[383 / 583] ArkTraceRuntime
+[384 / 583]
+[391 / 583]
+[391 / 583] ArkTraceRuntime
+[393 / 583] ArkTraceRuntime
+[398 / 583] ArkTraceRendering
+[398 / 583]
+[406 / 583] ArkTraceRendering
+[408 / 583] ArkTraceCoreTests-product
+[409 / 583] ArkTraceAnalysis
+[417 / 583] ArkTraceParser
+[418 / 583] ArkTraceParser
+[420 / 583] ArkTraceCoreTests-product
+[422 / 583] ArkTraceCoreTests-product
+[423 / 583] ArkTraceCoreTests-product
+[424 / 583] ArkTraceCaptureTests-product
+[430 / 583] ArkTraceCapture-product
+[433 / 584]
+[438 / 586] ArkTraceAnalysis
+[441 / 587]
+[441 / 588] ArkTraceCaptureTests-product
+[442 / 591] ArkTraceCLI
+[444 / 601]
+[445 / 601] ArkTraceCaptureTests-product
+[447 / 605] ArkTraceCLI
+[447 / 605] ArkTraceAppSupport
+[449 / 614] ArkTraceCoreTests-product
+[455 / 614] ArkTraceParserTests-product
+[456 / 614] ArkTraceParserTests-product
+[457 / 614] ArkTraceParserTests-product
+[463 / 614] ArkTraceCLI
+[464 / 614] ArkTraceCLI
+[469 / 614] ArkTraceCLI
+[472 / 614] ArkTraceCLI
+[473 / 614] ArkTraceCaptureTests-product
+[475 / 614] ArkTraceCLI
+[482 / 614] ArkTraceCLI-product
+[484 / 614] ArkTraceCLI
+[485 / 614] ArkTraceAppSupport
+[488 / 614] ArkTraceRendering
+[489 / 614] ArkTraceRendering
+[490 / 614] ArkTraceIntegrationTests-product
+[493 / 614] ArkTraceAppSupport
+[494 / 614] ArkTraceAppSupport
+[500 / 614] ArkTraceCoreTests-product
+[508 / 615] ArkTraceRenderingTests-product
+[513 / 616] ArkTraceCoreTests-product
+[516 / 616] ArkTraceCaptureTests-product
+[518 / 616] ArkTraceAnalysis-product
+[521 / 617] arktrace-product
+[523 / 619] arktrace-product
+[524 / 619] ArkTraceRenderingTests-product
+[527 / 628] ArkTraceRenderingTests-product
+[527 / 628] ArkTraceAnalysisTests-product
+[530 / 633] ArkTraceRenderingTests-product
+[531 / 633] ArkTraceRenderingTests-product
+[532 / 633] ArkTraceRenderingTests-product
+[543 / 633] ArkTraceRenderingTests-product
+[544 / 633] ArkTraceRuntime
+[546 / 633] ArkTraceRuntime
+[550 / 633] ArkTraceAnalysisTests-product
+[551 / 633] ArkTraceAnalysisTests-product
+[553 / 633] ArkTraceAnalysisTests-product
+[553 / 633] ArkTraceParserTests-product
+[556 / 633] ArkTraceParserTests-product
+[558 / 633] ArkTraceAnalysisTests-product
+[558 / 633] ArkTraceCLI
+[560 / 633] ArkTraceCLI
+[569 / 635] ArkTraceCLITests-product
+[569 / 635] ArkTraceCLI-product
+[570 / 635] ArkTraceAnalysisTests-product
+[571 / 635] arktrace-product
+[572 / 635] ArkTraceStoreTests-product
+[575 / 638] ArkTraceCLITests-product
+[578 / 647] ArkTraceCLITests-product
+[579 / 647] ArkTraceCLITests-product
+[580 / 647] ArkTraceCLITests-product
+[582 / 647] ArkTraceCLITests-product
+[587 / 647] ArkTraceCLITests-product
+[589 / 647] ArkTraceCLITests-product
+[590 / 647] ArkTraceCLITests-product
+[597 / 647] ArkTraceCLITests-product
+[603 / 648] ArkTraceIntegrationTests-product
+[605 / 649]
+[607 / 649] ArkTraceRenderingTests-product
+[609 / 649] ArkTraceIntegrationTests-product
+[613 / 658] ArkTraceIntegrationTests-product
+[614 / 658] ArkTraceIntegrationTests-product
+[615 / 667] ArkTraceAppSupportTests-product
+[616 / 667] ArkTraceIntegrationTests-product
+[617 / 667] ArkTraceIntegrationTests-product
+[618 / 667] ArkTraceIntegrationTests-product
+[620 / 667] ArkTraceIntegrationTests-product
+[626 / 667] ArkTraceAppSupportTests-product
+[627 / 667] ArkTraceIntegrationTests-product
+[629 / 667] ArkTraceIntegrationTests-product
+[630 / 667] ArkTraceIntegrationTests-product
+[632 / 667] ArkTraceAppSupportTests-product
+[637 / 667] ArkTraceIntegrationTests-product
+[639 / 667] ArkTraceAppSupportTests-product
+[639 / 667] ArkTraceCLITests-product
+[643 / 667] ArkTraceCLITests-product
+[645 / 667] ArkTraceAppSupportTests-product
+[646 / 667] ArkTraceAnalysisTests-product
+[647 / 667] ArkTraceAnalysisTests-product
+[649 / 667] ArkTraceAppSupportTests-product
+[649 / 667] ArkTraceStoreTests-product
+[651 / 667] ArkTraceAppSupportTests-product
+[653 / 667] ArkTraceStoreTests-product
+[655 / 667] ArkTraceStoreTests-product
+[657 / 667] ArkTraceAppSupportTests-product
+[661 / 667] ArkTraceIntegrationTests-product
+[663 / 667] ArkTraceIntegrationTests-product
+[665 / 667] ArkTraceIntegrationTests-product
+Build complete! (92.09秒)
+Test Suite 'Selected tests' started at 2026-10-04 09:57:21.443.
+Test Suite 'ArkTraceStoreTests.xctest' started at 2026-10-04 09:57:21.445.
+Test Suite 'ArkTraceStoreTests.xctest' passed at 2026-10-04 09:57:21.445.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:21.445.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:21.769.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 09:57:21.770.
+Test Suite 'TimelineNavigationKeyTests' started at 2026-10-04 09:57:21.771.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testBracketKeysAliasZoomToSelection]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testBracketKeysAliasZoomToSelection]' passed (0.024 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testCommandModifiedLettersAreNotTimelineNavigation]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testCommandModifiedLettersAreNotTimelineNavigation]' passed (0.154 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPlusAndMinusKeepTheirExistingAnchor]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPlusAndMinusKeepTheirExistingAnchor]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerAnchorIsIgnoredWhenThePointerIsAway]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerAnchorIsIgnoredWhenThePointerIsAway]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerLeavingTheTimelineDropsTheAnchor]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerLeavingTheTimelineDropsTheAnchor]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerZoomIsRefusedWhenAlreadyAtTheBound]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testPointerZoomIsRefusedWhenAlreadyAtTheBound]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testTheFocusIndicatorFollowsKeyboardUseRatherThanFocus]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testTheFocusIndicatorFollowsKeyboardUseRatherThanFocus]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testWasdKeysProduceBoundedZoomAndPanIntents]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineNavigationKeyTests testWasdKeysProduceBoundedZoomAndPanIntents]' passed (0.000 seconds).
+Test Suite 'TimelineNavigationKeyTests' passed at 2026-10-04 09:57:21.952.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.180 (0.182) seconds
+Test Suite 'TimelineRenderingTests' started at 2026-10-04 09:57:21.952.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAbsentDepthCollapsesToASingleBandWithoutGaps]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAbsentDepthCollapsesToASingleBandWithoutGaps]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAccessibilityActionsExposeOnlyCommandsThatCanChangeState]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAccessibilityActionsExposeOnlyCommandsThatCanChangeState]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]' started.
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:991: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - the paint request was consumed
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1016: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - the paint request was consumed
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1018: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - reapplying the same pending frame must not invalidate it
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1024: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - an empty pending frame keeps the displayed fallback
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]' failed (0.237 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAStripRedrawDrawsOnlyTheLabelsInsideIt]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAStripRedrawDrawsOnlyTheLabelsInsideIt]' passed (0.005 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticCounterLODReusesBoundedDensityCandidate]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticCounterLODReusesBoundedDensityCandidate]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testAutomaticLODDoesNotGiveUnusedBudgetToTheFinalBusyTrack]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCounterDetailUsesPositiveAndOpenEndedDurations]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCounterDetailUsesPositiveAndOpenEndedDurations]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCPUSliceLabelFallsBackThroughProcessThreadAndTID]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testCPUSliceLabelFallsBackThroughProcessThreadAndTID]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDeepStackKeepsFillBatchesBoundedByThePalette]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDeepStackKeepsFillBatchesBoundedByThePalette]' passed (0.556 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsAreColoredPerTrack]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsAreColoredPerTrack]' passed (0.002 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsBorrowTheDominantEventsFill]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityBandsBorrowTheDominantEventsFill]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityIntensityChangesHeightAndNotColor]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityIntensityChangesHeightAndNotColor]' passed (0.002 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityPrefetchChunksBeyondTheEventBatchQueryCap]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDensityPrefetchChunksBeyondTheEventBatchQueryCap]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDepthBeyondReservedRowsClampsInsideTheTrack]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDepthBeyondReservedRowsClampsInsideTheTrack]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailBudgetContract]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailBudgetContract]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailRenderingUsesClosedPaletteBucketsAndStableSnapshotCache]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testDetailRenderingUsesClosedPaletteBucketsAndStableSnapshotCache]' passed (0.025 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testEventFillsFollowIdentityAcrossTracks]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testEventFillsFollowIdentityAcrossTracks]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailQueriesOnlyVerticallyVisibleTracksWithOverscan]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailRequestSkipsTheDensityEstimateEntirely]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExplicitDetailRequestSkipsTheDensityEstimateEntirely]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testExtremeInt64ViewportEndpointsRoundTripAndRulerDrawsWithoutTrap]' passed (0.002 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testFocusedNamedSliceIsReservedBeyondOrdinaryDetailPrefix]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testFocusedNamedSliceIsReservedBeyondOrdinaryDetailPrefix]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testGeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testGeometryAndHitTestingUseSameFrameAndDensityCarriesNoEventKey]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedSwiftUIControlsHaveNonOverlappingMinimumHitFrames]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedSwiftUIControlsHaveNonOverlappingMinimumHitFrames]' passed (0.432 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedTimelineRestoresRealWindowFirstResponderAndTabOrder]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testHostedTimelineRestoresRealWindowFirstResponderAndTabOrder]' passed (0.308 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testInstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testInstantDetailRetainsDomainRangeButDrawsAtLeastOnePhysicalPixel]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLabelLayoutIsSharedByNameAndSurvivesTheFrame]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLabelLayoutIsSharedByNameAndSurvivesTheFrame]' passed (0.005 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderBuildsDepthRowsAndFlatteningReturnsToOneBand]' started.
+2026-10-04 09:57:23.784 xctest[74826:1098860] Connection Invalid error for service com.apple.hiservices-xpcservice.
+2026-10-04 09:57:23.784 xctest[74826:1098818] Error received in message reply handler: Connection invalid
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderBuildsDepthRowsAndFlatteningReturnsToOneBand]' passed (0.308 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderQueriesOnlyVerticallyVisibleTracksWithOverscan]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testLoaderQueriesOnlyVerticallyVisibleTracksWithOverscan]' passed (0.003 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testNestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testNestedDepthRowsAreDistinctAndHitTestMatchesTheDrawnFrame]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testOverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testOverlappingDetailHitUsesTheSameClosedStyleZOrderAsDrawing]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanAndCursorAnchoredZoomAreOverflowSafe]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanAndCursorAnchoredZoomAreOverflowSafe]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanDeltaSaturatesAndRejectsNonFinitePointDeltas]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPanDeltaSaturatesAndRejectsNonFinitePointDeltas]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitiveBudgetIsGlobalAcrossTracks]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitiveBudgetIsGlobalAcrossTracks]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testPrimitivesOutsideTheViewportAreNeitherDrawnNorHitTested]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]' started.
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:942: error: -[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw] : XCTAssertFalse failed - the request was consumed
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:947: error: -[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw] : XCTAssertFalse failed - an unchanged generation draws the same pixels
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]' failed (0.012 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testResetLayoutCachePreventsCrossTraceDepthReuse]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testResetLayoutCachePreventsCrossTraceDepthReuse]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testRowsCrossingABandBoundaryAreDrawnFromBothSides]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testRowsCrossingABandBoundaryAreDrawnFromBothSides]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testScrollStripDrawsFarFewerFillsThanTheWholeDocument]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testScrollStripDrawsFarFewerFillsThanTheWholeDocument]' passed (0.019 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSingleDepthTrackGeometryIsUnchanged]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSingleDepthTrackGeometryIsUnchanged]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderCachesOnlyExactDensityWithinTheSameTrace]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderCachesOnlyExactDensityWithinTheSameTrace]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderReportsDensityBatchTrackAndTotalMetrics]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testSnapshotLoaderReportsDensityBatchTrackAndTotalMetrics]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testStaleGenerationCompletionIsDiscarded]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testStaleGenerationCompletionIsDiscarded]' passed (0.051 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheHoverTrackingAreaIsBuiltOnceAndFollowsTheVisibleRect]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheHoverTrackingAreaIsBuiltOnceAndFollowsTheVisibleRect]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheViewPaintsEveryPixelItClaimsToOwn]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTheViewPaintsEveryPixelItClaimsToOwn]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents]' passed (0.001 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testViewportRejectsNonFiniteNanosecondsPerPoint]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testViewportRejectsNonFiniteNanosecondsPerPoint]' passed (0.000 seconds).
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testZoomedOutLoaderUsesBoundedNonSelectableDensity]' started.
+Test Case '-[ArkTraceRenderingTests.TimelineRenderingTests testZoomedOutLoaderUsesBoundedNonSelectableDensity]' passed (0.003 seconds).
+Test Suite 'TimelineRenderingTests' failed at 2026-10-04 09:57:23.955.
+	 Executed 47 tests, with 6 failures (0 unexpected) in 1.995 (2.003) seconds
+Test Suite 'ArkTraceRenderingTests.xctest' failed at 2026-10-04 09:57:23.955.
+	 Executed 55 tests, with 6 failures (0 unexpected) in 2.175 (2.185) seconds
+Test Suite 'Selected tests' failed at 2026-10-04 09:57:23.955.
+	 Executed 55 tests, with 6 failures (0 unexpected) in 2.175 (2.187) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:24.210.
+Test Suite 'ArkTraceParserTests.xctest' started at 2026-10-04 09:57:24.212.
+Test Suite 'ArkTraceParserTests.xctest' passed at 2026-10-04 09:57:24.212.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:24.212.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:24.447.
+Test Suite 'ArkTraceIntegrationTests.xctest' started at 2026-10-04 09:57:24.449.
+Test Suite 'ArkTraceIntegrationTests.xctest' passed at 2026-10-04 09:57:24.449.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:24.449.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:24.677.
+Test Suite 'ArkTraceCoreTests.xctest' started at 2026-10-04 09:57:24.679.
+Test Suite 'ArkTraceCoreTests.xctest' passed at 2026-10-04 09:57:24.679.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:24.679.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:24.907.
+Test Suite 'ArkTraceCaptureTests.xctest' started at 2026-10-04 09:57:24.909.
+Test Suite 'ArkTraceCaptureTests.xctest' passed at 2026-10-04 09:57:24.909.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:24.909.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:25.144.
+Test Suite 'ArkTraceCLITests.xctest' started at 2026-10-04 09:57:25.145.
+Test Suite 'ArkTraceCLITests.xctest' passed at 2026-10-04 09:57:25.145.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:25.146.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:25.432.
+Test Suite 'ArkTraceAppSupportTests.xctest' started at 2026-10-04 09:57:25.435.
+Test Suite 'TraceDocumentControllerTests' started at 2026-10-04 09:57:25.435.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAccessibilityAnnouncementsAreCoalescedAtMeaningfulBoundaries]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-a11y-2B3C5E18-D636-4C98-ACA9-AED9B009A0C6.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-a11y-2B3C5E18-D636-4C98-ACA9-AED9B009A0C6.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAccessibilityAnnouncementsAreCoalescedAtMeaningfulBoundaries]' passed (0.031 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testADensityBandPressSelectsTheRealEventUnderIt]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-density-press-B96769B8-184B-423F-B22D-38FE0CC9632A.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-density-press-B96769B8-184B-423F-B22D-38FE0CC9632A.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testADensityBandPressSelectsTheRealEventUnderIt]' passed (0.017 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAnnotationLifecycleAndSessionReplacement]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-annotations-5E10C09C-0404-4EAB-9DF2-314F79599310/a.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-annotations-5E10C09C-0404-4EAB-9DF2-314F79599310/a.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-annotations-5E10C09C-0404-4EAB-9DF2-314F79599310/b.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-annotations-5E10C09C-0404-4EAB-9DF2-314F79599310/b.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-annotations-5E10C09C-0404-4EAB-9DF2-314F79599310/a.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-annotations-5E10C09C-0404-4EAB-9DF2-314F79599310/a.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testAnnotationLifecycleAndSessionReplacement]' passed (0.029 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCacheMaintenanceRunsAfterOpenRatherThanGatingIt]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-maint-FCFB54D9-74A1-4295-8D7E-ECAE612DC3ED.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-maint-FCFB54D9-74A1-4295-8D7E-ECAE612DC3ED.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCacheMaintenanceRunsAfterOpenRatherThanGatingIt]' passed (0.022 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCloseCleanupFailureRemainsVisibleAndRetryable]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-close-00A174B6-B31C-4F3F-8448-5AED3BBFC78C.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-close-00A174B6-B31C-4F3F-8448-5AED3BBFC78C.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testCloseCleanupFailureRemainsVisibleAndRetryable]' passed (0.016 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testControllerRemovesAndRefreshesRecentDocuments]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-controller-5325EAFC-BABB-4DC6-BE6D-B57254D5ADAE/opened.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-controller-5325EAFC-BABB-4DC6-BE6D-B57254D5ADAE/opened.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testControllerRemovesAndRefreshesRecentDocuments]' passed (0.019 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testDeletedRecentStaysListedAsMissingUntilTheUserRemovesIt]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-missing-890546A5-24A0-4B2B-B06A-CE27501A753D/deleted.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-missing-890546A5-24A0-4B2B-B06A-CE27501A753D/deleted.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-missing-890546A5-24A0-4B2B-B06A-CE27501A753D/kept.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-missing-890546A5-24A0-4B2B-B06A-CE27501A753D/kept.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-missing-890546A5-24A0-4B2B-B06A-CE27501A753D/kept.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-missing-890546A5-24A0-4B2B-B06A-CE27501A753D/kept.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testDeletedRecentStaysListedAsMissingUntilTheUserRemovesIt]' passed (0.039 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testFocusRequestsAreDistinctAndRepeatable]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testFocusRequestsAreDistinctAndRepeatable]' passed (0.002 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testInspectorLayoutAndCollapseFocusPolicy]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testInspectorLayoutAndCollapseFocusPolicy]' passed (0.000 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testNewOpenGenerationPreventsOldResultFromReplacingDocument]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-controller-E90A254A-4D6D-473D-A901-C2A1C53AF55F/second.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-controller-E90A254A-4D6D-473D-A901-C2A1C53AF55F/second.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testNewOpenGenerationPreventsOldResultFromReplacingDocument]' passed (0.018 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOnlyTheBusiestProcessesStartExpanded]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-expansion-B5033F42-2421-4087-AC49-2EDA0670D03C.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-expansion-B5033F42-2421-4087-AC49-2EDA0670D03C.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOnlyTheBusiestProcessesStartExpanded]' passed (0.020 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOpeningATraceHandsTheKeyboardToTheTimeline]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-focus-84BF4639-BB5A-4A8C-8C07-D4DA5B268B4F/first.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-focus-84BF4639-BB5A-4A8C-8C07-D4DA5B268B4F/first.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-focus-84BF4639-BB5A-4A8C-8C07-D4DA5B268B4F/second.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-focus-84BF4639-BB5A-4A8C-8C07-D4DA5B268B4F/second.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testOpeningATraceHandsTheKeyboardToTheTimeline]' passed (0.018 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testPinningGathersLanesFromDifferentProcessesAndKeepsOrder]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-pin-7492B855-B059-4FB1-A022-1656F7F01EC7.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-pin-7492B855-B059-4FB1-A022-1656F7F01EC7.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testPinningGathersLanesFromDifferentProcessesAndKeepsOrder]' passed (0.014 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testProcessFilterMatchesNameAndPIDAndNothingElse]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-process-filter-C2ACFE59-0129-4088-92C9-ACFE2D416654.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-process-filter-C2ACFE59-0129-4088-92C9-ACFE2D416654.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testProcessFilterMatchesNameAndPIDAndNothingElse]' passed (0.012 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRapidViewportBurstCoalescesIntoOneDensityReload]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewport-coalescing-31614448-B7FC-4325-A25E-BA80DC55AFAF.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-viewport-coalescing-31614448-B7FC-4325-A25E-BA80DC55AFAF.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRapidViewportBurstCoalescesIntoOneDensityReload]' passed (0.079 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRecentBookmarksAreBoundedDeduplicatedAndResolvable]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/1.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/1.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/2.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-recent-2DD466DC-7A55-4C3D-B9F8-06EF296F4DF3/2.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRecentBookmarksAreBoundedDeduplicatedAndResolvable]' passed (0.028 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testReplacementImmediatelyHidesOldGenerationWhileNewOpenWaits]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-replacement-70EAFE90-9A5F-46D6-BA75-85295427D10D/first.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-replacement-70EAFE90-9A5F-46D6-BA75-85295427D10D/first.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-replacement-70EAFE90-9A5F-46D6-BA75-85295427D10D/second.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-replacement-70EAFE90-9A5F-46D6-BA75-85295427D10D/second.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testReplacementImmediatelyHidesOldGenerationWhileNewOpenWaits]' passed (0.020 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRevealingATrackGroupShowsItsLanesAndScrollsToThem]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-reveal-group-E19B179E-E33C-4CB2-89BB-17874693533D.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-reveal-group-E19B179E-E33C-4CB2-89BB-17874693533D.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testRevealingATrackGroupShowsItsLanesAndScrollsToThem]' passed (0.030 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchResultSteppingRevealsWithoutStealingKeyboardFocus]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-stepping-7DB495F8-0E41-406C-A789-A8132A40AF4E.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-stepping-7DB495F8-0E41-406C-A789-A8132A40AF4E.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchResultSteppingRevealsWithoutStealingKeyboardFocus]' passed (0.012 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-95A16E7C-8BEB-4970-BEBA-D249CC1323D0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-95A16E7C-8BEB-4970-BEBA-D249CC1323D0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-95A16E7C-8BEB-4970-BEBA-D249CC1323D0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-95A16E7C-8BEB-4970-BEBA-D249CC1323D0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem]' passed (0.027 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSliceAggregateRowRevealsItsFirstOccurrence]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-aggregate-9ECEED4E-2DCB-48FB-B51A-7AE1F756C950.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-aggregate-9ECEED4E-2DCB-48FB-B51A-7AE1F756C950.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSliceAggregateRowRevealsItsFirstOccurrence]' passed (0.011 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTheLoadingFractionIsPublishedAndResetPerDocument]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-fraction-1E68F5C2-A40E-4F51-900F-D3E01D68CB47/trace.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-fraction-1E68F5C2-A40E-4F51-900F-D3E01D68CB47/trace.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-fraction-1E68F5C2-A40E-4F51-900F-D3E01D68CB47/trace.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-fraction-1E68F5C2-A40E-4F51-900F-D3E01D68CB47/trace.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTheLoadingFractionIsPublishedAndResetPerDocument]' passed (0.022 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTracksGroupByProcessWithCPULanesLeftCrossProcess]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-grouping-A43D4ADA-FB02-42F8-ADC9-E9D65E2D3B48.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-grouping-A43D4ADA-FB02-42F8-ADC9-E9D65E2D3B48.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTracksGroupByProcessWithCPULanesLeftCrossProcess]' passed (0.013 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTypedErrorPresentationDoesNotExposeUnboundedDetails]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testTypedErrorPresentationDoesNotExposeUnboundedDetails]' passed (0.001 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-reveal-B349E515-76A4-4DBB-8763-CDB82D2B9A3E.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-reveal-B349E515-76A4-4DBB-8763-CDB82D2B9A3E.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent]' passed (0.011 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testZeroDurationTraceBecomesReadyEmptyState]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-zero-D4236C2F-E14B-4544-B062-8D102BB1EC74.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-zero-D4236C2F-E14B-4544-B062-8D102BB1EC74.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testZeroDurationTraceBecomesReadyEmptyState]' passed (0.015 seconds).
+Test Suite 'TraceDocumentControllerTests' passed at 2026-10-04 09:57:25.965.
+	 Executed 26 tests, with 0 failures (0 unexpected) in 0.525 (0.531) seconds
+Test Suite 'TraceViewStateStoreTests' started at 2026-10-04 09:57:25.965.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testEmptyAnnotationsRemoveTheSidecar]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testEmptyAnnotationsRemoveTheSidecar]' passed (0.006 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testFavoritesRoundTripInOrder]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testFavoritesRoundTripInOrder]' passed (0.006 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testRoundTripKeepsFlagsAndPersistentMarksOnly]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testRoundTripKeepsFlagsAndPersistentMarksOnly]' passed (0.010 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarContainsNoUserPath]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarContainsNoUserPath]' passed (0.006 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarLivesInsideTheCacheEntryDirectory]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarLivesInsideTheCacheEntryDirectory]' passed (0.003 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarWithoutFavoritesStillDecodes]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testSidecarWithoutFavoritesStillDecodes]' passed (0.003 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testUnreadableOrMismatchedSidecarYieldsNoAnnotations]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceViewStateStoreTests testUnreadableOrMismatchedSidecarYieldsNoAnnotations]' passed (0.004 seconds).
+Test Suite 'TraceViewStateStoreTests' passed at 2026-10-04 09:57:26.003.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.037 (0.038) seconds
+Test Suite 'ArkTraceAppSupportTests.xctest' passed at 2026-10-04 09:57:26.003.
+	 Executed 33 tests, with 0 failures (0 unexpected) in 0.562 (0.569) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:26.003.
+	 Executed 33 tests, with 0 failures (0 unexpected) in 0.562 (0.571) seconds
+Test Suite 'Selected tests' started at 2026-10-04 09:57:26.223.
+Test Suite 'ArkTraceAnalysisTests.xctest' started at 2026-10-04 09:57:26.225.
+Test Suite 'ArkTraceAnalysisTests.xctest' passed at 2026-10-04 09:57:26.225.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 09:57:26.225.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Note: Some test targets reported failures:
+  - ArkTraceRenderingTests (XCTest)

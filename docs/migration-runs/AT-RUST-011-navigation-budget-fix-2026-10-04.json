@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "status": "review-ready isolated capacity budget correction; no production import or migration completion",
+  "snapshotSHA256": "6791b05c3a1cca1e6d7cdf76c67e5ef1817fff82df1f6008e4864fd088d9a591",
+  "baselineFiles": 880,
+  "changedBaselineFiles": [
+    "rust/crates/arktrace-viewer/src/navigation.rs",
+    "rust/crates/arktrace-viewer/src/track_tree.rs",
+    "rust/crates/arktrace-viewer/src/view_actions.rs"
+  ],
+  "unchangedBaselineFiles": 877,
+  "limit": 8388608,
+  "inputLogicalLimit": 8388608,
+  "accounting": "one owned tree/state/reduction: size_of outer record + nested Vec capacities * size_of element + initialized nested String capacities; inline children counted once; allocator metadata/alignment/RSS excluded",
+  "borrowedInput": "catalog facts and request remain caller-owned; lengths/counts scanned/capped, spare capacity not transferred. Owned input ViewState/TrackTree spare capacity is included and rejected before clone.",
+  "hostAggregate": "simultaneous caller input + output clone + BTree/sort/temporary/reference buffers remain separate host aggregate budget; no claim of exact allocator peak",
+  "regressions": 6,
+  "viewerTests": 79,
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exitCode": 0,
+      "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/clippy.log",
+      "sha256": "c5275de5f6658bf03d943278119620db9bd6e5fa109d9f2d2e8933f8b2e5c5a5"
+    },
+    {
+      "name": "tests",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "exitCode": 0,
+      "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/tests.log",
+      "sha256": "b0c0fe64c19870192f41fab850175cbcd7e80fb451c41d779b237a868e118fab"
+    },
+    {
+      "name": "workspace",
+      "command": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "exitCode": 0,
+      "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/workspace.log",
+      "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+    },
+    {
+      "name": "licenses",
+      "command": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "exitCode": 0,
+      "log": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/licenses.log",
+      "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+    }
+  ],
+  "files": [
+    {
+      "path": "rust/crates/arktrace-viewer/src/track_tree.rs",
+      "sha256": "e66ebf130118a827b9005dc4afcf9f3677265ecd49f040036af3812e7878b998",
+      "byteCount": 22469
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/view_actions.rs",
+      "sha256": "0eb53ab72497aa4b57a71322bcc5fc1a539d4d1a4837b5d04086200e67fa5382",
+      "byteCount": 24159
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/navigation.rs",
+      "sha256": "482abd59baa65f38fa3dc022f09b9f301a4865a6a42e334bc0f0c96196b0021b",
+      "byteCount": 10015
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/unicode_title_budget.patch",
+      "sha256": "12917998147f009fd8fc5af8b4d2bb9be393f2260da247461001c7b7375ae761",
+      "byteCount": 14869
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/navigation_retained_budget.rs",
+      "sha256": "585865951eb44924cc241220602cc693fbb141503cc324c66fb05968a42a54be",
+      "byteCount": 10043
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/tests-initial.log.gz",
+      "sha256": "d3c9aba2be5ce3f765ed4f9856e957e5ce59814a7af914793c199797a0c8bf56",
+      "byteCount": 20600
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/clippy.log",
+      "sha256": "c5275de5f6658bf03d943278119620db9bd6e5fa109d9f2d2e8933f8b2e5c5a5",
+      "byteCount": 267
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/workspace.log",
+      "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+      "byteCount": 125
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/licenses.log",
+      "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+      "byteCount": 102
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/receipt-initial.json",
+      "sha256": "1aaac555e5f801e0352bd888efc6a3ed64aee7554f0472abdc9d691222668460",
+      "byteCount": 1787
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/tests.log",
+      "sha256": "b0c0fe64c19870192f41fab850175cbcd7e80fb451c41d779b237a868e118fab",
+      "byteCount": 11665
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/unicode-title-budget-verification/receipt.json",
+      "sha256": "2b38003675462e6e392c80503ce335015cc20084736b577ec65c66fbe152c10d",
+      "byteCount": 1785
+    }
+  ],
+  "developmentFailures": "Initial harness could not fill full 8MiB with 2,000 strings and incorrectly compared output against pre-clone spare capacity. A subsequent wrapper assertion had same clone-compaction assumption. Corrected harness fills additional existing favorite strings and uses compact input. Initial all-Viewer log retained gzip; its uncompressed SHA is in receipt-initial.json. No production semantic change required by these harness failures.",
+  "swift": "No Swift sources/canonical fixtures/previous frozen navigation report modified. All existing Rust Swift-oracle comparisons passed in 79 Viewer tests; previous actual Swift execution receipts unchanged. No claim of a fresh Swift run for budget-only arithmetic."
+}

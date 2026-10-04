@@ -78,6 +78,45 @@ def main():
         assert len(names) == len(set(names)) == presentation_receipt["counts"][section] == count
         assert names == [entry["name"] for entry in presentation_outputs[section]]
     print("Palette/presentation oracle: 1,068 palette, 38 style and 62 DTO vectors with actual Swift source/output identities")
+    navigation_receipt = json.loads((ROOT / viewer / "navigation-mainline-swift-receipt.json").read_text(encoding="utf-8"))
+    assert navigation_receipt["copiedAlgorithms"] is False and navigation_receipt["exitCode"] == 0
+    navigation_seen = set()
+    for entry in navigation_receipt["sourceDigests"]:
+        relative = entry["path"]
+        assert relative not in navigation_seen
+        navigation_seen.add(relative)
+        path = ROOT / relative
+        assert not path.is_symlink() and path.resolve().is_relative_to(ROOT)
+        data = path.read_bytes()
+        assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
+    assert navigation_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceStore", "ArkTraceRendering", "ArkTraceAppSupport"]
+    for name in navigation_receipt["sourceModules"]:
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in navigation_seen if p.startswith(f"Sources/{name}/")}
+    assert {"rust/crates/arktrace-viewer/oracle/" + name for name in (
+        "navigation_controller_seam.swift", "navigation_rendering_seam.swift",
+        "navigation_harness.swift", "navigation_run_swift.py",
+    )} <= navigation_seen
+    navigation_inputs = {}
+    for stem, count in (("navigation", 8), ("navigation-rendering", 64), ("navigation-restore", 3)):
+        input_path, output_path = viewer + stem + "-inputs.json", viewer + stem + "-swift-oracle.json"
+        assert {input_path, output_path} <= navigation_seen
+        inputs = json.loads((ROOT / input_path).read_text(encoding="utf-8"))
+        outputs = json.loads((ROOT / output_path).read_text(encoding="utf-8"))
+        names = [entry["name"] for entry in inputs]
+        assert len(names) == len(set(names)) == len(outputs) == count
+        assert names == [entry["name"] for entry in outputs]
+        navigation_inputs[stem] = inputs
+    assert sum(len(case["actions"]) for case in navigation_inputs["navigation"]) == 55
+    assert sum(len(case["filters"]) for case in navigation_inputs["navigation"]) == 161
+    whitespace_path = viewer + "navigation-whitespace-swift-oracle.json"
+    assert whitespace_path in navigation_seen
+    whitespace = json.loads((ROOT / whitespace_path).read_text(encoding="utf-8"))
+    assert len(whitespace) == len(set(whitespace)) == 26
+    assert navigation_receipt["counts"] == {
+        "catalogs": 8, "actions": 55, "filters": 161, "nativeNavigation": 64,
+        "restore": 3, "whitespaceScalars": 26,
+    }
+    print("Navigation oracle: 8 catalogs, 55 actions, 161 recorded host filters, 64 native focus/anchor and 3 restore vectors with current Swift source/output identities")
     source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
     scope_block = source.split("machineAllowed: Set<String> = [", 1)[1].split("\n    ]", 1)[0]
     scopes = sorted(re.findall(r'"([^"\n]+)"', scope_block))
