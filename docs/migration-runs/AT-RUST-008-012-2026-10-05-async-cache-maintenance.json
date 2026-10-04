@@ -1,0 +1,1632 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-05",
+  "tasks": [
+    "AT-RUST-008",
+    "AT-RUST-012"
+  ],
+  "baseCommit": "d38215078de9708dd6b75fe4d4024fc868dd5651",
+  "goalStatus": "active",
+  "fullCacheAcceptance": false,
+  "macOSAcceptanceComplete": false,
+  "rustAppCutover": false,
+  "runtimeSDKMaintenanceConnected": true,
+  "toolchain": {
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "6.4",
+    "languageMode": "6",
+    "deploymentTarget": "macOS 26 arm64"
+  },
+  "abi": {
+    "version": 1,
+    "contractSHA256": "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8",
+    "records": 10,
+    "fields": 95,
+    "exports": 24,
+    "productionMacOSCapabilities": 23,
+    "fixtureMacOSCapabilities": 31,
+    "windowsCapabilities": 0
+  },
+  "asyncMaintenance": {
+    "scope": "fixed configured content-addressed held root; session=0",
+    "operations": [
+      "inventory",
+      "standardMaintain",
+      "purgeUnused"
+    ],
+    "maximumEntries": 4096,
+    "maximumSDKResultBytes": 4096,
+    "timeoutMilliseconds": [
+      1,
+      300000
+    ],
+    "standardHighBytes": 21474836480,
+    "standardLowBytes": 17179869184,
+    "sharedRequestQueueCancelResultsAndDrain": true,
+    "frontendIO": false,
+    "sessionOrParserRequired": false,
+    "cancelledRemovalMayHaveMutated": true,
+    "inventoryActiveDistinctFromSkipped": true
+  },
+  "validation": {
+    "rustTests": 500,
+    "asyncMaintenanceRegressionTests": 4,
+    "synchronousMaintenanceRegressionTests": 13,
+    "sdkTests": 76,
+    "sdkDecodeRegressionTests": 4,
+    "defaultSwiftTestsPassed": 605,
+    "defaultSwiftTestsSkipped": 6,
+    "defaultSwiftSkipAudit": [
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]' skipped (0.001 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]' skipped (0.000 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]' skipped (0.000 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]' skipped (0.001 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]' skipped (0.000 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]' skipped (0.000 seconds)."
+    ],
+    "ffiResponsesCompared": 75,
+    "ffiRealTraces": 3,
+    "validAllocationFuzzCases": 1000,
+    "finalGateCount": 32,
+    "gates": [
+      {
+        "name": "native-tests-final-v3",
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "test",
+          "--workspace",
+          "--all-features"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146254.816043,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146282.768905,
+        "stdoutSHA256": "6370b505c5e00d627575195c37163212423ee9814bec1ffd60ab651e1cab5f59",
+        "stderrSHA256": "7757e4f25c04a6daeff5527487d48287640a3e7f3d1e81eaed3c0492e404e2ce"
+      },
+      {
+        "name": "clippy-final",
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--all-features",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146566.9670668,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146568.914149,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "13093336c325ef0771139a06ae6c6c78ae313af2ce0a234ef2270b6f1752ccd0"
+      },
+      {
+        "name": "fmt-check-final",
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146616.462477,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146621.9095209,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "native-build-final",
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "build",
+          "--workspace"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146948.440649,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146949.328992,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "5d03c3c583a2dcf4e0f8dde14e13fa6a028acb8727b8eea6ad5f3ea51cae48a7"
+      },
+      {
+        "name": "rust-smoke",
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "run",
+          "--bin",
+          "arktrace-migration-smoke"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146949.470755,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146950.056344,
+        "stdoutSHA256": "071b32eea36b5e931369d008981f210927a332e72a5595774ac8a258526a652e",
+        "stderrSHA256": "e22bd34125e6046409f713a8a6f4a35a6b2450614e8cfebb5b12db198adf486b"
+      },
+      {
+        "name": "viewer-json",
+        "argv": [
+          "python3",
+          "scripts/test_viewer_json_roundtrip.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146950.2134311,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146958.970041,
+        "stdoutSHA256": "a3b99178070a68fd2fc226fa9096e24242774f26eb05d305d51c1951a78a9f5b",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "rust-workspace",
+        "argv": [
+          "python3",
+          "scripts/verify_rust_workspace.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146616.462534,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146622.01358,
+        "stdoutSHA256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "ffi-contract-v2",
+        "argv": [
+          "python3",
+          "scripts/test_ffi_contract.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146893.2817621,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146897.369903,
+        "stdoutSHA256": "eaef83ef3bbfa216c2550aba2b03211b9f48788bce5d0d3feee5bb89ced7182a",
+        "stderrSHA256": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd"
+      },
+      {
+        "name": "bindings",
+        "argv": [
+          "python3",
+          "scripts/generate_ffi_bindings.py",
+          "--check"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.159362,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146256.5465522,
+        "stdoutSHA256": "3455a39d25e374ef50701da99711156b310fa4bd27493f5f8102595dd3b84cc6",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "migration-contracts-final",
+        "argv": [
+          "python3",
+          "scripts/verify_migration_contracts.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.094539,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146257.316224,
+        "stdoutSHA256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "migration-tests",
+        "argv": [
+          "python3",
+          "scripts/test_migration_contracts.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.523541,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146258.177888,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "de6c2d449d7da47a08518e600bd8a31f9d0ad78c430e8bbc3520b92537c4a4e8"
+      },
+      {
+        "name": "fixture-artifact",
+        "argv": [
+          "python3",
+          "scripts/build_macos_rust_sdk.py",
+          "--fixtures"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "<tmp>/arktrace-cache-session-artifacts"
+        },
+        "startedAtUnix": 1791146615.284699,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146622.4219599,
+        "stdoutSHA256": "afa7bbb8db546d2e0cbb01133f053d8fe4d81cdf800216419e141c545a84a45e",
+        "stderrSHA256": "0c8a0802024ea88671d7b242809a0dd013b1b3b644ef716ec22d3d6b414259d9"
+      },
+      {
+        "name": "production-artifact",
+        "argv": [
+          "python3",
+          "scripts/build_macos_rust_sdk.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "<tmp>/arktrace-cache-session-artifacts"
+        },
+        "startedAtUnix": 1791146666.047162,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146671.684312,
+        "stdoutSHA256": "5b6a816a68928d876ab34ffe46d6aeac1528e2460b6ea363fe3644bd239654a4",
+        "stderrSHA256": "5e5978592c46b98f5105a254fe709538ed5fc199185f3363f9cd40c6dae1c57d"
+      },
+      {
+        "name": "actual-sdk-maintenance",
+        "argv": [
+          "python3",
+          "scripts/test_macos_cache.py",
+          "--maintenance",
+          "--sdk-maintenance",
+          "--evidence-dir",
+          "<root>/.build/agent-coordination/arktrace/async-cache-maintenance-20261005/actual-sdk-maintenance"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "<tmp>/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "<tmp>/arktrace-cache-session-artifacts/4fa3b440bde466a023e818481ff8e4aa11a6638a1ba9b3b4aa407995c4ec9745/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "<tmp>/arktrace-cache-session-final-consumer"
+        },
+        "startedAtUnix": 1791146724.989441,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146789.4768782,
+        "stdoutSHA256": "1620f4065e89f637f8842e9dfc1f506bf2fb0610a52bf1c4bc25a6d39b3c2c1e",
+        "stderrSHA256": "53dbcaab8fc8c5f539c564e57c995b51b3de9159b04fdb6f17c025727a601197"
+      },
+      {
+        "name": "positive-external-rebuild",
+        "argv": [
+          "swift",
+          "build",
+          "--package-path",
+          "<tmp>/arktrace-cache-session-final-consumer/consumer",
+          "--scratch-path",
+          "<tmp>/arktrace-cache-session-final-consumer/build",
+          "--cache-path",
+          "<tmp>/arktrace-cache-session-final-consumer/dependencies",
+          "--disable-sandbox",
+          "--config-path",
+          "<tmp>/arktrace-cache-session-final-consumer/configuration",
+          "--security-path",
+          "<tmp>/arktrace-cache-session-final-consumer/security",
+          "-Xswiftc",
+          "-warnings-as-errors"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_RUST_XCFRAMEWORK": ".arktrace-native/6b4c81605fc44f31b6a453cdf35dfe30f639fc09a898f3d555a8ba12950f810f/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_FIXTURES": "1",
+          "CLANG_MODULE_CACHE_PATH": "<tmp>/arktrace-cache-session-final-consumer/ModuleCache",
+          "SWIFTPM_MODULECACHE_OVERRIDE": "<tmp>/arktrace-cache-session-final-consumer/ModuleCache"
+        },
+        "startedAtUnix": 1791146823.033788,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146825.6633751,
+        "stdoutSHA256": "53e697c1efc561a1d66f7b012b1c069d9b2bbc467c3f91de04e2d0284b7f10d6",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "production-sdk-final",
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "build",
+          "--target",
+          "ArkTraceRustRuntime",
+          "--disable-sandbox",
+          "--config-path",
+          "<tmp>/arktrace-cache-session-prod-sdk/configuration",
+          "--security-path",
+          "<tmp>/arktrace-cache-session-prod-sdk/security",
+          "-Xswiftc",
+          "-warnings-as-errors"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "<tmp>/arktrace-cache-session-prod-sdk",
+          "ARKTRACE_RUST_XCFRAMEWORK": "<tmp>/arktrace-cache-session-artifacts/c92bf57bb7a369d453c78c21c239a0d197169ad35b1000e250967c4ddc984737/CArkTrace.xcframework"
+        },
+        "startedAtUnix": 1791146893.281759,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146899.750131,
+        "stdoutSHA256": "450e316febf38997694dae0205e1c90630f2aeca1ab81c2b97f9cd77bef534d8",
+        "stderrSHA256": "a6f4e0936d4b10d5c280c67d48f399860bd057d6f7036f59265e68b12f8497c8"
+      },
+      {
+        "name": "swift-build-final",
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "build",
+          "--disable-sandbox",
+          "--config-path",
+          "<tmp>/arktrace-swiftpm-current/configuration",
+          "--security-path",
+          "<tmp>/arktrace-swiftpm-current/security",
+          "-Xswiftc",
+          "-warnings-as-errors"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "<tmp>/arktrace-swiftpm-current"
+        },
+        "startedAtUnix": 1791146313.114662,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146321.7084842,
+        "stdoutSHA256": "de27d74184b871490cdc8cb63d3274877571cb4e4a5bb186a5f3704863e2528e",
+        "stderrSHA256": "2b3f2be216ed3a9e53890a42d330db0d8f04122bd5ddd4392222455b12dd0942"
+      },
+      {
+        "name": "swift-tests-final",
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "<tmp>/arktrace-swiftpm-current/configuration",
+          "--security-path",
+          "<tmp>/arktrace-swiftpm-current/security"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "<tmp>/arktrace-swiftpm-current"
+        },
+        "startedAtUnix": 1791146684.416266,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146747.849301,
+        "stdoutSHA256": "89b452d145c287a8b7b6cfa90f01d92ab39c0e67075d3fc333c47e749f906c5f",
+        "stderrSHA256": "de32641001e1c80f57688ef32e7644326663fe990c5251c9d5bf7c0696e92867"
+      },
+      {
+        "name": "api-baseline-final",
+        "argv": [
+          "sh",
+          "scripts/test_api_baseline.sh",
+          "--scratch-path",
+          "<tmp>/arktrace-event-api-baseline/build",
+          "--cache-path",
+          "<tmp>/arktrace-event-api-baseline/dependencies",
+          "--config-path",
+          "<tmp>/arktrace-event-api-baseline/configuration",
+          "--security-path",
+          "<tmp>/arktrace-event-api-baseline/security",
+          "--disable-sandbox",
+          "-Xswiftc",
+          "-warnings-as-errors"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "CLANG_MODULE_CACHE_PATH": "<tmp>/arktrace-event-api-baseline/ModuleCache",
+          "SWIFTPM_MODULECACHE_OVERRIDE": "<tmp>/arktrace-event-api-baseline/ModuleCache"
+        },
+        "startedAtUnix": 1791146319.935977,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146321.2515059,
+        "stdoutSHA256": "867d1e6a49104d634f48225c85eed18202017d8bd5362f263a77a771b25a5bb0",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "app-build-final",
+        "argv": [
+          "sh",
+          "scripts/run-xcodebuild.sh"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_XCODE_CACHE_ROOT": "<tmp>/arktrace-lifecycle-xcode",
+          "ARKTRACE_XCODE_OUTPUT_ROOT": "<tmp>/arktrace-lifecycle-xcode-output"
+        },
+        "startedAtUnix": 1791146318.774878,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146322.8350132,
+        "stdoutSHA256": "43690feb9e35720037f4483b3d36a09a3a2863f0890f53048e3fc783f44dfd1d",
+        "stderrSHA256": "22b8d85ee014544c08f8404726c85d97164f5999e8c745c5be3169ed1b5860af"
+      },
+      {
+        "name": "app-document-types-final",
+        "argv": [
+          "sh",
+          "scripts/verify_app_document_types.sh",
+          "<tmp>/arktrace-lifecycle-xcode-output/Debug/ArkTrace.app"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {},
+        "startedAtUnix": 1791146569.289707,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146569.30599,
+        "stdoutSHA256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "licenses",
+        "argv": [
+          "sh",
+          "scripts/verify_licenses.sh"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.21525,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146257.182444,
+        "stdoutSHA256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "parser-lock",
+        "argv": [
+          "sh",
+          "scripts/verify_trace_streamer_lock.sh"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.3559759,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146256.551489,
+        "stdoutSHA256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "palette",
+        "argv": [
+          "python3",
+          "scripts/verify_palette.py",
+          "--report"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.2245262,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146258.078181,
+        "stdoutSHA256": "5b513cdcede959bc5372e81faea29b98994f6a8f78dff20589f0dd03e0efe7a3",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "palette-tests",
+        "argv": [
+          "python3",
+          "scripts/test_palette_verifier.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.2503018,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146266.565119,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "ea7f50aca785548cbb92e879ba4cdd3afef4059f769cb1841db0cad31e75dd14"
+      },
+      {
+        "name": "ci-planner-tests",
+        "argv": [
+          "sh",
+          "scripts/test_ci_plan.sh"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.232424,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146256.944959,
+        "stdoutSHA256": "6051c596f71980160f28390ff7ef62c0d1c7c7743119909ba0051b52454d9963",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "cargo-runner",
+        "argv": [
+          "python3",
+          "scripts/test_run_cargo.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.4095418,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146257.088332,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "d73fd8570ea6c135f94f4d70721ecc5a147abfac6affa568cd83d37a1707e4c6"
+      },
+      {
+        "name": "phase6-offline",
+        "argv": [
+          "sh",
+          "scripts/test_phase6.sh"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.2296698,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146256.501149,
+        "stdoutSHA256": "00ca77f6ce36abee9b86d82a5c0563c393ba3ce847cf7029c15e46dfc181ddd0",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "swift-runner",
+        "argv": [
+          "python3",
+          "scripts/test_run_swiftpm.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.311402,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146259.673645,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "22e8079deaa41ec748a5972bbb2d20a46d2b8b70796fa82319df9dcfc2ef8719"
+      },
+      {
+        "name": "xcode-runner",
+        "argv": [
+          "python3",
+          "scripts/test_run_xcodebuild.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.479628,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146260.286675,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "05b5674efa20cfd95fabccad6d9d2e0ad6c19155e5355e88521e5fce8f4165e9"
+      },
+      {
+        "name": "sdk-stage-tests",
+        "argv": [
+          "python3",
+          "scripts/test_stage_macos_rust_sdk.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146256.410481,
+        "exitCode": 0,
+        "finishedAtUnix": 1791146256.866379,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "39f4187237c711b5aa7cef82a0ab4f6f7df1ff3592b8bafb8ef0d47e7e64180c"
+      },
+      {
+        "name": "actual-ffi-owner",
+        "argv": [
+          "python3",
+          "scripts/test_macos_ffi_owner.py"
+        ],
+        "cwd": "<root>",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "<tmp>/arktrace-migration-cargo",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "startedAtUnix": 1791146985.452522,
+        "exitCode": 0,
+        "finishedAtUnix": 1791147011.768192,
+        "stdoutSHA256": "36a71409b170f3aa7f11aff11c79f3ace34ffb05843765da17b0a367324beb5a",
+        "stderrSHA256": "dd01d24cd6f1c6113cb4963acb322eeac3a042bf25a95e93f71b7c61e36dca14"
+      }
+    ],
+    "successfulCompilerWarnings": 0
+  },
+  "actualSDK": {
+    "sourceBytes": 67837,
+    "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+    "databaseBytes": 2351104,
+    "databaseSHA256": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+    "parserIdentity": {
+      "name": "trace_streamer",
+      "reportedVersion": "4.3.7",
+      "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+      "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+      "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+      "architecture": "arm64",
+      "adapterVersion": "1",
+      "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20"
+    },
+    "helperSHA256": "8586342256e5896a6b96dfa48489fd2a66263e90d0603377d8db6194453097e9",
+    "sdk": {
+      "allStorageCreditsReleased": true,
+      "createdTimestampPreserved": true,
+      "appCutover": false,
+      "cacheMaintenanceOneReaderProtected": true,
+      "concurrentSessionSurvivesTouch": true,
+      "timestampAdvanced": true,
+      "queryPagesEqual": true,
+      "cacheMaintenancePurgeAndReparse": true,
+      "cacheMaintenanceBeforeOpen": true,
+      "warmCacheHit": true,
+      "openingOwnersSurviveShutdown": true,
+      "cacheMaintenancePreCancelledPreservesReady": true,
+      "restartCacheHit": true,
+      "cacheMaintenanceActiveProtected": true,
+      "fullCacheAcceptance": false,
+      "runtimeSDKMaintenanceConnected": true,
+      "coldOpened": true,
+      "secondSessionSurvivesFirstClose": true
+    },
+    "sdkReceipt": {
+      "artifactIdentity": "6b4c81605fc44f31b6a453cdf35dfe30f639fc09a898f3d555a8ba12950f810f",
+      "artifactReceipt": {
+        "abiVersion": 1,
+        "contractSHA256": "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8",
+        "developmentFixtures": true,
+        "deploymentTarget": "26.0",
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+        "library": {
+          "byteCount": 30335960,
+          "sha256": "4fa3b440bde466a023e818481ff8e4aa11a6638a1ba9b3b4aa407995c4ec9745"
+        },
+        "headers": [
+          {
+            "path": "<root>/bindings/c/arktrace_ffi.h",
+            "byteCount": 22249,
+            "sha256": "5b796bc5d4f2301220f28d3366c44a3ef846a0d97920a61df7d58ead16eadd97"
+          },
+          {
+            "path": "<root>/bindings/c/module.modulemap",
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+          }
+        ],
+        "files": [
+          {
+            "byteCount": 761,
+            "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+            "relativePath": "CArkTrace.xcframework/Info.plist"
+          },
+          {
+            "byteCount": 22249,
+            "sha256": "5b796bc5d4f2301220f28d3366c44a3ef846a0d97920a61df7d58ead16eadd97",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+          },
+          {
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+          },
+          {
+            "byteCount": 30335960,
+            "sha256": "4fa3b440bde466a023e818481ff8e4aa11a6638a1ba9b3b4aa407995c4ec9745",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+          }
+        ],
+        "releaseAcceptance": false
+      },
+      "consumerExecutable": {
+        "byteCount": 13514608,
+        "sha256": "788f9400db7ef74af86705e9727b4feba7d816a20aee2b7e47c06ec4df620340"
+      },
+      "lifecycleExecutable": {
+        "byteCount": 13180128,
+        "sha256": "616276db730685816743c4a1c9a0f5a4ea85a908ae14b1e282a3744a22e45396"
+      },
+      "directoryExecutable": {
+        "byteCount": 13251472,
+        "sha256": "65de12f35b75bea4f92525dce23d40fa98a565575fdb38287bf2f84135f50e53"
+      },
+      "summaryExecutable": {
+        "byteCount": 13054240,
+        "sha256": "b8416475cd9f3844db6b7d9b68b588465360493fa2ac975a3dba3728be082660"
+      },
+      "coreExecutable": {
+        "byteCount": 15366496,
+        "sha256": "6da3869c8b626582e4d7ebf21036d9a3214c15921c74410b5f1635c825c01e58"
+      },
+      "coreConsumerBuildLogSHA256": "922d9355eda16a0e7a79d432c110282900d28108f8cf6a67a8ad056b23fa69ef",
+      "sdkBuildLogSHA256": "384e85c0ae1c40eca6ab9bc08c349536e23a8e74d9d4d1d2e418bea349bc5d8b",
+      "consumerBuildLogSHA256": "1e1f469d4685606c2299a3e371209fcbb9a39fa0bce877ffb3dc0c19ad1b8d41",
+      "sdkUnitTests": {
+        "passed": 76,
+        "failed": 0,
+        "skipped": 0,
+        "logSHA256": "d2319393e03750de7c5c3958aa42880ddb1bd4b92a6ae843f15f6d2c17c379f9"
+      },
+      "borrowCompileRejections": [
+        {
+          "case": "BorrowCapture.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "5eccf51dd604aa514057a5327364df6f730d945dd4cf378a7dc711904f2bbd0b"
+        },
+        {
+          "case": "BorrowEscape.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "a065b876470d6b177699161baabc670b15a2410d811af14f698693322136bdf1"
+        },
+        {
+          "case": "TextBorrowCapture.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "2226ad1f8292a93a950641ad02f558ae071455324c2e09e63ca3dc678d36b0a0"
+        },
+        {
+          "case": "TextBorrowEscape.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "c3cc017a2a67dd4407cb83ea53c14f0a248899fc8c0c462633678581cf4e1502"
+        }
+      ]
+    },
+    "sdkCommand": {
+      "argv": [
+        "<root>/.build/agent-coordination/arktrace/async-cache-maintenance-20261005/actual-sdk-maintenance/swift-cache-consumer",
+        "<root>/.build/agent-coordination/arktrace/async-cache-maintenance-20261005/actual-sdk-maintenance/sdk-input.json"
+      ],
+      "cwd": "<root>",
+      "exitCode": 0,
+      "executableSHA256": "6da3869c8b626582e4d7ebf21036d9a3214c15921c74410b5f1635c825c01e58",
+      "stdoutSHA256": "17618163247921690d0aeda853af0db6b252e10a01c5086b36d93ec833915eb6",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "nativeOnlyMaintenance": {
+      "activeInventory": {
+        "activeEntryCount": 1,
+        "entryCount": 1,
+        "totalByteCount": 2352629
+      },
+      "appCutover": false,
+      "beforePurge": {
+        "activeEntryCount": 0,
+        "entryCount": 1,
+        "totalByteCount": 2352629
+      },
+      "fullCacheAcceptance": false,
+      "interruptedPurges": [
+        {
+          "exitSuccess": false,
+          "recovery": {
+            "after": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "before": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "recoveredPrivateDirectoryCount": 1,
+            "removedEntryCount": 0,
+            "removedOrphanOwnerMarkerCount": 0,
+            "skippedActiveEntryCount": 0
+          },
+          "signal": 9,
+          "window": {
+            "creating": false,
+            "identifier": "entry-45fd8f32-9a7d-45ee-bf68-045cde1a7418",
+            "pid": 24057,
+            "point": 0
+          }
+        },
+        {
+          "exitSuccess": false,
+          "recovery": {
+            "after": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "before": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "recoveredPrivateDirectoryCount": 1,
+            "removedEntryCount": 0,
+            "removedOrphanOwnerMarkerCount": 0,
+            "skippedActiveEntryCount": 0
+          },
+          "signal": 9,
+          "window": {
+            "creating": false,
+            "identifier": "entry-f8380d6f-b98d-456e-a6ed-9ad896699054",
+            "pid": 24072,
+            "point": 1
+          }
+        },
+        {
+          "exitSuccess": false,
+          "recovery": {
+            "after": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "before": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "recoveredPrivateDirectoryCount": 1,
+            "removedEntryCount": 0,
+            "removedOrphanOwnerMarkerCount": 0,
+            "skippedActiveEntryCount": 0
+          },
+          "signal": 9,
+          "window": {
+            "creating": false,
+            "identifier": "entry-087b4814-c262-4fb7-bc6b-3c072e81df8f",
+            "pid": 24084,
+            "point": 2
+          }
+        },
+        {
+          "exitSuccess": false,
+          "recovery": {
+            "after": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "before": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "recoveredPrivateDirectoryCount": 0,
+            "removedEntryCount": 0,
+            "removedOrphanOwnerMarkerCount": 0,
+            "skippedActiveEntryCount": 0
+          },
+          "signal": 9,
+          "window": {
+            "creating": false,
+            "identifier": "entry-b7e9d08e-7d4f-4341-87f8-5d46f41e1b1e",
+            "pid": 24095,
+            "point": 3
+          }
+        },
+        {
+          "exitSuccess": false,
+          "recovery": {
+            "after": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "before": {
+              "activeEntryCount": 0,
+              "entryCount": 0,
+              "totalByteCount": 0
+            },
+            "recoveredPrivateDirectoryCount": 0,
+            "removedEntryCount": 0,
+            "removedOrphanOwnerMarkerCount": 0,
+            "skippedActiveEntryCount": 0
+          },
+          "signal": 9,
+          "window": {
+            "creating": false,
+            "identifier": "entry-f4c9ddb1-9e47-4b1c-9f07-8c264096dc06",
+            "pid": 24120,
+            "point": 4
+          }
+        }
+      ],
+      "lru": {
+        "after": {
+          "activeEntryCount": 0,
+          "entryCount": 0,
+          "totalByteCount": 0
+        },
+        "before": {
+          "activeEntryCount": 0,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "recoveredPrivateDirectoryCount": 0,
+        "removedEntryCount": 1,
+        "removedOrphanOwnerMarkerCount": 0,
+        "skippedActiveEntryCount": 0
+      },
+      "oneReaderLeft": {
+        "after": {
+          "activeEntryCount": 1,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "before": {
+          "activeEntryCount": 1,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "recoveredPrivateDirectoryCount": 0,
+        "removedEntryCount": 0,
+        "removedOrphanOwnerMarkerCount": 0,
+        "skippedActiveEntryCount": 1
+      },
+      "purged": {
+        "after": {
+          "activeEntryCount": 0,
+          "entryCount": 0,
+          "totalByteCount": 0
+        },
+        "before": {
+          "activeEntryCount": 0,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "recoveredPrivateDirectoryCount": 0,
+        "removedEntryCount": 1,
+        "removedOrphanOwnerMarkerCount": 0,
+        "skippedActiveEntryCount": 0
+      },
+      "quarantinePreserved": true,
+      "rawSourceUnchanged": true,
+      "reparseAfterPurge": true,
+      "runtimeSDKMaintenanceConnected": false,
+      "skipped": {
+        "after": {
+          "activeEntryCount": 1,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "before": {
+          "activeEntryCount": 1,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "recoveredPrivateDirectoryCount": 0,
+        "removedEntryCount": 0,
+        "removedOrphanOwnerMarkerCount": 0,
+        "skippedActiveEntryCount": 1
+      },
+      "stableLeasePreserved": true,
+      "thresholdNoOp": {
+        "after": {
+          "activeEntryCount": 0,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "before": {
+          "activeEntryCount": 0,
+          "entryCount": 1,
+          "totalByteCount": 2352629
+        },
+        "recoveredPrivateDirectoryCount": 0,
+        "removedEntryCount": 0,
+        "removedOrphanOwnerMarkerCount": 0,
+        "skippedActiveEntryCount": 0
+      }
+    }
+  },
+  "nativeFFILifecycle": {
+    "contractSHA256": "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8",
+    "panicCaughtAndEngineDrained": true,
+    "otherEngineSurvivesPanic": true,
+    "retainedExactRunArtifacts": [
+      {
+        "path": "ffi-owner-52667-artifacts/libarktrace_ffi.dylib",
+        "sha256": "eeef49f13dd2df959cd4497c43e87d7a851fbb7c75f6c0c45041c74f81ec5df4",
+        "byteCount": 16062088
+      },
+      {
+        "path": "ffi-owner-52667-artifacts/host-process",
+        "sha256": "8586342256e5896a6b96dfa48489fd2a66263e90d0603377d8db6194453097e9",
+        "byteCount": 2038312
+      },
+      {
+        "path": "ffi-owner-52667-artifacts/swift-native-viewport-oracle",
+        "sha256": "94c7b97c3b1b2c46251aa38dd3213d33f136aac9b3d3a177f2f3887c675cbdae",
+        "byteCount": 4891648
+      }
+    ],
+    "swiftOracle": {
+      "oracle": "actual Swift SQLiteTraceRepository + TimelineSnapshotLoader + TimelineGeometry + renderer style",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+      "sourceDigests": [
+        {
+          "path": "rust/crates/arktrace-viewer/oracle/build_native_viewport_oracle.py",
+          "sha256": "1a26794a37146a87057fd054ad73c03fc6145b65ee85405c1483c36f9bb77a50",
+          "byteCount": 4558
+        },
+        {
+          "path": "rust/crates/arktrace-viewer/oracle/NativeViewportOracle.swift",
+          "sha256": "62d08d793fc28bb6359f7f9d8e63e55cd7388fc85310fd2add159b46e27e96bd",
+          "byteCount": 7875
+        },
+        {
+          "path": "scripts/run-swiftpm.sh",
+          "sha256": "797b51daddf9efe5bc06debde72013582cbee8f0b7cd8730117aa7174fa5b524",
+          "byteCount": 8226
+        },
+        {
+          "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+          "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+          "byteCount": 11275
+        },
+        {
+          "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+          "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+          "byteCount": 4367
+        },
+        {
+          "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+          "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+          "byteCount": 1042
+        },
+        {
+          "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+          "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+          "byteCount": 375
+        },
+        {
+          "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+          "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+          "byteCount": 862
+        },
+        {
+          "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+          "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+          "byteCount": 17503
+        },
+        {
+          "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+          "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+          "byteCount": 1526
+        },
+        {
+          "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+          "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9",
+          "byteCount": 13541
+        },
+        {
+          "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+          "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+          "byteCount": 5258
+        },
+        {
+          "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+          "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+          "byteCount": 8071
+        },
+        {
+          "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+          "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+          "byteCount": 3147
+        },
+        {
+          "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+          "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+          "byteCount": 16011
+        },
+        {
+          "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+          "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+          "byteCount": 1186
+        },
+        {
+          "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+          "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+          "byteCount": 3873
+        },
+        {
+          "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+          "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+          "byteCount": 9752
+        },
+        {
+          "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+          "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+          "byteCount": 863
+        },
+        {
+          "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+          "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69",
+          "byteCount": 17117
+        },
+        {
+          "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+          "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+          "byteCount": 2757
+        },
+        {
+          "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+          "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+          "byteCount": 160666
+        },
+        {
+          "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+          "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+          "byteCount": 29935
+        },
+        {
+          "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+          "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+          "byteCount": 32838
+        },
+        {
+          "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+          "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+          "byteCount": 3269
+        },
+        {
+          "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+          "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+          "byteCount": 49595
+        },
+        {
+          "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+          "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+          "byteCount": 6210
+        },
+        {
+          "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+          "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+          "byteCount": 29018
+        },
+        {
+          "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+          "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+          "byteCount": 8131
+        },
+        {
+          "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+          "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+          "byteCount": 24339
+        },
+        {
+          "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+          "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+          "byteCount": 101313
+        },
+        {
+          "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+          "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+          "byteCount": 40541
+        }
+      ],
+      "oracleOnlyTransformations": {
+        "location": "cache copy only; repository source unchanged",
+        "renderer": "append one access method calling actual private visualStyle; no copied mapping",
+        "sourceConversion": "append one access property calling actual internal densitySource",
+        "augmentedSources": [
+          {
+            "path": "<tmp>/arktrace-native-viewport-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+            "sha256": "938e834f1986fb35e0065bd7c349b9a674108ebfba7ff7e88495d5525614ac90",
+            "byteCount": 101562
+          },
+          {
+            "path": "<tmp>/arktrace-native-viewport-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineModels.swift",
+            "sha256": "8051a109f11dbd9d0ca743e924e819ff9e4da9ba98538ea7602f8da46bef81c4",
+            "byteCount": 24518
+          }
+        ],
+        "package": {
+          "path": "<tmp>/arktrace-native-viewport-swiftpm/oracle-source/Package.swift",
+          "sha256": "9371439cfad9308d37a1195f2a0e4db004c535d87334b485e5e59af79b421b11",
+          "byteCount": 567
+        }
+      },
+      "buildLog": {
+        "path": "<tmp>/arktrace-native-viewport-swiftpm/native-viewport-build.log",
+        "sha256": "fca9f78048d54b03450a09e104e0291b97ad717d667188dafafbc52fda75e114",
+        "byteCount": 566
+      },
+      "executable": {
+        "path": "<tmp>/arktrace-native-viewport-swiftpm/build/out/Products/Debug/NativeViewportOracle",
+        "sha256": "94c7b97c3b1b2c46251aa38dd3213d33f136aac9b3d3a177f2f3887c675cbdae",
+        "byteCount": 4891648
+      }
+    }
+  },
+  "artifactReceipts": {
+    "fixture": {
+      "abiVersion": 1,
+      "contractSHA256": "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30335960,
+        "sha256": "4fa3b440bde466a023e818481ff8e4aa11a6638a1ba9b3b4aa407995c4ec9745"
+      },
+      "headers": [
+        {
+          "path": "<root>/bindings/c/arktrace_ffi.h",
+          "byteCount": 22249,
+          "sha256": "5b796bc5d4f2301220f28d3366c44a3ef846a0d97920a61df7d58ead16eadd97"
+        },
+        {
+          "path": "<root>/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 22249,
+          "sha256": "5b796bc5d4f2301220f28d3366c44a3ef846a0d97920a61df7d58ead16eadd97",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30335960,
+          "sha256": "4fa3b440bde466a023e818481ff8e4aa11a6638a1ba9b3b4aa407995c4ec9745",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    },
+    "production": {
+      "abiVersion": 1,
+      "contractSHA256": "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8",
+      "developmentFixtures": false,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30281624,
+        "sha256": "c92bf57bb7a369d453c78c21c239a0d197169ad35b1000e250967c4ddc984737"
+      },
+      "headers": [
+        {
+          "path": "<root>/bindings/c/arktrace_ffi.h",
+          "byteCount": 22249,
+          "sha256": "5b796bc5d4f2301220f28d3366c44a3ef846a0d97920a61df7d58ead16eadd97"
+        },
+        {
+          "path": "<root>/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 22249,
+          "sha256": "5b796bc5d4f2301220f28d3366c44a3ef846a0d97920a61df7d58ead16eadd97",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30281624,
+          "sha256": "c92bf57bb7a369d453c78c21c239a0d197169ad35b1000e250967c4ddc984737",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    }
+  },
+  "frozenCompilerInputs": [
+    {
+      "manifest": "actual-ffi-owner-52667-swift-inputs/inputs.json",
+      "sha256": "e1bfd9bce9d0ab18b98c1f2877a74ea9865f56c0579d70ee0c05fa8a3a27c595",
+      "fileLists": 20,
+      "sourceRows": 128,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "api-baseline-22750-inputs/inputs.json",
+      "sha256": "f9e289cbd8286410c6b30c665420a9cfc0c07189beef3cefde61abe495004464",
+      "fileLists": 8,
+      "sourceRows": 49,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "app-build-92658-inputs/inputs.json",
+      "sha256": "553d516ca93867a3cb2946297b71a979976c4765a1c652b8805990efcd4baeaf",
+      "fileLists": 9,
+      "sourceRows": 94,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "positive-external-17108-inputs/inputs.json",
+      "sha256": "6987c232573210c90f4188ad5c581e008568893881a0f4809e7abda2d9e94431",
+      "fileLists": 29,
+      "sourceRows": 310,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "production-sdk-12474-inputs/inputs.json",
+      "sha256": "88fd11c26efe155f564686bf8b42fd0375b8afb3126350e0d5c0247171e049ef",
+      "fileLists": 2,
+      "sourceRows": 86,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "sdk-root-42691-inputs/inputs.json",
+      "sha256": "bdf36398a9c485f82203b69ded90d5666605a34e1093578e0a8b28da80f02d38",
+      "fileLists": 23,
+      "sourceRows": 216,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "swift-build-32049-inputs/inputs.json",
+      "sha256": "ecf9f9790f6d1a28f97a5845db4d9161734baadd3db3cb67412a32d1f62ec996",
+      "fileLists": 20,
+      "sourceRows": 123,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "swift-tests-18684-inputs/inputs.json",
+      "sha256": "1a4b38a78cd9aac4b6724a5a1c0574beed951be2ce32e578cc3487c165c60d3e",
+      "fileLists": 20,
+      "sourceRows": 123,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "swift-tests-83704-inputs/inputs.json",
+      "sha256": "563fba2882994284f7196b302ae2991f29d29907f44d0a924e518f44a0369ccd",
+      "fileLists": 20,
+      "sourceRows": 123,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "actual-ffi-owner-52667-inputs/source-closure.json",
+      "sha256": "f62f7911dadc6ebcfacf96a08b2470224c29b5bf8e242798c463c4b18adca149",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "actual-sdk-maintenance-42691-native-inputs/source-closure.json",
+      "sha256": "e7c2ba3a2a47dbef176c9f235be3b979720b7017e9b2c795f105a56e47e279bd",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "async-tests-13096-inputs/source-closure.json",
+      "sha256": "6b66094bef0b7b4ec8d65ef9c92025bbddb4c21fdbedc23c4c02b6d2623dfd1c",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "check-63916-inputs/source-closure.json",
+      "sha256": "98d3e23561ebaae2fb2362b97364c653a87761e02c5718485caba4293c545627",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "clippy-14845-inputs/source-closure.json",
+      "sha256": "5d89e1bd265821a0d8b090a02d0644cd419c6fb4acf3b2ef7aefe1e8cc03cf66",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "failed-async-tests-31403-inputs/source-closure.json",
+      "sha256": "9df661d360199511a392bdac73ba2eaebaf96cef78855c813b6ada610579370c",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "failed-ffi-contract-99229-inputs/source-closure.json",
+      "sha256": "3b9b4c0476ce5a009e0f9222c65ce21099eb7223806cd4cbfc50e9123b729fd1",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "ffi-contract-60875-inputs/source-closure.json",
+      "sha256": "694e2339fd955951e6abf1367f4e3a22a54f20deb8ea63e44271634e1f343368",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "fixture-artifact-70341-inputs/source-closure.json",
+      "sha256": "ee1eee906fe0f528d8f434c0d72ff3dba929517ca330354c9ffbb0e83d50ba0d",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "native-build-final-inputs/source-closure.json",
+      "sha256": "b1d6c73049f79a8082a88c8ab0277d1e6c82cc4f592ba2ba8d11aad9b8be4996",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "native-tests-77891-inputs/source-closure.json",
+      "sha256": "f6282ed8081bdc9ef045160aead4ce8450ab8ccd9b6f51c02d560d6c9c62037c",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "production-artifact-5057-inputs/source-closure.json",
+      "sha256": "9429739d24ad06d31307d5ecfad11cdd83837f7e3041f9526bd7924ba878482c",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "rust-smoke-inputs/source-closure.json",
+      "sha256": "69a07a348cad852bafb908cfaf431bb5923e81f3737e510467d819a20e8e99a5",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    },
+    {
+      "manifest": "viewer-json-inputs/source-closure.json",
+      "sha256": "40260355775f369e85ea10a9b1a004266be3589e25085f715db8eea55f27e0c1",
+      "fileLists": 0,
+      "sourceRows": 465,
+      "missingSourceRows": 0
+    }
+  ],
+  "completeDiffCIPlan": {
+    "lane_swiftpm": "true",
+    "lane_app": "true",
+    "lane_contracts": "true",
+    "lane_rust_macos": "true",
+    "lane_rust_windows": "true"
+  },
+  "currentHeadRemoteCIRun": null,
+  "windowsNativeValidation": "not executed for this increment",
+  "arkDeckConsumption": "Current Packages/ArkDeckKit consumes ArkTraceAppSupport/Core; no Rust ABI consumer found in current package or Rust crate sources. Rust migration acceptance remains pending.",
+  "failuresAndLimitations": [
+    {
+      "gate": "async-tests",
+      "exitCode": 101,
+      "reason": "nonexistent trust enum variant corrected to existing DevelopmentPinned; source and logs preserved"
+    },
+    {
+      "gate": "ffi-contract",
+      "exitCode": 1,
+      "reason": "test expected invalid opcode before stale nonzero engine; common guard rejects invalid handle first; corrected input-validation calls use engine=0; source and logs preserved"
+    },
+    {
+      "commandFile": "swift-tests-final.command.json",
+      "terminalSession": 18684,
+      "observedExitCode": 1,
+      "failedTests": [
+        "TimelineRenderingTests.testAPendingViewportIsDrawnBeforeItsQueryReturns",
+        "TimelineRenderingTests.testReapplyingTheSameSnapshotAsksForNoRedraw"
+      ],
+      "observedAssertionFailures": 6,
+      "parserIntegrationFailures": 0,
+      "integrationSkipped": 6,
+      "frozenCompilerInputs": "swift-tests-18684-inputs/inputs.json",
+      "limitation": "The original complete stdout/stderr/receipt was overwritten by mistakenly reusing the gate prefix for native-environment rerun session 83704. This note records observed tool output only; it is not a replacement byte-for-byte log or passing evidence."
+    },
+    "XCFramework packaging exited 0 with validated checksums but contains CoreSimulator/Metal unavailable diagnostics; not release acceptance."
+  ],
+  "remaining": [
+    "App background maintenance and Settings purge Rust SDK adapter",
+    "actor namespace recovery",
+    "multiprocess builder/read/purge",
+    "product low disk",
+    "legacy annotations backup/import/conflict",
+    "complete cached query coverage",
+    "default App and hot snapshot cutover",
+    "ArkDeck equivalent Rust consumer",
+    "performance and RSS",
+    "signed distribution",
+    "macOS full acceptance"
+  ]
+}

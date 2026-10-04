@@ -11,7 +11,7 @@ extern "C" {
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
 #define ARKTRACE_ABI_VERSION 1u
-#define ARKTRACE_CONTRACT_DIGEST "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e"
+#define ARKTRACE_CONTRACT_DIGEST "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_STATUS_OK 0u
@@ -132,6 +132,10 @@ ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host
 #define ARKTRACE_DOMINANT_IDENTITY 1u
 #define ARKTRACE_QUALITY_STATUS_OK 1u
 #define ARKTRACE_QUALITY_STATUS_WARNINGS 2u
+#define ARKTRACE_CAP_CACHE_MAINTENANCE 16u
+#define ARKTRACE_CACHE_INVENTORY 1u
+#define ARKTRACE_CACHE_MAINTAIN 2u
+#define ARKTRACE_CACHE_PURGE_UNUSED 3u
 typedef struct ArkTraceAbiIdentity {
     uint32_t struct_size;
     uint32_t abi_version;
@@ -362,6 +366,7 @@ uint32_t arktrace_session_open(uint64_t engine, const uint8_t * source, uint64_t
 uint32_t arktrace_session_poll(uint64_t engine, uint64_t session, ArkTraceSessionStatus * output, uint64_t output_bytes);
 uint32_t arktrace_session_close(uint64_t engine, uint64_t session);
 uint32_t arktrace_session_release(uint64_t engine, uint64_t session);
+uint32_t arktrace_cache_request_submit(uint64_t engine, uint32_t operation, uint32_t timeout_ms, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_request_submit(uint64_t engine, uint64_t session, const uint8_t * input, uint64_t input_bytes, uint32_t timeout_ms, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_request_poll(uint64_t engine, uint64_t request, ArkTracePollStatus * output, uint64_t output_bytes);
 uint32_t arktrace_request_cancel(uint64_t engine, uint64_t request);

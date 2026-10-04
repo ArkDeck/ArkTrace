@@ -95,6 +95,10 @@ pub struct CacheMaintenance {
     maximum_entries: usize,
 }
 impl CacheMaintenance {
+    pub(crate) fn root(&self) -> &HeldDirectory {
+        &self.root
+    }
+
     pub fn new(root: HeldDirectory, maximum_entries: usize) -> Result<Self, EngineError> {
         if !(1..=65_536).contains(&maximum_entries) {
             return Err(invalid());

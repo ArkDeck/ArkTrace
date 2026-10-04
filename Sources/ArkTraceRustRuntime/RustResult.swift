@@ -41,6 +41,24 @@ public struct RustResult: Sendable {
         }
     }
     @concurrent
+    func cacheInventory() async throws -> RustCacheInventory {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, engineIdentity != 0, count <= 4096 else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustCacheDecoder.inventory(data, request: requestIdentity)
+    }
+    @concurrent
+    func cacheReport() async throws -> RustCacheMaintenanceReport {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, engineIdentity != 0, count <= 4096 else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustCacheDecoder.report(data, request: requestIdentity)
+    }
+    @concurrent
     func openView(identity: RustSessionIdentity) async throws -> RustOpenView {
         precondition(!Thread.isMainThread)
         guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }

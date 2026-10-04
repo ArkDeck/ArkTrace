@@ -68,7 +68,9 @@ pub unsafe extern "C" fn arktrace_abi_identity(out: *mut AbiIdentity, bytes: u64
             struct_size: size_of::<AbiIdentity>() as u32,
             abi_version: ABI_VERSION,
             capabilities: if cfg!(target_os = "macos") {
-                u64::from(CAP_MACOS_ENGINE | CAP_COLD_JSON | CAP_VIEWPORT_RECORDS)
+                u64::from(
+                    CAP_MACOS_ENGINE | CAP_COLD_JSON | CAP_VIEWPORT_RECORDS | CAP_CACHE_MAINTENANCE,
+                )
             } else {
                 0
             } | if cfg!(feature = "process-fixtures") {
@@ -308,6 +310,49 @@ simple!(arktrace_session_release(engine, session: u64), {
         Err(STATUS_UNSUPPORTED_HOST)
     }
 });
+/// # Safety
+/// Output is a live, aligned writable uint64_t of exactly eight bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn arktrace_cache_request_submit(
+    engine: u64,
+    operation: u32,
+    ms: u32,
+    out: *mut u64,
+    bytes: u64,
+) -> u32 {
+    guard(engine, || {
+        let out = unsafe { output(out, bytes) }?;
+        if !matches!(
+            operation,
+            CACHE_INVENTORY | CACHE_MAINTAIN | CACHE_PURGE_UNUSED
+        ) {
+            return Err(STATUS_INVALID_INPUT);
+        }
+        let timeout = timeout(ms)?;
+        let host = registry::host(engine)?;
+        host.active()?;
+        #[cfg(target_os = "macos")]
+        {
+            let operation = match operation {
+                CACHE_INVENTORY => arktrace_engine::CacheRequest::Inventory,
+                CACHE_MAINTAIN => arktrace_engine::CacheRequest::Maintain,
+                CACHE_PURGE_UNUSED => arktrace_engine::CacheRequest::PurgeUnused,
+                _ => return Err(STATUS_INVALID_INPUT),
+            };
+            *out = host
+                .engine
+                .submit_cache_maintenance(operation, timeout)
+                .map_err(registry::failure)?
+                .raw();
+            Ok(())
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (operation, timeout, host, out);
+            Err(STATUS_UNSUPPORTED_HOST)
+        }
+    })
+}
 /// # Safety
 /// Closed UTF-8 input/output record are live, aligned, sized and disjoint.
 #[unsafe(no_mangle)]

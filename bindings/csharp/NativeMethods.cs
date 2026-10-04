@@ -5,7 +5,7 @@ namespace ArkTrace.Native;
 public static unsafe partial class NativeMethods
 {
     public const uint ABI_VERSION = 1;
-    public const string CONTRACT_DIGEST = "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e";
+    public const string CONTRACT_DIGEST = "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8";
     public const uint STATUS_OK = 0;
     public const uint STATUS_BUSY = 1;
     public const uint STATUS_CAPACITY = 2;
@@ -124,6 +124,10 @@ public static unsafe partial class NativeMethods
     public const uint DOMINANT_IDENTITY = 1;
     public const uint QUALITY_STATUS_OK = 1;
     public const uint QUALITY_STATUS_WARNINGS = 2;
+    public const uint CAP_CACHE_MAINTENANCE = 16;
+    public const uint CACHE_INVENTORY = 1;
+    public const uint CACHE_MAINTAIN = 2;
+    public const uint CACHE_PURGE_UNUSED = 3;
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_abi_identity")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_abi_identity(AbiIdentity* output, ulong output_bytes);
@@ -154,6 +158,9 @@ public static unsafe partial class NativeMethods
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_session_release")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_session_release(ulong engine, ulong session);
+    [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_cache_request_submit")]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static partial uint arktrace_cache_request_submit(ulong engine, uint operation, uint timeout_ms, ulong* output, ulong output_bytes);
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_request_submit")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_request_submit(ulong engine, ulong session, byte* input, ulong input_bytes, uint timeout_ms, ulong* output, ulong output_bytes);

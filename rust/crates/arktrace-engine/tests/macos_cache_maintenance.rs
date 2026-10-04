@@ -539,3 +539,217 @@ fn cancellation_after_durable_intent_drains_removal_and_does_not_claim_no_mutati
             .exists()
     );
 }
+
+#[cfg(feature = "process-fixtures")]
+mod async_tests {
+    use super::*;
+    use arktrace_engine::{
+        AsyncEngine, CacheRequest, DrainStatus, RequestState, RuntimeConfiguration, RuntimeFailure,
+        RuntimeHandle, RuntimeLimits, WorkerBoundary,
+    };
+    use arktrace_platform::CodeTrustPolicy;
+    use std::sync::{Arc, Mutex, atomic::AtomicBool, mpsc};
+
+    fn configuration(f: &Fixture) -> RuntimeConfiguration {
+        let metadata = CacheMetadata::decode(include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../../contracts/ready-metadata.json"
+        )))
+        .unwrap();
+        let mut config = RuntimeConfiguration::new(
+            f.path.join("unopened-actor-namespace"),
+            f.path.join("absent-tools/helper"),
+            f.path.join("absent-tools/parser"),
+            "a".repeat(64),
+            metadata.parser,
+            CodeTrustPolicy::DevelopmentPinned,
+        );
+        config.cache_directory = Some(f.cache.path().to_owned());
+        config.limits = RuntimeLimits {
+            workers: 1,
+            queue_per_worker: 1,
+            requests: 2,
+            ..RuntimeLimits::default()
+        };
+        config
+    }
+    fn retry<T>(mut call: impl FnMut() -> Result<T, RuntimeFailure>) -> Result<T, RuntimeFailure> {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            match call() {
+                Err(RuntimeFailure::Busy) if Instant::now() < deadline => std::thread::yield_now(),
+                result => return result,
+            }
+        }
+    }
+    fn terminal(engine: &AsyncEngine, request: RuntimeHandle) -> arktrace_engine::RequestStatus {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            let status = retry(|| engine.poll(request)).unwrap();
+            if matches!(status.state, RequestState::Succeeded | RequestState::Failed) {
+                return status;
+            }
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+    }
+    fn submit(engine: &AsyncEngine, operation: CacheRequest) -> RuntimeHandle {
+        retry(|| engine.submit_cache_maintenance(operation, Duration::from_secs(10))).unwrap()
+    }
+    fn drain(engine: &AsyncEngine) {
+        engine.start_drain();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while engine.drain_status() != DrainStatus::Drained {
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+    }
+
+    #[test]
+    fn maintenance_before_open_uses_no_actor_or_parser_and_retains_engine_scoped_result() {
+        let f = Fixture::new();
+        let (_, _, ready) = f.add('a', "2026-10-02T00:00:00Z");
+        let config = configuration(&f);
+        let namespace = config.namespace.clone();
+        let engine = AsyncEngine::create(config).unwrap();
+        let request = submit(&engine, CacheRequest::Inventory);
+        let status = terminal(&engine, request);
+        assert_eq!(status.state, RequestState::Succeeded);
+        assert_eq!(status.session.raw(), 0);
+        let result = retry(|| engine.acquire_result(request)).unwrap();
+        let expected: serde_json::Value = serde_json::from_slice(result.bytes()).unwrap();
+        assert_eq!(expected["session"], 0);
+        assert_eq!(expected["request"], request.raw());
+        assert_eq!(expected["body"]["entryCount"], 1);
+        assert_eq!(expected["body"]["activeEntryCount"], 0);
+        retry(|| engine.release_request(request)).unwrap();
+        let clone = result.clone();
+        let maintained = submit(&engine, CacheRequest::Maintain);
+        assert_eq!(terminal(&engine, maintained).state, RequestState::Succeeded);
+        retry(|| engine.release_request(maintained)).unwrap();
+        assert!(ready.path().exists());
+        let purged = submit(&engine, CacheRequest::PurgeUnused);
+        assert_eq!(terminal(&engine, purged).state, RequestState::Succeeded);
+        let report = retry(|| engine.acquire_result(purged)).unwrap();
+        let report_value: serde_json::Value = serde_json::from_slice(report.bytes()).unwrap();
+        assert_eq!(report_value["body"]["removedEntryCount"], 1);
+        assert_eq!(report_value["body"]["after"]["entryCount"], 0);
+        retry(|| engine.release_request(purged)).unwrap();
+        assert_eq!(
+            engine.session_status(RuntimeHandle::from_raw(0)),
+            Err(RuntimeFailure::InvalidHandle)
+        );
+        assert!(!namespace.exists());
+        drain(&engine);
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(clone.bytes()).unwrap(),
+            expected
+        );
+        assert!(engine.retained_result_bytes() > 0);
+        drop(result);
+        drop(clone);
+        drop(report);
+        assert_eq!(engine.retained_result_bytes(), 0);
+    }
+
+    #[test]
+    fn running_and_queued_maintenance_cancel_and_drain_with_bounded_admission() {
+        let f = Fixture::new();
+        let (_, _, ready) = f.add('a', "2026-10-02T00:00:00Z");
+        let (started_send, started_recv) = mpsc::channel();
+        let (resume_send, resume_recv) = mpsc::channel();
+        let resume = Arc::new(Mutex::new(resume_recv));
+        let first = Arc::new(AtomicBool::new(true));
+        let config = configuration(&f).observe_worker_for_fixture(Arc::new(move |boundary| {
+            if boundary == WorkerBoundary::CacheMaintaining && first.swap(false, Ordering::AcqRel) {
+                started_send.send(()).unwrap();
+                resume
+                    .lock()
+                    .unwrap()
+                    .recv_timeout(Duration::from_secs(10))
+                    .unwrap();
+            }
+        }));
+        let engine = AsyncEngine::create(config).unwrap();
+        let running = submit(&engine, CacheRequest::PurgeUnused);
+        started_recv.recv_timeout(Duration::from_secs(10)).unwrap();
+        let queued = submit(&engine, CacheRequest::PurgeUnused);
+        assert_eq!(
+            engine.submit_cache_maintenance(CacheRequest::Inventory, Duration::from_secs(1)),
+            Err(RuntimeFailure::Capacity)
+        );
+        retry(|| engine.cancel(queued)).unwrap();
+        engine.start_drain();
+        assert_eq!(engine.drain_status(), DrainStatus::Draining);
+        resume_send.send(()).unwrap();
+        drain(&engine);
+        for request in [running, queued] {
+            let status = terminal(&engine, request);
+            assert_eq!(status.state, RequestState::Failed);
+            assert_eq!(status.failure, Some(RuntimeFailure::Cancelled));
+            assert_eq!(status.session.raw(), 0);
+            retry(|| engine.release_request(request)).unwrap();
+        }
+        assert!(ready.path().exists());
+        assert_eq!(engine.retained_result_bytes(), 0);
+    }
+
+    #[test]
+    fn worker_cancel_after_removal_intent_drains_owned_cleanup_before_terminal_failure() {
+        let f = Fixture::new();
+        let (metadata, id, ready) = f.add('a', "2026-10-02T00:00:00Z");
+        let config = configuration(&f).observe_worker_for_fixture(Arc::new(|boundary| {
+            if boundary == WorkerBoundary::CacheMaintaining {
+                arktrace_platform::process_fixture::cancel_next_cache_purge_after_intent();
+            }
+        }));
+        let engine = AsyncEngine::create(config).unwrap();
+        let request = submit(&engine, CacheRequest::PurgeUnused);
+        assert_eq!(
+            terminal(&engine, request).failure,
+            Some(RuntimeFailure::Cancelled)
+        );
+        assert!(!ready.path().exists());
+        assert!(
+            f.owners
+                .published_evidence(&id, &budget())
+                .unwrap()
+                .is_none()
+        );
+        assert!(
+            f.cache
+                .path()
+                .join(".leases")
+                .join(format!("{}.lease", metadata.cache_key.entry_identifier()))
+                .exists()
+        );
+        retry(|| engine.release_request(request)).unwrap();
+        drain(&engine);
+    }
+
+    #[test]
+    fn maintenance_rejects_ephemeral_policy_and_enforces_result_credit_before_publication() {
+        let f = Fixture::new();
+        let (_, _, ready) = f.add('a', "2026-10-02T00:00:00Z");
+        let mut config = configuration(&f);
+        config.cache_directory = None;
+        let ephemeral = AsyncEngine::create(config).unwrap();
+        assert_eq!(
+            ephemeral.submit_cache_maintenance(CacheRequest::Inventory, Duration::from_secs(1)),
+            Err(RuntimeFailure::InvalidRequest)
+        );
+        drain(&ephemeral);
+        let mut config = configuration(&f);
+        config.limits.maximum_retained_result_bytes = 1;
+        let engine = AsyncEngine::create(config).unwrap();
+        let request = submit(&engine, CacheRequest::Inventory);
+        assert_eq!(
+            terminal(&engine, request).failure,
+            Some(RuntimeFailure::OutputLimit)
+        );
+        assert!(ready.path().exists());
+        assert_eq!(engine.retained_result_bytes(), 0);
+        retry(|| engine.release_request(request)).unwrap();
+        drain(&engine);
+    }
+}

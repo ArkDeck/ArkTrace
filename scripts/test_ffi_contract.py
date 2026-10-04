@@ -27,13 +27,21 @@ def main():
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
     identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
     assert bytes(identity.contract_digest)==expected and identity.abi_version==1
-    assert identity.capabilities==(7 if sys.platform=='darwin' else 0)
+    assert identity.capabilities==(23 if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
     storage=(C.c_uint64*8)();bad=C.cast(C.byref(storage,1),C.POINTER(TYPES['AbiIdentity']))
     abi.call('abi_identity',bad,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     for name in ('engine_drain','engine_release','result_release','fixture_panic'):
         abi.call(name,2**64-1,expected=K['STATUS_INVALID_HANDLE'])
+    request=C.c_uint64()
+    abi.call('cache_request_submit',2**64-1,K['CACHE_INVENTORY'],1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_HANDLE'])
+    # A nonzero stale engine is rejected by the common panic guard first.
+    # Zero bypasses that lookup so these exercise scalar/buffer validation.
+    for operation in (0,4,2**32-1):
+        abi.call('cache_request_submit',0,operation,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
+    abi.call('cache_request_submit',0,K['CACHE_INVENTORY'],0,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
+    abi.call('cache_request_submit',0,K['CACHE_INVENTORY'],1,None,C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
     # Bounded arbitrary bytes are valid allocations, never dangling pointers.
     for payload in (b'{}',b'null',b'[]',b'\xff',b'{"sql":"SELECT *"}'):
         abi.input('engine_create',payload,'u64',expected=K['STATUS_INVALID_INPUT'])

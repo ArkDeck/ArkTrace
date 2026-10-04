@@ -70,7 +70,8 @@ public actor RustEngine {
                 unsafe buffer.map { byte in String(byte, radix: 16).count == 1 ? "0" + String(byte, radix: 16) : String(byte, radix: 16) }.joined()
             }
             guard identity.abi_version == ARKTRACE_ABI_VERSION, digest == ARKTRACE_CONTRACT_DIGEST,
-                identity.capabilities & UInt64(ARKTRACE_CAP_MACOS_ENGINE) != 0 else { throw RustAdmission.abiMismatch }
+                identity.capabilities & UInt64(ARKTRACE_CAP_MACOS_ENGINE) != 0,
+                identity.capabilities & UInt64(ARKTRACE_CAP_CACHE_MAINTENANCE) != 0 else { throw RustAdmission.abiMismatch }
             var handle: UInt64 = 0
             try unsafe data.withUnsafeBytes { buffer in
                 let p = unsafe buffer.bindMemory(to: UInt8.self).baseAddress
@@ -86,6 +87,44 @@ public actor RustEngine {
         // Cancellation racing successful admission must not strand an Engine.
         if Task.isCancelled { try await drainAndRelease(handle); throw CancellationError() }
         return RustEngine(handle)
+    }
+
+    public func cacheInventory(timeoutMilliseconds: UInt32 = 30_000) async throws -> RustCacheInventory {
+        let result = try await cacheRequest(UInt32(ARKTRACE_CACHE_INVENTORY), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.cacheInventory()
+    }
+
+    /// Uses the product's standard 20/16 GiB watermarks on the configured root.
+    public func maintainCache(timeoutMilliseconds: UInt32 = 30_000) async throws -> RustCacheMaintenanceReport {
+        let result = try await cacheRequest(UInt32(ARKTRACE_CACHE_MAINTAIN), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.cacheReport()
+    }
+
+    /// Cancellation after durable removal intent may follow completed deletion.
+    public func purgeUnusedCache(timeoutMilliseconds: UInt32 = 30_000) async throws -> RustCacheMaintenanceReport {
+        let result = try await cacheRequest(UInt32(ARKTRACE_CACHE_PURGE_UNUSED), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.cacheReport()
+    }
+
+    private func cacheRequest(_ operation: UInt32, timeoutMilliseconds: UInt32) async throws -> RustResult {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(60))
+        let handle = lease.handle
+        let request: UInt64
+        while true {
+            try Task.checkCancellation()
+            guard !draining else { throw RustAdmission.closed }
+            var out: UInt64 = 0
+            let status = unsafe arktrace_cache_request_submit(handle, operation, timeoutMilliseconds, &out, UInt64(MemoryLayout<UInt64>.size))
+            if status == ARKTRACE_STATUS_BUSY {
+                guard ContinuousClock.now < deadline else { throw RustAdmission.busy }
+                try await Task.sleep(for: .milliseconds(1)); continue
+            }
+            try checkAdmission(status)
+            request = out; requests.insert(out); break
+        }
+        let result = try await finishResult(request)
+        if result.kind == ARKTRACE_RESULT_FAILURE { _ = try await result.decode(RustOpenResult.self) }
+        return result
     }
 
     public func open(_ source: URL, format: RustSourceFormat, timeoutMilliseconds: UInt32 = 60_000) async throws -> RustSession {

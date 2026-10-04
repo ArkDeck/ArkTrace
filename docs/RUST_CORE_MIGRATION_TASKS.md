@@ -507,6 +507,16 @@ inventory.active 与 skippedActive 的区别；实际 parser Ready 的 dual-sess
 Runtime/SDK/App 维护入口及其余 008/macOS 验收继续推进，见
 [维护记录](migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。
 
+同日后续接通非阻塞 Engine-scoped cache request、C ABI scalar 入口与 Swift SDK 的 inventory、
+standard maintain、purge-unused。维护复用普通 request 的队列/取消/结果/drain，session 为零；
+独立于 trace open 和 parser 加载。四项异步原生回归覆盖首次 open 前、容量与排队取消、
+intent 后取消、ephemeral 拒绝与结果预算；四项 SDK 解码回归覆盖严格身份/整数/键/预算。
+500 Rust、76 SDK、605 默认 Swift tests 通过；实际原始 zlib 的 SDK 双读者保护、purge/reparse、
+提前取消，三份 Trace 的 75 个 FFI/Swift response 与五个原生 SIGKILL 删除窗口通过。
+C ABI 暂定 v1 新增一个 export，摘要/绑定/fixture 与 production SDK 同步。App/ArkDeck 的
+Rust 维护消费和其余 008/012/macOS 验收继续待办，见
+[异步维护接线记录](migration-runs/AT-RUST-008-012-2026-10-05-async-cache-maintenance.md)。
+
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：007。

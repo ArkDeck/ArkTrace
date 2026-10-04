@@ -56,6 +56,7 @@ fn fixture() -> (AsyncEngine, Receiver<Command>, [RuntimeHandle; 2]) {
     let (sender, receiver) = mpsc::sync_channel(24);
     (
         AsyncEngine {
+            cache_enabled: false,
             shared,
             senders: vec![sender],
             limits,

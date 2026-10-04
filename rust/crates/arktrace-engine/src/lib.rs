@@ -5,9 +5,9 @@ mod metadata;
 mod query_deadlines;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
-    AsyncEngine, DrainStatus, OpenTicket, RepositoryRequest, RequestState, RequestStatus,
-    RuntimeConfiguration, RuntimeFailure, RuntimeLimits, SessionState, SessionStatus,
-    WorkerBoundary,
+    AsyncEngine, CacheRequest, DrainStatus, OpenTicket, RepositoryRequest, RequestState,
+    RequestStatus, RuntimeConfiguration, RuntimeFailure, RuntimeLimits, SessionState,
+    SessionStatus, WorkerBoundary,
 };
 pub use query_deadlines::{
     BatchQueryDeadlines, DeadlineBatch, DeadlineQuery, DeadlineRepositoryQuery, QueryClock,

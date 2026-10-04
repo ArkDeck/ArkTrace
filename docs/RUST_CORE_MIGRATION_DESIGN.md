@@ -522,6 +522,16 @@ authority 下回收精确 ledger/marker；missing Ready proof 与 quarantine 保
 [维护记录](migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。Runtime/SDK/App 独立维护
 入口、产品 low-disk、多进程竞争、旧标注导入和默认 App 切换仍未验收。
 
+同日后续已接通 Engine-scoped 异步维护请求与 Swift SDK：固定配置 root，闭集 scalar opcode，
+共享普通 request 的有界 worker queue、取消、retained result 与 drain；不需要 session，不在
+前端执行 IO 或加载 parser。结果 envelope 的 session 为零。C ABI v1 暂定契约新增第 24 个
+export 与维护 capability，摘要和 C/C# 生成绑定同步；旧 artifact 由摘要检查拒绝。
+SDK 严格解析有界整数库存/报告，保持 inventory.active 与 skippedActive 的不同语义，
+不把前后不同观察强行列成计数等式。实际 SDK cold/warm/双读者/purge/reparse 通过，见
+[异步维护接线记录](migration-runs/AT-RUST-008-012-2026-10-05-async-cache-maintenance.md)。
+App 后台维护/Settings purge、ArkDeck Rust 消费与其余整体验收继续待办；App 维护仍应在
+成功 open 后调度，保持 AT-PERF-002 的首字节路径。
+
 切换时提供有界、单向的旧 cache reader：
 
 1. 固定产品根目录，拒绝链接/越界，识别每个 entry 的真实 source hash 和 parser identity。

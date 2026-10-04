@@ -2,10 +2,10 @@
 use arktrace_viewer::{PrimitiveRecord, QualityRecord, TrackRecord, ViewportRecord};
 pub const ABI_VERSION: u32 = 1;
 pub const CONTRACT_DIGEST_HEX: &str =
-    "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e";
+    "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8";
 pub const CONTRACT_DIGEST: [u8; 32] = [
-    60, 27, 41, 110, 167, 237, 102, 41, 50, 153, 91, 174, 80, 84, 38, 61, 123, 146, 209, 188, 63,
-    255, 93, 135, 185, 118, 186, 60, 64, 148, 132, 78,
+    244, 226, 222, 69, 33, 126, 121, 242, 13, 218, 95, 22, 178, 50, 80, 224, 99, 69, 246, 172, 131,
+    185, 9, 171, 48, 51, 95, 23, 221, 207, 87, 216,
 ];
 pub const STATUS_OK: u32 = 0;
 pub const STATUS_BUSY: u32 = 1;
@@ -125,6 +125,10 @@ pub const PROGRESS_READY: u32 = 8;
 pub const DOMINANT_IDENTITY: u32 = 1;
 pub const QUALITY_STATUS_OK: u32 = 1;
 pub const QUALITY_STATUS_WARNINGS: u32 = 2;
+pub const CAP_CACHE_MAINTENANCE: u32 = 16;
+pub const CACHE_INVENTORY: u32 = 1;
+pub const CACHE_MAINTAIN: u32 = 2;
+pub const CACHE_PURGE_UNUSED: u32 = 3;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct AbiIdentity {

@@ -242,6 +242,7 @@ pub enum WorkerBoundary {
     OpeningDrained,
     Querying,
     Closing,
+    CacheMaintaining,
 }
 fn observe(config: &RuntimeConfiguration, boundary: WorkerBoundary) {
     #[cfg(feature = "process-fixtures")]
@@ -363,6 +364,7 @@ struct SessionRecord {
     latest_viewport_generation: u64,
 }
 struct RequestRecord {
+    worker: usize,
     status: RequestStatus,
     token: CancellationToken,
     result: Option<OwnedResult>,
@@ -395,7 +397,16 @@ enum Operation {
         format: SourceFormat,
     },
     Query(Box<RepositoryRequest>),
+    Cache(CacheRequest),
     Close,
+}
+/// Engine-scoped requests use only the fixed configured cache root. They do
+/// not create a trace session, load parser tools or accept request paths.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CacheRequest {
+    Inventory,
+    Maintain,
+    PurgeUnused,
 }
 /// All front-end methods use try-lock/try-send; they never wait for IO, SQL,
 /// worker completion or a publication lock. Explicit drain is polled. Drop
@@ -404,6 +415,7 @@ pub struct AsyncEngine {
     shared: Arc<Shared>,
     senders: Vec<SyncSender<Command>>,
     limits: RuntimeLimits,
+    cache_enabled: bool,
 }
 impl AsyncEngine {
     pub fn create(configuration: RuntimeConfiguration) -> Result<Self, RuntimeFailure> {
@@ -440,6 +452,7 @@ impl AsyncEngine {
             shared,
             senders,
             limits,
+            cache_enabled: configuration.cache_directory.is_some(),
         })
     }
     fn registry(&self) -> Result<MutexGuard<'_, Registry>, RuntimeFailure> {
@@ -538,6 +551,7 @@ impl AsyncEngine {
             return Err(RuntimeFailure::Capacity);
         }
         let request = registry.table.insert(Record::Request(RequestRecord {
+            worker,
             status: RequestStatus {
                 session,
                 state: RequestState::Queued,
@@ -569,6 +583,37 @@ impl AsyncEngine {
                 })
             }
         }
+    }
+    /// Admission shares the bounded request table and worker queues. No disk
+    /// work, parser verification or wait occurs on this calling thread.
+    pub fn submit_cache_maintenance(
+        &self,
+        operation: CacheRequest,
+        timeout: Duration,
+    ) -> Result<RuntimeHandle, RuntimeFailure> {
+        self.check_running()?;
+        if !self.cache_enabled {
+            return Err(RuntimeFailure::InvalidRequest);
+        }
+        let budget = self.budget(timeout)?;
+        let mut registry = self.registry()?;
+        self.check_running()?;
+        let worker = (0..self.limits.workers)
+            .map(|offset| (registry.next_worker + offset) % self.limits.workers)
+            .min_by_key(|index| registry.queued[*index])
+            .ok_or(RuntimeFailure::WorkerPanicked)?;
+        if registry.queued[worker] >= self.limits.queue_per_worker {
+            return Err(RuntimeFailure::Capacity);
+        }
+        let request = self.enqueue(
+            &mut registry,
+            worker,
+            RuntimeHandle::from_raw(0),
+            budget,
+            Operation::Cache(operation),
+        )?;
+        registry.next_worker = (worker + 1) % self.limits.workers;
+        Ok(request)
     }
     pub fn submit(
         &self,
@@ -867,6 +912,7 @@ fn engine_failure(stage: EngineStage, failure: EngineFailure) -> RuntimeFailure 
 fn load_tools(
     config: &RuntimeConfiguration,
     budget: &EngineBudget,
+    held_cache: Option<&HeldDirectory>,
 ) -> Result<Tools, RuntimeFailure> {
     let io = IoBudget {
         maximum_bytes: 256 * 1024 * 1024,
@@ -906,7 +952,10 @@ fn load_tools(
         cache_root: config
             .cache_directory
             .as_ref()
-            .map(|p| HeldDirectory::open_private(p))
+            .map(|p| match held_cache {
+                Some(held) => held.revalidate().map(|()| held.clone()),
+                None => HeldDirectory::open_private(p),
+            })
             .transpose()
             .map_err(|e| engine_failure(EngineStage::CacheLookup, EngineFailure::Host(e)))?,
     })
@@ -1228,17 +1277,72 @@ fn process(
     config: &RuntimeConfiguration,
     tools: &mut Option<Tools>,
     sessions: &mut HashMap<RuntimeHandle, ActorSession>,
+    maintenance: &mut Option<crate::CacheMaintenance>,
 ) -> Result<Option<OwnedResult>, RuntimeFailure> {
     if !matches!(command.operation, Operation::Close) && is_closing(shared, command.session) {
         command.budget.cancellation.cancel();
     }
     match &command.operation {
+        Operation::Cache(operation) => {
+            observe(config, WorkerBoundary::CacheMaintaining);
+            let io = IoBudget {
+                maximum_bytes: 16_384,
+                deadline: command.budget.deadline,
+                cancellation: command.budget.cancellation.clone(),
+            };
+            io.check()
+                .map_err(|e| engine_failure(EngineStage::CacheLookup, EngineFailure::Host(e)))?;
+            if maintenance.is_none() {
+                let root = match tools.as_ref().and_then(|t| t.cache_root.as_ref()) {
+                    Some(held) => held.clone(),
+                    None => HeldDirectory::open_private(
+                        config
+                            .cache_directory
+                            .as_ref()
+                            .ok_or(RuntimeFailure::InvalidRequest)?,
+                    )
+                    .map_err(|e| {
+                        engine_failure(EngineStage::CacheLookup, EngineFailure::Host(e))
+                    })?,
+                };
+                *maintenance =
+                    Some(crate::CacheMaintenance::new(root, 4096).map_err(RuntimeFailure::Engine)?);
+            }
+            let cache = maintenance.as_ref().ok_or(RuntimeFailure::WorkerPanicked)?;
+            match operation {
+                CacheRequest::Inventory => response(
+                    &cache.inventory(&io).map_err(RuntimeFailure::Engine)?,
+                    command,
+                    shared,
+                    config,
+                ),
+                CacheRequest::Maintain => response(
+                    &cache
+                        .maintain(crate::CacheWatermarks::STANDARD, &io)
+                        .map_err(RuntimeFailure::Engine)?,
+                    command,
+                    shared,
+                    config,
+                ),
+                CacheRequest::PurgeUnused => response(
+                    &cache.purge_unused(&io).map_err(RuntimeFailure::Engine)?,
+                    command,
+                    shared,
+                    config,
+                ),
+            }
+            .map(Some)
+        }
         Operation::Open { source, format } => {
             if command.budget.cancellation.is_cancelled() {
                 return Err(RuntimeFailure::Cancelled);
             }
             if tools.is_none() {
-                *tools = Some(load_tools(config, &command.budget)?);
+                *tools = Some(load_tools(
+                    config,
+                    &command.budget,
+                    maintenance.as_ref().map(|m| m.root()),
+                )?);
             }
             let tools = tools.as_ref().ok_or(RuntimeFailure::WorkerPanicked)?;
             let io = IoBudget {
@@ -1335,6 +1439,7 @@ fn fatal(error: RuntimeFailure) -> bool {
                         arktrace_platform::HostError::Changed
                             | arktrace_platform::HostError::IdentityMismatch
                             | arktrace_platform::HostError::InvalidEvidence
+                            | arktrace_platform::HostError::CleanupFailed
                     )
                     | EngineFailure::Store(
                         arktrace_store::StoreError::WorkerFailed
@@ -1470,6 +1575,7 @@ fn run_worker(
 ) {
     let _exit = WorkerExit(shared.clone());
     let mut tools = None;
+    let mut maintenance = None;
     let mut sessions = HashMap::new();
     let crashed = catch_unwind(AssertUnwindSafe(|| {
         while !shared.stopping.load(Ordering::Acquire) {
@@ -1488,7 +1594,14 @@ fn run_worker(
                 registry.queued[index] -= 1;
             }
             let result = catch_unwind(AssertUnwindSafe(|| {
-                process(&command, &shared, &config, &mut tools, &mut sessions)
+                process(
+                    &command,
+                    &shared,
+                    &config,
+                    &mut tools,
+                    &mut sessions,
+                    &mut maintenance,
+                )
             }))
             .unwrap_or(Err(RuntimeFailure::WorkerPanicked));
             finish_command(&shared, &command, &config, &mut sessions, result);
@@ -1546,21 +1659,10 @@ fn run_worker(
             }
         }
         if crashed {
-            let worker_sessions = registry
-                .table
-                .values()
-                .filter_map(|r| match r {
-                    Record::Request(r) if !r.status.state.terminal() => Some(r.status.session),
-                    _ => None,
-                })
-                .filter(
-                    |h| matches!(registry.table.get(*h),Ok(Record::Session(s)) if s.worker==index),
-                )
-                .collect::<Vec<_>>();
             for record in registry.table.values_mut() {
                 if let Record::Request(r) = record
                     && !r.status.state.terminal()
-                    && worker_sessions.contains(&r.status.session)
+                    && r.worker == index
                 {
                     r.status.state = RequestState::Failed;
                     r.status.failure = Some(RuntimeFailure::WorkerPanicked);
@@ -1586,6 +1688,7 @@ fn run_worker(
             }
         }
     }
+    drop(maintenance);
     drop(tools); // release executable/directory descriptors before Drained
 }
 
@@ -1665,6 +1768,7 @@ mod tests {
             result_budget: ResultBudget::new(4096),
         });
         let engine = AsyncEngine {
+            cache_enabled: false,
             shared: shared.clone(),
             senders: Vec::new(),
             limits,
@@ -1751,6 +1855,10 @@ mod tests {
             RuntimeFailure::WorkerPanicked,
             engine_failure(EngineStage::Closing, EngineFailure::CleanupFailed),
             engine_failure(
+                EngineStage::CacheLookup,
+                EngineFailure::Host(arktrace_platform::HostError::CleanupFailed),
+            ),
+            engine_failure(
                 EngineStage::Querying,
                 EngineFailure::Store(arktrace_store::StoreError::WorkerFailed),
             ),
@@ -1777,6 +1885,7 @@ mod tests {
             result_budget: ResultBudget::new(128),
         });
         let engine = AsyncEngine {
+            cache_enabled: false,
             shared: shared.clone(),
             senders: Vec::new(),
             limits,
@@ -1810,6 +1919,7 @@ mod tests {
         });
         let (sender, _receiver) = mpsc::sync_channel(2);
         let engine = AsyncEngine {
+            cache_enabled: false,
             shared: shared.clone(),
             senders: vec![sender],
             limits,
@@ -1864,6 +1974,7 @@ mod tests {
         });
         let (sender, receiver) = mpsc::sync_channel(2);
         let engine = AsyncEngine {
+            cache_enabled: false,
             shared: shared.clone(),
             senders: vec![sender],
             limits,
@@ -1889,6 +2000,7 @@ mod tests {
             request = registry
                 .table
                 .insert(Record::Request(RequestRecord {
+                    worker: 0,
                     viewport_generation: None,
                     status: RequestStatus {
                         session,

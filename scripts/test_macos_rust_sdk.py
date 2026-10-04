@@ -46,7 +46,7 @@ def consumer(artifact):
         subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter','ArkTraceRustRuntimeTests','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
     unit_output=unit_log.read_text(encoding='utf-8')
     unit_tests=re.findall(r"Test Case '.*ArkTraceRustRuntimeTests.*' passed",unit_output)
-    assert len(unit_tests)==72 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
+    assert len(unit_tests)==76 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
     core_log=cache/'core-consumer-build.log'
     with core_log.open('w') as output:
         subprocess.run(['sh','scripts/run-swiftpm.sh','build','--product','ArkTraceRustCoreConformance','--disable-sandbox',
