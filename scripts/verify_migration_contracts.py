@@ -24,7 +24,7 @@ def main():
         ("swift-scoped-slices", "scoped-slices-inputs", 6, True),
         ("swift-scoped-counters", "scoped-counters-inputs", 7, True),
     ]:
-        receipt = json.loads((ROOT / viewer / f"{stem}-receipt.json").read_text())
+        receipt = json.loads((ROOT / viewer / f"{stem}-receipt.json").read_text(encoding="utf-8"))
         required = {viewer + inputs + ".json", viewer + stem + ".json"}
         seen = set()
         for entry in receipt["sourceDigests"]:
@@ -44,13 +44,13 @@ def main():
             if inputs.startswith("scoped-"):
                 assert {"rust/crates/arktrace-viewer/oracle/ScopedSliceOracle.swift", "rust/crates/arktrace-viewer/oracle/run_scoped_slice_oracle.py"} <= seen
                 assert receipt["database"]["bytesUnchanged"]
-        inputs_json = json.loads((ROOT / viewer / f"{inputs}.json").read_text())
-        outputs_json = json.loads((ROOT / viewer / f"{stem}.json").read_text())
+        inputs_json = json.loads((ROOT / viewer / f"{inputs}.json").read_text(encoding="utf-8"))
+        outputs_json = json.loads((ROOT / viewer / f"{stem}.json").read_text(encoding="utf-8"))
         names = [v["name"] for v in (inputs_json["cases"] if inputs.startswith("scoped-") else inputs_json)]
         assert len(names) == len(set(names)) == len(outputs_json) == receipt["vectors"] == count
         assert names == [v["name"] for v in outputs_json]
     print("Viewer oracles: retained geometry/boundary/old plan/scope-before; 13 current loader, 8 actual detail/style, 6 actual SQLite slices and 7 counter scope vectors with source identities")
-    presentation_receipt = json.loads((ROOT / viewer / "presentation-swift-receipt.json").read_text())
+    presentation_receipt = json.loads((ROOT / viewer / "presentation-swift-receipt.json").read_text(encoding="utf-8"))
     assert presentation_receipt["copiedAlgorithms"] is False
     presentation_seen = set()
     for entry in presentation_receipt["sourceDigests"]:
@@ -71,8 +71,8 @@ def main():
     } <= presentation_seen
     for name in ("ArkTraceCore", "ArkTraceRendering"):
         assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in presentation_seen if p.startswith(f"Sources/{name}/")}
-    presentation_inputs = json.loads((ROOT / viewer / "presentation-inputs.json").read_text())
-    presentation_outputs = json.loads((ROOT / viewer / "presentation-swift-oracle.json").read_text())
+    presentation_inputs = json.loads((ROOT / viewer / "presentation-inputs.json").read_text(encoding="utf-8"))
+    presentation_outputs = json.loads((ROOT / viewer / "presentation-swift-oracle.json").read_text(encoding="utf-8"))
     for section, count in (("palette", 1068), ("genericDetails", 38), ("dto", 62)):
         names = [entry["name"] for entry in presentation_inputs[section]]
         assert len(names) == len(set(names)) == presentation_receipt["counts"][section] == count

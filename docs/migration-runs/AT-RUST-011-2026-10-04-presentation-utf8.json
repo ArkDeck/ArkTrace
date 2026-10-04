@@ -1,0 +1,84 @@
+{
+  "recordVersion": 1,
+  "status": "in-progress",
+  "capturedAtUTC": "2026-10-04T03:06:01.386010+00:00",
+  "baseCommit": "dc0701a9746809f9af2227ce93214c1ce376e45d",
+  "failedNativeWindowsRun": 37172277525,
+  "failedStep": "Format, architecture, licenses and contract checks",
+  "nativeFailure": {
+    "exception": "UnicodeDecodeError",
+    "codec": "cp1252",
+    "byte": "0x81",
+    "position": 5797,
+    "file": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json"
+  },
+  "sourceDigests": [
+    {
+      "path": "scripts/verify_migration_contracts.py",
+      "byteCount": 9597,
+      "sha256": "f1f05f0a7b0e7c2665b55365b6d00bcb63de9854936b2caa7678bb4c85de78b9"
+    },
+    {
+      "path": "scripts/test_migration_contracts.py",
+      "byteCount": 1079,
+      "sha256": "b6519bbb48339a00999c70075f31cf6c692dfb975588d5a798305edfa8d0b7f8"
+    },
+    {
+      "path": "scripts/ci_plan.sh",
+      "byteCount": 7131,
+      "sha256": "9ae63f0203e764202f408a3d918554ea75131372a7e930d5352be7d3ff699ad5"
+    },
+    {
+      "path": "scripts/test_ci_plan.sh",
+      "byteCount": 7514,
+      "sha256": "314e9cec0f2d3dd88c8df5a566958138636f5e31e3eb2b4083091e5daf4df35f"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "byteCount": 30132,
+      "sha256": "72c00c9bf9ee7a6dbafd41a68df0eb5eb299d72266463f425323dc230135761f"
+    }
+  ],
+  "fixtureBytesUnchanged": true,
+  "regression": {
+    "usesActualFixture": true,
+    "injectsWindowsDefaultTextEncoding": true,
+    "oldDefaultReadStillRejected": true,
+    "beforeExitCode": 1,
+    "beforeSameByteAndPosition": true,
+    "afterExitCode": 0,
+    "fullVerifierPassesUnderCP1252Default": true,
+    "nativeWindowsRerunPassed": false
+  },
+  "plannerCases": 53,
+  "selectedLanes": {
+    "lane_swiftpm": "true",
+    "lane_app": "true",
+    "lane_contracts": "true",
+    "lane_rust_macos": "true",
+    "lane_rust_windows": "true"
+  },
+  "logs": {
+    "ci-windows-failure-37172277525.log": {
+      "byteCount": 29403,
+      "sha256": "bd45ef5a15d1610000f95b160fb72423829796236dcec223f28436f7c99ed144"
+    },
+    "encoding-regression-before.log": {
+      "byteCount": 1567,
+      "sha256": "92852ebc6ea7fa93f767427d644a5d4de629848fae832d7740d43717401809f6"
+    },
+    "encoding-regression-after.log": {
+      "byteCount": 98,
+      "sha256": "850014fd3070c55c603a22c4a9d43d66f8c32a0e184131ed005a562db09246a9"
+    },
+    "encoding-planner.log": {
+      "byteCount": 3501,
+      "sha256": "465d2755ce7df8315fab93025981d9e3ddea2a7ba7cb1564823817a5ecee08cb"
+    }
+  },
+  "limitations": [
+    "CP1252 injection on macOS is a regression check, not native Windows product acceptance. Exact fixed-head Windows CI remains required.",
+    "Rust product sources, Swift SDK, ABI, fixture bytes and parser identity are unchanged.",
+    "Production presentation wire and macOS App cutover remain incomplete."
+  ]
+}

@@ -52,7 +52,7 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
-        scripts/generate_ffi_bindings.py|scripts/ffi_test_support.py|scripts/test_ffi_contract.py)
+        scripts/generate_ffi_bindings.py|scripts/ffi_test_support.py|scripts/test_ffi_contract.py|scripts/verify_migration_contracts.py|scripts/test_migration_contracts.py)
             contracts=true
             rust_macos=true
             rust_windows=true

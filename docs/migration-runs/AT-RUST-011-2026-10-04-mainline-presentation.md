@@ -46,3 +46,15 @@ does not silently change the specification or resolve the product rules.
 Original and fresh evidence is frozen under Git-ignored
 `.build/agent-coordination/arktrace/presentation-mainline-20261004/`.
 AT-RUST-011 and final macOS cross-platform acceptance remain incomplete.
+
+The first hosted run of `dc0701a` passed its macOS Rust and offline lanes, but
+Windows Python 3.12 failed before Rust tests: a default-encoding fixture read
+used CP1252 and rejected UTF-8 byte `0x81` at position 5797. The verifier now
+reads all its JSON files explicitly as UTF-8. A regression uses the actual
+fixture and injects CP1252 as the default; it reproduces the same failure before
+the fix and passes the complete verifier after the fix. All fixture bytes and
+source checks stay intact. The regression runs in offline and both native
+lanes, and both verifier paths select those lanes. This patch selects all lanes
+because it changes the workflow/planner. [Encoding fix record](AT-RUST-011-2026-10-04-presentation-utf8.json)
+retains the original Windows failure and before/after evidence; a new actual
+Windows fixed-head run is required, independent of this local injected check.
