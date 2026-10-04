@@ -258,6 +258,7 @@ pub enum RepositoryRequest {
     CpuSlices(CpuSliceQuery),
     ThreadStates(ThreadStateQuery),
     Slices(TraceSliceQuery),
+    SliceDetails(TraceSliceQuery),
     Counters(CounterQuery),
     CounterSeries(CounterSeriesQuery),
     Frames(TraceFrameQuery),
@@ -294,7 +295,7 @@ impl RepositoryRequest {
             Self::Threads(q) => q.validate(),
             Self::CpuSlices(q) => q.validate(),
             Self::ThreadStates(q) => q.validate(),
-            Self::Slices(q) => q.validate(),
+            Self::Slices(q) | Self::SliceDetails(q) => q.validate(),
             Self::Counters(q) => q.validate(),
             Self::CounterSeries(q) => q.validate(),
             Self::Frames(q) => q.validate(),
@@ -961,6 +962,10 @@ fn query(
         RepositoryRequest::CpuSlices(q) => read!(session.cpu_slices(q, b)),
         RepositoryRequest::ThreadStates(q) => read!(session.thread_states(q, b)),
         RepositoryRequest::Slices(q) => read!(session.slices(q, b)),
+        RepositoryRequest::SliceDetails(q) => {
+            let page = session.slices(q, b).map_err(RuntimeFailure::Engine)?;
+            response(&SliceDetailPage(&page), command, shared, config)
+        }
         RepositoryRequest::Counters(q) => read!(session.counters(q, b)),
         RepositoryRequest::CounterSeries(q) => read!(session.counter_series(q, b)),
         RepositoryRequest::Frames(q) => read!(session.frames(q, b)),
@@ -1031,6 +1036,43 @@ fn query(
         RepositoryRequest::Analyze { request, scope } => {
             read!(session.analyze_bounded(request, *scope, b))
         }
+    }
+}
+
+/// SDK detail projection. Machine/CLI slice serialization intentionally omits
+/// the Inspector handle. Borrow the same query page without an extra record
+/// vector or a second SQLite query; only this operation adds the nullable ID.
+struct SliceDetailPage<'a>(&'a EventPage<TraceSlice>);
+impl Serialize for SliceDetailPage<'_> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeStruct;
+        let mut value = serializer.serialize_struct("SliceDetailPage", 4)?;
+        value.serialize_field("items", &SliceDetailItems(&self.0.items))?;
+        value.serialize_field("truncated", &self.0.truncated)?;
+        value.serialize_field("capabilityAvailable", &self.0.capability_available)?;
+        value.serialize_field("dataQuality", &self.0.data_quality)?;
+        value.end()
+    }
+}
+struct SliceDetailItems<'a>(&'a [TraceSlice]);
+impl Serialize for SliceDetailItems<'_> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeSeq;
+        #[derive(Serialize)]
+        struct Detail<'a> {
+            #[serde(flatten)]
+            slice: &'a TraceSlice,
+            #[serde(rename = "argSetID")]
+            arg_set_id: Option<i64>,
+        }
+        let mut items = serializer.serialize_seq(Some(self.0.len()))?;
+        for slice in self.0 {
+            items.serialize_element(&Detail {
+                slice,
+                arg_set_id: slice.arg_set_id,
+            })?;
+        }
+        items.end()
     }
 }
 fn close_actor(
@@ -1454,6 +1496,50 @@ fn run_worker(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn sdk_slice_details_keep_inspector_handles_without_changing_machine_shape() {
+        let slice = TraceSlice {
+            key: EventKey {
+                table: EventTable::Callstack,
+                row_id: i64::MIN,
+            },
+            range: TraceTimeRange::event(0, i64::MAX).unwrap(),
+            thread_key: None,
+            process_key: None,
+            pid: None,
+            tid: None,
+            process_name: None,
+            thread_name: None,
+            name: "a\0😀".into(),
+            category: None,
+            depth: None,
+            parent_event_key: None,
+            is_async: false,
+            is_open_ended: true,
+            arg_set_id: Some(i64::MAX),
+        };
+        let mut page = EventPage {
+            items: vec![slice],
+            truncated: true,
+            capability_available: true,
+            data_quality: DataQuality::machine(QualityStatus::Ok, vec![]).unwrap(),
+        };
+        for id in [Some(i64::MAX), Some(i64::MIN), Some(0), None] {
+            page.items[0].arg_set_id = id;
+            let machine = serde_json::to_value(&page).unwrap();
+            assert!(machine["items"][0].get("argSetID").is_none());
+            let mut detail = serde_json::to_value(SliceDetailPage(&page)).unwrap();
+            assert_eq!(
+                detail["items"][0]["argSetID"],
+                serde_json::to_value(id).unwrap()
+            );
+            detail["items"][0]
+                .as_object_mut()
+                .unwrap()
+                .remove("argSetID");
+            assert_eq!(detail, machine);
+        }
+    }
     mod viewport;
     #[test]
     fn retained_session_cleanup_error_preserves_reason_after_handle_release() {

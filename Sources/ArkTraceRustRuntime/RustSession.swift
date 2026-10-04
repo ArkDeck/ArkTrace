@@ -33,6 +33,48 @@ public final class RustSession: Sendable {
         let result = try await engine.query(handle, request: .summaryFacts(query), timeoutMilliseconds: timeoutMilliseconds)
         return try await result.summaryView(identity: RustSessionIdentity(engine: engine.identity, session: handle), query: query)
     }
+    public func cpuSlices(_ query: RustCPUQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustCPUSliceRecord> {
+        let result = try await engine.query(handle, request: .cpuSlices(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 100000, type: RustPackedCPU.self,
+                                          record: { RustCPUSliceRecord(lease: $0, index: $1) })
+    }
+    public func threadStates(_ query: RustThreadStateQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustThreadStateRecord> {
+        let result = try await engine.query(handle, request: .threadStates(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 100000, type: RustPackedState.self,
+                                          record: { RustThreadStateRecord(lease: $0, index: $1) })
+    }
+    public func slices(_ query: RustSliceQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustSliceRecord> {
+        let result = try await engine.query(handle, request: .sliceDetails(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 100000, type: RustPackedSlice.self, validate: { if !query.includesArgumentSet && $0.argSetID != nil { throw RustAdmission.invalidBuffer } },
+                                          record: { RustSliceRecord(lease: $0, index: $1) })
+    }
+    public func frames(_ query: RustFrameQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustFrameRecord> {
+        let result = try await engine.query(handle, request: .frames(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 20000, type: RustPackedFrame.self,
+                                          record: { RustFrameRecord(lease: $0, index: $1) })
+    }
+    public func arguments(_ query: RustArgumentQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustArgumentRecord> {
+        let result = try await engine.query(handle, request: .arguments(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 64, type: RustPackedArgument.self,
+                                          record: { RustArgumentRecord(lease: $0, index: $1) })
+    }
+    public func counterSeries(_ query: RustCounterSeriesQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustCounterSeriesRecord> {
+        let result = try await engine.query(handle, request: .counterSeries(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 100000, type: RustPackedDescriptor.self,
+                                          record: { RustCounterSeriesRecord(lease: $0, index: $1) })
+    }
+    public func counters(_ query: RustCounterQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustEventPage<RustCounterRecord> {
+        let result = try await engine.query(handle, request: .counters(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.eventPage(identity: RustSessionIdentity(engine: engine.identity, session: handle),
+                                          limit: query.limit, maximumItems: 100000, type: RustPackedCounter.self,
+                                          record: { RustCounterRecord(lease: $0, index: $1) })
+    }
     public func close() async throws { try await engine.closeSession(handle) }
     deinit {
         let engine = engine, handle = handle

@@ -5,7 +5,7 @@ import Foundation
 // SDK reservation and do not execute SQL, discover parsers, recompute counts,
 // or write Ready metadata. Cancellation is checked before publication.
 @concurrent
-private func coreText(_ value: RustOwnedText?) async throws -> String? {
+func coreText(_ value: RustOwnedText?) async throws -> String? {
     try Task.checkCancellation()
     return if let value { await value.copyString() } else { nil }
 }
@@ -21,7 +21,7 @@ public extension RustDirectoryQualityIssue {
 }
 
 @concurrent
-private func coreQuality(_ count: Int, issue: @Sendable (Int) -> RustDirectoryQualityIssue) async throws -> TraceDataQuality {
+func coreQuality(_ count: Int, issue: @Sendable (Int) -> RustDirectoryQualityIssue) async throws -> TraceDataQuality {
     var copied: [TraceDataQualityIssue] = []
     copied.reserveCapacity(count)
     for index in 0..<count { copied.append(try await issue(index).copyCoreIssue()) }

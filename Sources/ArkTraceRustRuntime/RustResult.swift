@@ -76,10 +76,24 @@ public struct RustResult: Sendable {
         let data = unsafe Data(bytes: lease.pointer, count: count)
         return try await RustSummaryDecoder.decode(data, identity: identity, request: requestIdentity, query: query)
     }
+    @concurrent
+    func eventPage<Packed: RustEventColdRecord, Record: Sendable>(
+        identity: RustSessionIdentity, limit: Int, maximumItems: Int = 100_000, type: Packed.Type,
+        validate: @Sendable (Packed) throws -> Void = { _ in },
+        record: @escaping @Sendable (RustEventLease<Packed>, Int) -> Record
+    ) async throws -> RustEventPage<Record> {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustEventDecoder.decode(data, type: type, identity: identity, request: requestIdentity,
+                                                limit: limit, maximumItems: maximumItems, validate: validate, record: record)
+    }
     /// Caller-directed materialization. Returned DTOs and allocations made by
     /// the caller's Decodable implementation are caller-owned; only the
-    /// explicit temporary JSON copy is charged here. Product directory paths
-    /// use RustSession.processes/threads/summaryFacts and retained packed owners.
+    /// explicit temporary JSON copy is charged here. Product typed query paths
+    /// use RustSession methods and retained packed owners.
     @concurrent
     public func decode<Body: Decodable & Sendable>(_ type: Body.Type) async throws -> Body {
         precondition(!Thread.isMainThread)

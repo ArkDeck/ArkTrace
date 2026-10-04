@@ -64,16 +64,16 @@ def main():
             source = ROOT / fixture['path']
             records = [record for record in golden['records'] if 'facts' in record
                 and record.get('request', {}).get('fixture') == source.stem]
-            if not records:
+            if not records and not os.environ.get("ARKTRACE_EVENT_REFERENCE_ORACLE"):
                 continue
             assert sha(source) == fixture['sha256']
             namespace = base / source.stem; namespace.mkdir(mode=0o700)
             vectors = [dict(id=record['id'], query={key: record['request'][key] for key in
                 ('range', 'maximumRowsPerSection', 'maximumEventsPerSection')}) for record in records]
             input_path = base / (source.stem + '.json')
-            input_path.write_text(json.dumps(dict(source=str(source), format=1, namespace=str(namespace),
+            input_path.write_text(json.dumps(dict(source=str(source), format=2 if source.suffix == ".systrace" else 1, namespace=str(namespace),
                 helper=str(tools / 'helper'), parser=str(tools / 'parser'), helperSHA256=tool_pins['helper'],
-                parserIdentity=parser_identity, vectors=vectors), ensure_ascii=False), encoding='utf-8')
+                parserIdentity=parser_identity, vectors=vectors, eventOracle=os.environ.get("ARKTRACE_EVENT_REFERENCE_ORACLE")), ensure_ascii=False), encoding='utf-8')
             process = subprocess.run([str(executable), str(input_path)], cwd=ROOT,
                 capture_output=True, timeout=120)
             assert process.returncode == 0, (process.returncode, process.stderr.decode('utf-8', errors='replace'))
@@ -81,6 +81,18 @@ def main():
             assert str(base).encode() not in process.stdout
             actual = json.loads(process.stdout)
             assert actual['metadata'] == actual['afterShutdownMetadata']
+            if os.environ.get("ARKTRACE_EVENT_REFERENCE_ORACLE"):
+                events = actual["eventProof"]
+                assert events["readyDatabaseBytesUnchanged"] and len(events["readyDatabaseSHA256"]) == 64
+                assert events["retainedBytesBeforeShutdown"] > 0 and events["retainedOwnersBeforeShutdown"] == len(events["responses"])
+                assert {r["request"]["kind"] for r in events["responses"]} == {
+                    "cpuSlices", "threadStates", "slices", "frames", "counterSeries", "counters", "arguments"}
+                for event in events["responses"]:
+                    for key in ("initialCore", "afterShutdownCore", "afterShutdownSDK"):
+                        assert event[key] == event["originalSwift"], event["request"]["id"]
+                assert all(all(h is None for h in event["initialCore"]["argSetIDs"]) for event in events["responses"]
+                    if event["request"]["kind"] == "slices" and not event["request"]["includesArgumentSet"])
+
             assert actual['copiedCallerDTOsSurviveShutdown']
             assert all(probe['sameJSONValue'] and json.loads(probe['beforeUTF8']) == json.loads(probe['afterUTF8']) for probe in actual['unsortedOrderProbes'])
             assert actual['processPages'] == 2 and actual['threadPages'] == 2
@@ -88,7 +100,7 @@ def main():
             assert all(actual[key] == 0 for key in ('storageBytesAfterCopies', 'storageOwnersAfterCopies',
                 'stagingBytesAfterCopies', 'stagingOwnersAfterCopies', 'nativeBytesBeforeShutdown'))
             metadata = actual['metadata']
-            assert metadata['traceSHA256'] == fixture['sha256'] and metadata['sourceFormat'] == 'htrace'
+            assert metadata['traceSHA256'] == fixture['sha256'] and metadata['sourceFormat'] == ('systrace' if source.suffix == '.systrace' else 'htrace')
             assert metadata['dataQuality']['warnings'] == []
             assert all('message' not in issue or issue['message'] is None for issue in metadata['dataQuality']['issues'])
             assert len(actual['responses']) == len(records)
@@ -104,7 +116,7 @@ def main():
             reports.append(dict(source=fixture, output=actual, outputByteCount=len(process.stdout),
                 outputSHA256=hashlib.sha256(process.stdout).hexdigest(), rawTraceUnchanged=True,
                 ownedReadyDatabaseRemoved=True))
-    assert len(reports) == 2 and sum(len(r['output']['responses']) for r in reports) == 4
+    assert len(reports) == (3 if os.environ.get("ARKTRACE_EVENT_REFERENCE_ORACLE") else 2) and sum(len(r['output']['responses']) for r in reports) == 4
     print(json.dumps(dict(coreCompatibilityCopies=True, rustAppCutover=False, fullSDKAcceptance=False,
         comparison='Independent original Swift frozen facts; explicit machine projection omits human prose only and preserves ordered quality, count, nulls and bounds',
         goldenSHA256=sha(golden_path), receipt=receipt, runtimeTools=tool_pins,

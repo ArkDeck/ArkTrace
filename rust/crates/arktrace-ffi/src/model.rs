@@ -172,6 +172,7 @@ pub(crate) enum Operation {
     CpuSlices(CpuSliceQuery),
     ThreadStates(ThreadStateQuery),
     Slices(TraceSliceQuery),
+    SliceDetails(TraceSliceQuery),
     Counters(CounterQuery),
     CounterSeries(CounterSeriesQuery),
     Frames(TraceFrameQuery),
@@ -220,7 +221,7 @@ impl Operation {
             Self::Threads(q) => q.validate(),
             Self::CpuSlices(q) => q.validate(),
             Self::ThreadStates(q) => q.validate(),
-            Self::Slices(q) => q.validate(),
+            Self::Slices(q) | Self::SliceDetails(q) => q.validate(),
             Self::Counters(q) => q.validate(),
             Self::CounterSeries(q) => q.validate(),
             Self::Frames(q) => q.validate(),
@@ -274,6 +275,7 @@ impl Operation {
             Self::CpuSlices(q) => Q::CpuSlices(q),
             Self::ThreadStates(q) => Q::ThreadStates(q),
             Self::Slices(q) => Q::Slices(q),
+            Self::SliceDetails(q) => Q::SliceDetails(q),
             Self::Counters(q) => Q::Counters(q),
             Self::CounterSeries(q) => Q::CounterSeries(q),
             Self::Frames(q) => Q::Frames(q),
@@ -305,4 +307,33 @@ impl Operation {
 }
 pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, u32> {
     serde_json::from_slice(bytes).map_err(|_| STATUS_INVALID_INPUT)
+}
+
+#[cfg(test)]
+mod sdk_slice_tests {
+    use super::*;
+
+    #[test]
+    fn detail_operation_reuses_slice_admission_and_keeps_legacy_operation() {
+        let query = serde_json::json!({
+            "range": {"startNs": 0, "endNs": 1}, "eventKey": null,
+            "processKey": null, "pid": null, "threadKey": null, "tid": null,
+            "name": null, "nameMatch": "exact", "minimumDurationNs": null,
+            "depth": null, "includesArgumentSet": true, "limit": 1
+        });
+        for name in ["sliceDetails", "slices"] {
+            let operation = serde_json::json!({"operation": name, "query": query});
+            let valid: Operation = decode(&serde_json::to_vec(&operation).unwrap()).unwrap();
+            valid.validate().unwrap();
+            for limit in [0, 100_001] {
+                let mut invalid = operation.clone();
+                invalid["query"]["limit"] = limit.into();
+                let value: Operation = decode(&serde_json::to_vec(&invalid).unwrap()).unwrap();
+                assert_eq!(value.validate(), Err(STATUS_INVALID_INPUT));
+            }
+            let mut invalid = operation;
+            invalid["query"]["sql"] = "SELECT 1".into();
+            assert!(decode::<Operation>(&serde_json::to_vec(&invalid).unwrap()).is_err());
+        }
+    }
 }

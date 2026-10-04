@@ -214,7 +214,7 @@ lane_rust_macos=true
 lane_rust_windows=false' 'scripts/swift-sdk-summary/SummaryOwnership.swift
 scripts/test_macos_summary_sdk.py'
 
-for path in scripts/swift-sdk-core/CoreOwnership.swift scripts/test_macos_core_sdk.py; do
+for path in scripts/swift-sdk-core/CoreOwnership.swift scripts/test_macos_core_sdk.py scripts/test_macos_event_sdk.py; do
     expect "Core SDK consumer input selects the artifact-enabled macOS lane" \
         'lane_swiftpm=false
 lane_app=false

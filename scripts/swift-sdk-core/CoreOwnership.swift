@@ -8,10 +8,12 @@ private struct Input: Decodable, Sendable {
     let format: UInt32
     let parserIdentity: TraceParserIdentity
     let vectors: [Vector]
+    let eventOracle: String?
 }
 private struct Response: Codable, Sendable { let id, nativeBodyUTF8, coreBodyUTF8, afterShutdownCoreBodyUTF8: String }
 private struct UnsortedOrderProbe: Codable, Sendable { let beforeUTF8, afterUTF8: String; let sameJSONValue: Bool }
 private struct Report: Codable, Sendable {
+    let eventProof: EventProofReport?
     let unsortedOrderProbes: [UnsortedOrderProbe]
     let metadata: TraceMetadata
     let afterShutdownMetadata: TraceMetadata
@@ -111,11 +113,18 @@ private struct Report: Codable, Sendable {
             let pair = try await facts(session!, query: vector.query)
             held.append(pair.0); native.append(pair.1); initial.append(try await encode(pair.0)); unordered.append(try await unsorted(pair.0))
         }
-        let counters = RustEngine.developmentColdStorageCounts()
-        precondition(counters.bytes == 0 && counters.owners == 0 && counters.stagingBytes == 0 && counters.stagingOwners == 0)
+        var eventProof: EventHeldProof? = if let oracle = input.eventOracle {
+            try await EventHeldProof.prepare(session: session!, namespace: input.namespace, oracle: oracle, metadata: metadata)
+        } else { nil }
+        let countsBeforeShutdown = RustEngine.developmentColdStorageCounts()
+        precondition(countsBeforeShutdown.stagingBytes == 0 && countsBeforeShutdown.stagingOwners == 0)
         try await session!.close(); session = nil; try await RustCleanup.flush()
         let nativeBytes = try await engine.retainedResultBytes(); precondition(nativeBytes == 0)
         try await engine.shutdown()
+        let eventReport = try await eventProof?.finish()
+        eventProof = nil
+        let counters = RustEngine.developmentColdStorageCounts()
+        precondition(counters.bytes == 0 && counters.owners == 0 && counters.stagingBytes == 0 && counters.stagingOwners == 0)
         var responses: [Response] = [], probes: [UnsortedOrderProbe] = []
         for index in held.indices {
             let after = try await encode(held[index]); precondition(after == initial[index])
@@ -126,7 +135,7 @@ private struct Report: Codable, Sendable {
         }
         let after = try await roundTrip(metadata)
         precondition(after.dataQuality == metadata.dataQuality)
-        try await emit(Report(unsortedOrderProbes: probes, metadata: metadata, afterShutdownMetadata: after, responses: responses, processPages: 2, threadPages: 2,
+        try await emit(Report(eventProof: eventReport, unsortedOrderProbes: probes, metadata: metadata, afterShutdownMetadata: after, responses: responses, processPages: 2, threadPages: 2,
             directoryRecordsCompared: count, copiedCallerDTOsSurviveShutdown: true, storageBytesAfterCopies: counters.bytes,
             storageOwnersAfterCopies: counters.owners, stagingBytesAfterCopies: counters.stagingBytes, stagingOwnersAfterCopies: counters.stagingOwners,
             nativeBytesBeforeShutdown: nativeBytes))

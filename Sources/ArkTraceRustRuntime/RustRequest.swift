@@ -20,6 +20,7 @@ public struct RustRequest: Encodable, Sendable {
     public static func summaryFacts(_ query: RustSummaryQuery) -> Self { Self("summaryFacts", query) }
     public static func threads(_ query: RustThreadQuery) -> Self { Self("threads", query) }
     public static func threadStates(_ query: RustThreadStateQuery) -> Self { Self("threadStates", query) }
+    static func sliceDetails(_ query: RustSliceQuery) -> Self { Self("sliceDetails", query) }
     public static func slices(_ query: RustSliceQuery) -> Self { Self("slices", query) }
     public static func counters(_ query: RustCounterQuery) -> Self { Self("counters", query) }
     public static func counterSeries(_ query: RustCounterSeriesQuery) -> Self { Self("counterSeries", query) }

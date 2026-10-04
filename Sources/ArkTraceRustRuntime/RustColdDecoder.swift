@@ -12,6 +12,7 @@ final class RustColdContext: Sendable {
     private struct State: Sendable {
         var bytes: [UInt8] = []
         var credits: [RustStorageCredit]
+        var samples = 0
     }
     private let state: Mutex<State>
     let limit: Int
@@ -45,17 +46,24 @@ final class RustColdContext: Sendable {
         return reservation
     }
 
-    func text(_ string: String?, maximum: Int = 4096) throws -> Range<Int>? {
+    func text(_ string: String?, maximum: Int = 4096, allowEmpty: Bool = false) throws -> Range<Int>? {
         guard let string else { return nil }
         let count = string.utf8.count
         return try state.withLock { state in
-            guard count > 0, count <= maximum, count <= maximumTextBytes - state.bytes.count else {
+            guard (allowEmpty || count > 0), count <= maximum, count <= maximumTextBytes - state.bytes.count else {
                 throw RustAdmission.invalidBuffer
             }
             let start = state.bytes.count
             state.bytes.append(contentsOf: string.utf8)
             guard state.bytes.capacity <= maximumTextBytes * 2 + 4096 else { throw RustAdmission.outputLimit }
             return start..<state.bytes.count
+        }
+    }
+
+    func consumeSample() throws {
+        try state.withLock { state in
+            guard state.samples < limit else { throw RustAdmission.outputLimit }
+            state.samples += 1
         }
     }
 }
@@ -67,9 +75,10 @@ private struct RustColdKey: CodingKey {
     init?(intValue: Int) { return nil }
 }
 
-func rustColdKeys(_ decoder: any Decoder, _ expected: Set<String>) throws {
+func rustColdKeys(_ decoder: any Decoder, _ expected: Set<String>, optional: Set<String> = []) throws {
     let container = try decoder.container(keyedBy: RustColdKey.self)
-    guard Set(container.allKeys.map(\.stringValue)) == expected else { throw RustAdmission.invalidBuffer }
+    let actual = Set(container.allKeys.map(\.stringValue))
+    guard expected.isSubset(of: actual), actual.isSubset(of: expected.union(optional)) else { throw RustAdmission.invalidBuffer }
 }
 
 func rustColdContext(_ decoder: any Decoder) throws -> RustColdContext {
