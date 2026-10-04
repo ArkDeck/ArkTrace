@@ -1,5 +1,29 @@
 use crate::StoreError;
 
+/// Monotonic SQL work credit shared by all statements of one summary request.
+#[cfg(any(target_os = "macos", test))]
+pub(crate) struct VmWork {
+    remaining: std::sync::atomic::AtomicU64,
+}
+#[cfg(any(target_os = "macos", test))]
+impl VmWork {
+    pub(crate) fn new(steps: u64) -> Self {
+        Self {
+            remaining: std::sync::atomic::AtomicU64::new(steps),
+        }
+    }
+    pub(crate) fn charge(&self, steps: u64) -> Result<(), StoreError> {
+        self.remaining
+            .try_update(
+                std::sync::atomic::Ordering::Relaxed,
+                std::sync::atomic::Ordering::Relaxed,
+                |n| n.checked_sub(steps),
+            )
+            .map(|_| ())
+            .map_err(|_| StoreError::VmBudgetExceeded)
+    }
+}
+
 /// Session already retains its primary reader; this pool adds at most three
 /// worker-owned connections. Policy stays outside the query JSON.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

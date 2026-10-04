@@ -19,6 +19,11 @@ class MigrationEncodingTests(unittest.TestCase):
             "README.md", "README.zh-CN.md",
             "rust/crates/arktrace-viewer/oracle/snapshot_event_index_lib_exports.patch",
             "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+            "rust/crates/arktrace-store/tests/fixtures/summary-temporal.sql",
+            "rust/crates/arktrace-store/tests/fixtures/summary-empty.sql",
+            "tools/parallel-summary-facts-canonical-20261004/fixtures/temporal-construction.sql",
+            "tools/parallel-summary-facts-canonical-20261004/fixtures/empty-absent-construction.sql",
+            "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log",
         ]
         environment = os.environ.copy()
         environment.pop("GIT_DIR", None)

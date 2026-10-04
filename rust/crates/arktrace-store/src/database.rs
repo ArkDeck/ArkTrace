@@ -5,7 +5,7 @@ use rusqlite::{Connection, Params, Row, config::DbConfig, limits::Limit, types::
 use std::{
     sync::{
         Arc,
-        atomic::{AtomicU8, Ordering},
+        atomic::{AtomicU8, AtomicU64, Ordering},
     },
     time::{Duration, Instant},
 };
@@ -53,6 +53,7 @@ pub(crate) struct Database<'a> {
     connection: ConnectionOwner<'a>,
     budget: &'a ValidationBudget,
     resources: Option<Arc<crate::query_resources::QueryResources>>,
+    vm_work: Option<Arc<crate::query_resources::VmWork>>,
     #[cfg(target_os = "macos")]
     writable: Option<Arc<arktrace_platform::WritableFile>>,
 }
@@ -131,6 +132,7 @@ impl<'a> Database<'a> {
             connection,
             budget,
             resources: None,
+            vm_work: None,
             #[cfg(target_os = "macos")]
             writable: None,
         };
@@ -246,6 +248,7 @@ impl<'a> Database<'a> {
             connection: ConnectionOwner::Borrowed(&self.connection),
             budget,
             resources: None,
+            vm_work: None,
             #[cfg(target_os = "macos")]
             writable: self.writable.clone(),
         }
@@ -302,6 +305,18 @@ impl<'a> Database<'a> {
             resources.reserve(bytes)?;
         }
         Ok(())
+    }
+    pub(crate) fn summary_request(&self, steps: u64) -> Result<Database<'_>, StoreError> {
+        Ok(Database {
+            connection: ConnectionOwner::Borrowed(&self.connection),
+            budget: self.budget,
+            resources: Some(Arc::new(crate::query_resources::QueryResources::new(
+                crate::ReadPoolLimits::default(),
+            )?)),
+            vm_work: Some(Arc::new(crate::query_resources::VmWork::new(steps))),
+            #[cfg(target_os = "macos")]
+            writable: self.writable.clone(),
+        })
     }
     #[cfg(target_os = "macos")]
     pub(crate) fn bind_writable(
@@ -367,6 +382,9 @@ impl<'a> Database<'a> {
         let callback_reason = reason.clone();
         let cancellation = self.budget.cancellation.clone();
         let resources = self.resources.clone();
+        let vm_work = self.vm_work.clone();
+        let charged = self.vm_work.as_ref().map(|_| Arc::new(AtomicU64::new(0)));
+        let callback_charged = charged.clone();
         let deadline = self.budget.deadline;
         let mut callbacks = vm_budget.div_ceil(PROGRESS_INTERVAL as u64);
         #[cfg(target_os = "macos")]
@@ -388,10 +406,17 @@ impl<'a> Database<'a> {
                         1
                     } else if Instant::now() >= deadline {
                         2
-                    } else if callbacks <= 1 {
+                    } else if callbacks <= 1
+                        || vm_work
+                            .as_ref()
+                            .is_some_and(|work| work.charge(PROGRESS_INTERVAL as u64).is_err())
+                    {
                         3
                     } else {
                         callbacks -= 1;
+                        if let Some(charged) = &callback_charged {
+                            charged.fetch_add(PROGRESS_INTERVAL as u64, Ordering::Relaxed);
+                        }
                         #[cfg(target_os = "macos")]
                         {
                             file_callbacks += 1;
@@ -419,39 +444,53 @@ impl<'a> Database<'a> {
         let guard = ProgressGuard(&self.connection);
         let outcome = (|| {
             let mut statement = self.connection.prepare(sql).map_err(sqlite_error)?;
-            let mut rows = statement.query(params).map_err(sqlite_error)?;
-            let mut result = Vec::new();
-            while let Some(row) = rows.next().map_err(sqlite_error)? {
-                self.budget.check()?;
-                if result.len() == maximum_rows {
-                    return Err(StoreError::SchemaBudgetExceeded);
-                }
-                if self.resources.is_some() {
-                    // Credit before the mapper can copy input strings. Four
-                    // copies cover Vec growth and typed-page/group conversion.
-                    let mut bytes = (std::mem::size_of::<T>() as u64)
-                        .checked_add(64)
-                        .ok_or(StoreError::DecodedBudgetExceeded)?;
-                    for index in 0..row.as_ref().column_count() {
-                        let value = row.get_ref(index).map_err(sqlite_error)?;
-                        let dynamic = match value {
-                            ValueRef::Text(v) | ValueRef::Blob(v) => v.len() as u64,
-                            _ => 0,
-                        };
-                        bytes = bytes
-                            .checked_add(dynamic)
-                            .and_then(|b| b.checked_add(32))
-                            .ok_or(StoreError::DecodedBudgetExceeded)?;
+            let outcome = (|| {
+                let mut rows = statement.query(params).map_err(sqlite_error)?;
+                let mut result = Vec::new();
+                while let Some(row) = rows.next().map_err(sqlite_error)? {
+                    self.budget.check()?;
+                    if result.len() == maximum_rows {
+                        return Err(StoreError::SchemaBudgetExceeded);
                     }
-                    self.reserve_decoded(
-                        bytes
-                            .checked_mul(4)
-                            .ok_or(StoreError::DecodedBudgetExceeded)?,
-                    )?;
+                    if self.resources.is_some() {
+                        // Credit before the mapper can copy input strings. Four
+                        // copies cover Vec growth and typed-page/group conversion.
+                        let mut bytes = (std::mem::size_of::<T>() as u64)
+                            .checked_add(64)
+                            .ok_or(StoreError::DecodedBudgetExceeded)?;
+                        for index in 0..row.as_ref().column_count() {
+                            let value = row.get_ref(index).map_err(sqlite_error)?;
+                            let dynamic = match value {
+                                ValueRef::Text(v) | ValueRef::Blob(v) => v.len() as u64,
+                                _ => 0,
+                            };
+                            bytes = bytes
+                                .checked_add(dynamic)
+                                .and_then(|b| b.checked_add(32))
+                                .ok_or(StoreError::DecodedBudgetExceeded)?;
+                        }
+                        self.reserve_decoded(
+                            bytes
+                                .checked_mul(4)
+                                .ok_or(StoreError::DecodedBudgetExceeded)?,
+                        )?;
+                    }
+                    result.push(map(row)?);
                 }
-                result.push(map(row)?);
+                Ok(result)
+            })();
+            if let Some(work) = &self.vm_work {
+                // Progress checks account for complete intervals; include the
+                // final short statement tail instead of resetting at each SQL.
+                let actual = statement
+                    .get_status(rusqlite::StatementStatus::VmStep)
+                    .max(0) as u64;
+                work.charge(
+                    actual
+                        .saturating_sub(charged.as_ref().map_or(0, |n| n.load(Ordering::Relaxed))),
+                )?;
             }
-            Ok(result)
+            outcome
         })();
         self.connection
             .progress_handler(0, None::<fn() -> bool>)

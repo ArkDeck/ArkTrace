@@ -12,6 +12,7 @@ mod parser;
 mod quality;
 mod search;
 mod slices;
+mod summary;
 mod time;
 
 pub use arguments::{TraceArgumentQuery, TraceEventArgument};
@@ -42,6 +43,10 @@ pub use search::{
     SearchDomains, TraceSearchRequest, TraceSearchResult, TraceSearchResultKind, TraceSearchResults,
 };
 pub use slices::{TraceSlice, TraceSliceQuery};
+pub use summary::{
+    TraceBoundedCount, TraceEventSourceCount, TraceEventSourceCounts, TraceSummaryFacts,
+    TraceSummaryQuery,
+};
 pub use time::TraceTimeRange;
 
 pub const MACHINE_JSON_VERSION: &str = "1.0";
@@ -70,4 +75,5 @@ pub enum ContractError {
     InvalidParserIdentity,
     InvalidDirectoryQuery,
     InvalidEventQuery,
+    InvalidSummaryQuery,
 }

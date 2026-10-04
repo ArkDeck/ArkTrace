@@ -485,6 +485,17 @@ impl NoCacheSession {
         self.query_reader(budget)?;
         result.map_err(|error| failure(EngineStage::Querying, EngineFailure::Store(error)))
     }
+    pub fn summary_facts(
+        &self,
+        query: &arktrace_contract::TraceSummaryQuery,
+        budget: &EngineBudget,
+    ) -> Result<arktrace_contract::TraceSummaryFacts, EngineError> {
+        let result = self
+            .query_reader(budget)?
+            .summary_facts(query, &budget.validation());
+        self.query_reader(budget)?;
+        result.map_err(|error| failure(EngineStage::Querying, EngineFailure::Store(error)))
+    }
     pub fn query_counters(
         &self,
         query: &CounterQuery,

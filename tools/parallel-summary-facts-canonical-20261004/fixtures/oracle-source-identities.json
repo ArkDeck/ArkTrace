@@ -1,0 +1,422 @@
+{
+  "sources": [
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "byteCount": 11275,
+        "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+      },
+      "gitBlob": "97216d00e86ee8eb3dd2909f8f72e55d7ce7d6e0",
+      "gitBlobSHA256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "byteCount": 11275,
+        "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "byteCount": 4367,
+        "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+      },
+      "gitBlob": "1befded4e46c926bda25accb5aeefe581cbd7762",
+      "gitBlobSHA256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "byteCount": 4367,
+        "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "byteCount": 1042,
+        "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+      },
+      "gitBlob": "51f05d814cdf64bf55a88c73f16d4382d774c395",
+      "gitBlobSHA256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "byteCount": 1042,
+        "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "byteCount": 375,
+        "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      },
+      "gitBlob": "44619de77a1f7d8d3cdc33059390777121d7ce0f",
+      "gitBlobSHA256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "byteCount": 375,
+        "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "byteCount": 862,
+        "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+      },
+      "gitBlob": "d4dda4b5a2484ca7dd711c63783e8ed70f209f50",
+      "gitBlobSHA256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "byteCount": 862,
+        "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "byteCount": 17503,
+        "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+      },
+      "gitBlob": "72230573f27ca9fcb0b4f0f26fe9a83e5f9883a0",
+      "gitBlobSHA256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "byteCount": 17503,
+        "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "byteCount": 1526,
+        "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+      },
+      "gitBlob": "5baafab1576d53df9adf7d57506d458dc053fe4c",
+      "gitBlobSHA256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "byteCount": 1526,
+        "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Model/TraceModels.swift",
+        "byteCount": 11916,
+        "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+      },
+      "gitBlob": "c6079ec2954f4f80010f9e71a6cf144f90e11597",
+      "gitBlobSHA256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Model/TraceModels.swift",
+        "byteCount": 11916,
+        "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "byteCount": 5258,
+        "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+      },
+      "gitBlob": "7954ac177a5bc25df36d7d2574deb130e62a825a",
+      "gitBlobSHA256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "byteCount": 5258,
+        "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "byteCount": 8071,
+        "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+      },
+      "gitBlob": "2c00cf2687c244917ba2f2d9ed6d6f7d3f7e3cf1",
+      "gitBlobSHA256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "byteCount": 8071,
+        "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "byteCount": 3147,
+        "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+      },
+      "gitBlob": "a42bd4319cee7b760e8a44a7363cd5ea0cf332a7",
+      "gitBlobSHA256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "byteCount": 3147,
+        "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "byteCount": 16011,
+        "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+      },
+      "gitBlob": "20d41d632da9b47ada3472e727734a90472819ae",
+      "gitBlobSHA256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "byteCount": 16011,
+        "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "byteCount": 1186,
+        "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+      },
+      "gitBlob": "dfeb8b719bca2fba320e9be38173d4491a7c7700",
+      "gitBlobSHA256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "byteCount": 1186,
+        "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "byteCount": 3873,
+        "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+      },
+      "gitBlob": "cc51eb8aaf0f451351225ac667a9ad09310d8ba7",
+      "gitBlobSHA256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "byteCount": 3873,
+        "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "byteCount": 9752,
+        "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+      },
+      "gitBlob": "2de7e89957ad2a5c0f45b9857aa2052b17356343",
+      "gitBlobSHA256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "byteCount": 9752,
+        "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "byteCount": 863,
+        "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+      },
+      "gitBlob": "0b8703f6a68b2462267d5f2eb92d1661e57b6ed8",
+      "gitBlobSHA256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "byteCount": 863,
+        "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "byteCount": 16274,
+        "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+      },
+      "gitBlob": "8dbfa41422ad19104a150b31b44f09e7f38b0c0d",
+      "gitBlobSHA256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "byteCount": 16274,
+        "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceCore/Time/TraceTime.swift",
+        "byteCount": 2757,
+        "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+      },
+      "gitBlob": "630f35aa93cbf0fbf93b1a7329084cb07d2fc907",
+      "gitBlobSHA256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceCore/Time/TraceTime.swift",
+        "byteCount": 2757,
+        "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+        "byteCount": 160666,
+        "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4"
+      },
+      "gitBlob": "405afcee62030ead5ae5963494ba1540de890338",
+      "gitBlobSHA256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+        "byteCount": 160666,
+        "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceStore/TraceDatabase.swift",
+        "byteCount": 29935,
+        "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631"
+      },
+      "gitBlob": "c610ef4cefc5607e9d3c9d5dabfd932f39f0cabd",
+      "gitBlobSHA256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceStore/TraceDatabase.swift",
+        "byteCount": 29935,
+        "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+        "byteCount": 32838,
+        "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+      },
+      "gitBlob": "f935f283230b2dfbe3d3f21b5c6a410845fb0e68",
+      "gitBlobSHA256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+        "byteCount": 32838,
+        "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceStore/TraceEventIntersection.swift",
+        "byteCount": 3269,
+        "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8"
+      },
+      "gitBlob": "07ca21fc77e72ee2505e3eee9014f8f0b3789fcc",
+      "gitBlobSHA256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceStore/TraceEventIntersection.swift",
+        "byteCount": 3269,
+        "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+        "byteCount": 49595,
+        "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+      },
+      "gitBlob": "c0348ea674e55b0133ebb24604fd2c74d0867042",
+      "gitBlobSHA256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+        "byteCount": 49595,
+        "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+        "byteCount": 20622,
+        "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c"
+      },
+      "gitBlob": "2c54f4ed2cf04285c0efe8b3c616814c4da110f4",
+      "gitBlobSHA256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+        "byteCount": 20622,
+        "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceAnalysis/TraceContext.swift",
+        "byteCount": 68967,
+        "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024"
+      },
+      "gitBlob": "095b34395559f3a644a85727762b8a791290d434",
+      "gitBlobSHA256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceAnalysis/TraceContext.swift",
+        "byteCount": 68967,
+        "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+        "byteCount": 51087,
+        "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804"
+      },
+      "gitBlob": "5446dc034f7499acf7f699c1aef37e897e4e28b1",
+      "gitBlobSHA256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+        "byteCount": 51087,
+        "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceAnalysis/TraceSummary.swift",
+        "byteCount": 14839,
+        "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6"
+      },
+      "gitBlob": "92880744c37727cba5c1984656dfa3fa7fd2e7c2",
+      "gitBlobSHA256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceAnalysis/TraceSummary.swift",
+        "byteCount": 14839,
+        "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6"
+      }
+    },
+    {
+      "original": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+        "byteCount": 33088,
+        "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac"
+      },
+      "gitBlob": "6b171e9c234b017fcd7a55ff8ae04f16c7ad238a",
+      "gitBlobSHA256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+      "copy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+        "byteCount": 33088,
+        "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac"
+      }
+    }
+  ],
+  "augmentedRepository": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+    "byteCount": 161690,
+    "sha256": "1b8597ac5f27881b1e91b9cc2075ec9bce76310aacabd341bfbac41cf5ab972d"
+  },
+  "seam": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/swift/RepositoryAccess.swift",
+    "byteCount": 1023,
+    "sha256": "8e39b4553afbccb7d5deabc36fca96a175fb85491941d1609ba902f18ec2195a"
+  },
+  "originalPrefixByteCount": 160666,
+  "harness": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/swift/SummaryOracle.swift",
+    "byteCount": 8112,
+    "sha256": "5ccec46642523804cc67e791a53112968e346ca2e032c29c8c8d46990b55b710"
+  },
+  "package": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source/Package.swift",
+    "byteCount": 621,
+    "sha256": "eb496f8f1fd64e5c1b2559b54d437a50fcfa82c4b0fafd4b42ce90918de8acf9"
+  },
+  "rootPackageReadOnly": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Package.swift",
+    "byteCount": 7220,
+    "sha256": "fd25a3f9657083f184dda44a62286ca7eef0338f40fc5a1744c352b6ba2ea369"
+  }
+}

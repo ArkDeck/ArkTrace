@@ -2,7 +2,7 @@ use crate::{
     DatabaseInspection, IndexedDatabaseInspection, StoreError, ValidationBudget,
     arguments::ArgumentSchema, counters::CounterSchema, database::Database,
     directory::DirectorySchema, events::EventSchema, frames::FrameSchema, indexes,
-    open_snapshot_connection, slices::SliceSchema,
+    open_snapshot_connection, slices::SliceSchema, summary::SummarySchema,
 };
 use arktrace_contract::{
     CounterQuery, CounterSeries, CounterSeriesDescriptor, CounterSeriesQuery, CpuSlice,
@@ -25,6 +25,7 @@ pub struct StoreReader {
     counters: CounterSchema,
     frames: FrameSchema,
     arguments: ArgumentSchema,
+    summary: SummarySchema,
     _worker: PhantomData<Rc<()>>,
     resources: Option<Arc<crate::query_resources::QueryResources>>,
 }
@@ -55,19 +56,21 @@ impl StoreReader {
             let counters = CounterSchema::read(&db, &inspection.inspection)?;
             let frames = FrameSchema::read(&db)?;
             let arguments = ArgumentSchema::read(&db)?;
+            let summary = SummarySchema::read(&db, &inspection.inspection)?;
             snapshot.readonly_database_path()?;
             budget.check()?;
             Ok((
-                inspection, directory, events, slices, counters, frames, arguments,
+                inspection, directory, events, slices, counters, frames, arguments, summary,
             ))
         })();
-        let (inspection, directory, events, slices, counters, frames, arguments) = match prepared {
-            Ok(value) => value,
-            Err(error) => {
-                connection.close().map_err(|_| StoreError::CleanupFailed)?;
-                return Err(error);
-            }
-        };
+        let (inspection, directory, events, slices, counters, frames, arguments, summary) =
+            match prepared {
+                Ok(value) => value,
+                Err(error) => {
+                    connection.close().map_err(|_| StoreError::CleanupFailed)?;
+                    return Err(error);
+                }
+            };
         Ok(Self {
             connection,
             snapshot,
@@ -78,6 +81,7 @@ impl StoreReader {
             counters,
             frames,
             arguments,
+            summary,
             _worker: PhantomData,
             resources,
         })
@@ -184,6 +188,16 @@ impl StoreReader {
     ) -> Result<arktrace_contract::TraceDensityResult, StoreError> {
         self.with_database(budget, |db| {
             crate::density::density(db, self.inspection(), &self.counters, self.frames, query)
+        })
+    }
+    pub fn summary_facts(
+        &self,
+        query: &arktrace_contract::TraceSummaryQuery,
+        budget: &ValidationBudget,
+    ) -> Result<arktrace_contract::TraceSummaryFacts, StoreError> {
+        self.with_database(budget, |db| {
+            self.summary
+                .facts(db, self.inspection(), &self.counters, query)
         })
     }
     /// Request-scoped bounded pool. Its connections are created, reused for

@@ -17,6 +17,7 @@ public struct RustRequest: Encodable, Sendable {
         try query(container.superEncoder(forKey: .query))
     }
     public static func processes(_ query: RustProcessQuery) -> Self { Self("processes", query) }
+    public static func summaryFacts(_ query: RustSummaryQuery) -> Self { Self("summaryFacts", query) }
     public static func threads(_ query: RustThreadQuery) -> Self { Self("threads", query) }
     public static func threadStates(_ query: RustThreadStateQuery) -> Self { Self("threadStates", query) }
     public static func slices(_ query: RustSliceQuery) -> Self { Self("slices", query) }

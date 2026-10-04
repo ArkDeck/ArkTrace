@@ -1,0 +1,442 @@
+{
+  "status": "pass",
+  "baselineFileCount": 1311,
+  "baselineManifest": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/parallel-snapshot.json",
+    "byteCount": 610148,
+    "sha256": "91e05c7db55f5ddbf48bf9eb55aa900d5e4e1ed27e7538cc6ced384843ea173c"
+  },
+  "baselineByteHashesUnchanged": true,
+  "ownedFileCount": 61,
+  "checkCount": 60,
+  "ownedPaths": [
+    "docs/migration-runs/AT-RUST-007-parallel-summary-facts-canonical-2026-10-04.json",
+    "docs/migration-runs/AT-RUST-007-parallel-summary-facts-canonical-2026-10-04.md",
+    "docs/migration-runs/AT-RUST-007-parallel-summary-facts-canonical-2026-10-04.sha256",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/compiled-identities.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/controlled-construction-provenance.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/database-after.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/database-before.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/directory-members-after.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/directory-members-before.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/empty-absent-construction.sql",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/handoff-golden.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/history-and-native-gap-assessment.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/input-construction.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/input-observation.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/interface-proposal.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/oracle-source-identities.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-hiprofiler_data_ability-opening.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-hiprofiler_data_ability-oracle-input.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-zlib-opening.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-zlib-oracle-input.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/real-capture-provenance.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/requests.json",
+    "tools/parallel-summary-facts-canonical-20261004/fixtures/temporal-construction.sql",
+    "tools/parallel-summary-facts-canonical-20261004/freeze_report.py",
+    "tools/parallel-summary-facts-canonical-20261004/handoff.py",
+    "tools/parallel-summary-facts-canonical-20261004/prepare.py",
+    "tools/parallel-summary-facts-canonical-20261004/run.py",
+    "tools/parallel-summary-facts-canonical-20261004/swift/RepositoryAccess.swift",
+    "tools/parallel-summary-facts-canonical-20261004/swift/SummaryOracle.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/canonical-verification.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-build-sources/RepositoryAccess.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-build-sources/SummaryOracle.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/final-scope-audit.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/first-build-sources/RepositoryAccess.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/first-build-sources/SummaryOracle.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/first-construction.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/first-construction.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/first-oracle-build.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/first-oracle-build.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/fixed-history-gap-search.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/fixed-interface-gap-search.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/freeze-syntax-failed.py",
+    "tools/parallel-summary-facts-canonical-20261004/verification/freeze-syntax-failure.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/handoff-and-prior-freeze-verification.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/once-canonical-15.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/once-canonical-15.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/pre-observation-identity-drift.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/strict-context-oracle-build.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/strict-context-oracle-build.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/toolchain.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/valid-empty-fixture-oracle-build.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/valid-empty-fixture-oracle-build.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.log",
+    "tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.receipt.json",
+    "tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-build-sources/RepositoryAccess.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-build-sources/SummaryOracle.swift",
+    "tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-rejected-input.json",
+    "tools/parallel-summary-facts-canonical-20261004/verify.py"
+  ],
+  "outsideOwnedAdditions": [],
+  "originalSwiftPrefixAndCompiledPinsVerified": true,
+  "actualObservationRequestCount": 15,
+  "schemaRejectionControls": 1,
+  "boundedTotal": 16,
+  "checks": [
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json",
+      "byteCount": 198304,
+      "sha256": "76d324cb5c8b7d0c4b914d1629c8ce7bbf8d748f59a5cbf8150d58037d40b77e"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/compiled-identities.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/compiled-identities.json",
+      "byteCount": 10295,
+      "sha256": "33d18dfd58b7c46cd493cefdb5b1252df361f185176c9a907287844dd6c70875"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/controlled-construction-provenance.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/controlled-construction-provenance.json",
+      "byteCount": 1724,
+      "sha256": "d3c98fcf6cdd29a9b8ef62ba6b7107335ccb7867722de06768bc42895fe44706"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/database-after.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/database-after.json",
+      "byteCount": 72312,
+      "sha256": "64853f87df9ffc0bc42697705163fef3d3c8a697548afc014a8e8d18d3438180"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/database-before.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/database-before.json",
+      "byteCount": 72312,
+      "sha256": "64853f87df9ffc0bc42697705163fef3d3c8a697548afc014a8e8d18d3438180"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/directory-members-after.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/directory-members-after.json",
+      "byteCount": 86,
+      "sha256": "dc7f296c815a9cf686731ceb2dc0edcc55b0a42da5a182c7496aab3652e75838"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/directory-members-before.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/directory-members-before.json",
+      "byteCount": 86,
+      "sha256": "dc7f296c815a9cf686731ceb2dc0edcc55b0a42da5a182c7496aab3652e75838"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/empty-absent-construction.sql",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/empty-absent-construction.sql",
+      "byteCount": 666,
+      "sha256": "b1bdbd2b74c970054ea817fbf850004a4b3175a8201f62a02da1a48ba3b9debf"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/handoff-golden.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/handoff-golden.json",
+      "byteCount": 38431,
+      "sha256": "a4858a859387d35314c0dd12e901d057050f848961c52135c29f6d763a0935e2"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/history-and-native-gap-assessment.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/history-and-native-gap-assessment.json",
+      "byteCount": 2463,
+      "sha256": "7d93d3ba2609b428f2d8932c1cd807e4597264b4bb15d36ed12be232cb5c85f3"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/input-construction.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/input-construction.json",
+      "byteCount": 14208,
+      "sha256": "c4422491857bc4ee0336cda8574655f510ec6fcf91373568b5651d2792b46ab9"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/input-observation.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/input-observation.json",
+      "byteCount": 14831,
+      "sha256": "68eb82dd8bd7349125b929cf681eba5036e359e9c5592007b678cd8989a74f6b"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/interface-proposal.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/interface-proposal.json",
+      "byteCount": 4890,
+      "sha256": "c06a793da7496980b9413002f818ddcf684fa3d7b4a664e33cf8d21765ced50c"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/oracle-source-identities.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/oracle-source-identities.json",
+      "byteCount": 25302,
+      "sha256": "e393472b7be78e5d511460c83c216d58d5d66982b84af3ccc59ead7577d5e9fb"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-hiprofiler_data_ability-opening.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-hiprofiler_data_ability-opening.json",
+      "byteCount": 3926,
+      "sha256": "d4d3f821f89cd4e43a85eb45c9453a8e47483794d97104045dad587a41668b7d"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-hiprofiler_data_ability-oracle-input.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-hiprofiler_data_ability-oracle-input.json",
+      "byteCount": 2576,
+      "sha256": "d493c784e94a64112565dd1a3dbd1f680dd9c37befc5a8a7d5e3a4ab845db200"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-zlib-opening.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-zlib-opening.json",
+      "byteCount": 3502,
+      "sha256": "8fb881528adcdb61b5ddd7478cf51c16fcb05748f3fe8f5712e1af88d6f9093c"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-zlib-oracle-input.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/private-runtime-zlib-oracle-input.json",
+      "byteCount": 2441,
+      "sha256": "a8f63cecc26c4cc3da695fbf466af00a91a3774ce2409dc41130487b64609d52"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/real-capture-provenance.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/real-capture-provenance.json",
+      "byteCount": 121622,
+      "sha256": "71d96f7fef3e79553cccc7dddd4ddca30f821cda273195a0759910f56584bef1"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/requests.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/requests.json",
+      "byteCount": 4098,
+      "sha256": "4298505c6a7bc8328c587d3c390c14f0b79ff4033358a035132c7d77a37d4dd7"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/fixtures/temporal-construction.sql",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/temporal-construction.sql",
+      "byteCount": 4317,
+      "sha256": "3026ffd0b61026ac1671e9a106fe4ac51e48372ca055d5c88e4d124027a250a7"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/freeze_report.py",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/freeze_report.py",
+      "byteCount": 15678,
+      "sha256": "3374e902f71205d83a2e45df93fe19a6654e9dbf1991c3e772fe0a30e6905f22"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/handoff.py",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/handoff.py",
+      "byteCount": 8377,
+      "sha256": "d806f1377f4929e21850b5c2c5c4fa928ab722ef60bf5c3623966f1f04cb8ad7"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/prepare.py",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/prepare.py",
+      "byteCount": 9314,
+      "sha256": "1e2d1492182b12e5121ef96634e13dacabf6d7a38115b2102dc487bbfd83ec6a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/run.py",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/run.py",
+      "byteCount": 5466,
+      "sha256": "403eea9f63d7295a770e466f5156d3c667dc9ac786a4ff0d485e756faec0e986"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/swift/RepositoryAccess.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/swift/RepositoryAccess.swift",
+      "byteCount": 1023,
+      "sha256": "8e39b4553afbccb7d5deabc36fca96a175fb85491941d1609ba902f18ec2195a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/swift/SummaryOracle.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/swift/SummaryOracle.swift",
+      "byteCount": 8112,
+      "sha256": "5ccec46642523804cc67e791a53112968e346ca2e032c29c8c8d46990b55b710"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/canonical-verification.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/canonical-verification.json",
+      "byteCount": 1378,
+      "sha256": "6d56da0c106ab06c8f5ab3660ee236e2906d58c47d5253fde57a5d35e8a98227"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-build-sources/RepositoryAccess.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-build-sources/RepositoryAccess.swift",
+      "byteCount": 1023,
+      "sha256": "8e39b4553afbccb7d5deabc36fca96a175fb85491941d1609ba902f18ec2195a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-build-sources/SummaryOracle.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-build-sources/SummaryOracle.swift",
+      "byteCount": 7867,
+      "sha256": "4da2d03308fcb9fc55394f1f2695e6dc475d7ecb48544f9349b7d2897ce24128"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log",
+      "byteCount": 17985,
+      "sha256": "2a4325511e91a98d848aa8515b3fe81380236323ab2ba6a1d1efe8076d995eb8"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.receipt.json",
+      "byteCount": 1356,
+      "sha256": "0c92926da0e5acc988d669044eb7c488177608192837e99686e2569a7d16e6bb"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/first-build-sources/RepositoryAccess.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/first-build-sources/RepositoryAccess.swift",
+      "byteCount": 585,
+      "sha256": "bf2401256c352f9bdc9adf355a7ac771d07af70674ec96f1f1b0e218805f1923"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/first-build-sources/SummaryOracle.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/first-build-sources/SummaryOracle.swift",
+      "byteCount": 8026,
+      "sha256": "8e66d43bfe8e1b1a43e9af55d8ab7be9baabc0df3c458ee4269ee6642fc90e81"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/first-construction.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/first-construction.log",
+      "byteCount": 328,
+      "sha256": "19178263f7788c646d9598aba3137eaec05c82ac402bacdadf320d241dc1121b"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/first-construction.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/first-construction.receipt.json",
+      "byteCount": 1226,
+      "sha256": "67d8ec09e1b5bef4486127b5d1851229ccfb75d91dafff70142ac7680c5ef6eb"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/first-oracle-build.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/first-oracle-build.log",
+      "byteCount": 11633,
+      "sha256": "e9839ea0c401c2821792aef389f3373b439f2de0d41cb82021ec62c20a0eb6a4"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/first-oracle-build.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/first-oracle-build.receipt.json",
+      "byteCount": 1343,
+      "sha256": "8d5b7ac0ff108e79bf7c580f136298e389db2cfac406b66cd9c11816f53366c9"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/fixed-history-gap-search.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/fixed-history-gap-search.log",
+      "byteCount": 1040,
+      "sha256": "cc5c8fb60346b012ef1cec87566a902e221ab0cba0d44840d5940d582048989d"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/fixed-interface-gap-search.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/fixed-interface-gap-search.log",
+      "byteCount": 375,
+      "sha256": "6385bbf40c34e3d5c2ccb08e06045e4406db4a8cc6aec41610f50d18350b907b"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/freeze-syntax-failed.py",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/freeze-syntax-failed.py",
+      "byteCount": 15679,
+      "sha256": "256a443647b31098922b4f7fb9780cc6de022cbc6cc3b16eb46a3b5db71db115"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/freeze-syntax-failure.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/freeze-syntax-failure.json",
+      "byteCount": 263,
+      "sha256": "dca4f8c10e4b830b8fa102c9486c4016ad1003b2d919f91bf316bbd05c8e996a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/handoff-and-prior-freeze-verification.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/handoff-and-prior-freeze-verification.json",
+      "byteCount": 1122,
+      "sha256": "8dbf6a89ad200f93c7360f0f631ae1cd031d865040c0f7be1678ed5b01163d41"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/once-canonical-15.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/once-canonical-15.log",
+      "byteCount": 149148,
+      "sha256": "1604ce564691ac525626cc13e06c6cff635b7906277b4b852426662111af2497"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/once-canonical-15.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/once-canonical-15.receipt.json",
+      "byteCount": 1225,
+      "sha256": "26f9716bf7214924894c6681d2ded999d31444b2d349ecf056ab54c8ce88f780"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/pre-observation-identity-drift.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/pre-observation-identity-drift.json",
+      "byteCount": 540,
+      "sha256": "bdd9823817c8ab35cc9751b0e6c23cff85a8d857729bdc9c13a9fb3eee32ea00"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/strict-context-oracle-build.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/strict-context-oracle-build.log",
+      "byteCount": 562,
+      "sha256": "899f10fcde8e9bcbfa8c972e688ec89ad731a86f7a5e3d91e789e94085d82c6a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/strict-context-oracle-build.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/strict-context-oracle-build.receipt.json",
+      "byteCount": 1350,
+      "sha256": "0dc10a9e5e365568c81583918b57d8e5c93f55e34104742826a65a92083c70c7"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/toolchain.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/toolchain.json",
+      "byteCount": 1397,
+      "sha256": "c568f8c0a2a20b43f2ad9af8b11f0ce4ba64f974a34967c61ab064ebb92a74e2"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/valid-empty-fixture-oracle-build.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/valid-empty-fixture-oracle-build.log",
+      "byteCount": 539,
+      "sha256": "7b96e88084444cbf4ba00e787d9b0ba4cad363998e8ecae77f698327b28a0458"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/valid-empty-fixture-oracle-build.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/valid-empty-fixture-oracle-build.receipt.json",
+      "byteCount": 1355,
+      "sha256": "50f06e717555bddd6b3cfcd5dba44d9770ea0370a92e609870048531906b97a6"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.log",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.log",
+      "byteCount": 651,
+      "sha256": "17f36cc60e61cbfc21ad7dd250e8850022b4a90f4772c6874e468bb55370d826"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.receipt.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.receipt.json",
+      "byteCount": 1241,
+      "sha256": "af8cd857f42cbf933d1b6d217362cf461e1e73aa11ce55db9a7e675695f4d98b"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-build-sources/RepositoryAccess.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-build-sources/RepositoryAccess.swift",
+      "byteCount": 1023,
+      "sha256": "8e39b4553afbccb7d5deabc36fca96a175fb85491941d1609ba902f18ec2195a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-build-sources/SummaryOracle.swift",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-build-sources/SummaryOracle.swift",
+      "byteCount": 7940,
+      "sha256": "0f45b4e200ef3f119e9a2ccd4b234aef49ed28ee6725f1817678b916586c07cc"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-rejected-input.json",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/zero-duration-rejected-input.json",
+      "byteCount": 14006,
+      "sha256": "02f026435ed1452d623ff42faebb858438bf4038e2ab40f4d04532de81654e5a"
+    },
+    {
+      "relativePath": "tools/parallel-summary-facts-canonical-20261004/verify.py",
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verify.py",
+      "byteCount": 8028,
+      "sha256": "8813f0a52ba090342bad39846a1da0eb9c7b8e470a714154fcdebe1db0fd461e"
+    }
+  ],
+  "markdown": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/docs/migration-runs/AT-RUST-007-parallel-summary-facts-canonical-2026-10-04.md",
+    "byteCount": 9851,
+    "sha256": "4d44a5c2e42af2143385c8f7db224174bfd1498b4cc2894c3d912a4a20a5ffe9"
+  },
+  "mainStatus": {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  "mainHeadAtFreeze": "9b31a5d5485167b7a6881a82cc10d37120336f3b",
+  "candidateSwitchPerformed": false,
+  "reverseMessageSent": false,
+  "subAgentsCreated": false
+}

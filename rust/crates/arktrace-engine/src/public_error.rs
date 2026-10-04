@@ -76,13 +76,18 @@ impl EngineError {
                         table == arktrace_store::CounterSampleTable::ProcessMeasure,
                     )
                 }
-                StoreError::CounterQueryFailed => make(Code::QueryFailed),
+                StoreError::CounterQueryFailed | StoreError::SummaryQueryFailed => {
+                    make(Code::QueryFailed)
+                }
                 StoreError::InvalidFrameIdentity => PublicError::invalid_frame_identity(),
                 StoreError::Host(error) => host(error),
                 StoreError::Cancelled => make(Code::Cancelled),
                 StoreError::DeadlineExceeded => make(Code::QueryTimeout),
                 StoreError::CleanupFailed => cleanup(),
                 StoreError::InvalidQuery => make(Code::InvalidArgument),
+                StoreError::InvalidSummaryQuery => {
+                    PublicError::new(Code::InvalidArgument, Stage::Request)
+                }
                 StoreError::DecodedBudgetExceeded => make(Code::QueryLimitExceeded),
                 StoreError::WorkerFailed => make(Code::InternalError),
                 StoreError::SchemaUnsupported | StoreError::SchemaBudgetExceeded => {
@@ -103,6 +108,23 @@ impl EngineError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn summary_request_errors_keep_request_stage_and_overflow_is_query_failed() {
+        let request = EngineError {
+            stage: EngineStage::Querying,
+            failure: EngineFailure::Store(StoreError::InvalidSummaryQuery),
+        }
+        .public_error();
+        assert_eq!(request.code(), Code::InvalidArgument);
+        assert_eq!(request.stage(), Stage::Request);
+        let overflow = EngineError {
+            stage: EngineStage::Querying,
+            failure: EngineFailure::Store(StoreError::SummaryQueryFailed),
+        }
+        .public_error();
+        assert_eq!(overflow.code(), Code::QueryFailed);
+        assert_eq!(overflow.stage(), Stage::Querying);
+    }
     #[test]
     fn viewer_failures_publish_closed_path_free_codes() {
         use crate::ViewerFailure::*;

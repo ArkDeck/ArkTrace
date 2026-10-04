@@ -1,0 +1,1800 @@
+[
+  {
+    "id": "zlib",
+    "facts": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-native/zlib.db",
+      "byteCount": 2351104,
+      "sha256": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+      "device": 16777233,
+      "inode": 265777003,
+      "mode": "0o600",
+      "mtimeNs": 1791098748155104279,
+      "ctimeNs": 1791098748828939482,
+      "schemaSHA256": "a222a82a2c99443444986f61a06b06108bf4bd708bb672c0e9cf122b058ba68a",
+      "schema": [
+        [
+          "index",
+          "arktrace_v1_callstack_callid_ts",
+          "callstack",
+          "CREATE INDEX arktrace_v1_callstack_callid_ts ON callstack(callid,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_measure_filter_id_ts",
+          "measure",
+          "CREATE INDEX arktrace_v1_measure_filter_id_ts ON measure(filter_id,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_ipid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_ipid ON process(ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_pid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_pid ON process(pid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_itid_ts",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_itid_ts ON sched_slice(itid,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_ts_cpu",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_ts_cpu ON sched_slice(ts,cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_itid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_itid ON thread(itid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_itid_ts",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_itid_ts ON thread_state(itid,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_ts_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_ts_cpu ON thread_state(ts,cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_tid_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_tid_ipid ON thread(tid,ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_callstack_callid_ts_cover_optional",
+          "callstack",
+          "CREATE INDEX arktrace_v2_callstack_callid_ts_cover_optional ON callstack(callid,ts,id,dur,name,cat,depth,parent_id,cookie)"
+        ],
+        [
+          "index",
+          "arktrace_v2_callstack_callid_ts_id_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v2_callstack_callid_ts_id_dur ON callstack(callid,ts,id,dur,name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_cpu_measure_filter_id",
+          "cpu_measure_filter",
+          "CREATE INDEX arktrace_v2_cpu_measure_filter_id ON cpu_measure_filter(id)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_ipid_pid_name",
+          "process",
+          "CREATE INDEX arktrace_v2_process_ipid_pid_name ON process(ipid,pid,name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_measure_filter_id",
+          "process_measure_filter",
+          "CREATE INDEX arktrace_v2_process_measure_filter_id ON process_measure_filter(id)"
+        ],
+        [
+          "index",
+          "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+          "sched_slice",
+          "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_cover_optional ON sched_slice(cpu,ts,id,dur,itid,ipid,end_state,priority)"
+        ],
+        [
+          "index",
+          "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+          "sched_slice",
+          "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid ON sched_slice(cpu,ts,id,dur,itid,ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_itid_tid_name_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v2_thread_itid_tid_name_ipid ON thread(itid,tid,name,ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_cover_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_cover_cpu ON thread_state(itid,ts,id,dur,state,cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_id_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_id_dur ON thread_state(itid,ts,id,dur,state)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_callid_ts_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid,ts,dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_ts_id_dur_callid",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_ts_id_dur_callid ON callstack(ts,id,dur,callid,name)"
+        ],
+        [
+          "index",
+          "arktrace_v3_sched_slice_cpu_ts_dur",
+          "sched_slice",
+          "CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_thread_state_itid_ts_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid,ts,dur)"
+        ],
+        [
+          "table",
+          "animation",
+          "animation",
+          "CREATE TABLE animation(\n  id INT,\n  input_time INT,\n  start_point INT,\n  end_point INT,\n  frame_info TEXT,\n  name TEXT\n)"
+        ],
+        [
+          "table",
+          "app_name",
+          "app_name",
+          "CREATE TABLE app_name(id INT,app_name INT,app_key INT)"
+        ],
+        [
+          "table",
+          "app_startup",
+          "app_startup",
+          "CREATE TABLE app_startup(\n  id INT,\n  call_id INT,\n  ipid INT,\n  tid INT,\n  start_time INT,\n  end_time INT,\n  start_name INT,\n  packed_name TEXT\n)"
+        ],
+        [
+          "table",
+          "args",
+          "args",
+          "CREATE TABLE args(\n  id INT,\n  \"key\" INT,\n  datatype INT,\n  value INT,\n  argset INT\n)"
+        ],
+        [
+          "table",
+          "bio_latency_sample",
+          "bio_latency_sample",
+          "CREATE TABLE bio_latency_sample(\n  id INT,\n  callchain_id INT,\n  type INT,\n  ipid INT,\n  itid INT,\n  start_ts INT,\n  end_ts INT,\n  latency_dur INT,\n  tier INT,\n  size INT,\n  block_number TEXT,\n  path_id TEXT,\n  dur_per_4k INT\n)"
+        ],
+        [
+          "table",
+          "callstack",
+          "callstack",
+          "CREATE TABLE callstack(\n  id INT,\n  ts INT,\n  dur INT,\n  callid INT,\n  cat TEXT,\n  name TEXT,\n  depth INT,\n  cookie INT,\n  parent_id INT,\n  argsetid INT,\n  chainId TEXT,\n  spanId TEXT,\n  parentSpanId TEXT,\n  flag TEXT,\n  trace_level TEXT,\n  trace_tag TEXT,\n  custom_category TEXT,\n  custom_args TEXT,\n  child_callid INT\n)"
+        ],
+        [
+          "table",
+          "clk_event_filter",
+          "clk_event_filter",
+          "CREATE TABLE clk_event_filter(\n  id INT,\n  type TEXT,\n  name TEXT,\n  cpu INT\n)"
+        ],
+        [
+          "table",
+          "clock_event_filter",
+          "clock_event_filter",
+          "CREATE TABLE clock_event_filter(\n  id INT,\n  type TEXT,\n  name TEXT,\n  cpu INT\n)"
+        ],
+        [
+          "table",
+          "clock_snapshot",
+          "clock_snapshot",
+          "CREATE TABLE clock_snapshot(\n  id INT,\n  clock_id INT,\n  ts INT,\n  clock_name TEXT\n)"
+        ],
+        [
+          "table",
+          "cpu_measure_filter",
+          "cpu_measure_filter",
+          "CREATE TABLE cpu_measure_filter(\n  id INT,\n  name TEXT,\n  cpu INT\n)"
+        ],
+        [
+          "table",
+          "cpu_usage",
+          "cpu_usage",
+          "CREATE TABLE cpu_usage(\n  ts INT,\n  dur INT,\n  total_load REAL,\n  user_load REAL,\n  system_load REAL,\n  process_num INT\n)"
+        ],
+        [
+          "table",
+          "data_dict",
+          "data_dict",
+          "CREATE TABLE data_dict(id INT,data TEXT)"
+        ],
+        [
+          "table",
+          "data_type",
+          "data_type",
+          "CREATE TABLE data_type(id INT,typeId INT,\"desc\" TEXT)"
+        ],
+        [
+          "table",
+          "datasource_clockid",
+          "datasource_clockid",
+          "CREATE TABLE datasource_clockid(\n  id INT,\n  data_source_name TEXT,\n  clock_id INT\n)"
+        ],
+        [
+          "table",
+          "device_info",
+          "device_info",
+          "CREATE TABLE device_info(\n  physical_width INT,\n  physical_height INT,\n  physical_frame_rate INT\n)"
+        ],
+        [
+          "table",
+          "device_state",
+          "device_state",
+          "CREATE TABLE device_state(\n  id INT,\n  brightness INT,\n  bt_state INT,\n  location INT,\n  wifi INT,\n  stream_default INT,\n  voice_call INT,\n  music INT,\n  stream_ring INT,\n  media INT,\n  voice_assistant INT,\n  system INT,\n  alarm INT,\n  notification INT,\n  bt_sco INT,\n  enforced_audible INT,\n  stream_dtmf INT,\n  stream_tts INT,\n  accessibility INT,\n  recording INT,\n  stream_all INT\n)"
+        ],
+        [
+          "table",
+          "diskio",
+          "diskio",
+          "CREATE TABLE diskio(\n  ts INT,\n  dur INT,\n  rd INT,\n  wr INT,\n  rd_speed REAL,\n  wr_speed REAL,\n  rd_count INT,\n  wr_count INT,\n  rd_count_speed REAL,\n  wr_count_speed REAL\n)"
+        ],
+        [
+          "table",
+          "dma_fence",
+          "dma_fence",
+          "CREATE TABLE dma_fence(\n  id INT,\n  ts INT,\n  dur INT,\n  cat TEXT,\n  driver TEXT,\n  timeline TEXT,\n  context INT,\n  seqno INT\n)"
+        ],
+        [
+          "table",
+          "dynamic_frame",
+          "dynamic_frame",
+          "CREATE TABLE dynamic_frame(\n  id INT,\n  x INT,\n  y INT,\n  width INT,\n  height INT,\n  alpha TEXT,\n  name TEXT,\n  end_time INT\n)"
+        ],
+        [
+          "table",
+          "ebpf_callstack",
+          "ebpf_callstack",
+          "CREATE TABLE ebpf_callstack(\n  id INT,\n  callchain_id INT,\n  depth INT,\n  ip TEXT,\n  symbols_id INT,\n  file_path_id INT\n)"
+        ],
+        [
+          "table",
+          "file_system_sample",
+          "file_system_sample",
+          "CREATE TABLE file_system_sample(\n  id INT,\n  callchain_id INT,\n  type INT,\n  ipid INT,\n  itid INT,\n  start_ts INT,\n  end_ts INT,\n  dur INT,\n  return_value TEXT,\n  error_code TEXT,\n  fd INT,\n  file_id INT,\n  size INT,\n  first_argument TEXT,\n  second_argument TEXT,\n  third_argument TEXT,\n  fourth_argument TEXT\n)"
+        ],
+        [
+          "table",
+          "filesystem_io",
+          "filesystem_io",
+          "CREATE TABLE filesystem_io(\n  id INT,\n  itid INT,\n  ipid INT,\n  start_time INT,\n  end_time INT,\n  duration INT,\n  is_block INT,\n  is_write INT,\n  main_dev INT,\n  sub_dev INT,\n  ino INT,\n  enter_size INT,\n  enter_offset INT,\n  exit_offset INT,\n  request_bytes INT,\n  actual_bytes INT,\n  file_id INT,\n  sector INT,\n  nr_sector INT,\n  rwbs_id INT,\n  cmd_id INT\n)"
+        ],
+        [
+          "table",
+          "frame_maps",
+          "frame_maps",
+          "CREATE TABLE frame_maps(id INT,src_row INT,dst_row INT)"
+        ],
+        [
+          "table",
+          "frame_slice",
+          "frame_slice",
+          "CREATE TABLE frame_slice(\n  id INT,\n  ts INT,\n  vsync INT,\n  ipid INT,\n  itid INT,\n  callstack_id INT,\n  dur INT,\n  src TEXT,\n  dst INT,\n  type INT,\n  type_desc TEXT,\n  flag INT,\n  depth INT,\n  frame_no INT\n)"
+        ],
+        [
+          "table",
+          "gpu_slice",
+          "gpu_slice",
+          "CREATE TABLE gpu_slice(id INT,frame_row INT,dur INT)"
+        ],
+        [
+          "table",
+          "hidump",
+          "hidump",
+          "CREATE TABLE hidump(id INT,ts INT,fps INT)"
+        ],
+        [
+          "table",
+          "hisys_all_event",
+          "hisys_all_event",
+          "CREATE TABLE hisys_all_event(\n  id INT,\n  domain_id INT,\n  event_name_id INT,\n  ts INT,\n  type INT,\n  time_zone TEXT,\n  pid INT,\n  tid INT,\n  uid INT,\n  level TEXT,\n  tag TEXT,\n  event_id TEXT,\n  seq INT,\n  info TEXT,\n  contents TEXT\n)"
+        ],
+        [
+          "table",
+          "hisys_event_measure",
+          "hisys_event_measure",
+          "CREATE TABLE hisys_event_measure(\n  id INT,\n  serial INT,\n  ts INT,\n  name_id INT,\n  key_id INT,\n  type INT,\n  int_value REAL,\n  string_value TEXT\n)"
+        ],
+        [
+          "table",
+          "instant",
+          "instant",
+          "CREATE TABLE instant(\n  ts INT,\n  name TEXT,\n  ref INT,\n  wakeup_from INT,\n  ref_type TEXT,\n  value REAL\n)"
+        ],
+        [
+          "table",
+          "irq",
+          "irq",
+          "CREATE TABLE irq(\n  id INT,\n  ts INT,\n  dur INT,\n  callid INT,\n  cat TEXT,\n  name TEXT,\n  depth INT,\n  cookie INT,\n  parent_id INT,\n  argsetid INT,\n  flag TEXT\n)"
+        ],
+        [
+          "table",
+          "js_config",
+          "js_config",
+          "CREATE TABLE js_config(\n  pid INT,\n  type INT,\n  interval INT,\n  capture_numeric_value INT,\n  trace_allocation INT,\n  enable_cpu_profiler INT,\n  cpu_profiler_interval INT\n)"
+        ],
+        [
+          "table",
+          "js_cpu_profiler_node",
+          "js_cpu_profiler_node",
+          "CREATE TABLE js_cpu_profiler_node(\n  function_id INT,\n  function_index INT,\n  script_id TEXT,\n  url_index INT,\n  line_number INT,\n  column_number INT,\n  hit_count INT,\n  children INT,\n  parent_id INT\n)"
+        ],
+        [
+          "table",
+          "js_cpu_profiler_sample",
+          "js_cpu_profiler_sample",
+          "CREATE TABLE js_cpu_profiler_sample(\n  id INT,\n  function_id INT,\n  start_time INT,\n  end_time INT,\n  dur INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_edges",
+          "js_heap_edges",
+          "CREATE TABLE js_heap_edges(\n  file_id INT,\n  edge_index INT,\n  type INT,\n  name_or_index INT,\n  to_node INT,\n  from_node_id INT,\n  to_node_id INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_files",
+          "js_heap_files",
+          "CREATE TABLE js_heap_files(\n  id INT,\n  file_name TEXT,\n  start_time INT,\n  end_time INT,\n  self_size INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_info",
+          "js_heap_info",
+          "CREATE TABLE js_heap_info(\n  file_id INT,\n  \"key\" TEXT,\n  type INT,\n  int_value INT,\n  str_value TEXT\n)"
+        ],
+        [
+          "table",
+          "js_heap_location",
+          "js_heap_location",
+          "CREATE TABLE js_heap_location(\n  file_id INT,\n  object_index INT,\n  script_id INT,\n  line INT,\n  \"column\" INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_nodes",
+          "js_heap_nodes",
+          "CREATE TABLE js_heap_nodes(\n  file_id INT,\n  node_index INT,\n  type INT,\n  name INT,\n  id INT,\n  self_size INT,\n  edge_count INT,\n  trace_node_id INT,\n  detachedness INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_sample",
+          "js_heap_sample",
+          "CREATE TABLE js_heap_sample(\n  file_id INT,\n  timestamp_us INT,\n  last_assigned_id INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_string",
+          "js_heap_string",
+          "CREATE TABLE js_heap_string(\n  file_id INT,\n  file_index INT,\n  string TEXT\n)"
+        ],
+        [
+          "table",
+          "js_heap_trace_function_info",
+          "js_heap_trace_function_info",
+          "CREATE TABLE js_heap_trace_function_info(\n  file_id INT,\n  function_index INT,\n  function_id INT,\n  name INT,\n  script_name INT,\n  script_id INT,\n  line INT,\n  \"column\" INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_trace_node",
+          "js_heap_trace_node",
+          "CREATE TABLE js_heap_trace_node(\n  file_id INT,\n  id INT,\n  function_info_index INT,\n  count INT,\n  size INT,\n  parent_id INT\n)"
+        ],
+        [
+          "table",
+          "live_process",
+          "live_process",
+          "CREATE TABLE live_process(\n  ts INT,\n  dur INT,\n  cpu_time INT,\n  process_id INT,\n  process_name TEXT,\n  parent_process_id INT,\n  uid INT,\n  user_name TEXT,\n  cpu_usage REAL,\n  pss_info INT,\n  thread_num INT,\n  disk_writes INT,\n  disk_reads INT\n)"
+        ],
+        [
+          "table",
+          "log",
+          "log",
+          "CREATE TABLE log(\n  seq INT,\n  ts INT,\n  pid INT,\n  tid INT,\n  level TEXT,\n  tag TEXT,\n  context TEXT,\n  origints INT\n)"
+        ],
+        [
+          "table",
+          "measure",
+          "measure",
+          "CREATE TABLE measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "table",
+          "measure_filter",
+          "measure_filter",
+          "CREATE TABLE measure_filter(\n  id INT,\n  type TEXT,\n  name TEXT,\n  source_arg_set_id INT\n)"
+        ],
+        [
+          "table",
+          "memory_ashmem",
+          "memory_ashmem",
+          "CREATE TABLE memory_ashmem(\n  id INT,\n  ts INT,\n  ipid INT,\n  adj INT,\n  fd INT,\n  ashmem_name_id INT,\n  size INT,\n  pss INT,\n  ashmem_id INT,\n  time INT,\n  ref_count INT,\n  purged INT,\n  flag INT\n)"
+        ],
+        [
+          "table",
+          "memory_cpu",
+          "memory_cpu",
+          "CREATE TABLE memory_cpu(id INT,ts INT,total_size INT)"
+        ],
+        [
+          "table",
+          "memory_dma",
+          "memory_dma",
+          "CREATE TABLE memory_dma(\n  id INT,\n  ts INT,\n  ipid INT,\n  fd INT,\n  size INT,\n  ino INT,\n  exp_pid INT,\n  exp_task_comm_id INT,\n  buf_name_id INT,\n  exp_name_id INT,\n  flag INT\n)"
+        ],
+        [
+          "table",
+          "memory_process_gpu",
+          "memory_process_gpu",
+          "CREATE TABLE memory_process_gpu(\n  id INT,\n  ts INT,\n  gpu_name_id INT,\n  all_gpu_size INT,\n  addr TEXT,\n  ipid INT,\n  itid INT,\n  used_gpu_size INT\n)"
+        ],
+        [
+          "table",
+          "memory_profile",
+          "memory_profile",
+          "CREATE TABLE memory_profile(\n  id INT,\n  ts INT,\n  channel_id INT,\n  total_size INT\n)"
+        ],
+        [
+          "table",
+          "memory_rs_image",
+          "memory_rs_image",
+          "CREATE TABLE memory_rs_image(\n  id INT,\n  ipid INT,\n  ts INT,\n  mem_size INT,\n  type_id INT,\n  surface_name_id INT\n)"
+        ],
+        [
+          "table",
+          "memory_window_gpu",
+          "memory_window_gpu",
+          "CREATE TABLE memory_window_gpu(\n  id INT,\n  ts INT,\n  window_name_id INT,\n  window_id INT,\n  module_name_id INT,\n  category_name_id INT,\n  size INT,\n  count INT,\n  purgeable_size INT,\n  ipid INT\n)"
+        ],
+        [
+          "table",
+          "native_hook",
+          "native_hook",
+          "CREATE TABLE native_hook(\n  id INT,\n  callchain_id INT,\n  ipid INT,\n  itid INT,\n  event_type TEXT,\n  sub_type_id INT,\n  start_ts INT,\n  end_ts INT,\n  dur INT,\n  addr INT,\n  heap_size INT,\n  all_heap_size INT,\n  current_size_dur INT,\n  last_lib_id INT,\n  last_symbol_id INT\n)"
+        ],
+        [
+          "table",
+          "native_hook_frame",
+          "native_hook_frame",
+          "CREATE TABLE native_hook_frame(\n  id INT,\n  callchain_id INT,\n  depth INT,\n  ip INT,\n  symbol_id INT,\n  file_id INT,\n  \"offset\" INT,\n  symbol_offset INT,\n  vaddr TEXT,\n  build_id INT\n)"
+        ],
+        [
+          "table",
+          "native_hook_statistic",
+          "native_hook_statistic",
+          "CREATE TABLE native_hook_statistic(\n  id INT,\n  callchain_id INT,\n  ipid INT,\n  ts INT,\n  type INT,\n  sub_type_id INT,\n  apply_count INT,\n  release_count INT,\n  apply_size INT,\n  release_size INT,\n  last_lib_id INT,\n  last_symbol_id INT,\n  addr_id INT\n)"
+        ],
+        [
+          "table",
+          "network",
+          "network",
+          "CREATE TABLE network(\n  ts INT,\n  dur INT,\n  tx INT,\n  rx INT,\n  tx_speed REAL,\n  rx_speed REAL,\n  packet_in INT,\n  packet_in_sec REAL,\n  packet_out INT,\n  packet_out_sec REAL,\n  net_type TEXT\n)"
+        ],
+        [
+          "table",
+          "network_information",
+          "network_information",
+          "CREATE TABLE network_information(\n  id INT,\n  request_id TEXT,\n  protocol TEXT,\n  domain TEXT,\n  request_uri TEXT,\n  request_method TEXT,\n  request_header TEXT,\n  response_status_code INT,\n  response_header TEXT,\n  response_effective_url TEXT,\n  ip_address TEXT,\n  version TEXT,\n  reason_phrase TEXT\n)"
+        ],
+        [
+          "table",
+          "network_time_information",
+          "network_time_information",
+          "CREATE TABLE network_time_information(\n  id INT,\n  itid INT,\n  ipid INT,\n  begin_time INT,\n  dns_end_time INT,\n  tcp_end_time INT,\n  tls_end_time INT,\n  first_send_time INT,\n  first_recv_time INT,\n  end_time INT,\n  cache_hit INT\n)"
+        ],
+        [
+          "table",
+          "paged_memory_sample",
+          "paged_memory_sample",
+          "CREATE TABLE paged_memory_sample(\n  id INT,\n  callchain_id INT,\n  type INT,\n  ipid INT,\n  start_ts INT,\n  end_ts INT,\n  dur INT,\n  size INT,\n  addr TEXT,\n  itid INT\n)"
+        ],
+        [
+          "table",
+          "perf_callchain",
+          "perf_callchain",
+          "CREATE TABLE perf_callchain(\n  id INT,\n  callchain_id INT,\n  depth INT,\n  ip INT,\n  vaddr_in_file INT,\n  offset_to_vaddr INT,\n  file_id INT,\n  symbol_id INT,\n  name INT,\n  source_file_id INT,\n  line_number INT\n)"
+        ],
+        [
+          "table",
+          "perf_files",
+          "perf_files",
+          "CREATE TABLE perf_files(\n  id INT,\n  file_id INT,\n  serial_id INT,\n  symbol TEXT,\n  path TEXT\n)"
+        ],
+        [
+          "table",
+          "perf_napi_async",
+          "perf_napi_async",
+          "CREATE TABLE perf_napi_async(\n  id INT,\n  ts INT,\n  traceid TEXT,\n  cpu_id INT,\n  thread_id INT,\n  process_id INT,\n  caller_callchainid INT,\n  callee_callchainid INT,\n  perf_sample_id INT,\n  event_count INT,\n  event_type_id INT\n)"
+        ],
+        [
+          "table",
+          "perf_report",
+          "perf_report",
+          "CREATE TABLE perf_report(\n  id INT,\n  report_type TEXT,\n  report_value TEXT\n)"
+        ],
+        [
+          "table",
+          "perf_sample",
+          "perf_sample",
+          "CREATE TABLE perf_sample(\n  id INT,\n  callchain_id INT,\n  timeStamp INT,\n  thread_id INT,\n  event_count INT,\n  event_type_id INT,\n  timestamp_trace INT,\n  cpu_id INT,\n  thread_state TEXT\n)"
+        ],
+        [
+          "table",
+          "perf_thread",
+          "perf_thread",
+          "CREATE TABLE perf_thread(\n  id INT,\n  thread_id INT,\n  process_id INT,\n  thread_name TEXT\n)"
+        ],
+        [
+          "table",
+          "process",
+          "process",
+          "CREATE TABLE process(\n  id INT,\n  ipid INT,\n  pid INT,\n  name TEXT,\n  start_ts INT,\n  switch_count INT,\n  thread_count INT,\n  slice_count INT,\n  mem_count INT\n)"
+        ],
+        [
+          "table",
+          "process_measure",
+          "process_measure",
+          "CREATE TABLE process_measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "table",
+          "process_measure_filter",
+          "process_measure_filter",
+          "CREATE TABLE process_measure_filter(\n  id INT,\n  name TEXT,\n  ipid INT\n)"
+        ],
+        [
+          "table",
+          "raw",
+          "raw",
+          "CREATE TABLE raw(\n  id INT,\n  ts INT,\n  name TEXT,\n  cpu INT,\n  itid INT\n)"
+        ],
+        [
+          "table",
+          "sched_slice",
+          "sched_slice",
+          "CREATE TABLE sched_slice(\n  id INT,\n  ts INT,\n  dur INT,\n  ts_end INT,\n  cpu INT,\n  itid INT,\n  ipid INT,\n  end_state TEXT,\n  priority INT,\n  arg_setid INT\n)"
+        ],
+        [
+          "table",
+          "smaps",
+          "smaps",
+          "CREATE TABLE smaps(\n  id INT,\n  timeStamp INT,\n  start_addr TEXT,\n  end_addr TEXT,\n  dirty INT,\n  swapper INT,\n  resident_size INT,\n  pss INT,\n  virtaul_size INT,\n  reside REAL,\n  protection_id INT,\n  path_id INT,\n  shared_clean INT,\n  shared_dirty INT,\n  private_clean INT,\n  private_dirty INT,\n  swap INT,\n  swap_pss INT,\n  type INT\n)"
+        ],
+        [
+          "table",
+          "stat",
+          "stat",
+          "CREATE TABLE stat(\n  event_name TEXT,\n  stat_type TEXT,\n  count INT,\n  serverity TEXT,\n  source TEXT\n)"
+        ],
+        [
+          "table",
+          "static_initalize",
+          "static_initalize",
+          "CREATE TABLE static_initalize(\n  id INT,\n  ipid INT,\n  tid INT,\n  call_id INT,\n  start_time INT,\n  end_time INT,\n  so_name TEXT,\n  depth INT\n)"
+        ],
+        [
+          "table",
+          "symbols",
+          "symbols",
+          "CREATE TABLE symbols(id INT,funcname TEXT,addr INT)"
+        ],
+        [
+          "table",
+          "sys_event_filter",
+          "sys_event_filter",
+          "CREATE TABLE sys_event_filter(id INT,type TEXT,name TEXT)"
+        ],
+        [
+          "table",
+          "sys_mem_measure",
+          "sys_mem_measure",
+          "CREATE TABLE sys_mem_measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "table",
+          "syscall",
+          "syscall",
+          "CREATE TABLE syscall(\n  syscall_number INT,\n  ts INT,\n  dur INT,\n  itid INT,\n  args TEXT,\n  ret INT\n)"
+        ],
+        [
+          "table",
+          "task_pool",
+          "task_pool",
+          "CREATE TABLE task_pool(\n  id INT,\n  allocation_task_row INT,\n  execute_task_row INT,\n  return_task_row INT,\n  allocation_itid INT,\n  execute_itid INT,\n  return_itid INT,\n  task_id INT,\n  priority INT,\n  execute_state INT,\n  return_state INT,\n  timeout_row INT\n)"
+        ],
+        [
+          "table",
+          "thread",
+          "thread",
+          "CREATE TABLE thread(\n  id INT,\n  itid INT,\n  tid INT,\n  name TEXT,\n  start_ts INT,\n  end_ts INT,\n  ipid INT,\n  is_main_thread INT,\n  switch_count INT\n)"
+        ],
+        [
+          "table",
+          "thread_state",
+          "thread_state",
+          "CREATE TABLE thread_state(\n  id INT,\n  ts INT,\n  dur INT,\n  cpu INT,\n  itid INT,\n  tid INT,\n  pid INT,\n  state TEXT,\n  arg_setid INT\n)"
+        ],
+        [
+          "table",
+          "timerfd_wakeup",
+          "timerfd_wakeup",
+          "CREATE TABLE timerfd_wakeup(\n  id INT,\n  ts INT,\n  pid INT,\n  tid INT,\n  thread_name INT,\n  interval INT,\n  curr_mono TEXT,\n  expire_mono INT\n)"
+        ],
+        [
+          "table",
+          "trace_config",
+          "trace_config",
+          "CREATE TABLE trace_config(\n  id INT,\n  trace_source TEXT,\n  \"key\" TEXT,\n  value TEXT\n)"
+        ],
+        [
+          "table",
+          "trace_range",
+          "trace_range",
+          "CREATE TABLE trace_range(start_ts INT,end_ts INT)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_cpu",
+          "xpower_app_detail_cpu",
+          "CREATE TABLE xpower_app_detail_cpu(\n  id INT,\n  thread_name_id INT,\n  start_time INT,\n  thread_time INT,\n  thread_loads INT,\n  thread_energy INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_display",
+          "xpower_app_detail_display",
+          "CREATE TABLE xpower_app_detail_display(\n  id INT,\n  start_time INT,\n  count_1hz INT,\n  count_5hz INT,\n  count_10hz INT,\n  count_15hz INT,\n  count_24hz INT,\n  count_30hz INT,\n  count_45hz INT,\n  count_60hz INT,\n  count_90hz INT,\n  count_120hz INT,\n  count_180hz INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_gpu",
+          "xpower_app_detail_gpu",
+          "CREATE TABLE xpower_app_detail_gpu(\n  id INT,\n  frequency INT,\n  start_time INT,\n  idle_time INT,\n  run_time INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_wifi",
+          "xpower_app_detail_wifi",
+          "CREATE TABLE xpower_app_detail_wifi(\n  id INT,\n  start_time INT,\n  tx_packets INT,\n  rx_packets INT,\n  tx_bytes INT,\n  rx_bytes INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_statistic",
+          "xpower_app_statistic",
+          "CREATE TABLE xpower_app_statistic(\n  id INT,\n  component_type_id INT,\n  start_time INT,\n  duration INT,\n  energy INT\n)"
+        ],
+        [
+          "table",
+          "xpower_component_top",
+          "xpower_component_top",
+          "CREATE TABLE xpower_component_top(\n  id INT,\n  component_type_id INT,\n  start_time INT,\n  appname INT,\n  background_duration INT,\n  background_energy INT,\n  foreground_duration INT,\n  foreground_energy INT,\n  screen_off_duration INT,\n  screen_off_energy INT,\n  screen_on_duration INT,\n  screen_on_energy INT,\n  camera_id INT,\n  uid INT,\n  load INT,\n  app_usage_duration INT,\n  app_usage_energy INT\n)"
+        ],
+        [
+          "table",
+          "xpower_measure",
+          "xpower_measure",
+          "CREATE TABLE xpower_measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "view",
+          "args_view",
+          "args_view",
+          "CREATE VIEW args_view AS select A.argset, V2.data as keyName, A.id, D.desc, (case when A.datatype==1 then V.data else A.value end) as strValue from args as A left join data_type as D on (D.typeId = A.datatype) left join data_dict as V on V.id = A.value left join data_dict as V2 on V2.id = A.key"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "hiprofiler_data_ability",
+    "facts": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-native/hiprofiler_data_ability.db",
+      "byteCount": 2072576,
+      "sha256": "b9c19f1a3ccf53e75864a4d465d087fe61be46bc32fe11c1f5f4c413c5b7732a",
+      "device": 16777233,
+      "inode": 265777006,
+      "mode": "0o600",
+      "mtimeNs": 1791098748163067308,
+      "ctimeNs": 1791098749282288340,
+      "schemaSHA256": "a222a82a2c99443444986f61a06b06108bf4bd708bb672c0e9cf122b058ba68a",
+      "schema": [
+        [
+          "index",
+          "arktrace_v1_callstack_callid_ts",
+          "callstack",
+          "CREATE INDEX arktrace_v1_callstack_callid_ts ON callstack(callid,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_measure_filter_id_ts",
+          "measure",
+          "CREATE INDEX arktrace_v1_measure_filter_id_ts ON measure(filter_id,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_ipid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_ipid ON process(ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_pid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_pid ON process(pid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_itid_ts",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_itid_ts ON sched_slice(itid,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_ts_cpu",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_ts_cpu ON sched_slice(ts,cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_itid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_itid ON thread(itid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_itid_ts",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_itid_ts ON thread_state(itid,ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_ts_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_ts_cpu ON thread_state(ts,cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_tid_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_tid_ipid ON thread(tid,ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_callstack_callid_ts_cover_optional",
+          "callstack",
+          "CREATE INDEX arktrace_v2_callstack_callid_ts_cover_optional ON callstack(callid,ts,id,dur,name,cat,depth,parent_id,cookie)"
+        ],
+        [
+          "index",
+          "arktrace_v2_callstack_callid_ts_id_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v2_callstack_callid_ts_id_dur ON callstack(callid,ts,id,dur,name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_cpu_measure_filter_id",
+          "cpu_measure_filter",
+          "CREATE INDEX arktrace_v2_cpu_measure_filter_id ON cpu_measure_filter(id)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_ipid_pid_name",
+          "process",
+          "CREATE INDEX arktrace_v2_process_ipid_pid_name ON process(ipid,pid,name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_measure_filter_id",
+          "process_measure_filter",
+          "CREATE INDEX arktrace_v2_process_measure_filter_id ON process_measure_filter(id)"
+        ],
+        [
+          "index",
+          "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+          "sched_slice",
+          "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_cover_optional ON sched_slice(cpu,ts,id,dur,itid,ipid,end_state,priority)"
+        ],
+        [
+          "index",
+          "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+          "sched_slice",
+          "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid ON sched_slice(cpu,ts,id,dur,itid,ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_itid_tid_name_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v2_thread_itid_tid_name_ipid ON thread(itid,tid,name,ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_cover_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_cover_cpu ON thread_state(itid,ts,id,dur,state,cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_id_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_id_dur ON thread_state(itid,ts,id,dur,state)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_callid_ts_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid,ts,dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_ts_id_dur_callid",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_ts_id_dur_callid ON callstack(ts,id,dur,callid,name)"
+        ],
+        [
+          "index",
+          "arktrace_v3_sched_slice_cpu_ts_dur",
+          "sched_slice",
+          "CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_thread_state_itid_ts_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid,ts,dur)"
+        ],
+        [
+          "table",
+          "animation",
+          "animation",
+          "CREATE TABLE animation(\n  id INT,\n  input_time INT,\n  start_point INT,\n  end_point INT,\n  frame_info TEXT,\n  name TEXT\n)"
+        ],
+        [
+          "table",
+          "app_name",
+          "app_name",
+          "CREATE TABLE app_name(id INT,app_name INT,app_key INT)"
+        ],
+        [
+          "table",
+          "app_startup",
+          "app_startup",
+          "CREATE TABLE app_startup(\n  id INT,\n  call_id INT,\n  ipid INT,\n  tid INT,\n  start_time INT,\n  end_time INT,\n  start_name INT,\n  packed_name TEXT\n)"
+        ],
+        [
+          "table",
+          "args",
+          "args",
+          "CREATE TABLE args(\n  id INT,\n  \"key\" INT,\n  datatype INT,\n  value INT,\n  argset INT\n)"
+        ],
+        [
+          "table",
+          "bio_latency_sample",
+          "bio_latency_sample",
+          "CREATE TABLE bio_latency_sample(\n  id INT,\n  callchain_id INT,\n  type INT,\n  ipid INT,\n  itid INT,\n  start_ts INT,\n  end_ts INT,\n  latency_dur INT,\n  tier INT,\n  size INT,\n  block_number TEXT,\n  path_id TEXT,\n  dur_per_4k INT\n)"
+        ],
+        [
+          "table",
+          "callstack",
+          "callstack",
+          "CREATE TABLE callstack(\n  id INT,\n  ts INT,\n  dur INT,\n  callid INT,\n  cat TEXT,\n  name TEXT,\n  depth INT,\n  cookie INT,\n  parent_id INT,\n  argsetid INT,\n  chainId TEXT,\n  spanId TEXT,\n  parentSpanId TEXT,\n  flag TEXT,\n  trace_level TEXT,\n  trace_tag TEXT,\n  custom_category TEXT,\n  custom_args TEXT,\n  child_callid INT\n)"
+        ],
+        [
+          "table",
+          "clk_event_filter",
+          "clk_event_filter",
+          "CREATE TABLE clk_event_filter(\n  id INT,\n  type TEXT,\n  name TEXT,\n  cpu INT\n)"
+        ],
+        [
+          "table",
+          "clock_event_filter",
+          "clock_event_filter",
+          "CREATE TABLE clock_event_filter(\n  id INT,\n  type TEXT,\n  name TEXT,\n  cpu INT\n)"
+        ],
+        [
+          "table",
+          "clock_snapshot",
+          "clock_snapshot",
+          "CREATE TABLE clock_snapshot(\n  id INT,\n  clock_id INT,\n  ts INT,\n  clock_name TEXT\n)"
+        ],
+        [
+          "table",
+          "cpu_measure_filter",
+          "cpu_measure_filter",
+          "CREATE TABLE cpu_measure_filter(\n  id INT,\n  name TEXT,\n  cpu INT\n)"
+        ],
+        [
+          "table",
+          "cpu_usage",
+          "cpu_usage",
+          "CREATE TABLE cpu_usage(\n  ts INT,\n  dur INT,\n  total_load REAL,\n  user_load REAL,\n  system_load REAL,\n  process_num INT\n)"
+        ],
+        [
+          "table",
+          "data_dict",
+          "data_dict",
+          "CREATE TABLE data_dict(id INT,data TEXT)"
+        ],
+        [
+          "table",
+          "data_type",
+          "data_type",
+          "CREATE TABLE data_type(id INT,typeId INT,\"desc\" TEXT)"
+        ],
+        [
+          "table",
+          "datasource_clockid",
+          "datasource_clockid",
+          "CREATE TABLE datasource_clockid(\n  id INT,\n  data_source_name TEXT,\n  clock_id INT\n)"
+        ],
+        [
+          "table",
+          "device_info",
+          "device_info",
+          "CREATE TABLE device_info(\n  physical_width INT,\n  physical_height INT,\n  physical_frame_rate INT\n)"
+        ],
+        [
+          "table",
+          "device_state",
+          "device_state",
+          "CREATE TABLE device_state(\n  id INT,\n  brightness INT,\n  bt_state INT,\n  location INT,\n  wifi INT,\n  stream_default INT,\n  voice_call INT,\n  music INT,\n  stream_ring INT,\n  media INT,\n  voice_assistant INT,\n  system INT,\n  alarm INT,\n  notification INT,\n  bt_sco INT,\n  enforced_audible INT,\n  stream_dtmf INT,\n  stream_tts INT,\n  accessibility INT,\n  recording INT,\n  stream_all INT\n)"
+        ],
+        [
+          "table",
+          "diskio",
+          "diskio",
+          "CREATE TABLE diskio(\n  ts INT,\n  dur INT,\n  rd INT,\n  wr INT,\n  rd_speed REAL,\n  wr_speed REAL,\n  rd_count INT,\n  wr_count INT,\n  rd_count_speed REAL,\n  wr_count_speed REAL\n)"
+        ],
+        [
+          "table",
+          "dma_fence",
+          "dma_fence",
+          "CREATE TABLE dma_fence(\n  id INT,\n  ts INT,\n  dur INT,\n  cat TEXT,\n  driver TEXT,\n  timeline TEXT,\n  context INT,\n  seqno INT\n)"
+        ],
+        [
+          "table",
+          "dynamic_frame",
+          "dynamic_frame",
+          "CREATE TABLE dynamic_frame(\n  id INT,\n  x INT,\n  y INT,\n  width INT,\n  height INT,\n  alpha TEXT,\n  name TEXT,\n  end_time INT\n)"
+        ],
+        [
+          "table",
+          "ebpf_callstack",
+          "ebpf_callstack",
+          "CREATE TABLE ebpf_callstack(\n  id INT,\n  callchain_id INT,\n  depth INT,\n  ip TEXT,\n  symbols_id INT,\n  file_path_id INT\n)"
+        ],
+        [
+          "table",
+          "file_system_sample",
+          "file_system_sample",
+          "CREATE TABLE file_system_sample(\n  id INT,\n  callchain_id INT,\n  type INT,\n  ipid INT,\n  itid INT,\n  start_ts INT,\n  end_ts INT,\n  dur INT,\n  return_value TEXT,\n  error_code TEXT,\n  fd INT,\n  file_id INT,\n  size INT,\n  first_argument TEXT,\n  second_argument TEXT,\n  third_argument TEXT,\n  fourth_argument TEXT\n)"
+        ],
+        [
+          "table",
+          "filesystem_io",
+          "filesystem_io",
+          "CREATE TABLE filesystem_io(\n  id INT,\n  itid INT,\n  ipid INT,\n  start_time INT,\n  end_time INT,\n  duration INT,\n  is_block INT,\n  is_write INT,\n  main_dev INT,\n  sub_dev INT,\n  ino INT,\n  enter_size INT,\n  enter_offset INT,\n  exit_offset INT,\n  request_bytes INT,\n  actual_bytes INT,\n  file_id INT,\n  sector INT,\n  nr_sector INT,\n  rwbs_id INT,\n  cmd_id INT\n)"
+        ],
+        [
+          "table",
+          "frame_maps",
+          "frame_maps",
+          "CREATE TABLE frame_maps(id INT,src_row INT,dst_row INT)"
+        ],
+        [
+          "table",
+          "frame_slice",
+          "frame_slice",
+          "CREATE TABLE frame_slice(\n  id INT,\n  ts INT,\n  vsync INT,\n  ipid INT,\n  itid INT,\n  callstack_id INT,\n  dur INT,\n  src TEXT,\n  dst INT,\n  type INT,\n  type_desc TEXT,\n  flag INT,\n  depth INT,\n  frame_no INT\n)"
+        ],
+        [
+          "table",
+          "gpu_slice",
+          "gpu_slice",
+          "CREATE TABLE gpu_slice(id INT,frame_row INT,dur INT)"
+        ],
+        [
+          "table",
+          "hidump",
+          "hidump",
+          "CREATE TABLE hidump(id INT,ts INT,fps INT)"
+        ],
+        [
+          "table",
+          "hisys_all_event",
+          "hisys_all_event",
+          "CREATE TABLE hisys_all_event(\n  id INT,\n  domain_id INT,\n  event_name_id INT,\n  ts INT,\n  type INT,\n  time_zone TEXT,\n  pid INT,\n  tid INT,\n  uid INT,\n  level TEXT,\n  tag TEXT,\n  event_id TEXT,\n  seq INT,\n  info TEXT,\n  contents TEXT\n)"
+        ],
+        [
+          "table",
+          "hisys_event_measure",
+          "hisys_event_measure",
+          "CREATE TABLE hisys_event_measure(\n  id INT,\n  serial INT,\n  ts INT,\n  name_id INT,\n  key_id INT,\n  type INT,\n  int_value REAL,\n  string_value TEXT\n)"
+        ],
+        [
+          "table",
+          "instant",
+          "instant",
+          "CREATE TABLE instant(\n  ts INT,\n  name TEXT,\n  ref INT,\n  wakeup_from INT,\n  ref_type TEXT,\n  value REAL\n)"
+        ],
+        [
+          "table",
+          "irq",
+          "irq",
+          "CREATE TABLE irq(\n  id INT,\n  ts INT,\n  dur INT,\n  callid INT,\n  cat TEXT,\n  name TEXT,\n  depth INT,\n  cookie INT,\n  parent_id INT,\n  argsetid INT,\n  flag TEXT\n)"
+        ],
+        [
+          "table",
+          "js_config",
+          "js_config",
+          "CREATE TABLE js_config(\n  pid INT,\n  type INT,\n  interval INT,\n  capture_numeric_value INT,\n  trace_allocation INT,\n  enable_cpu_profiler INT,\n  cpu_profiler_interval INT\n)"
+        ],
+        [
+          "table",
+          "js_cpu_profiler_node",
+          "js_cpu_profiler_node",
+          "CREATE TABLE js_cpu_profiler_node(\n  function_id INT,\n  function_index INT,\n  script_id TEXT,\n  url_index INT,\n  line_number INT,\n  column_number INT,\n  hit_count INT,\n  children INT,\n  parent_id INT\n)"
+        ],
+        [
+          "table",
+          "js_cpu_profiler_sample",
+          "js_cpu_profiler_sample",
+          "CREATE TABLE js_cpu_profiler_sample(\n  id INT,\n  function_id INT,\n  start_time INT,\n  end_time INT,\n  dur INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_edges",
+          "js_heap_edges",
+          "CREATE TABLE js_heap_edges(\n  file_id INT,\n  edge_index INT,\n  type INT,\n  name_or_index INT,\n  to_node INT,\n  from_node_id INT,\n  to_node_id INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_files",
+          "js_heap_files",
+          "CREATE TABLE js_heap_files(\n  id INT,\n  file_name TEXT,\n  start_time INT,\n  end_time INT,\n  self_size INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_info",
+          "js_heap_info",
+          "CREATE TABLE js_heap_info(\n  file_id INT,\n  \"key\" TEXT,\n  type INT,\n  int_value INT,\n  str_value TEXT\n)"
+        ],
+        [
+          "table",
+          "js_heap_location",
+          "js_heap_location",
+          "CREATE TABLE js_heap_location(\n  file_id INT,\n  object_index INT,\n  script_id INT,\n  line INT,\n  \"column\" INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_nodes",
+          "js_heap_nodes",
+          "CREATE TABLE js_heap_nodes(\n  file_id INT,\n  node_index INT,\n  type INT,\n  name INT,\n  id INT,\n  self_size INT,\n  edge_count INT,\n  trace_node_id INT,\n  detachedness INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_sample",
+          "js_heap_sample",
+          "CREATE TABLE js_heap_sample(\n  file_id INT,\n  timestamp_us INT,\n  last_assigned_id INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_string",
+          "js_heap_string",
+          "CREATE TABLE js_heap_string(\n  file_id INT,\n  file_index INT,\n  string TEXT\n)"
+        ],
+        [
+          "table",
+          "js_heap_trace_function_info",
+          "js_heap_trace_function_info",
+          "CREATE TABLE js_heap_trace_function_info(\n  file_id INT,\n  function_index INT,\n  function_id INT,\n  name INT,\n  script_name INT,\n  script_id INT,\n  line INT,\n  \"column\" INT\n)"
+        ],
+        [
+          "table",
+          "js_heap_trace_node",
+          "js_heap_trace_node",
+          "CREATE TABLE js_heap_trace_node(\n  file_id INT,\n  id INT,\n  function_info_index INT,\n  count INT,\n  size INT,\n  parent_id INT\n)"
+        ],
+        [
+          "table",
+          "live_process",
+          "live_process",
+          "CREATE TABLE live_process(\n  ts INT,\n  dur INT,\n  cpu_time INT,\n  process_id INT,\n  process_name TEXT,\n  parent_process_id INT,\n  uid INT,\n  user_name TEXT,\n  cpu_usage REAL,\n  pss_info INT,\n  thread_num INT,\n  disk_writes INT,\n  disk_reads INT\n)"
+        ],
+        [
+          "table",
+          "log",
+          "log",
+          "CREATE TABLE log(\n  seq INT,\n  ts INT,\n  pid INT,\n  tid INT,\n  level TEXT,\n  tag TEXT,\n  context TEXT,\n  origints INT\n)"
+        ],
+        [
+          "table",
+          "measure",
+          "measure",
+          "CREATE TABLE measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "table",
+          "measure_filter",
+          "measure_filter",
+          "CREATE TABLE measure_filter(\n  id INT,\n  type TEXT,\n  name TEXT,\n  source_arg_set_id INT\n)"
+        ],
+        [
+          "table",
+          "memory_ashmem",
+          "memory_ashmem",
+          "CREATE TABLE memory_ashmem(\n  id INT,\n  ts INT,\n  ipid INT,\n  adj INT,\n  fd INT,\n  ashmem_name_id INT,\n  size INT,\n  pss INT,\n  ashmem_id INT,\n  time INT,\n  ref_count INT,\n  purged INT,\n  flag INT\n)"
+        ],
+        [
+          "table",
+          "memory_cpu",
+          "memory_cpu",
+          "CREATE TABLE memory_cpu(id INT,ts INT,total_size INT)"
+        ],
+        [
+          "table",
+          "memory_dma",
+          "memory_dma",
+          "CREATE TABLE memory_dma(\n  id INT,\n  ts INT,\n  ipid INT,\n  fd INT,\n  size INT,\n  ino INT,\n  exp_pid INT,\n  exp_task_comm_id INT,\n  buf_name_id INT,\n  exp_name_id INT,\n  flag INT\n)"
+        ],
+        [
+          "table",
+          "memory_process_gpu",
+          "memory_process_gpu",
+          "CREATE TABLE memory_process_gpu(\n  id INT,\n  ts INT,\n  gpu_name_id INT,\n  all_gpu_size INT,\n  addr TEXT,\n  ipid INT,\n  itid INT,\n  used_gpu_size INT\n)"
+        ],
+        [
+          "table",
+          "memory_profile",
+          "memory_profile",
+          "CREATE TABLE memory_profile(\n  id INT,\n  ts INT,\n  channel_id INT,\n  total_size INT\n)"
+        ],
+        [
+          "table",
+          "memory_rs_image",
+          "memory_rs_image",
+          "CREATE TABLE memory_rs_image(\n  id INT,\n  ipid INT,\n  ts INT,\n  mem_size INT,\n  type_id INT,\n  surface_name_id INT\n)"
+        ],
+        [
+          "table",
+          "memory_window_gpu",
+          "memory_window_gpu",
+          "CREATE TABLE memory_window_gpu(\n  id INT,\n  ts INT,\n  window_name_id INT,\n  window_id INT,\n  module_name_id INT,\n  category_name_id INT,\n  size INT,\n  count INT,\n  purgeable_size INT,\n  ipid INT\n)"
+        ],
+        [
+          "table",
+          "native_hook",
+          "native_hook",
+          "CREATE TABLE native_hook(\n  id INT,\n  callchain_id INT,\n  ipid INT,\n  itid INT,\n  event_type TEXT,\n  sub_type_id INT,\n  start_ts INT,\n  end_ts INT,\n  dur INT,\n  addr INT,\n  heap_size INT,\n  all_heap_size INT,\n  current_size_dur INT,\n  last_lib_id INT,\n  last_symbol_id INT\n)"
+        ],
+        [
+          "table",
+          "native_hook_frame",
+          "native_hook_frame",
+          "CREATE TABLE native_hook_frame(\n  id INT,\n  callchain_id INT,\n  depth INT,\n  ip INT,\n  symbol_id INT,\n  file_id INT,\n  \"offset\" INT,\n  symbol_offset INT,\n  vaddr TEXT,\n  build_id INT\n)"
+        ],
+        [
+          "table",
+          "native_hook_statistic",
+          "native_hook_statistic",
+          "CREATE TABLE native_hook_statistic(\n  id INT,\n  callchain_id INT,\n  ipid INT,\n  ts INT,\n  type INT,\n  sub_type_id INT,\n  apply_count INT,\n  release_count INT,\n  apply_size INT,\n  release_size INT,\n  last_lib_id INT,\n  last_symbol_id INT,\n  addr_id INT\n)"
+        ],
+        [
+          "table",
+          "network",
+          "network",
+          "CREATE TABLE network(\n  ts INT,\n  dur INT,\n  tx INT,\n  rx INT,\n  tx_speed REAL,\n  rx_speed REAL,\n  packet_in INT,\n  packet_in_sec REAL,\n  packet_out INT,\n  packet_out_sec REAL,\n  net_type TEXT\n)"
+        ],
+        [
+          "table",
+          "network_information",
+          "network_information",
+          "CREATE TABLE network_information(\n  id INT,\n  request_id TEXT,\n  protocol TEXT,\n  domain TEXT,\n  request_uri TEXT,\n  request_method TEXT,\n  request_header TEXT,\n  response_status_code INT,\n  response_header TEXT,\n  response_effective_url TEXT,\n  ip_address TEXT,\n  version TEXT,\n  reason_phrase TEXT\n)"
+        ],
+        [
+          "table",
+          "network_time_information",
+          "network_time_information",
+          "CREATE TABLE network_time_information(\n  id INT,\n  itid INT,\n  ipid INT,\n  begin_time INT,\n  dns_end_time INT,\n  tcp_end_time INT,\n  tls_end_time INT,\n  first_send_time INT,\n  first_recv_time INT,\n  end_time INT,\n  cache_hit INT\n)"
+        ],
+        [
+          "table",
+          "paged_memory_sample",
+          "paged_memory_sample",
+          "CREATE TABLE paged_memory_sample(\n  id INT,\n  callchain_id INT,\n  type INT,\n  ipid INT,\n  start_ts INT,\n  end_ts INT,\n  dur INT,\n  size INT,\n  addr TEXT,\n  itid INT\n)"
+        ],
+        [
+          "table",
+          "perf_callchain",
+          "perf_callchain",
+          "CREATE TABLE perf_callchain(\n  id INT,\n  callchain_id INT,\n  depth INT,\n  ip INT,\n  vaddr_in_file INT,\n  offset_to_vaddr INT,\n  file_id INT,\n  symbol_id INT,\n  name INT,\n  source_file_id INT,\n  line_number INT\n)"
+        ],
+        [
+          "table",
+          "perf_files",
+          "perf_files",
+          "CREATE TABLE perf_files(\n  id INT,\n  file_id INT,\n  serial_id INT,\n  symbol TEXT,\n  path TEXT\n)"
+        ],
+        [
+          "table",
+          "perf_napi_async",
+          "perf_napi_async",
+          "CREATE TABLE perf_napi_async(\n  id INT,\n  ts INT,\n  traceid TEXT,\n  cpu_id INT,\n  thread_id INT,\n  process_id INT,\n  caller_callchainid INT,\n  callee_callchainid INT,\n  perf_sample_id INT,\n  event_count INT,\n  event_type_id INT\n)"
+        ],
+        [
+          "table",
+          "perf_report",
+          "perf_report",
+          "CREATE TABLE perf_report(\n  id INT,\n  report_type TEXT,\n  report_value TEXT\n)"
+        ],
+        [
+          "table",
+          "perf_sample",
+          "perf_sample",
+          "CREATE TABLE perf_sample(\n  id INT,\n  callchain_id INT,\n  timeStamp INT,\n  thread_id INT,\n  event_count INT,\n  event_type_id INT,\n  timestamp_trace INT,\n  cpu_id INT,\n  thread_state TEXT\n)"
+        ],
+        [
+          "table",
+          "perf_thread",
+          "perf_thread",
+          "CREATE TABLE perf_thread(\n  id INT,\n  thread_id INT,\n  process_id INT,\n  thread_name TEXT\n)"
+        ],
+        [
+          "table",
+          "process",
+          "process",
+          "CREATE TABLE process(\n  id INT,\n  ipid INT,\n  pid INT,\n  name TEXT,\n  start_ts INT,\n  switch_count INT,\n  thread_count INT,\n  slice_count INT,\n  mem_count INT\n)"
+        ],
+        [
+          "table",
+          "process_measure",
+          "process_measure",
+          "CREATE TABLE process_measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "table",
+          "process_measure_filter",
+          "process_measure_filter",
+          "CREATE TABLE process_measure_filter(\n  id INT,\n  name TEXT,\n  ipid INT\n)"
+        ],
+        [
+          "table",
+          "raw",
+          "raw",
+          "CREATE TABLE raw(\n  id INT,\n  ts INT,\n  name TEXT,\n  cpu INT,\n  itid INT\n)"
+        ],
+        [
+          "table",
+          "sched_slice",
+          "sched_slice",
+          "CREATE TABLE sched_slice(\n  id INT,\n  ts INT,\n  dur INT,\n  ts_end INT,\n  cpu INT,\n  itid INT,\n  ipid INT,\n  end_state TEXT,\n  priority INT,\n  arg_setid INT\n)"
+        ],
+        [
+          "table",
+          "smaps",
+          "smaps",
+          "CREATE TABLE smaps(\n  id INT,\n  timeStamp INT,\n  start_addr TEXT,\n  end_addr TEXT,\n  dirty INT,\n  swapper INT,\n  resident_size INT,\n  pss INT,\n  virtaul_size INT,\n  reside REAL,\n  protection_id INT,\n  path_id INT,\n  shared_clean INT,\n  shared_dirty INT,\n  private_clean INT,\n  private_dirty INT,\n  swap INT,\n  swap_pss INT,\n  type INT\n)"
+        ],
+        [
+          "table",
+          "stat",
+          "stat",
+          "CREATE TABLE stat(\n  event_name TEXT,\n  stat_type TEXT,\n  count INT,\n  serverity TEXT,\n  source TEXT\n)"
+        ],
+        [
+          "table",
+          "static_initalize",
+          "static_initalize",
+          "CREATE TABLE static_initalize(\n  id INT,\n  ipid INT,\n  tid INT,\n  call_id INT,\n  start_time INT,\n  end_time INT,\n  so_name TEXT,\n  depth INT\n)"
+        ],
+        [
+          "table",
+          "symbols",
+          "symbols",
+          "CREATE TABLE symbols(id INT,funcname TEXT,addr INT)"
+        ],
+        [
+          "table",
+          "sys_event_filter",
+          "sys_event_filter",
+          "CREATE TABLE sys_event_filter(id INT,type TEXT,name TEXT)"
+        ],
+        [
+          "table",
+          "sys_mem_measure",
+          "sys_mem_measure",
+          "CREATE TABLE sys_mem_measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "table",
+          "syscall",
+          "syscall",
+          "CREATE TABLE syscall(\n  syscall_number INT,\n  ts INT,\n  dur INT,\n  itid INT,\n  args TEXT,\n  ret INT\n)"
+        ],
+        [
+          "table",
+          "task_pool",
+          "task_pool",
+          "CREATE TABLE task_pool(\n  id INT,\n  allocation_task_row INT,\n  execute_task_row INT,\n  return_task_row INT,\n  allocation_itid INT,\n  execute_itid INT,\n  return_itid INT,\n  task_id INT,\n  priority INT,\n  execute_state INT,\n  return_state INT,\n  timeout_row INT\n)"
+        ],
+        [
+          "table",
+          "thread",
+          "thread",
+          "CREATE TABLE thread(\n  id INT,\n  itid INT,\n  tid INT,\n  name TEXT,\n  start_ts INT,\n  end_ts INT,\n  ipid INT,\n  is_main_thread INT,\n  switch_count INT\n)"
+        ],
+        [
+          "table",
+          "thread_state",
+          "thread_state",
+          "CREATE TABLE thread_state(\n  id INT,\n  ts INT,\n  dur INT,\n  cpu INT,\n  itid INT,\n  tid INT,\n  pid INT,\n  state TEXT,\n  arg_setid INT\n)"
+        ],
+        [
+          "table",
+          "timerfd_wakeup",
+          "timerfd_wakeup",
+          "CREATE TABLE timerfd_wakeup(\n  id INT,\n  ts INT,\n  pid INT,\n  tid INT,\n  thread_name INT,\n  interval INT,\n  curr_mono TEXT,\n  expire_mono INT\n)"
+        ],
+        [
+          "table",
+          "trace_config",
+          "trace_config",
+          "CREATE TABLE trace_config(\n  id INT,\n  trace_source TEXT,\n  \"key\" TEXT,\n  value TEXT\n)"
+        ],
+        [
+          "table",
+          "trace_range",
+          "trace_range",
+          "CREATE TABLE trace_range(start_ts INT,end_ts INT)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_cpu",
+          "xpower_app_detail_cpu",
+          "CREATE TABLE xpower_app_detail_cpu(\n  id INT,\n  thread_name_id INT,\n  start_time INT,\n  thread_time INT,\n  thread_loads INT,\n  thread_energy INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_display",
+          "xpower_app_detail_display",
+          "CREATE TABLE xpower_app_detail_display(\n  id INT,\n  start_time INT,\n  count_1hz INT,\n  count_5hz INT,\n  count_10hz INT,\n  count_15hz INT,\n  count_24hz INT,\n  count_30hz INT,\n  count_45hz INT,\n  count_60hz INT,\n  count_90hz INT,\n  count_120hz INT,\n  count_180hz INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_gpu",
+          "xpower_app_detail_gpu",
+          "CREATE TABLE xpower_app_detail_gpu(\n  id INT,\n  frequency INT,\n  start_time INT,\n  idle_time INT,\n  run_time INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_detail_wifi",
+          "xpower_app_detail_wifi",
+          "CREATE TABLE xpower_app_detail_wifi(\n  id INT,\n  start_time INT,\n  tx_packets INT,\n  rx_packets INT,\n  tx_bytes INT,\n  rx_bytes INT\n)"
+        ],
+        [
+          "table",
+          "xpower_app_statistic",
+          "xpower_app_statistic",
+          "CREATE TABLE xpower_app_statistic(\n  id INT,\n  component_type_id INT,\n  start_time INT,\n  duration INT,\n  energy INT\n)"
+        ],
+        [
+          "table",
+          "xpower_component_top",
+          "xpower_component_top",
+          "CREATE TABLE xpower_component_top(\n  id INT,\n  component_type_id INT,\n  start_time INT,\n  appname INT,\n  background_duration INT,\n  background_energy INT,\n  foreground_duration INT,\n  foreground_energy INT,\n  screen_off_duration INT,\n  screen_off_energy INT,\n  screen_on_duration INT,\n  screen_on_energy INT,\n  camera_id INT,\n  uid INT,\n  load INT,\n  app_usage_duration INT,\n  app_usage_energy INT\n)"
+        ],
+        [
+          "table",
+          "xpower_measure",
+          "xpower_measure",
+          "CREATE TABLE xpower_measure(\n  type TEXT,\n  ts INT,\n  dur INT,\n  value INT,\n  filter_id INT\n)"
+        ],
+        [
+          "view",
+          "args_view",
+          "args_view",
+          "CREATE VIEW args_view AS select A.argset, V2.data as keyName, A.id, D.desc, (case when A.datatype==1 then V.data else A.value end) as strValue from args as A left join data_type as D on (D.typeId = A.datatype) left join data_dict as V on V.id = A.value left join data_dict as V2 on V2.id = A.key"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "temporal",
+    "facts": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-native/temporal.db",
+      "byteCount": 143360,
+      "sha256": "0bd192e748b5575a8ff195805ecd665e259023fd9e990607d93303034d994d43",
+      "device": 16777233,
+      "inode": 265795453,
+      "mode": "0o400",
+      "mtimeNs": 1791098909927821391,
+      "ctimeNs": 1791098909937457926,
+      "schemaSHA256": "f85a11bbdc54c29be8c805894e29ed9ed1fdb495282a10cac32e45ebad178e49",
+      "schema": [
+        [
+          "index",
+          "arktrace_v1_callstack_callid_ts",
+          "callstack",
+          "CREATE INDEX arktrace_v1_callstack_callid_ts ON callstack(callid, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_measure_filter_id_ts",
+          "measure",
+          "CREATE INDEX arktrace_v1_measure_filter_id_ts ON measure(filter_id, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_ipid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_ipid ON process(ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_pid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_pid ON process(pid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_itid_ts",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_itid_ts ON sched_slice(itid, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_ts_cpu",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_ts_cpu ON sched_slice(ts, cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_itid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_itid ON thread(itid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_itid_ts",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_itid_ts ON thread_state(itid, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_ts_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_ts_cpu ON thread_state(ts, cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_tid_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_tid_ipid ON thread(tid, ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_callstack_callid_ts_id_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v2_callstack_callid_ts_id_dur ON callstack(callid, ts, id, dur, name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_cpu_measure_filter_id",
+          "cpu_measure_filter",
+          "CREATE INDEX arktrace_v2_cpu_measure_filter_id ON cpu_measure_filter(id)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_ipid_pid_name",
+          "process",
+          "CREATE INDEX arktrace_v2_process_ipid_pid_name ON process(ipid, pid, name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_measure_filter_id",
+          "process_measure_filter",
+          "CREATE INDEX arktrace_v2_process_measure_filter_id ON process_measure_filter(id)"
+        ],
+        [
+          "index",
+          "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+          "sched_slice",
+          "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid ON sched_slice(cpu, ts, id, dur, itid, ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_itid_tid_name_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v2_thread_itid_tid_name_ipid ON thread(itid, tid, name, ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_cover_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_cover_cpu ON thread_state(itid, ts, id, dur, state, cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_id_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_id_dur ON thread_state(itid, ts, id, dur, state)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_callid_ts_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid, ts, dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_ts_id_dur_callid",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_ts_id_dur_callid ON callstack(ts, id, dur, callid, name)"
+        ],
+        [
+          "index",
+          "arktrace_v3_sched_slice_cpu_ts_dur",
+          "sched_slice",
+          "CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu, ts, dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_thread_state_itid_ts_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid, ts, dur)"
+        ],
+        [
+          "table",
+          "callstack",
+          "callstack",
+          "CREATE TABLE callstack (\n                    id INTEGER, ts INTEGER, dur INTEGER, callid INTEGER, name TEXT\n                )"
+        ],
+        [
+          "table",
+          "cpu_measure_filter",
+          "cpu_measure_filter",
+          "CREATE TABLE cpu_measure_filter (id INTEGER, name TEXT, cpu INTEGER)"
+        ],
+        [
+          "table",
+          "measure",
+          "measure",
+          "CREATE TABLE measure (ts INTEGER, value INTEGER, filter_id INTEGER)"
+        ],
+        [
+          "table",
+          "process",
+          "process",
+          "CREATE TABLE process (\n                    ipid INTEGER, pid INTEGER, name TEXT, start_ts INTEGER, end_ts INTEGER\n                )"
+        ],
+        [
+          "table",
+          "process_measure_filter",
+          "process_measure_filter",
+          "CREATE TABLE process_measure_filter (id INTEGER, name TEXT, ipid INTEGER)"
+        ],
+        [
+          "table",
+          "sched_slice",
+          "sched_slice",
+          "CREATE TABLE sched_slice (\n                    id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER,\n                    itid INTEGER, ipid INTEGER\n                )"
+        ],
+        [
+          "table",
+          "stat",
+          "stat",
+          "CREATE TABLE stat (\n                    event_name TEXT, stat_type TEXT, count INTEGER,\n                    serverity TEXT, source TEXT\n                )"
+        ],
+        [
+          "table",
+          "thread",
+          "thread",
+          "CREATE TABLE thread (\n                    itid INTEGER, tid INTEGER, name TEXT, start_ts INTEGER,\n                    end_ts INTEGER, ipid INTEGER\n                )"
+        ],
+        [
+          "table",
+          "thread_state",
+          "thread_state",
+          "CREATE TABLE thread_state (\n                    id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER,\n                    itid INTEGER, state TEXT\n                )"
+        ],
+        [
+          "table",
+          "trace_range",
+          "trace_range",
+          "CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER)"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "empty-absent",
+    "facts": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-native/empty-absent.db",
+      "byteCount": 106496,
+      "sha256": "5ceea34c1366c797f8eac6cafacbc36831fae990c4e1abb631aa720d0faa1940",
+      "device": 16777233,
+      "inode": 265795551,
+      "mode": "0o400",
+      "mtimeNs": 1791098909931294695,
+      "ctimeNs": 1791098909937495885,
+      "schemaSHA256": "baeda74532ee48b30523a0a3d4a16af4321045ab6551fe164ff48a5d15c16d36",
+      "schema": [
+        [
+          "index",
+          "arktrace_v1_callstack_callid_ts",
+          "callstack",
+          "CREATE INDEX arktrace_v1_callstack_callid_ts ON callstack(callid, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_ipid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_ipid ON process(ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_process_pid",
+          "process",
+          "CREATE INDEX arktrace_v1_process_pid ON process(pid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_itid_ts",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_itid_ts ON sched_slice(itid, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_sched_slice_ts_cpu",
+          "sched_slice",
+          "CREATE INDEX arktrace_v1_sched_slice_ts_cpu ON sched_slice(ts, cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_itid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_itid ON thread(itid)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_itid_ts",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_itid_ts ON thread_state(itid, ts)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_state_ts_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v1_thread_state_ts_cpu ON thread_state(ts, cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v1_thread_tid_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v1_thread_tid_ipid ON thread(tid, ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_callstack_callid_ts_id_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v2_callstack_callid_ts_id_dur ON callstack(callid, ts, id, dur, name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_process_ipid_pid_name",
+          "process",
+          "CREATE INDEX arktrace_v2_process_ipid_pid_name ON process(ipid, pid, name)"
+        ],
+        [
+          "index",
+          "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+          "sched_slice",
+          "CREATE INDEX arktrace_v2_sched_slice_cpu_ts_id_dur_itid ON sched_slice(cpu, ts, id, dur, itid, ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_itid_tid_name_ipid",
+          "thread",
+          "CREATE INDEX arktrace_v2_thread_itid_tid_name_ipid ON thread(itid, tid, name, ipid)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_cover_cpu",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_cover_cpu ON thread_state(itid, ts, id, dur, state, cpu)"
+        ],
+        [
+          "index",
+          "arktrace_v2_thread_state_itid_ts_id_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v2_thread_state_itid_ts_id_dur ON thread_state(itid, ts, id, dur, state)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_callid_ts_dur",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid, ts, dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_callstack_ts_id_dur_callid",
+          "callstack",
+          "CREATE INDEX arktrace_v3_callstack_ts_id_dur_callid ON callstack(ts, id, dur, callid, name)"
+        ],
+        [
+          "index",
+          "arktrace_v3_sched_slice_cpu_ts_dur",
+          "sched_slice",
+          "CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu, ts, dur)"
+        ],
+        [
+          "index",
+          "arktrace_v3_thread_state_itid_ts_dur",
+          "thread_state",
+          "CREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid, ts, dur)"
+        ],
+        [
+          "table",
+          "callstack",
+          "callstack",
+          "CREATE TABLE callstack (\n            id INTEGER, ts INTEGER, dur INTEGER, callid INTEGER, name TEXT\n        )"
+        ],
+        [
+          "table",
+          "process",
+          "process",
+          "CREATE TABLE process (ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER)"
+        ],
+        [
+          "table",
+          "sched_slice",
+          "sched_slice",
+          "CREATE TABLE sched_slice (\n            id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER, itid INTEGER, ipid INTEGER\n        )"
+        ],
+        [
+          "table",
+          "thread",
+          "thread",
+          "CREATE TABLE thread (itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER)"
+        ],
+        [
+          "table",
+          "thread_state",
+          "thread_state",
+          "CREATE TABLE thread_state (\n            id INTEGER, ts INTEGER, dur INTEGER, cpu INTEGER, itid INTEGER, state TEXT\n        )"
+        ],
+        [
+          "table",
+          "trace_range",
+          "trace_range",
+          "CREATE TABLE trace_range (start_ts INTEGER, end_ts INTEGER)"
+        ]
+      ]
+    }
+  }
+]

@@ -403,31 +403,39 @@ pub(crate) fn time_filter(
     range: TraceTimeRange,
     duration: bool,
 ) -> Result<(String, Vec<Value>), StoreError> {
-    let (predicate, mut values) = intersection(inspection, range)?;
-    let start = inspection
-        .trace_start_ts
-        .checked_add(range.start_ns())
-        .ok_or(StoreError::InvalidQuery)?;
-    let end = inspection
-        .trace_start_ts
-        .checked_add(range.end_ns())
-        .ok_or(StoreError::InvalidQuery)?;
+    // Validate the caller's half-open trace-relative range before using the
+    // shared absolute predicate, also used by whole-trace summary queries.
+    let (start, end) = crate::events::absolute_bounds(inspection, range)?;
+    Ok(absolute_time_filter(
+        start,
+        end,
+        inspection.trace_end_ts,
+        duration,
+    ))
+}
+pub(crate) fn absolute_time_filter(
+    start: i64,
+    end: i64,
+    trace_end: i64,
+    duration: bool,
+) -> (String, Vec<Value>) {
     if !duration {
-        return Ok((
+        return (
             "m.ts>=? AND m.ts<?".into(),
             vec![Value::Integer(start), Value::Integer(end)],
-        ));
+        );
     }
     // Malformed optional durations remain instants, whereas NULL and negative
     // INTEGER durations use the full trace's open-ended interval predicate.
+    let (predicate, mut values) = crate::events::absolute_intersection(start, end, trace_end);
     values.extend([Value::Integer(start), Value::Integer(end)]);
-    Ok((
+    (
         format!(
             "({}) OR (m.dur IS NOT NULL AND typeof(m.dur)<>'integer' AND m.ts>=? AND m.ts<?)",
-            predicate[0].replace("s.", "m.")
+            predicate.replace("s.", "m.")
         ),
         values,
-    ))
+    )
 }
 struct Source {
     order: i64,

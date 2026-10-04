@@ -1,0 +1,61 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source
+Building for debugging...
+[Planning deferred tasks]
+[35 / 66]
+[36 / 67] ArkTraceCore
+[45 / 113]
+[48 / 113]
+[54 / 113]
+[56 / 113]
+[60 / 113]
+[63 / 113]
+[69 / 113]
+[71 / 113]
+[72 / 113]
+[82 / 113] ArkTraceCore
+[83 / 113] ArkTraceCore
+[90 / 115] ArkTraceCore
+[90 / 115] ArkTraceStore
+[96 / 129] ArkTraceAnalysis
+[98 / 129] ArkTraceStore
+[101 / 129] ArkTraceStore
+[103 / 129] ArkTraceAnalysis
+[104 / 129] ArkTraceAnalysis
+[113 / 129] ArkTraceAnalysis
+[118 / 129] SummaryOracle-product
+[120 / 129] ArkTraceCore
+[121 / 130] ArkTraceStore
+[121 / 130] ArkTraceAnalysis
+[121 / 130] SummaryOracle-product
+[124 / 132] ArkTraceAnalysis
+error: SwiftCompile normal arm64 /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift failed with a nonzero exit code. Command line:     cd /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner
+    builtin-SwiftPerFileCompile SummaryOracle.swift
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:60:42: error: cannot find 'TraceDatabase' in scope
+ 58 |                     precondition(!FileManager.default.fileExists(atPath: fixture.database))
+ 59 |                     do {
+ 60 |                         let writer = try TraceDatabase(url: URL(filePath: fixture.database), readOnly: false)
+    |                                          `- error: cannot find 'TraceDatabase' in scope
+ 61 |                         try writer.execute(fixture.constructionSQL!)
+ 62 |                     }
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:52:26: error: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 50 |     static func main() async throws {
+ 51 |         let args = CommandLine.arguments
+ 52 |         let output = try await Task.detached {
+    |                          `- error: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 53 |             precondition(!Thread.isMainThread)
+ 54 |             let input = try JSONDecoder().decode(Input.self, from: Data(contentsOf: URL(filePath: args[2])))
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:52:22: error: no calls to throwing functions occur within 'try' expression [#UnnecessaryEffectMarker]
+ 50 |     static func main() async throws {
+ 51 |         let args = CommandLine.arguments
+ 52 |         let output = try await Task.detached {
+    |                      `- error: no calls to throwing functions occur within 'try' expression [#UnnecessaryEffectMarker]
+ 53 |             precondition(!Thread.isMainThread)
+ 54 |             let input = try JSONDecoder().decode(Input.self, from: Data(contentsOf: URL(filePath: args[2])))
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c -primary-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift -emit-dependencies-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.d -emit-const-values-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.swiftconstvalues -emit-reference-dependencies-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.swiftdeps -serialize-diagnostics-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.dia -target arm64-apple-macos26.0 -disable-cross-import-overlay-search -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -stack-check -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -I /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/PackageFrameworks -F /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -module-cache-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/SwiftExplicitPrecompiledModules -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=5 -warnings-as-errors -warnings-as-errors -swift-version 6 -Onone -D SWIFT_PACKAGE -D DEBUG -D Xcode -serialize-debugging-options -enable-experimental-feature DebugDescriptionMacro -strict-memory-safety -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/ModuleCache.noindex/Session.modulevalidation -disable-sandbox -Xcc -working-directory -Xcc /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner -enable-anonymous-context-mangled-names -file-compilation-dir /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/SDKStatCaches.noindex/macosx27.0-26A425-a0facfad118c1a7a18f0aad9463f65497231f6df4def33e022ae2eb8f782df1a.sdkstatcache -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/include -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/DerivedSources-normal/arm64 -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/DerivedSources/arm64 -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name SummaryOracle -package-name workspace -const-gather-protocols-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle_const_extract_protocols.json -disable-clang-spi -clang-target arm64-apple-macos27.0 -target-sdk-version 27.0 -target-sdk-name macosx27.0 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -parse-as-library -o /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.o -debug-module-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.swiftmodule -index-unit-output-path /ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.o -index-store-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out -index-system-modules
+error: Build failed

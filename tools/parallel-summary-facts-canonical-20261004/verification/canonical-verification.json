@@ -1,0 +1,28 @@
+{
+  "status": "pass",
+  "baselineFiles": 1311,
+  "originalSwiftSources": 28,
+  "successfulRequests": 10,
+  "expectedErrorRequests": 5,
+  "actualSummaryRequests": 15,
+  "actualSchemaRejectionControls": 1,
+  "boundedTotal": 16,
+  "controlledDBs": 2,
+  "realCapturedDBs": 2,
+  "unchangedDBs": 4,
+  "allOffMainThread": true,
+  "nativeParityExecuted": false,
+  "nativeDeadlineOrCancellationProven": false,
+  "cancellationObserved": "original Swift CancellationError at already-cancelled Task entry, no public typed translation",
+  "budgetSemantics": "directory/stat/filter-table prefixes before filtering; events limit matching rows; CPU/counter queries DISTINCT before LIMIT; no uniform source-row bound claim",
+  "canonical": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json",
+    "byteCount": 198304,
+    "sha256": "76d324cb5c8b7d0c4b914d1629c8ce7bbf8d748f59a5cbf8150d58037d40b77e"
+  },
+  "compiledExecutable": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/SummaryOracle",
+    "byteCount": 5424416,
+    "sha256": "9bf5c1b08887007f5c7735bdecb7c9f6d92f2ce1002b5e47a915cd63bc8b9485"
+  }
+}

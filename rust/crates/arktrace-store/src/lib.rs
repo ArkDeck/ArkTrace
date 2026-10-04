@@ -26,6 +26,8 @@ mod reader;
 mod schema;
 #[cfg(any(target_os = "macos", test))]
 mod slices;
+#[cfg(any(target_os = "macos", test))]
+mod summary;
 pub use query_resources::ReadPoolLimits;
 #[cfg(target_os = "macos")]
 pub use read_pool::{ReadPoolOutput, ReadPoolStatistics};
@@ -93,6 +95,7 @@ impl ValidationBudget {
 pub enum StoreError {
     InvalidBudget,
     InvalidQuery,
+    InvalidSummaryQuery,
     Host(HostError),
     Cancelled,
     DeadlineExceeded,
@@ -102,6 +105,7 @@ pub enum StoreError {
     NamedSliceDepthUnavailable,
     CounterSampleIdentityUnavailable(CounterSampleTable),
     CounterQueryFailed,
+    SummaryQueryFailed,
     InvalidDatabase,
     InvalidIdentity,
     InvalidFrameIdentity,

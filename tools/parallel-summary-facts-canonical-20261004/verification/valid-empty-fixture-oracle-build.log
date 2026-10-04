@@ -1,0 +1,9 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source
+Building for debugging...
+[2 / 4] ArkTraceStore
+[3 / 5] ArkTraceStore
+[6 / 8] SummaryOracle-product
+[8 / 10] SummaryOracle-product
+[10 / 10] SummaryOracle-product
+Build complete! (1.26秒)

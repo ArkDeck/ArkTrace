@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "tools/parallel-summary-facts-canonical-20261004/freeze_report.py"
+  ],
+  "exitCode": 1,
+  "error": "SyntaxError: unmatched closing parenthesis; script failed at parse before report mutations",
+  "summaryRequestsExecuted": 0
+}

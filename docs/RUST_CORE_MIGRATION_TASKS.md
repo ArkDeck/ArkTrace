@@ -432,6 +432,13 @@ macOS `/dev/fd` 瞬时 EBADF 已用同身份、同预算、最多八次重试处
 回归通过。265 项 Rust tests 通过；完整 SDK async executor、density cache、detail/navigation、
 Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](migration-runs/AT-RUST-007-2026-10-03-batch-queries.md)。
 
+同日新增真实 native `summaryFacts`，接通 StoreReader/Session/async Engine/FFI 与 SDK
+typed request，保持各领域不同的前缀/匹配/DISTINCT 语义及缺失能力；独立跨语句 SQL
+VM work policy 与 decoded credit 约束工作。4 份冻结 DB 的 9 个成功事实和 5 个预期
+失败、两条真实 Trace 的 4 次包外 SDK 查询通过。机器质量明确移除人类 prose 并保留
+有序结构化事实；typed retained summary、Core warning/repository/App 适配与完整
+009/012 验收继续待办，见[native summaryFacts 记录](migration-runs/AT-RUST-007-012-2026-10-04-native-summary-facts.md)。
+
 交付：
 
 1. process/thread/CPU/state/slice/counter/frame/argument、density、search、event detail 和

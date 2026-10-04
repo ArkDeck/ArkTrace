@@ -1,0 +1,6 @@
+docs/migration-runs/AT-RUST-012-2026-10-04-typed-directory-sdk.md:84:genuine `summaryFacts` and repository/Engine integration, combined owner/scratch
+rust/crates/arktrace-store/oracle/SearchOracle.swift:59:    func summaryFacts(_ q: TraceSummaryQuery) async throws -> TraceSummaryFacts { try await base.summaryFacts(q) }
+rust/crates/arktrace-viewer/oracle/DetailOracleHarness.swift:25:        func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts { throw CancellationError() }
+rust/crates/arktrace-viewer/oracle/OracleHarness.swift:199:        func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts { throw CancellationError() }
+rust/crates/arktrace-viewer/oracle/inspector_projection_harness.swift:15:    func summaryFacts(_ q: TraceSummaryQuery) async throws -> TraceSummaryFacts { throw CancellationError() }
+rust/crates/arktrace-viewer/oracle/navigation_harness.swift:45:    func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts { throw CancellationError() }

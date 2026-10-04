@@ -166,6 +166,7 @@ impl EngineConfig {
     deny_unknown_fields
 )]
 pub(crate) enum Operation {
+    SummaryFacts(TraceSummaryQuery),
     Processes(ProcessQuery),
     Threads(ThreadQuery),
     CpuSlices(CpuSliceQuery),
@@ -214,6 +215,7 @@ pub(crate) struct Scope {
 impl Operation {
     pub fn validate(&self) -> Result<(), u32> {
         let result = match self {
+            Self::SummaryFacts(q) => q.validate(),
             Self::Processes(q) => q.validate(),
             Self::Threads(q) => q.validate(),
             Self::CpuSlices(q) => q.validate(),
@@ -266,6 +268,7 @@ impl Operation {
     pub fn native(self) -> arktrace_engine::RepositoryRequest {
         use arktrace_engine::RepositoryRequest as Q;
         match self {
+            Self::SummaryFacts(q) => Q::SummaryFacts(q),
             Self::Processes(q) => Q::Processes(q),
             Self::Threads(q) => Q::Threads(q),
             Self::CpuSlices(q) => Q::CpuSlices(q),

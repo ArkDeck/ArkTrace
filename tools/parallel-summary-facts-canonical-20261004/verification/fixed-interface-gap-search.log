@@ -1,0 +1,3 @@
+contracts/swift-entry-inventory.json:2732:          "declaration": "public func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts {"
+contracts/swift-entry-inventory.json:3301:          "declaration": "public let summary: TraceContextSectionStatus"
+contracts/swift-entry-inventory.json:3356:          "declaration": "public let summary: TraceSummary"

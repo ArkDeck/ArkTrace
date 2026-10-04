@@ -1,0 +1,99 @@
+{
+  "phase": "ready",
+  "opening": {
+    "inspection": {
+      "traceEndTs": 535831985215000,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "category": "droppedValue",
+            "scope": "stat.stat_type",
+            "count": 416,
+            "message": null
+          },
+          {
+            "category": "probeTruncated",
+            "scope": "callstack.cookie",
+            "count": null,
+            "message": null
+          },
+          {
+            "category": "probeTruncated",
+            "scope": "callstack.depth",
+            "count": null,
+            "message": null
+          },
+          {
+            "category": "probeTruncated",
+            "scope": "callstack.dur",
+            "count": null,
+            "message": null
+          },
+          {
+            "category": "probeTruncated",
+            "scope": "callstack.parent_id",
+            "count": null,
+            "message": null
+          },
+          {
+            "category": "probeTruncated",
+            "scope": "callstack.ts",
+            "count": null,
+            "message": null
+          }
+        ]
+      },
+      "capabilities": {
+        "namedSlices": true,
+        "threadStates": false,
+        "processCounters": false,
+        "cpuCounters": false,
+        "cpuScheduling": false
+      },
+      "processCounterSampleTables": [],
+      "traceStartTs": 535799774588000,
+      "durationNs": 32210627000,
+      "cpuCounterSampleTables": [],
+      "eventSourceCountsAvailable": true,
+      "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3"
+    },
+    "metadata": {
+      "indexSchemaVersion": 3,
+      "databaseByteCount": 2351104,
+      "cacheKey": {
+        "indexSchemaVersion": 3,
+        "parserKey": "9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095",
+        "parserBinarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+        "traceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+        "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+        "schemaAdapterVersion": "2"
+      },
+      "lastAccessedAt": "2026-10-04T05:47:39Z",
+      "formatVersion": 1,
+      "traceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+      "sourceByteCount": 67837,
+      "createdAt": "2026-10-04T05:47:39Z",
+      "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+      "databasePreparation": {
+        "upstreamDatabaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9",
+        "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+        "schemaAdapterVersion": "2",
+        "upstreamDatabaseByteCount": 917504,
+        "indexVersion": 3
+      },
+      "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+      "schemaAdapterVersion": "2",
+      "parser": {
+        "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+        "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+        "name": "trace_streamer",
+        "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+        "reportedVersion": "4.3.7",
+        "architecture": "arm64",
+        "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+        "adapterVersion": "1"
+      }
+    }
+  }
+}

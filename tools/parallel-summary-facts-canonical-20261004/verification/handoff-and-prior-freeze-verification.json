@@ -1,0 +1,22 @@
+{
+  "status": "pass",
+  "actualHandoffRecords": 16,
+  "countOrReductionReimplemented": false,
+  "explicitNullableProjectionPreservesAllOriginalValues": true,
+  "priorSDKReports": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-sdk-directory-swift-parity-20261004/docs/migration-runs/AT-RUST-012-parallel-sdk-directory-swift-parity-2026-10-04.json",
+      "sha256": "9e2eb9190eda776fa5cd620445a3e41e50f1b52e7a2d1770021b3f12a7d7e4e7",
+      "byteCount": 194827,
+      "expectedSHA256": "9e2eb9190eda776fa5cd620445a3e41e50f1b52e7a2d1770021b3f12a7d7e4e7",
+      "status": "unchanged"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-sdk-directory-lifecycle-20261004/docs/migration-runs/AT-RUST-012-parallel-sdk-directory-lifecycle-2026-10-04.json",
+      "sha256": "78f834d06e6b90b505be6896e49b0cdb6af3ec5503cbb595743fd0b3facc03e0",
+      "byteCount": 194232,
+      "expectedSHA256": "78f834d06e6b90b505be6896e49b0cdb6af3ec5503cbb595743fd0b3facc03e0",
+      "status": "unchanged"
+    }
+  ]
+}

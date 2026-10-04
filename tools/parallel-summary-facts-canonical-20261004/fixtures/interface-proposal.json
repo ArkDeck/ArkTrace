@@ -1,0 +1,88 @@
+{
+  "status": "proposalOnlyNotSharedImplementation",
+  "operation": "summaryFacts",
+  "wireSchemaVersion": 1,
+  "request": {
+    "range": "optional trace-relative signed Int64 ns; nil is inclusive entire trace, supplied range is strictly half-open 0<=start<end<=duration",
+    "maximumRowsPerSection": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000,
+      "observedTarget": "process/thread source prefix"
+    },
+    "maximumEventsPerSection": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000,
+      "default": "maximumRowsPerSection at original query constructor"
+    },
+    "timeout": "bounded duration converted to local monotonic deadline; do not serialize Swift ContinuousClock.Instant; Analysis original timeout is (0,300] s"
+  },
+  "response": {
+    "required": [
+      "processCount",
+      "threadCount",
+      "warnings",
+      "qualityIssues"
+    ],
+    "nullable": [
+      "cpuCount",
+      "cpuSliceCount",
+      "threadStateCount",
+      "namedSliceCount",
+      "counterSeriesCount",
+      "eventCountBySource"
+    ],
+    "boundedCount": {
+      "value": "nonnegative Int64",
+      "truncated": "Boolean; true includes incomplete budget or excluded invalid directory lifecycle, not just output length"
+    },
+    "eventCountBySource": {
+      "value": "{items:[{source:UTF-8 String,count:nonnegative Int64}],truncated:Bool} or explicit null",
+      "availability": "Only nil range plus compatible stat table; explicit even whole-duration range must be null",
+      "ordering": "original UTF-8 byte ordering, preserve actual items"
+    },
+    "qualityIssue": {
+      "category": "original typed category vocabulary",
+      "scope": "optional original scope",
+      "count": "optional Int64, unknown probe tail is null",
+      "message": "optional safe original message"
+    },
+    "warnings": "actual original strings/order; query facts are separate from metadata quality; original Analysis merges/deduplicates/sorts"
+  },
+  "errors": {
+    "observedInvalid": "INVALID_ARGUMENT/request/retryable=false; empty, out-of-duration, row budget 0 before SQL",
+    "observedSwiftDeadline": "QUERY_TIMEOUT/querying/retryable=true; expired at entry before VM execution",
+    "observedSwiftCancellation": "Raw CancellationError from original Store for pre-cancelled Task; no normalized CANCELLED observed here",
+    "recommendedNativeCancellation": "Native typed cancellation must retain its own actual bounded admission/interrupt/cleanup evidence; map only at authorized public contract boundary, never convert arbitrary failure into cancellation"
+  },
+  "budgetSemantics": {
+    "directory": "rowid source prefix (budget+1 probe), then lifecycle inclusion/filter; unknown NULL start retained with unavailableValue; invalid end<=start excluded with lower-bound flag",
+    "stat": "source prefix then received/count/label validation and reduction; dropped non-received rows alone do not imply truncation, invalid/unchecked rows can",
+    "events": "temporal WHERE first, LIMIT budget+1 matching rows, then COUNT/min; not uniform raw-source-row bound",
+    "cpu": "whole-trace topology DISTINCT CPU after valid event predicate, LIMIT distinct CPUs; independent requested range",
+    "counter": "time-qualified DISTINCT(sample-table,filter-id), ordered LIMIT then map against separate prefix-limited filter tables; sample-table/scope identity retained",
+    "unresolvedRequirement": "If native product requires all sections source-row bounded before filtering/reduction, that is not fixed 817 Swift compatibility for events/CPU/counter. Resolve/version explicitly and measure actual native work; this task does not silently relax that requirement."
+  },
+  "semanticFindings": [
+    "Zero-duration SQLite trace is rejected by original validation despite summaryFacts nil-range comment allowing degenerate Core range.",
+    "Final zero-duration sched/thread-state/callstack events admitted for nil range, excluded for explicit [0,duration). Process/thread end==start remains invalid lifecycle.",
+    "Unknown start_ts is counted with unavailableValue; it is not dropped or zeroed. Uninspected lifecycle tail gets probeTruncated with count null.",
+    "Original synthesized TraceSummaryFacts encoder omits absent optionals; golden wire explicitly inserts null. Original TraceSummary count encoder already emits null, quality issue optionals are synthesized/omitted."
+  ],
+  "nativeEvidence": {
+    "executed": false,
+    "frozenNativeInterfaceSupplied": false,
+    "fixed817InterfaceMissing": true,
+    "artifact": "none selected; no unstable working-tree source used",
+    "notProven": [
+      "native Store summary parity",
+      "native deadline during VM",
+      "native cancellation admission/interrupt",
+      "SDK/FFI summary owner budgets",
+      "App/CLI integration",
+      "production publisher runtime",
+      "CI lanes"
+    ]
+  }
+}

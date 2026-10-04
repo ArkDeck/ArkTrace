@@ -1,0 +1,113 @@
+{
+  "opening": {
+    "inspection": {
+      "durationNs": 48516841334,
+      "capabilities": {
+        "cpuScheduling": false,
+        "cpuCounters": false,
+        "processCounters": true,
+        "namedSlices": false,
+        "threadStates": false
+      },
+      "cpuCounterSampleTables": [],
+      "traceStartTs": 1502026301556913964,
+      "processCounterSampleTables": [
+        "process_measure"
+      ],
+      "traceEndTs": 1502026350073755298,
+      "eventSourceCountsAvailable": true,
+      "dataQuality": {
+        "status": "warnings",
+        "warnings": [
+          {
+            "scope": "stat.stat_type",
+            "message": null,
+            "count": 416,
+            "category": "droppedValue"
+          },
+          {
+            "scope": "process_measure.dur",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          },
+          {
+            "scope": "process_measure.filter_id",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          },
+          {
+            "scope": "process_measure.ts",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          },
+          {
+            "scope": "process_measure.value",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          },
+          {
+            "scope": "process_measure_filter.id",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          },
+          {
+            "scope": "process_measure_filter.ipid",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          },
+          {
+            "scope": "process_measure_filter.name",
+            "message": null,
+            "count": null,
+            "category": "probeTruncated"
+          }
+        ]
+      },
+      "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3"
+    },
+    "metadata": {
+      "databasePreparation": {
+        "schemaAdapterVersion": "2",
+        "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+        "upstreamDatabaseSHA256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755",
+        "indexVersion": 3,
+        "upstreamDatabaseByteCount": 1929216
+      },
+      "lastAccessedAt": "2026-10-04T05:47:41Z",
+      "createdAt": "2026-10-04T05:47:41Z",
+      "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+      "parser": {
+        "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+        "reportedVersion": "4.3.7",
+        "name": "trace_streamer",
+        "architecture": "arm64",
+        "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+        "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+        "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+        "adapterVersion": "1"
+      },
+      "databaseByteCount": 2072576,
+      "cacheKey": {
+        "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+        "parserKey": "9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095",
+        "parserBinarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+        "indexSchemaVersion": 3,
+        "schemaAdapterVersion": "2",
+        "traceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b"
+      },
+      "indexSchemaVersion": 3,
+      "sourceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+      "sourceByteCount": 557542,
+      "traceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+      "schemaAdapterVersion": "2",
+      "formatVersion": 1
+    }
+  },
+  "phase": "ready"
+}

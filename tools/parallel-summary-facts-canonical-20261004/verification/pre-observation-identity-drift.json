@@ -1,0 +1,24 @@
+{
+  "childStarted": false,
+  "summaryRequestsExecuted": 0,
+  "exitCode": 1,
+  "reason": "Parent compared freshly read sqlite_schema tuples with JSON-decoded lists; all DB file identity/size/SHA256/mode/timestamps unchanged. Normalize encoding shape only.",
+  "differences": [
+    {
+      "id": "zlib",
+      "differences": {}
+    },
+    {
+      "id": "hiprofiler_data_ability",
+      "differences": {}
+    },
+    {
+      "id": "temporal",
+      "differences": {}
+    },
+    {
+      "id": "empty-absent",
+      "differences": {}
+    }
+  ]
+}

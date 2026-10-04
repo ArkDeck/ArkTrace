@@ -402,6 +402,14 @@ pub(crate) fn intersection(
     inspection: &DatabaseInspection,
     range: TraceTimeRange,
 ) -> Result<(Vec<String>, Vec<Value>), StoreError> {
+    let (start, end) = absolute_bounds(inspection, range)?;
+    let (predicate, values) = absolute_intersection(start, end, inspection.trace_end_ts);
+    Ok((vec![predicate], values))
+}
+pub(crate) fn absolute_bounds(
+    inspection: &DatabaseInspection,
+    range: TraceTimeRange,
+) -> Result<(i64, i64), StoreError> {
     if range.is_instant() || range.end_ns() > inspection.duration_ns {
         return Err(StoreError::InvalidQuery);
     }
@@ -416,28 +424,21 @@ pub(crate) fn intersection(
     if start < inspection.trace_start_ts || end > inspection.trace_end_ts {
         return Err(StoreError::InvalidQuery);
     }
+    Ok((start, end))
+}
+pub(crate) fn absolute_intersection(start: i64, end: i64, trace_end: i64) -> (String, Vec<Value>) {
     let sql =
         "typeof(s.ts)='integer' AND (s.dur IS NULL OR typeof(s.dur)='integer') AND s.ts<? AND (
         (s.dur=0 AND s.ts>=? AND s.ts<?)
         OR ((s.dur IS NULL OR s.dur<0) AND s.ts<? AND ?>?)
         OR (s.dur>0 AND s.ts<? AND (s.ts>? OR s.dur>?-s.ts)))";
-    Ok((
-        vec![format!("({sql})")],
-        [
-            end,
-            start,
-            end,
-            end,
-            inspection.trace_end_ts,
-            start,
-            end,
-            start,
-            start,
-        ]
-        .into_iter()
-        .map(Value::Integer)
-        .collect(),
-    ))
+    (
+        format!("({sql})"),
+        [end, start, end, end, trace_end, start, end, start, start]
+            .into_iter()
+            .map(Value::Integer)
+            .collect(),
+    )
 }
 pub(crate) fn relative(value: i64, inspection: &DatabaseInspection) -> Result<i64, StoreError> {
     if value <= inspection.trace_start_ts {

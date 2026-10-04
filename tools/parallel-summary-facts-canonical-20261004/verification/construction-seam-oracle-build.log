@@ -1,0 +1,97 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source
+Building for debugging...
+[1 / 33]
+[2 / 17] ArkTraceStore
+[4 / 19] ArkTraceStore
+[9 / 16] SummaryOracle-product
+[11 / 18] SummaryOracle-product
+error: SwiftCompile normal arm64 /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift failed with a nonzero exit code. Command line:     cd /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner
+    builtin-SwiftPerFileCompile SummaryOracle.swift
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:61:121: error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+ 59 |                     let prepared = try SQLiteTraceRepository.summaryCanonicalConstruct(
+ 60 |                         databaseURL: URL(filePath: fixture.database), sql: fixture.constructionSQL!)
+ 61 |                     created.append(["id": fixture.id, "preparation": try object(prepared), "outsideMainThread": !Thread.isMainThread])
+    |                                                                                                                         `- error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+ 62 |                 }
+ 63 |                 return try JSONSerialization.data(withJSONObject: ["created": created], options: [.sortedKeys])
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSThread.h:126:34: note: 'isMainThread' declared here
+124 | 
+125 | /// Returns a Boolean value that indicates whether the current thread is the main thread.
+126 | @property (class, readonly) BOOL isMainThread API_AVAILABLE(macos(10.5), ios(2.0), watchos(2.0), tvos(9.0)) NS_SWIFT_UNAVAILABLE_FROM_ASYNC("Work intended for the main actor should be marked with @MainActor"); // reports whether current thread is main
+    |                                  `- note: 'isMainThread' declared here
+127 | 
+128 | /// Returns the `NSThread` object representing the main thread.
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:77:50: error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+ 75 |                 fixtureRecords.append(["id": fixture.id, "metadata": try object(metadata),
+ 76 |                     "databaseDevice": repository.databaseFileIdentity.device, "databaseInode": repository.databaseFileIdentity.inode,
+ 77 |                     "outsideMainThread": !Thread.isMainThread, "openStatements": try object(statements.withLock { $0 })])
+    |                                                  `- error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+ 78 |                 for request in input.requests where request.fixture == fixture.id {
+ 79 |                     statements.withLock { $0.removeAll(keepingCapacity: true) }
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSThread.h:126:34: note: 'isMainThread' declared here
+124 | 
+125 | /// Returns a Boolean value that indicates whether the current thread is the main thread.
+126 | @property (class, readonly) BOOL isMainThread API_AVAILABLE(macos(10.5), ios(2.0), watchos(2.0), tvos(9.0)) NS_SWIFT_UNAVAILABLE_FROM_ASYNC("Work intended for the main actor should be marked with @MainActor"); // reports whether current thread is main
+    |                                  `- note: 'isMainThread' declared here
+127 | 
+128 | /// Returns the `NSThread` object representing the main thread.
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:106:63: error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+104 |                             record["status"] = "error"; record["error"] = errorWire(error)
+105 |                         }
+106 |                         record["outsideMainThread"] = !Thread.isMainThread
+    |                                                               `- error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+107 |                         record["observedStatements"] = try object(statements.withLock { $0 })
+108 |                         return try JSONSerialization.data(withJSONObject: record, options: [.sortedKeys])
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSThread.h:126:34: note: 'isMainThread' declared here
+124 | 
+125 | /// Returns a Boolean value that indicates whether the current thread is the main thread.
+126 | @property (class, readonly) BOOL isMainThread API_AVAILABLE(macos(10.5), ios(2.0), watchos(2.0), tvos(9.0)) NS_SWIFT_UNAVAILABLE_FROM_ASYNC("Work intended for the main actor should be marked with @MainActor"); // reports whether current thread is main
+    |                                  `- note: 'isMainThread' declared here
+127 | 
+128 | /// Returns the `NSThread` object representing the main thread.
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:115:46: error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+113 |             precondition(records.count == input.requests.count)
+114 |             return try JSONSerialization.data(withJSONObject: ["schemaVersion": 1, "fixtures": fixtureRecords, "records": records,
+115 |                 "outsideMainThread": !Thread.isMainThread,
+    |                                              `- error: class property 'isMainThread' is unavailable from asynchronous contexts; Work intended for the main actor should be marked with @MainActor
+116 |                 "canonical": "original SQLiteTraceRepository.summaryFacts and original TraceSummaryEngine.summarize; no surrogate count or reduction"], options: [.sortedKeys])
+117 |         }.value
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework/Headers/NSThread.h:126:34: note: 'isMainThread' declared here
+124 | 
+125 | /// Returns a Boolean value that indicates whether the current thread is the main thread.
+126 | @property (class, readonly) BOOL isMainThread API_AVAILABLE(macos(10.5), ios(2.0), watchos(2.0), tvos(9.0)) NS_SWIFT_UNAVAILABLE_FROM_ASYNC("Work intended for the main actor should be marked with @MainActor"); // reports whether current thread is main
+    |                                  `- note: 'isMainThread' declared here
+127 | 
+128 | /// Returns the `NSThread` object representing the main thread.
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:86:33: error: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 84 |                         do {
+ 85 |                             if request.preCancelled {
+ 86 |                                 withUnsafeCurrentTask { task in task?.cancel() }
+    |                                 |                     `- note: argument 'body' in call to global function 'withUnsafeCurrentTask' has unsafe type '(UnsafeCurrentTask?) throws -> ()?'
+    |                                 `- error: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 87 |                             }
+ 88 |                             if request.consumer == "analysis" {
+
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift:86:65: error: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+ 84 |                         do {
+ 85 |                             if request.preCancelled {
+ 86 |                                 withUnsafeCurrentTask { task in task?.cancel() }
+    |                                                                 |   `- note: argument 'self' in call to instance method 'cancel' has unsafe type 'UnsafeCurrentTask'
+    |                                                                 |- error: expression uses unsafe constructs but is not marked with 'unsafe' [#StrictMemorySafety]
+    |                                                                 `- note: reference to parameter 'task' involves unsafe type 'UnsafeCurrentTask'
+ 87 |                             }
+ 88 |                             if request.consumer == "analysis" {
+
+[#StrictMemorySafety]: <https://docs.swift.org/compiler/documentation/diagnostics/strict-memory-safety>
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c -primary-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift -emit-dependencies-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.d -emit-const-values-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.swiftconstvalues -emit-reference-dependencies-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.swiftdeps -serialize-diagnostics-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.dia -target arm64-apple-macos26.0 -disable-cross-import-overlay-search -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -stack-check -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -I /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/PackageFrameworks -F /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -module-cache-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/SwiftExplicitPrecompiledModules -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=5 -warnings-as-errors -warnings-as-errors -swift-version 6 -Onone -D SWIFT_PACKAGE -D DEBUG -D Xcode -serialize-debugging-options -enable-experimental-feature DebugDescriptionMacro -strict-memory-safety -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/ModuleCache.noindex/Session.modulevalidation -disable-sandbox -Xcc -working-directory -Xcc /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner -enable-anonymous-context-mangled-names -file-compilation-dir /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/SDKStatCaches.noindex/macosx27.0-26A425-a0facfad118c1a7a18f0aad9463f65497231f6df4def33e022ae2eb8f782df1a.sdkstatcache -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/include -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/DerivedSources-normal/arm64 -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/DerivedSources/arm64 -Xcc -I/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name SummaryOracle -package-name workspace -const-gather-protocols-file /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle_const_extract_protocols.json -disable-clang-spi -clang-target arm64-apple-macos27.0 -target-sdk-version 27.0 -target-sdk-name macosx27.0 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -parse-as-library -o /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.o -debug-module-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Intermediates.noindex/ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.swiftmodule -index-unit-output-path /ArkTraceSummaryCanonical.build/Debug/SummaryOracle-p.build/Objects-normal/arm64/SummaryOracle.o -index-store-path /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out -index-system-modules
+error: Build failed

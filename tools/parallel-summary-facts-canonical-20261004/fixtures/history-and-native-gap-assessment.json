@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "command": [
+        "rg",
+        "-n",
+        "summaryFacts|summary_facts|TraceSummaryFacts",
+        "docs/migration-runs",
+        "rust",
+        "Sources/ArkTraceRustRuntime",
+        "--glob",
+        "*.md",
+        "--glob",
+        "*.rs",
+        "--glob",
+        "*.swift",
+        "--glob",
+        "*.py",
+        "--max-count",
+        "2"
+      ],
+      "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/fixed-history-gap-search.log",
+        "sha256": "cc5c8fb60346b012ef1cec87566a902e221ab0cba0d44840d5940d582048989d",
+        "byteCount": 1040
+      }
+    },
+    {
+      "command": [
+        "rg",
+        "-n",
+        "summaryFacts|summary_facts|SummaryFacts|pub.*summary",
+        "rust/crates/arktrace-store/src",
+        "Sources/ArkTraceRustRuntime",
+        "bindings/c",
+        "contracts"
+      ],
+      "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/fixed-interface-gap-search.log",
+        "sha256": "6385bbf40c34e3d5c2ccb08e06045e4406db4a8cc6aec41610f50d18350b907b",
+        "byteCount": 375
+      }
+    }
+  ],
+  "conclusion": "Within fixed snapshot reports and native/SDK source, no exact existing actual Store-summary canonical; only deferred gaps, forwarding or cancellation stubs and inventory declarations. This is a targeted gap claim, not a full historical audit.",
+  "nativeInterface": "No implemented fixed817 Store/SDK/FFI summaryFacts entry identified, no separately delivered frozen native summary artifact used.",
+  "repeatedHistoricalMatrices": [],
+  "sourceSnapshot": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/parallel-snapshot.json",
+    "sha256": "91e05c7db55f5ddbf48bf9eb55aa900d5e4e1ed27e7538cc6ced384843ea173c",
+    "byteCount": 610148
+  }
+}

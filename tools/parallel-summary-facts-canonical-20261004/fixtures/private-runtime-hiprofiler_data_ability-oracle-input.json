@@ -1,0 +1,82 @@
+{
+  "database": "/private/tmp/arktrace-caches/parallel-sdk-directory-swift-parity-native-20261004/sessions/private-runtime-hiprofiler_data_ability/.actors/session-ecfeb1ec-f955-42f2-8ba4-df51099c6982/.ready/session-b0f7352b-b8e4-4576-bd3b-8a0731540786/trace.db",
+  "parserIdentity": {
+    "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+    "reportedVersion": "4.3.7",
+    "name": "trace_streamer",
+    "architecture": "arm64",
+    "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+    "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+    "adapterVersion": "1"
+  },
+  "source": {
+    "sha256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b",
+    "byteCount": 557542
+  },
+  "preparation": {
+    "schemaAdapterVersion": "2",
+    "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+    "upstreamDatabaseSHA256": "e9df57d41bb3537f0293b30b779962828ae6cc48c273c1fce235a0176001c755",
+    "indexVersion": 3,
+    "upstreamDatabaseByteCount": 1929216
+  },
+  "cases": [
+    {
+      "id": "ability-process-exact-name",
+      "fixture": "hiprofiler_data_ability.htrace",
+      "kind": "processes",
+      "query": {
+        "processKey": null,
+        "pid": null,
+        "name": "/bin/init",
+        "nameMatch": "exact",
+        "limit": 2
+      },
+      "timeoutMilliseconds": 30000
+    },
+    {
+      "id": "ability-process-contains-truncated",
+      "fixture": "hiprofiler_data_ability.htrace",
+      "kind": "processes",
+      "query": {
+        "processKey": null,
+        "pid": null,
+        "name": "k",
+        "nameMatch": "contains",
+        "limit": 7
+      },
+      "timeoutMilliseconds": 30000
+    },
+    {
+      "id": "ability-thread-prefix-truncated",
+      "fixture": "hiprofiler_data_ability.htrace",
+      "kind": "threads",
+      "query": {
+        "processKey": null,
+        "pid": null,
+        "name": "k",
+        "nameMatch": "prefix",
+        "limit": 5,
+        "threadKey": null,
+        "tid": null
+      },
+      "timeoutMilliseconds": 30000
+    },
+    {
+      "id": "ability-thread-all-fields-filter",
+      "fixture": "hiprofiler_data_ability.htrace",
+      "kind": "threads",
+      "query": {
+        "processKey": 1,
+        "pid": 1,
+        "name": "/bin/init",
+        "nameMatch": "exact",
+        "limit": 2,
+        "threadKey": 1,
+        "tid": 1
+      },
+      "timeoutMilliseconds": 30000
+    }
+  ]
+}

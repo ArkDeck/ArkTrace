@@ -206,6 +206,14 @@ lane_rust_macos=true
 lane_rust_windows=false' 'scripts/swift-sdk-directory/DirectoryOwnership.swift
 scripts/test_macos_directory_sdk.py'
 
+expect "package-external summary owner selects the native SDK compile gate" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'scripts/swift-sdk-summary/SummaryOwnership.swift
+scripts/test_macos_summary_sdk.py'
+
 expect "native APFS harness selects the macOS Rust lane" \
     'lane_swiftpm=false
 lane_app=false

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/SummaryOracle",
+    "repair-construction",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/input-construction.json"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-native",
+  "exitCode": 0,
+  "elapsedSeconds": 0.3062144169998646,
+  "log": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/valid-range-construction.log",
+    "byteCount": 651,
+    "sha256": "17f36cc60e61cbfc21ad7dd250e8850022b4a90f4772c6874e468bb55370d826"
+  },
+  "warnings": [],
+  "environment": {
+    "MACOSX_DEPLOYMENT_TARGET": "26.0",
+    "ARKTRACE_SWIFTPM_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner"
+  }
+}

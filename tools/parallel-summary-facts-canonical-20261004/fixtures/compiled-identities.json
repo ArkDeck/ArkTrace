@@ -1,0 +1,159 @@
+{
+  "executable": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/SummaryOracle",
+    "byteCount": 5424416,
+    "sha256": "9bf5c1b08887007f5c7735bdecb7c9f6d92f2ce1002b5e47a915cd63bc8b9485"
+  },
+  "sources": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+      "byteCount": 20622,
+      "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceAnalysis/TraceContext.swift",
+      "byteCount": 68967,
+      "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+      "byteCount": 51087,
+      "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceAnalysis/TraceSummary.swift",
+      "byteCount": 14839,
+      "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+      "byteCount": 33088,
+      "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "byteCount": 11275,
+      "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "byteCount": 4367,
+      "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "byteCount": 1042,
+      "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "byteCount": 375,
+      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "byteCount": 862,
+      "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "byteCount": 17503,
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "byteCount": 1526,
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Model/TraceModels.swift",
+      "byteCount": 11916,
+      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "byteCount": 5258,
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "byteCount": 8071,
+      "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "byteCount": 3147,
+      "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "byteCount": 16011,
+      "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "byteCount": 1186,
+      "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "byteCount": 3873,
+      "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "byteCount": 9752,
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "byteCount": 863,
+      "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "byteCount": 16274,
+      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceCore/Time/TraceTime.swift",
+      "byteCount": 2757,
+      "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+      "byteCount": 161690,
+      "sha256": "1b8597ac5f27881b1e91b9cc2075ec9bce76310aacabd341bfbac41cf5ab972d"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceStore/TraceDatabase.swift",
+      "byteCount": 29935,
+      "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+      "byteCount": 32838,
+      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceStore/TraceEventIntersection.swift",
+      "byteCount": 3269,
+      "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "byteCount": 49595,
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Sources/SummaryOracle/SummaryOracle.swift",
+      "byteCount": 8112,
+      "sha256": "5ccec46642523804cc67e791a53112968e346ca2e032c29c8c8d46990b55b710"
+    }
+  ],
+  "package": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/workspace/Package.swift",
+    "byteCount": 621,
+    "sha256": "eb496f8f1fd64e5c1b2559b54d437a50fcfa82c4b0fafd4b42ce90918de8acf9"
+  }
+}

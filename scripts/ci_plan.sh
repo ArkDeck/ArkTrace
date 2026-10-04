@@ -57,7 +57,7 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
-        Sources/ArkTraceRustRuntime/*|Tests/ArkTraceRustRuntimeTests/*|scripts/swift-sdk-conformance/*|scripts/swift-sdk-lifecycle/*|scripts/swift-sdk-directory/*|scripts/build_macos_rust_sdk.py|scripts/stage_macos_rust_sdk.py|scripts/test_stage_macos_rust_sdk.py|scripts/test_macos_rust_sdk.py|scripts/test_macos_rust_lifecycle.py|scripts/test_macos_directory_sdk.py)
+        Sources/ArkTraceRustRuntime/*|Tests/ArkTraceRustRuntimeTests/*|scripts/swift-sdk-conformance/*|scripts/swift-sdk-lifecycle/*|scripts/swift-sdk-directory/*|scripts/swift-sdk-summary/*|scripts/build_macos_rust_sdk.py|scripts/stage_macos_rust_sdk.py|scripts/test_stage_macos_rust_sdk.py|scripts/test_macos_rust_sdk.py|scripts/test_macos_rust_lifecycle.py|scripts/test_macos_directory_sdk.py|scripts/test_macos_summary_sdk.py)
             # Native Swift SDK is compiled by the macOS Rust lane using an
             # explicit immutable local artifact; default SwiftPM has no asset.
             contracts=true

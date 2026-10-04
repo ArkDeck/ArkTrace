@@ -33,6 +33,8 @@ def consumer(artifact):
     shutil.copyfile(ROOT/'scripts/swift-sdk-conformance/GeneratedRecords.swift',lifecycle_sources/'GeneratedRecords.swift')
     directory_sources=package/'Sources/DirectoryOwnership';directory_sources.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(ROOT/'scripts/swift-sdk-directory/DirectoryOwnership.swift',directory_sources/'DirectoryOwnership.swift')
+    summary_sources=package/'Sources/SummaryOwnership';summary_sources.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(ROOT/'scripts/swift-sdk-summary/SummaryOwnership.swift',summary_sources/'SummaryOwnership.swift')
     mirror=cache/'arktrace/workspace'
     env=os.environ.copy();env.update(ARKTRACE_SWIFTPM_CACHE_ROOT=str(cache/'arktrace'),ARKTRACE_RUST_XCFRAMEWORK=str(artifact),ARKTRACE_RUST_SDK_FIXTURES='1')
     log=cache/'sdk-build.log'
@@ -53,7 +55,8 @@ import PackageDescription
 let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], dependencies: [.package(name: "ArkTrace", path: %s)], targets: [
  .executableTarget(name: "Consumer", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()]),
  .executableTarget(name: "Lifecycle", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()]),
- .executableTarget(name: "DirectoryOwnership", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])])
+ .executableTarget(name: "DirectoryOwnership", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])]),
+ .executableTarget(name: "SummaryOwnership", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])])
 ], swiftLanguageModes: [.v6])
 ''' % json.dumps(str(mirror)))
     invocation=['swift','build','--package-path',str(package),'--scratch-path',str(cache/'build'),'--cache-path',str(cache/'dependencies'),'--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'-Xswiftc','-warnings-as-errors']
@@ -73,7 +76,8 @@ let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], de
     executable=cache/'build/out/Products/Debug/Consumer'
     lifecycle=cache/'build/out/Products/Debug/Lifecycle'
     directory=cache/'build/out/Products/Debug/DirectoryOwnership'
-    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
+    summary=cache/'build/out/Products/Debug/SummaryOwnership'
+    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'summaryExecutable':{'byteCount':summary.stat().st_size,'sha256':sha(summary)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
 
 def projection(records):
     def array(name, values):

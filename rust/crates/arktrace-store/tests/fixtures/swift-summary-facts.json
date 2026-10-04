@@ -1,0 +1,1084 @@
+{
+  "schemaVersion": 1,
+  "status": "actualSwiftCanonicalOnly",
+  "records": [
+    {
+      "id": "zlib-full",
+      "request": {
+        "id": "zlib-full",
+        "fixture": "zlib",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": null,
+        "cpuCount": null,
+        "cpuSliceCount": null,
+        "eventCountBySource": {
+          "items": [
+            {
+              "count": 6138,
+              "source": "trace"
+            }
+          ],
+          "truncated": false
+        },
+        "namedSliceCount": {
+          "truncated": false,
+          "value": 3067
+        },
+        "processCount": {
+          "truncated": false,
+          "value": 100
+        },
+        "qualityIssues": [
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 198,
+            "message": "thread.start_ts: 198 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": false,
+          "value": 198
+        },
+        "threadStateCount": null,
+        "warnings": [
+          "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread.start_ts: 198 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "zlib-explicit-full",
+      "request": {
+        "id": "zlib-explicit-full",
+        "fixture": "zlib",
+        "consumer": "store",
+        "range": {
+          "startNs": 0,
+          "endNs": 32210627000
+        },
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": null,
+        "cpuCount": null,
+        "cpuSliceCount": null,
+        "eventCountBySource": null,
+        "namedSliceCount": {
+          "truncated": false,
+          "value": 3067
+        },
+        "processCount": {
+          "truncated": false,
+          "value": 100
+        },
+        "qualityIssues": [
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 198,
+            "message": "thread.start_ts: 198 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": false,
+          "value": 198
+        },
+        "threadStateCount": null,
+        "warnings": [
+          "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread.start_ts: 198 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "ability-full",
+      "request": {
+        "id": "ability-full",
+        "fixture": "hiprofiler_data_ability",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": {
+          "truncated": false,
+          "value": 2250
+        },
+        "cpuCount": null,
+        "cpuSliceCount": null,
+        "eventCountBySource": {
+          "items": [
+            {
+              "count": 12396,
+              "source": "trace"
+            }
+          ],
+          "truncated": false
+        },
+        "namedSliceCount": null,
+        "processCount": {
+          "truncated": false,
+          "value": 250
+        },
+        "qualityIssues": [
+          {
+            "category": "unavailableValue",
+            "count": 250,
+            "message": "process.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 250,
+            "message": "thread.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": false,
+          "value": 250
+        },
+        "threadStateCount": null,
+        "warnings": [
+          "process.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "ability-event-budget-1",
+      "request": {
+        "id": "ability-event-budget-1",
+        "fixture": "hiprofiler_data_ability",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 1,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": {
+          "truncated": true,
+          "value": 1
+        },
+        "cpuCount": null,
+        "cpuSliceCount": null,
+        "eventCountBySource": {
+          "items": [
+            {
+              "count": 0,
+              "source": "trace"
+            }
+          ],
+          "truncated": true
+        },
+        "namedSliceCount": null,
+        "processCount": {
+          "truncated": false,
+          "value": 250
+        },
+        "qualityIssues": [
+          {
+            "category": "unavailableValue",
+            "count": 250,
+            "message": "process.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 250,
+            "message": "thread.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": false,
+          "value": 250
+        },
+        "threadStateCount": null,
+        "warnings": [
+          "process.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread.start_ts: 250 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "temporal-full",
+      "request": {
+        "id": "temporal-full",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": {
+          "truncated": false,
+          "value": 2
+        },
+        "cpuCount": {
+          "truncated": false,
+          "value": 5
+        },
+        "cpuSliceCount": {
+          "truncated": false,
+          "value": 5
+        },
+        "eventCountBySource": {
+          "items": [
+            {
+              "count": 4,
+              "source": "ftrace"
+            },
+            {
+              "count": 5,
+              "source": "trace"
+            }
+          ],
+          "truncated": true
+        },
+        "namedSliceCount": {
+          "truncated": false,
+          "value": 4
+        },
+        "processCount": {
+          "truncated": true,
+          "value": 4
+        },
+        "qualityIssues": [
+          {
+            "category": "invalidValue",
+            "count": 2,
+            "message": "process lifecycle: invalid sampled value(s) excluded; processCount is a lower bound",
+            "scope": "process.lifecycle"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "invalidValue",
+            "count": 2,
+            "message": "thread lifecycle: invalid sampled value(s) excluded; threadCount is a lower bound",
+            "scope": "thread.lifecycle"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "thread.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": true,
+          "value": 4
+        },
+        "threadStateCount": {
+          "truncated": false,
+          "value": 4
+        },
+        "warnings": [
+          "process lifecycle: invalid sampled value(s) excluded; processCount is a lower bound",
+          "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread lifecycle: invalid sampled value(s) excluded; threadCount is a lower bound",
+          "thread.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "temporal-explicit-full",
+      "request": {
+        "id": "temporal-explicit-full",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": {
+          "startNs": 0,
+          "endNs": 1000
+        },
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": {
+          "truncated": false,
+          "value": 2
+        },
+        "cpuCount": {
+          "truncated": false,
+          "value": 5
+        },
+        "cpuSliceCount": {
+          "truncated": false,
+          "value": 4
+        },
+        "eventCountBySource": null,
+        "namedSliceCount": {
+          "truncated": false,
+          "value": 3
+        },
+        "processCount": {
+          "truncated": true,
+          "value": 4
+        },
+        "qualityIssues": [
+          {
+            "category": "invalidValue",
+            "count": 2,
+            "message": "process lifecycle: invalid sampled value(s) excluded; processCount is a lower bound",
+            "scope": "process.lifecycle"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "invalidValue",
+            "count": 2,
+            "message": "thread lifecycle: invalid sampled value(s) excluded; threadCount is a lower bound",
+            "scope": "thread.lifecycle"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "thread.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": true,
+          "value": 4
+        },
+        "threadStateCount": {
+          "truncated": false,
+          "value": 3
+        },
+        "warnings": [
+          "process lifecycle: invalid sampled value(s) excluded; processCount is a lower bound",
+          "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread lifecycle: invalid sampled value(s) excluded; threadCount is a lower bound",
+          "thread.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "temporal-half-open",
+      "request": {
+        "id": "temporal-half-open",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": {
+          "startNs": 200,
+          "endNs": 400
+        },
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": {
+          "truncated": false,
+          "value": 1
+        },
+        "cpuCount": {
+          "truncated": false,
+          "value": 5
+        },
+        "cpuSliceCount": {
+          "truncated": false,
+          "value": 2
+        },
+        "eventCountBySource": null,
+        "namedSliceCount": {
+          "truncated": false,
+          "value": 1
+        },
+        "processCount": {
+          "truncated": true,
+          "value": 2
+        },
+        "qualityIssues": [
+          {
+            "category": "invalidValue",
+            "count": 2,
+            "message": "process lifecycle: invalid sampled value(s) excluded; processCount is a lower bound",
+            "scope": "process.lifecycle"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "process.start_ts"
+          },
+          {
+            "category": "invalidValue",
+            "count": 2,
+            "message": "thread lifecycle: invalid sampled value(s) excluded; threadCount is a lower bound",
+            "scope": "thread.lifecycle"
+          },
+          {
+            "category": "unavailableValue",
+            "count": 1,
+            "message": "thread.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+            "scope": "thread.start_ts"
+          }
+        ],
+        "threadCount": {
+          "truncated": true,
+          "value": 2
+        },
+        "threadStateCount": {
+          "truncated": false,
+          "value": 2
+        },
+        "warnings": [
+          "process lifecycle: invalid sampled value(s) excluded; processCount is a lower bound",
+          "process.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range",
+          "thread lifecycle: invalid sampled value(s) excluded; threadCount is a lower bound",
+          "thread.start_ts: 1 sampled row(s) have no start timestamp; they are counted but cannot be excluded by the requested range"
+        ]
+      }
+    },
+    {
+      "id": "temporal-source-budget-before-filter",
+      "request": {
+        "id": "temporal-source-budget-before-filter",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": {
+          "startNs": 200,
+          "endNs": 400
+        },
+        "maximumRowsPerSection": 1,
+        "maximumEventsPerSection": 1,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": {
+          "truncated": false,
+          "value": 1
+        },
+        "cpuCount": {
+          "truncated": true,
+          "value": 1
+        },
+        "cpuSliceCount": {
+          "truncated": true,
+          "value": 1
+        },
+        "eventCountBySource": null,
+        "namedSliceCount": {
+          "truncated": false,
+          "value": 1
+        },
+        "processCount": {
+          "truncated": true,
+          "value": 0
+        },
+        "qualityIssues": [
+          {
+            "category": "probeTruncated",
+            "count": null,
+            "message": "process lifecycle: probe tail was not inspected; processCount is a lower bound",
+            "scope": "process.lifecycle"
+          },
+          {
+            "category": "probeTruncated",
+            "count": null,
+            "message": "thread lifecycle: probe tail was not inspected; threadCount is a lower bound",
+            "scope": "thread.lifecycle"
+          }
+        ],
+        "threadCount": {
+          "truncated": true,
+          "value": 0
+        },
+        "threadStateCount": {
+          "truncated": true,
+          "value": 1
+        },
+        "warnings": [
+          "process lifecycle: probe tail was not inspected; processCount is a lower bound",
+          "thread lifecycle: probe tail was not inspected; threadCount is a lower bound"
+        ]
+      }
+    },
+    {
+      "id": "analysis-source-budget-consumer",
+      "request": {
+        "id": "analysis-source-budget-consumer",
+        "fixture": "temporal",
+        "consumer": "analysis",
+        "range": {
+          "startNs": 200,
+          "endNs": 400
+        },
+        "maximumRowsPerSection": 1,
+        "maximumEventsPerSection": 1,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "summary": {
+        "capabilities": {
+          "cpuCounters": true,
+          "cpuScheduling": true,
+          "namedSlices": true,
+          "processCounters": true,
+          "threadStates": true
+        },
+        "counterSeriesCount": 1,
+        "cpuCount": 1,
+        "cpuSliceCount": 1,
+        "dataQuality": {
+          "issues": [
+            {
+              "category": "droppedValue",
+              "count": 1,
+              "message": "stat.stat_type: 1 sampled non-received row(s) excluded from event counts",
+              "scope": "stat.stat_type"
+            },
+            {
+              "category": "invalidValue",
+              "count": 1,
+              "message": "stat.count: 1 sampled negative value(s) excluded from event counts",
+              "scope": "stat.count"
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process lifecycle: probe tail was not inspected; processCount is a lower bound",
+              "scope": "process.lifecycle",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "thread lifecycle: probe tail was not inspected; threadCount is a lower bound",
+              "scope": "thread.lifecycle",
+              "count": null
+            }
+          ],
+          "status": "warnings",
+          "warnings": [
+            "stat.stat_type: 1 sampled non-received row(s) excluded from event counts",
+            "stat.count: 1 sampled negative value(s) excluded from event counts",
+            "process lifecycle: probe tail was not inspected; processCount is a lower bound",
+            "thread lifecycle: probe tail was not inspected; threadCount is a lower bound"
+          ]
+        },
+        "durationNs": 200,
+        "eventCountBySource": null,
+        "namedSliceCount": 1,
+        "processCount": 0,
+        "range": {
+          "endNs": 400,
+          "startNs": 200
+        },
+        "schemaFingerprint": "99367d11764cab79ad647da791b8c1e9925d94c217e9daa49b01fea2aa14dcb3",
+        "threadCount": 0,
+        "threadStateCount": 1,
+        "truncatedSections": [
+          "cpuCount",
+          "processCount",
+          "threadCount",
+          "cpuSliceCount",
+          "threadStateCount"
+        ]
+      }
+    },
+    {
+      "id": "invalid-range-past-duration",
+      "request": {
+        "id": "invalid-range-past-duration",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": {
+          "startNs": 0,
+          "endNs": 1001
+        },
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "error",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "error": {
+        "code": "INVALID_ARGUMENT",
+        "details": {},
+        "kind": "ArkTraceError",
+        "message": "Summary range is empty or exceeds trace duration",
+        "publicContractViolation": null,
+        "retryable": false,
+        "stage": "request"
+      }
+    },
+    {
+      "id": "invalid-row-budget-zero",
+      "request": {
+        "id": "invalid-row-budget-zero",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 0,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "error",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "error": {
+        "code": "INVALID_ARGUMENT",
+        "details": {},
+        "kind": "ArkTraceError",
+        "message": "maximumRowsPerSection must be within 1...1000000",
+        "publicContractViolation": null,
+        "retryable": false,
+        "stage": "request"
+      }
+    },
+    {
+      "id": "expired-swift-deadline",
+      "request": {
+        "id": "expired-swift-deadline",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": -1,
+        "preCancelled": false
+      },
+      "status": "error",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "error": {
+        "code": "QUERY_TIMEOUT",
+        "details": {},
+        "kind": "ArkTraceError",
+        "message": "Trace query deadline was reached",
+        "publicContractViolation": null,
+        "retryable": true,
+        "stage": "querying"
+      }
+    },
+    {
+      "id": "pre-cancelled-swift-task",
+      "request": {
+        "id": "pre-cancelled-swift-task",
+        "fixture": "temporal",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": true
+      },
+      "status": "error",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "error": {
+        "kind": "CancellationError",
+        "typedPublicError": null
+      }
+    },
+    {
+      "id": "empty-full-unsupported-null",
+      "request": {
+        "id": "empty-full-unsupported-null",
+        "fixture": "empty-absent",
+        "consumer": "store",
+        "range": null,
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "success",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "facts": {
+        "counterSeriesCount": null,
+        "cpuCount": null,
+        "cpuSliceCount": null,
+        "eventCountBySource": null,
+        "namedSliceCount": null,
+        "processCount": {
+          "truncated": false,
+          "value": 0
+        },
+        "qualityIssues": [],
+        "threadCount": {
+          "truncated": false,
+          "value": 0
+        },
+        "threadStateCount": null,
+        "warnings": []
+      }
+    },
+    {
+      "id": "invalid-empty-query",
+      "request": {
+        "id": "invalid-empty-query",
+        "fixture": "empty-absent",
+        "consumer": "store",
+        "range": {
+          "startNs": 0,
+          "endNs": 0
+        },
+        "maximumRowsPerSection": 100000,
+        "maximumEventsPerSection": 100000,
+        "deadlineMilliseconds": 30000,
+        "preCancelled": false
+      },
+      "status": "error",
+      "canonicalOrigin": "original Swift invocation, not generated expected count algorithm",
+      "error": {
+        "code": "INVALID_ARGUMENT",
+        "details": {},
+        "kind": "ArkTraceError",
+        "message": "Summary range must satisfy startNs < endNs",
+        "publicContractViolation": null,
+        "retryable": false,
+        "stage": "request"
+      }
+    },
+    {
+      "id": "zero-duration-schema-validation",
+      "status": "error",
+      "kind": "controlledSchemaValidation",
+      "input": "trace_range(1000,1000)",
+      "observed": {
+        "input": "verification/zero-duration-rejected-input.json",
+        "childExitCode": -5,
+        "typedCode": "TRACE_DATABASE_INVALID",
+        "stage": "validating",
+        "reason": "trace_range must contain exactly one row with end_ts > start_ts",
+        "countedAsOneControl": true
+      },
+      "summaryFactsInvoked": false,
+      "canonicalOrigin": "original TraceDatabaseStagingPreparer/TraceSchemaAdapter validation; top-level fatal error retained, no guessed query response"
+    }
+  ],
+  "metadata": [
+    {
+      "databaseDevice": 16777233,
+      "databaseInode": 265777003,
+      "id": "zlib",
+      "metadata": {
+        "capabilities": {
+          "cpuCounters": false,
+          "cpuScheduling": false,
+          "namedSlices": true,
+          "processCounters": false,
+          "threadStates": false
+        },
+        "dataQuality": {
+          "issues": [
+            {
+              "category": "probeTruncated",
+              "message": "callstack.ts: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "callstack.ts",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "callstack.dur: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "callstack.dur",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "callstack.depth: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "callstack.depth",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "callstack.parent_id: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "callstack.parent_id",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "callstack.cookie: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "callstack.cookie",
+              "count": null
+            },
+            {
+              "category": "droppedValue",
+              "count": 416,
+              "message": "stat.stat_type: 416 sampled non-received row(s) excluded from event counts",
+              "scope": "stat.stat_type"
+            }
+          ],
+          "status": "warnings",
+          "warnings": [
+            "callstack.ts: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "callstack.dur: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "callstack.depth: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "callstack.parent_id: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "callstack.cookie: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "stat.stat_type: 416 sampled non-received row(s) excluded from event counts"
+          ]
+        },
+        "durationNs": 32210627000,
+        "parser": {
+          "adapterVersion": "1",
+          "architecture": "arm64",
+          "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+          "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+          "name": "trace_streamer",
+          "reportedVersion": "4.3.7",
+          "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+          "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
+        },
+        "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+        "sourceByteCount": 67837,
+        "sourceFormat": "htrace",
+        "traceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe"
+      },
+      "outsideMainThread": true
+    },
+    {
+      "databaseDevice": 16777233,
+      "databaseInode": 265777006,
+      "id": "hiprofiler_data_ability",
+      "metadata": {
+        "capabilities": {
+          "cpuCounters": false,
+          "cpuScheduling": false,
+          "namedSlices": false,
+          "processCounters": true,
+          "threadStates": false
+        },
+        "dataQuality": {
+          "issues": [
+            {
+              "category": "probeTruncated",
+              "message": "process_measure.ts: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure.ts",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process_measure.filter_id: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure.filter_id",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process_measure.value: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure.value",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process_measure.dur: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure.dur",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process_measure_filter.id: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure_filter.id",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process_measure_filter.name: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure_filter.name",
+              "count": null
+            },
+            {
+              "category": "probeTruncated",
+              "message": "process_measure_filter.ipid: quality probe truncated after 1024 rows; remaining values were not inspected",
+              "scope": "process_measure_filter.ipid",
+              "count": null
+            },
+            {
+              "category": "droppedValue",
+              "count": 416,
+              "message": "stat.stat_type: 416 sampled non-received row(s) excluded from event counts",
+              "scope": "stat.stat_type"
+            }
+          ],
+          "status": "warnings",
+          "warnings": [
+            "process_measure.ts: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "process_measure.filter_id: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "process_measure.value: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "process_measure.dur: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "process_measure_filter.id: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "process_measure_filter.name: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "process_measure_filter.ipid: quality probe truncated after 1024 rows; remaining values were not inspected",
+            "stat.stat_type: 416 sampled non-received row(s) excluded from event counts"
+          ]
+        },
+        "durationNs": 48516841334,
+        "parser": {
+          "adapterVersion": "1",
+          "architecture": "arm64",
+          "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+          "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20",
+          "name": "trace_streamer",
+          "reportedVersion": "4.3.7",
+          "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+          "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
+        },
+        "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+        "sourceByteCount": 557542,
+        "sourceFormat": "htrace",
+        "traceSHA256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b"
+      },
+      "outsideMainThread": true
+    },
+    {
+      "databaseDevice": 16777233,
+      "databaseInode": 265795453,
+      "id": "temporal",
+      "metadata": {
+        "capabilities": {
+          "cpuCounters": true,
+          "cpuScheduling": true,
+          "namedSlices": true,
+          "processCounters": true,
+          "threadStates": true
+        },
+        "dataQuality": {
+          "issues": [
+            {
+              "category": "droppedValue",
+              "count": 1,
+              "message": "stat.stat_type: 1 sampled non-received row(s) excluded from event counts",
+              "scope": "stat.stat_type"
+            },
+            {
+              "category": "invalidValue",
+              "count": 1,
+              "message": "stat.count: 1 sampled negative value(s) excluded from event counts",
+              "scope": "stat.count"
+            }
+          ],
+          "status": "warnings",
+          "warnings": [
+            "stat.stat_type: 1 sampled non-received row(s) excluded from event counts",
+            "stat.count: 1 sampled negative value(s) excluded from event counts"
+          ]
+        },
+        "durationNs": 1000,
+        "parser": {
+          "adapterVersion": "1",
+          "architecture": "arm64",
+          "binarySHA256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "buildRecipeVersion": "1",
+          "name": "trace_streamer",
+          "reportedVersion": "4.3.7",
+          "upstreamRepository": "https://example.invalid/trace_streamer.git",
+          "upstreamRevision": "1111111111111111111111111111111111111111"
+        },
+        "schemaFingerprint": "99367d11764cab79ad647da791b8c1e9925d94c217e9daa49b01fea2aa14dcb3",
+        "sourceByteCount": 4317,
+        "sourceFormat": "controlled-sqlite",
+        "traceSHA256": "3026ffd0b61026ac1671e9a106fe4ac51e48372ca055d5c88e4d124027a250a7"
+      },
+      "outsideMainThread": true
+    },
+    {
+      "databaseDevice": 16777233,
+      "databaseInode": 265795551,
+      "id": "empty-absent",
+      "metadata": {
+        "capabilities": {
+          "cpuCounters": false,
+          "cpuScheduling": false,
+          "namedSlices": false,
+          "processCounters": false,
+          "threadStates": false
+        },
+        "dataQuality": {
+          "issues": [],
+          "status": "ok",
+          "warnings": []
+        },
+        "durationNs": 1,
+        "parser": {
+          "adapterVersion": "1",
+          "architecture": "arm64",
+          "binarySHA256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "buildRecipeVersion": "1",
+          "name": "trace_streamer",
+          "reportedVersion": "4.3.7",
+          "upstreamRepository": "https://example.invalid/trace_streamer.git",
+          "upstreamRevision": "1111111111111111111111111111111111111111"
+        },
+        "schemaFingerprint": "4570b38f5c7cc556a54ad63bec01c2fcffb0282db756e0c6bd48c1bbe98a673d",
+        "sourceByteCount": 666,
+        "sourceFormat": "controlled-sqlite",
+        "traceSHA256": "b1bdbd2b74c970054ea817fbf850004a4b3175a8201f62a02da1a48ba3b9debf"
+      },
+      "outsideMainThread": true
+    }
+  ],
+  "originalCanonical": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json",
+    "sha256": "76d324cb5c8b7d0c4b914d1629c8ce7bbf8d748f59a5cbf8150d58037d40b77e",
+    "byteCount": 198304
+  },
+  "encodingNote": "Only explicit null insertion for known optional fields; original model encoders retained alongside. All counts, flags, quality values and array order untouched.",
+  "totalNewControls": 16,
+  "successfulStoreCalls": 9,
+  "successfulOriginalAnalysisConsumerCalls": 1,
+  "expectedSwiftErrorRequests": 5,
+  "schemaValidationErrorControls": 1
+}

@@ -1,0 +1,173 @@
+[
+  {
+    "id": "zlib-full",
+    "fixture": "zlib",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "zlib-explicit-full",
+    "fixture": "zlib",
+    "consumer": "store",
+    "range": {
+      "startNs": 0,
+      "endNs": 32210627000
+    },
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "ability-full",
+    "fixture": "hiprofiler_data_ability",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "ability-event-budget-1",
+    "fixture": "hiprofiler_data_ability",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 1,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "temporal-full",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "temporal-explicit-full",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": {
+      "startNs": 0,
+      "endNs": 1000
+    },
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "temporal-half-open",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": {
+      "startNs": 200,
+      "endNs": 400
+    },
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "temporal-source-budget-before-filter",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": {
+      "startNs": 200,
+      "endNs": 400
+    },
+    "maximumRowsPerSection": 1,
+    "maximumEventsPerSection": 1,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "analysis-source-budget-consumer",
+    "fixture": "temporal",
+    "consumer": "analysis",
+    "range": {
+      "startNs": 200,
+      "endNs": 400
+    },
+    "maximumRowsPerSection": 1,
+    "maximumEventsPerSection": 1,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "empty-full-unsupported-null",
+    "fixture": "empty-absent",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "invalid-empty-query",
+    "fixture": "empty-absent",
+    "consumer": "store",
+    "range": {
+      "startNs": 0,
+      "endNs": 0
+    },
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "invalid-range-past-duration",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": {
+      "startNs": 0,
+      "endNs": 1001
+    },
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "invalid-row-budget-zero",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 0,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": false
+  },
+  {
+    "id": "expired-swift-deadline",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": -1,
+    "preCancelled": false
+  },
+  {
+    "id": "pre-cancelled-swift-task",
+    "fixture": "temporal",
+    "consumer": "store",
+    "range": null,
+    "maximumRowsPerSection": 100000,
+    "maximumEventsPerSection": 100000,
+    "deadlineMilliseconds": 30000,
+    "preCancelled": true
+  }
+]

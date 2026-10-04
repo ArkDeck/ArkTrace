@@ -252,6 +252,7 @@ fn validate_path(path: &std::path::Path) -> Result<(), RuntimeFailure> {
 /// Existing bounded typed operations; no SQL, callbacks or storage/tool paths.
 #[derive(Clone, Debug)]
 pub enum RepositoryRequest {
+    SummaryFacts(TraceSummaryQuery),
     Processes(ProcessQuery),
     Threads(ThreadQuery),
     CpuSlices(CpuSliceQuery),
@@ -288,6 +289,7 @@ impl RepositoryRequest {
     }
     fn validate(&self) -> Result<(), RuntimeFailure> {
         let value = match self {
+            Self::SummaryFacts(q) => q.validate(),
             Self::Processes(q) => q.validate(),
             Self::Threads(q) => q.validate(),
             Self::CpuSlices(q) => q.validate(),
@@ -953,6 +955,7 @@ fn query(
     }
     let b = &command.budget;
     match query {
+        RepositoryRequest::SummaryFacts(q) => read!(session.summary_facts(q, b)),
         RepositoryRequest::Processes(q) => read!(session.processes(q, b)),
         RepositoryRequest::Threads(q) => read!(session.threads(q, b)),
         RepositoryRequest::CpuSlices(q) => read!(session.cpu_slices(q, b)),

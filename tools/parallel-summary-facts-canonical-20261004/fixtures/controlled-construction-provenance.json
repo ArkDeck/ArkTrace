@@ -1,0 +1,20 @@
+{
+  "originalTestSource": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/Tests/ArkTraceStoreTests/RepositoryTests.swift",
+    "byteCount": 200017,
+    "sha256": "0c2727b4ef2fe01e032246685d0b77de11a85e3a026f946670bce57a57acb284"
+  },
+  "originalFunctionSHA256": "e68d66be95f17812841b9cb27ba022ecc082db9772f3748f52a712e631007b8b",
+  "baseSQLSHA256": "1bf6999361a5e4fc006312a2e5238ee5720e95a925ef1d59c6885d9ff54ecc13",
+  "endpointAdditions": "\nINSERT INTO process VALUES (6, 106, 'final-instant', 2000, 2000);\nINSERT INTO thread VALUES (6, 106, 'final-instant', 2000, 2000, 6);\nINSERT INTO sched_slice VALUES (5, 2000, 0, 4, 6, 6);\nINSERT INTO thread_state VALUES (4, 2000, 0, 4, 6, 'R');\nINSERT INTO callstack VALUES (4, 2000, 0, 6, 'final-instant');\nINSERT INTO measure VALUES (2000, 2, 1);\n",
+  "note": "Temporal base SQL extracted literally from original test fixture; only owned final-instant rows added. Empty fixture uses original required event-table DDL and a valid 1 ns trace; no expected count algorithm. Real original preparer and validated repository open.",
+  "zeroDurationRejected": {
+    "input": "verification/zero-duration-rejected-input.json",
+    "childExitCode": -5,
+    "typedCode": "TRACE_DATABASE_INVALID",
+    "stage": "validating",
+    "reason": "trace_range must contain exactly one row with end_ts > start_ts",
+    "countedAsOneControl": true
+  },
+  "repair": "Same owned controlled DB inode: UPDATE trace_range SET end_ts=1001 through original TraceDatabase, then original preparer. Temporal DB prepared again after initial output was lost to sibling validation failure. No query observation yet."
+}

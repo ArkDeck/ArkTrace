@@ -1,0 +1,42 @@
+{
+  "swift": {
+    "command": [
+      "swift",
+      "--version"
+    ],
+    "exitCode": 0,
+    "output": "swift-driver version: 1.168.6 Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0\n"
+  },
+  "xcode": {
+    "command": [
+      "xcodebuild",
+      "-version"
+    ],
+    "exitCode": 0,
+    "output": "Xcode 27.0\nBuild version 27A266a\n"
+  },
+  "sdk": {
+    "command": [
+      "xcrun",
+      "--show-sdk-path"
+    ],
+    "exitCode": 0,
+    "output": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk\n"
+  },
+  "os": {
+    "command": [
+      "sw_vers"
+    ],
+    "exitCode": 0,
+    "output": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428\n"
+  },
+  "machO": {
+    "command": [
+      "vtool",
+      "-show-build",
+      "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/SummaryOracle"
+    ],
+    "exitCode": 0,
+    "output": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/build/out/Products/Debug/SummaryOracle:\nLoad command 11\n      cmd LC_BUILD_VERSION\n  cmdsize 32\n platform MACOS\n    minos 26.0\n      sdk 26.0\n   ntools 1\n     tool LD\n  version 27037.1\n"
+  }
+}

@@ -1,0 +1,1 @@
+Swift/ErrorType.swift:254: Fatal error: Error raised at top level: ArkTraceCore.ArkTraceError(code: ArkTraceCore.ArkTraceError.Code.traceDatabaseInvalid, stage: ArkTraceCore.ArkTraceError.Stage.validating, message: "trace_range must contain exactly one row with end_ts > start_ts", retryable: false, details: ["rowCount": "1"])

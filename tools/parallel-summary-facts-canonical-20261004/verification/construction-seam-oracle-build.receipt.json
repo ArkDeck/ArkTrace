@@ -1,0 +1,29 @@
+{
+  "command": [
+    "sh",
+    "scripts/run-swiftpm.sh",
+    "build",
+    "--disable-sandbox",
+    "--config-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/configuration",
+    "--security-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner/security",
+    "--product",
+    "SummaryOracle",
+    "-Xswiftc",
+    "-warnings-as-errors"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/oracle-source",
+  "exitCode": 1,
+  "elapsedSeconds": 2.8918427499993413,
+  "log": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-summary-facts-canonical-20261004/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log",
+    "byteCount": 17985,
+    "sha256": "2a4325511e91a98d848aa8515b3fe81380236323ab2ba6a1d1efe8076d995eb8"
+  },
+  "warnings": [],
+  "environment": {
+    "MACOSX_DEPLOYMENT_TARGET": "26.0",
+    "ARKTRACE_SWIFTPM_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-summary-facts-canonical-swiftpm/runner"
+  }
+}

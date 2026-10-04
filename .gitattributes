@@ -11,6 +11,11 @@
 *.patch -text
 *.log -text
 
+# Original Swift construction SQL/logs retain their receipt-bound whitespace.
+/tools/parallel-summary-facts-canonical-20261004/fixtures/*.sql -text whitespace=-blank-at-eol,-blank-at-eof
+/rust/crates/arktrace-store/tests/fixtures/summary-*.sql -text whitespace=-blank-at-eol,-blank-at-eof
+/tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log whitespace=-blank-at-eol
+
 ThirdParty/TraceStreamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
 ThirdParty/TraceStreamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
 
