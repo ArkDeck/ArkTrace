@@ -1,5 +1,6 @@
 //! Private owner transactions. Format 2 retains legacy prototype evidence;
-//! format 3 binds ephemeral key/lease identity before publication or disposal.
+//! format 3 binds ephemeral key/lease identity before publication or disposal;
+//! format 4 binds persistent cache keys, stable entry leases and quarantine.
 //! Swift/ArkDeck format-1 writers must not use this isolated namespace.
 use super::{
     FileIdentity, HeldDirectory, HeldFile, Lease, LeaseMode, component, directory::names_bounded,
@@ -7,6 +8,7 @@ use super::{
 };
 use crate::{CancellationToken, HostError, HostOperation, IoBudget};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{
     ffi::{CString, OsStr},
     os::fd::AsRawFd,
@@ -100,6 +102,7 @@ enum State {
     Building,
     Publishing,
     Ready,
+    Quarantined,
     Removing,
     Removed,
 }
@@ -113,6 +116,45 @@ struct Evidence {
     relative_path: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     ephemeral: Option<EphemeralBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    cache: Option<CacheBinding>,
+}
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CacheBinding {
+    key_identifier: String,
+    entry_relative_path: String,
+    lease_device: u64,
+    lease_inode: u64,
+}
+fn digest_name(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+}
+impl CacheBinding {
+    fn validate(&self) -> Result<(), HostError> {
+        let parts = self.entry_relative_path.split('/').collect::<Vec<_>>();
+        if parts.len() != 2
+            || !parts.iter().all(|part| digest_name(part))
+            || self.lease_inode == 0
+            || self.key_identifier
+                != format!(
+                    "{:x}",
+                    Sha256::digest(format!("{}:{}", parts[0], parts[1]).as_bytes())
+                )
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        Ok(())
+    }
+    fn lease_identity(&self) -> FileIdentity {
+        FileIdentity {
+            device: self.lease_device,
+            inode: self.lease_inode,
+        }
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -147,11 +189,19 @@ impl Evidence {
     fn decode(bytes: &[u8]) -> Result<Self, HostError> {
         let shape: serde_json::Value =
             serde_json::from_slice(bytes).map_err(|_| HostError::InvalidEvidence)?;
-        if (shape.get("formatVersion").and_then(|v| v.as_u64()) == Some(2)
-            && shape.get("ephemeral").is_some())
-            || (shape.get("formatVersion").and_then(|v| v.as_u64()) == Some(3)
-                && !shape.get("ephemeral").is_some_and(|v| v.is_object()))
-        {
+        let version = shape.get("formatVersion").and_then(|v| v.as_u64());
+        if match version {
+            Some(2) => shape.get("ephemeral").is_some() || shape.get("cache").is_some(),
+            Some(3) => {
+                !shape.get("ephemeral").is_some_and(|v| v.is_object())
+                    || shape.get("cache").is_some()
+            }
+            Some(4) => {
+                !shape.get("cache").is_some_and(|v| v.is_object())
+                    || shape.get("ephemeral").is_some()
+            }
+            _ => true,
+        } {
             return Err(HostError::InvalidEvidence);
         }
         let evidence: Self =
@@ -167,9 +217,18 @@ impl Evidence {
     fn validate(&self) -> Result<(), HostError> {
         if !((self.format_version == 2
             && self.ephemeral.is_none()
-            && self.state != State::Publishing)
+            && self.cache.is_none()
+            && !matches!(self.state, State::Publishing | State::Quarantined))
             || (self.format_version == 3
                 && self.ephemeral.is_some()
+                && self.cache.is_none()
+                && !matches!(
+                    self.state,
+                    State::Creating | State::Session | State::Quarantined
+                ))
+            || (self.format_version == 4
+                && self.cache.is_some()
+                && self.ephemeral.is_none()
                 && !matches!(self.state, State::Creating | State::Session)))
             || (self.device.is_some() != self.inode.is_some())
             || (self.state == State::Creating) != self.identity().is_none()
@@ -184,6 +243,24 @@ impl Evidence {
                 && self.relative_path != format!(".ready/{}", binding.session_identifier)
             {
                 return Err(HostError::InvalidEvidence);
+            }
+        }
+        if let Some(binding) = &self.cache {
+            binding.validate()?;
+            if matches!(self.state, State::Publishing | State::Ready)
+                && self.relative_path != binding.entry_relative_path
+            {
+                return Err(HostError::InvalidEvidence);
+            }
+            if self.state == State::Quarantined {
+                let names = relative_names(&self.relative_path)?;
+                if names.len() != 2 || names[0].to_bytes() != b".corrupt" {
+                    return Err(HostError::InvalidEvidence);
+                }
+                owner_name(
+                    std::str::from_utf8(names[1].to_bytes())
+                        .map_err(|_| HostError::InvalidEvidence)?,
+                )?;
             }
         }
         Ok(())
@@ -231,7 +308,25 @@ impl PublishedOwnerEvidence {
         self.evidence
             .ephemeral
             .as_ref()
-            .map(|binding| binding.key_identifier.as_str())
+            .map(|b| b.key_identifier.as_str())
+            .or_else(|| {
+                self.evidence
+                    .cache
+                    .as_ref()
+                    .map(|b| b.key_identifier.as_str())
+            })
+    }
+    pub fn is_cached(&self) -> bool {
+        self.evidence.cache.is_some()
+    }
+    pub fn is_ready(&self) -> bool {
+        self.evidence.state == State::Ready
+    }
+    pub fn is_publishing(&self) -> bool {
+        self.evidence.state == State::Publishing
+    }
+    pub fn is_quarantined(&self) -> bool {
+        self.evidence.state == State::Quarantined
     }
     pub fn requires_metadata(&self) -> bool {
         self.evidence.state == State::Ready
@@ -367,7 +462,323 @@ fn rename(
     Ok(())
 }
 
+fn move_owned_directory(
+    directory: &HeldDirectory,
+    destination: &HeldDirectory,
+    name: &str,
+    budget: &IoBudget,
+) -> Result<HeldDirectory, HostError> {
+    budget.check()?;
+    directory.revalidate()?;
+    destination.revalidate()?;
+    let parent = HeldDirectory(directory.0.parent.clone().ok_or(HostError::InvalidPath)?);
+    parent.revalidate()?;
+    if !directory.0.private
+        || !destination.0.private
+        || !parent.0.private
+        || directory.identity().device != destination.identity().device
+    {
+        return Err(HostError::InvalidEvidence);
+    }
+    let target = component(OsStr::new(name))?;
+    // SAFETY: held private parents, single components, atomic no-replace move.
+    if unsafe {
+        libc::renameatx_np(
+            parent.0.file.as_raw_fd(),
+            directory.0.name.as_ptr(),
+            destination.0.file.as_raw_fd(),
+            target.as_ptr(),
+            libc::RENAME_EXCL,
+        )
+    } != 0
+    {
+        return Err(os_error(HostOperation::Rename));
+    }
+    let moved = destination.open_child(&target, true, true)?;
+    if moved.identity() != directory.identity() {
+        // Preserve a raced replacement by moving it back only into a vacant
+        // source name; never unlink it or overwrite another replacement.
+        // SAFETY: held private parents and exact components, no overwrite.
+        if unsafe {
+            libc::renameatx_np(
+                destination.0.file.as_raw_fd(),
+                target.as_ptr(),
+                parent.0.file.as_raw_fd(),
+                directory.0.name.as_ptr(),
+                libc::RENAME_EXCL,
+            )
+        } != 0
+        {
+            return Err(HostError::CleanupFailed);
+        }
+        parent.sync()?;
+        destination.sync()?;
+        return Err(HostError::IdentityMismatch);
+    }
+    parent.sync()?;
+    destination.sync()?;
+    moved.revalidate()?;
+    Ok(moved)
+}
+
+impl HeldDirectory {
+    /// Identity-checked atomic replacement of a private readonly document.
+    /// Neither a raced target nor an unrelated temporary file is deleted.
+    pub fn replace_readonly(
+        &self,
+        old: &HeldFile,
+        bytes: &[u8],
+        budget: &IoBudget,
+    ) -> Result<HeldFile, HostError> {
+        if old.parent.identity() != self.identity()
+            || !old.private
+            || old.initial.mode & 0o7777 != 0o400
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        budget.check()?;
+        old.verify()?;
+        let temporary = format!(".arktrace-atomic-{}.tmp", id());
+        let candidate = self.write_new_readonly(&temporary, bytes, budget)?;
+        let result = (|| {
+            candidate.verify()?;
+            old.verify()?;
+            budget.check()?;
+            rename(self, &candidate.name, &old.name, libc::RENAME_SWAP)?;
+            let current = stat_child(&self.0.file, &old.name)?;
+            let displaced = stat_child(&self.0.file, &candidate.name)?;
+            if stat_identity(&current) != candidate.initial.identity
+                || stat_identity(&displaced) != old.initial.identity
+            {
+                if stat_identity(&current) == candidate.initial.identity {
+                    rename(self, &candidate.name, &old.name, libc::RENAME_SWAP)
+                        .map_err(|_| HostError::CleanupFailed)?;
+                }
+                return Err(HostError::CleanupFailed);
+            }
+            self.sync()?;
+            self.remove_owned_component(&candidate.name, old.initial.identity)?;
+            self.sync()?;
+            let new = self.open_file_component(old.name.clone(), true)?;
+            if new.initial.identity != candidate.initial.identity {
+                return Err(HostError::IdentityMismatch);
+            }
+            Ok(new)
+        })();
+        if result.is_err() {
+            match stat_child(&self.0.file, &candidate.name) {
+                Ok(info) if stat_identity(&info) == candidate.initial.identity => {
+                    self.remove_owned_component(&candidate.name, candidate.initial.identity)?;
+                    self.sync()?;
+                }
+                Ok(info)
+                    if stat_identity(&info) == old.initial.identity
+                        && stat_identity(&stat_child(&self.0.file, &old.name)?)
+                            == candidate.initial.identity =>
+                {
+                    self.remove_owned_component(&candidate.name, old.initial.identity)?;
+                    self.sync()?;
+                }
+                Err(HostError::NotFound) => (),
+                _ => return Err(HostError::CleanupFailed),
+            }
+        }
+        result
+    }
+}
+
 impl OwnerStore {
+    fn cache_authority(
+        &self,
+        evidence: &Evidence,
+        key: &Lease,
+        entry: &Lease,
+        exclusive: bool,
+    ) -> Result<(), HostError> {
+        let binding = evidence.cache.as_ref().ok_or(HostError::InvalidEvidence)?;
+        binding.validate()?;
+        let locks = self.recovery_root.open_private_child(".locks")?;
+        let leases = self.recovery_root.open_private_child(".leases")?;
+        if key.mode != LeaseMode::Exclusive
+            || (exclusive && entry.mode != LeaseMode::Exclusive)
+            || key.parent.identity() != locks.identity()
+            || entry.parent.identity() != leases.identity()
+            || key.name.to_bytes() != format!("{}.lock", binding.key_identifier).as_bytes()
+            || entry.name.to_bytes() != format!("{}.lease", binding.key_identifier).as_bytes()
+            || entry.identity != binding.lease_identity()
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        key.revalidate()?;
+        entry.revalidate()
+    }
+
+    /// Read-only cache discovery under the fixed key and active entry lease.
+    /// A record copied from another root or replaced since discovery is rejected.
+    pub fn validate_cached_location(
+        &self,
+        published: &PublishedOwnerEvidence,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<Option<HeldDirectory>, HostError> {
+        if published.root_identity != self.recovery_root.identity() {
+            return Err(HostError::InvalidEvidence);
+        }
+        let (_, current) = self
+            .read(&published.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        if current != published.evidence {
+            return Err(HostError::InvalidEvidence);
+        }
+        self.cache_authority(&current, key, entry, false)?;
+        self.locate(&current, budget)
+    }
+
+    fn cached_owned(
+        &self,
+        published: &PublishedOwnerEvidence,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<OwnedDirectory, HostError> {
+        self.cache_authority(&published.evidence, key, entry, true)?;
+        let directory = self
+            .validate_cached_location(published, key, entry, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        let lease = Lease::try_acquire(
+            &self.owners,
+            &format!("{}.lock", published.identifier),
+            LeaseMode::Exclusive,
+            false,
+        )?
+        .ok_or(HostError::Busy)?;
+        let (_, current) = self
+            .read(&published.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        if current != published.evidence {
+            return Err(HostError::InvalidEvidence);
+        }
+        Ok(OwnedDirectory {
+            store: self.clone(),
+            identifier: published.identifier.clone(),
+            directory,
+            lease,
+            removed: false,
+        })
+    }
+
+    /// Complete a prior durable Publishing intent only after Engine has checked
+    /// the Ready metadata/schema/index handoff under exclusive entry authority.
+    pub fn complete_cached_publication(
+        &self,
+        published: &PublishedOwnerEvidence,
+        directory: &HeldDirectory,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<(), HostError> {
+        if !matches!(published.evidence.state, State::Publishing | State::Ready)
+            || published.evidence.identity() != Some(directory.identity())
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        let mut owned = self.cached_owned(published, key, entry, budget)?;
+        owned.record_published_location(directory, budget)
+    }
+
+    /// Preserve corrupt cache bytes, including user sidecars. Intent is durable
+    /// before rename and can be resumed after a crash without guessing by name.
+    pub fn quarantine_cached(
+        &self,
+        published: &PublishedOwnerEvidence,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<(), HostError> {
+        let mut owned = self.cached_owned(published, key, entry, budget)?;
+        let (record, mut evidence) = self
+            .read(&owned.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        if !matches!(
+            evidence.state,
+            State::Ready | State::Publishing | State::Quarantined
+        ) {
+            return Err(HostError::InvalidEvidence);
+        }
+        let corrupt = self.recovery_root.ensure_private_child(".corrupt")?;
+        let target = format!(".corrupt/{}", owned.identifier);
+        if relative(&self.recovery_root, &owned.directory)? == target {
+            return Ok(());
+        }
+        evidence.state = State::Quarantined;
+        evidence.relative_path = target;
+        self.write(
+            &owned.identifier,
+            &owned.lease,
+            &evidence,
+            Some(&record),
+            budget,
+        )?;
+        owned.directory =
+            move_owned_directory(&owned.directory, &corrupt, &owned.identifier, budget)?;
+        Ok(())
+    }
+
+    /// Dispose a bound abandoned build, never a Ready or quarantined cache.
+    /// Stable key/entry lease names are retained after payload disposal.
+    pub fn recover_cached_build(
+        &self,
+        published: &PublishedOwnerEvidence,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<OwnerRecoveryOutcome, HostError> {
+        if published.root_identity != self.recovery_root.identity() {
+            return Err(HostError::InvalidEvidence);
+        }
+        self.cache_authority(&published.evidence, key, entry, true)?;
+        if !matches!(
+            published.evidence.state,
+            State::Building | State::Removing | State::Removed | State::Publishing
+        ) {
+            return Ok(OwnerRecoveryOutcome::PublishedNeedsEntryLease);
+        }
+        if published.evidence.state == State::Removed
+            && self.locate(&published.evidence, budget)?.is_none()
+        {
+            let lease = Lease::try_acquire(
+                &self.owners,
+                &format!("{}.lock", published.identifier),
+                LeaseMode::Exclusive,
+                false,
+            )?
+            .ok_or(HostError::Busy)?;
+            let (_, current) = self
+                .read(&published.identifier, budget)?
+                .ok_or(HostError::InvalidEvidence)?;
+            if current != published.evidence {
+                return Err(HostError::InvalidEvidence);
+            }
+            self.remove_artifacts(&published.identifier, &lease, budget)?;
+            return Ok(OwnerRecoveryOutcome::Removed);
+        }
+        let mut owned = self.cached_owned(published, key, entry, budget)?;
+        if published.evidence.state == State::Publishing
+            && relative(&self.recovery_root, &owned.directory)?
+                == published
+                    .evidence
+                    .cache
+                    .as_ref()
+                    .ok_or(HostError::InvalidEvidence)?
+                    .entry_relative_path
+        {
+            return Ok(OwnerRecoveryOutcome::PublishedNeedsEntryLease);
+        }
+        owned.cleanup_cached(key, entry, budget)?;
+        Ok(OwnerRecoveryOutcome::Removed)
+    }
+
     /// Both directories must already be held/private and share this namespace.
     /// Only a missing .owners child is created; existing ACL/modes are not fixed.
     pub fn open(parent: &HeldDirectory, recovery_root: &HeldDirectory) -> Result<Self, HostError> {
@@ -429,6 +840,7 @@ impl OwnerStore {
             inode: None,
             relative_path,
             ephemeral: None,
+            cache: None,
         };
         self.write(&identifier, &lease, &creating, None, budget)?;
         #[cfg(feature = "process-fixtures")]
@@ -686,7 +1098,7 @@ impl OwnerStore {
             serde_json::from_slice(&bytes).map_err(|_| HostError::InvalidEvidence)?;
         if !matches!(
             json.get("formatVersion").and_then(|v| v.as_u64()),
-            Some(2 | 3)
+            Some(2..=4)
         ) {
             return Ok(OwnerRecoveryOutcome::UnsupportedVersion);
         }
@@ -695,7 +1107,10 @@ impl OwnerStore {
         if evidence.state == State::Creating {
             return Ok(OwnerRecoveryOutcome::CreatingUnbound);
         }
-        if evidence.state == State::Ready || evidence.ephemeral.is_some() {
+        if evidence.state == State::Ready
+            || evidence.ephemeral.is_some()
+            || evidence.cache.is_some()
+        {
             return Ok(OwnerRecoveryOutcome::PublishedNeedsEntryLease);
         }
         if evidence.state == State::Removed {
@@ -743,15 +1158,14 @@ impl OwnerStore {
         let Some((_, evidence)) = self.read(identifier, budget)? else {
             return Ok(None);
         };
-        Ok(
-            (evidence.state == State::Ready || evidence.ephemeral.is_some()).then(|| {
-                PublishedOwnerEvidence {
-                    identifier: identifier.into(),
-                    evidence,
-                    root_identity: self.recovery_root.identity(),
-                }
-            }),
-        )
+        Ok((evidence.state == State::Ready
+            || evidence.ephemeral.is_some()
+            || evidence.cache.is_some())
+        .then(|| PublishedOwnerEvidence {
+            identifier: identifier.into(),
+            evidence,
+            root_identity: self.recovery_root.identity(),
+        }))
     }
 
     /// A bounded identity lookup for preliminary metadata discovery. This never
@@ -901,6 +1315,121 @@ impl OwnedDirectory {
     pub fn directory(&self) -> &HeldDirectory {
         &self.directory
     }
+    pub fn bind_cached(
+        &mut self,
+        key: &Lease,
+        entry: &Lease,
+        entry_relative_path: &str,
+        budget: &IoBudget,
+    ) -> Result<(), HostError> {
+        let key_identifier = key
+            .name
+            .to_str()
+            .map_err(|_| HostError::InvalidEvidence)?
+            .strip_suffix(".lock")
+            .ok_or(HostError::InvalidEvidence)?
+            .to_owned();
+        let binding = CacheBinding {
+            key_identifier,
+            entry_relative_path: entry_relative_path.into(),
+            lease_device: entry.identity.device,
+            lease_inode: entry.identity.inode,
+        };
+        binding.validate()?;
+        let (record, mut evidence) = self
+            .store
+            .read(&self.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        if self.removed
+            || evidence.state != State::Building
+            || evidence.identity() != Some(self.directory.identity())
+            || evidence.ephemeral.is_some()
+            || evidence.cache.is_some()
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        evidence.format_version = 4;
+        evidence.cache = Some(binding);
+        self.store.cache_authority(&evidence, key, entry, true)?;
+        self.store.write(
+            &self.identifier,
+            &self.lease,
+            &evidence,
+            Some(&record),
+            budget,
+        )
+    }
+    pub fn prepare_cached_publication(
+        &mut self,
+        destination: &HeldDirectory,
+        name: &str,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<(), HostError> {
+        let (record, mut evidence) = self
+            .store
+            .read(&self.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        self.store.cache_authority(&evidence, key, entry, true)?;
+        if self.removed
+            || evidence.state != State::Building
+            || evidence.identity() != Some(self.directory.identity())
+            || format!(
+                "{}/{}",
+                relative(&self.store.recovery_root, destination)?,
+                name
+            ) != evidence
+                .cache
+                .as_ref()
+                .ok_or(HostError::InvalidEvidence)?
+                .entry_relative_path
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        evidence.state = State::Publishing;
+        evidence.relative_path = evidence
+            .cache
+            .as_ref()
+            .ok_or(HostError::InvalidEvidence)?
+            .entry_relative_path
+            .clone();
+        self.store.write(
+            &self.identifier,
+            &self.lease,
+            &evidence,
+            Some(&record),
+            budget,
+        )
+    }
+    pub fn cleanup_cached(
+        &mut self,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<(), HostError> {
+        if self.removed {
+            return Ok(());
+        }
+        let (_, evidence) = self
+            .store
+            .read(&self.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        if evidence.cache.is_none() && evidence.ephemeral.is_none() {
+            // Binding may have failed on cancellation after generic creation.
+            // The live owner still authorizes disposal of its unbound staging.
+            return self.cleanup(budget);
+        }
+        self.store.cache_authority(&evidence, key, entry, true)?;
+        if evidence.identity() != Some(self.directory.identity()) {
+            return Err(HostError::InvalidEvidence);
+        }
+        self.directory = self
+            .store
+            .locate(&evidence, budget)?
+            .ok_or(HostError::CleanupFailed)?;
+        self.cleanup_live(budget)
+    }
     /// Persist the actual fresh lease identity and key before any publication.
     /// This upgrades only the bound entry record; old format-2 records remain.
     pub fn bind_ephemeral(
@@ -949,6 +1478,7 @@ impl OwnedDirectory {
         if evidence.state != State::Building
             || evidence.identity() != Some(self.directory.identity())
             || evidence.ephemeral.is_some()
+            || evidence.cache.is_some()
         {
             return Err(HostError::InvalidEvidence);
         }
@@ -1082,6 +1612,9 @@ impl OwnedDirectory {
             .store
             .read(&self.identifier, budget)?
             .ok_or(HostError::InvalidEvidence)?;
+        if evidence.cache.is_some() {
+            return Err(HostError::InvalidEvidence);
+        }
         if evidence.identity() != Some(self.directory.identity()) {
             return Err(HostError::InvalidEvidence);
         }
@@ -1147,6 +1680,7 @@ impl OwnedDirectory {
             inode: Some(identity.inode),
             relative_path: relative(&self.store.recovery_root, &self.directory)?,
             ephemeral: previous.ephemeral,
+            cache: previous.cache,
         };
         self.store.write(
             &self.identifier,

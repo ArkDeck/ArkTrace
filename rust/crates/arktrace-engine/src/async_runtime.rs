@@ -1,6 +1,6 @@
 //! Nonblocking host front end; all parser, SQLite and cleanup work stays on
-//! a fixed set of owner threads. This is the actual no-cache Engine path,
-//! not an SDK ABI or persistent-cache implementation.
+//! a fixed set of owner threads. Fixed configuration selects persistent or
+//! ephemeral Ready; the transport never grants a request storage authority.
 use crate::{
     EngineBudget, EngineError, EngineFailure, EngineProgress, EngineStage, HandleError,
     NoCacheSession, OwnedResult, ParserTools, ReadPoolLimits, RuntimeHandle, SourceFormat,
@@ -165,6 +165,8 @@ impl RuntimeLimits {
 #[derive(Clone)]
 pub struct RuntimeConfiguration {
     pub namespace: PathBuf,
+    /// Isolated persistent native root. None keeps per-session ephemeral storage.
+    pub cache_directory: Option<PathBuf>,
     pub helper: PathBuf,
     pub parser: PathBuf,
     pub helper_sha256: String,
@@ -187,6 +189,7 @@ impl RuntimeConfiguration {
     ) -> Self {
         Self {
             namespace,
+            cache_directory: None,
             helper,
             parser,
             helper_sha256,
@@ -214,6 +217,12 @@ impl RuntimeConfiguration {
             .map_err(|_| RuntimeFailure::InvalidRequest)?;
         for path in [&self.namespace, &self.helper, &self.parser] {
             validate_path(path)?;
+        }
+        if let Some(cache) = &self.cache_directory {
+            validate_path(cache)?;
+            if cache.starts_with(&self.namespace) || self.namespace.starts_with(cache) {
+                return Err(RuntimeFailure::InvalidRequest);
+            }
         }
         if self.helper_sha256.len() != 64
             || !self
@@ -850,6 +859,7 @@ struct Tools {
     parser: VerifiedExecutable,
     identity: TraceParserIdentity,
     owners: OwnerStore,
+    cache_root: Option<HeldDirectory>,
 }
 fn engine_failure(stage: EngineStage, failure: EngineFailure) -> RuntimeFailure {
     RuntimeFailure::Engine(EngineError { stage, failure })
@@ -893,6 +903,12 @@ fn load_tools(
         )?,
         identity: config.parser_identity.clone(),
         owners,
+        cache_root: config
+            .cache_directory
+            .as_ref()
+            .map(|p| HeldDirectory::open_private(p))
+            .transpose()
+            .map_err(|e| engine_failure(EngineStage::CacheLookup, EngineFailure::Host(e)))?,
     })
 }
 fn background_registry(shared: &Shared) -> MutexGuard<'_, Registry> {
@@ -1247,19 +1263,30 @@ fn process(
             let actor = sessions
                 .get_mut(&command.session)
                 .ok_or(RuntimeFailure::WorkerPanicked)?;
+            let parser_tools = ParserTools {
+                helper: &tools.helper,
+                parser: &tools.parser,
+                identity: tools.identity.clone(),
+            };
             actor.session = Some(
-                open_no_cache(
-                    &source,
-                    *format,
-                    &ParserTools {
-                        helper: &tools.helper,
-                        parser: &tools.parser,
-                        identity: tools.identity.clone(),
-                    },
-                    actor.scope.directory(),
-                    &command.budget,
-                    |progress| report(shared, command, progress),
-                )
+                match &tools.cache_root {
+                    Some(cache) => crate::open_cached(
+                        &source,
+                        *format,
+                        &parser_tools,
+                        cache,
+                        &command.budget,
+                        |progress| report(shared, command, progress),
+                    ),
+                    None => open_no_cache(
+                        &source,
+                        *format,
+                        &parser_tools,
+                        actor.scope.directory(),
+                        &command.budget,
+                        |progress| report(shared, command, progress),
+                    ),
+                }
                 .map_err(RuntimeFailure::Engine)?,
             );
             observe(config, WorkerBoundary::Opened);
@@ -1267,7 +1294,7 @@ fn process(
                 .session
                 .as_ref()
                 .ok_or(RuntimeFailure::WorkerPanicked)?;
-            response(&serde_json::json!({"metadata":session.metadata(),"inspection":session.inspection()}),command,shared,config).map(Some)
+            response(&serde_json::json!({"metadata":session.metadata(),"inspection":session.inspection(),"cacheHit":session.cache_hit()}),command,shared,config).map(Some)
         }
         Operation::Query(q) => {
             if !matches!(background_registry(shared).table.get(command.session),Ok(Record::Session(s)) if s.status.state==SessionState::Ready)

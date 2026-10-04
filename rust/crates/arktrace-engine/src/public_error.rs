@@ -12,7 +12,7 @@ impl EngineError {
             EngineStage::Indexing => Stage::Indexing,
             EngineStage::Validating => Stage::Validating,
             EngineStage::Publishing | EngineStage::Closing => Stage::OpeningDatabase,
-            EngineStage::Recovering => Stage::CacheLookup,
+            EngineStage::Recovering | EngineStage::CacheLookup => Stage::CacheLookup,
             EngineStage::Querying => Stage::Querying,
             EngineStage::Analyzing => Stage::Analyzing,
         };
@@ -28,6 +28,7 @@ impl EngineError {
             _ if self.stage == EngineStage::SourceSnapshot => make(Code::TraceFileUnreadable),
             _ if self.stage == EngineStage::Querying => make(Code::QueryFailed),
             _ if self.stage == EngineStage::Analyzing => make(Code::InternalError),
+            _ if self.stage == EngineStage::CacheLookup => make(Code::TraceCacheCorrupt),
             _ => make(Code::TraceParseFailed),
         };
         match self.failure {
@@ -47,6 +48,9 @@ impl EngineError {
             EngineFailure::CleanupFailed => cleanup(),
             EngineFailure::Host(error) => host(error),
             EngineFailure::InvalidBudget => make(Code::InvalidArgument),
+            EngineFailure::CacheCorrupt
+            | EngineFailure::CacheUnsupported
+            | EngineFailure::CacheBusy => make(Code::TraceCacheCorrupt),
             EngineFailure::InvalidIdentity | EngineFailure::ParserVersionMismatch => {
                 make(Code::TraceStreamerIdentityMismatch)
             }

@@ -1317,6 +1317,22 @@ impl Lease {
         self.mode
     }
 
+    /// Convert the held exclusive lease without releasing its file identity.
+    /// Persistent Ready readers share the same stable lease file.
+    pub fn downgrade_shared(&mut self) -> Result<(), HostError> {
+        self.revalidate()?;
+        if self.mode == LeaseMode::Shared {
+            return Ok(());
+        }
+        // SAFETY: live owned descriptor; nonblocking conversion cannot wedge
+        // an Engine worker behind an unrelated locker.
+        if unsafe { libc::flock(self.file.as_raw_fd(), libc::LOCK_SH | libc::LOCK_NB) } != 0 {
+            return Err(os_error(HostOperation::Lock));
+        }
+        self.mode = LeaseMode::Shared;
+        self.revalidate()
+    }
+
     pub fn revalidate(&self) -> Result<(), HostError> {
         self.parent.revalidate()?;
         let linked = stat_child(&self.parent.0.file, &self.name)?;

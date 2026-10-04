@@ -51,6 +51,7 @@ final class OpenViewTests: XCTestCase {
         let storage = pool(), staging = pool()
         var view: RustOpenView? = try await decode(openingFixture(), storage: storage, staging: staging)
         XCTAssertEqual(view!.sessionIdentity, RustSessionIdentity(engine: 1, session: 7))
+        XCTAssertFalse(view!.cacheHit)
         XCTAssertEqual(view!.metadata.sessionIdentity, view!.sessionIdentity)
         XCTAssertEqual(view!.inspection.traceStartTs, .min)
         XCTAssertEqual(view!.inspection.traceEndTs, .max)
@@ -70,6 +71,17 @@ final class OpenViewTests: XCTestCase {
         XCTAssertEqual(staging.retainedBytes, 0)
         XCTAssertEqual(storage.retainedBytes, view!.retainedStorageBytes)
         view = nil; XCTAssertEqual(storage.retainedBytes, 0)
+    }
+
+    func testCacheHitIsTypedAndRetainedWithOpeningOwner() async throws {
+        let original = try await openingFixture()
+        let data = try mutate(original, path: ["body", "cacheHit"], value: true)
+        let storage = pool(), staging = pool()
+        let view = try await decode(data, storage: storage, staging: staging)
+        XCTAssertTrue(view.cacheHit)
+        for invalid: Any in [NSNull(), 1, "true"] {
+            await assertRejected(try mutate(original, path: ["body", "cacheHit"], value: invalid))
+        }
     }
 
     func testFacetsQualityAndTextHoldOneCreditAndPreserveDuplicateMachineIssues() async throws {

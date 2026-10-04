@@ -24,11 +24,14 @@ use std::{
     sync::Arc,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+mod persistent;
 mod viewer;
+pub use persistent::open_cached;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 pub enum EngineStage {
     SourceSnapshot,
+    CacheLookup,
     ParserIdentity,
     Parsing,
     Indexing,
@@ -44,6 +47,9 @@ pub enum EngineFailure {
     InvalidBudget,
     InvalidIdentity,
     InvalidMetadata,
+    CacheCorrupt,
+    CacheUnsupported,
+    CacheBusy,
     ParserVersionMismatch,
     ParserExit {
         exit_code: Option<i32>,
@@ -208,6 +214,7 @@ impl SourceFormat {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub enum EngineProgress {
     SourceSnapshot,
+    CacheLookup,
     ParserIdentity,
     Parsing,
     Indexing(IndexProgress),
@@ -217,12 +224,45 @@ pub enum EngineProgress {
     Ready,
 }
 
-/// Ephemeral Ready only; persistent cache lookup/eviction is a separate API.
-/// Drop releases handles and retains owner proof. Explicit close performs IO.
+enum SessionStorage {
+    Ephemeral {
+        owner: OwnedDirectory,
+        lease: EphemeralLease,
+    },
+    Cached {
+        directory: HeldDirectory,
+        lease: Lease,
+    },
+}
+impl SessionStorage {
+    fn revalidate(&self) -> Result<(), HostError> {
+        match self {
+            Self::Ephemeral { lease, .. } => lease.revalidate(),
+            Self::Cached { directory, lease } => {
+                directory.revalidate()?;
+                lease.revalidate()
+            }
+        }
+    }
+}
+enum OpeningLease {
+    Ephemeral(EphemeralLease),
+    Cached(Lease),
+}
+impl OpeningLease {
+    fn revalidate(&self) -> Result<(), HostError> {
+        match self {
+            Self::Ephemeral(v) => v.revalidate(),
+            Self::Cached(v) => v.revalidate(),
+        }
+    }
+}
+/// Worker-owned immutable Ready query authority. Close releases persistent
+/// active leases; ephemeral close additionally disposes its owned publication.
 #[must_use = "close the session explicitly; Drop retains proof for recovery"]
-pub struct NoCacheSession {
-    owner: OwnedDirectory,
-    lease: EphemeralLease,
+pub struct EngineSession {
+    storage: SessionStorage,
+    cache_hit: bool,
     database: Option<Arc<HeldFile>>,
     reader: Option<StoreReader>,
     metadata_file: Option<HeldFile>,
@@ -232,7 +272,9 @@ pub struct NoCacheSession {
     query_worker_failed: Cell<bool>,
     viewer: RefCell<arktrace_viewer::ViewportLoader>,
 }
-impl NoCacheSession {
+/// Compatibility name for existing no-cache consumers.
+pub type NoCacheSession = EngineSession;
+impl EngineSession {
     /// Worker-owned bounded Store-to-Viewer detail operation. Focused-event
     /// inclusion, snapshot planning and cache/generation stay separate.
     pub fn viewer_details(
@@ -305,6 +347,9 @@ impl NoCacheSession {
         }
         result
     }
+    pub fn cache_hit(&self) -> bool {
+        self.cache_hit
+    }
     pub fn metadata(&self) -> &CacheMetadata {
         &self.metadata
     }
@@ -318,7 +363,7 @@ impl NoCacheSession {
                 EngineFailure::Store(StoreError::WorkerFailed),
             ));
         }
-        self.lease
+        self.storage
             .revalidate()
             .map_err(|e| host(EngineStage::Validating, e))?;
         let reader = self
@@ -334,11 +379,10 @@ impl NoCacheSession {
                 EngineFailure::InvalidMetadata,
             ));
         }
-        self.metadata_file
-            .as_ref()
-            .ok_or_else(|| failure(EngineStage::Validating, EngineFailure::InvalidMetadata))?
-            .verify()
-            .map_err(|e| host(EngineStage::Validating, e))?;
+        self.verify_metadata(budget).map_err(|mut e| {
+            e.stage = EngineStage::Validating;
+            e
+        })?;
         Ok(())
     }
     pub fn processes(
@@ -818,14 +862,10 @@ impl NoCacheSession {
         budget
             .check()
             .map_err(|e| failure(EngineStage::Querying, e.failure))?;
-        self.lease
+        self.storage
             .revalidate()
             .map_err(|e| host(EngineStage::Querying, e))?;
-        self.metadata_file
-            .as_ref()
-            .ok_or_else(|| failure(EngineStage::Querying, EngineFailure::InvalidMetadata))?
-            .verify()
-            .map_err(|e| host(EngineStage::Querying, e))?;
+        self.verify_metadata(budget)?;
         self.reader
             .as_ref()
             .ok_or_else(|| failure(EngineStage::Querying, EngineFailure::InvalidMetadata))
@@ -836,7 +876,7 @@ impl NoCacheSession {
             deadline: Instant::now() + Duration::from_secs(5),
             cancellation: CancellationToken::default(),
         };
-        self.lease
+        self.storage
             .revalidate()
             .map_err(|e| host(EngineStage::Closing, e))?;
         if let Some(reader) = self.reader.take() {
@@ -846,12 +886,26 @@ impl NoCacheSession {
         }
         self.database.take();
         self.metadata_file.take();
-        self.owner
-            .cleanup(&budget)
-            .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))?;
-        self.owner
-            .finish_ephemeral_cleanup(self.lease, &budget)
-            .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))
+        match self.storage {
+            SessionStorage::Ephemeral { mut owner, lease } => {
+                owner
+                    .cleanup(&budget)
+                    .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))?;
+                owner
+                    .finish_ephemeral_cleanup(lease, &budget)
+                    .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))
+            }
+            SessionStorage::Cached { directory, lease } => {
+                directory
+                    .revalidate()
+                    .map_err(|e| host(EngineStage::Closing, e))?;
+                lease
+                    .revalidate()
+                    .map_err(|e| host(EngineStage::Closing, e))?;
+                drop(lease);
+                Ok(())
+            }
+        }
     }
 }
 pub(crate) fn viewer_error(error: arktrace_viewer::ViewerError) -> EngineError {
@@ -1500,8 +1554,27 @@ pub fn open_no_cache(
     tools: &ParserTools<'_>,
     temporary_namespace: &HeldDirectory,
     budget: &EngineBudget,
-    mut report: impl FnMut(EngineProgress),
+    report: impl FnMut(EngineProgress),
 ) -> Result<NoCacheSession, EngineError> {
+    open_store(
+        source,
+        format,
+        tools,
+        temporary_namespace,
+        budget,
+        false,
+        report,
+    )
+}
+fn open_store(
+    source: &HeldFile,
+    format: SourceFormat,
+    tools: &ParserTools<'_>,
+    temporary_namespace: &HeldDirectory,
+    budget: &EngineBudget,
+    cached: bool,
+    mut report: impl FnMut(EngineProgress),
+) -> Result<EngineSession, EngineError> {
     budget.check()?;
     tools
         .identity
@@ -1541,7 +1614,11 @@ pub fn open_no_cache(
             .map_err(|e| host(EngineStage::SourceSnapshot, e))
     };
     let stage = setup(".staging")?;
-    let ready = setup(".ready")?;
+    let ready = if cached {
+        setup(key.trace_sha256())?
+    } else {
+        setup(".ready")?
+    };
     let locks = setup(".locks")?;
     let leases = setup(".leases")?;
     let owners = OwnerStore::open(&stage, temporary_namespace)
@@ -1553,22 +1630,45 @@ pub fn open_no_cache(
         &source_io,
     )
     .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
+    if cached {
+        report(EngineProgress::CacheLookup);
+        if let Some(session) = persistent::lookup(
+            source,
+            &original,
+            tools,
+            temporary_namespace,
+            &owners,
+            &locks,
+            &leases,
+            &ready,
+            &key,
+            &key_lock,
+            budget,
+            &mut report,
+        )? {
+            return Ok(session);
+        }
+    }
     let mut input = owners
         .create(OwnerKind::Session, &source_io)
         .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
     // The private input session allocates the unique no-cache lease name. The
     // candidate owner's lock is taken only after key and entry authority exist.
-    let mut active_lease = None::<EphemeralLease>;
+    let mut active_lease = None::<OpeningLease>;
     let mut building = None::<OwnedDirectory>;
     let result = (|| {
-        active_lease = Some(
-            EphemeralLease::acquire(
-                &leases,
-                &format!("{}.lease", input.identifier()),
-                &source_io,
+        active_lease = Some(if cached {
+            OpeningLease::Cached(persistent::exclusive_lease(&leases, &key, budget)?)
+        } else {
+            OpeningLease::Ephemeral(
+                EphemeralLease::acquire(
+                    &leases,
+                    &format!("{}.lease", input.identifier()),
+                    &source_io,
+                )
+                .map_err(|e| host(EngineStage::SourceSnapshot, e))?,
             )
-            .map_err(|e| host(EngineStage::SourceSnapshot, e))?,
-        );
+        });
         let lease = active_lease
             .as_ref()
             .ok_or_else(|| failure(EngineStage::SourceSnapshot, EngineFailure::CleanupFailed))?;
@@ -1577,11 +1677,19 @@ pub fn open_no_cache(
                 .create(OwnerKind::Building, &source_io)
                 .map_err(|e| host(EngineStage::SourceSnapshot, e))?,
         );
-        building
+        let candidate_owner = building
             .as_mut()
-            .ok_or_else(|| failure(EngineStage::SourceSnapshot, EngineFailure::CleanupFailed))?
-            .bind_ephemeral(lease, &key_lock, &source_io)
-            .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
+            .ok_or_else(|| failure(EngineStage::SourceSnapshot, EngineFailure::CleanupFailed))?;
+        match lease {
+            OpeningLease::Ephemeral(v) => candidate_owner.bind_ephemeral(v, &key_lock, &source_io),
+            OpeningLease::Cached(v) => candidate_owner.bind_cached(
+                &key_lock,
+                v,
+                &format!("{}/{}", key.trace_sha256(), key.parser_key()),
+                &source_io,
+            ),
+        }
+        .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
         let directory = input.directory();
         let (snapshot, copied) = directory
             .copy_snapshot(source, format.name(), false, &source_io)
@@ -1713,7 +1821,7 @@ pub fn open_no_cache(
         let prepared = prepare_snapshot(
             &export,
             &candidate,
-            "trace.db",
+            if cached { "trace.sqlite" } else { "trace.db" },
             &budget.validation(),
             |event| report(EngineProgress::Indexing(event)),
         )
@@ -1770,7 +1878,10 @@ pub fn open_no_cache(
         }
         candidate
             .require_file_membership(
-                &["trace.db", "metadata.json"],
+                &[
+                    if cached { "trace.sqlite" } else { "trace.db" },
+                    "metadata.json",
+                ],
                 &budget.io(budget.maximum_database_bytes),
             )
             .map_err(|e| host(EngineStage::Validating, e))?;
@@ -1789,27 +1900,38 @@ pub fn open_no_cache(
         lease
             .revalidate()
             .map_err(|e| host(EngineStage::Publishing, e))?;
-        building
+        let publication_name = if cached {
+            key.parser_key()
+        } else {
+            input.identifier()
+        };
+        let candidate_owner = building
             .as_mut()
-            .ok_or_else(|| failure(EngineStage::Publishing, EngineFailure::CleanupFailed))?
-            .prepare_ephemeral_publication(&ready, input.identifier(), &publication_io)
-            .map_err(|e| host(EngineStage::Publishing, e))?;
-        let published = stage
-            .promote_sealed_directory_noreplace(
-                &sealed,
+            .ok_or_else(|| failure(EngineStage::Publishing, EngineFailure::CleanupFailed))?;
+        match lease {
+            OpeningLease::Ephemeral(_) => candidate_owner.prepare_ephemeral_publication(
                 &ready,
-                input.identifier(),
+                publication_name,
                 &publication_io,
-            )
+            ),
+            OpeningLease::Cached(v) => candidate_owner.prepare_cached_publication(
+                &ready,
+                publication_name,
+                &key_lock,
+                v,
+                &publication_io,
+            ),
+        }
+        .map_err(|e| host(EngineStage::Publishing, e))?;
+        let published = stage
+            .promote_sealed_directory_noreplace(&sealed, &ready, publication_name, &publication_io)
             .map_err(|e| host(EngineStage::Publishing, e))?;
-        building
-            .as_mut()
-            .ok_or_else(|| failure(EngineStage::Publishing, EngineFailure::CleanupFailed))?
+        candidate_owner
             .record_published_location(&published, &publication_io)
             .map_err(|e| host(EngineStage::Publishing, e))?;
         report(EngineProgress::OpeningDatabase);
         let database = published
-            .open_file("trace.db")
+            .open_file(if cached { "trace.sqlite" } else { "trace.db" })
             .map_err(|e| host(EngineStage::Validating, e))?;
         let metadata_file = published
             .open_file("metadata.json")
@@ -1871,16 +1993,32 @@ pub fn open_no_cache(
         publication_io
             .check()
             .map_err(|e| host(EngineStage::Publishing, e))?;
+        if let Some(OpeningLease::Cached(lease)) = active_lease.as_mut() {
+            lease
+                .downgrade_shared()
+                .map_err(|e| host(EngineStage::Publishing, e))?;
+        }
         let owner = building
             .take()
             .ok_or_else(|| failure(EngineStage::Publishing, EngineFailure::CleanupFailed))?;
         // No suspensions/IO after final cancellation and identity check. Report
         // is outside the transaction; a caller panic retains recoverable proof.
-        Ok(NoCacheSession {
-            owner,
-            lease: active_lease
-                .take()
-                .ok_or_else(|| failure(EngineStage::Publishing, EngineFailure::CleanupFailed))?,
+        let storage = match active_lease
+            .take()
+            .ok_or_else(|| failure(EngineStage::Publishing, EngineFailure::CleanupFailed))?
+        {
+            OpeningLease::Ephemeral(lease) => SessionStorage::Ephemeral { owner, lease },
+            OpeningLease::Cached(lease) => {
+                drop(owner);
+                SessionStorage::Cached {
+                    directory: published,
+                    lease,
+                }
+            }
+        };
+        Ok(EngineSession {
+            storage,
+            cache_hit: false,
             database: Some(database),
             reader: Some(reader),
             metadata_file: Some(metadata_file),
@@ -1899,16 +2037,25 @@ pub fn open_no_cache(
         }
         Err(error) => {
             let cleanup = budget.cleanup();
-            let candidate_cleanup = building
-                .as_mut()
-                .map_or(Ok(()), |owner| owner.cleanup(&cleanup));
+            let candidate_cleanup =
+                building
+                    .as_mut()
+                    .map_or(Ok(()), |owner| match active_lease.as_ref() {
+                        Some(OpeningLease::Cached(lease)) => {
+                            owner.cleanup_cached(&key_lock, lease, &cleanup)
+                        }
+                        _ => owner.cleanup(&cleanup),
+                    });
             let input_cleanup = input.cleanup(&cleanup);
             if candidate_cleanup.is_err() || input_cleanup.is_err() {
                 return Err(failure(error.stage, EngineFailure::CleanupFailed));
             }
             let lease_cleanup = match (active_lease.take(), building.as_mut()) {
-                (Some(lease), Some(owner)) => owner.finish_ephemeral_cleanup(lease, &cleanup),
-                (Some(lease), None) => lease.remove(),
+                (Some(OpeningLease::Ephemeral(lease)), Some(owner)) => {
+                    owner.finish_ephemeral_cleanup(lease, &cleanup)
+                }
+                (Some(OpeningLease::Ephemeral(lease)), None) => lease.remove(),
+                (Some(OpeningLease::Cached(_)), _) => Ok(()),
                 (None, _) => Ok(()),
             };
             if lease_cleanup.is_err() {

@@ -32,11 +32,13 @@ struct RustPackedInspection: Sendable {
     let cpuTables, processTables: [RustCounterTable]
 }
 final class RustOpenLease: Sendable {
+    let cacheHit: Bool
     let metadata: RustPackedMetadata
     let inspection: RustPackedInspection
     let text: RustTextStorage
     let identity: RustSessionIdentity
-    init(metadata: RustPackedMetadata, inspection: RustPackedInspection, text: RustTextStorage, identity: RustSessionIdentity) {
+    init(metadata: RustPackedMetadata, inspection: RustPackedInspection, text: RustTextStorage, identity: RustSessionIdentity, cacheHit: Bool) {
+        self.cacheHit = cacheHit
         self.metadata = metadata; self.inspection = inspection; self.text = text; self.identity = identity
     }
     func string(_ range: Range<Int>) -> RustOwnedText { RustOwnedText(storage: text, range: range) }
@@ -50,6 +52,7 @@ public struct RustOpenView: Sendable {
     private let lease: RustOpenLease
     init(_ lease: RustOpenLease) { self.lease = lease }
     public var sessionIdentity: RustSessionIdentity { lease.identity }
+    public var cacheHit: Bool { lease.cacheHit }
     public var retainedStorageBytes: Int { lease.text.credit.bytes }
     public var metadata: RustCacheMetadataView { RustCacheMetadataView(lease) }
     public var inspection: RustInspectionView { RustInspectionView(lease) }

@@ -496,6 +496,25 @@ generic recovery 不处理任何 bound entry；Engine 按 key→entry→owner �
 payload rmdir 后先持久化 Removed，再删除匹配的 lease，最后删 owner artifacts；若目录已消失
 但 Removed 未落盘则保留 unresolved proof。新证据见上述 006 记录；v3 不交给旧维护端。
 
+2026-10-05 增量在隔离 native root 接通 content-addressed Ready，复用上述 parser、preparation、
+原子发布和查询实现。固定 Engine/SDK 配置选择 ephemeral 或 contentAddressed；后者要求与
+actor namespace 分离的私有 cacheDirectory，请求不能覆盖。metadata 仍为现有 format 1，
+key/schema/index/parser 版本不变。新的 owner format 4 使用 closed cache binding：
+keyIdentifier、entryRelativePath、leaseDevice、leaseInode；v2/v3 字节契约与 reader 保留。
+key lock 下只允许一个 builder，Ready session 持稳定 shared entry lease，close 仅释放该 lease。
+隔离或回收要求 key→exclusive entry→owner authority；exclusive 等待最多两秒且服从原预算/取消，
+忙碌缓存返回现有 TRACE_CACHE_CORRUPT 闭集错误。Quarantined 意图先落盘，再按原目录身份
+移动到 .corrupt，保留数据库、metadata、view-state 和 owner proof。未知格式或缺少绑定证据
+不会被猜测删除。取消后的 payload 回收保留稳定 key/entry lease 文件。
+
+warm hit 不 copy source、不启动 parser version/export，但仍核对固定 executable 身份、source
+hash/byte count、metadata、readonly database、quick-check/schema/index。lastAccessedAt 的
+原子更新属于 bookkeeping；session 每次查询重读当前 metadata 并校验全部不可变字段，
+更新访问时间不撤销已有 session 的 DB FD/shared lease。预算、IO 和 cleanup 失败不充当
+损坏证据。实际原始 zlib trace、SDK cold/warm/并发/重启及原 Core 协议回归见
+[缓存 session 记录](migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
+LRU/purge、真实 cache crash/低磁盘、多进程竞争、旧标注导入和默认 App 切换仍未验收。
+
 切换时提供有界、单向的旧 cache reader：
 
 1. 固定产品根目录，拒绝链接/越界，识别每个 entry 的真实 source hash 和 parser identity。

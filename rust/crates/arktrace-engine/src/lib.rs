@@ -36,8 +36,8 @@ pub use metadata::CacheMetadata;
 #[cfg(target_os = "macos")]
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
-    EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession, ParserTools,
-    SourceFormat, ViewerFailure, open_no_cache, recover_no_cache,
+    EngineSession, EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession,
+    ParserTools, SourceFormat, ViewerFailure, open_cached, open_no_cache, recover_no_cache,
 };
 
 pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {

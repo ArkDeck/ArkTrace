@@ -369,6 +369,8 @@ pub unsafe extern "C" fn arktrace_request_poll(
             let progress = match status.progress {
                 None => 0,
                 Some(EngineProgress::SourceSnapshot) => PROGRESS_SOURCE_SNAPSHOT,
+                // The frozen ABI's coarse opening phase includes cache lookup.
+                Some(EngineProgress::CacheLookup) => PROGRESS_OPENING_DATABASE,
                 Some(EngineProgress::ParserIdentity) => PROGRESS_PARSER_IDENTITY,
                 Some(EngineProgress::Parsing) => PROGRESS_PARSING,
                 Some(EngineProgress::Indexing(_)) => PROGRESS_INDEXING,

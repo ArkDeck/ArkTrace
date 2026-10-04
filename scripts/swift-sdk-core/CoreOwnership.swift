@@ -14,6 +14,7 @@ private struct Input: Decodable, Sendable {
     let batchOracle: String?
     let deadlineOracle: String?
     let repositoryOracle: String?
+    let cacheDirectory: String?
 }
 private struct Response: Codable, Sendable { let id, nativeBodyUTF8, coreBodyUTF8, afterShutdownCoreBodyUTF8: String }
 private struct UnsortedOrderProbe: Codable, Sendable { let beforeUTF8, afterUTF8: String; let sameJSONValue: Bool }
@@ -110,6 +111,7 @@ private struct Report: Codable, Sendable {
 @MainActor @main private struct CoreOwnership {
     static func main() async throws {
         let input = try await load(CommandLine.arguments[1])
+        if input.cacheDirectory != nil { try await runCacheOwnership(); return }
         let configuration = RustConfiguration.developmentFixture(namespace: URL(filePath: input.namespace), helper: URL(filePath: input.helper),
             parser: URL(filePath: input.parser), helperSHA256: input.helperSHA256, parserIdentity: input.parserIdentity)
         let engine = try await RustEngine.createDevelopmentFixture(configuration)

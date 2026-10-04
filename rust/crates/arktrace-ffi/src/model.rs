@@ -7,6 +7,7 @@ pub(crate) struct EngineConfig {
     pub abi_version: u32,
     pub contract_digest: String,
     pub cache_policy: String,
+    pub cache_directory: Option<String>,
     pub namespace: String,
     pub helper: String,
     pub parser: String,
@@ -78,8 +79,14 @@ impl EngineConfig {
         if self.abi_version != ABI_VERSION || self.contract_digest != CONTRACT_DIGEST_HEX {
             return Err(STATUS_ABI_MISMATCH);
         }
-        if self.cache_policy != "ephemeral" {
-            return Err(STATUS_UNSUPPORTED_OPERATION);
+        match self.cache_policy.as_str() {
+            "ephemeral" if self.cache_directory.is_none() => (),
+            "contentAddressed"
+                if self.cache_directory.as_ref().is_some_and(|s| {
+                    !s.is_empty() && s.len() <= MAXIMUM_PATH_BYTES as usize && !s.contains('\0')
+                }) => {}
+            "ephemeral" | "contentAddressed" => return Err(STATUS_INVALID_INPUT),
+            _ => return Err(STATUS_UNSUPPORTED_OPERATION),
         }
         if let Some(publisher) = &self.publisher {
             publisher.validate()?;
@@ -144,6 +151,7 @@ impl EngineConfig {
             parser_trust,
         );
         c.helper_trust = helper_trust;
+        c.cache_directory = self.cache_directory.map(Into::into);
         let l = self.limits;
         c.limits = RuntimeLimits {
             workers: l.workers,
@@ -320,6 +328,37 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
+    #[test]
+    fn storage_policy_is_fixed_closed_and_requires_a_matching_root() {
+        let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../../contracts/ready-metadata.json"
+        )))
+        .unwrap();
+        let mut value = serde_json::json!({"abiVersion": ABI_VERSION, "contractDigest": CONTRACT_DIGEST_HEX,
+            "cachePolicy":"ephemeral", "namespace":"/private/tmp/native-actors", "helper":"/private/tmp/tools/helper",
+            "parser":"/private/tmp/tools/parser", "helperSHA256":"a".repeat(64), "parserIdentity": metadata["parser"]});
+        let config: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
+        config.validate(true).unwrap();
+        assert_eq!(config.validate(false), Err(STATUS_INVALID_INPUT));
+        value["cacheDirectory"] = "/private/tmp/native-cache".into();
+        let config: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
+        assert_eq!(config.validate(true), Err(STATUS_INVALID_INPUT));
+        value["cachePolicy"] = "contentAddressed".into();
+        let config: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
+        config.validate(true).unwrap();
+        #[cfg(target_os = "macos")]
+        assert_eq!(
+            config.native(true).unwrap().cache_directory.unwrap(),
+            std::path::PathBuf::from("/private/tmp/native-cache")
+        );
+        value.as_object_mut().unwrap().remove("cacheDirectory");
+        let config: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
+        assert_eq!(config.validate(true), Err(STATUS_INVALID_INPUT));
+        value["cachePolicy"] = "unknown".into();
+        let config: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
+        assert_eq!(config.validate(true), Err(STATUS_UNSUPPORTED_OPERATION));
+    }
     #[test]
     fn scalar_deadline_operation_uses_closed_native_admission() {
         let valid = serde_json::json!({"operation":"queryWithDeadline","query":{"clock":"hostContinuousEpochV1","deadline":null,"query":{"operation":"processes","query":{"nameMatch":"exact","limit":1}}}});

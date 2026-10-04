@@ -46,7 +46,7 @@
 | 009 | summary/context/analyze 与质量事实 | 001、002 | 007 | in-progress | L |
 | 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | in-progress | L |
 | 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | in-progress | L |
-| 012 | C ABI、Swift/C# SDK 与生命周期 | 001、002 | 008、009、011 | planned | L |
+| 012 | C ABI、Swift/C# SDK 与生命周期 | 001、002 | 008、009、011 | in-progress | L |
 | 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | planned | L |
 | 014 | Windows 原生 Viewer | 002、012 接口冻结 | 003、008、011、012 | planned | L |
 | 015 | 独立 GUI Capture 共享实现 | 002、004、005 | 004、005、013、014 | planned | L |
@@ -490,6 +490,15 @@ Failed 可 close、owner worker drain/Drop 与原子 Request/资源终态。三�
 完整 batch/search/analysis UTF-8 response 一致，12 项原生生命周期检查与 272 项 Rust tests
 通过。持久 cache、外层 namespace 自动重启恢复、旧标注导入和 Windows runtime 仍待完成；
 这也是 012 的后端前置，尚非 SDK/App 验收。详见[异步生命周期记录](migration-runs/AT-RUST-008-012-2026-10-04-async-runtime.md)。
+
+2026-10-05 持久 session 增量：隔离 native root 的 cold/warm Ready、format-4 cache owner binding、
+shared active lease、两秒 exclusive grace、corrupt quarantine、未知格式保留、timestamp touch
+与旧 session 不变字段复核接通；SDK 固定 storagePolicy/cacheDirectory 与 cacheHit 接通。
+实际原始 zlib 解析及 SDK 并发/close/Engine 重启、发布前后取消、低 DB 预算保留有效 Ready
+通过。483 Rust tests、72 SDK tests、4 Span 拒绝、27 个同 Ready 原 Core 回归、本机默认
+Swift/API/unsigned App 检查通过。状态仍为 in-progress：LRU/purge、cache 多进程/真实 crash/
+低磁盘、外层 namespace 重启恢复、旧标注迁移、默认 App/发行及 macOS 总验收尚待完成。
+来源、实际 artifact 与失败边界见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
 
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 

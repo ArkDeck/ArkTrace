@@ -150,14 +150,16 @@ extension RustPackedInspection: Decodable {
     }
 }
 private struct OpenBody: Decodable {
+    let cacheHit: Bool
     let metadata: RustPackedMetadata
     let inspection: RustPackedInspection
-    private enum CodingKeys: String, CodingKey { case metadata, inspection }
+    private enum CodingKeys: String, CodingKey { case metadata, inspection, cacheHit }
     init(from decoder: any Decoder) throws {
-        try rustColdKeys(decoder, ["metadata", "inspection"])
+        try rustColdKeys(decoder, ["metadata", "inspection"], optional: ["cacheHit"])
         let values = try decoder.container(keyedBy: CodingKeys.self)
         metadata = try values.decode(RustPackedMetadata.self, forKey: .metadata)
         inspection = try values.decode(RustPackedInspection.self, forKey: .inspection)
+        cacheHit = try values.contains(.cacheHit) ? values.decode(Bool.self, forKey: .cacheHit) : false
     }
 }
 
@@ -182,7 +184,7 @@ enum RustOpenDecoder {
             + (inspection.cpuTables.capacity + inspection.processTables.capacity) * MemoryLayout<RustCounterTable>.stride
         try Task.checkCancellation()
         let text = RustTextStorage(bytes: bytes, credit: try storage.reserve(retained))
-        let lease = RustOpenLease(metadata: decoded.body.metadata, inspection: inspection, text: text, identity: identity)
+        let lease = RustOpenLease(metadata: decoded.body.metadata, inspection: inspection, text: text, identity: identity, cacheHit: decoded.body.cacheHit)
         try Task.checkCancellation()
         return RustOpenView(lease)
     }

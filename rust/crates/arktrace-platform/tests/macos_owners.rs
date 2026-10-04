@@ -73,6 +73,270 @@ fn write_private(path: &std::path::Path, bytes: &[u8]) {
         .unwrap();
 }
 
+fn cache_authority(
+    fixture: &Fixture,
+) -> (
+    String,
+    String,
+    arktrace_platform::Lease,
+    arktrace_platform::Lease,
+) {
+    use arktrace_platform::{Lease, LeaseMode};
+    use sha2::{Digest, Sha256};
+    let trace = "a".repeat(64);
+    let parser = "b".repeat(64);
+    let key = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+    let locks = fixture.root.ensure_private_child(".locks").unwrap();
+    let leases = fixture.root.ensure_private_child(".leases").unwrap();
+    let key_lock = Lease::acquire(
+        &locks,
+        &format!("{key}.lock"),
+        LeaseMode::Exclusive,
+        &budget(),
+    )
+    .unwrap();
+    let entry = Lease::acquire(
+        &leases,
+        &format!("{key}.lease"),
+        LeaseMode::Exclusive,
+        &budget(),
+    )
+    .unwrap();
+    (trace, parser, key_lock, entry)
+}
+
+#[test]
+fn cached_ready_requires_fixed_exclusive_authority_and_quarantine_preserves_sidecar() {
+    use arktrace_platform::{Lease, LeaseMode};
+    let f = Fixture::new();
+    let (trace, parser, key, mut entry) = cache_authority(&f);
+    let hash = f.root.ensure_private_child(&trace).unwrap();
+    let mut owner = f.store.create(OwnerKind::Building, &budget()).unwrap();
+    let id = owner.identifier().to_owned();
+    owner
+        .bind_cached(&key, &entry, &format!("{trace}/{parser}"), &budget())
+        .unwrap();
+    let candidate = owner.directory().clone();
+    candidate
+        .write_new_readonly("trace.sqlite", b"database", &budget())
+        .unwrap();
+    candidate
+        .write_new_readonly("metadata.json", b"metadata", &budget())
+        .unwrap();
+    owner
+        .prepare_cached_publication(&hash, &parser, &key, &entry, &budget())
+        .unwrap();
+    let sealed = candidate.seal_readonly_directory(&budget()).unwrap();
+    let ready = f
+        .stage
+        .promote_sealed_directory_noreplace(&sealed, &hash, &parser, &budget())
+        .unwrap();
+    owner.record_published_location(&ready, &budget()).unwrap();
+    ready
+        .write_new_readonly("view-state.json", b"user sidecar", &budget())
+        .unwrap();
+    assert_eq!(owner.cleanup(&budget()), Err(HostError::InvalidEvidence));
+    drop(owner);
+    let record = f.store.published_evidence(&id, &budget()).unwrap().unwrap();
+    assert!(record.is_ready() && record.is_cached());
+    assert_eq!(
+        f.store.recover_stale(&id, &budget()).unwrap(),
+        OwnerRecoveryOutcome::PublishedNeedsEntryLease
+    );
+    entry.downgrade_shared().unwrap();
+    let leases = f.root.open_private_child(".leases").unwrap();
+    use sha2::{Digest, Sha256};
+    let key_id = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+    let another = Lease::acquire(
+        &leases,
+        &format!("{key_id}.lease"),
+        LeaseMode::Shared,
+        &budget(),
+    )
+    .unwrap();
+    assert_eq!(
+        f.store.quarantine_cached(&record, &key, &entry, &budget()),
+        Err(HostError::InvalidEvidence)
+    );
+    assert!(
+        Lease::try_acquire(
+            &leases,
+            &format!("{key_id}.lease"),
+            LeaseMode::Exclusive,
+            false
+        )
+        .unwrap()
+        .is_none()
+    );
+    drop(another);
+    drop(entry);
+    let exclusive = Lease::acquire(
+        &leases,
+        &format!("{key_id}.lease"),
+        LeaseMode::Exclusive,
+        &budget(),
+    )
+    .unwrap();
+    f.store
+        .quarantine_cached(&record, &key, &exclusive, &budget())
+        .unwrap();
+    assert!(!hash.path().join(&parser).exists());
+    let quarantined = f
+        .root
+        .open_private_child(".corrupt")
+        .unwrap()
+        .open_private_child(&id)
+        .unwrap();
+    assert_eq!(
+        quarantined
+            .open_file("view-state.json")
+            .unwrap()
+            .read_bounded(&budget())
+            .unwrap(),
+        b"user sidecar"
+    );
+    let current = f.store.published_evidence(&id, &budget()).unwrap().unwrap();
+    assert!(current.is_quarantined());
+    f.store
+        .quarantine_cached(&current, &key, &exclusive, &budget())
+        .unwrap();
+    assert_eq!(
+        f.store
+            .recover_cached_build(&current, &key, &exclusive, &budget())
+            .unwrap(),
+        OwnerRecoveryOutcome::PublishedNeedsEntryLease
+    );
+    assert!(leases.path().join(format!("{key_id}.lease")).exists());
+}
+
+#[test]
+fn abandoned_cached_publishing_before_rename_is_recovered_without_removing_stable_lease() {
+    let f = Fixture::new();
+    let (trace, parser, key, entry) = cache_authority(&f);
+    let hash = f.root.ensure_private_child(&trace).unwrap();
+    let mut owner = f.store.create(OwnerKind::Building, &budget()).unwrap();
+    let id = owner.identifier().to_owned();
+    let path = owner.directory().path().to_path_buf();
+    owner
+        .bind_cached(&key, &entry, &format!("{trace}/{parser}"), &budget())
+        .unwrap();
+    owner
+        .directory()
+        .write_new_readonly("partial", b"partial", &budget())
+        .unwrap();
+    owner
+        .prepare_cached_publication(&hash, &parser, &key, &entry, &budget())
+        .unwrap();
+    drop(owner);
+    let record = f.store.published_evidence(&id, &budget()).unwrap().unwrap();
+    assert!(record.is_publishing());
+    assert_eq!(
+        f.store
+            .recover_cached_build(&record, &key, &entry, &budget())
+            .unwrap(),
+        OwnerRecoveryOutcome::Removed
+    );
+    assert!(!path.exists());
+    assert!(f.store.identifiers(&budget()).unwrap().is_empty());
+    assert_eq!(
+        fs::read_dir(f.root.path().join(".leases")).unwrap().count(),
+        1
+    );
+}
+
+#[test]
+fn cached_owner_rejects_wrong_key_and_replaced_entry_lease_identity() {
+    use arktrace_platform::{Lease, LeaseMode};
+    let f = Fixture::new();
+    let (trace, parser, key, entry) = cache_authority(&f);
+    let mut owner = f.store.create(OwnerKind::Building, &budget()).unwrap();
+    let id = owner.identifier().to_owned();
+    owner
+        .bind_cached(&key, &entry, &format!("{trace}/{parser}"), &budget())
+        .unwrap();
+    let record = f.store.published_evidence(&id, &budget()).unwrap().unwrap();
+    let wrong = Lease::acquire(
+        &f.root.open_private_child(".locks").unwrap(),
+        "wrong.lock",
+        LeaseMode::Exclusive,
+        &budget(),
+    )
+    .unwrap();
+    assert!(
+        f.store
+            .validate_cached_location(&record, &wrong, &entry, &budget())
+            .is_err()
+    );
+    let leases = f.root.open_private_child(".leases").unwrap();
+    let lease_path = fs::read_dir(leases.path())
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    fs::rename(&lease_path, f.path.join("displaced.lease")).unwrap();
+    let replacement = Lease::acquire(
+        &leases,
+        lease_path.file_name().unwrap().to_str().unwrap(),
+        LeaseMode::Exclusive,
+        &budget(),
+    )
+    .unwrap();
+    assert!(
+        f.store
+            .validate_cached_location(&record, &key, &replacement, &budget())
+            .is_err()
+    );
+    assert!(owner.directory().path().exists());
+}
+
+#[test]
+fn readonly_document_replacement_preserves_current_bytes_and_rejects_stale_fd() {
+    let f = Fixture::new();
+    let old = f
+        .stage
+        .write_new_readonly("metadata.json", b"old", &budget())
+        .unwrap();
+    let current = f.stage.replace_readonly(&old, b"new", &budget()).unwrap();
+    assert_eq!(current.read_bounded(&budget()).unwrap(), b"new");
+    assert!(f.stage.replace_readonly(&old, b"stale", &budget()).is_err());
+    assert_eq!(
+        f.stage
+            .open_file("metadata.json")
+            .unwrap()
+            .read_bounded(&budget())
+            .unwrap(),
+        b"new"
+    );
+    assert!(!fs::read_dir(f.stage.path()).unwrap().any(|v| {
+        v.unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".arktrace-atomic")
+    }));
+}
+
+#[test]
+fn cancelled_cache_binding_disposes_its_still_generic_candidate() {
+    let f = Fixture::new();
+    let (trace, parser, key, entry) = cache_authority(&f);
+    let mut owner = f.store.create(OwnerKind::Building, &budget()).unwrap();
+    let path = owner.directory().path().to_path_buf();
+    let cancelled = budget();
+    cancelled.cancellation.cancel();
+    assert_eq!(
+        owner.bind_cached(&key, &entry, &format!("{trace}/{parser}"), &cancelled),
+        Err(HostError::Cancelled)
+    );
+    owner.cleanup_cached(&key, &entry, &budget()).unwrap();
+    assert!(!path.exists());
+    assert!(f.store.identifiers(&budget()).unwrap().is_empty());
+    assert_eq!(
+        fs::read_dir(f.root.path().join(".leases")).unwrap().count(),
+        1
+    );
+}
+
 #[test]
 fn active_owner_blocks_recovery_then_stale_identity_is_reclaimed() {
     let fixture = Fixture::new();
