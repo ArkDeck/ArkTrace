@@ -117,6 +117,45 @@ def main():
         "restore": 3, "whitespaceScalars": 26,
     }
     print("Navigation oracle: 8 catalogs, 55 actions, 161 recorded host filters, 64 native focus/anchor and 3 restore vectors with current Swift source/output identities")
+    annotation_receipt = json.loads((ROOT / viewer / "annotation-mainline-swift-receipt.json").read_text(encoding="utf-8"))
+    assert annotation_receipt["copiedExpectedStateAlgorithms"] is False and annotation_receipt["exitCode"] == 0
+    annotation_seen = set()
+    for entry in annotation_receipt["sourceDigests"]:
+        relative = entry["path"]
+        assert relative not in annotation_seen
+        annotation_seen.add(relative)
+        path = ROOT / relative
+        assert not path.is_symlink() and path.resolve().is_relative_to(ROOT)
+        data = path.read_bytes()
+        assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
+    assert annotation_receipt["sourceModules"] == ["ArkTraceCore", "ArkTraceParser", "ArkTraceStore", "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering", "ArkTraceAppSupport"]
+    for name in annotation_receipt["sourceModules"]:
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in annotation_seen if p.startswith(f"Sources/{name}/")}
+    assert {
+        viewer + "annotation-inputs.json", viewer + "annotation-swift-oracle.json",
+        "rust/crates/arktrace-viewer/oracle/annotation_access.swift",
+        "rust/crates/arktrace-viewer/oracle/annotation_harness.swift",
+        "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
+        "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
+        "Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
+        "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+        "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
+        "Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
+        "Tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
+    } <= annotation_seen
+    annotation_inputs = json.loads((ROOT / viewer / "annotation-inputs.json").read_text(encoding="utf-8"))["cases"]
+    annotation_outputs = json.loads((ROOT / viewer / "annotation-swift-oracle.json").read_text(encoding="utf-8"))["cases"]
+    names = [entry["name"] for entry in annotation_inputs]
+    assert len(names) == len(set(names)) == len(annotation_outputs) == annotation_receipt["cases"] == 74
+    assert names == [entry["name"] for entry in annotation_outputs]
+    assert sum(len(entry["steps"]) for entry in annotation_inputs) == annotation_receipt["actions"] == 674
+    assert sum(len(entry["states"]) for entry in annotation_outputs) == annotation_receipt["states"] == 748
+    assert all(len(inputs["steps"]) + 1 == len(outputs["states"]) for inputs, outputs in zip(annotation_inputs, annotation_outputs))
+    rename = annotation_receipt["deferredRenameCompiledOriginalBlock"]
+    assert rename["source"] == "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift"
+    body = re.search(r'rename: \{ label in\n(.*?)\n\s*\},', (ROOT / rename["source"]).read_text(encoding="utf-8"), re.S)[1]
+    assert body == rename["utf8"] and hashlib.sha256(body.encode("utf-8")).hexdigest() == rename["sha256"]
+    print("Annotation oracle: 74 scenarios, 674 actions and 748 actual Swift states with source/output and deferred editor identities")
     source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
     scope_block = source.split("machineAllowed: Set<String> = [", 1)[1].split("\n    ]", 1)[0]
     scopes = sorted(re.findall(r'"([^"\n]+)"', scope_block))

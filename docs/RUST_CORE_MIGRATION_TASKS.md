@@ -659,6 +659,12 @@ actual Swift canonical 与 88 项相关回归通过；四份新 oracle 输出逐
 相邻事件查询执行、session aggregate 预算和 Engine/SDK/App 接线仍未完成，不能据此
 关闭 011 或 macOS 验收。见[主线导航记录](migration-runs/AT-RUST-011-2026-10-04-mainline-navigation.md)。
 
+标注模块随后导入最终审查的 21 个新增路径，修正持久化投影的外部可变容量问题。
+当前 401 Rust runtime tests + 3 compile-fail、748 个新运行 actual Swift 状态观察点
+和 15 项相关回归通过；原 canonical 输出字节不变，verifier 核对完整当前源码与
+deferred editor 身份。host 总预算、持久化接线和 Engine/FFI/SDK/App 未完成；原始
+历史报告未重写。见[主线标注记录](migration-runs/AT-RUST-011-2026-10-04-mainline-annotations.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：008、009、011。

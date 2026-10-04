@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "task": "AT-RUST-011 annotation persistence projection review correction",
+  "status": "correctionVerified; productionIntegrationPending",
+  "createdAtUtc": "2026-10-04T03:23:10.118146+00:00",
+  "snapshot": {
+    "manifest": {
+      "path": "parallel-snapshot.json",
+      "byteCount": 181449,
+      "sha256": "e460706dfede659b3e56cabb487b292af7df26895e4fdf64174c13da2321fdb9"
+    },
+    "baselineFiles": 858,
+    "unchangedBaselineFiles": 855,
+    "modifiedBaselineFiles": [
+      "rust/crates/arktrace-viewer/src/annotations.rs",
+      "rust/crates/arktrace-viewer/tests/annotation_oracle.rs",
+      "rust/crates/arktrace-viewer/tests/annotation_regressions.rs"
+    ],
+    "originalDeliveriesWritten": false,
+    "mainCheckoutWritten": false,
+    "actionCatalogSnapshotWritten": false
+  },
+  "changedFiles": [
+    {
+      "path": "rust/crates/arktrace-viewer/src/annotations.rs",
+      "byteCount": 32091,
+      "sha256": "4685e275d312fe5587b6e1be8617b157fedab21ca45333279450194895632010"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/annotation_oracle.rs",
+      "byteCount": 7874,
+      "sha256": "720f828dc9f8930de1f72d370980d7373205bf02b8e6d613357b4f90bc0dc3f4"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/annotation_regressions.rs",
+      "byteCount": 17757,
+      "sha256": "bf88ba5424779f66a31cd2f3cd32dfdb6e342b0593c436811e644eb9494c96a2"
+    }
+  ],
+  "ownedNewSourceFiles": [
+    {
+      "path": "rust/crates/arktrace-viewer/tests/annotation_projection_budget.rs",
+      "byteCount": 3441,
+      "sha256": "942fe33dc6d1254a0234aa4d6017903251013ea3f221debba0434906601aacdc"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_projection_gates.py",
+      "byteCount": 1622,
+      "sha256": "a9952bad75269c8c3c37d3b8d98e297a23f582acb05e3a76a4b7869be5c8ef26"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_projection_report.py",
+      "byteCount": 6946,
+      "sha256": "79c1bdf34e4867aeb6f0f3ace9efd66a22c319e61378097e02b59720cdf6fc6b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_projection_validate.py",
+      "byteCount": 1943,
+      "sha256": "054a6e5692c716f64073aafee8b969e4b720b1304d8d55eb25297db74405e704"
+    }
+  ],
+  "commands": [
+    {
+      "name": "format",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/annotation_projection_validate.py",
+        "fmt",
+        "--all"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-review-fix-20261004",
+      "startedAtUtc": "2026-10-04T03:21:29.458671+00:00",
+      "finishedAtUtc": "2026-10-04T03:21:30.590618+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-projection-format.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/annotation_projection_validate.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-review-fix-20261004",
+      "startedAtUtc": "2026-10-04T03:21:30.591169+00:00",
+      "finishedAtUtc": "2026-10-04T03:21:31.549277+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-projection-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/annotation_projection_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-review-fix-20261004",
+      "startedAtUtc": "2026-10-04T03:21:31.549704+00:00",
+      "finishedAtUtc": "2026-10-04T03:21:47.469242+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-projection-test.log",
+        "byteCount": 11551,
+        "sha256": "e5e4902557720b53a6d1184656f3753eada73cb3bcded5348db25f93208162fa"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/annotation_projection_validate.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-review-fix-20261004",
+      "startedAtUtc": "2026-10-04T03:21:47.469569+00:00",
+      "finishedAtUtc": "2026-10-04T03:21:52.369897+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-projection-clippy.log",
+        "byteCount": 926,
+        "sha256": "6b33b2c30b5f8a488207c068b3fa08b561916fc21f58aa93ae43efefa8819e38"
+      }
+    },
+    {
+      "name": "verify",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/annotation_projection_validate.py",
+        "verify"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-review-fix-20261004",
+      "startedAtUtc": "2026-10-04T03:21:52.370380+00:00",
+      "finishedAtUtc": "2026-10-04T03:21:53.116089+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-projection-verify.log",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      }
+    }
+  ],
+  "actualCommandRecord": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/command-results.json",
+    "byteCount": 4224,
+    "sha256": "f8ec0c516b055ca98ed1a6725ac34b235539f3415825444e74e9f93c0ffb4903"
+  },
+  "results": {
+    "rustViewerTestsPassed": 72,
+    "compileFailDocTestsPassed": 3,
+    "newRuntimeRegressionTests": 4,
+    "oracleStatesCompared": 748,
+    "oracleCases": 74,
+    "oracleActions": 674,
+    "fmtPassed": true,
+    "strictAllTargetClippyPassed": true,
+    "workspaceVerifierPassed": true,
+    "swiftExecutedAgain": false
+  },
+  "inheritedActualSwiftEvidence": [
+    {
+      "name": "swiftOracle",
+      "executedInOriginalFrozenDelivery": true,
+      "source": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-swift-oracle.log",
+        "byteCount": 56771,
+        "sha256": "93eefd1378135aa715553198a2179399ab6874cbc52b346a49bfb65914d2a352"
+      },
+      "frozenCopy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-swift-oracle.log",
+        "byteCount": 56771,
+        "sha256": "93eefd1378135aa715553198a2179399ab6874cbc52b346a49bfb65914d2a352"
+      },
+      "exitCode": 0,
+      "passed": 1
+    },
+    {
+      "name": "swiftRegressions",
+      "executedInOriginalFrozenDelivery": true,
+      "source": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-swift-regressions.log",
+        "byteCount": 9274,
+        "sha256": "51589b6c26de468db42cbcaca0d9d73e8b38d454f1643f108bc103a6e9e20331"
+      },
+      "frozenCopy": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-review-fix-cargo/frozen-evidence/annotation-swift-regressions.log",
+        "byteCount": 9274,
+        "sha256": "51589b6c26de468db42cbcaca0d9d73e8b38d454f1643f108bc103a6e9e20331"
+      },
+      "exitCode": 0,
+      "passed": 15
+    }
+  ],
+  "unchangedSwiftFixtures": [
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",
+      "byteCount": 273525,
+      "sha256": "77d8727d9ba5c420cae0ab3b202f13afd421440375ad5330077f98627217f220"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-oracle.json",
+      "byteCount": 6150862,
+      "sha256": "bb027933e3de12696b080dca4e2a83e3099f890770bd75ded02742cad268dbb4"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+      "byteCount": 13079,
+      "sha256": "186347e369bbff48025546870ec1256637a8273dc732bea4127517d85b0170cc"
+    }
+  ],
+  "swiftReceipt": {
+    "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+    "byteCount": 13079,
+    "sha256": "186347e369bbff48025546870ec1256637a8273dc732bea4127517d85b0170cc"
+  },
+  "apiChange": {
+    "privateFields": [
+      "api_version",
+      "flags",
+      "marks"
+    ],
+    "readOnlyAccessors": [
+      "api_version() -> u32",
+      "flags() -> &[AnnotationFlag]",
+      "marks() -> &[AnnotationMark]"
+    ],
+    "retainedBytes": "Computed from current struct, Vec and label capacities; no creation-time cache. Clone reports its own capacities. serde preserves apiVersion/flags/marks/retainedBytes field names and measures current capacity.",
+    "sdk": "Generate fixed-width wire fields and bounded UTF-8 slices from read-only accessors. No Rust Vec/String/reference ABI. SDK integration stays with coordinator."
+  },
+  "limitations": [
+    "One state/projection value remains individually bounded. Host must budget the simultaneous sum of live state, transactional temporary, every projection/clone, encoding and borrowed sorted arrays; allocator headers are excluded. No claim of a combined 8MiB owner cap.",
+    "No Swift production source change: original actual Swift oracle source/input/output digests checked unchanged, success logs copied read-only; current Rust compares all 748 states. This is inherited actual Swift evidence, not a new Swift run.",
+    "No App/SDK/FFI/disk/native GUI/Windows integration or AT-RUST-011 acceptance performed. Original source/projection algorithms and valid Swift data output stay unchanged.",
+    "Original Swift logs include sandbox_extension_issue_file messages already recorded in the original receipt; pass exit codes do not prove native entitlement behavior."
+  ]
+}

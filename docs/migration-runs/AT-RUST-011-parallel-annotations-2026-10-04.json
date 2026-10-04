@@ -1,0 +1,391 @@
+{
+  "schemaVersion": 1,
+  "task": "AT-RUST-011 pure annotation state/actions/persistence projection",
+  "status": "pureModuleVerified; productionIntegrationPending",
+  "createdAtUtc": "2026-10-04T03:06:05.986397+00:00",
+  "snapshot": {
+    "directory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+    "commit": "04c04f43def3c708ef528e6563b40b3d1feea52f",
+    "manifest": {
+      "path": "parallel-snapshot.json",
+      "byteCount": 178074,
+      "sha256": "6102a1c6f0650fd4581fc8e02c6693dc99be06f017124c1e8f6c6affd0439fa8"
+    },
+    "expectedManifestSHA256": "6102a1c6f0650fd4581fc8e02c6693dc99be06f017124c1e8f6c6affd0439fa8",
+    "baselineFiles": 844,
+    "unchangedBaselineFiles": 843,
+    "modifiedBaselineFiles": [
+      "rust/crates/arktrace-viewer/src/lib.rs"
+    ],
+    "all844OriginalBytesAccounted": true,
+    "mainCheckoutWritten": false,
+    "previousPresentationSnapshotWritten": false
+  },
+  "ownedNewFiles": [
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_access.swift",
+      "byteCount": 1915,
+      "sha256": "53d5baf02764f499a7d7da1a10ab41ef727a2b10b031c08cddbef10c9e5f9bac"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_generate.py",
+      "byteCount": 6533,
+      "sha256": "00970650fc63b48fa7dad6a7b4588bc2cb1a3fdf9ed60aa32b70093bccb79846"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_harness.swift",
+      "byteCount": 9655,
+      "sha256": "6bdce4a2c7207746efe699dbbda41b2200a333365717e89626d3553d395d3155"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
+      "byteCount": 6560,
+      "sha256": "1fe9cb8173cf474a30c0d3368ef26f4fa0bf9b63a869ec6903ad5d2127a011b5"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/annotation_validate.py",
+      "byteCount": 1818,
+      "sha256": "47e55ea7e676d7bb43a51660b5768981d277081d6a0b0276c52184b0df566a2e"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/annotations.rs",
+      "byteCount": 30685,
+      "sha256": "d7bc5bab672ca6faf2500e64ec87f3cb336416665a1145d2c6c5a3f64cd38ca4"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/annotation_oracle.rs",
+      "byteCount": 7870,
+      "sha256": "409178b39e45772430ab9adaad669b068af30a09505cc1d18f18b52694c79ec0"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/annotation_regressions.rs",
+      "byteCount": 17751,
+      "sha256": "8b1867c57afb57a7feaa2d1cb60943550fab626f958ceaaa7f84fc46043824e5"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",
+      "byteCount": 273525,
+      "sha256": "77d8727d9ba5c420cae0ab3b202f13afd421440375ad5330077f98627217f220"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-oracle.json",
+      "byteCount": 6150862,
+      "sha256": "bb027933e3de12696b080dca4e2a83e3099f890770bd75ded02742cad268dbb4"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+      "byteCount": 13079,
+      "sha256": "186347e369bbff48025546870ec1256637a8273dc732bea4127517d85b0170cc"
+    }
+  ],
+  "existingFileApplication": {
+    "path": "rust/crates/arktrace-viewer/src/lib.rs",
+    "mode": "apply additive hunk only; never overwrite current main lib.rs",
+    "original": {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "kind": "file",
+      "byteCount": 3310,
+      "sha256": "0a091f3921621a328908db61de00643f547699117af77607537a94e6b9f37ab9"
+    },
+    "modified": {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "byteCount": 3352,
+      "sha256": "dbe238c43e25787eeef4f5c92aa824ca2ffe627f6fc8f129d8658ff0c3868333"
+    },
+    "hunk": "@@ -110,3 +110,6 @@\n     }\n     Ok(())\n }\n+\n+mod annotations;\n+pub use annotations::*;\n"
+  },
+  "toolchains": {
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "edition": 2024,
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "swiftLanguageMode": 6,
+    "minimumMacOS": 26
+  },
+  "cacheIsolation": {
+    "cargo": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo",
+    "cargoHome": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/dependencies",
+    "swiftpm": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-swiftpm",
+    "frozenEvidence": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence",
+    "registrySeedReadOnly": "copied previously frozen pinned registry entries from parallel-presentation-cargo/dependencies/registry into this task own cache; no shared mutable registry/target/locks",
+    "allCargoChecksOfflineAndLocked": true,
+    "manifestsLockContractsChanged": false
+  },
+  "api": {
+    "version": 1,
+    "state": "AnnotationState private owned bounded buffers; no Deserialize bypass",
+    "identity": "Int64 id/time/colorIndex, UInt64 session, UInt32 budget/version; memory layout is not ABI",
+    "actions": [
+      "add/update/remove flag",
+      "add/update/remove mark",
+      "cycle flag/mark color",
+      "previous/next flag/mark",
+      "scroll nearest flag",
+      "create transient/persistent mark command",
+      "replace session",
+      "advance session token preserving annotations/bounds/next ID (actual Swift cancel behavior)"
+    ],
+    "projection": "AnnotationPersistence with flags and kept marks; no content/path/favorite fields",
+    "outcome": "created key, reveal target/range, None/Save persistence intent",
+    "errorDiscriminants": {
+      "unsupportedVersion": 1,
+      "invalidRequest": 2,
+      "inputBudgetExceeded": 3,
+      "retainedBudgetExceeded": 4,
+      "arithmeticOverflow": 5,
+      "identityExhausted": 6,
+      "staleSession": 7,
+      "sessionExhausted": 8,
+      "cancelled": 9,
+      "deadlineReached": 10
+    }
+  },
+  "budgets": {
+    "maximumCombinedRecords": 4096,
+    "maximumSingleLabelUTF8Bytes": 4096,
+    "maximumInputBytes": 4194304,
+    "maximumRetainedLabelBytes": 4194304,
+    "maximumRetainedBytesPerOwnedStateOrProjection": 8388608,
+    "inputAccounting": "restore: record storage size for input slices plus all label UTF-8 bytes; action: request storage size plus optional label bytes; host encoded input has its own budget",
+    "retainedAccounting": "Rust struct + Vec capacity/String controls + String capacity; allocator headers excluded",
+    "transactionalStateCopies": 2,
+    "sortedResult": "at most 4096 borrowed record references; stable time + id ordering",
+    "checkPolicy": "entry/end; copy/retain/input loops per 256 records; each bounded label copy both sides; before/after bounded sort",
+    "publication": "all-or-error per call; failed apply/restore preserves live state"
+  },
+  "oracle": {
+    "receipt": {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+      "byteCount": 13079,
+      "sha256": "186347e369bbff48025546870ec1256637a8273dc732bea4127517d85b0170cc"
+    },
+    "cases": 74,
+    "actions": 674,
+    "states": 748,
+    "expectedResultsFromActualSwift": true,
+    "copiedExpectedStateAlgorithms": false,
+    "sourceDigestReceiptVerified": true,
+    "deferredGuard": "actual TraceTimelinePane rename closure body extracted verbatim and compiled inside cache-only controller access seam; original UI source and compiled block hashes in receipt",
+    "observation": "actual orderedFlags/orderedMarks/pointRange/strict navigation probes; public mutations/commands; real open/close/restoration; real sidecar save/load projection",
+    "comparison": "integer/key/session/UTF-8 fields exact; unchanged existing recursive comparator; no tolerance or expected formula generation"
+  },
+  "verification": [
+    {
+      "name": "formatPreparation",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_validate.py",
+        "fmt",
+        "-p",
+        "arktrace-viewer"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "startAtUtc": "2026-10-04T03:03:23.606273+00:00",
+      "finishedAtUtc": "2026-10-04T03:03:24.610957+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-final-formatPreparation.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_validate.py",
+        "fmt",
+        "-p",
+        "arktrace-viewer",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "startAtUtc": "2026-10-04T03:03:24.611350+00:00",
+      "finishedAtUtc": "2026-10-04T03:03:25.277464+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-final-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "tests",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "startAtUtc": "2026-10-04T03:03:25.277818+00:00",
+      "finishedAtUtc": "2026-10-04T03:03:32.097176+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-final-tests.log",
+        "byteCount": 9568,
+        "sha256": "dce952b0850e0c3277210b31276f41142ec99bd44baadedbe2e1a803f1e7dc11"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_validate.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "startAtUtc": "2026-10-04T03:03:32.097542+00:00",
+      "finishedAtUtc": "2026-10-04T03:03:33.173375+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-final-clippy.log",
+        "byteCount": 263,
+        "sha256": "7a079184808e68514ff2f2536b3a7abbffaf759892c542a0ffe4e66286c9fca6"
+      }
+    },
+    {
+      "name": "verify",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_validate.py",
+        "verify"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "startAtUtc": "2026-10-04T03:03:33.173681+00:00",
+      "finishedAtUtc": "2026-10-04T03:03:33.679810+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-final-verify.log",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      }
+    },
+    {
+      "name": "swiftOracle",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "exitCode": 0,
+      "passed": 1,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-swift-oracle.log",
+        "byteCount": 56771,
+        "sha256": "93eefd1378135aa715553198a2179399ab6874cbc52b346a49bfb65914d2a352"
+      },
+      "sandboxExtensionMessages": 297
+    },
+    {
+      "name": "swiftRegressions",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/annotation_swift.py",
+        "--regressions"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-annotations-20261004",
+      "exitCode": 0,
+      "passed": 15,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-swift-regressions.log",
+        "byteCount": 9274,
+        "sha256": "51589b6c26de468db42cbcaca0d9d73e8b38d454f1643f108bc103a6e9e20331"
+      },
+      "sandboxExtensionMessages": 17
+    }
+  ],
+  "actualCommandRecord": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-final-command-results.json",
+    "byteCount": 3167,
+    "sha256": "b3a9b10c6590bd199f4e7345b6bda0de757bf66d6a17c90b4c942e6ea4c8c62a"
+  },
+  "resultSummary": {
+    "rustViewerTestsPassed": 68,
+    "newRustTests": 15,
+    "swiftOracleTestsPassed": 1,
+    "swiftExistingTestsPassed": 15,
+    "swiftRenderingTestsPassed": 7,
+    "swiftAppSupportTestsPassed": 8,
+    "rustWorkspaceCrates": 8,
+    "frozenThirdPartyLicenseExpressions": 35,
+    "rustIgnoredTests": 0,
+    "rustFilteredTests": 0,
+    "finalCompilerWarnings": 0,
+    "finalCompilerErrors": 0,
+    "appBuildExecuted": false,
+    "nativeGuiAcceptanceExecuted": false
+  },
+  "resolvedAttempts": [
+    {
+      "name": "swiftSeamCompile",
+      "exitCode": 1,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-swift-attempt-1.log",
+        "byteCount": 16602,
+        "sha256": "3ae102afd336a7d204ce375a464a2ef27f86d1f91efe513f07554f1ce5e5a288"
+      },
+      "resolution": "Access seam initially used wrong inspector initializer labels. Fixed to the actual TraceEventInspector initializer, then real source execution passed."
+    },
+    {
+      "name": "clippyTestClone",
+      "exitCode": 101,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-clippy-attempt-1.log",
+        "byteCount": 1199,
+        "sha256": "a0e5094a37db53812a4ce89e0a12f7548bad04fd02ec4f564ccec82002dc265b"
+      },
+      "resolution": "Strict all-targets clippy rejected one redundant test clone. Replaced with slice::from_ref; no lint allowance or gate relaxation."
+    }
+  ],
+  "environmentMessages": {
+    "swiftOracleSandboxExtensionMessages": 297,
+    "swiftRegressionSandboxExtensionMessages": 17,
+    "allAssociatedTestsPassed": true,
+    "notProductionEntitlementAcceptance": true
+  },
+  "integrationProposal": {
+    "stateOwnership": "One AnnotationState per document session, outside viewport snapshots, held by the same session owner worker. Keep bounds/content identity and monotonic document session token; pan/zoom passes context without recreating/restoring annotations. For document cancel/token invalidation that retains the current document, use AdvanceSession instead of ReplaceSession; preserve records, bounds and next cursor while invalidating old editor tokens.",
+    "actions": "Route flag/mark create/update/delete/cycle and annotation commands through typed AnnotationRequest(version,session,context,action). Capture session in deferred editors; reject StaleSession before reused IDs can affect new trace state. Convert owner cancellation/deadline into AnnotationError::Cancelled/DeadlineReached.",
+    "persistence": "On Save intent, obtain bounded insertion-order persistence projection and combine it with the other owner-held view-state fields, including favorites, under current content hash/version checks. The module does not define sidecar JSON shape, path, trace name, bookmark or file removal. Treat persistence cancellation/retry independently from viewport generations so successful user edits are not dropped.",
+    "reveal": "Forward AnnotationReveal.range to the existing generic host reveal path/navigation module. Keep target kind/ID for UI association only; do not invent EventKey or Store lookup for annotations. nearest visible endpoints intentionally use the current Swift closed check.",
+    "ffiSdk": "Coordinator defines generated versioned fixed-width records (kind/id/time/range/color index/persistent flag and bounded UTF-8 offset+length), request discriminator, version/session token, error code and None/Save intent. Do not expose Rust Vec/String/reference layout. AnnotationState remains private owned data; colorIndex resolves through the already delivered annotation palette.",
+    "validation": "Re-run actual 748-state oracle against generated wire/SDK facts, ABI offsets/version and Swift/C# API gates, total owner+projection+encoding budget, stale editor after replacement, cancellation/deadline/retry, persistence format/content mismatch and overlay survival across real pan/zoom; build App and perform native GUI acceptance on main."
+  },
+  "limitations": [
+    "Pure module only. No Store/Engine/cache/SDK/FFI/App/CLI production integration, disk IO, sidecar schema, favorite rules, palette duplication, general reveal/viewport algorithm or completion of AT-RUST-011/macOS acceptance.",
+    "New input/retained caps, typed cancellation/deadline errors, ID/color/timestamp checked overflow and monotonically increasing non-wrapping session tokens are new safety boundaries. Trapping or over-budget Swift inputs are not executed as oracle vectors.",
+    "The oracle intercepts the unmodified annotation command-selected revealRange argument before generic viewport padding/clamping. Target range is compared; Rust target kind/ID is a new typed field separately checked against the real state/navigation records.",
+    "Restoration accepts duplicate/negative IDs and negative flag timestamps that current Swift Codable accepts. First matching ID is edited; all matches are deleted. Negative flag point targets fall back to [0,1), matching Swift. Product host still validates content identity and sidecar compatibility before restore.",
+    "Persistence projection includes insertion-order flags and persistent marks only. Its is_empty does not authorize deleting a sidecar that contains favorites; host owns whole view-state persistence decisions.",
+    "retained_bytes counts result struct, Vec capacity including String control blocks, and String capacity. Allocator headers, caller input, borrowed sorted reference arrays and transactional temporary copy are excluded; each state/projection is bounded and the host must budget simultaneous owner state/projection/encoding storage.",
+    "Atomicity is per apply/restore/projection call: a failed apply/restore does not mutate live state and a failed projection returns no partial projection. This is not a new disk-transaction guarantee; main owns persistence delivery/retry and existing atomic file operations.",
+    "Sorting is bounded to 4096 records and checked before/after, not inside sort comparison. Copy/retain/input loops check every 256 records; each <=4096-byte label copy checks both sides. Cancellation/deadline are supplied by the owner callback; the module has no clock.",
+    "Actual Swift execution emitted 297 sandbox_extension_issue_file messages; related regressions emitted 17. Exit codes and assertions passed. These are environment/security-scope messages, not compiler warnings or proof of production App bookmark entitlement behavior.",
+    "7 Rendering and 8 AppSupport existing tests passed; this is a relevant selection, not all Swift/App CI or a native Rust-backed GUI/device/Windows/release acceptance.",
+    "Owned Python readers/writers/subprocess text decoding use explicit UTF-8 and preserve non-ASCII fixture/source bytes. This fixes locale-dependent decoding but does not supply Windows native runtime evidence; Swift oracle requires macOS/Xcode."
+  ],
+  "utf8Portability": {
+    "audit": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-cargo/frozen-evidence/annotation-utf8-audit.json",
+      "byteCount": 2231,
+      "sha256": "a11744abe6e1e167a465070892a797cf95dd7bc2a5f2676f92fbd329e79b6bfe"
+    },
+    "explicitTextEncoding": "utf-8",
+    "textAccessCount": 13,
+    "ownedPythonScripts": 3,
+    "inputBytesUnchangedByEncodingFix": true,
+    "nonASCIIInputsPreserved": true,
+    "nativeWindowsExecution": false,
+    "baselineScriptsChanged": false
+  }
+}

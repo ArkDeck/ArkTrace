@@ -121,3 +121,6 @@ mod palette;
 mod presentation;
 pub use palette::*;
 pub use presentation::*;
+
+mod annotations;
+pub use annotations::*;
