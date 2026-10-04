@@ -10,8 +10,8 @@
   "sourceDigests": [
     {
       "path": "Package.swift",
-      "byteCount": 7220,
-      "sha256": "fd25a3f9657083f184dda44a62286ca7eef0338f40fc5a1744c352b6ba2ea369"
+      "byteCount": 7778,
+      "sha256": "3e2700964e39d7f3f8e9f3a9da4938c042ca97796b3c694bda79129823859621"
     },
     {
       "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
@@ -90,8 +90,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "byteCount": 11916,
-      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+      "byteCount": 13541,
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9"
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
@@ -135,8 +135,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "byteCount": 16274,
-      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+      "byteCount": 17117,
+      "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69"
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
@@ -304,12 +304,21 @@
       "testActualCounterCombinationOracle|CounterRevealCompatibilityOracleTests|testSearchResultSteppingRevealsWithoutStealingKeyboardFocus|testTimelineKeyboardAndVoiceOverContractUsesBoundedRealEvents"
     ],
     "cwd": "/private/tmp/arktrace-counter-mainline-swift/oracle-source",
+    "environment": {
+      "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-counter-mainline-swift",
+      "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
+      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/core-materialization-20261004/oracle-refresh/fresh-swift-counter-oracle.json",
+      "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
+      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/core-materialization-20261004/oracle-refresh/fresh-swift-counter-reveal.json",
+      "COUNTER_REVEAL_DATABASES": "/private/tmp/arktrace-counter-mainline-swift/databases",
+      "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
+    },
     "exitCode": 0,
-    "elapsedSeconds": 46.32148095800221,
+    "elapsedSeconds": 60.75906554199901,
     "log": {
-      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/counter-compat-mainline-20261004/fresh-swift-canonical-and-regressions.log",
-      "sha256": "613df97fe2e860d4b0965ebcad0ee5246f671e3dced0cff08cf65504c458dded",
-      "byteCount": 10329
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/core-materialization-20261004/oracle-refresh/fresh-swift-canonical-and-regressions.log",
+      "byteCount": 8005,
+      "sha256": "196866299c13d7763a034e29ec29f8442a4bc78a34d2a6046daacb9a83cefd93"
     }
   },
   "databases": [
@@ -334,8 +343,8 @@
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
   "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
   "setupLimitations": [
-    "Initial cache git init failed because a copied worktree .git file pointed at primary metadata; no source or metadata writes succeeded. Swift runner subsequently read the cache working tree correctly.",
-    "Swift test producer exited 0 and both outputs matched bytes, but parent proof finalization failed on missing preparation JSON; independent postprocessing audited the completed producer receipt and unchanged DB hashes.",
-    "First independent finalization attempt failed constructing a Python digest dictionary; no completed receipt was replaced."
-  ]
+    "Prior mainline setup limitations remain in the previous receipt; this fresh replay uses its independently audited access seams and unchanged frozen DBs."
+  ],
+  "previousReceiptSHA256": "a82a3f841b9b1c8c8fde654ed70617fd2d2268a054926dfd86a42413a2c2b91c",
+  "revalidatedBaseCommit": "f1ba02030316d10a046847ffdf055f1627757a9b"
 }

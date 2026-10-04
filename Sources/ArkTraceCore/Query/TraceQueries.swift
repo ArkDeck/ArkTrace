@@ -214,6 +214,19 @@ package struct TraceSummaryFacts: Hashable, Codable, Sendable {
         warnings: [String] = [],
         qualityIssues: [TraceDataQualityIssue] = []
     ) {
+        self.init(cpuCount: cpuCount, processCount: processCount, threadCount: threadCount,
+            cpuSliceCount: cpuSliceCount, threadStateCount: threadStateCount, namedSliceCount: namedSliceCount,
+            counterSeriesCount: counterSeriesCount, eventCountBySource: eventCountBySource,
+            dataQuality: TraceDataQuality(warnings: warnings, issues: qualityIssues))
+    }
+
+    /// Explicit quality evidence keeps its source order/multiplicity. Existing
+    /// callers using warnings/qualityIssues retain their compatibility merge.
+    public init(
+        cpuCount: TraceBoundedCount?, processCount: TraceBoundedCount, threadCount: TraceBoundedCount,
+        cpuSliceCount: TraceBoundedCount?, threadStateCount: TraceBoundedCount?, namedSliceCount: TraceBoundedCount?,
+        counterSeriesCount: TraceBoundedCount?, eventCountBySource: TraceEventSourceCounts?, dataQuality: TraceDataQuality
+    ) {
         self.cpuCount = cpuCount
         self.processCount = processCount
         self.threadCount = threadCount
@@ -222,9 +235,8 @@ package struct TraceSummaryFacts: Hashable, Codable, Sendable {
         self.namedSliceCount = namedSliceCount
         self.counterSeriesCount = counterSeriesCount
         self.eventCountBySource = eventCountBySource
-        let quality = TraceDataQuality(warnings: warnings, issues: qualityIssues)
-        self.warnings = quality.warnings
-        self.qualityIssues = quality.issues
+        self.warnings = dataQuality.warnings
+        self.qualityIssues = dataQuality.issues
     }
 }
 

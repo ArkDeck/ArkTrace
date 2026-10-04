@@ -8,6 +8,6 @@ public struct RustOpenResult: Codable, Sendable {
         TraceMetadata(traceSHA256: metadata.traceSHA256, sourceByteCount: metadata.sourceByteCount,
             durationNs: inspection.durationNs, sourceFormat: sourceFormat == .htrace ? "htrace" : "systrace",
             parser: metadata.parser, schemaFingerprint: inspection.schemaFingerprint,
-            capabilities: inspection.capabilities, dataQuality: TraceDataQuality(issues: inspection.dataQuality.warnings))
+            capabilities: inspection.capabilities, dataQuality: TraceDataQuality(preservingIssues: inspection.dataQuality.warnings))
     }
 }

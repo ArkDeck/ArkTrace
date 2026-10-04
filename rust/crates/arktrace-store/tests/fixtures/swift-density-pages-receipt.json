@@ -4,7 +4,7 @@
   "xcode": "Xcode 27.0\nBuild version 27A266a",
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
   "vectors": 190,
-  "executableSHA256": "c5b176f2d3d1b044aea3d57ccbfadc3f3d4322d0c9ce486884c9017288da595c",
+  "executableSHA256": "5f71a2bdae0db12a0b6e60f2614ee0e7e5f594edf9741002e6503cad3cf6d322",
   "databases": [
     {
       "fixture": "density-full",
@@ -93,8 +93,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
-      "byteCount": 11916
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9",
+      "byteCount": 13541
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
@@ -138,8 +138,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
-      "byteCount": 16274
+      "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69",
+      "byteCount": 17117
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",

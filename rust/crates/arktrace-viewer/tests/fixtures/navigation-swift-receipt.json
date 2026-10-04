@@ -7,115 +7,115 @@
     "test",
     "--disable-sandbox",
     "--config-path",
-    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/configuration",
+    "/private/tmp/arktrace-navigation-mainline-swiftpm/configuration",
     "--security-path",
-    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/security",
+    "/private/tmp/arktrace-navigation-mainline-swiftpm/security",
     "--filter",
     "NavigationCanonicalOracleTests"
   ],
   "exitCode": 0,
   "sourceFiles": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
       "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
       "byteCount": 92567
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
       "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
       "byteCount": 101313
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
       "sha256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
       "byteCount": 4911
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/Sources/ArkTraceRendering/TimelineModels.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineModels.swift",
       "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
       "byteCount": 24339
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/Sources/ArkTraceCore/Model/TraceModels.swift",
-      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
-      "byteCount": 11916
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceModels.swift",
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9",
+      "byteCount": 13541
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceEventModels.swift",
       "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
       "byteCount": 17503
     }
   ],
   "patchedSources": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
       "sha256": "5d3c96ec64e68235051ece7c7a72b282c12c4b1931a00e25fd8be442666b418b",
       "byteCount": 94038
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
       "sha256": "ebe6242e02fe550c8bd380330e4f9f4f1d596d84757cca660bb80d8fd6519d54",
       "byteCount": 101876
     }
   ],
   "seams": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/oracle/navigation_controller_seam.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/oracle/navigation_controller_seam.swift",
       "sha256": "bc35a93fbad4364ff537723ea6822f199c88e07e0357367fda032dd3964d91c8",
       "byteCount": 1247
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/oracle/navigation_rendering_seam.swift",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/oracle/navigation_rendering_seam.swift",
       "sha256": "c6b7ea2cc08bb9b06be5bd2b8500f413c291f9e7070b64df3388d50087367bc9",
       "byteCount": 562
     }
   ],
   "harness": {
-    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/oracle/navigation_harness.swift",
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/oracle/navigation_harness.swift",
     "sha256": "f9dc850436a7b5bcec01169b9da1b8607f70c76ef85d0cee4583d30789f77c7c",
     "byteCount": 16616
   },
   "inputs": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",
       "sha256": "764301d329540c92f22ec3df9eb268f2363c9437f153b54be836d1022ff037fe",
       "byteCount": 27471
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-inputs.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-inputs.json",
       "sha256": "4c7fe192ca59a5827c2a513a4c76b348a79ced780f4477cbbb4e4a36e040262a",
       "byteCount": 126403
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-inputs.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-inputs.json",
       "sha256": "f6c19176fb8a993e45c06263cf021369d6b52db52449e1de26ae471f99cf30b8",
       "byteCount": 15936
     }
   ],
   "log": {
-    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-navigation-swiftpm/navigation-oracle.log",
-    "sha256": "4d360c1f7f2603c8b4de8afbb23310f1fb5176e199f12736a5dc27f1f4a48858",
-    "byteCount": 8268
+    "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
+    "sha256": "e8438374c5fb9fb9db851e3d60ce0284fb4f3662862831b854e1029f48f96090",
+    "byteCount": 5385
   },
   "note": "Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.",
   "outputs": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-oracle.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-oracle.json",
       "sha256": "78cd3c72a4ccec350defa471255e7fe1a9fffa8e025971c0af0af9ffa00f9486",
       "byteCount": 1299042
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-swift-oracle.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-swift-oracle.json",
       "sha256": "7c3db9a4bcb5c8400273d08b8fc0ad100073ede8f03fe8a1c858be3843967fe0",
       "byteCount": 13300
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-swift-oracle.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-swift-oracle.json",
       "sha256": "36556ddac2178441a911fe647adc84a8052cb7e1072fe98404ced48a8add3af4",
       "byteCount": 57427
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-navigation-20261004/rust/crates/arktrace-viewer/tests/fixtures/navigation-whitespace-swift-oracle.json",
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-whitespace-swift-oracle.json",
       "sha256": "b7e91cf48f65e2d8ccf1cc394bf61dd282ce8bb61d918db8ebb554924d46dfc3",
       "byteCount": 196
     }

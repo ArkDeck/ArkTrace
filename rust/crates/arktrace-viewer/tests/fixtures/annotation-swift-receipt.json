@@ -118,8 +118,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "byteCount": 11916,
-      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+      "byteCount": 13541,
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9"
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
@@ -163,8 +163,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "byteCount": 16274,
-      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+      "byteCount": 17117,
+      "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69"
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
@@ -304,17 +304,17 @@
   ],
   "cacheOnlyAugmentedSources": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-swiftpm/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
       "byteCount": 94832,
       "sha256": "ed5855122e4b1932df43ca8a81ea618414ff1606f544cf7a14bb7bb949154c36"
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-swiftpm/oracle-source/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+      "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
       "byteCount": 91176,
       "sha256": "8d22eee498d97deaf81657288149cfdb608034fac9806f2054c61f3584a7f844"
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-annotations-swiftpm/oracle-source/Package.swift",
+      "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Package.swift",
       "byteCount": 1192,
       "sha256": "72548eed43da9a05da346dbfd1e57dd5b693f9598e64f3dcf8c282bcf0ec69b8"
     }

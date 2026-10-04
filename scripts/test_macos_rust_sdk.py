@@ -46,7 +46,13 @@ def consumer(artifact):
         subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter','ArkTraceRustRuntimeTests','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
     unit_output=unit_log.read_text(encoding='utf-8')
     unit_tests=re.findall(r"Test Case '.*ArkTraceRustRuntimeTests.*' passed",unit_output)
-    assert len(unit_tests)==35 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
+    assert len(unit_tests)==41 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
+    core_log=cache/'core-consumer-build.log'
+    with core_log.open('w') as output:
+        subprocess.run(['sh','scripts/run-swiftpm.sh','build','--product','ArkTraceRustCoreConformance','--disable-sandbox',
+            '--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'-Xswiftc','-warnings-as-errors'],
+            cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
+    assert not re.search(r'warning:|error:',core_log.read_text(encoding='utf-8'))
     relative='.arktrace-native/'+identity+'/CArkTrace.xcframework'
     env.update(ARKTRACE_RUST_XCFRAMEWORK=relative,CLANG_MODULE_CACHE_PATH=str(cache/'ModuleCache'),SWIFTPM_MODULECACHE_OVERRIDE=str(cache/'ModuleCache'))
     # Consume the complete actual root package, never a copied SDK source target.
@@ -77,7 +83,8 @@ let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], de
     lifecycle=cache/'build/out/Products/Debug/Lifecycle'
     directory=cache/'build/out/Products/Debug/DirectoryOwnership'
     summary=cache/'build/out/Products/Debug/SummaryOwnership'
-    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'summaryExecutable':{'byteCount':summary.stat().st_size,'sha256':sha(summary)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
+    core=cache/'arktrace/build/out/Products/Debug/ArkTraceRustCoreConformance'
+    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'summaryExecutable':{'byteCount':summary.stat().st_size,'sha256':sha(summary)},'coreExecutable':{'byteCount':core.stat().st_size,'sha256':sha(core)},'coreConsumerBuildLogSHA256':sha(core_log),'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
 
 def projection(records):
     def array(name, values):

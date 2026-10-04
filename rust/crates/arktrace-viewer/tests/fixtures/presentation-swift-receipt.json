@@ -45,8 +45,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
-      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
-      "byteCount": 11916
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9",
+      "byteCount": 13541
     },
     {
       "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
@@ -90,8 +90,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
-      "byteCount": 16274
+      "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69",
+      "byteCount": 17117
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
@@ -176,17 +176,17 @@
   ],
   "cacheOnlyAugmentedSources": [
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "path": "/private/tmp/arktrace-presentation-core-refresh/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
       "sha256": "346f123925aa5dfb4301e4602300d92c839492939a6beedd3e89d8760ddc0669",
       "byteCount": 140706
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "path": "/private/tmp/arktrace-presentation-core-refresh/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
       "sha256": "f1a68242314235445c67914174359ed339d9c49b9bc4e71f20c0676cbbbfd6e1",
       "byteCount": 102724
     },
     {
-      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "path": "/private/tmp/arktrace-presentation-core-refresh/oracle-source/Sources/ArkTraceRendering/TimelineColorPalette.swift",
       "sha256": "86d41d14771842658661f25b31356eac010cec8a75627225f9d776689c50d79c",
       "byteCount": 29218
     }

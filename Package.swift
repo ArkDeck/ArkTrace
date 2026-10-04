@@ -23,7 +23,7 @@ let nativeSDKPath = ProcessInfo.processInfo.environment["ARKTRACE_RUST_XCFRAMEWO
 let nativeSDKFixtures = ProcessInfo.processInfo.environment["ARKTRACE_RUST_SDK_FIXTURES"] == "1"
 let nativeProducts: [Product] = nativeSDKPath == nil ? [] : [
     .library(name: "ArkTraceRustRuntime", targets: ["ArkTraceRustRuntime"])
-]
+] + (nativeSDKFixtures ? [.executable(name: "ArkTraceRustCoreConformance", targets: ["ArkTraceRustCoreConformance"])] : [])
 let nativeTargets: [Target] = if let nativeSDKPath {
     [
         .binaryTarget(name: "CArkTrace", path: nativeSDKPath),
@@ -32,7 +32,12 @@ let nativeTargets: [Target] = if let nativeSDKPath {
             linkerSettings: [.linkedFramework("Security"), .linkedFramework("CoreFoundation")]),
         .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"],
             swiftSettings: firstPartySwiftSettings),
-    ]
+    ] + (nativeSDKFixtures ? [
+        // Package-scoped Core DTOs are intentionally not promoted for tests.
+        // This development-only consumer exercises the actual shared adapter.
+        .executableTarget(name: "ArkTraceRustCoreConformance", dependencies: ["ArkTraceCore", "ArkTraceRustRuntime"],
+            path: "scripts/swift-sdk-core", swiftSettings: firstPartySwiftSettings + [.unsafeFlags(["-parse-as-library"])])
+    ] : [])
 } else { [] }
 
 let package = Package(

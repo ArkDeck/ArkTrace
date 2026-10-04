@@ -4,7 +4,7 @@ import XCTest
 @testable import ArkTraceRustRuntime
 
 @concurrent
-private func openingFixture() async throws -> Data {
+func openingFixture() async throws -> Data {
     let root = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
     let metadata = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appending(path: "contracts/ready-metadata.json")))
     return try JSONSerialization.data(withJSONObject: ["formatVersion": 1, "session": 7, "request": 9, "body": [

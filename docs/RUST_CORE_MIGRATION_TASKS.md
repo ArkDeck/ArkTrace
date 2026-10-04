@@ -764,6 +764,17 @@ nil，未冒充文本检查。其它响应、aggregate/RSS、App 切换与发布
 Core warning materialization、其他响应、repository/App 接线与完整 012/013/macOS
 验收仍未完成，见[typed summary SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
 
+随后接通 opening、目录和 summary 的显式 Core 兼容复制；机器质量入口保留顺序、
+重复、null 和 count，移除人类 prose，旧 warning 构造接口保持兼容。新增 10 项测试，
+41 项 SDK tests、四个真实借用编译反例、两条真实 trace 的 Core metadata/8 个目录页/
+4 个 summary 对照通过，Core 副本在 SDK owners 归零及 shutdown 后仍有效。
+当前 Store/Analysis/Viewer 原 Swift oracle 已真实重放，原输出字节不变，更新收据绑定
+当前 Core 源码；没有重写历史报告或放宽 verifier。默认 Swift 611 tests（605 passed、
+6 个既有 skips）、API baseline、生产 SDK、App 构建及文档类型检查通过；App 构建保留
+一条可选 AppIntents 提取告警。App 仍用 Swift 内核；人类质量呈现、其他 typed responses、
+repository/App 接线与完整 macOS 验收仍待办，见
+[Core 兼容复制记录](migration-runs/AT-RUST-012-2026-10-04-core-materialization.md)。
+
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 
 - 状态：planned；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。

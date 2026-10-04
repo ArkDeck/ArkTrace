@@ -20,10 +20,17 @@ def main():
     if not cache.is_absolute() or cache.resolve().is_relative_to(ROOT): raise SystemExit("external absolute cache required")
     source = cache / "navigation-oracle-source"
     source.mkdir(parents=True, exist_ok=True)
+    # Older cache copies may contain the calling worktree's Git pointer.
+    # Remove only that cache-owned file, before creating independent metadata.
+    git_marker = source / ".git"
+    if git_marker.is_symlink(): raise SystemExit("oracle Git metadata must not be a symlink")
+    if git_marker.is_file():
+        if not git_marker.read_text().startswith("gitdir: "): raise SystemExit("unexpected oracle Git marker")
+        git_marker.unlink()
     for directory in ("Sources", "Tests", "scripts", "ThirdParty", "Fixtures"):
         shutil.copytree(ROOT / directory, source / directory, dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__", "trace_streamer"))
     for path in ROOT.iterdir():
-        if path.is_file() and not path.is_symlink(): shutil.copyfile(path, source / path.name)
+        if path.name != ".git" and path.is_file() and not path.is_symlink(): shutil.copyfile(path, source / path.name)
     controller_path = "Sources/ArkTraceAppSupport/TraceDocumentController.swift"
     original = (ROOT / controller_path).read_text()
     patched = original.replace("    private func scheduleSnapshot(preference: TimelineDetailPreference) {", "    private func scheduleSnapshot(preference: TimelineDetailPreference) {\n        navigationOraclePreferences.append(preference)")

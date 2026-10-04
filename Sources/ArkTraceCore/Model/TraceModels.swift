@@ -184,6 +184,35 @@ public struct TraceDataQuality: Hashable, Codable, Sendable {
         self.issues = combined
     }
 
+    /// Copies machine evidence without deduplication or human diagnostic text.
+    /// Category/scope/count remain the semantic facts; caller-supplied prose is
+    /// discarded before admission, as at the existing machine boundary.
+    public init(machineIssues: [TraceDataQualityIssue]) throws {
+        guard machineIssues.allSatisfy({ issue in
+            issue.category != .unclassified && (issue.scope.map { TraceDataQualityScope.machineAllowed.contains($0) } ?? true)
+                && (issue.count.map { $0 >= 0 } ?? true)
+        }) else {
+            throw ArkTraceError(code: .invalidArgument, stage: .request, message: "Machine quality evidence is invalid")
+        }
+        self.init(preservingIssues: machineIssues.map {
+            TraceDataQualityIssue(category: $0.category, scope: $0.scope, count: $0.count)
+        })
+    }
+
+    /// Stored structured evidence already has an order and multiplicity.
+    /// Legacy warning strings are merged once without normalizing that array.
+    package init(preservingIssues: [TraceDataQualityIssue], legacyWarnings: [String] = []) {
+        var combined = preservingIssues
+        var represented = Set(preservingIssues.compactMap(\.message))
+        for warning in legacyWarnings where represented.insert(warning).inserted {
+            combined.append(TraceDataQualityIssue(category: .unclassified, message: warning))
+        }
+        self.status = combined.isEmpty ? .ok : .warnings
+        self.issues = combined
+        var seen = Set<String>()
+        self.warnings = combined.compactMap(\.message).filter { seen.insert($0).inserted }
+    }
+
     private enum CodingKeys: String, CodingKey {
         case status
         case warnings
@@ -197,7 +226,7 @@ public struct TraceDataQuality: Hashable, Codable, Sendable {
             [TraceDataQualityIssue].self,
             forKey: .issues
         ) ?? []
-        self.init(warnings: warnings, issues: issues)
+        self.init(preservingIssues: issues, legacyWarnings: warnings)
     }
 
     public func encode(to encoder: Encoder) throws {

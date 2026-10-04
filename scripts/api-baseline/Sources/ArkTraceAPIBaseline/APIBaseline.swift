@@ -365,3 +365,8 @@ private func pinAnalysisSurface(analysis: TraceRangeAnalysis) {
     _ = analysis.sliceNameAggregatesTruncated
     _ = analysis.truncated
 }
+
+// The shared machine-evidence entry point is available to package consumers.
+private func pinMachineQualitySurface(_ issues: [TraceDataQualityIssue]) throws {
+    _ = try TraceDataQuality(machineIssues: issues)
+}
