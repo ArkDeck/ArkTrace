@@ -39,13 +39,14 @@ public enum RustSourceFormat: UInt32, Sendable { case htrace = 1, systrace = 2 }
 /// Native Engine operations are actor-isolated. Polling suspends this actor;
 /// independent sessions and cancellation remain able to make progress.
 public actor RustEngine {
+    nonisolated let identity: UInt64
     private let lease: EngineLease
     private var sessions: [UInt64: Bool] = [:] // false = ready, true = closing
     private var requests: Set<UInt64> = []
     private var closes: [UInt64: Task<Void, Error>] = [:]
     private var shutdownTask: Task<Void, Error>?
     private var draining = false
-    private init(_ handle: UInt64) { lease = EngineLease(handle) }
+    private init(_ handle: UInt64) { lease = EngineLease(handle); identity = handle }
 
     @concurrent
     public static func create(_ configuration: RustConfiguration) async throws -> RustEngine {
@@ -191,7 +192,7 @@ public actor RustEngine {
         return try await retryAdmission(until: .now.advanced(by: .seconds(60))) {
             var out = unsafe ArkTraceResultView()
             try unsafe checkAdmission(arktrace_result_acquire(handle, request, &out, UInt64(MemoryLayout<ArkTraceResultView>.size)))
-            do { return try unsafe RustResult(out) }
+            do { return try unsafe RustResult(out, engineIdentity: handle, requestIdentity: request) }
             catch { let owner = unsafe out.owner; RustCleanup.schedule { try await releaseResultOwner(owner) }; throw error }
         }
     }
@@ -296,6 +297,13 @@ public actor RustEngine {
     /// not stand in for the pending native event/metric batch contract.
     public func developmentLifecycleCounts() -> (sessions: Int, requests: Int) {
         (sessions.count, requests.count)
+    }
+    /// SDK storage diagnostics are independent of native result leases. Read
+    /// after settling tasks/ARC; the separate atomic loads are not a snapshot
+    /// of concurrent admission and do not measure Foundation scratch or RSS.
+    public static func developmentDirectoryStorageCounts() -> (bytes: Int, owners: Int, stagingBytes: Int, stagingOwners: Int) {
+        let staging = RustDirectoryDecoder.developmentStagingCounts
+        return (RustRetainedStorage.shared.retainedBytes, RustRetainedStorage.shared.retainedOwners, staging.bytes, staging.owners)
     }
     #endif
 }

@@ -477,6 +477,7 @@ jobs:
             sdk-consumer.json
             ${{ runner.temp }}/arktrace-sdk-consumer/sdk-build.log
             ${{ runner.temp }}/arktrace-sdk-consumer/consumer-build.log
+            ${{ runner.temp }}/arktrace-sdk-consumer/sdk-unit-tests.log
             ${{ runner.temp }}/arktrace-sdk-consumer/*.invalid.log
           if-no-files-found: ignore
           retention-days: 7

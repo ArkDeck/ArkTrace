@@ -13,6 +13,14 @@ public final class RustSession: Sendable {
     public func query(_ request: RustRequest, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustResult {
         try await engine.query(handle, request: request, timeoutMilliseconds: timeoutMilliseconds)
     }
+    public func processes(_ query: RustProcessQuery = RustProcessQuery(), timeoutMilliseconds: UInt32 = 30_000) async throws -> RustProcessPage {
+        let result = try await engine.query(handle, request: .processes(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.processPage(identity: RustSessionIdentity(engine: engine.identity, session: handle), limit: query.limit)
+    }
+    public func threads(_ query: RustThreadQuery = RustThreadQuery(), timeoutMilliseconds: UInt32 = 30_000) async throws -> RustThreadPage {
+        let result = try await engine.query(handle, request: .threads(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.threadPage(identity: RustSessionIdentity(engine: engine.identity, session: handle), limit: query.limit)
+    }
     public func snapshot(_ query: RustViewportQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustSnapshot? {
         try await engine.snapshot(handle, query: query, timeoutMilliseconds: timeoutMilliseconds)
     }

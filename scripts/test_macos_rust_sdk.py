@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import re
 from stage_macos_rust_sdk import verified_receipt
 from test_macos_ffi_owner import compare, scene
 from ffi_test_support import TYPES
@@ -30,11 +31,20 @@ def consumer(artifact):
     lifecycle_sources=package/'Sources/Lifecycle';lifecycle_sources.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(ROOT/'scripts/swift-sdk-lifecycle/Lifecycle.swift',lifecycle_sources/'Lifecycle.swift')
     shutil.copyfile(ROOT/'scripts/swift-sdk-conformance/GeneratedRecords.swift',lifecycle_sources/'GeneratedRecords.swift')
+    directory_sources=package/'Sources/DirectoryOwnership';directory_sources.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(ROOT/'scripts/swift-sdk-directory/DirectoryOwnership.swift',directory_sources/'DirectoryOwnership.swift')
     mirror=cache/'arktrace/workspace'
     env=os.environ.copy();env.update(ARKTRACE_SWIFTPM_CACHE_ROOT=str(cache/'arktrace'),ARKTRACE_RUST_XCFRAMEWORK=str(artifact),ARKTRACE_RUST_SDK_FIXTURES='1')
     log=cache/'sdk-build.log'
     with log.open('w') as output:
         subprocess.run(['sh','scripts/run-swiftpm.sh','build','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--target','ArkTraceRustRuntime','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
+    assert not re.search(r'warning:|error:',log.read_text(encoding='utf-8')),log.read_text(encoding='utf-8')[-6000:]
+    unit_log=cache/'sdk-unit-tests.log'
+    with unit_log.open('w') as output:
+        subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter','ArkTraceRustRuntimeTests','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
+    unit_output=unit_log.read_text(encoding='utf-8')
+    unit_tests=re.findall(r"Test Case '.*ArkTraceRustRuntimeTests.*' passed",unit_output)
+    assert len(unit_tests)==14 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
     relative='.arktrace-native/'+identity+'/CArkTrace.xcframework'
     env.update(ARKTRACE_RUST_XCFRAMEWORK=relative,CLANG_MODULE_CACHE_PATH=str(cache/'ModuleCache'),SWIFTPM_MODULECACHE_OVERRIDE=str(cache/'ModuleCache'))
     # Consume the complete actual root package, never a copied SDK source target.
@@ -42,25 +52,28 @@ def consumer(artifact):
 import PackageDescription
 let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], dependencies: [.package(name: "ArkTrace", path: %s)], targets: [
  .executableTarget(name: "Consumer", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()]),
- .executableTarget(name: "Lifecycle", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()])
+ .executableTarget(name: "Lifecycle", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()]),
+ .executableTarget(name: "DirectoryOwnership", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])])
 ], swiftLanguageModes: [.v6])
 ''' % json.dumps(str(mirror)))
     invocation=['swift','build','--package-path',str(package),'--scratch-path',str(cache/'build'),'--cache-path',str(cache/'dependencies'),'--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'-Xswiftc','-warnings-as-errors']
     with (cache/'consumer-build.log').open('w') as output:
         subprocess.run(invocation,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
+    assert not re.search(r'warning:|error:',(cache/'consumer-build.log').read_text(encoding='utf-8'))
     rejected=[]
     for case in sorted((ROOT/'scripts/swift-sdk-conformance').glob('*.invalid')):
         invalid=sources/'Invalid.swift';invalid.write_bytes(case.read_bytes())
         try:
             with (cache/(case.name+'.log')).open('w') as output:
                 failed=subprocess.run(invocation,env=env,stdout=output,stderr=subprocess.STDOUT)
-            diagnostic=(cache/(case.name+'.log')).read_text()
+            diagnostic=(cache/(case.name+'.log')).read_text(encoding='utf-8')
             assert failed.returncode!=0 and (('lifetime-dependent' in diagnostic and 'escapes its scope' in diagnostic) or ('Span' in diagnostic and 'Escapable' in diagnostic)),diagnostic[-6000:]
             rejected.append({'case':case.name,'exitCode':failed.returncode,'logSHA256':sha(cache/(case.name+'.log'))})
         finally:invalid.unlink()
     executable=cache/'build/out/Products/Debug/Consumer'
     lifecycle=cache/'build/out/Products/Debug/Lifecycle'
-    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'borrowCompileRejections':rejected}
+    directory=cache/'build/out/Products/Debug/DirectoryOwnership'
+    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
 
 def projection(records):
     def array(name, values):

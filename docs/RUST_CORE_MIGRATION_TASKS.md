@@ -721,6 +721,13 @@ hash 不变、无 Ready 残留。10 warmups 不计入这 1,000 轮，取消 admi
 typed response/decoded-owner budget、C# owners、event/metric、生产签名和 SDK 分发仍待
 完成，012 与 macOS 整体验收继续保持 in-progress。
 
+同日继续接通进程/线程 typed SDK pages 与共享 ARC credit：私有 packed arrays/UTF-8
+pool、Engine+Session 身份和实际 request 验证，记录/质量/text views 保持 owner；14 个
+SDK 测试和四个实际借用编译反例通过。三条真实 trace 的 18 个目录页与独立发起的
+native 查询一致，256-owner 拒绝/恢复、关闭后存活与最终归零已实测；zlib 的名称为
+nil，未冒充文本检查。其它响应、aggregate/RSS、App 切换与发布/性能验收仍待完成。
+见[typed 目录 SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-directory-sdk.md)。
+
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 
 - 状态：planned；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。

@@ -3,7 +3,8 @@ import Synchronization
 /// Credits for the SDK's explicit JSON byte copies, distinct from Rust leases.
 /// JSONDecoder scratch, decoded values and copies made by consumers are not an
 /// RSS measurement or covered by this counter. Retained decoded DTO ownership
-/// remains a separate AT-RUST-012 gate.
+/// uses separate packed-owner credits for typed directory pages. Other typed
+/// responses and complete AT-RUST-012 aggregate budgeting remain pending.
 enum RustDecodeCopies {
     private static let used = Atomic<Int>(0)
     static let maximumBytes = 64 * 1024 * 1024

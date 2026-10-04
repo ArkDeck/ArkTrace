@@ -1,0 +1,6 @@
+import ArkTraceRustRuntime
+func invalidTextBorrowCapture(_ owner: RustOwnedText) {
+    _ = owner.withUTF8 { text in
+        Task { text.count }
+    }
+}

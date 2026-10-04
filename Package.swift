@@ -30,6 +30,8 @@ let nativeTargets: [Target] = if let nativeSDKPath {
         .target(name: "ArkTraceRustRuntime", dependencies: ["ArkTraceCore", "CArkTrace"],
             swiftSettings: firstPartySwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : []),
             linkerSettings: [.linkedFramework("Security"), .linkedFramework("CoreFoundation")]),
+        .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"],
+            swiftSettings: firstPartySwiftSettings),
     ]
 } else { [] }
 

@@ -191,6 +191,21 @@ scripts/swift-sdk-lifecycle/Lifecycle.swift
 scripts/test_macos_rust_sdk.py
 scripts/test_macos_rust_lifecycle.py'
 
+expect "typed directory SDK tests use the artifact-enabled macOS lane" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift'
+
+expect "package-external directory owner selects the native SDK compile gate" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'scripts/swift-sdk-directory/DirectoryOwnership.swift
+scripts/test_macos_directory_sdk.py'
+
 expect "native APFS harness selects the macOS Rust lane" \
     'lane_swiftpm=false
 lane_app=false

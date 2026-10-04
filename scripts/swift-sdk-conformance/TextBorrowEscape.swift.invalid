@@ -1,0 +1,5 @@
+import ArkTraceRustRuntime
+func invalidTextBorrowEscape(_ owner: RustOwnedText) {
+    let escaped: Span<UInt8> = owner.withUTF8 { text in return text }
+    _ = escaped.count
+}

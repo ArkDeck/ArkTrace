@@ -21,7 +21,9 @@ public struct RustResult: Sendable {
     public let count: Int
     public let retainedBytes: UInt64
     let kind: UInt32
-    init(_ view: ArkTraceResultView) throws {
+    private let requestIdentity: UInt64
+    private let engineIdentity: UInt64
+    init(_ view: ArkTraceResultView, engineIdentity: UInt64 = 0, requestIdentity: UInt64 = 0) throws {
         guard unsafe view.struct_size == UInt32(MemoryLayout<ArkTraceResultView>.size),
             unsafe view.kind == ARKTRACE_RESULT_SUCCESS || view.kind == ARKTRACE_RESULT_FAILURE,
             unsafe view.retained_bytes >= view.length, unsafe view.retained_bytes <= 256 * 1024 * 1024,
@@ -29,6 +31,8 @@ public struct RustResult: Sendable {
             let pointer = unsafe view.data else { throw RustAdmission.invalidBuffer }
         lease = unsafe ResultLease(owner: view.owner, pointer: pointer)
         count = unsafe Int(view.length); retainedBytes = unsafe view.retained_bytes; kind = unsafe view.kind
+        self.requestIdentity = requestIdentity
+        self.engineIdentity = engineIdentity
     }
     public func withBytes<R>(_ body: (Span<UInt8>) throws -> R) rethrows -> R {
         try withExtendedLifetime(self) {
@@ -36,6 +40,28 @@ public struct RustResult: Sendable {
             return try body(span)
         }
     }
+    @concurrent
+    func processPage(identity: RustSessionIdentity, limit: Int) async throws -> RustProcessPage {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustDirectoryDecoder.processes(data, identity: identity, request: requestIdentity, limit: limit)
+    }
+    @concurrent
+    func threadPage(identity: RustSessionIdentity, limit: Int) async throws -> RustThreadPage {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustDirectoryDecoder.threads(data, identity: identity, request: requestIdentity, limit: limit)
+    }
+    /// Caller-directed materialization. Returned DTOs and allocations made by
+    /// the caller's Decodable implementation are caller-owned; only the
+    /// explicit temporary JSON copy is charged here. Product directory paths
+    /// use RustSession.processes/threads and their retained packed owners.
     @concurrent
     public func decode<Body: Decodable & Sendable>(_ type: Body.Type) async throws -> Body {
         precondition(!Thread.isMainThread)
