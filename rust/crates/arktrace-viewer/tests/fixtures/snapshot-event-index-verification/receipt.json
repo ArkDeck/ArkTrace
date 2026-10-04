@@ -1,0 +1,120 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "fmt",
+      "--all"
+    ],
+    "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/format.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "byteCount": 0,
+    "environment": {
+      "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+      "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+      "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "fmt",
+      "--all",
+      "--check"
+    ],
+    "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/fmt-check.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "byteCount": 0,
+    "environment": {
+      "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+      "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+      "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/clippy.log",
+    "sha256": "9fa0588221158b3ee13f9267a1f8174426daba857856b43a813c6437126c1f8c",
+    "byteCount": 860,
+    "environment": {
+      "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+      "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+      "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/run-cargo.py",
+      "test",
+      "-p",
+      "arktrace-viewer",
+      "--",
+      "--nocapture"
+    ],
+    "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/viewer-tests.log",
+    "sha256": "4da20abcbd1fadded274271000abdef80ae0183de0c461edff8fe434d7fb5ca6",
+    "byteCount": 16400,
+    "environment": {
+      "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+      "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+      "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/verify_rust_workspace.py"
+    ],
+    "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/workspace.log",
+    "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+    "byteCount": 125,
+    "environment": {
+      "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+      "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+      "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  },
+  {
+    "command": [
+      "sh",
+      "scripts/verify_licenses.sh"
+    ],
+    "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "exitCode": 0,
+    "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/licenses.log",
+    "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+    "byteCount": 102,
+    "environment": {
+      "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+      "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+      "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "CARGO_NET_OFFLINE": "true"
+    }
+  }
+]

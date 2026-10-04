@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main():
+    from verify_viewer_facts_oracles import main as verify_viewer_facts_oracles
+    verify_viewer_facts_oracles()
     from verify_analysis_oracles import main as verify_analysis_oracles
     verify_analysis_oracles()
     from verify_store_oracles import main as verify_store_oracles

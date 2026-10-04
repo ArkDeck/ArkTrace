@@ -1,0 +1,111 @@
+import ArkTraceCore
+import ArkTraceStore
+import ArkTraceRendering
+import Foundation
+import XCTest
+
+private struct Case: Decodable, Sendable {
+    let id: String
+    let fixture: String
+    let kind: String
+    let range: TraceTimeRange
+    let limit: Int
+    let cpu: Int64?
+    let threadKey: Int64?
+    let processKey: Int64?
+    let filterID: Int64?
+    let focusedKey: EventKey?
+    var source: TimelineTrackSource {
+        switch kind {
+        case "cpu": .cpu(cpu!)
+        case "threadState": .threadState(ThreadKey(itid: threadKey!))
+        case "namedSlice": .namedSlice(threadKey.map(ThreadKey.init))
+        case "frame": .frame(processKey.map(ProcessKey.init))
+        case "cpuCounter": .cpuCounter(filterID: filterID!, cpu: cpu)
+        case "processCounter": .processCounter(filterID: filterID!, processKey: processKey.map(ProcessKey.init))
+        default: fatalError("Invalid bounded harness kind")
+        }
+    }
+}
+private func object<T: Encodable>(_ value: T) throws -> Any {
+    try JSONSerialization.jsonObject(with: JSONEncoder().encode(value))
+}
+private func page<T: Encodable & Sendable>(_ value: TraceEventPage<T>) throws -> [String: Any] {
+    ["items": try object(value.items), "truncated": value.truncated,
+     "capabilityAvailable": value.capabilityAvailable]
+}
+private func facts(_ inspector: TraceEventInspector) throws -> [String: Any] {
+    // Read the real immutable inspector, preserving explicit nil vs empty text.
+    var result = try object(inspector) as! [String: Any]
+    result["kind"] = result.removeValue(forKey: "type")
+    result["isInstant"] = inspector.isInstant
+    for key in ["name", "semanticDurationNs", "processKey", "threadKey", "pid", "tid",
+                "cpu", "processName", "threadName", "category", "state", "value", "unit", "priority"] {
+        if result[key] == nil { result[key] = NSNull() }
+    }
+    precondition(result.count == 19)
+    return result
+}
+final class RepositoryInspectorOracleTests: XCTestCase {
+    func testOriginalLoaderFromRealSQLite() async throws {
+        let environment = ProcessInfo.processInfo.environment
+        let result = try await Task.detached {
+            let cases = try JSONDecoder().decode([Case].self, from: Data(contentsOf: URL(filePath: environment["PARITY_CASES"]!)))
+            precondition(!cases.isEmpty && cases.count <= 32)
+            let parser = try JSONDecoder().decode(TraceParserIdentity.self, from: Data(contentsOf: URL(filePath: environment["PARITY_PARSER"]!)))
+            let loader = TimelineSnapshotLoader()
+            var records: [[String: Any]] = []
+            var positions = 0
+            for value in cases {
+                let url = URL(filePath: environment["PARITY_DATABASES"]!).appending(path: value.fixture).appending(path: "fixture.sqlite")
+                let source = TraceSourceDescriptor(traceSHA256: String(repeating: "a", count: 64), sourceByteCount: Int64(try Data(contentsOf: url).count))
+                let repository = try SQLiteTraceRepository(databaseURL: url, parser: parser, source: source)
+                let deadline = ContinuousClock.now.advanced(by: .seconds(30))
+                let raw: [String: Any]
+                let quality: Any
+                var focused: Any = NSNull()
+                switch value.source {
+                case .cpu(let cpu):
+                    let p = try await repository.cpuSlices(CpuSliceQuery(range: value.range, cpu: cpu, limit: value.limit, deadline: deadline))
+                    raw = try page(p); quality = try object(p.dataQuality)
+                case .threadState(let thread):
+                    let p = try await repository.threadStates(ThreadStateQuery(range: value.range, threadKey: thread, limit: value.limit, deadline: deadline))
+                    raw = try page(p); quality = try object(p.dataQuality)
+                case .namedSlice(let thread):
+                    let p = try await repository.slices(TraceSliceQuery(range: value.range, threadKey: thread, unattributedOnly: thread == nil, limit: value.limit, deadline: deadline))
+                    raw = try page(p); quality = try object(p.dataQuality)
+                    if let key = value.focusedKey {
+                        focused = try page(await repository.slices(TraceSliceQuery(range: value.range, eventKey: key, threadKey: thread, unattributedOnly: thread == nil, limit: 1, deadline: deadline)))
+                    }
+                case .frame(let process):
+                    let p = try await repository.frames(TraceFrameQuery(range: value.range, processKey: process, limit: value.limit, deadline: deadline))
+                    raw = try page(p); quality = try object(p.dataQuality)
+                case .cpuCounter(let filter, let cpu):
+                    let p = try await repository.counters(CounterQuery(range: value.range, scope: .cpu, filterID: filter, cpu: cpu, limit: value.limit, deadline: deadline))
+                    raw = try page(p); quality = try object(p.dataQuality)
+                case .processCounter(let filter, let process):
+                    let p = try await repository.counters(CounterQuery(range: value.range, scope: .process, filterID: filter, processKey: process, limit: value.limit, deadline: deadline))
+                    raw = try page(p); quality = try object(p.dataQuality)
+                }
+                let (primitives, issues) = try await loader.repositoryInspectorOracleDetails(
+                    track: TrackDescriptor(title: value.id, source: value.source),
+                    range: value.range, limit: value.limit, focusedEventKey: value.focusedKey,
+                    repository: repository
+                )
+                let fullFacts = try primitives.map { primitive in
+                    guard case .detail(let detail) = primitive, let inspector = detail.inspector else {
+                        throw CocoaError(.coderInvalidValue)
+                    }
+                    return try facts(inspector)
+                }
+                positions += fullFacts.count
+                records.append(["id": value.id, "repositoryPage": raw, "repositoryQuality": quality,
+                                "focusedPage": focused, "facts": fullFacts, "loaderQualityIssues": try object(issues)])
+            }
+            precondition(positions <= 64)
+            return try JSONSerialization.data(withJSONObject: records, options: [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes])
+        }.value
+        try result.write(to: URL(filePath: environment["PARITY_SWIFT_OUTPUT"]!))
+        XCTAssertFalse(result.isEmpty)
+    }
+}

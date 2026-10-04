@@ -1,0 +1,22 @@
+[
+  {
+    "snapshot": "parallel-inspector-projection-20261004",
+    "filesVerified": 15,
+    "checksumManifestSHA256": "53853fe01e3f542fbba719d155dcc2a5c397c95f19cf05c4a3266771d84ec6d3"
+  },
+  {
+    "snapshot": "parallel-quality-adapter-conformance-20261004",
+    "filesVerified": 89,
+    "checksumManifestSHA256": "fd7d8653e642d639c642ff9bbdaae26148c8e94786734749fa3bc7f0706905d3"
+  },
+  {
+    "snapshot": "parallel-cold-response-decoding-20261004",
+    "filesVerified": 331,
+    "checksumManifestSHA256": "2099b8e60496f5ccd41fb1b9c513892dfcabf8922fd9dbc8eb8d815c8a2d058d"
+  },
+  {
+    "snapshot": "parallel-presentation-20261004",
+    "filesVerified": 18,
+    "checksumManifestSHA256": "9800ad1a38eae3e1d869039b98097b44d2e797837dfe075555a49fa8f0820e18"
+  }
+]

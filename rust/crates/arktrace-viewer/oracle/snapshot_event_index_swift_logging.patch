@@ -1,0 +1,42 @@
+--- Sources/ArkTraceAppSupport/TraceDocumentController.swift
++++ cache-only/Sources/ArkTraceAppSupport/TraceDocumentController.swift
+@@ -396,6 +396,7 @@
+     public private(set) var metadata: TraceMetadata?
+     public private(set) var trackGroups: [TraceTrackGroup] = []
+     public private(set) var snapshot: TimelineSnapshot?
++    package var snapshotEventIndexOraclePosition: [Int]?
+     public private(set) var selectedEvent: TraceEventInspector?
+     /// Where the selected event is, when it was resolved from a density band
+     /// and so is not among the primitives the viewport drew. The canvas needs
+@@ -1585,9 +1586,11 @@
+     }
+ 
+     private func inspector(for key: EventKey) -> TraceEventInspector? {
+-        for track in snapshot?.tracks ?? [] {
+-            for primitive in track.primitives {
++        snapshotEventIndexOraclePosition = nil
++        for (trackIndex, track) in (snapshot?.tracks ?? []).enumerated() {
++            for (primitiveIndex, primitive) in track.primitives.enumerated() {
+                 if case .detail(let detail) = primitive, detail.eventKey == key {
++                    snapshotEventIndexOraclePosition = [trackIndex, primitiveIndex]
+                     return detail.inspector
+                 }
+             }
+@@ -2199,3 +2202,17 @@
+         return result.sorted { $0.id < $1.id }
+     }
+ }
++
++// Cache-only access and input seam. The original lookup/hover/select executes.
++extension TraceDocumentController {
++    package func snapshotEventIndexOracleInstall(_ value: TimelineSnapshot?) {
++        snapshot = value
++    }
++    package func snapshotEventIndexOracleResetPosition() {
++        snapshotEventIndexOraclePosition = nil
++    }
++    package func snapshotEventIndexOracleInspector(_ key: EventKey?) -> TraceEventInspector? {
++        snapshotEventIndexOraclePosition = nil
++        return key.flatMap { inspector(for: $0) }
++    }
++}

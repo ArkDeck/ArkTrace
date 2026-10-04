@@ -1,0 +1,26 @@
+{
+  "name": "baseline-replay",
+  "command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source/scripts/run-cargo.py",
+    "test",
+    "-p",
+    "arktrace-viewer",
+    "--test",
+    "inspector_counter_compat_regressions",
+    "--offline",
+    "--",
+    "--nocapture"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source",
+  "startedAtUtc": "2026-10-04T04:46:54.676526+00:00",
+  "endedAtUtc": "2026-10-04T04:46:57.892905+00:00",
+  "exitCode": 101,
+  "expectedExitCode": 101,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/baseline-replay.log",
+  "logSHA256": "feac1479429dde6027c98b59bcb66848056f900d0f8dec2f3bd828c0575af43a",
+  "productionSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "compiledSourceSHA256": "8168f90b8de964c2c3c22515161cd2db40bfb800cd73a0c3d175336df18f01c5",
+  "regressionSourceSHA256": "ffe43d911d12fc256cca542089a56959926163dd008e725aef6dff7571c52754"
+}

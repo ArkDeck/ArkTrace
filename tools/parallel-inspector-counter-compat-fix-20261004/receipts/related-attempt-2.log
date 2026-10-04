@@ -1,0 +1,22 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running tests/inspector_projection_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/target/debug/deps/inspector_projection_oracle-44d6c6605ea8b438)
+
+running 1 test
+test actual_swift_loader_inspector_all_fields_match_exactly ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/inspector_projection_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/target/debug/deps/inspector_projection_regressions-9838cb0769554220)
+
+running 8 tests
+test density_has_no_detail_and_identity_does_not_follow_reused_pid_tid ... ok
+test counter_invalid_duration_timestamp_query_and_overflow_are_typed ... ok
+test counter_open_range_and_semantic_duration_are_independent ... ok
+test version_budget_and_table_identity_fail_without_publishing_then_retry_succeeds ... ok
+test input_byte_limits_count_duplicate_borrowed_fields_and_utf8_not_characters ... ok
+test retained_limits_include_fixed_and_spare_slots_and_string_capacity ... ok
+test cancellation_and_deadline_at_every_checkpoint_publish_no_partial_batch ... ok
+test clone_measures_current_capacity_and_aggregate_owner_budget_is_separate ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

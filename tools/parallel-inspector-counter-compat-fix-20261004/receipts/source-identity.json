@@ -1,0 +1,68 @@
+{
+  "snapshotManifestSHA256": "5e36c84f964c4e2078fecc8b7704fb81c9a228ce28fefc5409a7201892ca7f0d",
+  "sourceCommit": "ff496514f20d728a8e1f62d62552ae9c38912388",
+  "parentSnapshot": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+  "baselineFiles": 886,
+  "unchangedBaselineFiles": 885,
+  "onlyModifiedBaseline": "rust/crates/arktrace-viewer/src/inspector_projection.rs",
+  "originalSourceSHA256": "8168f90b8de964c2c3c22515161cd2db40bfb800cd73a0c3d175336df18f01c5",
+  "fixedSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "regressionSHA256": "ffe43d911d12fc256cca542089a56959926163dd008e725aef6dff7571c52754",
+  "essentialSwiftSourceMatches": [
+    {
+      "surface": "prepared",
+      "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+      "sha256": "d1e702ae131b57acc88678d13bbbf82e5a20124d8db347a55ab7f1f65e4c6ff4",
+      "baselineSHA256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+      "cacheOnlyAppend": true
+    },
+    {
+      "surface": "prepared",
+      "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+      "baselineSHA256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+      "cacheOnlyAppend": false
+    },
+    {
+      "surface": "prepared",
+      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "baselineSHA256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "cacheOnlyAppend": false
+    },
+    {
+      "surface": "prepared",
+      "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+      "baselineSHA256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+      "cacheOnlyAppend": false
+    }
+  ],
+  "sourceContractPins": [
+    {
+      "path": "rust/crates/arktrace-store/src/schema.rs",
+      "sha256": "94ab170a9c26f2fecb2e2af8350b3c4bfebc9c1f9e0cb4e975065349c981c964"
+    },
+    {
+      "path": "rust/crates/arktrace-store/src/counters.rs",
+      "sha256": "c001b206f2572b32fdfd1924e14d5bd7fccfdbd9520ec01999d0f1b640a9ae42"
+    },
+    {
+      "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "sha256": "66fc7b1d680a44898416b5ba7d8c87d4e84c949c934f122114d5f918a5316f02"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "sha256": "07167503373f42d4d9f3e7776f8456c50966de337d4440a612c7c52581b7cd4a"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "sha256": "32778dd2ce013cfbbfc9d6ee278ceedb28b124802eb5d2e644ebcd228be2e669"
+    }
+  ],
+  "sourceDiff": "--- a/rust/crates/arktrace-viewer/src/inspector_projection.rs\n+++ b/rust/crates/arktrace-viewer/src/inspector_projection.rs\n@@ -495,14 +495,12 @@\n                 {\n                     return Err(InspectorProjectionError::InvalidRequest);\n                 }\n-                event_key(\n-                    sample.key,\n-                    if series.scope == CounterScope::Cpu {\n-                        EventTable::Measure\n-                    } else {\n-                        EventTable::ProcessMeasure\n-                    },\n-                )?;\n+                let valid_table = sample.key.table == EventTable::Measure\n+                    || (series.scope == CounterScope::Process\n+                        && sample.key.table == EventTable::ProcessMeasure);\n+                if !valid_table {\n+                    return Err(InspectorProjectionError::InvalidEventKey);\n+                }\n                 let end = match sample.duration_ns {\n                     Some(d) => sample\n                         .timestamp_ns\n"
+}

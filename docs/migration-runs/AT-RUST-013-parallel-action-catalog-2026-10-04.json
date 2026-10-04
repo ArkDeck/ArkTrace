@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "task": "AT-RUST-013 delivery 5 shared semantic action/shortcut catalog",
+  "status": "pureCatalogAndTimelineRouterVerified; productionIntegrationPending",
+  "createdAtUtc": "2026-10-04T03:30:39.958419+00:00",
+  "snapshot": {
+    "directory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+    "commit": "ff496514f20d728a8e1f62d62552ae9c38912388",
+    "manifest": {
+      "path": "parallel-snapshot.json",
+      "byteCount": 183834,
+      "sha256": "14cceffe02599e4bb855a06b889b818b02aff47b4b4bec7a4f2cf7b35a7f0ccc"
+    },
+    "baselineFiles": 870,
+    "unchangedBaselineFiles": 869,
+    "modifiedBaselineFiles": [
+      "rust/crates/arktrace-viewer/src/lib.rs"
+    ],
+    "all870OriginalBytesAccounted": true,
+    "mainCheckoutWritten": false,
+    "previousDeliveriesWritten": false
+  },
+  "ownedNewSourceFiles": [
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_access.swift",
+      "byteCount": 220,
+      "sha256": "3f88ee429f8782a06958a169374995aae8139e2052e03a6d6e1b938354449df4"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_display_harness.swift",
+      "byteCount": 1319,
+      "sha256": "c8e7c8388dcf733fe7389a026e6969f038c06959b25d5678e557ba4116d45247"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_gates.py",
+      "byteCount": 2244,
+      "sha256": "06de166dc59983ee69dd62fc1c52067b521219cbc425f9c402a68e6b24c42126"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_generate.py",
+      "byteCount": 1812,
+      "sha256": "2f196c2cd086f51786dce86aa935976a66edf744d748f95f51b0906d23d2eadf"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_harness.swift",
+      "byteCount": 3577,
+      "sha256": "39bb4ab8f7ba524438e0ad3b648ecfde39ce0df757a50e67bc76030fd145130d"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_report.py",
+      "byteCount": 15914,
+      "sha256": "46e790e079ec4ac3cbd8b44bf9ab0bc132a03f1954e64a5fee11070c0f14fb73"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py",
+      "byteCount": 6643,
+      "sha256": "fd5f909129c0b02926d02d2b20736e0c928c81fc7a089f95810bae30f9ea9d2b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+      "byteCount": 1873,
+      "sha256": "43dbb1050cc402d85f116a0b8895c2c1e727f82a4c3590a26983b0ed9587d7f9"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/action_catalog.rs",
+      "byteCount": 27888,
+      "sha256": "ae9fe196a8f380264f28d19a2e1d2a5b81d9ed6fe453f010d4a05765ad2c794f"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/action_catalog_oracle.rs",
+      "byteCount": 4358,
+      "sha256": "e3ad774ced07cd8cb824e5f52f03088954f186fb101ba5f2b41b3514ca1ab607"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/action_catalog_regressions.rs",
+      "byteCount": 8184,
+      "sha256": "7d4420e82af7af0ef6c04f26790c703f05b654535601a39b4c7da29fea3b13e6"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-display-swift.json",
+      "byteCount": 10837,
+      "sha256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+      "byteCount": 266960,
+      "sha256": "b5fe00e561ab5417d7f636472722458c44b492c4a7374cb818d197b340306816"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-keyboard-swift.json",
+      "byteCount": 123896,
+      "sha256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-swift-receipt.json",
+      "byteCount": 22618,
+      "sha256": "7be2459f02ac695974a1f00c0975d24f2223b7aaaa3e90641182282f6cb80c7b"
+    }
+  ],
+  "existingFileApplication": {
+    "path": "rust/crates/arktrace-viewer/src/lib.rs",
+    "appendUtf8": "\nmod action_catalog;\npub use action_catalog::*;\n",
+    "replaceWholeFile": false
+  },
+  "cacheIsolation": {
+    "cargo": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo",
+    "swiftpm": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-swiftpm",
+    "registrySeedReadOnly": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/dependencies/registry",
+    "otherCachesWritten": false
+  },
+  "api": {
+    "version": 1,
+    "semanticActions": 29,
+    "domains": [
+      "timelineKeyboard",
+      "timelineAnnotation",
+      "pointer",
+      "searchResults"
+    ],
+    "sections": 3,
+    "entries": 19,
+    "catalogRecordAccess": "Private fields with read-only accessors, no Deserialize/custom constructors or caller-provided text; fixed canonical catalog only.",
+    "numericIDs": "Closed versioned u32 discriminants; new IDs, not pre-existing Swift numeric facts. Swift legacy English-title/key-markup IDs preserved separately. Rust layouts are not ABI.",
+    "input": "Closed normalized key enum, four modifier booleans, typed scope and text_input_active; no raw NSEvent/virtual key/layout/UTF-8 event input.",
+    "router": "Constant-work zero-allocation resolve_mac_shortcut(version,input,check). Dispatch selects an existing handler; eligibility, viewport/navigation, annotation state and focus restoration remain separate.",
+    "output": "Dispatch(action ID) or Forward(reason) plus show_keyboard_focus intent. No menu invocation is synthesized.",
+    "budgets": {
+      "maximumMarkdownTableBytes": 16384,
+      "catalogRows": 19,
+      "recordIDs": 29,
+      "routerCheckpoints": 2,
+      "tableCheckpoints": "entry, each row, end"
+    },
+    "errors": [
+      "UnsupportedVersion",
+      "UnknownAction",
+      "OutputBudgetExceeded",
+      "Cancelled",
+      "DeadlineReached"
+    ]
+  },
+  "oracle": {
+    "receipt": {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-swift-receipt.json",
+      "byteCount": 22618,
+      "sha256": "7be2459f02ac695974a1f00c0975d24f2223b7aaaa3e90641182282f6cb80c7b"
+    },
+    "productionSourceDigestsVerified": true,
+    "nativeKeyCases": 664,
+    "directCommandCases": 14,
+    "catalogRows": 19,
+    "bilingualTables": 6,
+    "outcomeCounts": {
+      "commands": 232,
+      "annotations": 56,
+      "forwarded": 376,
+      "keyboardFocusVisible": 664
+    },
+    "source": "Real TraceShortcutCatalog methods and TimelineNSView.keyDown called with actual NSEvent; real nextResponder records forwarding; one cache-only command-entry probe then unmodified handler executes.",
+    "copiedExpectedRoutingAlgorithms": false,
+    "exactRecursiveComparison": true,
+    "scopeTextIMEFocusNativeEvidence": false,
+    "searchResultsNativeKeyboardEvidence": false
+  },
+  "toolchains": {
+    "rust": "exact 1.99.0 / edition 2024, runner --locked --offline",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "swiftPackage": "cache-only minimal package, macOS26 / Swift language mode6; original seven production source targets; App source contracts copied but App not built"
+  },
+  "verification": [
+    {
+      "name": "swiftOracle",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:26:27.317321+00:00",
+      "finishedAtUtc": "2026-10-04T03:26:30.890709+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-01-swiftOracle.log",
+        "byteCount": 259,
+        "sha256": "3f34163c97a6eafb33a7f85f9abd31fa531b881dd0102a980199a6d672f86a21"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-01-swiftOracle-actual.log",
+        "byteCount": 2183,
+        "sha256": "c9183e7d264c7eb1efe83471a9e3b8abf793a1ba88e9996d9e565350e9726615"
+      }
+    },
+    {
+      "name": "swiftRegressions",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py",
+        "--regressions"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:26:30.891246+00:00",
+      "finishedAtUtc": "2026-10-04T03:26:33.776948+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-02-swiftRegressions.log",
+        "byteCount": 1912,
+        "sha256": "7bb0a81b9f50275a6d878cb3990bfd916f47b0b841ae13b45728e68f6b87fb72"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-02-swiftRegressions-actual.log",
+        "byteCount": 7019,
+        "sha256": "b2857dbf058ce97295e2c896b60017ca4727450849bebbb64fde26bbf8bc9afe"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:26:33.777458+00:00",
+      "finishedAtUtc": "2026-10-04T03:26:35.254172+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-03-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:26:35.264846+00:00",
+      "finishedAtUtc": "2026-10-04T03:27:17.894917+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-04-test.log",
+        "byteCount": 12920,
+        "sha256": "f6ddbe6a2b5f65a3e44780a73fb2ab056bbf7c1e49a43767597ff8bc71b530e1"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:27:17.895755+00:00",
+      "finishedAtUtc": "2026-10-04T03:27:27.241469+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-05-clippy.log",
+        "byteCount": 910,
+        "sha256": "c9af91fc430a4fc1b72e5411ea015e40de9d40fffe068d2e006f181b2631b7e7"
+      }
+    },
+    {
+      "name": "verify",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "verify"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:27:27.242410+00:00",
+      "finishedAtUtc": "2026-10-04T03:27:28.460727+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-06-verify.log",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      }
+    },
+    {
+      "name": "swiftOracle",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:29:57.034351+00:00",
+      "finishedAtUtc": "2026-10-04T03:29:59.124486+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-07-swiftOracle.log",
+        "byteCount": 259,
+        "sha256": "3f34163c97a6eafb33a7f85f9abd31fa531b881dd0102a980199a6d672f86a21"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-07-swiftOracle-actual.log",
+        "byteCount": 2155,
+        "sha256": "ed167881eba0acb983cd12e05a9639498a2a70e652a0fbb5b96653ad2d80812c"
+      }
+    },
+    {
+      "name": "swiftRegressions",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_swift.py",
+        "--regressions"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:29:59.125212+00:00",
+      "finishedAtUtc": "2026-10-04T03:30:01.110680+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-08-swiftRegressions.log",
+        "byteCount": 1912,
+        "sha256": "713c13676128cbf1ee0aa8dd3f4c055f9e8ef24130d47507e8d496e8487753e2"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-08-swiftRegressions-actual.log",
+        "byteCount": 6994,
+        "sha256": "5807e05eddfdfdd51c41f1177a098561d0f236353b6c9dd5c4224ae4e13906b7"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:30:01.111236+00:00",
+      "finishedAtUtc": "2026-10-04T03:30:02.109233+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-09-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:30:02.109566+00:00",
+      "finishedAtUtc": "2026-10-04T03:30:10.820642+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-10-test.log",
+        "byteCount": 12200,
+        "sha256": "fbb9139a6e1391e1df8c352fe4470e0831df70e8329d7afe3c51bfba5bec5a4c"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:30:10.821001+00:00",
+      "finishedAtUtc": "2026-10-04T03:30:12.145807+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-11-clippy.log",
+        "byteCount": 266,
+        "sha256": "4ed6bee1b17746c20c644030df810d419ec8a2ac18c2064e7d533ff69dbe4fcf"
+      }
+    },
+    {
+      "name": "verify",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/action_catalog_validate.py",
+        "verify"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-action-catalog-20261004",
+      "startedAtUtc": "2026-10-04T03:30:12.148638+00:00",
+      "finishedAtUtc": "2026-10-04T03:30:12.732234+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-12-verify.log",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      }
+    }
+  ],
+  "actualCommandRecord": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/command-results.json",
+    "byteCount": 11049,
+    "sha256": "c45877d36c17a08a9e00c5ce84c821fa93f830e29351575f2135b57923d9ede4"
+  },
+  "resultSummary": {
+    "rustViewerTestsPassed": 83,
+    "compileFailDocTestsPassed": 1,
+    "newRustTests": 11,
+    "swiftOracleTestsPassed": 2,
+    "swiftExistingTestsPassed": 19,
+    "swiftRenderingTestsPassed": 13,
+    "swiftAppSupportTestsPassed": 6,
+    "rustWorkspaceCrates": 8,
+    "frozenThirdPartyLicenseExpressions": 35,
+    "finalCompilerWarnings": 0,
+    "rustIgnoredTests": 0,
+    "appBuildExecuted": false,
+    "nativeGuiAcceptanceExecuted": false
+  },
+  "utf8Portability": {
+    "audit": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-action-catalog-cargo/frozen-evidence/action-catalog-utf8-audit.json",
+      "byteCount": 5088,
+      "sha256": "d8332512aa91cb684c03a68b4a31e3adc9dcc45fa847b78737b01079ff33809f"
+    },
+    "explicitTextEncoding": "utf-8",
+    "ownedPythonScripts": 5,
+    "textOperations": 30,
+    "nativeWindowsExecution": false
+  },
+  "integrationProposal": {
+    "sdk": "Generate stable fixed-width version/action/domain/section/entry/key/scope/route discriminants and bounded UTF-8 offset-length catalog records. Do not expose Rust enum/Vec/String/reference layout. New action IDs map by domain to the existing keyboard/annotation modules; keep transient/persistent creation as separate IDs.",
+    "macAdapter": "Before routing, determine responder/focus scope and mark text field, editor, marked-text or IME ownership as text_input_active. Normalize physical keyCode 123/124/125/126 first; otherwise lower the complete charactersIgnoringModifiers string and recognize one key token. Preserve raw native event solely in the host for Forward. Ignore capsLock/function/numericPad/help for four modifier flags.",
+    "precedence": "After native scope guard, horizontal/vertical physical arrows precede Command/Control guards, matching current Swift. Option switches horizontal arrows to pan. Command letters forward; Control comma/period/brackets are annotations; bare brackets alias zoomSelection; M remains annotation with optional Shift even with Control/Option.",
+    "helpReadme": "Main replaces the current Swift catalog consumer with generated shared records. Preserve section/row order, original legacy IDs, keysEnglish display form, localized gesture cells, exact six markdown tables and no trailing newline. Re-run ShortcutCatalogTests and update both READMEs only if intentionally changed; this snapshot modifies neither.",
+    "searchPointer": "Catalog semantic/display metadata only. Search-results scope returns Forward(SearchResultsHost); native SwiftUI onKeyPress/Button owns result stepping/activation/focus. Pointer gestures retain existing Cocoa translation and algorithms. Wire those hosts to semantic IDs after native evidence, without synthesizing a Windows keymap.",
+    "validation": "On main run generated wire/ABI/version and SDK gates, the 664 native inputs against actual adapter output, scope/text/IME/menu/window focus tests, actual search keyboard activation, pointer normalization, accessibility and App build/native medium-trace GUI evidence. Pure tests are not AT-RUST-013 macOS acceptance."
+  },
+  "limitations": [
+    "Pure catalog and normalized macOS timeline-key router only; no Store/Engine/SDK/FFI/App/CLI/README/manifest/lock production integration. AT-RUST-013 and macOS GUI acceptance remain incomplete.",
+    "Native layout conversion, nil characters, text/IME/focus ownership and window menu behavior require host evidence. Raw inputs cover letters/uppercase, aliases, unknown/empty/multi-character/non-ASCII keys, four physical arrows with conflicting text, all16modifier combinations and extra modifier/repeat variants.",
+    "Search/pointer domains provide semantic/display data only; native result focus/Return/Button key handling and pointer delta/gesture dispatch are not claimed equivalent by this module. SearchResultsHost preserves those host paths.",
+    "Actual direct command performed booleans are native-state evidence, not a shared command eligibility implementation. Accessibility still invokes the existing command boundary.",
+    "New u32 IDs and typed safety guards are v1 contract decisions. Current Swift IDs are strings and duplicate up/down rows across timeline/search; retain legacy values separately.",
+    "Help currently uses the English stripped keys/action/title fields. Bilingual markdown methods are compared exactly; this delivery does not introduce a localized Help UI or Windows bindings.",
+    "Swift harness runs bounded synthesized events and source contracts, not an App build, live menu acceptance, focus/IME field test, real medium trace, device, release or Windows native acceptance.",
+    "The static table formatter allocates <=16KiB per returned table. Host must budget SDK encoded catalog/display copies; cancellation/deadline callback is owner-supplied, no clock or IO."
+  ]
+}

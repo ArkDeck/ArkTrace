@@ -1,0 +1,18 @@
+--- rust/crates/arktrace-viewer/src/lib.rs
++++ rust/crates/arktrace-viewer/src/lib.rs
+@@ -10,6 +10,7 @@
+ mod navigation;
+ mod plan;
+ mod snapshot;
++mod snapshot_event_index;
+ mod track_tree;
+ mod types;
+ mod view_actions;
+@@ -23,6 +24,7 @@
+ pub use navigation::*;
+ pub use plan::*;
+ pub use snapshot::*;
++pub use snapshot_event_index::*;
+ pub use track_tree::*;
+ pub use types::*;
+ pub use view_actions::*;

@@ -1,0 +1,99 @@
+{
+  "sourceSnapshot": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004",
+  "pins": [
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-rust-output.json",
+      "byteCount": 2618,
+      "sha256": "2ec03fbd2c2ec30a63cd9eb37e834be02ffd7f4e969b7822c3c8a9402a202233"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-swift-output.json",
+      "byteCount": 2586,
+      "sha256": "991e1470a346b22a8e104ea9732e0f941c3e1d7021b4c5ac9ea60e181d3cb2cd"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-sealed-rust-output.json",
+      "byteCount": 85515,
+      "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/fixtures/bounded-swift-output.json",
+      "byteCount": 72355,
+      "sha256": "3c0914000a62406e85a2b956ee334945a0a229b907cc0b19e52cca8ed3559f43"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal-valid.receipt.json",
+      "byteCount": 1528,
+      "sha256": "567c80d73fefd0768c56b6306eb577a82ace132119e6b80730bb5ed23874312a"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/observe-minimal-valid.log",
+      "byteCount": 2618,
+      "sha256": "2ec03fbd2c2ec30a63cd9eb37e834be02ffd7f4e969b7822c3c8a9402a202233"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.receipt.json",
+      "byteCount": 2041,
+      "sha256": "2dbb57a8b53e7bbb163652eca9d2d6741acaf3404a5101d3c987140b56cba672"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.log",
+      "byteCount": 5344,
+      "sha256": "3290e06d930adbfbfee76ebada74048c0cafdcdfd6b0d204009e3f6193a19eee"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.receipt.json",
+      "byteCount": 4561,
+      "sha256": "bd05043fc24cea72fdc7f70110b1a1f6962cb5b9c212ed0b4eefca4792d82cb8"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/observe-bounded-sealed.log",
+      "byteCount": 85515,
+      "sha256": "30765990fd46c19ebb1fe5c5d2a181f808498ac24736e615a741cd992734d9b4"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.receipt.json",
+      "byteCount": 2017,
+      "sha256": "e34b35878a21850c42e7f0546e3be2ff16719296944bd9691c99d68d2ce1890f"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/swift-bounded.log",
+      "byteCount": 5341,
+      "sha256": "5dde0d5bf7ab93c9fef6fb0baf1c3ac84d0e6924c4809c9cde211cfc5a2f9b4f"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/swift-source-identities.json",
+      "byteCount": 62523,
+      "sha256": "5e52d5a43a5e1ed47c29418b111d54b57284b853ea50c75b8f338b13589414cd"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/verification/rust-source-identities.json",
+      "byteCount": 96926,
+      "sha256": "36e566ea930af18865e66e8ee3fbe57b46f8566f461def6e0bdf85df5ca57e3a"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/prepare.py",
+      "byteCount": 3297,
+      "sha256": "88ca49190e976a7d1856bc3390a82358b893223e69d20236e03880348d70b163"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/swift/LoaderAccess.swift",
+      "byteCount": 835,
+      "sha256": "4a51771d96701738ed71b4368adfd2a3316f35f7724623ce66f50deb95a04c92"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/swift/RepositoryInspectorOracleTests.swift",
+      "byteCount": 6575,
+      "sha256": "09ad66c037d112d1c6f86bcf9378a33f77ad9aaeaeb4e90bef320c77121ae330"
+    },
+    {
+      "path": "tools/parallel-repository-inspector-parity-20261004/src/main.rs",
+      "byteCount": 545,
+      "sha256": "287101ee5fa0abe8f7c6ea907bef4faf85b3317bd332b5093340dccb8fb27265"
+    }
+  ],
+  "cases": 6,
+  "facts": 11,
+  "fieldsPerFact": 19,
+  "scope": "Existing real SQLite/typed repositories and actual Swift loader results inherited; no new producer run or invented Swift output."
+}

@@ -1,0 +1,636 @@
+{
+  "schemaVersion": 1,
+  "status": "verified-isolated-prototype-not-production-integrated",
+  "createdAtUtc": "2026-10-04T03:55:08.385322+00:00",
+  "task": "AT-RUST-011/013 snapshot first-detail EventKey index",
+  "baseline": {
+    "sourceCommit": "645d07102f0acfaa789f99df1e67d4a3feec5756",
+    "manifest": {
+      "path": "parallel-snapshot.json",
+      "sha256": "ed5f6be369f88393330220538e4aa52dcbedb971afa5a3b0b0921ec8a72a9a2c",
+      "byteCount": 196155
+    },
+    "fileCount": 922,
+    "baselineChangedPaths": [
+      "rust/crates/arktrace-viewer/src/lib.rs"
+    ],
+    "otherBaselineFilesUnchanged": 921
+  },
+  "ownedPaths": [
+    "docs/migration-runs/AT-RUST-011-parallel-snapshot-event-index-2026-10-04.json",
+    "docs/migration-runs/AT-RUST-011-parallel-snapshot-event-index-2026-10-04.md",
+    "docs/migration-runs/AT-RUST-011-parallel-snapshot-event-index-2026-10-04.sha256",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_generate_inputs.py",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_harness.swift",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_lib_exports.patch",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_report.py",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_run_swift.py",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+    "rust/crates/arktrace-viewer/oracle/snapshot_event_index_validate.py",
+    "rust/crates/arktrace-viewer/src/lib.rs",
+    "rust/crates/arktrace-viewer/src/snapshot_event_index.rs",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-environment.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-canonical-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-canonical.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions-first-attempt-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions-first-attempt.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-feature-clippy-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-feature-clippy.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-plan-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-plan.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/clippy.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/first-attempt-clippy.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/first-attempt-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/fmt-check.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/format.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/licenses.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/second-attempt-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/second-attempt-viewer-tests.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/viewer-tests.log",
+    "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/workspace.log",
+    "rust/crates/arktrace-viewer/tests/snapshot_event_index_oracle.rs",
+    "rust/crates/arktrace-viewer/tests/snapshot_event_index_regressions.rs"
+  ],
+  "ownedFileReceipts": [
+    {
+      "path": "docs/migration-runs/AT-RUST-011-parallel-snapshot-event-index-2026-10-04.md",
+      "sha256": "179783b5e8500c07cb927c62c3c925a1a3ad6b4f3dc7d3f4ac9c88980e5582ba",
+      "byteCount": 7017
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
+      "sha256": "53e4c4906f98955b1d83928501c93fed3186c3128a791be9c2deda43839fb42d",
+      "byteCount": 538
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_generate_inputs.py",
+      "sha256": "e73e7e620f1f897f534971c8563a69d71fb0c75796eb22c5f11206a16fa5d738",
+      "byteCount": 2810
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_harness.swift",
+      "sha256": "42a91c987019c2cd94b5dcbf9ff136a5209f77d7b26c104b351dad8a6fb7b6c3",
+      "byteCount": 5301
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_lib_exports.patch",
+      "sha256": "9abf3f8ea227a87f4724ee471df3fb126156335d3d5322bd58e3f6a8e7648ef6",
+      "byteCount": 407
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_report.py",
+      "sha256": "13eaea4753892622637ed60ee7346707617b8b70af21901aa6887f27ce287c77",
+      "byteCount": 15036
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_run_swift.py",
+      "sha256": "133aeef5048d3eb707148351cdcdee42bb32f74cf93d3c85cbb66e3609b0fdfa",
+      "byteCount": 4922
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+      "sha256": "8e615fda6fbe03f05f7b72ee9f9fcc4f8ed4c5ac89eb4929702e94549438ae3d",
+      "byteCount": 1897
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_validate.py",
+      "sha256": "c2826081c74b5b3e438c8687a6db1713677518c6e0e3af125fcd815ab10bcbc2",
+      "byteCount": 1886
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "sha256": "7839a98c2c492f4b0a9392200aca070157efb233ebc5e7f07d50d39b2d867752",
+      "byteCount": 3567
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/snapshot_event_index.rs",
+      "sha256": "28cd4d600969995ca999adc96d3317dae0d8eb4250ccc5d779f67397d54bcf66",
+      "byteCount": 11428
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-environment.json",
+      "sha256": "1af8bca4e080bb00a7ed0f311488bfd22a4239a7c27633a47bb483534e60dced",
+      "byteCount": 899
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+      "sha256": "0f1a85eb7f56dfca37517e507d227ce0ee4125c7783ea94be3d2083d9cae645c",
+      "byteCount": 11601319
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-canonical-receipt.json",
+      "sha256": "ef40c1d1d73d530ffadbcad716552f2f5681d6fd9721b3794424e187c0c3d4b5",
+      "byteCount": 4640
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-canonical.log",
+      "sha256": "44bd65b84f4780b464d106e014ed1f9de9b44381440a08b0f6d4cd1957186eac",
+      "byteCount": 9383
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+      "sha256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+      "byteCount": 2674042
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions-first-attempt-receipt.json",
+      "sha256": "feef4d2ed8ee04cdf1c255491c3c510220adc50e6e186e3eadf3e37fd5a50569",
+      "byteCount": 4574
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions-first-attempt.log",
+      "sha256": "cc5b8692b1d6a5c4b26a51a3848845cad7ae9cd578b14356c4441197b291472d",
+      "byteCount": 10178
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions-receipt.json",
+      "sha256": "3546e5f095e5f46a49d5334e058b42442d2a08ce32b4c51356852aea91b48ff6",
+      "byteCount": 4916
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions.log",
+      "sha256": "80787753013651f6cd4adfade6b87079d9e14c8763a2474c4ff3a9628c22951a",
+      "byteCount": 9169
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-feature-clippy-receipt.json",
+      "sha256": "73c966b1bc2b69ea0e87eb2e0d5eb1744f5d26253e799b0ae8ea1299d12de901",
+      "byteCount": 1057
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-feature-clippy.log",
+      "sha256": "bde0c3b00937d0c74e5fc22e129edff2cb28700850cf8237135af652e49d3d24",
+      "byteCount": 1062
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-plan-receipt.json",
+      "sha256": "97945c41e953643ea3180891cbea0dd59d67f2a257c54c7deb15d2241761cdc4",
+      "byteCount": 4004
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-plan.log",
+      "sha256": "1bc17a4eb405a5c621c1a4452e1c6581730a65aec19ee80cd694db2d1795941b",
+      "byteCount": 99
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/clippy.log",
+      "sha256": "9fa0588221158b3ee13f9267a1f8174426daba857856b43a813c6437126c1f8c",
+      "byteCount": 860
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/first-attempt-clippy.log",
+      "sha256": "1051c6fd736abdb6d3d5daa710adcd5f6811c5ffa94b780961ce82934c1d08ce",
+      "byteCount": 2775
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/first-attempt-receipt.json",
+      "sha256": "b39811de3e8fc37f6fd99e1590100179a57e42460c14a93132c95b8ed7cb01b4",
+      "byteCount": 3084
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/fmt-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byteCount": 0
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/licenses.log",
+      "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+      "byteCount": 102
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/receipt.json",
+      "sha256": "2514505087358f91f4fb63d7472296f565e066f3d67fc76830553058cf35e1cf",
+      "byteCount": 6095
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/second-attempt-receipt.json",
+      "sha256": "53df5b370ee5d041e4ae082ab5ef6937cd6254cfd244cae362208ace332a3b80",
+      "byteCount": 4143
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/second-attempt-viewer-tests.log",
+      "sha256": "56e4a9ee56be12cd6b7f5d9354df45ef16b371369ffb4f394a165a56914ef437",
+      "byteCount": 14541
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/viewer-tests.log",
+      "sha256": "4da20abcbd1fadded274271000abdef80ae0183de0c461edff8fe434d7fb5ca6",
+      "byteCount": 16400
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/workspace.log",
+      "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+      "byteCount": 125
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/snapshot_event_index_oracle.rs",
+      "sha256": "040811e9e732ef6e87eb089ce8bbe3f869b889cf81d8676d56e157743be86bf0",
+      "byteCount": 3195
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/snapshot_event_index_regressions.rs",
+      "sha256": "42769942a8b4159244a7aeb953aec75092bf8782d66dba458f243c4f1add09a0",
+      "byteCount": 13680
+    }
+  ],
+  "canonical": {
+    "snapshotCount": 295,
+    "primitiveFacts": 73704,
+    "queryCount": 11923,
+    "matched": 7623,
+    "nilInspectorMatched": 2555,
+    "noMatch": 4300,
+    "paths": [
+      "private inspector",
+      "public hoverEvent",
+      "public selectEvent"
+    ],
+    "receipt": {
+      "command": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/configuration",
+        "--security-path",
+        "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/security",
+        "--filter",
+        "SnapshotEventIndexCanonicalOracleTests"
+      ],
+      "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source",
+      "exitCode": 0,
+      "canonicalSource": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+        "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+        "byteCount": 92567
+      },
+      "patchedSource": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+        "sha256": "4a3f1685e65a322b5c555d151e95964582a55eeab5497d3f1f6f61037f8cb376",
+        "byteCount": 93354
+      },
+      "loggingPatch": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+        "sha256": "8e615fda6fbe03f05f7b72ee9f9fcc4f8ed4c5ac89eb4929702e94549438ae3d",
+        "byteCount": 1897
+      },
+      "seam": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
+        "sha256": "53e4c4906f98955b1d83928501c93fed3186c3128a791be9c2deda43839fb42d",
+        "byteCount": 538
+      },
+      "harness": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_harness.swift",
+        "sha256": "42a91c987019c2cd94b5dcbf9ff136a5209f77d7b26c104b351dad8a6fb7b6c3",
+        "byteCount": 5301
+      },
+      "input": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "sha256": "0f1a85eb7f56dfca37517e507d227ce0ee4125c7783ea94be3d2083d9cae645c",
+        "byteCount": 11601319
+      },
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-canonical.log",
+        "sha256": "44bd65b84f4780b464d106e014ed1f9de9b44381440a08b0f6d4cd1957186eac",
+        "byteCount": 9383
+      },
+      "sourcePins": [
+        {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+          "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+          "byteCount": 1526
+        },
+        {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+          "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+          "byteCount": 5258
+        },
+        {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceRendering/TimelineModels.swift",
+          "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+          "byteCount": 24339
+        }
+      ],
+      "note": "Original Controller.inspector equality/return, hoverEvent and selectEvent execute. Enumerated loops and matched-position assignment record the existing first-return branch, including nil Inspector. No copied scan generates expected output. Cache injection only; production source unchanged.",
+      "output": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+        "sha256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "byteCount": 2674042
+      }
+    },
+    "regressionsReceipt": {
+      "command": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/configuration",
+        "--security-path",
+        "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/security",
+        "--filter",
+        "TraceDocumentControllerTests/(testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem|testADensityBandPressSelectsTheRealEventUnderIt|testInspectorLayoutAndCollapseFocusPolicy|testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent)|ObservationBoundaryTests/testInspectorPaneIgnoresSearchState"
+      ],
+      "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source",
+      "exitCode": 0,
+      "canonicalSource": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+        "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+        "byteCount": 92567
+      },
+      "patchedSource": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+        "sha256": "4a3f1685e65a322b5c555d151e95964582a55eeab5497d3f1f6f61037f8cb376",
+        "byteCount": 93354
+      },
+      "loggingPatch": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+        "sha256": "8e615fda6fbe03f05f7b72ee9f9fcc4f8ed4c5ac89eb4929702e94549438ae3d",
+        "byteCount": 1897
+      },
+      "seam": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
+        "sha256": "53e4c4906f98955b1d83928501c93fed3186c3128a791be9c2deda43839fb42d",
+        "byteCount": 538
+      },
+      "harness": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_harness.swift",
+        "sha256": "42a91c987019c2cd94b5dcbf9ff136a5209f77d7b26c104b351dad8a6fb7b6c3",
+        "byteCount": 5301
+      },
+      "input": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "sha256": "0f1a85eb7f56dfca37517e507d227ce0ee4125c7783ea94be3d2083d9cae645c",
+        "byteCount": 11601319
+      },
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions.log",
+        "sha256": "80787753013651f6cd4adfade6b87079d9e14c8763a2474c4ff3a9628c22951a",
+        "byteCount": 9169
+      },
+      "sourcePins": [
+        {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+          "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+          "byteCount": 1526
+        },
+        {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+          "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+          "byteCount": 5258
+        },
+        {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceRendering/TimelineModels.swift",
+          "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+          "byteCount": 24339
+        }
+      ],
+      "note": "Original Controller.inspector equality/return, hoverEvent and selectEvent execute. Enumerated loops and matched-position assignment record the existing first-return branch, including nil Inspector. No copied scan generates expected output. Cache injection only; production source unchanged.",
+      "output": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+        "sha256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "byteCount": 2674042
+      }
+    }
+  },
+  "rust": {
+    "passed": 110,
+    "failed": 0,
+    "ignored": 0,
+    "newTests": 12,
+    "commands": [
+      {
+        "command": [
+          "python3",
+          "scripts/run-cargo.py",
+          "fmt",
+          "--all"
+        ],
+        "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "exitCode": 0,
+        "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/format.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "byteCount": 0,
+        "environment": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+          "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+          "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+          "CARGO_NET_OFFLINE": "true"
+        }
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/run-cargo.py",
+          "fmt",
+          "--all",
+          "--check"
+        ],
+        "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "exitCode": 0,
+        "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/fmt-check.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "byteCount": 0,
+        "environment": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+          "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+          "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+          "CARGO_NET_OFFLINE": "true"
+        }
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/run-cargo.py",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "exitCode": 0,
+        "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/clippy.log",
+        "sha256": "9fa0588221158b3ee13f9267a1f8174426daba857856b43a813c6437126c1f8c",
+        "byteCount": 860,
+        "environment": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+          "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+          "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+          "CARGO_NET_OFFLINE": "true"
+        }
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/run-cargo.py",
+          "test",
+          "-p",
+          "arktrace-viewer",
+          "--",
+          "--nocapture"
+        ],
+        "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "exitCode": 0,
+        "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/viewer-tests.log",
+        "sha256": "4da20abcbd1fadded274271000abdef80ae0183de0c461edff8fe434d7fb5ca6",
+        "byteCount": 16400,
+        "environment": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+          "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+          "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+          "CARGO_NET_OFFLINE": "true"
+        }
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/verify_rust_workspace.py"
+        ],
+        "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "exitCode": 0,
+        "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/workspace.log",
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+        "byteCount": 125,
+        "environment": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+          "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+          "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+          "CARGO_NET_OFFLINE": "true"
+        }
+      },
+      {
+        "command": [
+          "sh",
+          "scripts/verify_licenses.sh"
+        ],
+        "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "exitCode": 0,
+        "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/licenses.log",
+        "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+        "byteCount": 102,
+        "environment": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+          "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+          "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+          "CARGO_NET_OFFLINE": "true"
+        }
+      }
+    ],
+    "ciAllFeatureStrictClippy": {
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+      "environment": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+        "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+        "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-feature-clippy.log",
+      "sha256": "bde0c3b00937d0c74e5fc22e129edff2cb28700850cf8237135af652e49d3d24",
+      "byteCount": 1062
+    }
+  },
+  "swiftAudit": {
+    "canonical": {
+      "compilerWarnings": 0,
+      "runtimeSkips": 0,
+      "sandboxExtensionDiagnostics": 0
+    },
+    "regressions": {
+      "compilerWarnings": 0,
+      "runtimeSkips": 0,
+      "sandboxExtensionDiagnostics": 17
+    }
+  },
+  "memory": {
+    "maximumTracks": 10000,
+    "maximumPrimitives": 20000,
+    "maximumSingleIndexRetainedBytes": 1048576,
+    "measuredInlineBytes": 72,
+    "measuredEntryBytes": 32,
+    "measuredFactBytes": 24,
+    "measuredBorrowedTrackBytes": 16,
+    "measuredMaximumIndexRetainedBytes": 640072,
+    "maximumLogicalBorrowedPayloadBytes": 640000,
+    "maximumLogicalInputPlusTwoIndicesBytes": 1920144,
+    "heapSortScratchBytes": 0,
+    "note": "Parent input spare capacity and actual snapshot/Inspector/string/allocator/RSS ownership remain separate host aggregate; no RSS/GUI benchmark claim."
+  },
+  "identity": {
+    "fields": [
+      "sessionID",
+      "generation",
+      "snapshotRevision"
+    ],
+    "ownerRequirements": [
+      "Fresh nonreused revision on every snapshot replacement including equal generation/nil/loading",
+      "Current identity check before lookup/dereference and after await/state transitions",
+      "Existing publication gate remains authoritative; index identity does not authorize old publish"
+    ]
+  },
+  "ciPlan": {
+    "command": [
+      "sh",
+      "scripts/ci_plan.sh"
+    ],
+    "stdout": "lane_swiftpm=false\nlane_app=false\nlane_contracts=false\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "exitCode": 0,
+    "fullLanesCompleted": false
+  },
+  "limits": [
+    "Prototype only; no owner/SDK/FFI/App/wire integration",
+    "No complete Inspector facts projection",
+    "No Windows native runner",
+    "No macOS 26 runtime proof",
+    "No native GUI performance proof",
+    "No complete CI workspace build/all-features test/migration smoke/SDK consumer gate",
+    "No commit/push/PR"
+  ],
+  "archivedLogMappings": [
+    {
+      "receipt": "snapshot-event-index-verification/first-attempt-receipt.json",
+      "original": "snapshot-event-index-verification/clippy.log",
+      "archived": "snapshot-event-index-verification/first-attempt-clippy.log"
+    },
+    {
+      "receipt": "snapshot-event-index-verification/second-attempt-receipt.json",
+      "original": "snapshot-event-index-verification/viewer-tests.log",
+      "archived": "snapshot-event-index-verification/second-attempt-viewer-tests.log"
+    },
+    {
+      "receipt": "snapshot-event-index-swift-regressions-first-attempt-receipt.json",
+      "original": "snapshot-event-index-swift-regressions.log",
+      "archived": "snapshot-event-index-swift-regressions-first-attempt.log"
+    }
+  ],
+  "failuresPreserved": [
+    "first-attempt-clippy.log: E0689 detail_count type, fixed usize",
+    "snapshot-event-index-swift-regressions-first-attempt.log: Apps omitted from private source mirror, fixed copy",
+    "second-attempt-viewer-tests.log: density unit variant ignored extra fields, fixed empty struct variant"
+  ]
+}

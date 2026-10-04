@@ -1,0 +1,18 @@
+{
+  "newCombinations": 18,
+  "canonicalCases": 6,
+  "canonicalFacts": 11,
+  "fieldsPerFact": 19,
+  "guardScopeTablePairs": 12,
+  "legalScopeTablePairs": 3,
+  "rejectedScopeTablePairs": 9,
+  "beforeTypedFailingRegressions": 3,
+  "afterPassingRegressions": 4,
+  "existingInspectorRegressions": 8,
+  "existingFrozenSwiftOracleCases": 362,
+  "existingOracleTests": 1,
+  "contractTests": 20,
+  "exactSameFinalRegressionBeforeAfter": true,
+  "inheritedSwift": true,
+  "newSwiftOrDatabaseRun": false
+}

@@ -1,0 +1,626 @@
+{
+  "schemaVersion": 1,
+  "task": "AT-RUST-011 full Inspector facts pure shared projection",
+  "status": "pureProjectionVerified; productionIntegrationPending",
+  "createdAtUtc": "2026-10-04T03:48:39.202806+00:00",
+  "snapshot": {
+    "directory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+    "commit": "ff496514f20d728a8e1f62d62552ae9c38912388",
+    "manifest": {
+      "path": "parallel-snapshot.json",
+      "byteCount": 183928,
+      "sha256": "97797d83b0b0be04112bc51eb405f9f6bdeade6de83179f88cac358944169213"
+    },
+    "baselineFiles": 870,
+    "unchangedBaselineFiles": 869,
+    "modifiedBaselineFiles": [
+      "rust/crates/arktrace-viewer/src/lib.rs"
+    ],
+    "all870OriginalBytesAccounted": true,
+    "mainCheckoutWritten": false,
+    "previousDeliveriesWritten": false
+  },
+  "ownedNewSourceFiles": [
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_access.swift",
+      "byteCount": 583,
+      "sha256": "b15f2912933e3a2de0cab33ed97c6aa6cea7fd50f4b39bc00878f2ff5f07f371"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_gates.py",
+      "byteCount": 2208,
+      "sha256": "14ded1bccfb4c8a16ecb4050c479a951a5a517bb4ac7bd5d11c16c4fc0ca5a85"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_generate.py",
+      "byteCount": 3911,
+      "sha256": "ad14cbf2553d0d6e02858038842d57a26edb7d44818b8b9ba5dc0133333d25c9"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_harness.swift",
+      "byteCount": 6703,
+      "sha256": "c394b00715dd9bf472785123ad22c412cdc1513939e9dd97b2050c61b9c4dbfb"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_report.py",
+      "byteCount": 17631,
+      "sha256": "7d3e35ee712586a5eae18a46208634695e6d76c5dc7e46a0e400a17a30b9ca88"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
+      "byteCount": 4945,
+      "sha256": "e730c1963f5b4103f34d6afb511e23b77ceb74642de0daf7f4aa7aea37ab39f7"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+      "byteCount": 1897,
+      "sha256": "cdf5791ed74f8ac162026a565c6d66c27bcb3fee8eba8464be86f15c0871f8f5"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/inspector_projection.rs",
+      "byteCount": 20448,
+      "sha256": "8168f90b8de964c2c3c22515161cd2db40bfb800cd73a0c3d175336df18f01c5"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+      "byteCount": 281931,
+      "sha256": "f19b09342df67acdac5e0afc5fc2304ac20ab98e0fa0457f01cd27b3236e67cd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift-receipt.json",
+      "byteCount": 10287,
+      "sha256": "369787be4d280b885c2d9c19aa3159dc301b75998b8efa54179a112c39c5a693"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift.json",
+      "byteCount": 340307,
+      "sha256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/inspector_projection_oracle.rs",
+      "byteCount": 3895,
+      "sha256": "2890f21f62fa673c7533e094cd1d53a458404abd97ec6482a9853124ae4cac76"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/inspector_projection_regressions.rs",
+      "byteCount": 11036,
+      "sha256": "e56603a9e5a95d635c6dfd850c758b2359da5eb4f045576f34bad36c703c7c53"
+    }
+  ],
+  "existingFileApplication": {
+    "path": "rust/crates/arktrace-viewer/src/lib.rs",
+    "appendUtf8": "\nmod inspector_projection;\npub use inspector_projection::*;\n",
+    "replaceWholeFile": false
+  },
+  "cacheIsolation": {
+    "cargo": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo",
+    "swiftpm": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-swiftpm",
+    "registrySeedReadOnly": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/dependencies/registry",
+    "otherCachesWritten": false
+  },
+  "api": {
+    "version": 1,
+    "entry": "project_inspectors(version,&[InspectorProjectionInput],budget,check)",
+    "inputVariants": [
+      "CpuSlice(&CpuSlice)",
+      "ThreadState(&ThreadStateInterval)",
+      "NamedSlice(&TraceSlice)",
+      "Frame(&TraceFrame)",
+      "Counter{series:&CounterSeriesDescriptor,sample:&CounterSample,query_range:TraceTimeRange}",
+      "DensityBand"
+    ],
+    "output": "Private InspectorProjectionBatch with read-only api_version/strings/records/text accessors; records are Option<InspectorFacts>, None only for DensityBand; facts have read-only scalar/optional-string-index getters and computed is_instant(). No Deserialize or custom constructor.",
+    "fields": [
+      "category",
+      "cpu",
+      "isInstant",
+      "isOpenEnded",
+      "key",
+      "kind",
+      "name",
+      "pid",
+      "priority",
+      "processKey",
+      "processName",
+      "range",
+      "semanticDurationNs",
+      "state",
+      "threadKey",
+      "threadName",
+      "tid",
+      "unit",
+      "value"
+    ],
+    "frameReuse": [
+      "frame_label",
+      "jank_state_text",
+      "TraceFrame::jank_tag"
+    ],
+    "identity": "ipid/itid and table-qualified row IDs copied directly; PID/TID are attributes, never identity sources.",
+    "errors": [
+      "UnsupportedVersion",
+      "InvalidRequest",
+      "InvalidEventKey",
+      "InputBudgetExceeded",
+      "RetainedBudgetExceeded",
+      "ArithmeticOverflow",
+      "Cancelled",
+      "DeadlineReached"
+    ]
+  },
+  "budgets": {
+    "maximumRecords": 4096,
+    "maximumTextUTF8Bytes": 4096,
+    "maximumInputStringBytes": 4194304,
+    "maximumRetainedStringCapacityBytes": 4194304,
+    "maximumRetainedBytes": 8388608,
+    "stringSlotsReserved": "6 per input, actual allocated capacity charged even when dedup or density leaves spare slots",
+    "retainedGetter": "Computed current struct + records Vec capacity + strings Vec capacity + sum String capacity; clone computes its own capacities. No cached retained metric.",
+    "inputCharge": "Borrowed relevant DTO text bytes counted per field/per input, including repeated equal fields; generated frame label and static category/unit charged to retained output.",
+    "scratch": "BTreeMap index nodes temporary, <=6*records entries. Owned text keys move into the final string table; no second text copy. Node/allocator overhead is excluded from retained metric.",
+    "aggregate": "Owner must sum input DTO ownership + live snapshot/other module outputs + projection + every clone + index/sort scratch + SDK/JSON encoding; individually bounded values do not imply an 8MiB owner cap.",
+    "checkpoints": "Entry; every input during budget scan and projection; before/after each new <=4096-byte intern copy; each index-to-table move; before final publication. No partial batch returned on error."
+  },
+  "oracle": {
+    "receipt": {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift-receipt.json",
+      "byteCount": 10287,
+      "sha256": "369787be4d280b885c2d9c19aa3159dc301b75998b8efa54179a112c39c5a693"
+    },
+    "cases": 362,
+    "positions": 393,
+    "detailFacts": 392,
+    "noDetailPositions": 1,
+    "fieldsPerDetail": 19,
+    "caseKinds": {
+      "cpuSlice": 150,
+      "threadState": 36,
+      "namedSlice": 31,
+      "frame": 96,
+      "counter": 48,
+      "densityBand": 1
+    },
+    "actualSource": "Cache-only actor extension directly invokes original TimelineSnapshotLoader.detailPrimitives, which calls original counterPrimitives. Typed repository pages assigned from inputs. Harness only reads every actual inspector property plus isInstant; no constructor switch duplicated.",
+    "exactRecursiveComparison": true,
+    "copiedInspectorConstructorAlgorithms": false,
+    "repositoryNormalizationProven": false,
+    "nativeFormatterOrSDKProof": false,
+    "inputArgSetIDRemovedWithoutOutputChange": true
+  },
+  "toolchains": {
+    "rust": "exact1.99.0 / edition2024, runner --locked --offline",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "swiftPackage": "Cache-only minimal original Core+Rendering targets, macOS26+ / Swift mode6 / strict memory safety; no root manifest change"
+  },
+  "verification": [
+    {
+      "name": "swiftOracle",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:44:24.885917+00:00",
+      "finishedAtUtc": "2026-10-04T03:44:29.806879+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-01-swiftOracle.log",
+        "byteCount": 237,
+        "sha256": "14b77da3e62c8be61ea32b3cdd9e345a9e3cb32be3b3290c3ddc021d016f057f"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-01-swiftOracle-actual.log",
+        "byteCount": 1826,
+        "sha256": "37b53ac7e3175034f2a19cdb0b1cfd180d5617536249f56d59fb4a171deadcb2"
+      }
+    },
+    {
+      "name": "swiftRegressions",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
+        "--regressions"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:44:29.807408+00:00",
+      "finishedAtUtc": "2026-10-04T03:44:31.525468+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-02-swiftRegressions.log",
+        "byteCount": 1819,
+        "sha256": "dd62b6d81983d78bb8038823100b2360a8534fead31486e1f9da8531b32e265a"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-02-swiftRegressions-actual.log",
+        "byteCount": 6745,
+        "sha256": "881465616184038a65d82f609a7b8c52c3fc9d0a6d93e12014025b11986e2942"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:44:31.525885+00:00",
+      "finishedAtUtc": "2026-10-04T03:44:32.472118+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-03-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:44:32.472445+00:00",
+      "finishedAtUtc": "2026-10-04T03:44:45.362143+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-04-test.log",
+        "byteCount": 4422,
+        "sha256": "d0eefc37074109630cbcec9eb4975d3e5a56157db0c78a34f1b53bec510171e3"
+      }
+    },
+    {
+      "name": "swiftOracle",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:45:16.176222+00:00",
+      "finishedAtUtc": "2026-10-04T03:45:17.964170+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-05-swiftOracle.log",
+        "byteCount": 237,
+        "sha256": "14b77da3e62c8be61ea32b3cdd9e345a9e3cb32be3b3290c3ddc021d016f057f"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-05-swiftOracle-actual.log",
+        "byteCount": 1696,
+        "sha256": "d7082cf423bb62ea1550ad8c9dee03eb26c5a0e81428637947a698461eb77ba2"
+      }
+    },
+    {
+      "name": "swiftRegressions",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
+        "--regressions"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:45:17.964584+00:00",
+      "finishedAtUtc": "2026-10-04T03:45:19.802649+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-06-swiftRegressions.log",
+        "byteCount": 1819,
+        "sha256": "ea240f59d6c349ecafb60bdbc4d48c56d08fe03d66627f49c23928cdebe736ed"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-06-swiftRegressions-actual.log",
+        "byteCount": 6745,
+        "sha256": "70050afc7199184d724cf0051360c5b0dc5dfff269fb75d24c44ebc3b79978c6"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:45:19.803114+00:00",
+      "finishedAtUtc": "2026-10-04T03:45:20.944310+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-07-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:45:20.944809+00:00",
+      "finishedAtUtc": "2026-10-04T03:45:26.337265+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-08-test.log",
+        "byteCount": 12359,
+        "sha256": "6609ba894722f25ba7d148827a412abe0aedd0af943e03d5a0da3e53a1ec2b1a"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:45:26.337758+00:00",
+      "finishedAtUtc": "2026-10-04T03:45:33.182371+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-09-clippy.log",
+        "byteCount": 2107,
+        "sha256": "1608b246d3e052aa56c1ae92816c0a769125998fff498098ce5243bdcf90df3a"
+      }
+    },
+    {
+      "name": "swiftOracle",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:48:16.608643+00:00",
+      "finishedAtUtc": "2026-10-04T03:48:18.524512+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-10-swiftOracle.log",
+        "byteCount": 237,
+        "sha256": "14b77da3e62c8be61ea32b3cdd9e345a9e3cb32be3b3290c3ddc021d016f057f"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-10-swiftOracle-actual.log",
+        "byteCount": 1739,
+        "sha256": "46932d3e6762b75276002d6562274f6a538c69d58982313cb825ee0f39ee3f5b"
+      }
+    },
+    {
+      "name": "swiftRegressions",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py",
+        "--regressions"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:48:18.524955+00:00",
+      "finishedAtUtc": "2026-10-04T03:48:20.245007+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-11-swiftRegressions.log",
+        "byteCount": 1819,
+        "sha256": "283644067f5db6bbaaac852c3c887afdffcd76afa25d905c9d3629bdde7e7eea"
+      },
+      "actualLog": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-11-swiftRegressions-actual.log",
+        "byteCount": 6745,
+        "sha256": "6a04c2914d978f06fb74d70d8a42e8a7ece5d98d8f9518e6a0da78ee8054969a"
+      }
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:48:20.245479+00:00",
+      "finishedAtUtc": "2026-10-04T03:48:21.159306+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-12-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "test",
+        "-p",
+        "arktrace-viewer",
+        "--offline"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:48:21.159666+00:00",
+      "finishedAtUtc": "2026-10-04T03:48:23.079285+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-13-test.log",
+        "byteCount": 12359,
+        "sha256": "117ed9a124b349c4c2e847e5831e5fa0b14b59218d290c49c3e15baec2a49159"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "clippy",
+        "-p",
+        "arktrace-viewer",
+        "--all-targets",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:48:23.079611+00:00",
+      "finishedAtUtc": "2026-10-04T03:48:23.737718+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-14-clippy.log",
+        "byteCount": 272,
+        "sha256": "5291db195c5e358911c80fba311cd9759629c27a884526f8b1ef299a7f502b04"
+      }
+    },
+    {
+      "name": "verify",
+      "command": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_validate.py",
+        "verify"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "startedAtUtc": "2026-10-04T03:48:23.738069+00:00",
+      "finishedAtUtc": "2026-10-04T03:48:24.229207+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-15-verify.log",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      }
+    }
+  ],
+  "actualCommandRecord": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/command-results.json",
+    "byteCount": 14565,
+    "sha256": "edef379a1e91c441c7f8b262c0bb0a1113593a890cf5b7a0caac209b61820e6b"
+  },
+  "resolvedAttempts": [
+    {
+      "name": "swiftScalarSerialization",
+      "command": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/inspector_projection_swift.py"
+      ],
+      "workingDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004",
+      "exitCode": 1,
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-swift-attempt-01.log",
+        "byteCount": 3666,
+        "sha256": "2af00f72545605fc38cb96faf940105b373bd01363835ceed756a3270de97f7f"
+      },
+      "harness": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-swift-attempt-01-harness.swift",
+        "byteCount": 6675,
+        "sha256": "a48f4db9fea8cdb5a7cc55b26fcdbb6be6d723b4d5398669b3406a7d6f9acaac"
+      },
+      "resolution": "JSONSerialization reader omitted fragmentsAllowed for scalar Inspector fields. Add the scalar-read option; original loader/DTO/constructor unchanged."
+    },
+    {
+      "name": "inputContractArgSetID",
+      "exitCode": 101,
+      "generator": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-rust-attempt-01-generator.py",
+        "byteCount": 3938,
+        "sha256": "122e7aa6bf6084fd9a36a4df7306ce21b1ecc0c12f4b26aec6f09e49a3872440"
+      },
+      "inputs": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-rust-attempt-01-inputs.json",
+        "byteCount": 284117,
+        "sha256": "071544d55a71a4ea71e25c8b9d893c446838400de7181de8620f2712a00a9aa1"
+      },
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-04-test.log",
+        "byteCount": 4422,
+        "sha256": "d0eefc37074109630cbcec9eb4975d3e5a56157db0c78a34f1b53bec510171e3"
+      },
+      "previousActualSwiftOutput": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-projection-20261004/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift.json",
+        "byteCount": 340307,
+        "sha256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9"
+      },
+      "resolution": "Generator added unused argSetID outside the committed shared DTO decoding surface (field skipped). Remove it from owned inputs to match the committed typed contract; do not alter contract or drop any Inspector output field. Args parsing is outside this task."
+    },
+    {
+      "name": "clippyManualSliceSize",
+      "exitCode": 101,
+      "source": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-clippy-attempt-01-regressions.rs",
+        "byteCount": 11062,
+        "sha256": "cdc7da6c380f4e0fd588b1e107b73256ddea0ffb8b7827c0e3ff6bd932e2fe2b"
+      },
+      "log": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-09-clippy.log",
+        "byteCount": 2107,
+        "sha256": "1608b246d3e052aa56c1ae92816c0a769125998fff498098ce5243bdcf90df3a"
+      },
+      "resolution": "Replace two test-only manual slice-size expressions with std::mem::size_of_val, preserving capacity expectations. No lint allowances or gate relaxation."
+    }
+  ],
+  "resolvedAttemptRecord": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/resolved-attempts.json",
+    "byteCount": 3781,
+    "sha256": "8e0dd4ec0120789496b512c06ead8f9d5754f9bcc19f41c233eedfcea4f0b7af"
+  },
+  "resultSummary": {
+    "rustViewerTestsPassed": 81,
+    "newRustTests": 9,
+    "compileFailDocTestsPassed": 2,
+    "swiftOracleTestsPassed": 1,
+    "swiftExistingTestsPassed": 20,
+    "swiftRenderingTestsPassed": 7,
+    "swiftCoreTestsPassed": 13,
+    "rustWorkspaceCrates": 8,
+    "frozenThirdPartyLicenseExpressions": 35,
+    "finalCompilerWarnings": 0,
+    "rustIgnoredTests": 0,
+    "appBuildExecuted": false,
+    "nativeGuiAcceptanceExecuted": false
+  },
+  "utf8Portability": {
+    "audit": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-projection-cargo/frozen-evidence/inspector-projection-utf8-audit.json",
+      "byteCount": 4927,
+      "sha256": "22ba7595dda19f3b69e8086663f6f4642fb55561542c597f3f90e7e871073cba"
+    },
+    "ownedPythonScripts": 5,
+    "textOperations": 28,
+    "encoding": "utf-8",
+    "nativeWindowsExecution": false
+  },
+  "integrationProposal": {
+    "wire": "Main generates versioned fixed-width event-kind/key/optional scalar records and bounded UTF-8 offset-length text descriptors from read-only getters. isInstant is computed from semantic duration and open-ended, distinct from range.isInstant. No Rust Vec/String/reference layout export.",
+    "input": "After existing typed query normalization, named-slice dedup/limit and quality/availability checks, borrow each DTO. Counter passes its descriptor and selected sample plus actual query range; do not scan unrelated samples. DensityBand maps to no detail. Batch cap4096 is a new safety boundary: large native snapshots require owner-admitted chunks or a separate bounded delivery decision, never silent truncation.",
+    "semantics": "CPU name is threadName; cpu/processName/threadName/endState/priority copied. Thread category is normalizedState raw value or nil, not primitive unknown fallback. Named category/name and identities copied. Frame uses existing label/jank helpers, vsync value/unit. Positive counter duration keeps timestamp+duration even past viewport; nil duration uses max(timestamp,queryEnd); semanticDuration stays original optional sample duration. Preserve nil/empty UTF-8 and all Int64 values.",
+    "owner": "Budget each output and temporary aggregate, assign strings to existing SDK string-table format, release scratch on error/cancel/deadline, only publish a whole batch to the same session/generation owner. Projection has no session/navigation/selection/Store/cache state.",
+    "validation": "On main compare all393 canonical positions through actual generated wire/SDK conversion; run ABI/API, whole owner-budget and cancellation/retry gates, App build, native Inspector copy/accessibility/formatting, real medium trace GUI and Windows native evidence where required. Do not claim AT-RUST-011/012/013/macOS acceptance from this pure module."
+  },
+  "limitations": [
+    "Only new pure Rust Inspector projection; no production wire/SDK/App/FFI/Engine/Store/cache/CLI/search/annotation/navigation/args integration, disk IO, formatter or localization. Previous presentation/color/label modules remain unchanged.",
+    "New version/key-table/capacity/negative counter/query/overflow/cancellation safety guards are separately typed. Invalid unsafe Swift vectors are not used as canonical expected behavior. Negative IDs and PID/TID attributes that typed DTOs allow remain unchanged.",
+    "Actual Swift loader counter range is not uniformly clipped: positive duration can end after viewport. Only nil/open duration substitutes query end, with max(timestamp,end). Primitive range and semantic duration remain distinct.",
+    "Oracle executes original private projection methods on assigned DTO pages; it does not establish SQL/repository normalization, availability/quality, dedup/planning/limit behavior or full snapshot integration. Existing related Swift regressions are a selection, not complete App CI.",
+    "Density input has no source detail DTO, EventKey or Inspector; None preserves input alignment. The module never invents a representative event from a band.",
+    "Input ownership, BTreeMap nodes/allocator headers, simultaneously live outputs/clones and encoding scratch are excluded from per-output retained bytes and must be accounted by owner. Capacity getters are actual current allocations, not serialized payload size.",
+    "UTF-8/NUL/Unicode and empty vs nil facts are preserved; this does not introduce native number/time formatter rules or Windows runtime evidence."
+  ]
+}

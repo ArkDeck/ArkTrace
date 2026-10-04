@@ -1,0 +1,184 @@
+{
+  "schemaVersion" : 1,
+  "sections" : [
+    {
+      "entries" : [
+        {
+          "actionChinese" : "以指针位置为锚点放大 / 缩小",
+          "actionEnglish" : "Zoom in / out about the pointer",
+          "displayKeys" : "W / S",
+          "keysChinese" : "<kbd>W</kbd> / <kbd>S</kbd>",
+          "keysEnglish" : "<kbd>W</kbd> / <kbd>S</kbd>",
+          "legacyID" : "<kbd>W</kbd> / <kbd>S</kbd>"
+        },
+        {
+          "actionChinese" : "左移 / 右移",
+          "actionEnglish" : "Pan backward / forward",
+          "displayKeys" : "A / D",
+          "keysChinese" : "<kbd>A</kbd> / <kbd>D</kbd>",
+          "keysEnglish" : "<kbd>A</kbd> / <kbd>D</kbd>",
+          "legacyID" : "<kbd>A</kbd> / <kbd>D</kbd>"
+        },
+        {
+          "actionChinese" : "缩放到选中区间",
+          "actionEnglish" : "Zoom to the selected range",
+          "displayKeys" : "F, [, ]",
+          "keysChinese" : "<kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd>",
+          "keysEnglish" : "<kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd>",
+          "legacyID" : "<kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd>"
+        },
+        {
+          "actionChinese" : "同一轨道的前一 / 后一真实 event",
+          "actionEnglish" : "Previous / next real event in the track",
+          "displayKeys" : "← / →",
+          "keysChinese" : "<kbd>←</kbd> / <kbd>→</kbd>",
+          "keysEnglish" : "<kbd>←</kbd> / <kbd>→</kbd>",
+          "legacyID" : "<kbd>←</kbd> / <kbd>→</kbd>"
+        },
+        {
+          "actionChinese" : "相邻可见轨道",
+          "actionEnglish" : "Adjacent visible track",
+          "displayKeys" : "↑ / ↓",
+          "keysChinese" : "<kbd>↑</kbd> / <kbd>↓</kbd>",
+          "keysEnglish" : "<kbd>↑</kbd> / <kbd>↓</kbd>",
+          "legacyID" : "<kbd>↑</kbd> / <kbd>↓</kbd>"
+        },
+        {
+          "actionChinese" : "平移约一个 viewport 的 10%",
+          "actionEnglish" : "Pan by ~10% of the viewport",
+          "displayKeys" : "Option+←/→",
+          "keysChinese" : "<kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd>",
+          "keysEnglish" : "<kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd>",
+          "legacyID" : "<kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd>"
+        },
+        {
+          "actionChinese" : "围绕 selection 或 viewport center 缩放",
+          "actionEnglish" : "Zoom about the selection or viewport center",
+          "displayKeys" : "+ / -",
+          "keysChinese" : "<kbd>+</kbd> / <kbd>-</kbd>",
+          "keysEnglish" : "<kbd>+</kbd> / <kbd>-</kbd>",
+          "legacyID" : "<kbd>+</kbd> / <kbd>-</kbd>"
+        },
+        {
+          "actionChinese" : "选择 focused event · 重置缩放 · 清除选择",
+          "actionEnglish" : "Select focused event · reset zoom · clear selection",
+          "displayKeys" : "Return · 0 · Esc",
+          "keysChinese" : "<kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd>",
+          "keysEnglish" : "<kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd>",
+          "legacyID" : "<kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd>"
+        },
+        {
+          "actionChinese" : "把最近的 flag 滚回视野",
+          "actionEnglish" : "Scroll the nearest flag back into view",
+          "displayKeys" : ", / .",
+          "keysChinese" : "<kbd>,</kbd> / <kbd>.</kbd>",
+          "keysEnglish" : "<kbd>,</kbd> / <kbd>.</kbd>",
+          "legacyID" : "<kbd>,</kbd> / <kbd>.</kbd>"
+        },
+        {
+          "actionChinese" : "跳到上一个 / 下一个 flag",
+          "actionEnglish" : "Jump to the previous / next flag",
+          "displayKeys" : "Ctrl+, / Ctrl+.",
+          "keysChinese" : "<kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd>",
+          "keysEnglish" : "<kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd>",
+          "legacyID" : "<kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd>"
+        },
+        {
+          "actionChinese" : "把当前选区标记为 mark —— 临时 / 保留",
+          "actionEnglish" : "Mark the selection — temporary / kept",
+          "displayKeys" : "M / Shift+M",
+          "keysChinese" : "<kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd>",
+          "keysEnglish" : "<kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd>",
+          "legacyID" : "<kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd>"
+        },
+        {
+          "actionChinese" : "在 mark 之间跳转",
+          "actionEnglish" : "Jump to the previous / next mark",
+          "displayKeys" : "Ctrl+[ / Ctrl+]",
+          "keysChinese" : "<kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd>",
+          "keysEnglish" : "<kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd>",
+          "legacyID" : "<kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd>"
+        }
+      ],
+      "legacyID" : "Timeline",
+      "tableChinese" : "| 按键 | 动作 |\n|---|---|\n| <kbd>W</kbd> / <kbd>S</kbd> | 以指针位置为锚点放大 / 缩小 |\n| <kbd>A</kbd> / <kbd>D</kbd> | 左移 / 右移 |\n| <kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd> | 缩放到选中区间 |\n| <kbd>←</kbd> / <kbd>→</kbd> | 同一轨道的前一 / 后一真实 event |\n| <kbd>↑</kbd> / <kbd>↓</kbd> | 相邻可见轨道 |\n| <kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | 平移约一个 viewport 的 10% |\n| <kbd>+</kbd> / <kbd>-</kbd> | 围绕 selection 或 viewport center 缩放 |\n| <kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd> | 选择 focused event · 重置缩放 · 清除选择 |\n| <kbd>,</kbd> / <kbd>.</kbd> | 把最近的 flag 滚回视野 |\n| <kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd> | 跳到上一个 / 下一个 flag |\n| <kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd> | 把当前选区标记为 mark —— 临时 / 保留 |\n| <kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd> | 在 mark 之间跳转 |",
+      "tableEnglish" : "| Keys | Action |\n|---|---|\n| <kbd>W</kbd> / <kbd>S</kbd> | Zoom in / out about the pointer |\n| <kbd>A</kbd> / <kbd>D</kbd> | Pan backward / forward |\n| <kbd>F</kbd>, <kbd>[</kbd>, <kbd>]</kbd> | Zoom to the selected range |\n| <kbd>←</kbd> / <kbd>→</kbd> | Previous / next real event in the track |\n| <kbd>↑</kbd> / <kbd>↓</kbd> | Adjacent visible track |\n| <kbd>Option</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Pan by ~10% of the viewport |\n| <kbd>+</kbd> / <kbd>-</kbd> | Zoom about the selection or viewport center |\n| <kbd>Return</kbd> · <kbd>0</kbd> · <kbd>Esc</kbd> | Select focused event · reset zoom · clear selection |\n| <kbd>,</kbd> / <kbd>.</kbd> | Scroll the nearest flag back into view |\n| <kbd>Ctrl</kbd>+<kbd>,</kbd> / <kbd>Ctrl</kbd>+<kbd>.</kbd> | Jump to the previous / next flag |\n| <kbd>M</kbd> / <kbd>Shift</kbd>+<kbd>M</kbd> | Mark the selection — temporary / kept |\n| <kbd>Ctrl</kbd>+<kbd>[</kbd> / <kbd>Ctrl</kbd>+<kbd>]</kbd> | Jump to the previous / next mark |",
+      "titleChinese" : "时间轴",
+      "titleEnglish" : "Timeline"
+    },
+    {
+      "entries" : [
+        {
+          "actionChinese" : "框选时间区间；拖动任一边界可单独调整",
+          "actionEnglish" : "Select a time range; drag either edge to adjust it",
+          "displayKeys" : "Drag",
+          "keysChinese" : "拖动",
+          "keysEnglish" : "Drag",
+          "legacyID" : "Drag"
+        },
+        {
+          "actionChinese" : "横向平移",
+          "actionEnglish" : "Pan horizontally",
+          "displayKeys" : "Scroll",
+          "keysChinese" : "滚动",
+          "keysEnglish" : "Scroll",
+          "legacyID" : "Scroll"
+        },
+        {
+          "actionChinese" : "以指针位置为锚点缩放",
+          "actionEnglish" : "Zoom about the pointer",
+          "displayKeys" : "Option or Ctrl + Scroll",
+          "keysChinese" : "<kbd>Option</kbd> 或 <kbd>Ctrl</kbd> + 滚动",
+          "keysEnglish" : "<kbd>Option</kbd> or <kbd>Ctrl</kbd> + Scroll",
+          "legacyID" : "<kbd>Option</kbd> or <kbd>Ctrl</kbd> + Scroll"
+        },
+        {
+          "actionChinese" : "以指针位置为锚点缩放",
+          "actionEnglish" : "Zoom about the pointer",
+          "displayKeys" : "Pinch",
+          "keysChinese" : "捏合",
+          "keysEnglish" : "Pinch",
+          "legacyID" : "Pinch"
+        },
+        {
+          "actionChinese" : "在该时刻放置一个 flag",
+          "actionEnglish" : "Place a flag at that instant",
+          "displayKeys" : "Click the time ruler",
+          "keysChinese" : "点击时间标尺",
+          "keysEnglish" : "Click the time ruler",
+          "legacyID" : "Click the time ruler"
+        }
+      ],
+      "legacyID" : "Pointer, on the timeline",
+      "tableChinese" : "| 按键 | 动作 |\n|---|---|\n| 拖动 | 框选时间区间；拖动任一边界可单独调整 |\n| 滚动 | 横向平移 |\n| <kbd>Option</kbd> 或 <kbd>Ctrl</kbd> + 滚动 | 以指针位置为锚点缩放 |\n| 捏合 | 以指针位置为锚点缩放 |\n| 点击时间标尺 | 在该时刻放置一个 flag |",
+      "tableEnglish" : "| Keys | Action |\n|---|---|\n| Drag | Select a time range; drag either edge to adjust it |\n| Scroll | Pan horizontally |\n| <kbd>Option</kbd> or <kbd>Ctrl</kbd> + Scroll | Zoom about the pointer |\n| Pinch | Zoom about the pointer |\n| Click the time ruler | Place a flag at that instant |",
+      "titleChinese" : "时间轴上的指针操作",
+      "titleEnglish" : "Pointer, on the timeline"
+    },
+    {
+      "entries" : [
+        {
+          "actionChinese" : "上一条 / 下一条匹配，并在时间轴上跳到它",
+          "actionEnglish" : "Previous / next match, revealing it on the timeline",
+          "displayKeys" : "↑ / ↓",
+          "keysChinese" : "<kbd>↑</kbd> / <kbd>↓</kbd>",
+          "keysEnglish" : "<kbd>↑</kbd> / <kbd>↓</kbd>",
+          "legacyID" : "<kbd>↑</kbd> / <kbd>↓</kbd>"
+        },
+        {
+          "actionChinese" : "跳到选中的匹配，并把 focus 交给 Timeline",
+          "actionEnglish" : "Go to the selected match and move focus to the timeline",
+          "displayKeys" : "Return",
+          "keysChinese" : "<kbd>Return</kbd>",
+          "keysEnglish" : "<kbd>Return</kbd>",
+          "legacyID" : "<kbd>Return</kbd>"
+        }
+      ],
+      "legacyID" : "Search Results",
+      "tableChinese" : "| 按键 | 动作 |\n|---|---|\n| <kbd>↑</kbd> / <kbd>↓</kbd> | 上一条 / 下一条匹配，并在时间轴上跳到它 |\n| <kbd>Return</kbd> | 跳到选中的匹配，并把 focus 交给 Timeline |",
+      "tableEnglish" : "| Keys | Action |\n|---|---|\n| <kbd>↑</kbd> / <kbd>↓</kbd> | Previous / next match, revealing it on the timeline |\n| <kbd>Return</kbd> | Go to the selected match and move focus to the timeline |",
+      "titleChinese" : "搜索结果",
+      "titleEnglish" : "Search Results"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Prepare fresh exclusive caches. Refuse existing caches and baseline drift."""
+from pathlib import Path
+import hashlib,json,platform,shutil,subprocess
+ROOT=Path(__file__).resolve().parents[2];OWN=Path(__file__).resolve().parent
+CARGO=ROOT.parent/'caches/parallel-repository-inspector-parity-cargo'
+SWIFT=ROOT.parent/'caches/parallel-repository-inspector-parity-swiftpm'
+SEED=ROOT.parent/'caches/parallel-inspector-index-consumer-cargo/dependencies/registry'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+assert platform.system()=='Darwin' and platform.machine()=='arm64'
+assert subprocess.check_output(['rustc','+1.99.0','--version'],text=True,encoding='utf-8').startswith('rustc 1.99.0 ')
+assert 'Apple Swift version 6.4 ' in subprocess.check_output(['swift','--version'],text=True,encoding='utf-8')
+assert subprocess.check_output(['xcodebuild','-version'],text=True,encoding='utf-8').startswith('Xcode 27.0')
+assert sha(ROOT/'parallel-snapshot.json')=='6e755a0a9de04beb45616e866cfb06a9b923e229b7197dd37ee3831a97bb9440'
+manifest=json.loads((ROOT/'parallel-snapshot.json').read_text(encoding='utf-8'))
+assert len(manifest['files'])==947
+for record in manifest['files']:assert sha(ROOT/record['path'])==record['sha256'],record['path']
+assert not CARGO.exists() and not SWIFT.exists(), 'Use a fresh cache; preserve frozen results'
+CARGO.mkdir(mode=0o700);SWIFT.mkdir(mode=0o700)
+# Registry-only byte copies; producer targets and mutable caches are not shared.
+shutil.copytree(SEED,CARGO/'dependencies/registry')
+subprocess.run(['git','init','--bare',str(CARGO/'source-index.git')],check=True)
+subprocess.run(['python3',str(OWN/'generate.py'),str(CARGO)],check=True)
+workspace=CARGO/'workspace';workspace.mkdir()
+for rel in ('rust','contracts'):shutil.copytree(ROOT/rel,workspace/rel)
+package=workspace/OWN.relative_to(ROOT)
+shutil.copytree(OWN,package,ignore=shutil.ignore_patterns('__pycache__'))
+shutil.copyfile(ROOT/'rust/Cargo.lock',package/'Cargo.lock')
+source=SWIFT/'oracle-source';source.mkdir()
+for rel in ('Sources','Tests','scripts','ThirdParty','Fixtures'):
+    shutil.copytree(ROOT/rel,source/rel,ignore=shutil.ignore_patterns('trace_streamer_bin','trace_streamer','__pycache__'))
+for rel in ('LICENSE','THIRD_PARTY_NOTICES.md','.gitignore'):shutil.copyfile(ROOT/rel,source/rel)
+original=(ROOT/'Package.swift').read_text(encoding='utf-8')
+needle='targets: [\n        .target(name: "ArkTraceCore"'
+assert original.count(needle)==1
+package_text=original.replace(needle,'targets: [\n        .testTarget(name: "RepositoryInspectorOracleTests", dependencies: ["ArkTraceCore", "ArkTraceStore", "ArkTraceRendering"]),\n        .target(name: "ArkTraceCore"')
+(source/'Package.swift').write_text(package_text,encoding='utf-8')
+loader=source/'Sources/ArkTraceRendering/TimelineSnapshotLoader.swift'
+loader.write_text(loader.read_text(encoding='utf-8')+(OWN/'swift/LoaderAccess.swift').read_text(encoding='utf-8'),encoding='utf-8')
+target=source/'Tests/RepositoryInspectorOracleTests';target.mkdir()
+shutil.copyfile(OWN/'swift/RepositoryInspectorOracleTests.swift',target/'RepositoryInspectorOracleTests.swift')
+subprocess.run(['git','init',str(source)],check=True)
+print(json.dumps(dict(baselineFilesUnchanged=947,exclusiveCaches=[str(CARGO),str(SWIFT)])))

@@ -1,0 +1,97 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source
+Building for debugging...
+[Computing dependencies]
+[1 / 2] ArkTraceAnalysisTests-product
+[4 / 5] ArkTraceCLITests-product
+Build complete! (0.66秒)
+Test Suite 'Selected tests' started at 2026-10-04 11:50:14.987.
+Test Suite 'ArkTraceStoreTests.xctest' started at 2026-10-04 11:50:14.988.
+Test Suite 'ArkTraceStoreTests.xctest' passed at 2026-10-04 11:50:14.988.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:14.988.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.072.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 11:50:15.072.
+Test Suite 'ArkTraceRenderingTests.xctest' passed at 2026-10-04 11:50:15.072.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.072.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.160.
+Test Suite 'ArkTraceParserTests.xctest' started at 2026-10-04 11:50:15.160.
+Test Suite 'ArkTraceParserTests.xctest' passed at 2026-10-04 11:50:15.160.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.160.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.244.
+Test Suite 'ArkTraceIntegrationTests.xctest' started at 2026-10-04 11:50:15.245.
+Test Suite 'ArkTraceIntegrationTests.xctest' passed at 2026-10-04 11:50:15.245.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.245.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.328.
+Test Suite 'ArkTraceCoreTests.xctest' started at 2026-10-04 11:50:15.329.
+Test Suite 'ArkTraceCoreTests.xctest' passed at 2026-10-04 11:50:15.329.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.329.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.413.
+Test Suite 'ArkTraceCaptureTests.xctest' started at 2026-10-04 11:50:15.414.
+Test Suite 'ArkTraceCaptureTests.xctest' passed at 2026-10-04 11:50:15.414.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.414.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.498.
+Test Suite 'ArkTraceCLITests.xctest' started at 2026-10-04 11:50:15.499.
+Test Suite 'ArkTraceCLITests.xctest' passed at 2026-10-04 11:50:15.499.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.499.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.563.
+Test Suite 'ArkTraceAppSupportTests.xctest' started at 2026-10-04 11:50:15.564.
+Test Suite 'ObservationBoundaryTests' started at 2026-10-04 11:50:15.564.
+Test Case '-[ArkTraceAppSupportTests.ObservationBoundaryTests testInspectorPaneIgnoresSearchState]' started.
+/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/workspace/Tests/ArkTraceAppSupportTests/AppSource.swift:25: error: -[ArkTraceAppSupportTests.ObservationBoundaryTests testInspectorPaneIgnoresSearchState] : failed: caught error: "Error Domain=NSCocoaErrorDomain Code=260 "未能打开文件“ArkTraceApp”，因为它不存在。" UserInfo={NSURL=file:///Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/workspace/Apps/ArkTraceApp, NSFilePath=/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/workspace/Apps/ArkTraceApp, NSUnderlyingError=0x76bb431a40 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}"
+Test Case '-[ArkTraceAppSupportTests.ObservationBoundaryTests testInspectorPaneIgnoresSearchState]' failed (0.184 seconds).
+Test Suite 'ObservationBoundaryTests' failed at 2026-10-04 11:50:15.748.
+	 Executed 1 test, with 1 failure (1 unexpected) in 0.184 (0.184) seconds
+Test Suite 'TraceDocumentControllerTests' started at 2026-10-04 11:50:15.748.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testADensityBandPressSelectsTheRealEventUnderIt]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-density-press-E839BB78-CF77-445D-93E6-63DD5A2DF9C1.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-density-press-E839BB78-CF77-445D-93E6-63DD5A2DF9C1.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testADensityBandPressSelectsTheRealEventUnderIt]' passed (0.011 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testInspectorLayoutAndCollapseFocusPolicy]' started.
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testInspectorLayoutAndCollapseFocusPolicy]' passed (0.000 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-0E84B877-E30B-474D-BBBC-229FD7D43090.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-0E84B877-E30B-474D-BBBC-229FD7D43090.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-0E84B877-E30B-474D-BBBC-229FD7D43090.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-search-arguments-0E84B877-E30B-474D-BBBC-229FD7D43090.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem]' passed (0.013 seconds).
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent]' started.
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-reveal-A2632D37-2201-4B8C-B295-986DC2A6FBA0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /var/folders/kq/6vwvyjds2nx0tc3g0xt_19br0000gn/T/arktrace-reveal-A2632D37-2201-4B8C-B295-986DC2A6FBA0.htrace: 1 (Operation not permitted)
+sandbox_extension_issue_file failed for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Xcode/Agents/xctest: 1 (Operation not permitted)
+Test Case '-[ArkTraceAppSupportTests.TraceDocumentControllerTests testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent]' passed (0.005 seconds).
+Test Suite 'TraceDocumentControllerTests' passed at 2026-10-04 11:50:15.777.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.029 (0.029) seconds
+Test Suite 'ArkTraceAppSupportTests.xctest' failed at 2026-10-04 11:50:15.777.
+	 Executed 5 tests, with 1 failure (1 unexpected) in 0.212 (0.213) seconds
+Test Suite 'Selected tests' failed at 2026-10-04 11:50:15.777.
+	 Executed 5 tests, with 1 failure (1 unexpected) in 0.212 (0.214) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:50:15.873.
+Test Suite 'ArkTraceAnalysisTests.xctest' started at 2026-10-04 11:50:15.873.
+Test Suite 'ArkTraceAnalysisTests.xctest' passed at 2026-10-04 11:50:15.873.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:50:15.873.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Note: Some test targets reported failures:
+  - ArkTraceAppSupportTests (XCTest)

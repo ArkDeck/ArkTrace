@@ -671,6 +671,13 @@ deferred editor 身份。host 总预算、持久化接线和 Engine/FFI/SDK/App 
 输出逐字节一致。生产 wire、SDK/App 接线和完整验收仍未完成，见
 [主线 counter 兼容记录](migration-runs/AT-RUST-011-2026-10-04-mainline-counter-compat.md)。
 
+随后按审查清单接入 Inspector 完整事实投影、snapshot EventKey 索引和 action catalog，
+仅新增 149 个专属路径并追加六行模块导出。当前 442 Rust runtime + 6 compile-fail、
+4 项 actual Swift canonical 和 40 项相关回归通过；四份新 oracle 输出字节不变。
+索引保留首个 nil Inspector 对重复键的阻断，catalog 保留原生键盘路由语义。
+实际 snapshot owner、SDK/App 和用户焦点/IME 接线仍未完成，见
+[主线 Viewer facts 记录](migration-runs/AT-RUST-011-2026-10-04-mainline-viewer-facts.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：008、009、011。

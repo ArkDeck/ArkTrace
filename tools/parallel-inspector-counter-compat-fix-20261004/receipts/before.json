@@ -1,0 +1,23 @@
+{
+  "name": "before",
+  "command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source/scripts/run-cargo.py",
+    "test",
+    "-p",
+    "arktrace-viewer",
+    "--test",
+    "inspector_counter_compat_regressions",
+    "--offline",
+    "--",
+    "--nocapture"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source",
+  "startedAtUtc": "2026-10-04T04:42:59.606572+00:00",
+  "endedAtUtc": "2026-10-04T04:43:10.359516+00:00",
+  "exitCode": 101,
+  "expectedExitCode": 101,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/before.log",
+  "logSHA256": "159128f6dfa8867d8cf2403040b74eae0bccac22d40a0bf1467fe37ab7b45d9f"
+}

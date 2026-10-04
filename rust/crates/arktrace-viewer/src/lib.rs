@@ -124,3 +124,12 @@ pub use presentation::*;
 
 mod annotations;
 pub use annotations::*;
+
+mod inspector_projection;
+pub use inspector_projection::*;
+
+mod snapshot_event_index;
+pub use snapshot_event_index::*;
+
+mod action_catalog;
+pub use action_catalog::*;

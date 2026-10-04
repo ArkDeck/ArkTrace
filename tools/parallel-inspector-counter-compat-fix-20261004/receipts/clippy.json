@@ -1,0 +1,26 @@
+{
+  "name": "clippy",
+  "command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source/scripts/run-cargo.py",
+    "clippy",
+    "-p",
+    "arktrace-viewer",
+    "--all-targets",
+    "--all-features",
+    "--offline",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source",
+  "startedAtUtc": "2026-10-04T04:44:29.212314+00:00",
+  "endedAtUtc": "2026-10-04T04:44:34.975540+00:00",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/clippy.log",
+  "logSHA256": "7fa76f4733538796b8b1877f7d1ef30a3a072fc1704e4ae91744f8f06e91b098",
+  "productionSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "regressionSourceSHA256": "e962d4c956204e216673e0cdca650f49d5e09380a5d76d81919e97af7a7e08dd"
+}

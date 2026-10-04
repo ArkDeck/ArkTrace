@@ -1,0 +1,22 @@
+{
+  "name": "fmt-attempt-2",
+  "command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source/scripts/run-cargo.py",
+    "fmt",
+    "--all",
+    "--",
+    "--check"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/validation-source",
+  "startedAtUtc": "2026-10-04T04:46:59.994189+00:00",
+  "endedAtUtc": "2026-10-04T04:47:01.041605+00:00",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/fmt-attempt-2.log",
+  "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "productionSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "compiledSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "regressionSourceSHA256": "ffe43d911d12fc256cca542089a56959926163dd008e725aef6dff7571c52754"
+}

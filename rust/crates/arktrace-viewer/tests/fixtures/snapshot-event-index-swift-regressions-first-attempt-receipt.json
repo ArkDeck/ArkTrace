@@ -1,0 +1,69 @@
+{
+  "command": [
+    "sh",
+    "scripts/run-swiftpm.sh",
+    "test",
+    "--disable-sandbox",
+    "--config-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/configuration",
+    "--security-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/security",
+    "--filter",
+    "TraceDocumentControllerTests/(testSearchSelectionRefreshesInspectorArgumentsAndReplacementClearsThem|testADensityBandPressSelectsTheRealEventUnderIt|testInspectorLayoutAndCollapseFocusPolicy|testUnattributedSearchRevealAdmitsTrackAndSelectsExactEvent)|ObservationBoundaryTests/testInspectorPaneIgnoresSearchState"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source",
+  "exitCode": 1,
+  "canonicalSource": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+    "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+    "byteCount": 92567
+  },
+  "patchedSource": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+    "sha256": "4a3f1685e65a322b5c555d151e95964582a55eeab5497d3f1f6f61037f8cb376",
+    "byteCount": 93354
+  },
+  "loggingPatch": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+    "sha256": "8e615fda6fbe03f05f7b72ee9f9fcc4f8ed4c5ac89eb4929702e94549438ae3d",
+    "byteCount": 1897
+  },
+  "seam": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_controller_seam.swift",
+    "sha256": "53e4c4906f98955b1d83928501c93fed3186c3128a791be9c2deda43839fb42d",
+    "byteCount": 538
+  },
+  "harness": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/oracle/snapshot_event_index_harness.swift",
+    "sha256": "42a91c987019c2cd94b5dcbf9ff136a5209f77d7b26c104b351dad8a6fb7b6c3",
+    "byteCount": 5301
+  },
+  "input": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+    "sha256": "0f1a85eb7f56dfca37517e507d227ce0ee4125c7783ea94be3d2083d9cae645c",
+    "byteCount": 11601319
+  },
+  "log": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-regressions.log",
+    "sha256": "cc5b8692b1d6a5c4b26a51a3848845cad7ae9cd578b14356c4441197b291472d",
+    "byteCount": 10178
+  },
+  "sourcePins": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+      "byteCount": 1526
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "byteCount": 5258
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004/Sources/ArkTraceRendering/TimelineModels.swift",
+      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+      "byteCount": 24339
+    }
+  ],
+  "note": "Original Controller.inspector equality/return, hoverEvent and selectEvent execute. Enumerated loops and matched-position assignment record the existing first-return branch, including nil Inspector. No copied scan generates expected output. Cache injection only; production source unchanged."
+}

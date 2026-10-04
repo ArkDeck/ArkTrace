@@ -1,0 +1,17 @@
+{
+  "name": "license",
+  "command": [
+    "sh",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004/scripts/verify_licenses.sh"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004",
+  "startedAtUtc": "2026-10-04T04:44:40.547893+00:00",
+  "endedAtUtc": "2026-10-04T04:44:41.621899+00:00",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/license.log",
+  "logSHA256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+  "productionSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "regressionSourceSHA256": "e962d4c956204e216673e0cdca650f49d5e09380a5d76d81919e97af7a7e08dd"
+}

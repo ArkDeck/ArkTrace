@@ -1,0 +1,199 @@
+ArkTrace SwiftPM cache: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm
+ArkTrace SwiftPM worktree: /Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-swiftpm/snapshot-event-index-oracle-source
+Building for debugging...
+[Computing dependencies]
+[Pre-planning 1 / 938]
+[Planning deferred tasks]
+[112 / 438] ArkTraceCaptureTests-product
+[196 / 438] ArkTrace_ArkTraceCLIResourceFixtures
+[202 / 438]
+[206 / 441] ArkTraceSignalShim
+[212 / 454]
+[215 / 454]
+[216 / 454] ArkTraceCLIResourceFixtures
+[225 / 493]
+[229 / 505]
+[231 / 505]
+[237 / 505]
+[239 / 505]
+[241 / 505]
+[245 / 505]
+[247 / 505]
+[250 / 505]
+[254 / 505]
+[255 / 505]
+[256 / 505]
+[257 / 505]
+[267 / 505] ArkTraceCore
+[268 / 505] ArkTraceCLIResourceFixtures
+[271 / 505] ArkTraceCapture
+[288 / 505] ArkTraceStore
+[290 / 505] ArkTraceCore
+[290 / 505] ArkTraceCapture
+[294 / 506] ArkTraceCaptureTests-product
+[298 / 509]
+[300 / 509]
+[302 / 517] ArkTraceParser
+[306 / 521] ArkTraceStore
+[307 / 527] ArkTraceAnalysis
+[308 / 527] ArkTraceParser
+[317 / 563]
+[320 / 563] ArkTraceStore
+[330 / 563]
+[334 / 563]
+[342 / 563] ArkTraceStore
+[346 / 563] ArkTraceRuntime
+[350 / 563]
+[353 / 563]
+[355 / 563] ArkTraceParser-product
+[363 / 563]
+[365 / 563] ArkTraceAnalysisTests-product
+[368 / 563]
+[376 / 565] ArkTraceRuntime
+[379 / 569] ArkTraceRuntime
+[380 / 569]
+[381 / 569] ArkTraceRuntime
+[383 / 569] ArkTraceRuntime
+[385 / 583] ArkTraceRuntime
+[392 / 583] ArkTraceRendering
+[396 / 583] ArkTraceRendering
+[401 / 583] ArkTraceRuntime-product
+[403 / 583] ArkTraceRenderingTests-product
+[404 / 583] ArkTraceRendering-product
+[408 / 583] ArkTraceStore
+[412 / 583] ArkTraceCoreTests-product
+[418 / 583] ArkTraceParser
+[419 / 583] ArkTraceParser
+[422 / 583] ArkTraceCoreTests-product
+[424 / 583] ArkTraceCLI
+[437 / 585]
+[438 / 586]
+[439 / 587] ArkTraceAnalysis
+[446 / 598]
+[448 / 598] ArkTraceCLI
+[449 / 602] ArkTraceCaptureTests-product
+[451 / 615] ArkTraceAppSupport
+[460 / 615] ArkTraceParserTests-product
+[470 / 615] ArkTraceParserTests-product
+[470 / 615] ArkTraceCoreTests-product
+[474 / 620] ArkTraceCaptureTests-product
+[475 / 620] ArkTraceAnalysisTests-product
+[481 / 620] arktrace-product
+[484 / 620] ArkTraceCLI
+[488 / 620] ArkTraceAppSupport
+[494 / 620] ArkTraceCLI
+[495 / 620] ArkTraceIntegrationTests-product
+[498 / 620] ArkTraceIntegrationTests-product
+[500 / 620] ArkTraceAppSupport
+[502 / 620] ArkTraceAppSupport
+[504 / 620] ArkTraceAppSupport
+[506 / 620] ArkTraceAnalysisTests-product
+[508 / 620] ArkTraceAnalysisTests-product
+[508 / 620]
+[513 / 621] ArkTraceRuntime
+[519 / 621] ArkTraceCaptureTests-product
+[531 / 622] ArkTraceCaptureTests-product
+[536 / 622] arktrace-product
+[538 / 624] arktrace-product
+[539 / 624] arktrace-product
+[540 / 624] ArkTraceRenderingTests-product
+[545 / 633] ArkTraceRenderingTests-product
+[546 / 633] ArkTraceRenderingTests-product
+[547 / 633] ArkTraceRenderingTests-product
+[548 / 633] ArkTraceRenderingTests-product
+[549 / 633] ArkTraceRenderingTests-product
+[559 / 633] ArkTraceCLI
+[566 / 634] ArkTraceStoreTests-product
+[569 / 635] ArkTraceCLITests-product
+[569 / 635]
+[570 / 635]
+[572 / 635] ArkTraceAnalysisTests-product
+[574 / 635] ArkTraceStoreTests-product
+[580 / 647] ArkTraceCLITests-product
+[581 / 647] ArkTraceCLITests-product
+[583 / 647] ArkTraceCLITests-product
+[588 / 647] ArkTraceStoreTests-product
+[591 / 647] ArkTraceCLITests-product
+[592 / 647] ArkTraceCLITests-product
+[600 / 647]
+[606 / 648]
+[609 / 658] ArkTraceIntegrationTests-product
+[611 / 658] ArkTraceIntegrationTests-product
+[613 / 667] ArkTraceIntegrationTests-product
+[616 / 667] ArkTraceRenderingTests-product
+[616 / 667] ArkTraceCLITests-product
+[619 / 667] ArkTraceIntegrationTests-product
+[620 / 667] ArkTraceAppSupportTests-product
+[623 / 667] ArkTraceRenderingTests-product
+[629 / 667] ArkTraceAppSupportTests-product
+[630 / 667] ArkTraceAppSupportTests-product
+[633 / 667] ArkTraceIntegrationTests-product
+[638 / 667] ArkTraceIntegrationTests-product
+[640 / 667] ArkTraceAppSupportTests-product
+[643 / 667] AllIncludingTests
+[649 / 667] ArkTraceAppSupportTests-product
+[649 / 667] ArkTraceStoreTests-product
+[653 / 667] ArkTraceStoreTests-product
+[657 / 667] ArkTraceAppSupportTests-product
+[661 / 667] ArkTraceIntegrationTests-product
+[663 / 667] ArkTraceIntegrationTests-product
+Build complete! (37.51秒)
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.449.
+Test Suite 'ArkTraceStoreTests.xctest' started at 2026-10-04 11:49:39.451.
+Test Suite 'ArkTraceStoreTests.xctest' passed at 2026-10-04 11:49:39.451.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.451.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.546.
+Test Suite 'ArkTraceRenderingTests.xctest' started at 2026-10-04 11:49:39.547.
+Test Suite 'ArkTraceRenderingTests.xctest' passed at 2026-10-04 11:49:39.547.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.547.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.638.
+Test Suite 'ArkTraceParserTests.xctest' started at 2026-10-04 11:49:39.639.
+Test Suite 'ArkTraceParserTests.xctest' passed at 2026-10-04 11:49:39.639.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.639.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.729.
+Test Suite 'ArkTraceIntegrationTests.xctest' started at 2026-10-04 11:49:39.730.
+Test Suite 'ArkTraceIntegrationTests.xctest' passed at 2026-10-04 11:49:39.730.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.730.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.817.
+Test Suite 'ArkTraceCoreTests.xctest' started at 2026-10-04 11:49:39.818.
+Test Suite 'ArkTraceCoreTests.xctest' passed at 2026-10-04 11:49:39.818.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.818.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.907.
+Test Suite 'ArkTraceCaptureTests.xctest' started at 2026-10-04 11:49:39.908.
+Test Suite 'ArkTraceCaptureTests.xctest' passed at 2026-10-04 11:49:39.908.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.908.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:39.998.
+Test Suite 'ArkTraceCLITests.xctest' started at 2026-10-04 11:49:39.998.
+Test Suite 'ArkTraceCLITests.xctest' passed at 2026-10-04 11:49:39.998.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:39.998.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:40.067.
+Test Suite 'ArkTraceAppSupportTests.xctest' started at 2026-10-04 11:49:40.068.
+Test Suite 'SnapshotEventIndexCanonicalOracleTests' started at 2026-10-04 11:49:40.068.
+Test Case '-[ArkTraceAppSupportTests.SnapshotEventIndexCanonicalOracleTests testActualControllerFirstMatchHoverAndSelection]' started.
+Test Case '-[ArkTraceAppSupportTests.SnapshotEventIndexCanonicalOracleTests testActualControllerFirstMatchHoverAndSelection]' passed (1.455 seconds).
+Test Suite 'SnapshotEventIndexCanonicalOracleTests' passed at 2026-10-04 11:49:41.523.
+	 Executed 1 test, with 0 failures (0 unexpected) in 1.455 (1.455) seconds
+Test Suite 'ArkTraceAppSupportTests.xctest' passed at 2026-10-04 11:49:41.523.
+	 Executed 1 test, with 0 failures (0 unexpected) in 1.455 (1.455) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:41.523.
+	 Executed 1 test, with 0 failures (0 unexpected) in 1.455 (1.456) seconds
+Test Suite 'Selected tests' started at 2026-10-04 11:49:41.608.
+Test Suite 'ArkTraceAnalysisTests.xctest' started at 2026-10-04 11:49:41.609.
+Test Suite 'ArkTraceAnalysisTests.xctest' passed at 2026-10-04 11:49:41.609.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-04 11:49:41.609.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds

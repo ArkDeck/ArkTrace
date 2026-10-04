@@ -1,0 +1,24 @@
+{
+  "command": [
+    "python3",
+    "scripts/run-cargo.py",
+    "clippy",
+    "--workspace",
+    "--all-targets",
+    "--all-features",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exitCode": 0,
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+  "environment": {
+    "ARKTRACE_CARGO_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo",
+    "GIT_DIR": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/source-index.git",
+    "GIT_WORK_TREE": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-snapshot-event-index-20261004",
+    "CARGO_NET_OFFLINE": "true"
+  },
+  "log": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-verification/ci-feature-clippy.log",
+  "sha256": "bde0c3b00937d0c74e5fc22e129edff2cb28700850cf8237135af652e49d3d24",
+  "byteCount": 1062
+}

@@ -1,0 +1,24 @@
+{
+  "name": "format-attempt-4",
+  "command": [
+    "rustup",
+    "run",
+    "1.99.0",
+    "rustfmt",
+    "--edition",
+    "2024",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004/rust/crates/arktrace-viewer/tests/inspector_counter_compat_regressions.rs",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004/rust/crates/arktrace-viewer/src/inspector_projection.rs"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004",
+  "startedAtUtc": "2026-10-04T04:46:54.154741+00:00",
+  "endedAtUtc": "2026-10-04T04:46:54.401213+00:00",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/format-attempt-4.log",
+  "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "productionSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "compiledSourceSHA256": "b19baee3c1eeb024d9d647e834a1fbd94fc8eb554bcabbd167246445132a9973",
+  "regressionSourceSHA256": "ffe43d911d12fc256cca542089a56959926163dd008e725aef6dff7571c52754"
+}

@@ -1,0 +1,18 @@
+
+// Validation-only access seam, appended to the original file in the exclusive
+// cache mirror. This calls the original private loader implementation.
+extension TimelineSnapshotLoader {
+    package func repositoryInspectorOracleDetails(
+        track: TrackDescriptor, range: TraceTimeRange, limit: Int,
+        focusedEventKey: EventKey?, repository: any TraceRepositoryProtocol
+    ) async throws -> ([TimelinePrimitive], [TraceDataQualityIssue]) {
+        var issues: [TraceDataQualityIssue] = []
+        let primitives = try await detailPrimitives(
+            for: track, range: range, limit: limit,
+            deadline: ContinuousClock.now.advanced(by: .seconds(30)),
+            focusedEventKey: focusedEventKey, repository: repository,
+            qualityIssues: &issues
+        )
+        return (primitives, issues)
+    }
+}

@@ -1,0 +1,222 @@
+   Compiling typenum v1.20.1
+   Compiling zmij v1.0.23
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling libc v0.2.189
+   Compiling serde_core v1.0.229
+   Compiling cfg-if v1.0.5
+   Compiling serde_json v1.0.151
+   Compiling generic-array v0.14.7
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling digest v0.10.7
+   Compiling arktrace-contract v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-contract)
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling serde v1.0.229
+   Compiling arktrace-viewer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-viewer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.34s
+     Running unittests src/lib.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/arktrace_viewer-37a8e3ba0b92fd30)
+
+running 2 tests
+test loader::tests::cache_bounds_charge_retained_vector_and_string_capacity_and_use_lru ... ok
+test loader::tests::cache_total_bucket_limit_applies_before_the_entry_limit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/detail_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/detail_oracle-bc9b780afde778b6)
+
+running 4 tests
+test unavailable_detail_pages_cannot_publish_rows_or_truncation_and_check_is_live ... ok
+test counter_mapping_rejects_overflow_negative_duration_and_total_sample_overrun ... ok
+test detail_mapping_rejects_wrong_family_lane_and_table_identity ... ok
+test replay_eight_actual_swift_loader_dto_mapping_vectors_exactly ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/detail_queries.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/detail_queries-81a671d5ab6238af)
+
+running 1 test
+test typed_detail_queries_keep_lane_identity_and_prelimit_unattributed_scope ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/hot_snapshot.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/hot_snapshot-c00c0835c2113913)
+
+running 3 tests
+test optional_sources_keep_zero_distinct_from_absence_and_filter_family ... ok
+test string_table_preserves_utf8_dominant_identity_and_complete_machine_quality ... ok
+test pack_actual_geometry_vectors_without_losing_ranges_keys_or_binary64_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/loader.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/loader-00b920ee023b8730)
+
+running 10 tests
+test stale_generation_and_reset_preserve_generation_arbitration_without_queries ... ok
+test focus_prefix_deduplicates_and_keeps_the_original_quality_and_truncation ... ok
+test cancelled_batch_never_enters_cache_and_backend_failure_keeps_its_identity ... ok
+test density_press_prefers_covering_then_fallback_with_canonical_rank_and_query_caps ... ok
+test density_press_at_int64_max_skips_overflowed_covering_query_and_rejects_bad_pages ... ok
+test nested_depth_survives_offscreen_and_reset_removes_its_height ... ok
+test short_batch_is_rejected_and_zero_fair_share_uses_bounded_scalar_queries ... ok
+test repeated_viewport_reuses_density_but_range_source_and_bucket_count_do_not_alias ... ok
+test unsupported_density_is_cacheable_and_never_dispatches_detail ... ok
+test warm_hits_are_removed_before_misses_are_chunked_and_lru_is_bounded ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/navigation_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/navigation_oracle-decf1cb50c8ebe22)
+
+running 4 tests
+test replay_actual_native_move_event_move_track_and_zoom_anchor_without_tolerance ... ok
+test replay_actual_controller_open_sidecar_restoration_without_copying_its_io ... ok
+test replay_actual_swift_catalog_action_order_identity_and_focus_exactly ... ok
+test trimming_matches_actual_foundation_character_set_over_all_unicode_scalars ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/navigation_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/navigation_regressions-e04b20934c240d94)
+
+running 6 tests
+test focus_anchor_chain_keeps_selection_midpoint_and_real_focus_start_at_large_time ... ok
+test search_selection_empty_delta_extremes_and_invalid_cursor_never_wrap ... ok
+test reveal_instant_open_range_edges_and_overflow_are_integer_exact ... ok
+test track_step_skips_empty_lanes_and_nearest_ties_keep_sorted_real_event ... ok
+test repository_navigation_is_only_bounded_query_intent_and_has_no_invented_result ... ok
+test displayed_event_step_uses_real_keys_first_lane_and_raw_table_order ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/navigation_retained_budget.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/navigation_retained_budget-f19586550dbc7254)
+
+running 6 tests
+test borrowed_catalog_spare_is_scan_bounded_and_zero_duration_output_is_checked ... ok
+test state_aggregate_includes_nested_strings_and_empty_vectors ... ok
+test every_tree_vector_and_string_spare_is_owned_and_rejected ... ok
+test borrowed_request_spare_is_not_transferred_and_cancellation_never_publishes ... ok
+test whole_reduction_includes_intents_and_stale_publication_checks_capacity ... ok
+test favorite_growth_fails_before_publication_then_next_legal_request_recovers ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/palette_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/palette_oracle-4d975f5d61ee93cc)
+
+running 2 tests
+test actual_swift_detail_discriminator_nil_and_fallback_chains ... ok
+test actual_swift_palette_and_private_density_paint_exact_oracle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/palette_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/palette_regressions-37ecfc22530668f9)
+
+running 5 tests
+test exact_raw_state_takes_precedence_and_unknown_does_not_guess ... ok
+test alpha_is_clamped_for_finite_input_and_nonfinite_is_explicitly_rejected ... ok
+test negative_annotation_index_and_depth_are_total_even_at_int64_extremes ... ok
+test number_multiply_utf16_and_ascii_digit_stripping_have_distinct_semantics ... ok
+test palette_budget_and_cancel_failure_allow_next_hash_request ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/presentation_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/presentation_oracle-09767a8858e57d99)
+
+running 1 test
+test actual_swift_loader_labels_classification_color_and_identity_from_store_dtos ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/presentation_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/presentation_regressions-d06995cf8fef0977)
+
+running 11 tests
+test depth_and_open_ended_survive_without_changing_name_color ... ok
+test pid_tid_color_identity_is_separate_from_internal_identity ... ok
+test label_nil_empty_and_tid_fallback_are_preserved ... ok
+test invalid_source_key_or_counter_index_is_not_replaced_by_fake_key ... ok
+test density_has_no_event_key_keeps_full_opacity_and_explicit_fallback_fact ... ok
+test string_pool_preserves_utf8_bytes_and_first_occurrence_order ... ok
+test source_strings_are_bounded_before_projection_and_normal_request_recovers ... ok
+test batch_primitive_and_retained_fixed_memory_caps_reject ... ok
+test counter_index_duration_and_open_ended_are_bounded_without_cloning_series ... ok
+test retained_limits_reject_atomically_while_interning_repeated_labels_once ... ok
+test cancellation_and_deadline_are_bounded_and_do_not_poison_next_request ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/regressions-5ca6bfea86190def)
+
+running 28 tests
+test density_int64_max_has_no_overflowing_covering_query ... ok
+test density_prefetch_chunks_are_bounded_and_unused_share_stays_capped ... ok
+test cached_rows_affect_overscan_and_invalid_cache_is_rejected ... ok
+test depth_cap_preserves_event_and_extreme_depth_never_adds_overflow ... ok
+test density_row_hit_keeps_first_closed_boundary_and_real_resolution_intent ... ok
+test assembly_requires_selected_pages_and_enforces_output_budget ... ok
+test all_viewer_degradations_contribute_to_the_complete_snapshot_quality ... ok
+test detail_hit_uses_style_then_later_input_not_duration_or_rowid ... ok
+test identical_derived_quality_facts_keep_first_occurrence_like_swift ... ok
+test inclusive_visual_edges_preserve_domain_halfopen_contract ... ok
+test explicit_detail_keeps_overscan_without_querying_offscreen_lanes ... ok
+test invalid_scale_track_and_density_fail_without_partial_snapshot ... ok
+test instant_and_open_ended_keep_domain_identity_while_expanding_one_pixel ... ok
+test local_subtraction_and_interior_floor_survive_int64_extremes ... ok
+test lod_threshold_unavailable_invalid_and_checked_count_sum_are_explicit ... ok
+test narrow_selection_midpoint_is_closed_and_start_wins ... ok
+test new_selection_zero_clears_endpoint_zero_preserves_and_crossing_reorders ... ok
+test nonfinite_requests_reject_and_finite_pan_overflow_saturates ... ok
+test pan_and_zoom_clamp_safely_while_preserving_anchor ... ok
+test resolver_is_nearest_then_longest_then_lowest_actual_rowid ... ok
+test request_caps_generation_and_budget_are_enforced ... ok
+test source_issue_identity_deduplicates_before_human_message_redaction ... ok
+test source_machine_quality_strips_diagnostics_and_rejects_unknown_scopes ... ok
+test source_truncation_and_depth_facts_survive_flattening_rules ... ok
+test viewport_rejects_nonfinite_degenerate_and_inconsistent_scale ... ok
+test cancellation_and_deadline_checkpoint_abort_then_allow_fresh_request ... ok
+test merged_source_quality_has_one_total_budget_before_allocating ... ok
+test source_and_derived_quality_share_one_cap_and_full_identity_deduplication ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/scoped_history.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/scoped_history-1c13565c3e1c140b)
+
+running 1 test
+test independent_swift_scope_fix_changes_only_the_three_unattributed_detail_cases ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/snapshot_event_index_oracle.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/snapshot_event_index_oracle-0f19840954243554)
+
+running 1 test
+actual Swift canonical: 295 snapshots, 11923 lookup/hover/select queries
+test all_positions_and_nil_inspectors_match_actual_swift_controller_hover_select ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/snapshot_event_index_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/target/debug/deps/snapshot_event_index_regressions-6ee11cf38fc0f097)
+
+running 11 tests
+test equal_generation_replacement_session_and_generation_all_reject_old_index ... ok
+test first_nil_inspector_blocks_later_duplicates_and_density_preserves_offsets ... ok
+test maximum_identity_values_are_opaque_and_do_not_increment_or_wrap ... ok
+test budget_failure_recovers_and_empty_still_accounts_inline_index ... ok
+
+thread 'density_cannot_deserialize_a_selectable_key_or_inspector_flag' (2275338) panicked at crates/arktrace-viewer/tests/snapshot_event_index_regressions.rs:164:9:
+assertion failed: serde_json::from_str::<SnapshotEventPrimitiveFact>(text).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test density_cannot_deserialize_a_selectable_key_or_inspector_flag ... FAILED
+test every_lookup_checkpoint_including_final_gate_rejects_and_recovers ... ok
+test logical_count_limits_include_density_and_empty_tracks_before_allocation ... ok
+test signed_rows_and_all_six_table_identities_are_distinct ... ok
+test cancellation_and_deadline_at_every_build_checkpoint_are_all_or_error_and_recover ... ok
+test reverse_sorted_unique_and_duplicate_inputs_keep_original_positions ... ok
+snapshot-event-index retained: empty=72 single=104 duplicate_20000=640072 input_fact=24 track_slice=16
+test owned_capacity_remains_charged_after_dedup_and_input_spare_stays_borrowed ... ok
+
+failures:
+
+failures:
+    density_cannot_deserialize_a_selectable_key_or_inspector_flag
+
+test result: FAILED. 10 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `-p arktrace-viewer --test snapshot_event_index_regressions`

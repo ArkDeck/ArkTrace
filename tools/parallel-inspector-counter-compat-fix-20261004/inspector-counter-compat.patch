@@ -1,0 +1,23 @@
+--- a/rust/crates/arktrace-viewer/src/inspector_projection.rs
++++ b/rust/crates/arktrace-viewer/src/inspector_projection.rs
+@@ -495,14 +495,12 @@
+                 {
+                     return Err(InspectorProjectionError::InvalidRequest);
+                 }
+-                event_key(
+-                    sample.key,
+-                    if series.scope == CounterScope::Cpu {
+-                        EventTable::Measure
+-                    } else {
+-                        EventTable::ProcessMeasure
+-                    },
+-                )?;
++                let valid_table = sample.key.table == EventTable::Measure
++                    || (series.scope == CounterScope::Process
++                        && sample.key.table == EventTable::ProcessMeasure);
++                if !valid_table {
++                    return Err(InspectorProjectionError::InvalidEventKey);
++                }
+                 let end = match sample.duration_ns {
+                     Some(d) => sample
+                         .timestamp_ns

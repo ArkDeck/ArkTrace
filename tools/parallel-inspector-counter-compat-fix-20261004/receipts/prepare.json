@@ -1,0 +1,15 @@
+{
+  "name": "prepare",
+  "command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004/tools/parallel-inspector-counter-compat-fix-20261004/prepare.py"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-inspector-counter-compat-fix-20261004",
+  "startedAtUtc": "2026-10-04T04:42:37.046415+00:00",
+  "endedAtUtc": "2026-10-04T04:42:37.087130+00:00",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "passed": true,
+  "log": "tools/parallel-inspector-counter-compat-fix-20261004/receipts/prepare.log",
+  "logSHA256": "e4e4741d0c6af978da99c9b5150ef5aa9f1d593faf93aaea5538ac30cd14c1cc"
+}

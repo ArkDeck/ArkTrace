@@ -1,0 +1,30 @@
+{
+  "label": "swift-minimal-valid",
+  "command": [
+    "sh",
+    "scripts/run-swiftpm.sh",
+    "test",
+    "--disable-sandbox",
+    "--config-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/config",
+    "--security-path",
+    "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/security",
+    "--filter",
+    "RepositoryInspectorOracleTests"
+  ],
+  "cwd": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/oracle-source",
+  "exitCode": 0,
+  "acceptedExitCodes": [
+    0
+  ],
+  "log": "tools/parallel-repository-inspector-parity-20261004/verification/swift-minimal-valid.log",
+  "sha256": "3290e06d930adbfbfee76ebada74048c0cafdcdfd6b0d204009e3f6193a19eee",
+  "byteCount": 5344,
+  "environment": {
+    "PARITY_CASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-cases.json",
+    "PARITY_DATABASES": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-cargo/databases-valid",
+    "PARITY_PARSER": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/parser-identity.json",
+    "PARITY_SWIFT_OUTPUT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-repository-inspector-parity-20261004/tools/parallel-repository-inspector-parity-20261004/fixtures/minimal-valid-swift-output.json",
+    "ARKTRACE_SWIFTPM_CACHE_ROOT": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-repository-inspector-parity-swiftpm/stable-cache"
+  }
+}

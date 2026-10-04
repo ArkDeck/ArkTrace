@@ -1,0 +1,6 @@
+    Checking arktrace-platform v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-platform)
+    Checking arktrace-store v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-store)
+    Checking arktrace-engine v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-engine)
+    Checking arktrace-cli v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-cli)
+    Checking arktrace-ffi v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-snapshot-event-index-cargo/workspace/rust/crates/arktrace-ffi)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.07s

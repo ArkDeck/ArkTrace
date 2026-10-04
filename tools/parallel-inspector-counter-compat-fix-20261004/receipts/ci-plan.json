@@ -1,0 +1,5 @@
+{
+  "output": "lane_swiftpm=true\nlane_app=true\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+  "allSelectedCIExecuted": false,
+  "reason": "Unknown tools paths select all; isolated Rust repair validation is not complete CI/App/Windows evidence."
+}

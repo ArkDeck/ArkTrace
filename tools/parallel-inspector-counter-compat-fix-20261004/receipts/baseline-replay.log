@@ -1,0 +1,44 @@
+   Compiling arktrace-viewer v0.1.0 (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/workspace/rust/crates/arktrace-viewer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.08s
+     Running tests/inspector_counter_compat_regressions.rs (/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-inspector-counter-compat-fix-cargo/target/debug/deps/inspector_counter_compat_regressions-5894777b0bf36bf9)
+
+running 4 tests
+guard Cpu SchedSlice Some(InvalidEventKey)
+guard Cpu ThreadState Some(InvalidEventKey)
+guard Cpu Callstack Some(InvalidEventKey)
+
+thread 'inherited_legacy_process_measure_matches_actual_swift_facts' (2944062) panicked at crates/arktrace-viewer/tests/inspector_counter_compat_regressions.rs:42:5:
+"legacy-process-measure-single" legitimate repository DTO rejected: Some(InvalidEventKey)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+guard Cpu Measure None
+guard Cpu ProcessMeasure Some(InvalidEventKey)
+
+thread 'inherited_merged_same_rowid_keeps_both_physical_tables_and_values' (2944063) panicked at crates/arktrace-viewer/tests/inspector_counter_compat_regressions.rs:42:5:
+"merged-physical-table-rowid-collision" legitimate repository DTO rejected: Some(InvalidEventKey)
+canonical "cpu-counter-predecessor-nil-duration" [{"category":"cpu","cpu":0,"isInstant":false,"isOpenEnded":false,"key":{"rowID":10,"table":"measure"},"kind":"counter","name":"频率🚀","pid":null,"priority":null,"processKey":null,"processName":null,"range":{"endNs":200,"startNs":0},"semanticDurationNs":200,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":"MHz","value":7},{"category":"cpu","cpu":0,"isInstant":true,"isOpenEnded":false,"key":{"rowID":11,"table":"measure"},"kind":"counter","name":"频率🚀","pid":null,"priority":null,"processKey":null,"processName":null,"range":{"endNs":140,"startNs":140},"semanticDurationNs":0,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":"MHz","value":8},{"category":"cpu","cpu":0,"isInstant":false,"isOpenEnded":true,"key":{"rowID":12,"table":"measure"},"kind":"counter","name":"频率🚀","pid":null,"priority":null,"processKey":null,"processName":null,"range":{"endNs":200,"startNs":150},"semanticDurationNs":null,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":"MHz","value":9}]
+guard Cpu FrameSlice Some(InvalidEventKey)
+test inherited_merged_same_rowid_keeps_both_physical_tables_and_values ... FAILED
+test inherited_legacy_process_measure_matches_actual_swift_facts ... FAILED
+canonical "cpu-counter-left-bound-instant" [{"category":"cpu","cpu":0,"isInstant":false,"isOpenEnded":false,"key":{"rowID":10,"table":"measure"},"kind":"counter","name":"频率🚀","pid":null,"priority":null,"processKey":null,"processName":null,"range":{"endNs":200,"startNs":0},"semanticDurationNs":200,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":"MHz","value":7},{"category":"cpu","cpu":0,"isInstant":true,"isOpenEnded":false,"key":{"rowID":11,"table":"measure"},"kind":"counter","name":"频率🚀","pid":null,"priority":null,"processKey":null,"processName":null,"range":{"endNs":140,"startNs":140},"semanticDurationNs":0,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":"MHz","value":8}]
+canonical "native-process-counter-nil-duration" [{"category":"process","cpu":null,"isInstant":false,"isOpenEnded":false,"key":{"rowID":1,"table":"process_measure"},"kind":"counter","name":"legacy","pid":700,"priority":null,"processKey":{"ipid":1},"processName":"进程🚀","range":{"endNs":120,"startNs":100},"semanticDurationNs":20,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":null,"value":99},{"category":"process","cpu":null,"isInstant":false,"isOpenEnded":true,"key":{"rowID":2,"table":"process_measure"},"kind":"counter","name":"legacy","pid":700,"priority":null,"processKey":{"ipid":1},"processName":"进程🚀","range":{"endNs":200,"startNs":150},"semanticDurationNs":null,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":null,"value":100}]
+canonical "native-process-counter-nullable-metadata" [{"category":"process","cpu":null,"isInstant":false,"isOpenEnded":false,"key":{"rowID":4,"table":"process_measure"},"kind":"counter","name":"process2","pid":700,"priority":null,"processKey":{"ipid":2},"processName":null,"range":{"endNs":120,"startNs":100},"semanticDurationNs":20,"state":null,"threadKey":null,"threadName":null,"tid":null,"unit":"","value":99}]
+test inherited_cpu_temporal_and_native_process_facts_remain_exact ... ok
+guard Process SchedSlice Some(InvalidEventKey)
+guard Process ThreadState Some(InvalidEventKey)
+guard Process Callstack Some(InvalidEventKey)
+guard Process Measure Some(InvalidEventKey)
+
+thread 'every_scope_table_pair_accepts_only_actual_schema_sources_and_preserves_key' (2944060) panicked at crates/arktrace-viewer/tests/inspector_counter_compat_regressions.rs:152:35:
+called `Result::unwrap()` on an `Err` value: InvalidEventKey
+test every_scope_table_pair_accepts_only_actual_schema_sources_and_preserves_key ... FAILED
+
+failures:
+
+failures:
+    every_scope_table_pair_accepts_only_actual_schema_sources_and_preserves_key
+    inherited_legacy_process_measure_matches_actual_swift_facts
+    inherited_merged_same_rowid_keeps_both_physical_tables_and_values
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p arktrace-viewer --test inspector_counter_compat_regressions`
