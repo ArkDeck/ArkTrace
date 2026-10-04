@@ -183,6 +183,7 @@ pub(crate) enum Operation {
     ResolveDensity(arktrace_viewer::DensityResolutionRequest),
     Batch(TraceRepositoryEventBatch),
     BatchDetails(TraceRepositoryEventBatch),
+    BatchDetailsWithDeadlines(arktrace_engine::DeadlineBatch),
     Search(TraceSearchRequest),
     Analyze(Analyze),
 }
@@ -229,6 +230,7 @@ impl Operation {
             Self::Arguments(q) => q.validate(),
             Self::Density(q) => q.validate(),
             Self::Batch(q) | Self::BatchDetails(q) => q.validate(),
+            Self::BatchDetailsWithDeadlines(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::ViewerDetails(q) => {
                 return arktrace_viewer::detail_query(&q.source, q.range, q.limit)
@@ -294,6 +296,7 @@ impl Operation {
             Self::ResolveDensity(q) => Q::ViewerResolveDensity(q),
             Self::Batch(q) => Q::Batch(q),
             Self::BatchDetails(q) => Q::BatchDetails(q),
+            Self::BatchDetailsWithDeadlines(q) => Q::BatchDetailsWithDeadlines(q),
             Self::Search(q) => Q::Search(q),
             Self::Analyze(q) => Q::Analyze {
                 request: q.request,
@@ -314,6 +317,39 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
+
+    #[test]
+    fn timed_detail_batch_admission_requires_paired_closed_absolute_deadlines() {
+        let thread = serde_json::json!({"nameMatch":"exact","limit":1});
+        let input = serde_json::json!({"operation":"batchDetailsWithDeadlines", "query": {
+            "batch":{"threads":[thread]}, "deadlines":{"clock":"hostContinuousEpochV1",
+                "cpuSlices":[],"threadStates":[],"slices":[],"counters":[],"counterSeries":[],"densities":[],"threads":[null]}}});
+        let value: Operation = decode(&serde_json::to_vec(&input).unwrap()).unwrap();
+        value.validate().unwrap();
+        let mut mismatched = input.clone();
+        mismatched["query"]["deadlines"]["threads"] = serde_json::json!([]);
+        let value: Operation = decode(&serde_json::to_vec(&mismatched).unwrap()).unwrap();
+        assert_eq!(value.validate(), Err(STATUS_INVALID_INPUT));
+        let mut noncanonical = input.clone();
+        noncanonical["query"]["deadlines"]["threads"][0] =
+            serde_json::json!({"seconds":1,"attoseconds":-1});
+        let value: Operation = decode(&serde_json::to_vec(&noncanonical).unwrap()).unwrap();
+        assert_eq!(value.validate(), Err(STATUS_INVALID_INPUT));
+        for (path, replacement) in [
+            ("clock", serde_json::json!("wall")),
+            (
+                "threads",
+                serde_json::json!([{"seconds":0,"attoseconds":1.5}]),
+            ),
+        ] {
+            let mut value = input.clone();
+            value["query"]["deadlines"][path] = replacement;
+            assert!(decode::<Operation>(&serde_json::to_vec(&value).unwrap()).is_err());
+        }
+        let mut value = input;
+        value["query"]["sql"] = serde_json::json!("SELECT 1");
+        assert!(decode::<Operation>(&serde_json::to_vec(&value).unwrap()).is_err());
+    }
 
     #[test]
     fn detail_batch_keeps_legacy_batch_bounds_and_closed_queries() {

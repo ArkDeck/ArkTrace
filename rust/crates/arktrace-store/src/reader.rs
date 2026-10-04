@@ -10,8 +10,8 @@ use arktrace_contract::{
     ThreadStateQuery, TraceArgumentQuery, TraceEventArgument, TraceFrame, TraceFrameQuery,
     TraceProcess, TraceSlice, TraceSliceQuery, TraceThread,
 };
-use arktrace_platform::HeldFile;
-use std::{marker::PhantomData, rc::Rc, sync::Arc};
+use arktrace_platform::{ContinuousDeadline, HeldFile};
+use std::{cell::Cell, marker::PhantomData, rc::Rc, sync::Arc};
 
 /// One immutable snapshot and one private SQLite connection, owned by the
 /// calling worker. A connection cannot move between threads or expose SQL.
@@ -28,6 +28,7 @@ pub struct StoreReader {
     summary: SummarySchema,
     _worker: PhantomData<Rc<()>>,
     resources: Option<Arc<crate::query_resources::QueryResources>>,
+    query_deadline: Cell<Option<ContinuousDeadline>>,
 }
 impl StoreReader {
     #[cfg(test)]
@@ -84,6 +85,7 @@ impl StoreReader {
             summary,
             _worker: PhantomData,
             resources,
+            query_deadline: Cell::new(None),
         })
     }
     pub fn inspection(&self) -> &DatabaseInspection {
@@ -221,6 +223,46 @@ impl StoreReader {
             )
         })
     }
+    pub fn event_batch_with_deadlines(
+        &self,
+        batch: &arktrace_contract::TraceRepositoryEventBatch,
+        deadlines: &[Option<ContinuousDeadline>],
+        budget: &ValidationBudget,
+        limits: crate::ReadPoolLimits,
+    ) -> Result<crate::ReadPoolOutput, StoreError> {
+        self.with_database(budget, |_| {
+            crate::read_pool::run_with_deadlines(
+                self.snapshot.clone(),
+                &self.inspection,
+                batch,
+                deadlines,
+                budget,
+                limits,
+            )
+        })
+    }
+    pub(crate) fn with_query_deadline<T>(
+        &self,
+        deadline: Option<ContinuousDeadline>,
+        body: impl FnOnce() -> Result<T, StoreError>,
+    ) -> Result<T, StoreError> {
+        if deadline.is_some_and(|value| !value.is_valid()) {
+            return Err(StoreError::InvalidBudget);
+        }
+        struct Restore<'a>(
+            &'a Cell<Option<ContinuousDeadline>>,
+            Option<ContinuousDeadline>,
+        );
+        impl Drop for Restore<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.1);
+            }
+        }
+        let restore = Restore(&self.query_deadline, self.query_deadline.replace(deadline));
+        let result = body();
+        drop(restore);
+        result
+    }
     pub(crate) fn with_database<T>(
         &self,
         budget: &ValidationBudget,
@@ -234,7 +276,8 @@ impl StoreReader {
         }
         self.snapshot.readonly_database_path()?;
         let db = Database::borrow_readonly(&self.connection, budget)?
-            .with_resources(self.resources.clone());
+            .with_resources(self.resources.clone())
+            .with_query_deadline(self.query_deadline.get());
         let result = body(&db);
         let revalidation = self.snapshot.readonly_database_path();
         // A concurrent caller cancellation must not hide a fatal worker or

@@ -2,12 +2,14 @@
 #[cfg(target_os = "macos")]
 mod async_runtime;
 mod metadata;
+mod query_deadlines;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
     AsyncEngine, DrainStatus, OpenTicket, RepositoryRequest, RequestState, RequestStatus,
     RuntimeConfiguration, RuntimeFailure, RuntimeLimits, SessionState, SessionStatus,
     WorkerBoundary,
 };
+pub use query_deadlines::{BatchQueryDeadlines, DeadlineBatch, QueryClock};
 mod handles;
 #[cfg(any(target_os = "macos", test))]
 mod owned_result;

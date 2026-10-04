@@ -3,7 +3,7 @@ use crate::{
     query_resources::QueryResources,
 };
 use arktrace_contract::*;
-use arktrace_platform::HeldFile;
+use arktrace_platform::{ContinuousDeadline, HeldFile};
 use serde::Serialize;
 use std::{
     panic::{AssertUnwindSafe, catch_unwind},
@@ -102,7 +102,45 @@ pub(crate) fn run_inner(
     limits: ReadPoolLimits,
     observer: &(impl Fn(usize) + Sync),
 ) -> Result<ReadPoolOutput, StoreError> {
+    run_inner_with_deadlines(snapshot, expected, batch, None, budget, limits, observer)
+}
+pub(crate) fn run_with_deadlines(
+    snapshot: Arc<HeldFile>,
+    expected: &IndexedDatabaseInspection,
+    batch: &TraceRepositoryEventBatch,
+    deadlines: &[Option<ContinuousDeadline>],
+    budget: &ValidationBudget,
+    limits: ReadPoolLimits,
+) -> Result<ReadPoolOutput, StoreError> {
+    run_inner_with_deadlines(
+        snapshot,
+        expected,
+        batch,
+        Some(deadlines),
+        budget,
+        limits,
+        &|_| {},
+    )
+}
+pub(crate) fn run_inner_with_deadlines(
+    snapshot: Arc<HeldFile>,
+    expected: &IndexedDatabaseInspection,
+    batch: &TraceRepositoryEventBatch,
+    deadlines: Option<&[Option<ContinuousDeadline>]>,
+    budget: &ValidationBudget,
+    limits: ReadPoolLimits,
+    observer: &(impl Fn(usize) + Sync),
+) -> Result<ReadPoolOutput, StoreError> {
     batch.validate().map_err(|_| StoreError::InvalidQuery)?;
+    if let Some(deadlines) = deadlines
+        && (deadlines.len() != batch.query_count()
+            || deadlines
+                .iter()
+                .flatten()
+                .any(|deadline| !deadline.is_valid()))
+    {
+        return Err(StoreError::InvalidBudget);
+    }
     limits.validate()?;
     budget.check()?;
     let resources = Arc::new(QueryResources::new(limits)?);
@@ -166,7 +204,9 @@ pub(crate) fn run_inner(
                             resources.reserve(2 * 1024 * 1024)?;
                             let active = Active::enter(counters);
                             observer(index);
-                            let result = query.execute(reader, budget)?;
+                            let deadline = deadlines.and_then(|values| values[index]);
+                            let result = reader
+                                .with_query_deadline(deadline, || query.execute(reader, budget))?;
                             output.lock().map_err(|_| StoreError::WorkerFailed)?[index] =
                                 Some(result);
                             counters.completed.fetch_add(1, Ordering::Relaxed);

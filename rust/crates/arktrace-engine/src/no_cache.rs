@@ -470,9 +470,36 @@ impl NoCacheSession {
         budget: &EngineBudget,
         limits: crate::ReadPoolLimits,
     ) -> Result<crate::ReadPoolOutput, EngineError> {
-        let result = self
-            .query_reader(budget)?
-            .event_batch(batch, &budget.validation(), limits);
+        self.event_batch_policy(batch, None, budget, limits)
+    }
+    pub fn event_batch_with_deadlines(
+        &self,
+        query: &crate::DeadlineBatch,
+        budget: &EngineBudget,
+        limits: crate::ReadPoolLimits,
+    ) -> Result<crate::ReadPoolOutput, EngineError> {
+        let deadlines = query.deadlines.ordered(&query.batch).map_err(|_| {
+            failure(
+                EngineStage::Querying,
+                EngineFailure::Store(StoreError::InvalidQuery),
+            )
+        })?;
+        self.event_batch_policy(&query.batch, Some(&deadlines), budget, limits)
+    }
+    fn event_batch_policy(
+        &self,
+        batch: &arktrace_contract::TraceRepositoryEventBatch,
+        deadlines: Option<&[Option<arktrace_platform::ContinuousDeadline>]>,
+        budget: &EngineBudget,
+        limits: crate::ReadPoolLimits,
+    ) -> Result<crate::ReadPoolOutput, EngineError> {
+        let reader = self.query_reader(budget)?;
+        let validation = budget.validation();
+        let result = if let Some(deadlines) = deadlines {
+            reader.event_batch_with_deadlines(batch, deadlines, &validation, limits)
+        } else {
+            reader.event_batch(batch, &validation, limits)
+        };
         if matches!(result, Err(StoreError::WorkerFailed)) {
             self.query_worker_failed.set(true);
         }

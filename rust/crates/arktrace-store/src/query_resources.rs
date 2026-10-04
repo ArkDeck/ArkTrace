@@ -12,6 +12,10 @@ impl VmWork {
             remaining: std::sync::atomic::AtomicU64::new(steps),
         }
     }
+    #[cfg(all(test, target_os = "macos"))]
+    pub(crate) fn remaining_for_test(&self) -> u64 {
+        self.remaining.load(std::sync::atomic::Ordering::Relaxed)
+    }
     pub(crate) fn charge(&self, steps: u64) -> Result<(), StoreError> {
         self.remaining
             .try_update(

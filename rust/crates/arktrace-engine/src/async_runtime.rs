@@ -276,6 +276,7 @@ pub enum RepositoryRequest {
     ViewerResolveDensity(arktrace_viewer::DensityResolutionRequest),
     Batch(TraceRepositoryEventBatch),
     BatchDetails(TraceRepositoryEventBatch),
+    BatchDetailsWithDeadlines(crate::DeadlineBatch),
     Search(TraceSearchRequest),
     Analyze {
         request: crate::BoundedAnalysisRequest,
@@ -332,6 +333,7 @@ impl RepositoryRequest {
                     .map_err(|_| RuntimeFailure::InvalidRequest);
             }
             Self::Batch(q) | Self::BatchDetails(q) => q.validate(),
+            Self::BatchDetailsWithDeadlines(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::Analyze { request, scope } => {
                 return request
@@ -1036,6 +1038,12 @@ fn query(
         RepositoryRequest::BatchDetails(q) => {
             let output = session
                 .event_batch(q, b, ReadPoolLimits::default())
+                .map_err(RuntimeFailure::Engine)?;
+            response(&BatchDetailResult(&output.result), command, shared, config)
+        }
+        RepositoryRequest::BatchDetailsWithDeadlines(q) => {
+            let output = session
+                .event_batch_with_deadlines(q, b, ReadPoolLimits::default())
                 .map_err(RuntimeFailure::Engine)?;
             response(&BatchDetailResult(&output.result), command, shared, config)
         }

@@ -734,6 +734,221 @@ mod native_indexing {
             ..Default::default()
         }
     }
+    fn deadline_after_seconds(seconds: i64) -> arktrace_platform::ContinuousDeadline {
+        let mut value = arktrace_platform::ContinuousDeadline::now().unwrap();
+        value.seconds += seconds;
+        value
+    }
+    fn ready_reader(fixture: &Fixture) -> StoreReader {
+        let root = fixture.root();
+        let source = root.open_file("source.db").unwrap();
+        let prepared = prepare_snapshot(
+            &source,
+            &root.create_private_child("deadline-stage").unwrap(),
+            "ready.db",
+            &budget(),
+            |_| {},
+        )
+        .unwrap();
+        StoreReader::open(std::sync::Arc::new(prepared.snapshot), &budget()).unwrap()
+    }
+    #[test]
+    fn completed_slot_deadline_is_not_rechecked_while_a_later_slot_waits() {
+        let fixture = Fixture::new("INSERT INTO sched_slice VALUES(1,100,20,0,NULL,NULL);");
+        let reader = ready_reader(&fixture);
+        let mut queries = batch();
+        queries.cpu_slices.truncate(2);
+        queries.densities.clear();
+        queries.threads.clear();
+        let first_deadline = deadline_after_seconds(2);
+        let deadlines = [Some(first_deadline), Some(deadline_after_seconds(7))];
+        let result = crate::read_pool::run_inner_with_deadlines(
+            reader.snapshot_for_test(),
+            reader.indexed_inspection(),
+            &queries,
+            Some(&deadlines),
+            &budget(),
+            ReadPoolLimits {
+                maximum_workers: 1,
+                ..Default::default()
+            },
+            &|index| {
+                if index == 1 {
+                    while !first_deadline.expired().unwrap() {
+                        std::thread::yield_now();
+                    }
+                }
+            },
+        )
+        .unwrap();
+        assert!(first_deadline.expired().unwrap());
+        assert_eq!(result.statistics.completed_queries, 2);
+        assert_eq!(result.statistics.workers_opened, 1);
+        assert_eq!(result.statistics.connections_closed, 1);
+        assert_eq!(result.result.cpu_slices[0].items.len(), 1);
+        assert!(result.result.cpu_slices[1].items.is_empty());
+    }
+    #[test]
+    fn expired_slot_rejects_available_queries_but_preserves_unavailable_error_timing() {
+        use arktrace_platform::ContinuousDeadline;
+        let expired = Some(ContinuousDeadline {
+            seconds: 0,
+            attoseconds: 0,
+        });
+        for (extra, available) in [
+            ("", false),
+            (
+                "INSERT INTO sched_slice VALUES(1,100,20,0,NULL,NULL);",
+                true,
+            ),
+        ] {
+            let fixture = Fixture::new(extra);
+            let reader = ready_reader(&fixture);
+            let mut queries = batch();
+            queries.cpu_slices.truncate(1);
+            queries.densities.clear();
+            queries.threads.clear();
+            let result = reader.event_batch_with_deadlines(
+                &queries,
+                &[expired],
+                &budget(),
+                ReadPoolLimits::default(),
+            );
+            if available {
+                assert_eq!(result.unwrap_err(), StoreError::DeadlineExceeded);
+            } else {
+                assert!(result.unwrap().result.cpu_slices[0].items.is_empty());
+            }
+            queries.cpu_slices.clear();
+            queries.densities = batch().densities[..1].to_vec();
+            assert_eq!(
+                reader
+                    .event_batch_with_deadlines(
+                        &queries,
+                        &[expired],
+                        &budget(),
+                        ReadPoolLimits::default()
+                    )
+                    .unwrap_err(),
+                StoreError::DeadlineExceeded
+            );
+            // A failed slot does not cancel the caller or poison its next pool.
+            queries.densities.clear();
+            queries.threads = batch().threads[..1].to_vec();
+            let next = reader
+                .event_batch_with_deadlines(&queries, &[None], &budget(), ReadPoolLimits::default())
+                .unwrap();
+            assert_eq!(next.statistics.completed_queries, 1);
+            assert_eq!(next.statistics.connections_closed, 1);
+        }
+    }
+    #[test]
+    fn scoped_deadline_restores_on_error_panic_and_nested_nil_override() {
+        use arktrace_platform::ContinuousDeadline;
+        let fixture = Fixture::new("INSERT INTO thread VALUES(1,11,'t',100,NULL);");
+        let reader = ready_reader(&fixture);
+        let past = Some(ContinuousDeadline {
+            seconds: 0,
+            attoseconds: 0,
+        });
+        let query = &batch().threads[0];
+        reader
+            .with_query_deadline(past, || {
+                assert_eq!(
+                    reader.threads(query, &budget()).unwrap_err(),
+                    StoreError::DeadlineExceeded
+                );
+                assert_eq!(
+                    reader
+                        .with_query_deadline(None, || reader.threads(query, &budget()))
+                        .unwrap()
+                        .items
+                        .len(),
+                    1
+                );
+                assert_eq!(
+                    reader.threads(query, &budget()).unwrap_err(),
+                    StoreError::DeadlineExceeded
+                );
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(reader.threads(query, &budget()).unwrap().items.len(), 1);
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                let _ = reader.with_query_deadline(past, || -> Result<(), StoreError> {
+                    panic!("deadline scope fault");
+                });
+            }))
+            .is_err()
+        );
+        assert_eq!(reader.threads(query, &budget()).unwrap().items.len(), 1);
+    }
+    #[test]
+    fn deadline_admission_rejects_mismatched_slots_and_noncanonical_epoch() {
+        let fixture = Fixture::new("");
+        let reader = ready_reader(&fixture);
+        let queries = batch();
+        let valid = vec![None; 32];
+        assert_eq!(
+            reader
+                .event_batch_with_deadlines(
+                    &queries,
+                    &valid[..31],
+                    &budget(),
+                    ReadPoolLimits::default()
+                )
+                .unwrap_err(),
+            StoreError::InvalidBudget
+        );
+        let mut invalid = valid.clone();
+        invalid[31] = Some(arktrace_platform::ContinuousDeadline {
+            seconds: 1,
+            attoseconds: -1,
+        });
+        assert_eq!(
+            reader
+                .event_batch_with_deadlines(
+                    &queries,
+                    &invalid,
+                    &budget(),
+                    ReadPoolLimits::default()
+                )
+                .unwrap_err(),
+            StoreError::InvalidBudget
+        );
+        let result = reader
+            .event_batch_with_deadlines(&queries, &valid, &budget(), ReadPoolLimits::default())
+            .unwrap();
+        assert_eq!(result.statistics.completed_queries, 32);
+        assert_eq!(result.statistics.connections_closed, 3);
+    }
+    #[test]
+    fn continuous_deadline_interrupts_running_sql_and_removes_progress_handler() {
+        let request = budget();
+        let db = Database::new(fixture(""), &request).unwrap();
+        let mut deadline = arktrace_platform::ContinuousDeadline::now().unwrap();
+        // One second permits admission even under load; the recursive aggregate
+        // has enough work to remain in SQLite until the progress check fires.
+        deadline.seconds += 1;
+        let timed = db
+            .summary_request(100_000_000_000)
+            .unwrap()
+            .with_query_deadline(Some(deadline));
+        let before = timed.remaining_vm_work_for_test();
+        let result = timed.query("WITH RECURSIVE n(v) AS (VALUES(0) UNION ALL SELECT v+1 FROM n WHERE v<1000000000) SELECT sum(v) FROM n", [], 1, 100_000_000_000, |row| integer(row, 0));
+        assert_eq!(result, Err(StoreError::DeadlineExceeded));
+        assert!(
+            timed.remaining_vm_work_for_test() < before,
+            "SQLite executed VM steps before the interrupt"
+        );
+        drop(timed);
+        assert_eq!(
+            db.query("SELECT 7", [], 1, DEFAULT_VM_BUDGET, |row| integer(row, 0))
+                .unwrap(),
+            [7]
+        );
+    }
     #[test]
     fn native_descriptor_reopens_are_stable_under_concurrent_worker_churn() {
         use std::sync::{Arc, Barrier};

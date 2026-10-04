@@ -45,6 +45,28 @@ pub use trust::{CodeTrustPolicy, TrustVerdict};
 mod cli;
 pub use cli::{CliSignalGuard, CliWriteFailure, MappedExecutable, user_temporary_workspace};
 
+// Swift ContinuousClock.systemEpoch uses this same clock. std::time::Instant
+// uses CLOCK_UPTIME_RAW and cannot substitute across machine suspension.
+pub(crate) fn continuous_time() -> Result<(i64, u32), HostError> {
+    let mut value = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    // SAFETY: valid uniquely borrowed output storage, fixed supported clock ID.
+    if unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC_RAW, &mut value) } != 0 {
+        return Err(HostError::SystemIo {
+            operation: HostOperation::Read,
+            code: io::Error::last_os_error()
+                .raw_os_error()
+                .unwrap_or(libc::EIO),
+        });
+    }
+    if value.tv_sec < 0 || !(0..1_000_000_000).contains(&value.tv_nsec) {
+        return Err(HostError::InvalidEvidence);
+    }
+    Ok((value.tv_sec, value.tv_nsec as u32))
+}
+
 // Native inspection used only by the opt-in compiled process fixture. Keep
 // test syscalls in the same audited boundary as production syscalls.
 #[cfg(feature = "process-fixtures")]

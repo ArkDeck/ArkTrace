@@ -1,8 +1,10 @@
 //! Native host ports. Domain contracts and GUI/Capture are intentionally absent.
 mod budget;
+mod continuous_time;
 mod error;
 
 pub use budget::{CancellationToken, IoBudget};
+pub use continuous_time::ContinuousDeadline;
 pub use error::{HostError, HostOperation};
 
 #[cfg(target_os = "macos")]

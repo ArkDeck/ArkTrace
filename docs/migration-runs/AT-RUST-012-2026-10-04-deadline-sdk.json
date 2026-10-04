@@ -1,0 +1,3432 @@
+{
+  "formatVersion": 1,
+  "baseCommit": "d8e0a49d54efb45cf1716301241aef5fd5c557aa",
+  "toolchain": {
+    "rust": "1.99.0",
+    "xcode": "27.0 (27A266a)",
+    "swift": "6.4 / language mode 6",
+    "deployment": "macOS 26+ arm64"
+  },
+  "implementation": {
+    "individualCoreDeadlinesTransported": true,
+    "clock": "hostContinuousEpochV1",
+    "epochParts": "Int64 seconds and attoseconds, exact i128 native comparison",
+    "nilThreadSlot": true,
+    "completedSlotsNotRechecked": true,
+    "wholeOperationTimeoutSeparate": true,
+    "privateOperation": "batchDetailsWithDeadlines",
+    "coreBatchAdapter": true,
+    "defaultAppKernel": "Swift",
+    "ffiABI": 1,
+    "ffiExports": 23
+  },
+  "actualProducer": {
+    "deadlineSDK": true,
+    "rustAppCutover": false,
+    "fullSDKAcceptance": false,
+    "individualCoreDeadlinesTransported": true,
+    "controlledReadyOpening": true,
+    "originalTraceReparsed": false,
+    "sourceSHA256": "9fc8dfb215db961d215e1ed50a108c02fc3a31fccbdd91c5e852dd3d6dde5249",
+    "sourceBytes": 19734528,
+    "originalReadySupplementSHA256": "381451a895fb9e73e5c04a8fede19759aa5d20ceaeb83bbfe3c36a0851eb0aef",
+    "successfulRequests": 6,
+    "timedOutRequests": 5,
+    "nativeBatchCalls": 22,
+    "referenceReceipt": {
+      "command": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "build",
+        "--disable-sandbox",
+        "--config-path",
+        "<private-tmp>/arktrace-deadline-reference/configuration",
+        "--security-path",
+        "<private-tmp>/arktrace-deadline-reference/security",
+        "--product",
+        "DeadlineOriginalOracle",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "<private-tmp>/arktrace-deadline-reference/oracle-source",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "<private-tmp>/arktrace-deadline-reference"
+      },
+      "removedEnvironmentKeys": [
+        "ARKTRACE_RUST_XCFRAMEWORK",
+        "ARKTRACE_RUST_SDK_FIXTURES"
+      ],
+      "exitCode": 0,
+      "executableSHA256": "2534e711c83c1e80c5b8e5ad394747ca23753ec4085f581be37754656ab712f3",
+      "logSHA256": "0b3720eb79c971a9d90c04aad45a9f71303feb5eee6342e2b277859e5fbee2d5",
+      "sourcePins": [
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+          "byteCount": 11275,
+          "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+          "byteCount": 4367,
+          "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+          "byteCount": 1042,
+          "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+          "byteCount": 375,
+          "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+          "byteCount": 862,
+          "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+          "byteCount": 17503,
+          "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+          "byteCount": 1526,
+          "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Model/TraceModels.swift",
+          "byteCount": 13541,
+          "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+          "byteCount": 5258,
+          "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Parser/TraceParser.swift",
+          "byteCount": 8071,
+          "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+          "byteCount": 3147,
+          "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+          "byteCount": 16011,
+          "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+          "byteCount": 1186,
+          "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Query/TraceDensity.swift",
+          "byteCount": 3873,
+          "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+          "byteCount": 9752,
+          "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+          "byteCount": 863,
+          "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Query/TraceQueries.swift",
+          "byteCount": 17117,
+          "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceCore/Time/TraceTime.swift",
+          "byteCount": 2757,
+          "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+          "byteCount": 160666,
+          "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceStore/TraceDatabase.swift",
+          "byteCount": 29935,
+          "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+          "byteCount": 32838,
+          "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceStore/TraceEventIntersection.swift",
+          "byteCount": 3269,
+          "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+          "byteCount": 49595,
+          "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/DeadlineOriginalOracle/BatchProofModel.swift",
+          "byteCount": 4141,
+          "sha256": "64a227a27fc554057a3db9605517f78d68cdcb015858b2de3fda13401b7b2a5c"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/DeadlineOriginalOracle/DeadlineProofModel.swift",
+          "byteCount": 3332,
+          "sha256": "ae61f92fd270ed436ef679031d61d3e98384230f39105e41aed53fc8f154b855"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/DeadlineOriginalOracle/DeadlineSDKOriginal.swift",
+          "byteCount": 1546,
+          "sha256": "6d14c5a3ee3b65f8f394b189ee451520ddb07303e26337dbf64d18318d30d24c"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/DeadlineOriginalOracle/DensityProofModel.swift",
+          "byteCount": 1790,
+          "sha256": "3289a210e9ae9160422e4300ade890d6f1d2d39b05a16502beb18de9f1dfc2c2"
+        },
+        {
+          "path": "<private-tmp>/arktrace-deadline-reference/workspace/Sources/DeadlineOriginalOracle/EventProofModel.swift",
+          "byteCount": 2730,
+          "sha256": "5f3a92f50f03fd96a04d5eb2f02733d51992fb3127c2c401ecd66a46169ffdd0"
+        }
+      ]
+    },
+    "sdkReceipt": {
+      "artifactIdentity": "307aed17ce4ce521431f09aa200c100d03981199577cd7e481ec4b90c5973c56",
+      "artifactReceipt": {
+        "abiVersion": 1,
+        "contractSHA256": "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e",
+        "developmentFixtures": true,
+        "deploymentTarget": "26.0",
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+        "library": {
+          "byteCount": 29912936,
+          "sha256": "c398c532db897a2a0aa3db1db6a52d9ea78e4604f6cc365916e8419a31e92f11"
+        },
+        "headers": [
+          {
+            "path": "<worktree>/bindings/c/arktrace_ffi.h",
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661"
+          },
+          {
+            "path": "<worktree>/bindings/c/module.modulemap",
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+          }
+        ],
+        "files": [
+          {
+            "byteCount": 761,
+            "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+            "relativePath": "CArkTrace.xcframework/Info.plist"
+          },
+          {
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+          },
+          {
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+          },
+          {
+            "byteCount": 29912936,
+            "sha256": "c398c532db897a2a0aa3db1db6a52d9ea78e4604f6cc365916e8419a31e92f11",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+          }
+        ],
+        "releaseAcceptance": false
+      },
+      "consumerExecutable": {
+        "byteCount": 13066256,
+        "sha256": "9bfc1909e295b38280a86e2f715d48944331f03baf9427a5ce0ab1524e4dd34c"
+      },
+      "lifecycleExecutable": {
+        "byteCount": 12715568,
+        "sha256": "9a52d93cf518382abb6249f3b68ce76f7cd0de035bcd1afab81d478dbb7c6388"
+      },
+      "directoryExecutable": {
+        "byteCount": 12803312,
+        "sha256": "3a7996384f6578167bf1d22ead6961afcbaf150d1648ca7ca7af6dff47e13a7f"
+      },
+      "summaryExecutable": {
+        "byteCount": 12589664,
+        "sha256": "7b1f27ba8c6987e6282256ff8baa8b85e5ac8211fdbf663aaefd5eca7b063eec"
+      },
+      "coreExecutable": {
+        "byteCount": 14079776,
+        "sha256": "ef4c3a0f2e6c8289b9d4ef46c106019f99322983f8038df96a96ea346e0cd51f"
+      },
+      "coreConsumerBuildLogSHA256": "1f97d7e49ad9fdc02cd6818a08c812f65ffaeea480191769749353663cb9ffa2",
+      "sdkBuildLogSHA256": "bc1e6732955c23aa0859e6b0f476a7c953b18af1b36aebcf5a5fbcb73371304c",
+      "consumerBuildLogSHA256": "3c359e4119b8bcc623e0f770f481d9edbdfec0e1be824a1aab75eaaa1ffcaac2",
+      "sdkUnitTests": {
+        "passed": 68,
+        "failed": 0,
+        "skipped": 0,
+        "logSHA256": "9b222b2f1ccd13d595c18422058ea63ae0c7a19e571c28d844a7468e758389c1"
+      },
+      "borrowCompileRejections": [
+        {
+          "case": "BorrowCapture.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "242c505a27205ee3da2aa6c2ad318f19e830f2ba451d6571ca9aa3b6f04ee6ab"
+        },
+        {
+          "case": "BorrowEscape.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "456243e1ddcdb208376dfb29a3eef4f4edf9eeed48057c77b418d8a329dfcc87"
+        },
+        {
+          "case": "TextBorrowCapture.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "c40b866f29eb691c38bcda6ee9e31bd6ffb5552cb7c31ec6c9f56e1d0572c926"
+        },
+        {
+          "case": "TextBorrowEscape.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "90856cc76ffd3c6c0cc6a62a7e2cdc8ff6546f099880321a6999506414cba9f6"
+        }
+      ]
+    },
+    "consumerCommand": {
+      "argv": [
+        "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Products/Debug/ArkTraceRustCoreConformance",
+        "<worktree>/.build/agent-coordination/arktrace/deadline-sdk-20261004/controlled-fourth/input.json"
+      ],
+      "cwd": "<worktree>",
+      "inputSHA256": "0d990df5987d900aba1f09ab7ac2844a3f81bc2c916844ef7cafd20a98407942",
+      "executableSHA256": "ef4c3a0f2e6c8289b9d4ef46c106019f99322983f8038df96a96ea346e0cd51f",
+      "exitCode": 0,
+      "stdoutSHA256": "c0551e02c8b3b49fae966c2c2808902c8014bee4fecb343d89f64abd56b8bc89",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "output": {
+      "processPages": 2,
+      "directoryRecordsCompared": 156,
+      "stagingBytesAfterCopies": 0,
+      "afterShutdownMetadata": {
+        "traceSHA256": "9fc8dfb215db961d215e1ed50a108c02fc3a31fccbdd91c5e852dd3d6dde5249",
+        "sourceByteCount": 19734528,
+        "capabilities": {
+          "cpuScheduling": true,
+          "threadStates": true,
+          "processCounters": false,
+          "cpuCounters": false,
+          "namedSlices": false
+        },
+        "parser": {
+          "adapterVersion": "1",
+          "buildRecipeVersion": "controlled-ready-copy-v1",
+          "reportedVersion": "0.0.0",
+          "architecture": "arm64",
+          "name": "ArkTraceControlledReadyCopy",
+          "upstreamRevision": "0ca4c241f4a209ed4c2fe9358443ecfff7f10404",
+          "upstreamRepository": "https://github.com/ArkDeck/ArkTrace",
+          "binarySHA256": "d9b9364d6835463fc9e324eb8d6992882eac5fb61ab01268eded9db814ca678e"
+        },
+        "sourceFormat": "htrace",
+        "durationNs": 9127944000,
+        "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+        "dataQuality": {
+          "warnings": [],
+          "issues": [
+            {
+              "scope": "stat.stat_type",
+              "category": "droppedValue",
+              "count": 416
+            },
+            {
+              "scope": "sched_slice.cpu",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "sched_slice.dur",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "sched_slice.ts",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "thread_state.cpu",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "thread_state.dur",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "thread_state.ts",
+              "category": "probeTruncated"
+            }
+          ],
+          "status": "warnings"
+        }
+      },
+      "copiedCallerDTOsSurviveShutdown": true,
+      "storageBytesAfterCopies": 0,
+      "unsortedOrderProbes": [],
+      "deadlineProof": {
+        "readyDatabaseSHA256": "fbd33a269d177c8c60258b866e5a74bb340108c35abaea85fc8e194af909d066",
+        "retainedBytesBeforeShutdown": 39872,
+        "responses": [
+          {
+            "request": {
+              "plan": {
+                "threadStates": [
+                  1
+                ],
+                "counters": [
+                  1
+                ],
+                "counterSeries": [
+                  1
+                ],
+                "threads": [
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "threadKey": {
+                      "itid": 84
+                    },
+                    "limit": 1
+                  }
+                ],
+                "cpuSlices": [
+                  1
+                ],
+                "id": "future/mixed8",
+                "slices": [
+                  {
+                    "limit": 1,
+                    "includesArgumentSet": true
+                  }
+                ],
+                "densities": [
+                  {
+                    "range": {
+                      "startNs": 0,
+                      "endNs": 9127944000
+                    },
+                    "bucketCount": 7,
+                    "id": "state",
+                    "source": {
+                      "threadState": {
+                        "_0": {
+                          "itid": 84
+                        }
+                      }
+                    }
+                  }
+                ],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [
+                  {
+                    "seconds": 52389,
+                    "attoseconds": 703031291000000004
+                  }
+                ],
+                "threads": [
+                  null,
+                  {
+                    "seconds": 52390,
+                    "attoseconds": 703031291000000000
+                  }
+                ],
+                "counterSeries": [
+                  {
+                    "seconds": 52389,
+                    "attoseconds": 703031291000000005
+                  }
+                ],
+                "cpuSlices": [
+                  {
+                    "seconds": 52389,
+                    "attoseconds": 703031291000000001
+                  }
+                ],
+                "slices": [
+                  {
+                    "seconds": 52389,
+                    "attoseconds": 703031291000000003
+                  }
+                ],
+                "densities": [
+                  {
+                    "seconds": 52389,
+                    "attoseconds": 703031291000000006
+                  }
+                ],
+                "threadStates": [
+                  {
+                    "seconds": 52389,
+                    "attoseconds": 703031291000000002
+                  }
+                ]
+              }
+            },
+            "originalSwift": {
+              "value": {
+                "counters": [
+                  "{\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]},\"items\":[],\"truncated\":false}"
+                ],
+                "threads": [
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":false}"
+                ],
+                "counterSeries": [
+                  "{\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]},\"items\":[],\"truncated\":false}"
+                ],
+                "argSetIDs": [
+                  []
+                ],
+                "cpuSlices": [
+                  "{\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"count\":416,\"message\":null,\"scope\":\"stat.stat_type\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.cpu\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.dur\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.ts\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.cpu\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.dur\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.ts\"}]},\"items\":[{\"cpu\":3,\"endState\":\"S\",\"isOpenEnded\":false,\"key\":{\"rowID\":0,\"table\":\"sched_slice\"},\"pid\":325,\"priority\":120,\"processKey\":{\"ipid\":2},\"processName\":\"wifi_hal_servic\",\"range\":{\"endNs\":152000,\"startNs\":112000},\"threadKey\":{\"itid\":4},\"threadName\":\"wifi_hal_servic\",\"tid\":325}],\"truncated\":true}"
+                ],
+                "id": "future/mixed8",
+                "slices": [
+                  "{\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]},\"items\":[],\"truncated\":false}"
+                ],
+                "densities": [
+                  "{\"buckets\":[{\"dominant\":{\"threadState\":{\"_0\":\"S\"}},\"eventCount\":3,\"range\":{\"endNs\":1303992000,\"startNs\":0}},{\"dominant\":{\"threadState\":{\"_0\":\"Running\"}},\"eventCount\":3,\"range\":{\"endNs\":6519960000,\"startNs\":5215968000}}],\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"count\":416,\"message\":null,\"scope\":\"stat.stat_type\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.cpu\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.dur\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.ts\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.cpu\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.dur\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.ts\"},{\"category\":\"unavailableValue\",\"count\":null,\"message\":null,\"scope\":\"timeline.density.occupancy\"}]}}"
+                ],
+                "threadStates": [
+                  "{\"capabilityAvailable\":true,\"dataQuality\":{\"status\":\"warnings\",\"warnings\":[{\"category\":\"droppedValue\",\"count\":416,\"message\":null,\"scope\":\"stat.stat_type\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.cpu\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.dur\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"sched_slice.ts\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.cpu\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.dur\"},{\"category\":\"probeTruncated\",\"count\":null,\"message\":null,\"scope\":\"thread_state.ts\"}]},\"items\":[{\"cpu\":null,\"isOpenEnded\":false,\"key\":{\"rowID\":0,\"table\":\"thread_state\"},\"normalizedState\":\"runnable\",\"pid\":338,\"processKey\":{\"ipid\":3},\"processName\":\"hilogd\",\"range\":{\"endNs\":115000,\"startNs\":30000},\"state\":\"R\",\"threadKey\":{\"itid\":3},\"threadName\":\"hilogd.server\",\"tid\":511}],\"truncated\":true}"
+                ]
+              },
+              "id": "future/mixed8"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "62cecd1782252c74164aa3769c43fff7481f6f2652157e965801b8b958262b42"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "62cecd1782252c74164aa3769c43fff7481f6f2652157e965801b8b958262b42"
+              },
+              "afterShutdownCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "62cecd1782252c74164aa3769c43fff7481f6f2652157e965801b8b958262b42"
+              },
+              "afterShutdownSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "62cecd1782252c74164aa3769c43fff7481f6f2652157e965801b8b958262b42"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  },
+                  {
+                    "limit": 1
+                  }
+                ],
+                "cpuSlices": [],
+                "id": "future/32thread",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [
+                  null,
+                  {
+                    "seconds": 52390,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52392,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52394,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52396,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52398,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52400,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52402,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52404,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52406,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52408,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52410,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52412,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52414,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52416,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52418,
+                    "attoseconds": 703031291000000000
+                  },
+                  null,
+                  {
+                    "seconds": 52420,
+                    "attoseconds": 703031291000000000
+                  }
+                ],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "value": {
+                "counters": [],
+                "threads": [
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}",
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}"
+                ],
+                "counterSeries": [],
+                "argSetIDs": [],
+                "cpuSlices": [],
+                "id": "future/32thread",
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              },
+              "id": "future/32thread"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "613d54c234e0ca0fbb042417a5657a5c38b66351d1241ebce47d1aeb2850f73c"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "613d54c234e0ca0fbb042417a5657a5c38b66351d1241ebce47d1aeb2850f73c"
+              },
+              "afterShutdownCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "613d54c234e0ca0fbb042417a5657a5c38b66351d1241ebce47d1aeb2850f73c"
+              },
+              "afterShutdownSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "613d54c234e0ca0fbb042417a5657a5c38b66351d1241ebce47d1aeb2850f73c"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [
+                  {
+                    "limit": 1
+                  }
+                ],
+                "cpuSlices": [],
+                "id": "nil/1thread",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [
+                  null
+                ],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "value": {
+                "counters": [],
+                "threads": [
+                  "{\"dataQualityIssues\":[],\"items\":[{\"endNs\":null,\"isMainThread\":true,\"key\":{\"itid\":84},\"name\":\"kthreadd\",\"pid\":2,\"processKey\":{\"ipid\":42},\"processName\":\"kthreadd\",\"startNs\":null,\"tid\":2}],\"truncated\":true}"
+                ],
+                "counterSeries": [],
+                "argSetIDs": [],
+                "cpuSlices": [],
+                "id": "nil/1thread",
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              },
+              "id": "nil/1thread"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "953ccf765c222346086ad7b67818853db9fa5d4abe60178d07a64f84a095bada"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "953ccf765c222346086ad7b67818853db9fa5d4abe60178d07a64f84a095bada"
+              },
+              "afterShutdownCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "953ccf765c222346086ad7b67818853db9fa5d4abe60178d07a64f84a095bada"
+              },
+              "afterShutdownSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "953ccf765c222346086ad7b67818853db9fa5d4abe60178d07a64f84a095bada"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [],
+                "cpuSlices": [
+                  1
+                ],
+                "id": "past/cpu",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [],
+                "cpuSlices": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 2
+                  }
+                ],
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "stage": "querying",
+              "retryable": true,
+              "code": "QUERY_TIMEOUT",
+              "id": "past/cpu"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "58200e461e7f608f3ad3d116f14e92300a30c50e909f1a00137146ab8fdb773e"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "58200e461e7f608f3ad3d116f14e92300a30c50e909f1a00137146ab8fdb773e"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [
+                  1
+                ],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [],
+                "cpuSlices": [],
+                "id": "past/state",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [],
+                "threadStates": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 3
+                  }
+                ]
+              }
+            },
+            "originalSwift": {
+              "stage": "querying",
+              "retryable": true,
+              "code": "QUERY_TIMEOUT",
+              "id": "past/state"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "2cfe79c2ed0694afc7732dd6e0d05ab741e246146842c9e38d6781d803b75c7d"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "2cfe79c2ed0694afc7732dd6e0d05ab741e246146842c9e38d6781d803b75c7d"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [
+                  {
+                    "limit": 1
+                  }
+                ],
+                "cpuSlices": [],
+                "id": "past/thread",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 1
+                  }
+                ],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "stage": "querying",
+              "retryable": true,
+              "code": "QUERY_TIMEOUT",
+              "id": "past/thread"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f9f95a5447f633a4a12b2f0b23bd4ec5c19acb526d5b9a76250ab32a1f536d51"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f9f95a5447f633a4a12b2f0b23bd4ec5c19acb526d5b9a76250ab32a1f536d51"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [],
+                "cpuSlices": [],
+                "id": "past/densityCPU",
+                "slices": [],
+                "densities": [
+                  {
+                    "range": {
+                      "startNs": 0,
+                      "endNs": 9127944000
+                    },
+                    "bucketCount": 1,
+                    "id": "cpu",
+                    "source": {
+                      "cpu": {
+                        "_0": 0
+                      }
+                    }
+                  }
+                ],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 7
+                  }
+                ],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "stage": "querying",
+              "retryable": true,
+              "code": "QUERY_TIMEOUT",
+              "id": "past/densityCPU"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "dcb167772f8bd4203655382bd1bc45be76d0e946846f99145e316e67cc423ad7"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "dcb167772f8bd4203655382bd1bc45be76d0e946846f99145e316e67cc423ad7"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [],
+                "cpuSlices": [],
+                "id": "past/unavailableSlice",
+                "slices": [
+                  {
+                    "limit": 1,
+                    "includesArgumentSet": true
+                  }
+                ],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 4
+                  }
+                ],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "value": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [],
+                "argSetIDs": [
+                  []
+                ],
+                "cpuSlices": [],
+                "id": "past/unavailableSlice",
+                "slices": [
+                  "{\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]},\"items\":[],\"truncated\":false}"
+                ],
+                "densities": [],
+                "threadStates": []
+              },
+              "id": "past/unavailableSlice"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "c4341a38bd89a3662818999279baf09f9ab7af95243fa388f10728819bbd4e40"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "c4341a38bd89a3662818999279baf09f9ab7af95243fa388f10728819bbd4e40"
+              },
+              "afterShutdownCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "c4341a38bd89a3662818999279baf09f9ab7af95243fa388f10728819bbd4e40"
+              },
+              "afterShutdownSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "c4341a38bd89a3662818999279baf09f9ab7af95243fa388f10728819bbd4e40"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [
+                  1
+                ],
+                "counterSeries": [],
+                "threads": [],
+                "cpuSlices": [],
+                "id": "past/unavailableCounter",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 5
+                  }
+                ],
+                "threads": [],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "value": {
+                "counters": [
+                  "{\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]},\"items\":[],\"truncated\":false}"
+                ],
+                "threads": [],
+                "counterSeries": [],
+                "argSetIDs": [],
+                "cpuSlices": [],
+                "id": "past/unavailableCounter",
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              },
+              "id": "past/unavailableCounter"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f57287c0c808c22ab733eb5bbf5fe44ef6252741b911dbec9d0d7ba184650efb"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f57287c0c808c22ab733eb5bbf5fe44ef6252741b911dbec9d0d7ba184650efb"
+              },
+              "afterShutdownCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f57287c0c808c22ab733eb5bbf5fe44ef6252741b911dbec9d0d7ba184650efb"
+              },
+              "afterShutdownSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f57287c0c808c22ab733eb5bbf5fe44ef6252741b911dbec9d0d7ba184650efb"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [
+                  1
+                ],
+                "threads": [],
+                "cpuSlices": [],
+                "id": "past/unavailableSeries",
+                "slices": [],
+                "densities": [],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 6
+                  }
+                ],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "value": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [
+                  "{\"capabilityAvailable\":false,\"dataQuality\":{\"status\":\"ok\",\"warnings\":[]},\"items\":[],\"truncated\":false}"
+                ],
+                "argSetIDs": [],
+                "cpuSlices": [],
+                "id": "past/unavailableSeries",
+                "slices": [],
+                "densities": [],
+                "threadStates": []
+              },
+              "id": "past/unavailableSeries"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "ab58c7ef6ede4f8155f874c9c827a77883e11c4afeea1da40613b82ae5bd743d"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "ab58c7ef6ede4f8155f874c9c827a77883e11c4afeea1da40613b82ae5bd743d"
+              },
+              "afterShutdownCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "ab58c7ef6ede4f8155f874c9c827a77883e11c4afeea1da40613b82ae5bd743d"
+              },
+              "afterShutdownSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "ab58c7ef6ede4f8155f874c9c827a77883e11c4afeea1da40613b82ae5bd743d"
+              }
+            }
+          },
+          {
+            "request": {
+              "plan": {
+                "threadStates": [],
+                "counters": [],
+                "counterSeries": [],
+                "threads": [],
+                "cpuSlices": [],
+                "id": "past/unavailableDensity",
+                "slices": [],
+                "densities": [
+                  {
+                    "range": {
+                      "startNs": 0,
+                      "endNs": 9127944000
+                    },
+                    "bucketCount": 1,
+                    "id": "named",
+                    "source": {
+                      "namedSlice": {}
+                    }
+                  }
+                ],
+                "range": {
+                  "startNs": 0,
+                  "endNs": 9127944000
+                }
+              },
+              "deadlines": {
+                "counters": [],
+                "threads": [],
+                "counterSeries": [],
+                "cpuSlices": [],
+                "slices": [],
+                "densities": [
+                  {
+                    "seconds": 0,
+                    "attoseconds": 7
+                  }
+                ],
+                "threadStates": []
+              }
+            },
+            "originalSwift": {
+              "stage": "querying",
+              "retryable": true,
+              "code": "QUERY_TIMEOUT",
+              "id": "past/unavailableDensity"
+            },
+            "comparisons": {
+              "initialCore": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f7645fccc4aa7c9a76f511c7e10c792ca9f557bc5fa8024814be5e88d2d7e033"
+              },
+              "initialSDK": {
+                "matchesOriginal": true,
+                "canonicalValueSHA256": "f7645fccc4aa7c9a76f511c7e10c792ca9f557bc5fa8024814be5e88d2d7e033"
+              }
+            }
+          }
+        ],
+        "originalOracleExitCode": 0,
+        "originalOracleArguments": [
+          "<worktree>/.build/agent-coordination/arktrace/deadline-sdk-20261004/controlled-fourth/runtime/.actors/session-565e5055-53a8-4b3a-923d-f7baf1938fa7/.ready/session-c216a1dc-35ea-4cdb-838a-dc8c179ea4c7/trace.db",
+          "{\"metadata\":{\"traceSHA256\":\"9fc8dfb215db961d215e1ed50a108c02fc3a31fccbdd91c5e852dd3d6dde5249\",\"sourceByteCount\":19734528,\"capabilities\":{\"cpuScheduling\":true,\"threadStates\":true,\"processCounters\":false,\"cpuCounters\":false,\"namedSlices\":false},\"parser\":{\"adapterVersion\":\"1\",\"buildRecipeVersion\":\"controlled-ready-copy-v1\",\"reportedVersion\":\"0.0.0\",\"architecture\":\"arm64\",\"name\":\"ArkTraceControlledReadyCopy\",\"upstreamRevision\":\"0ca4c241f4a209ed4c2fe9358443ecfff7f10404\",\"upstreamRepository\":\"https:\\/\\/github.com\\/ArkDeck\\/ArkTrace\",\"binarySHA256\":\"d9b9364d6835463fc9e324eb8d6992882eac5fb61ab01268eded9db814ca678e\"},\"sourceFormat\":\"htrace\",\"durationNs\":9127944000,\"schemaFingerprint\":\"cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3\",\"dataQuality\":{\"warnings\":[],\"issues\":[{\"scope\":\"stat.stat_type\",\"category\":\"droppedValue\",\"count\":416},{\"scope\":\"sched_slice.cpu\",\"category\":\"probeTruncated\"},{\"scope\":\"sched_slice.dur\",\"category\":\"probeTruncated\"},{\"scope\":\"sched_slice.ts\",\"category\":\"probeTruncated\"},{\"scope\":\"thread_state.cpu\",\"category\":\"probeTruncated\"},{\"scope\":\"thread_state.dur\",\"category\":\"probeTruncated\"},{\"scope\":\"thread_state.ts\",\"category\":\"probeTruncated\"}],\"status\":\"warnings\"}},\"preparation\":{\"upstreamDatabaseByteCount\":19734528,\"indexVersion\":3,\"upstreamDatabaseSHA256\":\"9fc8dfb215db961d215e1ed50a108c02fc3a31fccbdd91c5e852dd3d6dde5249\",\"schemaAdapterVersion\":\"2\",\"schemaFingerprint\":\"cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3\"}}",
+          "[{\"deadlines\":{\"counters\":[{\"seconds\":52389,\"attoseconds\":703031291000000004}],\"threads\":[null,{\"seconds\":52390,\"attoseconds\":703031291000000000}],\"counterSeries\":[{\"seconds\":52389,\"attoseconds\":703031291000000005}],\"cpuSlices\":[{\"seconds\":52389,\"attoseconds\":703031291000000001}],\"slices\":[{\"seconds\":52389,\"attoseconds\":703031291000000003}],\"densities\":[{\"seconds\":52389,\"attoseconds\":703031291000000006}],\"threadStates\":[{\"seconds\":52389,\"attoseconds\":703031291000000002}]},\"plan\":{\"counters\":[1],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[1],\"threads\":[{\"limit\":1},{\"threadKey\":{\"itid\":84},\"limit\":1}],\"cpuSlices\":[1],\"id\":\"future\\/mixed8\",\"slices\":[{\"limit\":1,\"includesArgumentSet\":true}],\"densities\":[{\"id\":\"state\",\"source\":{\"threadState\":{\"_0\":{\"itid\":84}}},\"bucketCount\":7,\"range\":{\"endNs\":9127944000,\"startNs\":0}}],\"threadStates\":[1]}},{\"deadlines\":{\"counters\":[],\"threads\":[null,{\"seconds\":52390,\"attoseconds\":703031291000000000},null,{\"seconds\":52392,\"attoseconds\":703031291000000000},null,{\"seconds\":52394,\"attoseconds\":703031291000000000},null,{\"seconds\":52396,\"attoseconds\":703031291000000000},null,{\"seconds\":52398,\"attoseconds\":703031291000000000},null,{\"seconds\":52400,\"attoseconds\":703031291000000000},null,{\"seconds\":52402,\"attoseconds\":703031291000000000},null,{\"seconds\":52404,\"attoseconds\":703031291000000000},null,{\"seconds\":52406,\"attoseconds\":703031291000000000},null,{\"seconds\":52408,\"attoseconds\":703031291000000000},null,{\"seconds\":52410,\"attoseconds\":703031291000000000},null,{\"seconds\":52412,\"attoseconds\":703031291000000000},null,{\"seconds\":52414,\"attoseconds\":703031291000000000},null,{\"seconds\":52416,\"attoseconds\":703031291000000000},null,{\"seconds\":52418,\"attoseconds\":703031291000000000},null,{\"seconds\":52420,\"attoseconds\":703031291000000000}],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1},{\"limit\":1}],\"cpuSlices\":[],\"id\":\"future\\/32thread\",\"slices\":[],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[null],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[{\"limit\":1}],\"cpuSlices\":[],\"id\":\"nil\\/1thread\",\"slices\":[],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[],\"counterSeries\":[],\"cpuSlices\":[{\"seconds\":0,\"attoseconds\":2}],\"slices\":[],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[],\"cpuSlices\":[1],\"id\":\"past\\/cpu\",\"slices\":[],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[],\"threadStates\":[{\"seconds\":0,\"attoseconds\":3}]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[],\"cpuSlices\":[],\"id\":\"past\\/state\",\"slices\":[],\"densities\":[],\"threadStates\":[1]}},{\"deadlines\":{\"counters\":[],\"threads\":[{\"seconds\":0,\"attoseconds\":1}],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[{\"limit\":1}],\"cpuSlices\":[],\"id\":\"past\\/thread\",\"slices\":[],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[{\"seconds\":0,\"attoseconds\":7}],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[],\"cpuSlices\":[],\"id\":\"past\\/densityCPU\",\"slices\":[],\"densities\":[{\"id\":\"cpu\",\"source\":{\"cpu\":{\"_0\":0}},\"bucketCount\":1,\"range\":{\"endNs\":9127944000,\"startNs\":0}}],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[{\"seconds\":0,\"attoseconds\":4}],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[],\"cpuSlices\":[],\"id\":\"past\\/unavailableSlice\",\"slices\":[{\"limit\":1,\"includesArgumentSet\":true}],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[{\"seconds\":0,\"attoseconds\":5}],\"threads\":[],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[1],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[],\"cpuSlices\":[],\"id\":\"past\\/unavailableCounter\",\"slices\":[],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[],\"counterSeries\":[{\"seconds\":0,\"attoseconds\":6}],\"cpuSlices\":[],\"slices\":[],\"densities\":[],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[1],\"threads\":[],\"cpuSlices\":[],\"id\":\"past\\/unavailableSeries\",\"slices\":[],\"densities\":[],\"threadStates\":[]}},{\"deadlines\":{\"counters\":[],\"threads\":[],\"counterSeries\":[],\"cpuSlices\":[],\"slices\":[],\"densities\":[{\"seconds\":0,\"attoseconds\":7}],\"threadStates\":[]},\"plan\":{\"counters\":[],\"range\":{\"endNs\":9127944000,\"startNs\":0},\"counterSeries\":[],\"threads\":[],\"cpuSlices\":[],\"id\":\"past\\/unavailableDensity\",\"slices\":[],\"densities\":[{\"id\":\"named\",\"source\":{\"namedSlice\":{}},\"bucketCount\":1,\"range\":{\"endNs\":9127944000,\"startNs\":0}}],\"threadStates\":[]}}]"
+        ],
+        "retainedOwnersBeforeShutdown": 6,
+        "readyDatabaseBytesUnchanged": true
+      },
+      "stagingOwnersAfterCopies": 0,
+      "nativeBytesBeforeShutdown": 0,
+      "storageOwnersAfterCopies": 0,
+      "threadPages": 2,
+      "responses": [],
+      "metadata": {
+        "traceSHA256": "9fc8dfb215db961d215e1ed50a108c02fc3a31fccbdd91c5e852dd3d6dde5249",
+        "sourceByteCount": 19734528,
+        "capabilities": {
+          "cpuScheduling": true,
+          "threadStates": true,
+          "processCounters": false,
+          "cpuCounters": false,
+          "namedSlices": false
+        },
+        "parser": {
+          "adapterVersion": "1",
+          "buildRecipeVersion": "controlled-ready-copy-v1",
+          "reportedVersion": "0.0.0",
+          "architecture": "arm64",
+          "name": "ArkTraceControlledReadyCopy",
+          "upstreamRevision": "0ca4c241f4a209ed4c2fe9358443ecfff7f10404",
+          "upstreamRepository": "https://github.com/ArkDeck/ArkTrace",
+          "binarySHA256": "d9b9364d6835463fc9e324eb8d6992882eac5fb61ab01268eded9db814ca678e"
+        },
+        "sourceFormat": "htrace",
+        "durationNs": 9127944000,
+        "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
+        "dataQuality": {
+          "warnings": [],
+          "issues": [
+            {
+              "scope": "stat.stat_type",
+              "category": "droppedValue",
+              "count": 416
+            },
+            {
+              "scope": "sched_slice.cpu",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "sched_slice.dur",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "sched_slice.ts",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "thread_state.cpu",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "thread_state.dur",
+              "category": "probeTruncated"
+            },
+            {
+              "scope": "thread_state.ts",
+              "category": "probeTruncated"
+            }
+          ],
+          "status": "warnings"
+        }
+      }
+    },
+    "controlledSourceUnchanged": true,
+    "ownedReadyDatabaseRemoved": true
+  },
+  "actualProducerReceipt": {
+    "argv": [
+      "python3",
+      "scripts/test_macos_deadline_sdk.py",
+      "--controlled-opening",
+      "<worktree>/.build/agent-coordination/arktrace/density-sdk-20261004/controlled-opening-supplement-v2.json",
+      "--evidence-dir",
+      "<worktree>/.build/agent-coordination/arktrace/deadline-sdk-20261004/controlled-fourth"
+    ],
+    "cwd": "<worktree>",
+    "environmentOverrides": {
+      "ARKTRACE_RUST_XCFRAMEWORK": "<private-tmp>/arktrace-rust-sdk-artifacts/c398c532db897a2a0aa3db1db6a52d9ea78e4604f6cc365916e8419a31e92f11/CArkTrace.xcframework",
+      "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "<private-tmp>/arktrace-deadline-real-consumer",
+      "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "<private-tmp>/arktrace-deadline-reference",
+      "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+      "CARGO_NET_OFFLINE": "true"
+    },
+    "startedAtUnix": 1791128168.995391,
+    "exitCode": 0,
+    "finishedAtUnix": 1791128221.3301299,
+    "stdoutSHA256": "07f659e329c6332223fc70842953e5f8b82582fc42c964422a0b3d1361a3eda9",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "commandReceipts": [
+    {
+      "name": "rust-tests-final",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128069.2741098,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128090.217553,
+      "stdoutSHA256": "bb26c62046e26781c22e4a00857c09e5f1244cc5400b72450bcb6a700edeec3b",
+      "stderrSHA256": "7f227836787b85ca24c69bc93fdb6f030b59ab96e2bed270d750c72688e13d36"
+    },
+    {
+      "name": "rust-clippy-final",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128090.253027,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128092.107528,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "b74310392fca30fca5b8266cdc89aa4075b322f962aab576a2579063c014336e"
+    },
+    {
+      "name": "rust-fmt-final",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128092.138268,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128092.680235,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rust-build",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "build",
+        "--workspace"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128441.8515399,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128445.0039942,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "7fb277f3c12b2d781b3c5ae15d08cb4d770abab8e5067f0e22fa7cb30831f1fc"
+    },
+    {
+      "name": "native-fixture-final",
+      "argv": [
+        "python3",
+        "scripts/build_macos_rust_sdk.py",
+        "--fixtures"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128092.711523,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128101.149002,
+      "stdoutSHA256": "c21bfb77083adee8dcc2d9fa32998ff232ad218d67ba747f27b87ebe94bb585f",
+      "stderrSHA256": "f577b037b61715622c983404a1850c23e60384ab628a0adfaeef224a8680ad82"
+    },
+    {
+      "name": "native-production-final",
+      "argv": [
+        "python3",
+        "scripts/build_macos_rust_sdk.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128101.180539,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128108.6694999,
+      "stdoutSHA256": "2e443ee07409c948059d0297cc0f8c4f7a287553d472387f341d200184ab53e7",
+      "stderrSHA256": "a219f32528021c133b0f0521915f4745ac50fbef913595cabc235c1437b1e1bf"
+    },
+    {
+      "name": "production-sdk-complete",
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "build",
+        "--target",
+        "ArkTraceRustRuntime",
+        "--disable-sandbox",
+        "--config-path",
+        "<private-tmp>/arktrace-deadline-production-sdk/configuration",
+        "--security-path",
+        "<private-tmp>/arktrace-deadline-production-sdk/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "<private-tmp>/arktrace-deadline-production-sdk",
+        "ARKTRACE_RUST_XCFRAMEWORK": "<private-tmp>/arktrace-rust-sdk-artifacts/e52d88a38a66b87d261bd97ebf21ae5962c4b12f11b9311f38700ec31d555ebf/CArkTrace.xcframework"
+      },
+      "startedAtUnix": 1791128168.9953952,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128176.6801002,
+      "stdoutSHA256": "044c47deff50e7f5023164de62f8aa35a0ddf0de87be23db868c5c1f714a5a12",
+      "stderrSHA256": "ed488f9b3060ce402034dc171a31584d1c0466fba623f264f3100c70d6bf615c"
+    },
+    {
+      "name": "real-fourth",
+      "argv": [
+        "python3",
+        "scripts/test_macos_deadline_sdk.py",
+        "--controlled-opening",
+        "<worktree>/.build/agent-coordination/arktrace/density-sdk-20261004/controlled-opening-supplement-v2.json",
+        "--evidence-dir",
+        "<worktree>/.build/agent-coordination/arktrace/deadline-sdk-20261004/controlled-fourth"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "<private-tmp>/arktrace-rust-sdk-artifacts/c398c532db897a2a0aa3db1db6a52d9ea78e4604f6cc365916e8419a31e92f11/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "<private-tmp>/arktrace-deadline-real-consumer",
+        "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "<private-tmp>/arktrace-deadline-reference",
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128168.995391,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128221.3301299,
+      "stdoutSHA256": "07f659e329c6332223fc70842953e5f8b82582fc42c964422a0b3d1361a3eda9",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "external-positive-complete",
+      "argv": [
+        "swift",
+        "build",
+        "--package-path",
+        "<private-tmp>/arktrace-deadline-real-consumer/consumer",
+        "--scratch-path",
+        "<private-tmp>/arktrace-deadline-real-consumer/build",
+        "--cache-path",
+        "<private-tmp>/arktrace-deadline-real-consumer/dependencies",
+        "--disable-sandbox",
+        "--config-path",
+        "<private-tmp>/arktrace-deadline-real-consumer/configuration",
+        "--security-path",
+        "<private-tmp>/arktrace-deadline-real-consumer/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": ".arktrace-native/307aed17ce4ce521431f09aa200c100d03981199577cd7e481ec4b90c5973c56/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1",
+        "CLANG_MODULE_CACHE_PATH": "<private-tmp>/arktrace-deadline-real-consumer/ModuleCache",
+        "SWIFTPM_MODULECACHE_OVERRIDE": "<private-tmp>/arktrace-deadline-real-consumer/ModuleCache"
+      },
+      "startedAtUnix": 1791128326.792452,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128331.246686,
+      "stdoutSHA256": "187c64a34642841eb07519bd5282824c89a5ca18a93020756b8683fecdb8199c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "swift-tests-expanded",
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "<private-tmp>/arktrace-swiftpm-current/configuration",
+        "--security-path",
+        "<private-tmp>/arktrace-swiftpm-current/security"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "<private-tmp>/arktrace-swiftpm-current"
+      },
+      "startedAtUnix": 1791127691.9501498,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127749.582155,
+      "stdoutSHA256": "ca3f2211b7bf33fdec44508729c67a2ae90e3f9163a093c99c166d91eb8cfd0a",
+      "stderrSHA256": "764c71a02619c3d0fa805c076a0374139266c0b569faf57264734a6c9428573c"
+    },
+    {
+      "name": "api-baseline",
+      "argv": [
+        "sh",
+        "scripts/test_api_baseline.sh",
+        "--scratch-path",
+        "<private-tmp>/arktrace-event-api-baseline/build",
+        "--cache-path",
+        "<private-tmp>/arktrace-event-api-baseline/dependencies",
+        "--config-path",
+        "<private-tmp>/arktrace-event-api-baseline/configuration",
+        "--security-path",
+        "<private-tmp>/arktrace-event-api-baseline/security",
+        "--disable-sandbox",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "CLANG_MODULE_CACHE_PATH": "<private-tmp>/arktrace-event-api-baseline/ModuleCache",
+        "SWIFTPM_MODULECACHE_OVERRIDE": "<private-tmp>/arktrace-event-api-baseline/ModuleCache"
+      },
+      "startedAtUnix": 1791127749.64209,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127760.344898,
+      "stdoutSHA256": "8441a2ba2730dc6843114a4b0db1782062b9cfdc9d487adb4a254e4133784045",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "app-build-expanded",
+      "argv": [
+        "sh",
+        "scripts/run-xcodebuild.sh"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_XCODE_CACHE_ROOT": "<private-tmp>/arktrace-lifecycle-xcode",
+        "ARKTRACE_XCODE_OUTPUT_ROOT": "<private-tmp>/arktrace-lifecycle-xcode-output"
+      },
+      "startedAtUnix": 1791127689.5166779,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127693.151205,
+      "stdoutSHA256": "43690feb9e35720037f4483b3d36a09a3a2863f0890f53048e3fc783f44dfd1d",
+      "stderrSHA256": "22b8d85ee014544c08f8404726c85d97164f5999e8c745c5be3169ed1b5860af"
+    },
+    {
+      "name": "app-document-types",
+      "argv": [
+        "sh",
+        "scripts/verify_app_document_types.sh",
+        "<private-tmp>/arktrace-lifecycle-xcode-output/Debug/ArkTrace.app"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {},
+      "startedAtUnix": 1791127693.182142,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127693.19798,
+      "stdoutSHA256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rust-workspace",
+      "argv": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127685.073436,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127685.34202,
+      "stdoutSHA256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "migration-final",
+      "argv": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128219.026575,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128219.3037848,
+      "stdoutSHA256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "workspace-final",
+      "argv": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128219.334638,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128219.9283059,
+      "stdoutSHA256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ffi-generated",
+      "argv": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127685.605505,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127685.700096,
+      "stdoutSHA256": "6a3c1928de3bb377c982957d69d18c942ae564f8fda270487e0f993c4fbd1534",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ffi-contract",
+      "argv": [
+        "python3",
+        "scripts/test_ffi_contract.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127685.728564,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127691.510006,
+      "stdoutSHA256": "3ae2d0b34599ae4cc29a49681658249ff2cefe44bd9c32472626ff388eeb81d3",
+      "stderrSHA256": "25fddc52ee320583ca8ea6409d839b64a36fdbff3e00dc2590a618e92100a19d"
+    },
+    {
+      "name": "licenses",
+      "argv": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127691.545217,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127691.9726279,
+      "stdoutSHA256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "parser-lock",
+      "argv": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127692.0031538,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127692.09839,
+      "stdoutSHA256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "sdk-staging",
+      "argv": [
+        "python3",
+        "scripts/test_stage_macos_rust_sdk.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127692.129811,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127692.241887,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "dae97527feaa5f4404b7cf8a367c36b5834935509ab9babacf648b1bb8476a3b"
+    },
+    {
+      "name": "rust-smoke",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "run",
+        "--bin",
+        "arktrace-migration-smoke"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791127692.273941,
+      "exitCode": 0,
+      "finishedAtUnix": 1791127693.238786,
+      "stdoutSHA256": "071b32eea36b5e931369d008981f210927a332e72a5595774ac8a258526a652e",
+      "stderrSHA256": "8fee83b2854b7a8570d125f2a8f9a87d37c4aaca8fae5ddbcf063bbfe3ecb37e"
+    },
+    {
+      "name": "viewer-json",
+      "argv": [
+        "python3",
+        "scripts/test_viewer_json_roundtrip.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128445.035136,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128455.516211,
+      "stdoutSHA256": "26697411fb114dfec364ccfd83140202d94fee67fca4981c4f02eb08e4130d16",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "palette",
+      "argv": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128455.553631,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128455.832445,
+      "stdoutSHA256": "5b513cdcede959bc5372e81faea29b98994f6a8f78dff20589f0dd03e0efe7a3",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "palette-test",
+      "argv": [
+        "python3",
+        "scripts/test_palette_verifier.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128455.8627808,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128461.092053,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "247c54466df5f5b6e6b78f6384d9f098b78c84c2023969aacf9b3bb27db8ddfd"
+    },
+    {
+      "name": "phase6-offline",
+      "argv": [
+        "sh",
+        "scripts/test_phase6.sh"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128461.1394188,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128461.278673,
+      "stdoutSHA256": "00ca77f6ce36abee9b86d82a5c0563c393ba3ce847cf7029c15e46dfc181ddd0",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ci-planner",
+      "argv": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128218.7265542,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128218.995185,
+      "stdoutSHA256": "098bef1668840292c09a217949cf762d61f52051d24d650b5e7efb9bd44cd528",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "swift-runner",
+      "argv": [
+        "python3",
+        "scripts/test_run_swiftpm.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128461.3112588,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128463.587754,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "a8a2a4bbe8eef1dd68da6fb748f71605207700d3592a37c622351f58ae1e3961"
+    },
+    {
+      "name": "xcode-runner",
+      "argv": [
+        "python3",
+        "scripts/test_run_xcodebuild.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128463.629892,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128466.0302222,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "584d2a0f4fd36351cf4bcc233121df9e9f08428904e6757ce81e27b7f3f8093b"
+    },
+    {
+      "name": "cargo-runner",
+      "argv": [
+        "python3",
+        "scripts/test_run_cargo.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128466.075511,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128466.2148821,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "1ab5546329c2181a220edbbeaf99fbda859d171835676a99754b7a1dbe40cab1"
+    },
+    {
+      "name": "migration-tests",
+      "argv": [
+        "python3",
+        "scripts/test_migration_contracts.py"
+      ],
+      "cwd": "<worktree>",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "<private-tmp>/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true"
+      },
+      "startedAtUnix": 1791128466.2508302,
+      "exitCode": 0,
+      "finishedAtUnix": 1791128466.604178,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "483d6f6b169a84f387eabad541124cb0e395278ea66695c3f8c67fe11e51b964"
+    }
+  ],
+  "compiledRootOverlay": {
+    "baseCommit": "d8e0a49d54efb45cf1716301241aef5fd5c557aa",
+    "inputs": [
+      {
+        "path": "Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+        "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c",
+        "byteCount": 20622,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAnalysis/TraceAgentQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAnalysis/TraceContext.swift",
+        "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024",
+        "byteCount": 68967,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAnalysis/TraceContext.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+        "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804",
+        "byteCount": 51087,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAnalysis/TraceSummary.swift",
+        "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6",
+        "byteCount": 14839,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAnalysis/TraceSummary.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+        "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac",
+        "byteCount": 33088,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAnalysisTests/TraceAgentBatchTests.swift",
+        "sha256": "adcc7a35d2a961a91d11fde27a9c145ada2f5fa97dd8a2a73d012fe230c3f041",
+        "byteCount": 76233,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAnalysisTests/TraceAgentBatchTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAnalysisTests/TraceSummaryTests.swift",
+        "sha256": "379b3881bb0aea98a51f366801241e8eba7d88939f448f3e932d4a9ca1fdb698",
+        "byteCount": 17700,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAnalysisTests/TraceSummaryTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAnalysisTests/TraceViewerAnalysisTests.swift",
+        "sha256": "a64569e7f978aab671831a80543e4aab3c015f2e0247ac3f6c8b0d297497afe2",
+        "byteCount": 29377,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAnalysisTests/TraceViewerAnalysisTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
+        "sha256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830",
+        "byteCount": 2988,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/AppDistribution.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift",
+        "sha256": "c396bc0de76f9e1c7645153364648a99be144c0f3262bf0e1f2c59e5e0b76ef3",
+        "byteCount": 3880,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+        "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
+        "byteCount": 92567,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceDocumentController.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
+        "sha256": "920022106a05279b837965702562662a27c9cd0fe748799f5c0175086ee28569",
+        "byteCount": 9497,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
+        "sha256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39",
+        "byteCount": 7009,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceProductConfiguration.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
+        "sha256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622",
+        "byteCount": 5850,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceRecentDocuments.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
+        "sha256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e",
+        "byteCount": 9117,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift"
+      },
+      {
+        "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
+        "sha256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
+        "byteCount": 4911,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/AppCommandTests.swift",
+        "sha256": "12c23b63d0fa6aff9baac8fc8a8181febe36bfef0f489b344120ef2ea412bf33",
+        "byteCount": 6152,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/AppCommandTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/AppDistributionTests.swift",
+        "sha256": "ad4ece41c495262955927204501d77a57feff9b04763584b96b701efc8301fc0",
+        "byteCount": 28387,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/AppDistributionTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/AppSource.swift",
+        "sha256": "3760827686befcd68239ccb7c675c4837fc85b741e3ea3ba08081e4682f138a9",
+        "byteCount": 3276,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/AppSource.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/CatalogBatchTests.swift",
+        "sha256": "3a31d14a95ffbce6afd522174f457524d764e70f9a9f0a5cd3ce50a319c2a192",
+        "byteCount": 14027,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/CatalogBatchTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/LocalizationCatalogTests.swift",
+        "sha256": "bab91c653daefb1a61d3dd45b53578e45110fd6bb96651c1a3990c2dd29c8c92",
+        "byteCount": 7488,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/LocalizationCatalogTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/ObservationBoundaryTests.swift",
+        "sha256": "d4b1f02de7ef71bf00e3f39b1d4f4ae6b7a6d9b0e1a754f345410128f5cecd26",
+        "byteCount": 4758,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/ObservationBoundaryTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/ShortcutCatalogTests.swift",
+        "sha256": "424e697617ddfbd8c0fc687d542199a946bec9f85f98e1d00c64963846b2d29e",
+        "byteCount": 5427,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/ShortcutCatalogTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/SidebarLabelTests.swift",
+        "sha256": "d0452f9020fe7720b1ef34c9f56261c781c17b9b8ec72d93d9d4c00578f2b139",
+        "byteCount": 2828,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/SidebarLabelTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+        "sha256": "7ab5bd3b29105c202906ad5017adae8af18201470c136386f68c932388d59d45",
+        "byteCount": 81520,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/TraceOfflineInspectionServiceTests.swift",
+        "sha256": "d8dd37fb6ef32e7cdfb96cca6746532fe6de1b238949cdc4e03ff8b990f2b406",
+        "byteCount": 14951,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/TraceOfflineInspectionServiceTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
+        "sha256": "a7176628cbb67ae72152c3a858d4b4b8b763801487f98e568c15a60077926dc1",
+        "byteCount": 9626,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIApplication.swift",
+        "sha256": "868843d5f4d0dce6c0253e5948a9d87add7fb4d87c4050028a89b087dca48f31",
+        "byteCount": 24226,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIApplication.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIExecutableIdentity.swift",
+        "sha256": "8b2dd64c4806204d227fb117df421177f94b0745c61261f5005990dfbcebe839",
+        "byteCount": 7232,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIExecutableIdentity.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLILicenseResources.swift",
+        "sha256": "09ae936aa81644fd545caa61154e2df20668485f800fe0d23915a9c519e5b897",
+        "byteCount": 12090,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLILicenseResources.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIModels.swift",
+        "sha256": "8c7dd63b96f2c463dfe69c1a6eecd663a2a4e4f0b9a9bc1ff25b102edd6cea3b",
+        "byteCount": 5425,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIModels.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIOperationDeadline.swift",
+        "sha256": "1cb3b952a043d5ea65a118a2ceb2b3d0bbd524ee856f3cb9a0af79e6a4da46aa",
+        "byteCount": 6142,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIOperationDeadline.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIParser.swift",
+        "sha256": "0612f8fd23f5bbb4f009f391b11612914df46997826170d78870f4f56e510d67",
+        "byteCount": 32490,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIParser.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIPresentation.swift",
+        "sha256": "7e8fcc3bf5a6cdaaf383635434137828d1352b3885b0d8ac2b702acb7ab629c6",
+        "byteCount": 20538,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIPresentation.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIProductionCommandExecutor.swift",
+        "sha256": "b62b76ded6fda42baa918e5a46cc1c8c8265544612b8f8a316198beafbeb16a2",
+        "byteCount": 29694,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIProductionCommandExecutor.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLIResourceLocator.swift",
+        "sha256": "4a2a81d878576fa585a3c21e698aff0feb2f9bb9a284ccc2dc49761523c6be6f",
+        "byteCount": 3063,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLIResourceLocator.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/CLISignalMonitor.swift",
+        "sha256": "64aa47a2d4fef167084b60f46aef4c122136dec183e7691e5bcecbf360f48a59",
+        "byteCount": 5812,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/CLISignalMonitor.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLI/MachineContract.swift",
+        "sha256": "029a6b3dd3bece0b78f34d2890f63ae785f4c6cedc89665f58de5638aa2c7df2",
+        "byteCount": 93798,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLI/MachineContract.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCLIResourceFixtures/ArkTraceCLIResourceFixtures.swift",
+        "sha256": "4732007f7b1127d8b8aa4a1c48a9816357d8fb47cb7efca6c165351372fb29ed",
+        "byteCount": 993,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCLIResourceFixtures/ArkTraceCLIResourceFixtures.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCLITests/CLITests.swift",
+        "sha256": "74cef4e79176edd3fec27d470b00144623b7d3eeeffd914d4168c8aa3b26e67e",
+        "byteCount": 30429,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCLITests/CLITests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCLITests/ExecutableIdentityTests.swift",
+        "sha256": "928e481ff549ef5b0cb3373cb1493564e70c85a91852ddba398e4e182e5919bb",
+        "byteCount": 10441,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCLITests/ExecutableIdentityTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCLITests/GoldenFixtureTests.swift",
+        "sha256": "4a5b6da9abd6e0ee9b8afb7a488d799ce951171e4f5861b2af0db71a2ee26603",
+        "byteCount": 22289,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCLITests/GoldenFixtureTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCLITests/MachineContractTests.swift",
+        "sha256": "f2180c7436778f670edb46d1bf9992de9c328573019dba32c35e1a3ed6db094f",
+        "byteCount": 56575,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCLITests/MachineContractTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCLITests/ProductionCommandExecutorTests.swift",
+        "sha256": "640e232657b310ea82a0ed5edb6ae8a1ee5494a040411e26ac7749182f0d517a",
+        "byteCount": 47569,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCLITests/ProductionCommandExecutorTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCLITests/TypedMachinePayloadTests.swift",
+        "sha256": "08d0292d813f9c30fa178c08ed3c0f1c8f88ff0023ff0930ace2fce6b8688890",
+        "byteCount": 36879,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCLITests/TypedMachinePayloadTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCapture/TraceCapture.swift",
+        "sha256": "e28244a3fb1fcebe580858b7fb3065c0a0d3eeb2b771f127b2d9637758900967",
+        "byteCount": 46455,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCapture/TraceCapture.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCaptureTests/HDCProcessExecutorTests.swift",
+        "sha256": "582f3dfe9771dc5f71016839973350335802b3c0368d82a137decedf91e3857d",
+        "byteCount": 4296,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCaptureTests/HDCProcessExecutorTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCaptureTests/TraceCaptureTests.swift",
+        "sha256": "79d4a53622747907f263ff766a21b7955898a8c6e60015b6268e278132d692d6",
+        "byteCount": 24873,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCaptureTests/TraceCaptureTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+        "byteCount": 11275,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Error/ArkTraceError.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+        "byteCount": 4367,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/IO/BoundedRegularFile.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+        "byteCount": 1042,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/IO/LowercaseHex.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+        "byteCount": 375,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Model/ArkTraceProduct.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+        "byteCount": 862,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Model/IdentityGrammar.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+        "byteCount": 17503,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Model/TraceEventModels.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+        "byteCount": 1526,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Model/TraceIdentity.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+        "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9",
+        "byteCount": 13541,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Model/TraceModels.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+        "byteCount": 5258,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Model/TraceViewerModels.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+        "byteCount": 8071,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Parser/TraceParser.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+        "byteCount": 3147,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+        "byteCount": 16011,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Query/TraceAgentQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+        "byteCount": 1186,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+        "byteCount": 3873,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Query/TraceDensity.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+        "byteCount": 9752,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Query/TraceEventQueries.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+        "byteCount": 863,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Query/TraceFrameQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69",
+        "byteCount": 17117,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Query/TraceQueries.swift"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+        "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+        "byteCount": 2757,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceCore/Time/TraceTime.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/ArkTraceErrorContractTests.swift",
+        "sha256": "f7d72ad55906f899065e206f73586eddfbf17f04c0a3360fc8a0add1dbf1c882",
+        "byteCount": 10122,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/ArkTraceErrorContractTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/BoundedRegularFileTests.swift",
+        "sha256": "aca9157bb4c3702d8c83394a05180f0860d777bc0d3d7d20e10020ba1a321f59",
+        "byteCount": 3754,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/BoundedRegularFileTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/LowercaseHexTests.swift",
+        "sha256": "ec0020022b1c85d5056638c0fd707f926fffe8161c2525ea98f993b86e005c2f",
+        "byteCount": 2124,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/LowercaseHexTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/MachineQualityTests.swift",
+        "sha256": "381a5a1c55109e13a2cf74400c57fa06b6dbc0b89536d39bd5f1233cbd1a8f98",
+        "byteCount": 4106,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/MachineQualityTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/MigrationTimeContractTests.swift",
+        "sha256": "2a76990963356ddbf2fdc9bca6b6a6d8378bfc5f6e7fe05eb6dbce60f0d50926",
+        "byteCount": 1724,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/MigrationTimeContractTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift",
+        "sha256": "da86f36e673f4cdcfb676e924bfd1d81ebe9ee7175be41a7006936fb9f1cf15e",
+        "byteCount": 7059,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/TraceEventModelContractTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/TraceSliceScopeTests.swift",
+        "sha256": "645872365ed31007cf5fa6ff1af53959db89d06d8cb354690902cccad16015d5",
+        "byteCount": 2067,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/TraceSliceScopeTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceCoreTests/TraceTimeTests.swift",
+        "sha256": "cef5992375591128abe8d787cd7a979665698dfe4103cc13ac001acc3d0ac671",
+        "byteCount": 4756,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceCoreTests/TraceTimeTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/MigrationCacheContractTests.swift",
+        "sha256": "a7d77107d946aafdc6095bc5383247dc5248ea4cd6ebf1636ab87f5cbe9e40b3",
+        "byteCount": 2101,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/MigrationCacheContractTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/MigrationCacheMetadataTests.swift",
+        "sha256": "d5400f188be7364db599878e79f22eac8ed3a89c5fba2aa5d149b63a815d96d9",
+        "byteCount": 2315,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/MigrationCacheMetadataTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/OfflineInspectionIntegrationTests.swift",
+        "sha256": "71980df78830d36938b74f812973de271c6aa923bf9a9763c69cd3eac176f3bd",
+        "byteCount": 3686,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/OfflineInspectionIntegrationTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/ParserIntegrationTests.swift",
+        "sha256": "77fe40eb14f8cf358510581c5f27109a39bd13b199dd373142e33fa2818d2226",
+        "byteCount": 231805,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/ParserIntegrationTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/TraceCacheIOTests.swift",
+        "sha256": "1ac80244478b095a6bb73a28953d42cc43b3a964caf2d9768f0e323d90ef077c",
+        "byteCount": 5190,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/TraceCacheIOTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/TraceCacheMaintenanceReadyEntryTests.swift",
+        "sha256": "4ed3d076021274e9474440aa762507e9e1a2e469ae28074782a0a8e229135757",
+        "byteCount": 9232,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/TraceCacheMaintenanceReadyEntryTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceIntegrationTests/TraceCacheMetadataDecodingTests.swift",
+        "sha256": "29c29f5f8113d9f85c386aad300e135ea2596d87825e41c424148adb02ce05d2",
+        "byteCount": 5715,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceIntegrationTests/TraceCacheMetadataDecodingTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceParser/TraceStreamerManifest.swift",
+        "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866",
+        "byteCount": 11624,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceParser/TraceStreamerManifest.swift"
+      },
+      {
+        "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
+        "sha256": "afa5fb19a7dbd4730a280f01671d0edc541cb3795e71304a15d593c4fb9279b9",
+        "byteCount": 79365,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceParser/TraceStreamerProcessParser.swift"
+      },
+      {
+        "path": "Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
+        "sha256": "5d58e6a308ad39286c2e112c0b9ac95998c21d61cd5ba67848d5fdb1bba4e36f",
+        "byteCount": 2941,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceParser/TraceStreamerProgressScanner.swift"
+      },
+      {
+        "path": "Tests/ArkTraceParserTests/TraceStreamerIdentityTests.swift",
+        "sha256": "5411f066ebd7043e10765c14c75670fdd0d68a1a5df1397ec2307849ead8c08b",
+        "byteCount": 73844,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceParserTests/TraceStreamerIdentityTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceParserTests/TraceStreamerProgressScannerTests.swift",
+        "sha256": "49672afae3d7df9bfd5a8ae4c582e743aadd3e9aa0dfbca5ad9bbd2e1723de2e",
+        "byteCount": 3360,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceParserTests/TraceStreamerProgressScannerTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+        "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+        "byteCount": 6210,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRendering/TimelineAnnotations.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+        "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+        "byteCount": 29018,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRendering/TimelineColorPalette.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+        "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+        "byteCount": 8131,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRendering/TimelineGeometry.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+        "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+        "byteCount": 24339,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRendering/TimelineModels.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+        "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+        "byteCount": 101313,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRendering/TimelineNSView.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+        "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+        "byteCount": 40541,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRendering/TimelineSnapshotLoader.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
+        "sha256": "69e3a947d72e976d21e1df0b12df32c77e5180772cf148c2f34903f9b9f5a7df",
+        "byteCount": 9931,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineDensitySelectionTests.swift",
+        "sha256": "07fe2fbfef0f3a05ffa4236f7174975b30fc49c70399ca91f02d94be4f0e3e81",
+        "byteCount": 19303,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineDensitySelectionTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift",
+        "sha256": "1443963da1fb39d43cfed7e621f96ede91afbd8aefb283e4955a585f2ae4d5cc",
+        "byteCount": 3386,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineFlagSelectionTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineFrameLaneTests.swift",
+        "sha256": "2568a184ab2c8d46a777933efa99d069dee9b250e559ea93cd44848ad75c00ec",
+        "byteCount": 5608,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineFrameLaneTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineHoverTests.swift",
+        "sha256": "0027fd7f0ffa8597119b1d2567c12ae61cc76945df212b390fb09e91887c9db2",
+        "byteCount": 7516,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineHoverTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift",
+        "sha256": "e274318c1dd87beec0cb802eeb09e14a394b10f9c3cc4ab26d1ced96f14e0cc3",
+        "byteCount": 10854,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelinePaletteTests.swift",
+        "sha256": "67241e0022c4defa7052cf484c9419af59f9c133b7afe2858de76f38cd1c3b05",
+        "byteCount": 17740,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelinePaletteTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelinePointerGestureTests.swift",
+        "sha256": "f56c091781571be1c479567209d05584a8fbc38baa71fe79e3bf6822721ff771",
+        "byteCount": 21205,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelinePointerGestureTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "sha256": "6a76e3993b57623e2f7ba93c05a2e51edb868772288f6092dceeffc1d34532e9",
+        "byteCount": 108917,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineTimeLabelFormatTests.swift",
+        "sha256": "0222bf15c130326db8215ab76e9a6a1145522a8e2a744a2080cad1a495b86ebc",
+        "byteCount": 2477,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRenderingTests/TimelineTimeLabelFormatTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRuntime/BoundedSnapshotReader.swift",
+        "sha256": "8e5da37961111f86f12b77baac397e05e19feb9ad31e8c9e1294349de8bed23f",
+        "byteCount": 1309,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRuntime/BoundedSnapshotReader.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRuntime/TraceCache.swift",
+        "sha256": "a399ba16153fe9c906c407ffcdbe722d7e132194d1a7de749a1f17f1ea2cda81",
+        "byteCount": 145556,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRuntime/TraceCache.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRuntime/TraceSession.swift",
+        "sha256": "f224f67738fad58dc87e0b4baa05fa510677c891b5c657e9b2ebecfa1a16f4df",
+        "byteCount": 15360,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRuntime/TraceSession.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/BatchOwnership.swift",
+        "sha256": "5271862842122fb536388dd450d2333326b536c987795868c2d73ae5c0fd3ead",
+        "byteCount": 7468,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/BatchOwnership.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/BatchProofModel.swift",
+        "sha256": "64a227a27fc554057a3db9605517f78d68cdcb015858b2de3fda13401b7b2a5c",
+        "byteCount": 4141,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/BatchProofModel.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/CoreOwnership.swift",
+        "sha256": "787095d487d4f64cf9ad0071f3c32e7cabb4ba87b1a851614d6440e67fe56ba0",
+        "byteCount": 10662,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/CoreOwnership.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/DeadlineOwnership.swift",
+        "sha256": "c8d17e3f8c275d6f2932145fd560f8c8defc99df7474b7d09da6c16fac8e2d59",
+        "byteCount": 9862,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/DeadlineOwnership.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/DeadlineProofModel.swift",
+        "sha256": "ae61f92fd270ed436ef679031d61d3e98384230f39105e41aed53fc8f154b855",
+        "byteCount": 3332,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/DeadlineProofModel.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/DensityOwnership.swift",
+        "sha256": "ef739b0831b0f88337e1002939787e43be1734ff0c55f63149f6a53e3288b0f6",
+        "byteCount": 6797,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/DensityOwnership.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/DensityProofModel.swift",
+        "sha256": "3289a210e9ae9160422e4300ade890d6f1d2d39b05a16502beb18de9f1dfc2c2",
+        "byteCount": 1790,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/DensityProofModel.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/EventOwnership.swift",
+        "sha256": "c2739008bed910b401d80a3a927982a3307539b1aeb137dd5c50e8db4ef82dec",
+        "byteCount": 7808,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/EventOwnership.swift"
+      },
+      {
+        "path": "scripts/swift-sdk-core/EventProofModel.swift",
+        "sha256": "5f3a92f50f03fd96a04d5eb2f02733d51992fb3127c2c401ecd66a46169ffdd0",
+        "byteCount": 2730,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/scripts/swift-sdk-core/EventProofModel.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "sha256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18",
+        "byteCount": 403,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "sha256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050",
+        "byteCount": 1907,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "sha256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848",
+        "byteCount": 511,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustAnalysisScope.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "sha256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493",
+        "byteCount": 334,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustArgumentQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustBatchDeadlines.swift",
+        "sha256": "f4d4af5d2300db52a6c848d4d551b3216ee23b7f71c5b156f3808918a19e08a3",
+        "byteCount": 2836,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustBatchDeadlines.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustBatchDecoder.swift",
+        "sha256": "79d969fd86591bc2bf6f5113e8d1c005a3e58065f0323d114b035220e2a38577",
+        "byteCount": 10190,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustBatchDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "sha256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298",
+        "byteCount": 1002,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustBatchQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustBatchResult.swift",
+        "sha256": "78145f51fac07bc937e33d67abcd3fe468917adb12847b3d0145a6692b9097f3",
+        "byteCount": 1594,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustBatchResult.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "sha256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8",
+        "byteCount": 636,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCPUQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "sha256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126",
+        "byteCount": 324,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCacheKey.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "sha256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4",
+        "byteCount": 619,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCacheMetadata.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "sha256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307",
+        "byteCount": 1255,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCleanup.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "sha256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214",
+        "byteCount": 560,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCleanupFailure.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "sha256": "3f96f5fb24ab4c751d4772aca45c84dd118e5ffb531e610b9afe1f0d35db10d5",
+        "byteCount": 8970,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustColdDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "sha256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5",
+        "byteCount": 1986,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustConfiguration.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCoreBatchMaterialization.swift",
+        "sha256": "ddc81af2cb5de8c965e82b280dc1da1ec242a8ce3b859e09db2ac8449dce72d0",
+        "byteCount": 1379,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCoreBatchMaterialization.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCoreBatchQuery.swift",
+        "sha256": "9716b4cd61cacee6ab338d3468d35459eb09bb7cc0e85dd63e60376d5e2aae26",
+        "byteCount": 4115,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCoreBatchQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCoreDensityMaterialization.swift",
+        "sha256": "498cb553fcf7f1c0f311f80e4f028b7e8f228997b531c00457bc0b2182e57ce5",
+        "byteCount": 1437,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCoreDensityMaterialization.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCoreEventMaterialization.swift",
+        "sha256": "859c20e65c56911485738c9685b4a12f7a1dd5ad97c16364a7bfb8e4af74f4f7",
+        "byteCount": 8480,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCoreEventMaterialization.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCoreMaterialization.swift",
+        "sha256": "86292842178aa5e6107be5b301661e2e3dfe59a9ae62d957c00b6f5285c3f7a1",
+        "byteCount": 6033,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCoreMaterialization.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "sha256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309",
+        "byteCount": 951,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCounterQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "sha256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e",
+        "byteCount": 97,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCounterScope.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "sha256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23",
+        "byteCount": 349,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "sha256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1",
+        "byteCount": 136,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustCounterTable.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "sha256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8",
+        "byteCount": 612,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDataQuality.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "sha256": "0818dcba3c867ffe4b3a5baad2fc90c4722cb828c0af1c2df85196cc457265d0",
+        "byteCount": 1159,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDecodeCopies.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensityDecoder.swift",
+        "sha256": "c38febd053b8cfcbed3cbe87b541853f7d1f1b4726dcc85d999122866230dabc",
+        "byteCount": 5125,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDensityDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "sha256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd",
+        "byteCount": 376,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDensityQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensityResult.swift",
+        "sha256": "21eb24a61db6cb7557591dc9627823956d1b66a95ed5905f44f7cc47c2b2849e",
+        "byteCount": 2429,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDensityResult.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "sha256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8",
+        "byteCount": 332,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDensitySource.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "sha256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72",
+        "byteCount": 351,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDetailQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "sha256": "25e5314657213785bb712af29e10a4f868207015f0a1b46b4c484c6be91c4d84",
+        "byteCount": 6176,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "sha256": "056313e7cd376b94c08440344397452e99f382b8b4cbfaa44005ea8af652cba4",
+        "byteCount": 5880,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustDirectoryPages.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "sha256": "b14427b561938a17712632e6730b0f31ba01341d125f69cf129787f4217e9de9",
+        "byteCount": 17009,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustEngine.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustError.swift",
+        "sha256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9",
+        "byteCount": 1250,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustError.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEventDecoder.swift",
+        "sha256": "e3744e65101e1f4168f9fa8c29b39902e23c0816343b1a7f0f3c4993e58d8985",
+        "byteCount": 6872,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustEventDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEventPages.swift",
+        "sha256": "95f641bebe913a954f17c125ccc518c63b5ceacce0ae0e9f635ae202bfe0db57",
+        "byteCount": 3377,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustEventPages.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEventRecordDecoding.swift",
+        "sha256": "4445b86249b0867dc316aee33c11870e8e3ef3b3fda24ed23193e2279f7054fb",
+        "byteCount": 11257,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustEventRecordDecoding.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEventRecords.swift",
+        "sha256": "f68109558fc5b35a9fe66f34ca85508b1342f3e509f656ebc72495a30d0d2080",
+        "byteCount": 9506,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustEventRecords.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "sha256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b",
+        "byteCount": 438,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustFrameQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "sha256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c",
+        "byteCount": 492,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustInspection.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "sha256": "eb3c32466599ed171d793ae745e68e0a411e0d10a5d2ed4249920406d75380c9",
+        "byteCount": 7978,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustJSONShape.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "sha256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f",
+        "byteCount": 315,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "sha256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264",
+        "byteCount": 105,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustNameMatch.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "sha256": "4c8d636cf20bc88a32036624452e575d79b055677a579678bdfc5bae059024e9",
+        "byteCount": 12936,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustOpenDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "sha256": "2d14c0f8fc2f1f0a73828ddb544e79a79df22f75c0e3ad1681921bd2f14ec8c5",
+        "byteCount": 692,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustOpenResult.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "sha256": "53a722a0e5c4565405ee2e93ac38a9563784e1326b4c6edd42d7997c6a957722",
+        "byteCount": 8018,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustOpenView.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "sha256": "a7eb275ecccf824e24cfd084b8e6a4d91a3aed216251d3f89aaa6fa5549201f8",
+        "byteCount": 1732,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustOwnedText.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "sha256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75",
+        "byteCount": 607,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustProcessQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "sha256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123",
+        "byteCount": 635,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustQualityEncoding.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "sha256": "e52005a8f74343e01a3759049ff78374a960bc68369acfeb9a69a7283257c3f1",
+        "byteCount": 2799,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustRequest.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "sha256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39",
+        "byteCount": 367,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustResolutionQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustResult.swift",
+        "sha256": "9aca17900329e60c83be9e2dd7c5f8c9fd3f37c9e92940bfef9ec0041fea2381",
+        "byteCount": 7651,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustResult.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "sha256": "4e0488052bf023c7c4e66fe9a85e564e404e9b419543c8dc36ba7e07cee9f56c",
+        "byteCount": 2535,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustRetainedStorage.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "sha256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7",
+        "byteCount": 1237,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustRetry.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "sha256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7",
+        "byteCount": 400,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSearchQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSession.swift",
+        "sha256": "90c665f308f0b1e54f6cf3c44942efd8926d93b3b55529ce51dc0e3a043d37b6",
+        "byteCount": 8861,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSession.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "sha256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce",
+        "byteCount": 1401,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSliceQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "sha256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2",
+        "byteCount": 2881,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSnapshot.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "sha256": "4672fc812c0f530dd6708c1d6510240eb89324a42df2fd58220f5254726b1a02",
+        "byteCount": 6500,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "sha256": "6ea0eea71ddff4252bfaae4e88141ef4a7f5c176c9cbca5f9d25a4b73c66a4fe",
+        "byteCount": 677,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSummaryQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "sha256": "5d496b5b99815fd295cf99c34ddf55d87c82751b9abd704411beeee97e572233",
+        "byteCount": 4275,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustSummaryView.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "sha256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805",
+        "byteCount": 768,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustThreadQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "sha256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3",
+        "byteCount": 934,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "sha256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979",
+        "byteCount": 2104,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceRustRuntime/RustViewportQuery.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/BatchDeadlineTests.swift",
+        "sha256": "b6660616389f7a0b70ec6e7e7833891e4b979c3e086b3d2385a190c30a1cfb54",
+        "byteCount": 6645,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/BatchDeadlineTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/BatchResultTests.swift",
+        "sha256": "7d05fff07142e3f81dd18d1464fc9c4972ece70858f7acd2b7ae698ef3dcc1f9",
+        "byteCount": 12558,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/BatchResultTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/CoreMaterializationTests.swift",
+        "sha256": "fabed5bef5406808d2fee1886696472994f24d148695ad980248c770b6e9c596",
+        "byteCount": 10305,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/CoreMaterializationTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/DensityResultTests.swift",
+        "sha256": "99aaa1c59d4ec34523ab53a4d62d540bc8c71cdd68d91e64af172722a1b755c1",
+        "byteCount": 10691,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/DensityResultTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift",
+        "sha256": "47b2b7eae033cfa8f6d1cf9b7bec1b76dbf562bd610afc03e66db78c5403b0fa",
+        "byteCount": 15542,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/EventPageTests.swift",
+        "sha256": "65fe37a2ec848e262a46c4f5838dca8b141487582f1e0b8a00b83283361e1e35",
+        "byteCount": 15459,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/EventPageTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/JSONShapeTests.swift",
+        "sha256": "087ecfae50968c0da875d0459e6b396390d39ca77935a28c476e931b7d9da69d",
+        "byteCount": 1781,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/JSONShapeTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/OpenViewTests.swift",
+        "sha256": "d2fc48daeccc54d28b153bcc9187c90b22992db9c2980baa62fb11fa0707b124",
+        "byteCount": 12175,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/OpenViewTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/RetainedStorageTests.swift",
+        "sha256": "a93c04f28f7d916d68064de08154af38beed4cbba293323ceff9b1df7dd98c01",
+        "byteCount": 4076,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/RetainedStorageTests.swift"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift",
+        "sha256": "7a5b3b16ed30129aa06a7abc6f1b80689ebaa56be0d2a897a39e9e2f683a71be",
+        "byteCount": 13150,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift"
+      },
+      {
+        "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+        "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
+        "byteCount": 160666,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceStore/SQLiteTraceRepository.swift"
+      },
+      {
+        "path": "Sources/ArkTraceStore/TraceDatabase.swift",
+        "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631",
+        "byteCount": 29935,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceStore/TraceDatabase.swift"
+      },
+      {
+        "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+        "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
+        "byteCount": 32838,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift"
+      },
+      {
+        "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
+        "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8",
+        "byteCount": 3269,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceStore/TraceEventIntersection.swift"
+      },
+      {
+        "path": "Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+        "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193",
+        "byteCount": 49595,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/ArkTraceStore/TraceSchemaAdapter.swift"
+      },
+      {
+        "path": "Tests/ArkTraceStoreTests/RepositoryTests.swift",
+        "sha256": "0c2727b4ef2fe01e032246685d0b77de11a85e3a026f946670bce57a57acb284",
+        "byteCount": 200017,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Tests/ArkTraceStoreTests/RepositoryTests.swift"
+      },
+      {
+        "path": "Sources/arktrace/ArkTraceMain.swift",
+        "sha256": "dd46445a1de813b96990cfb985ec6cac0faa1d11f141194f4769b8813a04cbb0",
+        "byteCount": 1886,
+        "frozenPath": ".build/agent-coordination/arktrace/deadline-sdk-20261004/completed-sdk-inputs/inputs/cache/workspace/Sources/arktrace/ArkTraceMain.swift"
+      }
+    ],
+    "nativeFrozenCount": 448,
+    "allCurrentRootMatches": true
+  },
+  "counts": {
+    "rustTests": 471,
+    "sdkTests": 68,
+    "defaultSwiftTests": 605,
+    "defaultSwiftExistingOptInSkips": 6,
+    "actualOriginalBatchRequests": 11,
+    "actualOriginalPlannedSlots": 49,
+    "nativeBatchCalls": 22,
+    "nativePlannedSlots": 98,
+    "successfulPlans": 6,
+    "timedOutPlans": 5,
+    "sdkOwnersHeldThroughShutdown": 6,
+    "sdkRetainedCredits": 39872,
+    "finalOwners": 0,
+    "finalBytes": 0,
+    "finalStaging": 0,
+    "finalNativeResults": 0
+  },
+  "actualSDKFileLists": [
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceAnalysis-t.build/Objects-normal/arm64/ArkTraceAnalysis.SwiftFileList",
+      "sha256": "2bdc379f48a0a4c83eb0eb3d003955dd0b5e061aebdaff95622536bbc25f0f33"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceAnalysisTests-p.build/Objects-normal/arm64/ArkTraceAnalysisTests.SwiftFileList",
+      "sha256": "a617989ca34e7677f690cbe0ff16c99e7332b0f812a2e767c79e987b0322e8f9"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceAppSupport-t.build/Objects-normal/arm64/ArkTraceAppSupport.SwiftFileList",
+      "sha256": "b96170fbfcab39916e18859f60d9cb2a26f6424f3a8f9d0d8b611c7e3a945f45"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceAppSupportTests-p.build/Objects-normal/arm64/ArkTraceAppSupportTests.SwiftFileList",
+      "sha256": "a32f066db7efc350235275ec378694b85b07a4d72828dc1198e403f2b3d91350"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCLI-t.build/Objects-normal/arm64/ArkTraceCLI.SwiftFileList",
+      "sha256": "03ecbaa27b979ae6bcfc4cf28b363dee1209b5c0b6fb6b40a41f670f37020b0d"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCLIResourceFixtures-t.build/Objects-normal/arm64/ArkTraceCLIResourceFixtures.SwiftFileList",
+      "sha256": "c411f5aa2c09beb2653d70c9ad2f1a7c35b453b618446b2ffaaffc7452fb7ada"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCLITests-p.build/Objects-normal/arm64/ArkTraceCLITests.SwiftFileList",
+      "sha256": "d282674877e876ab051057aba89c03ec4d13f52818169fea4c1525ce1f53b033"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCapture-t.build/Objects-normal/arm64/ArkTraceCapture.SwiftFileList",
+      "sha256": "636cd9954916f29e120d72261e75c329bbf5ffcd515547138ecfa0c2a1509947"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCaptureTests-p.build/Objects-normal/arm64/ArkTraceCaptureTests.SwiftFileList",
+      "sha256": "d5be0409c376fbc712300f9f0fda0f7fdad0089072903b6b8d9417a9f43b698a"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCore-t.build/Objects-normal/arm64/ArkTraceCore.SwiftFileList",
+      "sha256": "d876a3df6ee360f3563c58d8cb21e984d282a7cc285b825b98b19ed8345be9e5"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceCoreTests-p.build/Objects-normal/arm64/ArkTraceCoreTests.SwiftFileList",
+      "sha256": "19be6d59b50704c0b5ab8948c92ea30f1a2d35a05f135880f2c997de80de9a9e"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceIntegrationTests-p.build/Objects-normal/arm64/ArkTraceIntegrationTests.SwiftFileList",
+      "sha256": "79d2b2a6a3eaa8d10491ab7a6b2f0025d2a52972086aa168de0cac97f3ddc6cd"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceParser-t.build/Objects-normal/arm64/ArkTraceParser.SwiftFileList",
+      "sha256": "515d9035836698a3d4a6a94e3306191800c71053412e72521f25998d680c3c20"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceParserTests-p.build/Objects-normal/arm64/ArkTraceParserTests.SwiftFileList",
+      "sha256": "514a807f0eb63af084121fd201f0cd91ab5c96f6b53f4c28858c75728e9e96bc"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRendering-t.build/Objects-normal/arm64/ArkTraceRendering.SwiftFileList",
+      "sha256": "672395bb918d539533c3958d397648bcb5262c02882d98573c4b4e3839464ef5"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRenderingTests-p.build/Objects-normal/arm64/ArkTraceRenderingTests.SwiftFileList",
+      "sha256": "91f7432809fe54c0fb809e6da5ee2e29300447d80d5b10ce56eff504cc81844f"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRuntime-t.build/Objects-normal/arm64/ArkTraceRuntime.SwiftFileList",
+      "sha256": "12a22c4400b9ff9fe1d68d1292568e68ebb4c6c1ffe7ceced995556ab63d8b0a"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRustCoreConformance-p.build/Objects-normal/arm64/ArkTraceRustCoreConformance.SwiftFileList",
+      "sha256": "bd991a5c9faae06948ef31aecc4d5c7267eee4f2eac1881c9483461559d4d9cd"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRustRuntime-t.build/Objects-normal/arm64/ArkTraceRustRuntime.SwiftFileList",
+      "sha256": "268daa57425d9ea36dd049714a85b35e4870f5eb10b16972ebdbf673d9f09cc4"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRustRuntimeTests-p.build/Objects-normal/arm64/ArkTraceRustRuntimeTests.SwiftFileList",
+      "sha256": "f56e9e134dcc82abc4bb3a472cac64845cace46354dee46ec7d163380d5cc8b3"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceStore-t.build/Objects-normal/arm64/ArkTraceStore.SwiftFileList",
+      "sha256": "356bb788ab7a224029744d37c712cc9298f8e26fa0b1419142365f92c9b9f189"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceStoreTests-p.build/Objects-normal/arm64/ArkTraceStoreTests.SwiftFileList",
+      "sha256": "916e6a137ed9c31dfbd094ba3a38b6a5948dcb80a09ace2c540db03ca8e56e26"
+    },
+    {
+      "path": "<private-tmp>/arktrace-deadline-real-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/arktrace-p.build/Objects-normal/arm64/arktrace.SwiftFileList",
+      "sha256": "1909bba39c44b86bea062f7de92041ca902d4334f4a009c67d4a7b1d877ccfc6"
+    }
+  ],
+  "failures": [
+    {
+      "scope": "First independent reference compile",
+      "result": "Failed: default initialization shared a Swift multi-variable type annotation; corrected each array declaration",
+      "inputFreeze": "19 reference FileLists / 126 source rows and full failed log retained"
+    },
+    {
+      "scope": "Second SDK consumer compile",
+      "result": "Failed: package helper initializer/fields were internal; package visibility fixed and third/fourth full consumer passed",
+      "inputFreeze": "Reference receipt/log/binary retained; SDK freezer stopped at planned missing generated test_entry_point.swift before full input freeze, cache later reused; complete failed SDK compiler-input closure is not claimed"
+    },
+    {
+      "scope": "Third actual native producer",
+      "result": "Passed with prior database-row check; before final delivery row checks narrowed to budget+deadline to preserve existing file-validation frequency; fourth actual producer plus rebuilt native archives/tests passed"
+    }
+  ],
+  "privateEvidence": {
+    "directory": ".build/agent-coordination/arktrace/deadline-sdk-20261004",
+    "finalNative": "final-native-inputs",
+    "finalSDK": "completed-sdk-inputs",
+    "finalReference": "completed-reference-inputs",
+    "finalProductionSDK": "completed-production-sdk-inputs",
+    "finalExternal": "completed-external-positive-inputs",
+    "finalExecutablesAndLogs": "completed-producer-outputs",
+    "finalGateLogs": "completed-gates",
+    "ownedReadyRetained": false,
+    "originalOracleArgvAndExit": true,
+    "hostHelperParserTransientArgvCaptured": false
+  },
+  "limitations": [
+    "Controlled opening copies immutable Ready produced earlier from a real systrace; no fresh original trace parse in this slice.",
+    "Real nonempty CPU/thread-state/thread/density pages; slice/counter/series are unavailable here, so this run proves their deadline timing, not nonempty payloads.",
+    "Per-query nil thread means no slot deadline; separate explicit SDK whole-operation timeout remains default 30000 ms, maximum 300000 ms. Full Core repository timeout policy still requires its own integration decision.",
+    "No shared Rust Core repository/default App cutover or complete 012/013/macOS acceptance.",
+    "No fresh signed release, medium/large performance, global allocator/RSS, Windows SDK/C#, or ArkDeck end-to-end acceptance in this slice.",
+    "Final new commit CI has not run at report creation; prior commit CI does not certify this diff."
+  ],
+  "preDeliveryCI": {
+    "headSha": "d8e0a49d54efb45cf1716301241aef5fd5c557aa",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37210340024",
+    "jobs": [
+      {
+        "name": "Plan lanes",
+        "conclusion": "success"
+      },
+      {
+        "name": "Medium benchmark (slow lane)",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Offline release gates",
+        "conclusion": "success"
+      },
+      {
+        "name": "SwiftPM build, test and skip audit",
+        "conclusion": "success"
+      },
+      {
+        "name": "App build and bundle checks",
+        "conclusion": "success"
+      },
+      {
+        "name": "Rust macOS native",
+        "conclusion": "success"
+      },
+      {
+        "name": "Rust Windows native",
+        "conclusion": "success"
+      },
+      {
+        "name": "CI required",
+        "conclusion": "success"
+      }
+    ],
+    "appActualBuildAndDocumentSteps": "skipped; current local unsigned App build/document verification passed separately"
+  },
+  "goalStatus": "active",
+  "macOSAcceptanceComplete": false
+}

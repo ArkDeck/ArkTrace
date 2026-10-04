@@ -88,6 +88,16 @@ public final class RustSession: Sendable {
         let result = try await engine.query(handle, request: .batchDetails(query), timeoutMilliseconds: timeoutMilliseconds)
         return try await result.batchResult(identity: RustSessionIdentity(engine: engine.identity, session: handle), query: query)
     }
+    /// Absolute same-host epochs retain precision through encoding, admission
+    /// retries and queueing. Completed slots are never checked again against
+    /// another slot's deadline. A nil thread deadline adds no query timeout.
+    public func eventBatch(_ query: RustBatchQuery, deadlines: RustBatchDeadlines,
+                           timeoutMilliseconds: UInt32 = 30_000) async throws -> RustBatchResult {
+        let wire = try RustWireBatchDeadlines(deadlines, query: query)
+        let result = try await engine.query(handle, request: .batchDetailsWithDeadlines(RustWireDeadlineBatch(batch: query, deadlines: wire)),
+            timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.batchResult(identity: RustSessionIdentity(engine: engine.identity, session: handle), query: query)
+    }
     deinit {
         let engine = engine, handle = handle
         RustCleanup.schedule { try await engine.closeSession(handle) }

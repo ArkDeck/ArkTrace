@@ -54,6 +54,7 @@ pub(crate) struct Database<'a> {
     budget: &'a ValidationBudget,
     resources: Option<Arc<crate::query_resources::QueryResources>>,
     vm_work: Option<Arc<crate::query_resources::VmWork>>,
+    query_deadline: Option<arktrace_platform::ContinuousDeadline>,
     #[cfg(target_os = "macos")]
     writable: Option<Arc<arktrace_platform::WritableFile>>,
 }
@@ -133,6 +134,7 @@ impl<'a> Database<'a> {
             budget,
             resources: None,
             vm_work: None,
+            query_deadline: None,
             #[cfg(target_os = "macos")]
             writable: None,
         };
@@ -249,6 +251,7 @@ impl<'a> Database<'a> {
             budget,
             resources: None,
             vm_work: None,
+            query_deadline: None,
             #[cfg(target_os = "macos")]
             writable: self.writable.clone(),
         }
@@ -282,8 +285,18 @@ impl<'a> Database<'a> {
         self.check()
     }
 
-    pub(crate) fn check(&self) -> Result<(), StoreError> {
+    fn check_deadline(&self) -> Result<(), StoreError> {
         self.budget.check()?;
+        #[cfg(target_os = "macos")]
+        if let Some(deadline) = self.query_deadline
+            && deadline.expired()?
+        {
+            return Err(StoreError::DeadlineExceeded);
+        }
+        Ok(())
+    }
+    pub(crate) fn check(&self) -> Result<(), StoreError> {
+        self.check_deadline()?;
         if let Some(resources) = &self.resources {
             resources.check()?;
         }
@@ -292,6 +305,14 @@ impl<'a> Database<'a> {
             file.verify_sqlite_connection(&self.connection, &self.io_budget())?;
         }
         Ok(())
+    }
+    #[cfg(target_os = "macos")]
+    pub(crate) fn with_query_deadline(
+        mut self,
+        deadline: Option<arktrace_platform::ContinuousDeadline>,
+    ) -> Self {
+        self.query_deadline = deadline;
+        self
     }
     pub(crate) fn with_resources(
         mut self,
@@ -314,9 +335,14 @@ impl<'a> Database<'a> {
                 crate::ReadPoolLimits::default(),
             )?)),
             vm_work: Some(Arc::new(crate::query_resources::VmWork::new(steps))),
+            query_deadline: self.query_deadline,
             #[cfg(target_os = "macos")]
             writable: self.writable.clone(),
         })
+    }
+    #[cfg(all(test, target_os = "macos"))]
+    pub(crate) fn remaining_vm_work_for_test(&self) -> u64 {
+        self.vm_work.as_ref().unwrap().remaining_for_test()
     }
     #[cfg(target_os = "macos")]
     pub(crate) fn bind_writable(
@@ -386,6 +412,8 @@ impl<'a> Database<'a> {
         let charged = self.vm_work.as_ref().map(|_| Arc::new(AtomicU64::new(0)));
         let callback_charged = charged.clone();
         let deadline = self.budget.deadline;
+        #[cfg(target_os = "macos")]
+        let query_deadline = self.query_deadline;
         let mut callbacks = vm_budget.div_ceil(PROGRESS_INTERVAL as u64);
         #[cfg(target_os = "macos")]
         let file = self.writable.clone();
@@ -400,12 +428,27 @@ impl<'a> Database<'a> {
             .progress_handler(
                 PROGRESS_INTERVAL,
                 Some(move || {
+                    #[cfg(target_os = "macos")]
+                    let continuous_reason =
+                        match query_deadline.map(|value| value.expired()).transpose() {
+                            Ok(Some(true)) => 2,
+                            Ok(_) => 0,
+                            Err(error) => {
+                                *callback_error.lock().unwrap_or_else(|p| p.into_inner()) =
+                                    Some(error);
+                                4
+                            }
+                        };
+                    #[cfg(not(target_os = "macos"))]
+                    let continuous_reason = 0;
                     let why = if cancellation.is_cancelled()
                         || resources.as_ref().is_some_and(|r| r.abort.is_cancelled())
                     {
                         1
                     } else if Instant::now() >= deadline {
                         2
+                    } else if continuous_reason != 0 {
+                        continuous_reason
                     } else if callbacks <= 1
                         || vm_work
                             .as_ref()
@@ -448,7 +491,7 @@ impl<'a> Database<'a> {
                 let mut rows = statement.query(params).map_err(sqlite_error)?;
                 let mut result = Vec::new();
                 while let Some(row) = rows.next().map_err(sqlite_error)? {
-                    self.budget.check()?;
+                    self.check_deadline()?;
                     if result.len() == maximum_rows {
                         return Err(StoreError::SchemaBudgetExceeded);
                     }

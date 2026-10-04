@@ -12,6 +12,7 @@ private struct Input: Decodable, Sendable {
     let densityOracle: String?
     let densityReadyCopy: String?
     let batchOracle: String?
+    let deadlineOracle: String?
 }
 private struct Response: Codable, Sendable { let id, nativeBodyUTF8, coreBodyUTF8, afterShutdownCoreBodyUTF8: String }
 private struct UnsortedOrderProbe: Codable, Sendable { let beforeUTF8, afterUTF8: String; let sameJSONValue: Bool }
@@ -19,6 +20,7 @@ private struct Report: Codable, Sendable {
     let eventProof: EventProofReport?
     let densityProof: DensityProofReport?
     let batchProof: BatchProofReport?
+    let deadlineProof: DeadlineProofReport?
     let unsortedOrderProbes: [UnsortedOrderProbe]
     let metadata: TraceMetadata
     let afterShutdownMetadata: TraceMetadata
@@ -128,6 +130,9 @@ private struct Report: Codable, Sendable {
         var batchProof: BatchHeldProof? = if let oracle = input.batchOracle {
             try await BatchHeldProof.prepare(session: session!, namespace: input.namespace, oracle: oracle, metadata: metadata)
         } else { nil }
+        var deadlineProof: DeadlineHeldProof? = if let oracle = input.deadlineOracle {
+            try await DeadlineHeldProof.prepare(session: session!, namespace: input.namespace, oracle: oracle, metadata: metadata)
+        } else { nil }
         let countsBeforeShutdown = RustEngine.developmentColdStorageCounts()
         precondition(countsBeforeShutdown.stagingBytes == 0 && countsBeforeShutdown.stagingOwners == 0)
         try await session!.close(); session = nil; try await RustCleanup.flush()
@@ -139,6 +144,8 @@ private struct Report: Codable, Sendable {
         densityProof = nil
         let batchReport = try await batchProof?.finish()
         batchProof = nil
+        let deadlineReport = try await deadlineProof?.finish()
+        deadlineProof = nil
         let counters = RustEngine.developmentColdStorageCounts()
         precondition(counters.bytes == 0 && counters.owners == 0 && counters.stagingBytes == 0 && counters.stagingOwners == 0)
         var responses: [Response] = [], probes: [UnsortedOrderProbe] = []
@@ -151,7 +158,7 @@ private struct Report: Codable, Sendable {
         }
         let after = try await roundTrip(metadata)
         precondition(after.dataQuality == metadata.dataQuality)
-        try await emit(Report(eventProof: eventReport, densityProof: densityReport, batchProof: batchReport, unsortedOrderProbes: probes, metadata: metadata, afterShutdownMetadata: after, responses: responses, processPages: 2, threadPages: 2,
+        try await emit(Report(eventProof: eventReport, densityProof: densityReport, batchProof: batchReport, deadlineProof: deadlineReport, unsortedOrderProbes: probes, metadata: metadata, afterShutdownMetadata: after, responses: responses, processPages: 2, threadPages: 2,
             directoryRecordsCompared: count, copiedCallerDTOsSurviveShutdown: true, storageBytesAfterCopies: counters.bytes,
             storageOwnersAfterCopies: counters.owners, stagingBytesAfterCopies: counters.stagingBytes, stagingOwnersAfterCopies: counters.stagingOwners,
             nativeBytesBeforeShutdown: nativeBytes))
