@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "scope": "Preserve exact oracle source bytes across LF/CRLF Git checkouts",
+  "baseRevision": "817b33d39a9b7211039472ee80f076edd2dadc18",
+  "observedNativeFailure": {
+    "runId": 37184735814,
+    "jobId": 111384309352,
+    "step": "Format, architecture, licenses and contract checks",
+    "failedFile": "README.md",
+    "nativeWindowsBuildTests": "skipped-after-verifier-failure",
+    "rawLog": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/viewer-facts-mainline-20261004/ci-windows-failure-37184735814.log",
+      "byteCount": 28034,
+      "sha256": "574c2da8a4f5a5451070138db466bd92ee29fb0d222a4e1e1d7de58a4fb05d18"
+    }
+  },
+  "checkoutBefore": {
+    "mode": "before",
+    "scope": "Actual Git core.autocrlf=true checkout simulation on macOS; not native Windows product acceptance",
+    "mismatches": [
+      {
+        "path": "README.md",
+        "byteCount": 15600,
+        "sha256": "c1d973f2da0867509c7f3ca5ee3c66d386ef022bbbf522d0abb1d785433207ec"
+      },
+      {
+        "path": "README.zh-CN.md",
+        "byteCount": 15098,
+        "sha256": "9257a20b413d12aa635190840cbf098550bc1cef9a679d3ae4de52030edb3fce"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_lib_exports.patch",
+        "byteCount": 425,
+        "sha256": "b2a37060cf87c91ce164b6adf60b36820d852461ed578bd149b71541076c29e8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+        "byteCount": 1939,
+        "sha256": "08b78899c8a34412831a9c41421a53f21aa2d0113b5090cba7bb15673484dddf"
+      }
+    ],
+    "sourcePins": 152
+  },
+  "checkoutAfter": {
+    "mode": "after",
+    "scope": "Actual Git core.autocrlf=true checkout simulation on macOS; not native Windows product acceptance",
+    "mismatches": [],
+    "sourcePins": 152
+  },
+  "checks": [
+    {
+      "name": "actual Git checkout conversion",
+      "exitCode": 0,
+      "mode": "macOS core.autocrlf=true simulation; no native Windows product acceptance"
+    },
+    {
+      "name": "new regression on original attributes",
+      "expectedFailures": 1,
+      "errors": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/viewer-facts-mainline-20261004/eol-regression-before-fix.log",
+        "byteCount": 1117,
+        "sha256": "0c423f2e1852633a7974f9b6a31bf230817297f6e270b1798818e9ebb543bdbf"
+      }
+    },
+    {
+      "name": "new checkout regression + actual CP1252 whole verifier",
+      "producerExitCode": 0,
+      "passed": 2,
+      "log": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/viewer-facts-mainline-20261004/eol-regression-final.log",
+        "byteCount": 400,
+        "sha256": "5451fdb59680b2598ddeb7b58022180618c87a4115144f3002c6a92d7b807a51"
+      }
+    },
+    {
+      "name": "migration source/fixture verifier",
+      "producerExitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/viewer-facts-mainline-20261004/eol-migration.log",
+        "byteCount": 1319,
+        "sha256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983"
+      }
+    },
+    {
+      "name": "CI planner regressions",
+      "producerExitCode": 0,
+      "log": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/viewer-facts-mainline-20261004/eol-planner-tests.log",
+        "byteCount": 3660,
+        "sha256": "ed2d2bc7cacdb27b100dac792b29f6ccc4ae8c36a245ecf5227780cd05cd4f05"
+      }
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": ".gitattributes",
+      "byteCount": 541,
+      "sha256": "3b8dd9de276877ce8ae6ec23a2693817773f1393eae923f4e59bb0c518678953"
+    },
+    {
+      "path": "scripts/test_migration_contracts.py",
+      "byteCount": 2899,
+      "sha256": "90867d38b32cf1a73bdc1936e81d09f94d05837cd6ef7abd74d0f261210d004f"
+    },
+    {
+      "path": "scripts/verify_viewer_facts_oracles.py",
+      "byteCount": 3408,
+      "sha256": "18e3e6c08997a74112a60a2419ff49bab6bc0101e54c762b05fbd060e3ca8596"
+    },
+    {
+      "path": "README.md",
+      "byteCount": 15416,
+      "sha256": "7304be8e06d1851456b727f808e30932e5303a5a528226d278e26d8dfee7c442"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "byteCount": 14915,
+      "sha256": "24e5a032ff4b3b2d6ea86114e50c7d21737f650572cf458b5a0727acd3165cab"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_lib_exports.patch",
+      "byteCount": 407,
+      "sha256": "9abf3f8ea227a87f4724ee471df3fb126156335d3d5322bd58e3f6a8e7648ef6"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/snapshot_event_index_swift_logging.patch",
+      "byteCount": 1897,
+      "sha256": "8e615fda6fbe03f05f7b72ee9f9fcc4f8ed4c5ac89eb4929702e94549438ae3d"
+    }
+  ],
+  "initialHarnessLimitation": "Initial checkout-index reused existing stat-matched working files and did not perform conversion; zero mismatches from that attempt were not red evidence. Corrected runs removed files before checkout; original log/JSON preserved.",
+  "allFrozenSourceBytesPreserved": true,
+  "ciAfterCorrection": "not-yet-triggered",
+  "macOSAcceptanceComplete": false
+}
