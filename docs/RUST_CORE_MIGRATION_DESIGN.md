@@ -669,6 +669,10 @@ controllers 与 cache maintenance 使用；原 catalog/Rendering 通过 Core ada
 held-FD persistence 和 Rust hot snapshot 仍未切换；实际边界见
 [运行时接线记录](migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)。
 
+同日扩展名提示已与 Swift 原始大小写/nil 对等，新增 Session-held 只读 sidecar
+端口并验证原字节保留与有界读取；C ABI/SDK/controller 持久化写入尚未接通，
+不形成默认切换。见[读取增量记录](migration-runs/AT-RUST-008-012-2026-10-05-source-format-sidecar-read.md)。
+
 Rust 输出 immutable snapshot：viewport generation、logical dimensions、track/depth layout、
 event key、primitive bounds、LOD/density、color slot、label facts、truncation/quality。
 绘制与命中使用同一 snapshot；物理像素的最小宽度只改变 visual bounds，不改 domain time。

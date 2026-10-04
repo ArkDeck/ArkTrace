@@ -242,7 +242,7 @@ pub(super) fn lookup(
     tools: &ParserTools<'_>,
     _root: &HeldDirectory,
     owners: &OwnerStore,
-    _locks: &HeldDirectory,
+    locks: &HeldDirectory,
     leases: &HeldDirectory,
     hash_directory: &HeldDirectory,
     key: &TraceCacheKey,
@@ -349,7 +349,11 @@ pub(super) fn lookup(
     io.check().map_err(|e| host(EngineStage::CacheLookup, e))?;
     let inspection = reader.inspection().clone();
     let session = EngineSession {
-        storage: SessionStorage::Cached { directory, lease },
+        storage: SessionStorage::Cached {
+            directory,
+            lease,
+            locks: locks.clone(),
+        },
         cache_hit: true,
         database: Some(database),
         reader: Some(reader),

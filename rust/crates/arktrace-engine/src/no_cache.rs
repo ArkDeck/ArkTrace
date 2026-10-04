@@ -25,6 +25,7 @@ use std::{
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 mod persistent;
+mod view_state;
 mod viewer;
 pub use persistent::open_cached;
 
@@ -232,14 +233,20 @@ enum SessionStorage {
     Cached {
         directory: HeldDirectory,
         lease: Lease,
+        locks: HeldDirectory,
     },
 }
 impl SessionStorage {
     fn revalidate(&self) -> Result<(), HostError> {
         match self {
             Self::Ephemeral { lease, .. } => lease.revalidate(),
-            Self::Cached { directory, lease } => {
+            Self::Cached {
+                directory,
+                lease,
+                locks,
+            } => {
                 directory.revalidate()?;
+                locks.revalidate()?;
                 lease.revalidate()
             }
         }
@@ -895,7 +902,9 @@ impl EngineSession {
                     .finish_ephemeral_cleanup(lease, &budget)
                     .map_err(|_| failure(EngineStage::Closing, EngineFailure::CleanupFailed))
             }
-            SessionStorage::Cached { directory, lease } => {
+            SessionStorage::Cached {
+                directory, lease, ..
+            } => {
                 directory
                     .revalidate()
                     .map_err(|e| host(EngineStage::Closing, e))?;
@@ -2013,6 +2022,7 @@ fn open_store(
                 SessionStorage::Cached {
                     directory: published,
                     lease,
+                    locks: locks.clone(),
                 }
             }
         };

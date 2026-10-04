@@ -1,0 +1,786 @@
+{
+  "schemaVersion": 1,
+  "status": "Validated local increment; overall migration active",
+  "baseCommit": "aa24479718713a63e4f6ca6d6469d50e22ae7294",
+  "sourceFormatCommit": "9fbf6579f22457325ce97899cae4c05a6c01352b",
+  "toolchain": {
+    "rust": "1.99.0",
+    "rustVersionOutput": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "27.0",
+    "build": "27A266a",
+    "host": "macOS arm64"
+  },
+  "implementation": {
+    "sourceFormatHintPreservesRawExtensionOrNil": true,
+    "nativeSessionRetainsKeyLockParent": true,
+    "nativeHeldDirectoryReadOnlySidecar": true,
+    "readBounds": {
+      "maximumFileBytes": 4194304,
+      "maximumFlagsPlusMarks": 4096,
+      "maximumFavorites": 4096,
+      "maximumEachLabelOrFavoriteUTF8Bytes": 4096
+    },
+    "unknownOrOverBudgetBytesPreserved": true,
+    "writePortConnected": false,
+    "SDKSidecarTransportConnected": false,
+    "defaultAppCutover": false
+  },
+  "tests": {
+    "rustPassed": 509,
+    "sdkPassed": 79,
+    "sdkSkipped": 0,
+    "defaultSwiftPassed": 609,
+    "defaultSwiftOptInSkipped": 6,
+    "compilerWarnings": 0,
+    "appToolWarnings": [
+      "Metadata extraction skipped, no AppIntents.framework dependency found"
+    ]
+  },
+  "productRuntime": {
+    "output": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1.stdout",
+      "byteCount": 434,
+      "sha256": "e6e9788f26eac53e7f4b974d76710335ee97c8e76a4dbff6c1f9077d3396ddcf"
+    },
+    "results": {
+      "allStorageCreditsReleased": true,
+      "annotationsAndFavoritesRoundTrip": true,
+      "appCutover": false,
+      "cacheMaintenanceActiveProtected": true,
+      "cacheMaintenanceBeforeOpen": true,
+      "cacheMaintenanceOneReaderProtected": true,
+      "controllerMachineModelsEqualToSwift": true,
+      "controllerSettingsPurgeAndReparse": true,
+      "fullCacheAcceptance": false,
+      "persistenceDrainedBeforeClose": true,
+      "productRuntimeConnected": true,
+      "sourceFormatAliasMetadataEqualToSwift": true
+    },
+    "binary": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1/swift-product-consumer",
+      "byteCount": 24028944,
+      "sha256": "943de8d2d9f6aeeaa941bf599c55911cbc3bdf6949b257abca8605b0fb535738"
+    },
+    "compilerClosure": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/sdk-tests-v1-inputs/inputs.json",
+      "byteCount": 158104,
+      "sha256": "99dc5841d633a92858a8e30750677b886cffa289fa34d621e91a3c1f8c81bace"
+    },
+    "linkedFixtureArchiveSHA256": "4fa3b440bde466a023e818481ff8e4aa11a6638a1ba9b3b4aa407995c4ec9745",
+    "linkedArchivePredatesNativeSidecarReadPort": true,
+    "aliases": [
+      "ftrace",
+      "trace",
+      "HTRACE",
+      null
+    ],
+    "comparison": "Existing complete typed machine boundary; quality prose and probe traversal order normalized only; raw native and Swift metadata retained separately"
+  },
+  "nativeSessionRead": {
+    "output": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-native-sidecar-v1.stdout",
+      "byteCount": 12450,
+      "sha256": "57e939fd323810dd00e0111398e89f41fca68bb1a9168f11a5e200963b2e2696"
+    },
+    "binary": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-native-sidecar-v1/macos-cache-probe",
+      "byteCount": 11476448,
+      "sha256": "c90bd46142a73f510fc6f9722089ac3cacf34e51db965568ab31b407da93912f"
+    },
+    "compilerClosure": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/native-sidecar-build-v1-inputs/source-closure.json",
+      "byteCount": 195851,
+      "sha256": "5f7db835c06864f76fee1e2c574b72edbbbcf5a72ae552b5fc3b9a12ba126a3f"
+    },
+    "results": {
+      "nativeSessionSidecarRead": true,
+      "nativeSessionSidecarCancelAndLockBudget": true,
+      "unknownSidecarBytesPreserved": true,
+      "rawSourceUnchanged": true,
+      "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+      "sourceBytes": 67837,
+      "databaseSHA256": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+      "databaseBytes": 2351104,
+      "fullCacheAcceptance": false,
+      "appCutover": false
+    },
+    "postProbeChange": "Only a Swift-produced fixture test was added; production payload prefix verified byte-identical"
+  },
+  "swiftProducedSidecar": {
+    "fixture": {
+      "path": "rust/crates/arktrace-engine/tests/fixtures/swift-view-state-v1.json",
+      "byteCount": 313,
+      "sha256": "15fa541ba624f79b2fd84e425381ed5ed44ee6e814f85f33e6b6b72ae0b15488"
+    },
+    "producerBinary": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1/swift-product-consumer",
+      "byteCount": 24028944,
+      "sha256": "943de8d2d9f6aeeaa941bf599c55911cbc3bdf6949b257abca8605b0fb535738"
+    },
+    "savedOriginal": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1/product-saved-view-state.json",
+      "byteCount": 313,
+      "sha256": "15fa541ba624f79b2fd84e425381ed5ed44ee6e814f85f33e6b6b72ae0b15488"
+    },
+    "permissions": 384
+  },
+  "nativeABI": {
+    "unchangedContractSHA256": "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8",
+    "records": 10,
+    "fields": 95,
+    "exports": 24,
+    "productionCapabilities": 23,
+    "validAllocationFuzzCases": 1000,
+    "artifacts": [
+      {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/native-production-artifacts/libarktrace_ffi.a",
+        "byteCount": 74867904,
+        "sha256": "1de41a23fd55b6fe7c351edc991c1a0b7efdc100805eedc1f63f5c5b0e6fefa9"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/native-production-artifacts/libarktrace_ffi.dylib",
+        "byteCount": 16023256,
+        "sha256": "a35340567d7288a598c9e33a6bac031b2f282c0c7e54ca992fb383f7b385efa4"
+      }
+    ],
+    "sidecarOperationExposed": false
+  },
+  "gates": [
+    {
+      "name": "sdk-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/sdk-tests-v1.receipt.json",
+        "byteCount": 1034,
+        "sha256": "35f6b9b4e69d94a5ae0a9d584b3427ec36a5d90b4a76136e026a9fba33513982"
+      },
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--filter",
+        "ArkTraceRustRuntimeTests",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-cache-session-final-consumer/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-cache-session-final-consumer/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "actual-product-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1.receipt.json",
+        "byteCount": 687,
+        "sha256": "30fe59786a4e3c5ca7cf48dfd736674a697763a373f4c7f45964b81ed6e8ae0f"
+      },
+      "argv": [
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1/swift-product-consumer",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/actual-product-v1/sdk-input.json"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "native-rust-tests-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/native-rust-tests-v2.receipt.json",
+        "byteCount": 611,
+        "sha256": "53be2c800ede30b49316a44aa62d10874afe94ca3fe969f72fa63b01aafc91ac"
+      },
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "native-sidecar-build-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/native-sidecar-build-v1.receipt.json",
+        "byteCount": 645,
+        "sha256": "cff53f837c34555cc18e830e9f7d0b2ed38ee0cb887164ce240a473ab4530e89"
+      },
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "build",
+        "-p",
+        "arktrace-engine",
+        "--example",
+        "macos_cache_probe"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "actual-native-sidecar-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/actual-native-sidecar-v1.receipt.json",
+        "byteCount": 1396,
+        "sha256": "8ca63285f527fb9d6ec0de2826f5ee12a7ef399958eceb2eb7ea95bf94ef7458"
+      },
+      "argv": [
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/actual-native-sidecar-v1/macos-cache-probe",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/actual-native-sidecar-v1",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/actual-native-sidecar-v1/source.htrace",
+        "{\"name\": \"trace_streamer\", \"reportedVersion\": \"4.3.7\", \"binarySHA256\": \"0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a\", \"upstreamRepository\": \"https://gitcode.com/openharmony/developtools_smartperf_host.git\", \"upstreamRevision\": \"447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6\", \"architecture\": \"arm64\", \"adapterVersion\": \"1\", \"buildRecipeVersion\": \"a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20\"}",
+        "8586342256e5896a6b96dfa48489fd2a66263e90d0603377d8db6194453097e9",
+        "htrace"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "oracle-facts-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/oracle-facts-v1.receipt.json",
+        "byteCount": 544,
+        "sha256": "c7f34451fdb56ba2af2c274e6be095a804d7ff7f69ab7e20434d5aaa79210bc7"
+      },
+      "argv": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/refresh-oracles-v1.py",
+        "facts"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "oracle-viewer-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/oracle-viewer-v1.receipt.json",
+        "byteCount": 546,
+        "sha256": "b4e2838bbd68132c6af9aa49cd759b6bec757b55086228e45132a919e4b1567f"
+      },
+      "argv": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/refresh-oracles-v1.py",
+        "viewer"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "swift-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/swift-tests-v1.receipt.json",
+        "byteCount": 688,
+        "sha256": "bb397cf45f6abc3225cc09e11a7fd2a779e0266e465d15ff4d5db4cbb531f779"
+      },
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-swiftpm-current/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-swiftpm-current/security"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "api-baseline-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/api-baseline-v1.receipt.json",
+        "byteCount": 991,
+        "sha256": "036fcd2e2b98a09f978198c50ca1a2953f566c5104abbacae44f4abe411121ab"
+      },
+      "argv": [
+        "sh",
+        "scripts/test_api_baseline.sh",
+        "--scratch-path",
+        "/private/tmp/arktrace-event-api-baseline/build",
+        "--cache-path",
+        "/private/tmp/arktrace-event-api-baseline/dependencies",
+        "--config-path",
+        "/private/tmp/arktrace-event-api-baseline/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-event-api-baseline/security",
+        "--disable-sandbox",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "rust-clippy-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/rust-clippy-v1.receipt.json",
+        "byteCount": 669,
+        "sha256": "6331cc98aa1941db0a57da5a37cae873a8013e770a47e9bc9692f71727778ec9"
+      },
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "rust-fmt-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/rust-fmt-v1.receipt.json",
+        "byteCount": 606,
+        "sha256": "7052f13f3c67c303ce3513ba93286cde7edc49a6f5bd90e1493d89ac9d5d1214"
+      },
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "workspace-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/workspace-v1.receipt.json",
+        "byteCount": 567,
+        "sha256": "b1a73111e351fa4de1b06c43ecfb435dda9402333b16b0b696abbae0f66ba4d9"
+      },
+      "argv": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "viewer-json-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/viewer-json-v1.receipt.json",
+        "byteCount": 574,
+        "sha256": "20e264e997bca50bc18e685678b907ffa6e54098fddf579d9a76370bfb7968ac"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_viewer_json_roundtrip.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "bindings-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/bindings-v1.receipt.json",
+        "byteCount": 585,
+        "sha256": "51d504a8b2cda011bb3380bf846dbf7ecdaa43a9bb3c3ace5dc57b812fffe2ef"
+      },
+      "argv": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "migration-contracts-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/migration-contracts-v1.receipt.json",
+        "byteCount": 575,
+        "sha256": "562184d7d1400f9f4abcd83bdb12d3b4818ddb23b2b0f0db839093ad8c451a3f"
+      },
+      "argv": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "migration-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/migration-tests-v1.receipt.json",
+        "byteCount": 572,
+        "sha256": "8f0ac5a2eba0c4fcfa169f02fe4f691848944e748b70af924e4dc99039933c90"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_migration_contracts.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "ci-planner-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/ci-planner-tests-v1.receipt.json",
+        "byteCount": 556,
+        "sha256": "0c5857ba791b3f2e93bd69d9e0097628612dc75c4b9e9b15d8de215c9b6e06b5"
+      },
+      "argv": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "rust-build-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/rust-build-v1.receipt.json",
+        "byteCount": 590,
+        "sha256": "252812d74028a2d0c750aee83700cd3c87659a8e0785256532ce08a9f7faa819"
+      },
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "build",
+        "--workspace"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "app-build-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/app-build-v2.receipt.json",
+        "byteCount": 576,
+        "sha256": "fbf3e1a5746e6438c89051b5c17e00fab965f405ff95d4e71879e2f792d01c61"
+      },
+      "argv": [
+        "sh",
+        "scripts/run-xcodebuild.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "ffi-contract-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/ffi-contract-v1.receipt.json",
+        "byteCount": 565,
+        "sha256": "6fffcc31015770d5709b792ac6658e1d8c8b3e65c14d5c4ba713e8dd6134a7f8"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_ffi_contract.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "app-document-types-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/app-document-types-v1.receipt.json",
+        "byteCount": 500,
+        "sha256": "3c7fa6f7107389310c55210e3e4ac73a0bdab6f584e258f0af52ccb4d278dbaf"
+      },
+      "argv": [
+        "sh",
+        "scripts/verify_app_document_types.sh",
+        "/private/tmp/arktrace-lifecycle-xcode-output/Debug/ArkTrace.app"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "licenses-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/licenses-v1.receipt.json",
+        "byteCount": 559,
+        "sha256": "f2b2178b14e68b0b56a0b87edfc8acf1a0c867ce670242a139d31f55677a5357"
+      },
+      "argv": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "parser-lock-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/parser-lock-v1.receipt.json",
+        "byteCount": 570,
+        "sha256": "fd668cc2c783bd58af2f728456307954b9fd692993e37f0ef24ad433c365fda4"
+      },
+      "argv": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "palette-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/palette-v1.receipt.json",
+        "byteCount": 579,
+        "sha256": "91c0672470b0f95965e5e50a4485d6495848e127a83c1294007ed2fa8b562cd5"
+      },
+      "argv": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "palette-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/palette-tests-v1.receipt.json",
+        "byteCount": 568,
+        "sha256": "ee6dd5511ef703732b7af9f52abfc2e57cb85ff4fe7b9f0097a05ae128f80559"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_palette_verifier.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "cargo-runner-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/cargo-runner-v1.receipt.json",
+        "byteCount": 564,
+        "sha256": "9738d38dc0f400af17fafd3d7f210ee46cb1a4f511bf75938424200f10ec7b5f"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_run_cargo.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "phase6-offline-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/phase6-offline-v1.receipt.json",
+        "byteCount": 554,
+        "sha256": "45937f1e673b96fec19bda9e41dfde53bc7aafa79530326e0f7689a179dcf71c"
+      },
+      "argv": [
+        "sh",
+        "scripts/test_phase6.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "swift-runner-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/swift-runner-v1.receipt.json",
+        "byteCount": 565,
+        "sha256": "10708f2e2ec5503bc3441b0aca251885c4be75cfb47dde45b9bbc24ca2d4d164"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_run_swiftpm.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "xcode-runner-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/xcode-runner-v1.receipt.json",
+        "byteCount": 567,
+        "sha256": "8ca0a767e729ac1d65cdbc02876f2b33e6f8058ebd503352f979f566fc4e7085"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_run_xcodebuild.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "sdk-stage-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/sdk-stage-tests-v1.receipt.json",
+        "byteCount": 573,
+        "sha256": "7dbbe50158e8a06353210207a077636e3d0214f9d9eceaa773503c0f99379a7b"
+      },
+      "argv": [
+        "python3",
+        "scripts/test_stage_macos_rust_sdk.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "rust-smoke-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/rust-smoke-v1.receipt.json",
+        "byteCount": 614,
+        "sha256": "2e0468f733cf5e6795a435b3825c57e7ff4bfc1127e3ae751acd6ff966377fc6"
+      },
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "run",
+        "--bin",
+        "arktrace-migration-smoke"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "frozenInputAudit": {
+    "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/frozen-inputs-audit.json",
+    "byteCount": 3865,
+    "sha256": "b6a417196cdf0f62ea993201d4a5c82a2c1756947293d1ad043131019ac624c9"
+  },
+  "oracleReplay": {
+    "groups": [
+      "facts",
+      "counter",
+      "navigation",
+      "annotation"
+    ],
+    "outputsByteIdenticalToPriorReviewed": true,
+    "sourceReceiptsReexecuted": true,
+    "originalsDirectory": ".build/agent-coordination/arktrace/source-format-hints-20261005/oracle-original"
+  },
+  "failuresRetained": [
+    {
+      "gate": "app-build-v1",
+      "exitCode": 65,
+      "reason": "No space left on device while writing AppKit PCM",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/app-build-v1.receipt.json",
+        "byteCount": 578,
+        "sha256": "8acbe5b6fdd82e5026931d65fd5850f44dd8f770be7a761339050421eb6efad2"
+      },
+      "compilerClosure": {
+        "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/app-build-v1-inputs/inputs.json",
+        "byteCount": 60016,
+        "sha256": "7cd5ead14a48d475ff5fb09b2f79021145d725b864c9028478d9aa9d0f6b6b2d"
+      },
+      "resolvedBy": "Remove only completed owned standalone consumer intermediates; app-build-v2 passed"
+    }
+  ],
+  "ci": {
+    "plan": {
+      "swiftpm": true,
+      "app": true,
+      "contracts": true,
+      "rust_macos": true,
+      "rust_windows": true
+    },
+    "mainAndLocalOrigin": "5a234a2cad465cf7f0ef3fcd5db57c9469d4e925",
+    "windowsNativePassed": false,
+    "currentHeadRemoteCIPassed": false,
+    "mainMergedOrPushed": false,
+    "planPath": ".build/agent-coordination/arktrace/source-format-hints-20261005/full-diff-ci-plan.txt"
+  },
+  "remaining": [
+    "Native sidecar atomic save/remove with crash recovery and preservation/backup of unsupported source bytes",
+    "Expose closed async Session sidecar transport and SDK credits; connect controller load/save without compatibility URL IO",
+    "Backup/import original Swift cache user state before cutover",
+    "Default native App wiring, Rust hot snapshot/rendering and current artifact consumption",
+    "Performance, actual GUI/device where required, signed distribution/clean-host/ArkDeck acceptance",
+    "Native Windows runner and current-head remote CI",
+    "main/push still requires current trusted direct human authorization after auto-review rejection"
+  ],
+  "macOSCrossPlatformAcceptance": false,
+  "goalStatus": "active",
+  "ownedInputs": [
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
+      "byteCount": 7762,
+      "sha256": "e43b38f67943edf93ce4bbfc7b9a67cf91d8bdd05378fad0013570a37629d1a0"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustCoreMaterialization.swift",
+      "byteCount": 6451,
+      "sha256": "426347b2da60f1702aadeed568f5a540a2921216e5a1d458a472b79d97ff972d"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustTraceRepository.swift",
+      "byteCount": 6675,
+      "sha256": "91458a11b863b181862af973b7feb45f7b610c7fc2d288eb990532911c294d35"
+    },
+    {
+      "path": "Tests/ArkTraceRustRuntimeTests/CoreMaterializationTests.swift",
+      "byteCount": 11352,
+      "sha256": "d197f2d75279ae5b46bf47fd1b4a6692607ac9ab75d91a4f40ef65ac0a98f634"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/examples/macos_cache_probe.rs",
+      "byteCount": 20027,
+      "sha256": "aab317397fec3d37ef2cf25181e5494c789b953efeaa6034e201a40591a156d0"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/lib.rs",
+      "byteCount": 2114,
+      "sha256": "2f7d63dc5a42e1e45aeeadda94204d2fdfa8eef812914fd169df180a713ffc2c"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/no_cache.rs",
+      "byteCount": 78092,
+      "sha256": "825b3e30ccfa6f200e24005d963c2c3e5470844dc2fea824c38e044e40299b91"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/no_cache/persistent.rs",
+      "byteCount": 15676,
+      "sha256": "79d5cff203cc345184acbd1202d7eb057e1aa896570ac7645440eb270bd2c4e3"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/no_cache/view_state.rs",
+      "byteCount": 6299,
+      "sha256": "eb7ae9fc3a0dce0202dc3d28fd4e684d918e4ea43798c08c819cf71fde3284e0"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/src/view_state.rs",
+      "byteCount": 9584,
+      "sha256": "651c9f573977f2b1bfc8a3fb219906f8aec98a92434f2ec60536225f6e6f810c"
+    },
+    {
+      "path": "rust/crates/arktrace-engine/tests/fixtures/swift-view-state-v1.json",
+      "byteCount": 313,
+      "sha256": "15fa541ba624f79b2fd84e425381ed5ed44ee6e814f85f33e6b6b72ae0b15488"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-mainline-swift-receipt.json",
+      "byteCount": 14453,
+      "sha256": "f869f48c0f3aebefd90a0cd1fcbf8689ea206bddfa4c910f3d15272215377d7d"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+      "byteCount": 13469,
+      "sha256": "d8c4416e7cc16776cb0e67793e8f424819bf07ad3a7814ee1922e7b1f63625a0"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+      "byteCount": 14920,
+      "sha256": "ecafb53b05456db2014524adbc2ae7a659d2894a50c18249658ebd1a5a665f91"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json",
+      "byteCount": 15944,
+      "sha256": "b9789c8da35cff07876bc5f682cb1955fa1a536799825fd88ca816fd50975038"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json",
+      "byteCount": 5558,
+      "sha256": "ee4261728e84b772eb0e541d6ee77f2106a8e3801a101ef9ba94cfc2c6c9a8cd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "byteCount": 38057,
+      "sha256": "b32127ab5bfe8f148a8c5adaa0012707f6f22c72abd6f06258f46164e332defb"
+    },
+    {
+      "path": "scripts/swift-sdk-core/ProductRuntimeOwnership.swift",
+      "byteCount": 12803,
+      "sha256": "6560498538be15581e9be32ec0732600ad031a1d5006ef91f384ccaba6fad95b"
+    },
+    {
+      "path": "scripts/test_macos_rust_sdk.py",
+      "byteCount": 16916,
+      "sha256": "5351594a33d193142de2dfc4c9ed947677ddeee3ad676f0b22d7c1dd47c97aab"
+    }
+  ],
+  "diskCleanup": {
+    "receipt": {
+      "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/disk-cleanup-20261005.json",
+      "sha256": "252ff9068f8c6017f75453ab80081fb8588dd829068b98704ad5cbc272c8456a",
+      "byteCount": 654351
+    },
+    "beforeFreeBytes": 125337600,
+    "finalFreeBytes": 937984000,
+    "removedEstimatedBytes": 910659739,
+    "dependencyInfoFilesArchived": 699,
+    "onlyOwnedRegenerableIntermediates": true,
+    "allEvidenceAndFinalProductsPreserved": true
+  },
+  "finalRustSmokeCompilerClosure": {
+    "path": ".build/agent-coordination/arktrace/source-format-hints-20261005/rust-smoke-v1-inputs/source-closure.json",
+    "sha256": "70624aa6f2086b1b99e1457f009b8e49b6473ebecd3ab118e0fc5a061220fbb6"
+  }
+}

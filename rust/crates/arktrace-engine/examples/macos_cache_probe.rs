@@ -2,7 +2,8 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use arktrace_contract::{ProcessQuery, TraceParserIdentity};
     use arktrace_engine::{
-        EngineBudget, EngineFailure, EngineProgress, ParserTools, SourceFormat, open_cached,
+        EngineBudget, EngineFailure, EngineProgress, ParserTools, SourceFormat, ViewStateRead,
+        open_cached,
     };
     use arktrace_platform::{
         CancellationToken, CodeTrustPolicy, HeldDirectory, HeldFile, IoBudget, Lease, LeaseMode,
@@ -129,7 +130,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let leases = cache.open_private_child(".leases")?;
     let lease_name = format!("{}.lease", key.entry_identifier());
     assert!(Lease::try_acquire(&leases, &lease_name, LeaseMode::Exclusive, false)?.is_none());
+    assert_eq!(first.read_view_state(&budget())?, ViewStateRead::Missing);
+    let sidecar_bytes = serde_json::to_vec(
+        &serde_json::json!({"formatVersion":1,"traceSHA256":metadata.trace_sha256,
+        "flags":[{"id":1,"timestampNs":0,"label":"保存 🦀","colorIndex":2}],"marks":[],"favoriteTrackIDs":["cpu:0"]}),
+    )?;
+    let sidecar = directory.write_new_readonly("view-state.json", &sidecar_bytes, &io())?;
+    let restored = first.read_view_state(&budget())?;
+    let ViewStateRead::Restored(document) = restored else {
+        return Err("native sidecar did not restore".into());
+    };
+    assert_eq!(document.flags[0].label, "保存 🦀");
+    assert_eq!(document.favorite_track_ids, Some(vec!["cpu:0".into()]));
+    assert_eq!(
+        second.read_view_state(&budget())?,
+        ViewStateRead::Restored(document)
+    );
+    let cancelled = budget();
+    cancelled.cancellation.cancel();
+    assert!(first.read_view_state(&cancelled).is_err());
+    assert_eq!(sidecar.read_bounded(&io())?, sidecar_bytes);
+    let lock_parent = cache.open_private_child(".locks")?;
+    let key_lock = Lease::acquire(
+        &lock_parent,
+        &format!("{}.lock", key.entry_identifier()),
+        LeaseMode::Exclusive,
+        &io(),
+    )?;
+    let short = EngineBudget {
+        deadline: Instant::now() + Duration::from_millis(25),
+        ..budget()
+    };
+    assert!(first.read_view_state(&short).is_err());
+    drop(key_lock);
+    let future_sidecar = serde_json::to_vec(
+        &serde_json::json!({"formatVersion":999,"traceSHA256":metadata.trace_sha256,"flags":[],"marks":[]}),
+    )?;
+    let sidecar = directory.replace_readonly(&sidecar, &future_sidecar, &io())?;
+    assert_eq!(first.read_view_state(&budget())?, ViewStateRead::Preserved);
+    assert_eq!(sidecar.read_bounded(&io())?, future_sidecar);
+    directory.remove_owned_file("view-state.json", sidecar.snapshot().identity)?;
     directory.write_new_readonly("view-state.json", b"{\"fixtureUserState\":true}", &io())?;
+    assert_eq!(first.read_view_state(&budget())?, ViewStateRead::Preserved);
     let current = directory.open_file("metadata.json")?;
     let saved = current.read_bounded(&io())?;
     let mut corrupt: serde_json::Value = serde_json::from_slice(&saved)?;
@@ -397,6 +439,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "corruptionQuarantinedWithUserSidecar":true,"futureFormatPreserved":true,"cancelledPhases":cancelled,
         "stableLeaseCount":1,"ownerProofCount":owners.identifiers(&io())?.len(),"stagingPayloadCount":0,"rawSourceUnchanged":true,
         "sourceSHA256":before.sha256,"sourceBytes":before.byte_count,"databaseSHA256":database_before.sha256,"databaseBytes":database_before.byte_count,
+        "nativeSessionSidecarRead":true,"nativeSessionSidecarCancelAndLockBudget":true,"unknownSidecarBytesPreserved":true,
         "processPage":original_page,"maintenance":maintenance_proof,"fullCacheAcceptance":false,"appCutover":false})
     );
     Ok(())

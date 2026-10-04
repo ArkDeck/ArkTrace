@@ -3,6 +3,7 @@
 mod async_runtime;
 mod metadata;
 mod query_deadlines;
+mod view_state;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
     AsyncEngine, CacheRequest, DrainStatus, OpenTicket, RepositoryRequest, RequestState,
@@ -11,6 +12,9 @@ pub use async_runtime::{
 };
 pub use query_deadlines::{
     BatchQueryDeadlines, DeadlineBatch, DeadlineQuery, DeadlineRepositoryQuery, QueryClock,
+};
+pub use view_state::{
+    MAXIMUM_VIEW_STATE_BYTES, MAXIMUM_VIEW_STATE_RECORDS, ViewStateDocument, ViewStateRead,
 };
 mod handles;
 #[cfg(any(target_os = "macos", test))]
