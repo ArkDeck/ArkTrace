@@ -25,6 +25,11 @@ thread_local! {
     static PAUSE_CREATE: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
     static PAUSE_CLEANUP: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
     static PAUSE_EPHEMERAL: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
+    static CANCEL_PURGE_AFTER_INTENT: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+#[cfg(feature = "process-fixtures")]
+pub(super) fn fixture_cancel_purge_after_intent() {
+    CANCEL_PURGE_AFTER_INTENT.set(true);
 }
 #[cfg(feature = "process-fixtures")]
 pub(super) fn fixture_pause_create(point: u8) {
@@ -318,6 +323,15 @@ impl PublishedOwnerEvidence {
     }
     pub fn is_cached(&self) -> bool {
         self.evidence.cache.is_some()
+    }
+    pub fn directory_identity(&self) -> Option<FileIdentity> {
+        self.evidence.identity()
+    }
+    pub fn cached_entry_relative_path(&self) -> Option<&str> {
+        self.evidence
+            .cache
+            .as_ref()
+            .map(|b| b.entry_relative_path.as_str())
     }
     pub fn is_ready(&self) -> bool {
         self.evidence.state == State::Ready
@@ -744,7 +758,7 @@ impl OwnerStore {
         ) {
             return Ok(OwnerRecoveryOutcome::PublishedNeedsEntryLease);
         }
-        if published.evidence.state == State::Removed
+        if matches!(published.evidence.state, State::Removing | State::Removed)
             && self.locate(&published.evidence, budget)?.is_none()
         {
             let lease = Lease::try_acquire(
@@ -760,6 +774,14 @@ impl OwnerStore {
             if current != published.evidence {
                 return Err(HostError::InvalidEvidence);
             }
+            // A durable removal intent may have completed rmdir immediately
+            // before death, without committing Removed. Dispose only this
+            // exact ledger/marker pair; no payload name is deletion authority.
+            // Ready/Publishing records with missing identity never enter here.
+            if self.locate(&current, budget)?.is_some() {
+                return Err(HostError::InvalidEvidence);
+            }
+            self.cache_authority(&current, key, entry, true)?;
             self.remove_artifacts(&published.identifier, &lease, budget)?;
             return Ok(OwnerRecoveryOutcome::Removed);
         }
@@ -777,6 +799,64 @@ impl OwnerStore {
         }
         owned.cleanup_cached(key, entry, budget)?;
         Ok(OwnerRecoveryOutcome::Removed)
+    }
+
+    /// Ready eviction uses the same fixed key -> exclusive entry -> exact
+    /// owner transaction as publication. Discovery alone grants no authority.
+    /// Stable key/entry leases survive removal; quarantined bytes are retained.
+    pub fn purge_cached_ready(
+        &self,
+        published: &PublishedOwnerEvidence,
+        expected_directory: FileIdentity,
+        key: &Lease,
+        entry: &Lease,
+        budget: &IoBudget,
+    ) -> Result<(), HostError> {
+        if !published.is_cached()
+            || !(published.is_ready() || published.is_publishing())
+            || published.directory_identity() != Some(expected_directory)
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        let mut owned = self.cached_owned(published, key, entry, budget)?;
+        if relative(&self.recovery_root, &owned.directory)?
+            != published
+                .cached_entry_relative_path()
+                .ok_or(HostError::InvalidEvidence)?
+            || owned.directory.identity() != expected_directory
+        {
+            return Err(HostError::InvalidEvidence);
+        }
+        // Ready records cannot be treated as disposable private residuals.
+        // Persist removal authority before the first rename, so a crash in
+        // cleanup's rename-before-location window can resume under entry EX.
+        let (record, mut evidence) = self
+            .read(&owned.identifier, budget)?
+            .ok_or(HostError::InvalidEvidence)?;
+        evidence.state = State::Removing;
+        self.write(
+            &owned.identifier,
+            &owned.lease,
+            &evidence,
+            Some(&record),
+            budget,
+        )?;
+        #[cfg(feature = "process-fixtures")]
+        if CANCEL_PURGE_AFTER_INTENT.replace(false) {
+            budget.cancellation.cancel();
+        }
+        // Once the durable removal intent exists, cancellation must drain this
+        // owned transaction instead of abandoning half a directory. Cleanup
+        // gets its own short deadline; any residual takes failure priority.
+        let cleanup = IoBudget {
+            maximum_bytes: budget.maximum_bytes,
+            deadline: Instant::now() + Duration::from_secs(5),
+            cancellation: CancellationToken::default(),
+        };
+        owned
+            .cleanup_cached(key, entry, &cleanup)
+            .map_err(|_| HostError::CleanupFailed)?;
+        budget.check()
     }
 
     /// Both directories must already be held/private and share this namespace.
@@ -1137,8 +1217,18 @@ impl OwnerStore {
         Ok(OwnerRecoveryOutcome::Removed)
     }
     pub fn identifiers(&self, budget: &IoBudget) -> Result<Vec<String>, HostError> {
+        self.identifiers_bounded(budget, ENTRY_LIMIT)
+    }
+    pub fn identifiers_bounded(
+        &self,
+        budget: &IoBudget,
+        maximum_names: usize,
+    ) -> Result<Vec<String>, HostError> {
+        if maximum_names > 196_608 {
+            return Err(HostError::LimitExceeded);
+        }
         let mut result = Vec::new();
-        for name in names_bounded(&self.owners, budget, ENTRY_LIMIT)? {
+        for name in names_bounded(&self.owners, budget, maximum_names)? {
             let name =
                 std::str::from_utf8(name.as_bytes()).map_err(|_| HostError::InvalidEvidence)?;
             if let Some(identifier) = name.strip_suffix(".json") {
@@ -1147,6 +1237,49 @@ impl OwnerStore {
             }
         }
         Ok(result)
+    }
+
+    /// A missing record is checked again under its existing exclusive marker.
+    /// A live creator, unknown record or replaced marker is never unlinked.
+    pub fn recover_orphan_markers(
+        &self,
+        budget: &IoBudget,
+        maximum_names: usize,
+    ) -> Result<usize, HostError> {
+        if maximum_names > 196_608 {
+            return Err(HostError::LimitExceeded);
+        }
+        let mut removed = 0;
+        for name in names_bounded(&self.owners, budget, maximum_names)? {
+            budget.check()?;
+            let name_text =
+                std::str::from_utf8(name.as_bytes()).map_err(|_| HostError::InvalidEvidence)?;
+            let Some(identifier) = name_text.strip_suffix(".lock") else {
+                continue;
+            };
+            owner_name(identifier)?;
+            match self.owners.open_file(&format!("{identifier}.json")) {
+                Ok(_) => continue,
+                Err(HostError::NotFound) => (),
+                Err(e) => return Err(e),
+            }
+            let Some(lease) =
+                Lease::try_acquire(&self.owners, name_text, LeaseMode::Exclusive, false)?
+            else {
+                continue;
+            };
+            match self.owners.open_file(&format!("{identifier}.json")) {
+                Ok(_) => continue,
+                Err(HostError::NotFound) => (),
+                Err(e) => return Err(e),
+            }
+            budget.check()?;
+            lease.revalidate()?;
+            self.owners.remove_owned_component(&name, lease.identity)?;
+            self.owners.sync()?;
+            removed += 1;
+        }
+        Ok(removed)
     }
 
     pub fn published_evidence(

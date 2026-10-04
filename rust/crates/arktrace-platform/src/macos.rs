@@ -2,7 +2,7 @@
 use crate::{HostError, HostOperation, IoBudget};
 use sha2::{Digest, Sha256};
 use std::{
-    ffi::{CString, OsStr},
+    ffi::{CString, OsStr, OsString},
     fs::{File, Metadata},
     io,
     os::{
@@ -72,6 +72,9 @@ pub(crate) fn continuous_time() -> Result<(i64, u32), HostError> {
 #[cfg(feature = "process-fixtures")]
 pub mod process_fixture {
     use crate::ProcessError;
+    pub fn cancel_next_cache_purge_after_intent() {
+        super::owner::fixture_cancel_purge_after_intent();
+    }
     pub fn pause_owner_creation(point: u8) -> Result<(), ProcessError> {
         if point > 2 {
             return Err(ProcessError::InvalidArguments);
@@ -525,6 +528,24 @@ impl HeldDirectory {
         &self.0.path
     }
 
+    /// Sorted component names from an independent directory cursor. The bound
+    /// includes every child, including ignored names; no path is followed.
+    pub fn child_names(
+        &self,
+        budget: &IoBudget,
+        maximum_children: usize,
+    ) -> Result<Vec<OsString>, HostError> {
+        if maximum_children > 196_608 {
+            return Err(HostError::LimitExceeded);
+        }
+        directory::names_bounded(self, budget, maximum_children).map(|names| {
+            names
+                .into_iter()
+                .map(|name| OsStr::from_bytes(name.as_bytes()).to_os_string())
+                .collect()
+        })
+    }
+
     pub fn revalidate(&self) -> Result<(), HostError> {
         let metadata = self
             .0
@@ -577,6 +598,27 @@ impl HeldDirectory {
             return Err(HostError::NotPrivate);
         }
         self.open_child(&component(OsStr::new(name))?, true, true)
+    }
+
+    /// Ignore non-directory components without following them. A selected
+    /// directory must retain the lstat identity when its descriptor is opened.
+    pub fn find_private_child(&self, name: &str) -> Result<Option<Self>, HostError> {
+        self.revalidate()?;
+        let component = component(OsStr::new(name))?;
+        let info = match stat_child(&self.0.file, &component) {
+            Ok(info) => info,
+            Err(HostError::NotFound) => return Ok(None),
+            Err(e) => return Err(e),
+        };
+        if info.st_mode & libc::S_IFMT != libc::S_IFDIR {
+            return Ok(None);
+        }
+        let directory = self.open_private_child(name)?;
+        if directory.identity() != stat_identity(&info) {
+            return Err(HostError::IdentityMismatch);
+        }
+        directory.revalidate()?;
+        Ok(Some(directory))
     }
 
     pub fn ensure_private_child(&self, name: &str) -> Result<Self, HostError> {

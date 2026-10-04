@@ -500,6 +500,13 @@ Swift/API/unsigned App 检查通过。状态仍为 in-progress：LRU/purge、cac
 低磁盘、外层 namespace 重启恢复、旧标注迁移、默认 App/发行及 macOS 总验收尚待完成。
 来源、实际 artifact 与失败边界见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
 
+2026-10-05 维护增量：Rust Engine fixed-root inventory/LRU/purge、稳定 key/entry 与 exact-owner
+删除、durable Removing intent 及 generic/orphan/removal recovery 已接通。计数保留原 Swift
+inventory.active 与 skippedActive 的区别；实际 parser Ready 的 dual-session 保护、purge/reparse、
+阈值维护和五个 SIGKILL 删除窗口通过。intent 后取消先 drain 本次删除，不声称没有 mutation。
+Runtime/SDK/App 维护入口及其余 008/macOS 验收继续推进，见
+[维护记录](migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。
+
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：007。

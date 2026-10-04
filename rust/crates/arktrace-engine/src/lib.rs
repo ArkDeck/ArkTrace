@@ -34,6 +34,12 @@ pub use arktrace_store::ReadPoolLimits;
 pub use arktrace_store::{ReadPoolOutput, ReadPoolStatistics};
 pub use metadata::CacheMetadata;
 #[cfg(target_os = "macos")]
+mod cache_maintenance;
+#[cfg(target_os = "macos")]
+pub use cache_maintenance::{
+    CacheInventory, CacheMaintenance, CacheMaintenanceReport, CacheWatermarks,
+};
+#[cfg(target_os = "macos")]
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
     EngineSession, EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession,

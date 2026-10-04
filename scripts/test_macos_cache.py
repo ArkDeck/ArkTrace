@@ -37,12 +37,21 @@ def main():
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--controlled-opening", type=Path)
     parser.add_argument("--sdk", action="store_true")
+    parser.add_argument("--maintenance", action="store_true")
     options = parser.parse_args()
     base = options.evidence_dir
     assert base.is_absolute() and not base.exists() and not base.parent.is_symlink()
     base.mkdir(mode=0o700)
     cargo = [sys.executable, str(ROOT / "scripts/run-cargo.py")]
-    subprocess.run(cargo + ["build", "-p", "arktrace-engine", "--example", "macos_cache_probe", "-p", "arktrace-platform", "--bin", "arktrace-host-process"], cwd=ROOT, check=True, stdout=sys.stderr)
+    build = cargo + ["build", "-p", "arktrace-engine", "--example", "macos_cache_probe"]
+    if options.maintenance:
+        build += ["--features", "process-fixtures"]
+        os.environ["ARKTRACE_CACHE_MAINTENANCE_PROBE"] = "1"
+    subprocess.run(build, cwd=ROOT, check=True, stdout=sys.stderr)
+    # The probe may expose deliberate crash windows. The separately pinned
+    # production-mode helper must not write the fixture .supervisor-entered
+    # marker into the parser's closed disposable output directory.
+    subprocess.run(cargo + ["build", "-p", "arktrace-platform", "--bin", "arktrace-host-process"], cwd=ROOT, check=True, stdout=sys.stderr)
     target = Path(json.loads(subprocess.check_output(cargo + ["metadata", "--format-version", "1", "--no-deps"], cwd=ROOT))["target_directory"]) / "debug"
     if options.controlled_opening:
         fixture = json.loads(options.controlled_opening.read_text())
@@ -71,6 +80,11 @@ def main():
     probe = base / "macos-cache-probe"; shutil.copyfile(target / "examples/macos_cache_probe", probe); probe.chmod(0o500)
     native, native_receipt = execute([str(probe), str(base), str(source), json.dumps(identity), sha(tools / "helper"), source_format], base, "native")
     assert native["rawSourceUnchanged"] and native["warmDidNotParse"] and native["stagingPayloadCount"] == 0
+    if options.maintenance:
+        m = native["maintenance"]
+        assert m["rawSourceUnchanged"] and m["reparseAfterPurge"] and m["quarantinePreserved"] and m["stableLeasePreserved"]
+        assert [r["window"]["point"] for r in m["interruptedPurges"]] == [0, 1, 2, 3, 4]
+        assert all(not r["exitSuccess"] and r["signal"] == 9 for r in m["interruptedPurges"])
     sdk = sdk_receipt = sdk_command = None
     if options.sdk:
         _, sdk_receipt = consumer(Path(os.environ["ARKTRACE_RUST_XCFRAMEWORK"]))

@@ -14,6 +14,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         time::{Duration, Instant},
     };
     let args = std::env::args_os().skip(1).collect::<Vec<_>>();
+    if args.first().and_then(|a| a.to_str()) == Some("--purge-interrupted") {
+        #[cfg(feature = "process-fixtures")]
+        {
+            if args.len() != 3 {
+                return Err("cache root and cleanup point required".into());
+            }
+            let cache = HeldDirectory::open_private(Path::new(&args[1]))?;
+            let point: u8 = args[2].to_str().ok_or("invalid point")?.parse()?;
+            arktrace_platform::process_fixture::pause_owner_cleanup(point)?;
+            let maintenance = arktrace_engine::CacheMaintenance::new(cache, 4096)?;
+            maintenance.purge_unused(&IoBudget {
+                maximum_bytes: 16_384,
+                deadline: Instant::now() + Duration::from_secs(120),
+                cancellation: CancellationToken::default(),
+            })?;
+            return Err("expected interrupted purge window".into());
+        }
+        #[cfg(not(feature = "process-fixtures"))]
+        return Err("purge interruption requires development fixtures".into());
+    }
     if args.len() != 5 {
         return Err(
             "private root, source, identity JSON, helper pin, source format required".into(),
@@ -230,15 +250,154 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(owners.identifiers(&io())?.len(), 2); // Ready + preserved quarantine proof.
     assert_eq!(fs::read_dir(stage.path())?.count(), 1); // Only .owners.
     assert_eq!(fs::read_dir(leases.path())?.count(), 1);
+    let maintenance_proof = if std::env::var_os("ARKTRACE_CACHE_MAINTENANCE_PROBE").is_some() {
+        use arktrace_engine::{CacheMaintenance, CacheWatermarks};
+        let maintenance = CacheMaintenance::new(cache.clone(), 4096)?;
+        let active = open_cached(&source, format, &tools, &cache, &budget(), |_| {})?;
+        let second_active = open_cached(&source, format, &tools, &cache, &budget(), |_| {})?;
+        let active_inventory = maintenance.inventory(&io())?;
+        assert_eq!(active_inventory.entry_count, 1);
+        assert_eq!(active_inventory.active_entry_count, 1);
+        let skipped = maintenance.purge_unused(&io())?;
+        assert_eq!(skipped.removed_entry_count, 0);
+        assert_eq!(skipped.skipped_active_entry_count, 1);
+        assert_eq!(
+            serde_json::to_value(active.processes(&query, &budget())?)?,
+            original_page
+        );
+        active.close()?;
+        let one_left = maintenance.purge_unused(&io())?;
+        assert_eq!(one_left.removed_entry_count, 0);
+        assert_eq!(one_left.skipped_active_entry_count, 1);
+        assert_eq!(
+            serde_json::to_value(second_active.processes(&query, &budget())?)?,
+            original_page
+        );
+        second_active.close()?;
+        let before_purge = maintenance.inventory(&io())?;
+        let purged = maintenance.purge_unused(&io())?;
+        assert_eq!(purged.removed_entry_count, 1);
+        assert_eq!(purged.after.entry_count, 0);
+        assert_eq!(fs::read_dir(leases.path())?.count(), 1);
+        assert_eq!(owners.identifiers(&io())?.len(), 1); // preserved quarantine only
+        let reparsed = open_cached(&source, format, &tools, &cache, &budget(), |_| {})?;
+        assert!(!reparsed.cache_hit());
+        assert_eq!(
+            serde_json::to_value(reparsed.processes(&query, &budget())?)?,
+            original_page
+        );
+        reparsed.close()?;
+        let threshold = maintenance.inventory(&io())?;
+        let no_op =
+            maintenance.maintain(CacheWatermarks::new(threshold.total_byte_count, 0)?, &io())?;
+        assert_eq!(no_op.removed_entry_count, 0);
+        let lru = maintenance.maintain(
+            CacheWatermarks::new(threshold.total_byte_count - 1, 0)?,
+            &io(),
+        )?;
+        assert_eq!(lru.removed_entry_count, 1);
+        #[cfg(feature = "process-fixtures")]
+        let interrupted = {
+            use std::{os::unix::process::ExitStatusExt, process::Command};
+            struct ChildGuard(std::process::Child, bool);
+            impl Drop for ChildGuard {
+                fn drop(&mut self) {
+                    if self.1 {
+                        let _ = self.0.kill();
+                        let _ = self.0.wait();
+                    }
+                }
+            }
+            let executable = std::env::current_exe()?;
+            let marker = cache.path().join("owner-window.json");
+            let mut rows = Vec::new();
+            for point in [0_u8, 1, 2, 3, 4] {
+                let reopened = open_cached(&source, format, &tools, &cache, &budget(), |_| {})?;
+                reopened.close()?;
+                if marker.exists() {
+                    fs::remove_file(&marker)?;
+                }
+                let mut child = ChildGuard(
+                    Command::new(&executable)
+                        .arg("--purge-interrupted")
+                        .arg(cache.path())
+                        .arg(point.to_string())
+                        .spawn()?,
+                    true,
+                );
+                let until = Instant::now() + Duration::from_secs(10);
+                let window = loop {
+                    if marker.exists() {
+                        let v: serde_json::Value = serde_json::from_slice(&fs::read(&marker)?)?;
+                        if v["point"] == point && v["pid"].as_u64() == Some(u64::from(child.0.id()))
+                        {
+                            break v;
+                        }
+                    }
+                    if child.0.try_wait()?.is_some() {
+                        child.1 = false;
+                        return Err("purge child exited before its window".into());
+                    }
+                    if Instant::now() >= until {
+                        return Err("purge window timeout".into());
+                    }
+                    std::thread::sleep(Duration::from_millis(5));
+                };
+                child.0.kill()?;
+                let status = child.0.wait()?;
+                child.1 = false;
+                assert_eq!(status.signal(), Some(9));
+                let recovered = maintenance.maintain(CacheWatermarks::STANDARD, &io())?;
+                assert_eq!(
+                    recovered.recovered_private_directory_count,
+                    usize::from(point < 3)
+                );
+                assert_eq!(recovered.after.entry_count, 0);
+                assert_eq!(owners.identifiers(&io())?.len(), 1);
+                assert_eq!(fs::read_dir(leases.path())?.count(), 1);
+                assert_eq!(
+                    cache
+                        .open_private_child(".staging")?
+                        .child_names(&io(), 4096)?
+                        .len(),
+                    1
+                );
+                rows.push(serde_json::json!({"window":window,"exitSuccess":status.success(),"signal":status.signal(),"recovery":recovered}));
+                fs::remove_file(&marker)?;
+            }
+            rows
+        };
+        #[cfg(not(feature = "process-fixtures"))]
+        let interrupted: Vec<serde_json::Value> = Vec::new();
+        assert_eq!(source.facts(&io())?, before);
+        assert_eq!(
+            quarantined.open_file("trace.sqlite")?.facts(&io())?,
+            database_before
+        );
+        assert_eq!(
+            quarantined
+                .open_file("view-state.json")?
+                .read_bounded(&io())?,
+            b"{\"fixtureUserState\":true}"
+        );
+        Some(
+            serde_json::json!({"beforePurge":before_purge,"activeInventory":active_inventory,"oneReaderLeft":one_left,
+            "skipped":skipped,"purged":purged,"thresholdNoOp":no_op,"lru":lru,"interruptedPurges":interrupted,
+            "rawSourceUnchanged":true,"reparseAfterPurge":true,"quarantinePreserved":true,"stableLeasePreserved":true,
+            "runtimeSDKMaintenanceConnected":false,"appCutover":false,"fullCacheAcceptance":false}),
+        )
+    } else {
+        None
+    };
     println!(
         "{}",
         serde_json::json!({"coldProgress":cold_progress,"warmProgress":warm_progress,"rebuildProgress":rebuild_progress,
         "coldParsed":true,"warmDidNotParse":true,"warmTimestampAdvanced":true,"concurrentSessionSurvivesTouch":true,
         "closePreservesReady":true,"exclusiveLeaseBlockedByReaders":true,"activeCorruptionBoundedBusy":true,"lowDatabaseBudgetPreservesReady":true,
         "corruptionQuarantinedWithUserSidecar":true,"futureFormatPreserved":true,"cancelledPhases":cancelled,
-        "stableLeaseCount":1,"ownerProofCount":2,"stagingPayloadCount":0,"rawSourceUnchanged":true,
+        "stableLeaseCount":1,"ownerProofCount":owners.identifiers(&io())?.len(),"stagingPayloadCount":0,"rawSourceUnchanged":true,
         "sourceSHA256":before.sha256,"sourceBytes":before.byte_count,"databaseSHA256":database_before.sha256,"databaseBytes":database_before.byte_count,
-        "processPage":original_page,"fullCacheAcceptance":false,"appCutover":false})
+        "processPage":original_page,"maintenance":maintenance_proof,"fullCacheAcceptance":false,"appCutover":false})
     );
     Ok(())
 }

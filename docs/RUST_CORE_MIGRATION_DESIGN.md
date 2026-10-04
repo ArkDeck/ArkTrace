@@ -513,7 +513,14 @@ hash/byte count、metadata、readonly database、quick-check/schema/index。last
 更新访问时间不撤销已有 session 的 DB FD/shared lease。预算、IO 和 cleanup 失败不充当
 损坏证据。实际原始 zlib trace、SDK cold/warm/并发/重启及原 Core 协议回归见
 [缓存 session 记录](migration-runs/AT-RUST-008-012-2026-10-05-persistent-session.md)。
-LRU/purge、真实 cache crash/低磁盘、多进程竞争、旧标注导入和默认 App 切换仍未验收。
+2026-10-05 后续增量提供固定 held root 的有界 inventory、LRU maintain 与 purge-unused。
+删除要求 key EX→stable entry EX→exact owner EX，重读 metadata 和目录 identity；先持久化
+Removing，再 rename/删除。意图后的取消用独立五秒 cleanup budget drain 当前事务，最后仍
+返回取消；取消不等于没有 mutation。Removing/Removed 且原目录已不存在时，只在相同 lease
+authority 下回收精确 ledger/marker；missing Ready proof 与 quarantine 保留。13 项原生维护
+回归及实际 trace 的五个 SIGKILL 删除窗口见
+[维护记录](migration-runs/AT-RUST-008-2026-10-05-cache-maintenance.md)。Runtime/SDK/App 独立维护
+入口、产品 low-disk、多进程竞争、旧标注导入和默认 App 切换仍未验收。
 
 切换时提供有界、单向的旧 cache reader：
 
