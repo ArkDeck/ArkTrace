@@ -1,0 +1,755 @@
+{
+  "recordVersion": 1,
+  "status": "in-progress",
+  "capturedAtUTC": "2026-10-04T02:42:55.001398+00:00",
+  "baseCommit": "6fdd34a8289b314f30ecff0d73713db2320c7b2d",
+  "review": {
+    "schemaVersion": 1,
+    "reviewedAtUtc": "2026-10-04T02:19:20.812093+00:00",
+    "task": "AT-RUST-011 phase 2: pure shared palette and bounded presentation facts",
+    "snapshotDirectory": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/parallel-presentation-20261004",
+    "baselineCommit": "04c04f43def3c708ef528e6563b40b3d1feea52f",
+    "baselineFilesVerified": 844,
+    "modifiedBaselineFiles": [
+      "rust/crates/arktrace-viewer/src/lib.rs"
+    ],
+    "originalLibRecoveredByRemovingExactSuffix": true,
+    "additiveLibHunk": "@@ -110,3 +110,8 @@\n     }\n     Ok(())\n }\n+\n+mod palette;\n+mod presentation;\n+pub use palette::*;\n+pub use presentation::*;\n",
+    "ownedAddedPaths": [
+      "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.json",
+      "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.md",
+      "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.sha256",
+      "rust/crates/arktrace-viewer/oracle/presentation_generate.py",
+      "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+      "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+      "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+      "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+      "rust/crates/arktrace-viewer/oracle/presentation_validate.py",
+      "rust/crates/arktrace-viewer/src/palette.rs",
+      "rust/crates/arktrace-viewer/src/presentation.rs",
+      "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/palette_oracle.rs",
+      "rust/crates/arktrace-viewer/tests/palette_regressions.rs",
+      "rust/crates/arktrace-viewer/tests/presentation_oracle.rs",
+      "rust/crates/arktrace-viewer/tests/presentation_regressions.rs"
+    ],
+    "ownedAddedFileDigests": [
+      {
+        "path": "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.json",
+        "byteCount": 16791,
+        "sha256": "0d05f877a9490e286490f7da518ef7f3f557eb46443cffecfa0161d3883bd45c"
+      },
+      {
+        "path": "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.md",
+        "byteCount": 11594,
+        "sha256": "b6d36d698043206ad9c091d68a4a141c336d881ff35afc0db79c89abece40cca"
+      },
+      {
+        "path": "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.sha256",
+        "byteCount": 2279,
+        "sha256": "9800ad1a38eae3e1d869039b98097b44d2e797837dfe075555a49fa8f0820e18"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_generate.py",
+        "byteCount": 4847,
+        "sha256": "12bb39d45732c6048c0625e99fe37a3aca2740d8f1fe33b90d2532e7eaf53366"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+        "byteCount": 8299,
+        "sha256": "518cde26710f52705a143b81bfa507313b463308b52ce802ac2409211f20c2d6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+        "byteCount": 199,
+        "sha256": "aae5d494e6e7ed43cfc21d98555fb6bba654977f68732b2ad9a848f083ba7105"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+        "byteCount": 1276,
+        "sha256": "27b22884925beb1dec4c1c7d4e173a0acafff9b27b49ee3e528f3ddb63662545"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+        "byteCount": 4690,
+        "sha256": "a2275d463e650e0c91c09cdd8b35298f359064d3eecd7dca81a6104ff3953e30"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_validate.py",
+        "byteCount": 2131,
+        "sha256": "b4d3eb1141a43e7f54e1315a15620235bf2fb3786a3b7ce20bf5d2010ec5b88e"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/palette.rs",
+        "byteCount": 9591,
+        "sha256": "eddc3b2c7cc68f0085a6b2a251a8f964b86477088dd3152832973e5b2d1e2932"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/src/presentation.rs",
+        "byteCount": 21474,
+        "sha256": "004b62e5593d7eb18e73f2cb8c621eefd8d75fff164169ef9100fdb363be2241"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+        "byteCount": 299512,
+        "sha256": "7901cc228208d6b52fc6f0371a701b5efb07125b60d0095c089d97dfecd2a908"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+        "byteCount": 828932,
+        "sha256": "fd8d0dc7034397b19fa548d92c1978e77e2574b5b157b326f90771c92503dff2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json",
+        "byteCount": 7755,
+        "sha256": "d4a629df76b13944b26f979465e2a30f56065f0fb76fc70a3d168a9c77b83894"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/palette_oracle.rs",
+        "byteCount": 6553,
+        "sha256": "c79cc1a77fa5c45d8773a30a7f688c9ea59014816a0f1c2e4066283a3c0dc44c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/palette_regressions.rs",
+        "byteCount": 2797,
+        "sha256": "49b10fc46a03825cc4df2aedaa347619f1d05b448de97258e31102fbf5967c61"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/presentation_oracle.rs",
+        "byteCount": 2566,
+        "sha256": "2c01ff1012ef25d6206eda33b7486c217e6d05de4e4de0bcd18befa9388e4e86"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/presentation_regressions.rs",
+        "byteCount": 10146,
+        "sha256": "24996ca2e1d2fa1f41d0aa95ebeaec83b1924a8c82f9f30ce2768332cf55af9b"
+      }
+    ],
+    "checksumEntriesVerified": 18,
+    "actualSwiftReceiptDigestsVerified": 36,
+    "swiftOracleCases": 1168,
+    "rustViewerTests": 72,
+    "swiftExistingRegressionTests": 26,
+    "verifiedChecks": [
+      {
+        "name": "rustViewerAllTests",
+        "command": "python3 rust/crates/arktrace-viewer/oracle/presentation_validate.py test -p arktrace-viewer --offline",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/presentation-final-tests.log",
+          "byteCount": 10540,
+          "sha256": "20b5ba6a2f547ff9fc877123637e6c9f9e03381096f9bc7b0a3d8c91f9bc882b"
+        }
+      },
+      {
+        "name": "rustFormat",
+        "command": "python3 rust/crates/arktrace-viewer/oracle/presentation_validate.py fmt -p arktrace-viewer --check",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/presentation-final-fmt.log",
+          "byteCount": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "name": "rustClippy",
+        "command": "python3 rust/crates/arktrace-viewer/oracle/presentation_validate.py clippy -p arktrace-viewer --all-targets --offline -- -D warnings",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/presentation-final-clippy.log",
+          "byteCount": 264,
+          "sha256": "f6e5be773ae6da66f8fc84ed61eae003f05d29e0d9e3cd79e390cffd1f532a32"
+        }
+      },
+      {
+        "name": "rustWorkspaceDependencyLicenses",
+        "command": "python3 rust/crates/arktrace-viewer/oracle/presentation_validate.py verify",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/presentation-final-verify.log",
+          "byteCount": 125,
+          "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+        }
+      },
+      {
+        "name": "actualSwiftOracle",
+        "command": "python3 rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/presentation-swift-oracle.log",
+          "byteCount": 1273,
+          "sha256": "e50364ff43d8c1b6498b46d2acf26aff3789b7d482989154d3ea7b87d5a703f5"
+        }
+      },
+      {
+        "name": "swiftExistingRegressions",
+        "command": "python3 rust/crates/arktrace-viewer/oracle/presentation_swift.py --regressions",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/presentation-swift-regressions.log",
+          "byteCount": 7522,
+          "sha256": "59bdecb6fc6932d44c83238dc9dda6a0bda1edd7c2ebe20aa2a57125384b3194"
+        }
+      },
+      {
+        "name": "existingPaletteVerifier",
+        "command": "python3 scripts/verify_palette.py",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/presentation-final-palette-verifier.log",
+          "byteCount": 455,
+          "sha256": "91cfa5f59a551556561d5f806bc1dda97293f3d92d809fa154d03897580a703e"
+        }
+      },
+      {
+        "name": "existingPaletteVerifierMutationTests",
+        "command": "python3 scripts/test_palette_verifier.py",
+        "exitCode": 0,
+        "log": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-cargo/presentation-final-palette-verifier-mutations.log",
+          "byteCount": 121,
+          "sha256": "c8d33bfddcf2f9ff2767126572cbb41d54b206b7f2b492a481fabe5fe28ff203"
+        }
+      }
+    ],
+    "typedBoundedApiReview": {
+      "sourceStringBytes": 4096,
+      "primitives": 20000,
+      "inputStringBytes": 8388608,
+      "retainedStringBytes": 4194304,
+      "retainedBytes": 16777216,
+      "scanCheckInterval": 256,
+      "noIOUnsafeOrSQLInProductionModules": true,
+      "immutableAllOrErrorOutput": true,
+      "trueDetailKeysAndNoDensityEventKey": true
+    },
+    "limitations": [
+      "This deliverable is the phase 2 pure viewer palette/presentation layer only. No SDK/FFI/ABI, Engine, Swift consumer, hot record packing, navigation, annotation persistence, App integration or new GUI acceptance was implemented.",
+      "Current Swift density_color falls back to track color for missing dominant identity for every source. SPEC AT-RENDER-002 describes counter-only fallback and unavailable-value quality. The module preserves observed color and exposes uses_track_fallback; host must retain existing repository/source quality and resolve the product rule during integration.",
+      "Current Swift expected frames use depth 0 and actual frames depth 1. SPEC AT-RENDER-002 describes zero depth for non-named records. Observed frame lane behavior is preserved without changing SPEC.",
+      "Actual renderer density draw cache/path and opaque paint facts were observed in a CGContext. Full raster appearance, production GUI interaction, device capture, macOS App acceptance and Windows native acceptance were not run.",
+      "Finite alpha is compared with Swift; NaN and infinity are rejected by the new bounded Rust API. Invalid density counts/instant buckets and invalid budgets are rejected. These Rust boundary rules do not assert parity with unbounded invalid Swift input.",
+      "Rust str and valid Swift JSON strings cannot express unpaired UTF-16 surrogates. Valid astral scalars and surrogate-pair hashing are covered; no invalid-surrogate compatibility claim.",
+      "Canonical-equivalent Unicode strings keep their exact UTF-8 bytes and distinct pool slots. This is the explicit new wire pool contract, not a Swift String equality/cache identity claim.",
+      "retained_bytes includes Rust result structs, Vec capacity, String control blocks and String capacity. Allocator headers and bounded transient BTreeMap overhead are excluded. SDK serialization bytes need their own existing host output budget.",
+      "Existing verify_palette.py remains a verifier of Swift token sources. Rust token inventory is checked against actual Swift output; a later canonical export/generated table bridge is proposed, not implemented.",
+      "The INT64_MAX named-depth safety test is a Rust boundary regression. It is not an assertion that the current Swift loader, whose depth-row count can add 1, accepts this invalid extreme."
+    ],
+    "integrationProposal": {
+      "status": "proposal only; coordinator owns production integration",
+      "baselineGap": "HotSnapshot::pack currently sees geometry-only DetailInput. PrimitiveRecord has no detail label/category/state, OS/internal identity, jank tag or resolved color fields; text_offset/text_length currently describe density dominant strings. Existing records are generated and must not be hand-edited or have reserved fields repurposed.",
+      "storeToPresentation": "Keep the actual bounded repository DTO page alive long enough to construct borrowed PresentationInput. Run existing source/query/page validation, retain capability/truncation/DataQuality, and call present before map_detail_page consumes DTOs. Flatten counter samples in actual sample order. Do not reconstruct label/identity from DetailInput after the source DTO has been discarded.",
+      "projectionAssociation": "Associate detail facts by track identity and true EventKey, including pinned/focused detail records. Associate density facts by track identity and ordered bucket index/range, with no event key. Preserve project/visibility order when making a presentation table indexed by the final packed primitive index; assert kind/key/range/depth/style agreement before publication.",
+      "hotSnapshotWire": "Recommended coordinator bridge is a generated, versioned presentation record table attached to the same owned snapshot, keyed by primitive_index. Pack ColorSlot/RGB/foreground, jank tag, optional Int64 identity, label/category/state UTF-8 offset/length and density intensity/height/fallback. Preserve geometry, source_generation, generation, occupancy/utilization and existing quality. Use the canonical contract/bindings generator for a new layout/version; no ad-hoc changes to generated wire_records.rs.",
+      "ffiOwnership": "Expose count/index access through the existing snapshot handle lifecycle; copied bounded value records and handle-owned UTF-8 only. Add explicit has-value flags for optional pool/identity fields. No Rust Vec/String layout or borrowed source DTO references across FFI. Budget geometry, quality, presentation records, string payloads and any simultaneously retained PresentationBatch together, and run cancellation checks before all-or-error snapshot publication.",
+      "sdkConsumption": "Swift/C# SDK wrappers consume typed fixed-width records under current owner/generation/stale/release checks, validate UTF-8 offset+length and discriminator, and map color/style into host painting. SDK should not parse viewport JSON or reimplement hashing/state/label/density rules. Inspector still fetches real Store records by EventKey; density remains non-inspectable.",
+      "requiredIntegrationValidation": [
+        "generated ABI layout/offset/version checks and SDK API baselines",
+        "primitive/presentation alignment, pinned/focused detail, unavailable source quality and fallback tests",
+        "aggregate retained/serialized byte budget, cancellation/deadline/stale handle/release regressions",
+        "same 1168-case actual Swift oracle on the integrated wire facts plus App build and actual GUI checks"
+      ]
+    },
+    "disposition": "Reviewed owned additions and exact export hunks ready for main integration; production wiring/combined-budget/spec-gap verification remains on main",
+    "mainIntegrationConfirmed": false,
+    "macOSAcceptance": false
+  },
+  "ownedImportsExact": true,
+  "sharedHunks": {
+    "rust/crates/arktrace-viewer/src/lib.rs": "@@ -110,3 +110,8 @@\n     }\n     Ok(())\n }\n+\n+mod palette;\n+mod presentation;\n+pub use palette::*;\n+pub use presentation::*;\n"
+  },
+  "freshMainlineSwiftOracle": {
+    "oracle": "actual TimelinePalette, DetailPalette, DensityPalette, SnapshotLoader and NSView private drawDensityOverlay cache",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "counts": {
+      "palette": 1068,
+      "genericDetails": 38,
+      "dto": 62
+    },
+    "sourceDigests": [
+      {
+        "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+        "byteCount": 11275
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+        "byteCount": 4367
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+        "byteCount": 1042
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+        "byteCount": 375
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+        "byteCount": 862
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+        "byteCount": 17503
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+        "byteCount": 1526
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+        "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+        "byteCount": 11916
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+        "byteCount": 5258
+      },
+      {
+        "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+        "byteCount": 8071
+      },
+      {
+        "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+        "byteCount": 3147
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+        "byteCount": 16011
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+        "byteCount": 1186
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+        "byteCount": 3873
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+        "byteCount": 9752
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+        "byteCount": 863
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+        "byteCount": 16274
+      },
+      {
+        "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+        "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+        "byteCount": 2757
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+        "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+        "byteCount": 6210
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+        "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+        "byteCount": 29018
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+        "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+        "byteCount": 8131
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+        "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+        "byteCount": 24339
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+        "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+        "byteCount": 101313
+      },
+      {
+        "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+        "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+        "byteCount": 40541
+      },
+      {
+        "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "sha256": "6a76e3993b57623e2f7ba93c05a2e51edb868772288f6092dceeffc1d34532e9",
+        "byteCount": 108917
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/DetailOracleHarness.swift",
+        "sha256": "aa5a96cf423cbaec25aaaa5503e6656e3776d64e8bf44165351fc7f994c3a760",
+        "byteCount": 4201
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/OracleHarness.swift",
+        "sha256": "96ff8ac8dc3130f483d8c3305a8159ab629717d28504673733cc3c9235ef76dd",
+        "byteCount": 19286
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+        "sha256": "518cde26710f52705a143b81bfa507313b463308b52ce802ac2409211f20c2d6",
+        "byteCount": 8299
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+        "sha256": "aae5d494e6e7ed43cfc21d98555fb6bba654977f68732b2ad9a848f083ba7105",
+        "byteCount": 199
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+        "sha256": "27b22884925beb1dec4c1c7d4e173a0acafff9b27b49ee3e528f3ddb63662545",
+        "byteCount": 1276
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+        "sha256": "a2275d463e650e0c91c09cdd8b35298f359064d3eecd7dca81a6104ff3953e30",
+        "byteCount": 4690
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+        "sha256": "7901cc228208d6b52fc6f0371a701b5efb07125b60d0095c089d97dfecd2a908",
+        "byteCount": 299512
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+        "sha256": "fd8d0dc7034397b19fa548d92c1978e77e2574b5b157b326f90771c92503dff2",
+        "byteCount": 828932
+      }
+    ],
+    "cacheOnlyAugmentedSources": [
+      {
+        "path": "/private/tmp/arktrace-presentation-mainline-swiftpm/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "sha256": "346f123925aa5dfb4301e4602300d92c839492939a6beedd3e89d8760ddc0669",
+        "byteCount": 140706
+      },
+      {
+        "path": "/private/tmp/arktrace-presentation-mainline-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+        "sha256": "f1a68242314235445c67914174359ed339d9c49b9bc4e71f20c0676cbbbfd6e1",
+        "byteCount": 102724
+      },
+      {
+        "path": "/private/tmp/arktrace-presentation-mainline-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineColorPalette.swift",
+        "sha256": "86d41d14771842658661f25b31356eac010cec8a75627225f9d776689c50d79c",
+        "byteCount": 29218
+      }
+    ],
+    "copiedAlgorithms": false
+  },
+  "freshOutputsByteIdenticalToReviewed": true,
+  "originalReviewedReceiptPreserved": true,
+  "checks": {
+    "rustPassed": 356,
+    "rustFailed": 0,
+    "rustIgnored": 0,
+    "rustViewerPassed": 72,
+    "strictClippy": true,
+    "format": true,
+    "workspace": true,
+    "swiftOracleCases": 1168,
+    "swiftRegressionsPassed": 26,
+    "generatedBindingsUnchanged": true,
+    "migrationContracts": true,
+    "licenseParserPalette": true,
+    "plannerCases": 51,
+    "selectedLanes": {
+      "lane_swiftpm": "false",
+      "lane_app": "false",
+      "lane_contracts": "true",
+      "lane_rust_macos": "true",
+      "lane_rust_windows": "true"
+    }
+  },
+  "logs": {
+    "gates.log": {
+      "byteCount": 7860,
+      "sha256": "5e27063529f9a9af6792867b66e01b444ec837c27cd1904183423bbaf6d54dbd"
+    },
+    "lane-plan.log": {
+      "byteCount": 98,
+      "sha256": "bd29b495200086b8cc922683924c28f47810e33bedf27c16a91a0a9b8b4c6de7"
+    },
+    "rust.log": {
+      "byteCount": 41923,
+      "sha256": "37a2f61981956cf5fc6affe8f67baf1124dccfef8d65908cfe646cefcdc1dab6"
+    },
+    "swift-oracle.log": {
+      "byteCount": 2784,
+      "sha256": "e519c8b824df9fbdbf96cf943a1df789cebec4b7e423812d6789359f76943db6"
+    },
+    "swift-regressions.log": {
+      "byteCount": 7353,
+      "sha256": "c6117396d98934f2101a3b2d479986e0b6c35d4d2d566e7b3951808d702d79da"
+    },
+    "swift-wrapper.log": {
+      "byteCount": 1899,
+      "sha256": "829613134d47a01459d361a08198e09b1c08a6e5c1fc6b2e3ffb64751d747562"
+    }
+  },
+  "productionSnapshotPresentationWired": false,
+  "abiChanged": false,
+  "appCutover": false,
+  "macOSAcceptance": false,
+  "limitations": [
+    "This deliverable is the phase 2 pure viewer palette/presentation layer only. No SDK/FFI/ABI, Engine, Swift consumer, hot record packing, navigation, annotation persistence, App integration or new GUI acceptance was implemented.",
+    "Current Swift density_color falls back to track color for missing dominant identity for every source. SPEC AT-RENDER-002 describes counter-only fallback and unavailable-value quality. The module preserves observed color and exposes uses_track_fallback; host must retain existing repository/source quality and resolve the product rule during integration.",
+    "Current Swift expected frames use depth 0 and actual frames depth 1. SPEC AT-RENDER-002 describes zero depth for non-named records. Observed frame lane behavior is preserved without changing SPEC.",
+    "Actual renderer density draw cache/path and opaque paint facts were observed in a CGContext. Full raster appearance, production GUI interaction, device capture, macOS App acceptance and Windows native acceptance were not run.",
+    "Finite alpha is compared with Swift; NaN and infinity are rejected by the new bounded Rust API. Invalid density counts/instant buckets and invalid budgets are rejected. These Rust boundary rules do not assert parity with unbounded invalid Swift input.",
+    "Rust str and valid Swift JSON strings cannot express unpaired UTF-16 surrogates. Valid astral scalars and surrogate-pair hashing are covered; no invalid-surrogate compatibility claim.",
+    "Canonical-equivalent Unicode strings keep their exact UTF-8 bytes and distinct pool slots. This is the explicit new wire pool contract, not a Swift String equality/cache identity claim.",
+    "retained_bytes includes Rust result structs, Vec capacity, String control blocks and String capacity. Allocator headers and bounded transient BTreeMap overhead are excluded. SDK serialization bytes need their own existing host output budget.",
+    "Existing verify_palette.py remains a verifier of Swift token sources. Rust token inventory is checked against actual Swift output; a later canonical export/generated table bridge is proposed, not implemented.",
+    "The INT64_MAX named-depth safety test is a Rust boundary regression. It is not an assertion that the current Swift loader, whose depth-row count can add 1, accepts this invalid extreme."
+  ],
+  "persistentFrozenEvidence": ".build/agent-coordination/arktrace/presentation-mainline-20261004",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/presentation_swift.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+        "--regressions"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "completeDiffPaths": [
+    "docs/RUST_CORE_MIGRATION_TASKS.md",
+    "docs/migration-runs/AT-RUST-011-2026-10-04-mainline-presentation.json",
+    "docs/migration-runs/AT-RUST-011-2026-10-04-mainline-presentation.md",
+    "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.json",
+    "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.md",
+    "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.sha256",
+    "rust/crates/arktrace-viewer/oracle/presentation_generate.py",
+    "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+    "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+    "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+    "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+    "rust/crates/arktrace-viewer/oracle/presentation_validate.py",
+    "rust/crates/arktrace-viewer/src/lib.rs",
+    "rust/crates/arktrace-viewer/src/palette.rs",
+    "rust/crates/arktrace-viewer/src/presentation.rs",
+    "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/palette_oracle.rs",
+    "rust/crates/arktrace-viewer/tests/palette_regressions.rs",
+    "rust/crates/arktrace-viewer/tests/presentation_oracle.rs",
+    "rust/crates/arktrace-viewer/tests/presentation_regressions.rs",
+    "scripts/verify_migration_contracts.py"
+  ],
+  "sourceDigests": [
+    {
+      "path": "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.json",
+      "byteCount": 16791,
+      "sha256": "0d05f877a9490e286490f7da518ef7f3f557eb46443cffecfa0161d3883bd45c"
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.md",
+      "byteCount": 11594,
+      "sha256": "b6d36d698043206ad9c091d68a4a141c336d881ff35afc0db79c89abece40cca"
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-011-parallel-presentation-2026-10-04.sha256",
+      "byteCount": 2279,
+      "sha256": "9800ad1a38eae3e1d869039b98097b44d2e797837dfe075555a49fa8f0820e18"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_generate.py",
+      "byteCount": 4847,
+      "sha256": "12bb39d45732c6048c0625e99fe37a3aca2740d8f1fe33b90d2532e7eaf53366"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+      "byteCount": 8299,
+      "sha256": "518cde26710f52705a143b81bfa507313b463308b52ce802ac2409211f20c2d6"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+      "byteCount": 199,
+      "sha256": "aae5d494e6e7ed43cfc21d98555fb6bba654977f68732b2ad9a848f083ba7105"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+      "byteCount": 1276,
+      "sha256": "27b22884925beb1dec4c1c7d4e173a0acafff9b27b49ee3e528f3ddb63662545"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+      "byteCount": 4690,
+      "sha256": "a2275d463e650e0c91c09cdd8b35298f359064d3eecd7dca81a6104ff3953e30"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_validate.py",
+      "byteCount": 2131,
+      "sha256": "b4d3eb1141a43e7f54e1315a15620235bf2fb3786a3b7ce20bf5d2010ec5b88e"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/palette.rs",
+      "byteCount": 9591,
+      "sha256": "eddc3b2c7cc68f0085a6b2a251a8f964b86477088dd3152832973e5b2d1e2932"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/presentation.rs",
+      "byteCount": 21474,
+      "sha256": "004b62e5593d7eb18e73f2cb8c621eefd8d75fff164169ef9100fdb363be2241"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+      "byteCount": 299512,
+      "sha256": "7901cc228208d6b52fc6f0371a701b5efb07125b60d0095c089d97dfecd2a908"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+      "byteCount": 828932,
+      "sha256": "fd8d0dc7034397b19fa548d92c1978e77e2574b5b157b326f90771c92503dff2"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json",
+      "byteCount": 7755,
+      "sha256": "d4a629df76b13944b26f979465e2a30f56065f0fb76fc70a3d168a9c77b83894"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/palette_oracle.rs",
+      "byteCount": 6553,
+      "sha256": "c79cc1a77fa5c45d8773a30a7f688c9ea59014816a0f1c2e4066283a3c0dc44c"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/palette_regressions.rs",
+      "byteCount": 2797,
+      "sha256": "49b10fc46a03825cc4df2aedaa347619f1d05b448de97258e31102fbf5967c61"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/presentation_oracle.rs",
+      "byteCount": 2566,
+      "sha256": "2c01ff1012ef25d6206eda33b7486c217e6d05de4e4de0bcd18befa9388e4e86"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/presentation_regressions.rs",
+      "byteCount": 10146,
+      "sha256": "24996ca2e1d2fa1f41d0aa95ebeaec83b1924a8c82f9f30ce2768332cf55af9b"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/src/lib.rs",
+      "byteCount": 3387,
+      "sha256": "f1b308b4114d5abd4373a2d7680abc897aa3ee6c8d2d89e8fc59d1dc84f3079d"
+    },
+    {
+      "path": "scripts/verify_migration_contracts.py",
+      "byteCount": 9501,
+      "sha256": "ac4588c0e4be71ee0b80b8a99e908162ac72962b026cc2cf8dd62adc17287fe4"
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "oracle": "actual TimelinePalette, DetailPalette, DensityPalette, SnapshotLoader and NSView private drawDensityOverlay cache",
+  "xcode": "Xcode 27.0\nBuild version 27A266a",
+  "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+  "counts": {
+    "palette": 1068,
+    "genericDetails": 38,
+    "dto": 62
+  },
+  "sourceDigests": [
+    {
+      "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a",
+      "byteCount": 11275
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3",
+      "byteCount": 4367
+    },
+    {
+      "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981",
+      "byteCount": 1042
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2",
+      "byteCount": 375
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd",
+      "byteCount": 862
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7",
+      "byteCount": 17503
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765",
+      "byteCount": 1526
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+      "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626",
+      "byteCount": 11916
+    },
+    {
+      "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e",
+      "byteCount": 5258
+    },
+    {
+      "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6",
+      "byteCount": 8071
+    },
+    {
+      "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f",
+      "byteCount": 3147
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a",
+      "byteCount": 16011
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331",
+      "byteCount": 1186
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
+      "byteCount": 3873
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
+      "byteCount": 9752
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc",
+      "byteCount": 863
+    },
+    {
+      "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770",
+      "byteCount": 16274
+    },
+    {
+      "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+      "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f",
+      "byteCount": 2757
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
+      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
+      "byteCount": 6210
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
+      "byteCount": 29018
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
+      "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
+      "byteCount": 8131
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineModels.swift",
+      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
+      "byteCount": 24339
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
+      "byteCount": 101313
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+      "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
+      "byteCount": 40541
+    },
+    {
+      "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "sha256": "6a76e3993b57623e2f7ba93c05a2e51edb868772288f6092dceeffc1d34532e9",
+      "byteCount": 108917
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/DetailOracleHarness.swift",
+      "sha256": "aa5a96cf423cbaec25aaaa5503e6656e3776d64e8bf44165351fc7f994c3a760",
+      "byteCount": 4201
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/OracleHarness.swift",
+      "sha256": "96ff8ac8dc3130f483d8c3305a8159ab629717d28504673733cc3c9235ef76dd",
+      "byteCount": 19286
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+      "sha256": "518cde26710f52705a143b81bfa507313b463308b52ce802ac2409211f20c2d6",
+      "byteCount": 8299
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+      "sha256": "aae5d494e6e7ed43cfc21d98555fb6bba654977f68732b2ad9a848f083ba7105",
+      "byteCount": 199
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+      "sha256": "27b22884925beb1dec4c1c7d4e173a0acafff9b27b49ee3e528f3ddb63662545",
+      "byteCount": 1276
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+      "sha256": "a2275d463e650e0c91c09cdd8b35298f359064d3eecd7dca81a6104ff3953e30",
+      "byteCount": 4690
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+      "sha256": "7901cc228208d6b52fc6f0371a701b5efb07125b60d0095c089d97dfecd2a908",
+      "byteCount": 299512
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+      "sha256": "fd8d0dc7034397b19fa548d92c1978e77e2574b5b157b326f90771c92503dff2",
+      "byteCount": 828932
+    }
+  ],
+  "cacheOnlyAugmentedSources": [
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "sha256": "346f123925aa5dfb4301e4602300d92c839492939a6beedd3e89d8760ddc0669",
+      "byteCount": 140706
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "sha256": "f1a68242314235445c67914174359ed339d9c49b9bc4e71f20c0676cbbbfd6e1",
+      "byteCount": 102724
+    },
+    {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.build/agent-coordination/arktrace/caches/parallel-presentation-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "sha256": "86d41d14771842658661f25b31356eac010cec8a75627225f9d776689c50d79c",
+      "byteCount": 29218
+    }
+  ],
+  "copiedAlgorithms": false
+}

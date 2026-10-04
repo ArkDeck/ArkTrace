@@ -50,6 +50,34 @@ def main():
         assert len(names) == len(set(names)) == len(outputs_json) == receipt["vectors"] == count
         assert names == [v["name"] for v in outputs_json]
     print("Viewer oracles: retained geometry/boundary/old plan/scope-before; 13 current loader, 8 actual detail/style, 6 actual SQLite slices and 7 counter scope vectors with source identities")
+    presentation_receipt = json.loads((ROOT / viewer / "presentation-swift-receipt.json").read_text())
+    assert presentation_receipt["copiedAlgorithms"] is False
+    presentation_seen = set()
+    for entry in presentation_receipt["sourceDigests"]:
+        relative = entry["path"]
+        assert relative not in presentation_seen
+        presentation_seen.add(relative)
+        path = ROOT / relative
+        assert not path.is_symlink() and path.resolve().is_relative_to(ROOT)
+        data = path.read_bytes()
+        assert len(data) == entry["byteCount"] and hashlib.sha256(data).hexdigest() == entry["sha256"], relative
+    assert {
+        viewer + "presentation-inputs.json", viewer + "presentation-swift-oracle.json",
+        "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "rust/crates/arktrace-viewer/oracle/presentation_harness.swift",
+        "rust/crates/arktrace-viewer/oracle/presentation_renderer_access.swift",
+        "rust/crates/arktrace-viewer/oracle/presentation_palette_access.swift",
+        "rust/crates/arktrace-viewer/oracle/presentation_swift.py",
+    } <= presentation_seen
+    for name in ("ArkTraceCore", "ArkTraceRendering"):
+        assert {p.relative_to(ROOT).as_posix() for p in (ROOT / "Sources" / name).rglob("*.swift")} == {p for p in presentation_seen if p.startswith(f"Sources/{name}/")}
+    presentation_inputs = json.loads((ROOT / viewer / "presentation-inputs.json").read_text())
+    presentation_outputs = json.loads((ROOT / viewer / "presentation-swift-oracle.json").read_text())
+    for section, count in (("palette", 1068), ("genericDetails", 38), ("dto", 62)):
+        names = [entry["name"] for entry in presentation_inputs[section]]
+        assert len(names) == len(set(names)) == presentation_receipt["counts"][section] == count
+        assert names == [entry["name"] for entry in presentation_outputs[section]]
+    print("Palette/presentation oracle: 1,068 palette, 38 style and 62 DTO vectors with actual Swift source/output identities")
     source = (ROOT / "Sources/ArkTraceCore/Model/TraceModels.swift").read_text(encoding="utf-8")
     scope_block = source.split("machineAllowed: Set<String> = [", 1)[1].split("\n    ]", 1)[0]
     scopes = sorted(re.findall(r'"([^"\n]+)"', scope_block))

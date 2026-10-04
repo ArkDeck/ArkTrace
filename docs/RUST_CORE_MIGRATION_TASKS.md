@@ -645,6 +645,13 @@ Swift snapshot/inspector 保留；labels/inspector/palette/jank、tree/navigatio
 SDK/App/persistent-cache/发行/性能及最终验收仍未完成，见
 [viewport owner 记录](migration-runs/AT-RUST-011-2026-10-04-viewport-owner.md)。
 
+011 的后续共享配色/呈现模块已按审查清单进入主线：仅导入 18 个新增文件并追加
+精确模块导出。实际主线 356 Rust tests（含 72 viewer）和 26 Swift 回归通过；重新
+运行的 1,168 个 actual Swift oracle 输出与原审查结果逐字节一致，迁移 verifier
+覆盖输入/输出与完整 Swift source pins。仅纯模块可用，production snapshot/ABI、
+SDK 绘制和 App 尚未接通；density fallback 与 actual frame depth 的既有规格差异
+保持明确未裁决。见[主线呈现记录](migration-runs/AT-RUST-011-2026-10-04-mainline-presentation.md)。
+
 ## 14. AT-RUST-012 — C ABI 与 Swift/C# SDK
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：008、009、011。
