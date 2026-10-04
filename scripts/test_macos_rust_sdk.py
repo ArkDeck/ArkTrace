@@ -44,7 +44,7 @@ def consumer(artifact):
         subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter','ArkTraceRustRuntimeTests','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
     unit_output=unit_log.read_text(encoding='utf-8')
     unit_tests=re.findall(r"Test Case '.*ArkTraceRustRuntimeTests.*' passed",unit_output)
-    assert len(unit_tests)==14 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
+    assert len(unit_tests)==27 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
     relative='.arktrace-native/'+identity+'/CArkTrace.xcframework'
     env.update(ARKTRACE_RUST_XCFRAMEWORK=relative,CLANG_MODULE_CACHE_PATH=str(cache/'ModuleCache'),SWIFTPM_MODULECACHE_OVERRIDE=str(cache/'ModuleCache'))
     # Consume the complete actual root package, never a copied SDK source target.
@@ -132,6 +132,12 @@ def main():
                     if process.poll() is None:process.kill();process.wait()
             report=json.loads(stdout)
             assert report['opening']['inspection']==historical['inspection']
+            typed=report['typedOpening']
+            assert json.loads(typed['bodyUTF8'])==report['opening']
+            assert typed['bodyUTF8']==typed['afterShutdownBodyUTF8']
+            assert typed['identity']['engine']>0 and typed['identity']['session']>0
+            assert typed['retainedBytes']>0
+            assert (typed['afterOnlyParserFacetOwners'],typed['afterOnlyTextOwners'],typed['finalBytes'],typed['finalOwners'])==(1,1,0,0)
             for response,expected in zip(report['responses'],fresh):
                 body=json.loads(response['responseUtf8'])['body']
                 if 'request' in response['input']:

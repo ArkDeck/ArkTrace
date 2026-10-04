@@ -173,6 +173,34 @@ final class DirectoryPageTests: XCTestCase {
         await assertProcessRejected(try envelope([], quality: [missing]))
     }
 
+    func testDuplicateJSONKeysAreRejectedBeforeFoundationCanCollapseThem() async {
+        // Foundation's keyed container exposes only one of repeated keys.
+        // Test raw bytes, including a JSON escape spelling the same name.
+        for (prefix, body) in [
+            ("\"session\":7,", "{\"items\":[],\"dataQualityIssues\":[],\"truncated\":false}"),
+            ("", "{\"items\":[],\"items\":[],\"dataQualityIssues\":[],\"truncated\":false}"),
+            ("", "{\"items\":[{\"key\":1,\"\\u006bey\":2,\"pid\":1,\"name\":null,\"startNs\":null,\"endNs\":null,\"threadCount\":null}],\"dataQualityIssues\":[],\"truncated\":false}")
+        ] {
+            let raw = "{\(prefix)\"formatVersion\":1,\"session\":7,\"request\":9,\"body\":\(body)}"
+            await assertProcessRejected(Data(raw.utf8))
+        }
+    }
+
+    func testSingleEscapedJSONKeyRemainsValid() async throws {
+        let raw = #"{"formatVersion":1,"session":7,"request":9,"body":{"items":[{"\u006bey":1,"pid":2,"name":"x\"y\\z","startNs":null,"endNs":null,"threadCount":null}],"dataQualityIssues":[],"truncated":false}}"#
+        let page = try await RustDirectoryDecoder.processes(Data(raw.utf8), identity: RustSessionIdentity(engine: 1, session: 7), request: 9, limit: 1, storage: pool())
+        XCTAssertEqual(page[0].key, ProcessKey(ipid: 1))
+        let name = await page[0].name!.copyString()
+        XCTAssertEqual(name, "x\"y\\z")
+    }
+
+    func testFloatingTokensCannotMasqueradeAsIntegerScalars() async {
+        for token in ["1.0", "1e0", "1E+0"] {
+            let raw = "{\"formatVersion\":1,\"session\":7,\"request\":9,\"body\":{\"items\":[{\"key\":1,\"pid\":\(token),\"name\":null,\"startNs\":null,\"endNs\":null,\"threadCount\":null}],\"dataQualityIssues\":[],\"truncated\":false}}"
+            await assertProcessRejected(Data(raw.utf8))
+        }
+    }
+
     func testItemQualityNameAndInputBoundsRejectBeforePublicationAndRecover() async throws {
         await assertProcessRejected(try envelope([process(), process()]), limit: 1, expected: .outputLimit)
         let quality: [String: Any] = ["category": "invalidValue", "scope": NSNull(), "count": NSNull(), "message": NSNull()]

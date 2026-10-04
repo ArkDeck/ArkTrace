@@ -10,6 +10,11 @@ public final class RustSession: Sendable {
     init(engine: RustEngine, handle: UInt64, opening: RustResult) {
         self.engine = engine; self.handle = handle; self.opening = opening
     }
+    /// Decode retained opening facts without submitting another repository
+    /// query. Explicit re-decoding creates another bounded SDK owner.
+    public func openingView() async throws -> RustOpenView {
+        try await opening.openView(identity: RustSessionIdentity(engine: engine.identity, session: handle))
+    }
     public func query(_ request: RustRequest, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustResult {
         try await engine.query(handle, request: request, timeoutMilliseconds: timeoutMilliseconds)
     }

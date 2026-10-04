@@ -741,6 +741,13 @@ native 查询一致，256-owner 拒绝/恢复、关闭后存活与最终归零�
 nil，未冒充文本检查。其它响应、aggregate/RSS、App 切换与发布/性能验收仍待完成。
 见[typed 目录 SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-directory-sdk.md)。
 
+随后新增闭合保留的 `RustSession.openingView()`，metadata/parser/cache/preparation/inspection
+及文本共享 SDK credit；与目录共用预算和闭合解码。原始 JSON 检查拒绝重复字段及
+浮点表示冒充整数，保留质量顺序与重复项。27 SDK tests、四项真实借用拒绝、三条
+真实 trace 的完整 native opening 对照及18页目录回归通过。独立同DB原Swift metadata
+对照、Core machine quality 适配、其他 typed responses、summaryFacts 与 App/发行/
+最终验收仍未完成，见[typed opening SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-opening-sdk.md)。
+
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 
 - 状态：planned；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。

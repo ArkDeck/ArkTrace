@@ -41,6 +41,15 @@ public struct RustResult: Sendable {
         }
     }
     @concurrent
+    func openView(identity: RustSessionIdentity) async throws -> RustOpenView {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustOpenDecoder.decode(data, identity: identity, request: requestIdentity)
+    }
+    @concurrent
     func processPage(identity: RustSessionIdentity, limit: Int) async throws -> RustProcessPage {
         precondition(!Thread.isMainThread)
         guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }

@@ -302,6 +302,11 @@ public actor RustEngine {
     /// after settling tasks/ARC; the separate atomic loads are not a snapshot
     /// of concurrent admission and do not measure Foundation scratch or RSS.
     public static func developmentDirectoryStorageCounts() -> (bytes: Int, owners: Int, stagingBytes: Int, stagingOwners: Int) {
+        developmentColdStorageCounts()
+    }
+    /// The shared counters include all typed directory and opening owners;
+    /// legacy directory diagnostics above preserve their existing call shape.
+    public static func developmentColdStorageCounts() -> (bytes: Int, owners: Int, stagingBytes: Int, stagingOwners: Int) {
         let staging = RustDirectoryDecoder.developmentStagingCounts
         return (RustRetainedStorage.shared.retainedBytes, RustRetainedStorage.shared.retainedOwners, staging.bytes, staging.owners)
     }

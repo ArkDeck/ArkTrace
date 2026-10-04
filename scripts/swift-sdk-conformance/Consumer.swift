@@ -46,6 +46,7 @@ struct Report: Codable, Sendable {
     let concurrentSessionsClosed: Bool
     let finalOwnerRefundBytes: UInt64?
     let uiTicks: Int
+    let typedOpening: TypedOpeningEvidence
 }
 @concurrent func raw(_ value: RustResult) async -> String {
     precondition(!Thread.isMainThread)
@@ -115,6 +116,12 @@ struct Report: Codable, Sendable {
                 "arcFallbackFailureObservable": "true"])
             return
         }
+        var typedOpening: RustOpenView? = try await session!.openingView()
+        let openingBody = try await typedOpeningBody(typedOpening!)
+        try await compareOpeningBody(openingBody, opened)
+        let typedIdentity = typedOpening!.sessionIdentity
+        let typedRetained = typedOpening!.retainedStorageBytes
+        precondition(RustEngine.developmentColdStorageCounts().owners == 1)
         var responses: [Response] = []
         var held: [RustSnapshot] = []
         for vector in input.vectors {
@@ -210,10 +217,30 @@ struct Report: Codable, Sendable {
         independent = nil
         await Task.yield()
         try await RustCleanup.flush()
+        let afterShutdownBody = try await typedOpeningBody(typedOpening!)
+        try await compareOpeningBody(afterShutdownBody, opened)
+        precondition(openingBody == afterShutdownBody)
+        var parserFacet: RustParserIdentityView? = typedOpening!.metadata.parser
+        typedOpening = nil
+        let facetOwners = RustEngine.developmentColdStorageCounts().owners
+        precondition(facetOwners == 1)
+        var name: RustOwnedText? = parserFacet!.name
+        parserFacet = nil
+        let textOwners = RustEngine.developmentColdStorageCounts().owners
+        precondition(textOwners == 1)
+        let copiedName = await name!.copyString()
+        precondition(copiedName == opened.metadata.parser.name)
+        name = nil
+        let finalTyped = RustEngine.developmentColdStorageCounts()
+        precondition(finalTyped.bytes == 0 && finalTyped.owners == 0 && finalTyped.stagingBytes == 0 && finalTyped.stagingOwners == 0)
+        let typedEvidence = TypedOpeningEvidence(bodyUTF8: String(decoding: openingBody, as: UTF8.self),
+            afterShutdownBodyUTF8: String(decoding: afterShutdownBody, as: UTF8.self),
+            identity: RustSessionIdentityProbe(engine: typedIdentity.engine, session: typedIdentity.session), retainedBytes: typedRetained,
+            afterOnlyParserFacetOwners: facetOwners, afterOnlyTextOwners: textOwners, finalBytes: finalTyped.bytes, finalOwners: finalTyped.owners)
         heartbeat.cancel(); _ = try? await heartbeat.value
         precondition(ticks > 0)
         try await emit(Report(opening: opened, openingUtf8: openingUtf8, responses: responses, retainedAfterClose: retained,
             retainedAfterOnlyOneSnapshot: onlyOneRetained, snapshotsSurviveEngineRelease: afterRelease != nil, queryRejectedAfterClose: closed,
-            preCancelledQuery: preCancelled, cancelledOpenAfterAdmission: openWasCancelled, concurrentSessionsClosed: concurrent.0 && concurrent.1, finalOwnerRefundBytes: refunded, uiTicks: ticks))
+            preCancelledQuery: preCancelled, cancelledOpenAfterAdmission: openWasCancelled, concurrentSessionsClosed: concurrent.0 && concurrent.1, finalOwnerRefundBytes: refunded, uiTicks: ticks, typedOpening: typedEvidence))
     }
 }
