@@ -46,7 +46,7 @@ def consumer(artifact):
         subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter','ArkTraceRustRuntimeTests','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
     unit_output=unit_log.read_text(encoding='utf-8')
     unit_tests=re.findall(r"Test Case '.*ArkTraceRustRuntimeTests.*' passed",unit_output)
-    assert len(unit_tests)==27 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
+    assert len(unit_tests)==35 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
     relative='.arktrace-native/'+identity+'/CArkTrace.xcframework'
     env.update(ARKTRACE_RUST_XCFRAMEWORK=relative,CLANG_MODULE_CACHE_PATH=str(cache/'ModuleCache'),SWIFTPM_MODULECACHE_OVERRIDE=str(cache/'ModuleCache'))
     # Consume the complete actual root package, never a copied SDK source target.

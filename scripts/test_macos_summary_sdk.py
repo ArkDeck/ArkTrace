@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Actual package-external SDK summary requests against frozen Swift facts.
 
-This checks the native JSON response. The retained typed summary facade and
-Core warning materialization remain separate acceptance work.
+This checks native JSON and retained typed facts, shared ownership admission
+and post-shutdown lifetime. Core warning materialization remains separate.
 """
 import hashlib
 import json
@@ -73,6 +73,10 @@ def main():
             assert actual['invalidLimitAdmission'] == 3
             assert actual['preCancelledOutcome'] == 'swiftCancellationError'
             assert actual['queryRejectedAfterClose']
+            assert actual['heldOwners'] == len(records) and actual['heldBytes'] > 0
+            assert actual['peakOwners'] == 256 and actual['sharedCapAndRecovery']
+            assert actual['ownersAfterViewDrop'] == 1 and actual['textSurvivesViewsAndRecords']
+            assert all(actual[key] == 0 for key in ('finalOwners', 'finalBytes', 'finalStagingBytes', 'finalStagingOwners'))
             assert len(actual['responses']) == len(records)
             identities = set()
             for result, expected in zip(actual['responses'], records):
@@ -82,6 +86,8 @@ def main():
                 assert envelope['formatVersion'] == 1 and envelope['session'] > 0 and envelope['request'] > 0
                 identities.add(envelope['request'])
                 assert envelope['body'] == machine(expected['facts']), result['id']
+                assert result['typedBodyUTF8'] == result['typedAfterShutdownBodyUTF8']
+                assert json.loads(result['typedBodyUTF8']) == envelope['body']
             assert len(identities) == len(records)
             assert not list(namespace.rglob('trace.db'))
             assert sha(source) == fixture['sha256']
@@ -90,7 +96,7 @@ def main():
                 outputSHA256=hashlib.sha256(process.stdout).hexdigest(), rawTraceUnchanged=True,
                 ownedReadyDatabaseRemoved=True))
     assert len(reports) == 2 and sum(len(r['output']['responses']) for r in reports) == 4
-    print(json.dumps(dict(nativeSummarySDK=True, typedSummaryFacade=False, fullSDKAcceptance=False,
+    print(json.dumps(dict(nativeSummarySDK=True, typedSummaryFacade=True, fullSDKAcceptance=False,
         comparison='Independent original Swift frozen facts; explicit machine projection omits human prose only and preserves ordered quality, count, nulls and bounds',
         goldenSHA256=sha(golden_path), receipt=receipt, runtimeTools=tool_pins,
         parserIdentity=parser_identity, sources=reports), ensure_ascii=False, indent=2))

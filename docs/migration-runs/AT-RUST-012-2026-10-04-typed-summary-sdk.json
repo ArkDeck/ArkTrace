@@ -1,0 +1,2240 @@
+{
+  "task": "AT-RUST-012 typed summary SDK",
+  "status": "in-progress",
+  "sourceBase": "90f8d3bf4519f21a49fc992e106c9d462e3d8d88",
+  "toolchain": {
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swiftLanguageMode": 6,
+    "deploymentTarget": "macOS 26 arm64"
+  },
+  "abiDigest": "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e",
+  "ownedSourcePins": [
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+      "byteCount": 6350,
+      "sha256": "b941cdb63249938460023750fe753a9a434ac743f59d876d4cddc9be99f176a0"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustEngine.swift",
+      "byteCount": 17009,
+      "sha256": "b14427b561938a17712632e6730b0f31ba01341d125f69cf129787f4217e9de9"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+      "byteCount": 7001,
+      "sha256": "8670c086236e1987a27d4f966b823340f6ff5d693bd5b5d862ada97f886be672"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustResult.swift",
+      "byteCount": 5576,
+      "sha256": "4ac4c379e2c102b85deded3cc9c5b51f71cca97ba5b9e4c68e0e96a47615debf"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustSession.swift",
+      "byteCount": 2699,
+      "sha256": "23e522e08f06c0915f41098a44b6dcd7eb2c64da24de834114c8dd3fd7e29d50"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+      "byteCount": 6500,
+      "sha256": "4672fc812c0f530dd6708c1d6510240eb89324a42df2fd58220f5254726b1a02"
+    },
+    {
+      "path": "Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+      "byteCount": 4275,
+      "sha256": "5d496b5b99815fd295cf99c34ddf55d87c82751b9abd704411beeee97e572233"
+    },
+    {
+      "path": "Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift",
+      "byteCount": 13150,
+      "sha256": "7a5b3b16ed30129aa06a7abc6f1b80689ebaa56be0d2a897a39e9e2f683a71be"
+    },
+    {
+      "path": "scripts/swift-sdk-summary/SummaryOwnership.swift",
+      "byteCount": 10947,
+      "sha256": "6e1b8d5ebc469d854a1854974346375b26e9510f7a292111445a90ee31e4273e"
+    },
+    {
+      "path": "scripts/test_macos_rust_sdk.py",
+      "byteCount": 16223,
+      "sha256": "a6997aa960255a4a156fead88d77706e8b542ab0f7d66afc6afcb7294838aae4"
+    },
+    {
+      "path": "scripts/test_macos_summary_sdk.py",
+      "byteCount": 6380,
+      "sha256": "9f0a50e209835c8ca8939a0244cff898960a13cab440a502267bbfdb6f8a2db4"
+    }
+  ],
+  "compiledSDKSourceReceipt": {
+    "sourceCount": 81,
+    "sourcePins": [
+      {
+        "path": "Package.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Package.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Package.swift",
+        "byteCount": 7220,
+        "sha256": "fd25a3f9657083f184dda44a62286ca7eef0338f40fc5a1744c352b6ba2ea369"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "byteCount": 11275,
+        "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "byteCount": 4367,
+        "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "byteCount": 1042,
+        "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "byteCount": 375,
+        "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "byteCount": 862,
+        "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "byteCount": 17503,
+        "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "byteCount": 1526,
+        "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Model/TraceModels.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceModels.swift",
+        "byteCount": 11916,
+        "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "byteCount": 5258,
+        "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "byteCount": 8071,
+        "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "byteCount": 3147,
+        "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "byteCount": 16011,
+        "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "byteCount": 1186,
+        "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "byteCount": 3873,
+        "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "byteCount": 9752,
+        "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "byteCount": 863,
+        "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "byteCount": 16274,
+        "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceCore/Time/TraceTime.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Time/TraceTime.swift",
+        "byteCount": 2757,
+        "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "byteCount": 403,
+        "sha256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "byteCount": 1907,
+        "sha256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "byteCount": 511,
+        "sha256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "byteCount": 334,
+        "sha256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "byteCount": 1002,
+        "sha256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "byteCount": 636,
+        "sha256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "byteCount": 324,
+        "sha256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "byteCount": 619,
+        "sha256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "byteCount": 1255,
+        "sha256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "byteCount": 560,
+        "sha256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "byteCount": 6350,
+        "sha256": "b941cdb63249938460023750fe753a9a434ac743f59d876d4cddc9be99f176a0"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "byteCount": 1986,
+        "sha256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "byteCount": 951,
+        "sha256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "byteCount": 97,
+        "sha256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "byteCount": 349,
+        "sha256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "byteCount": 136,
+        "sha256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "byteCount": 612,
+        "sha256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "byteCount": 1159,
+        "sha256": "0818dcba3c867ffe4b3a5baad2fc90c4722cb828c0af1c2df85196cc457265d0"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "byteCount": 376,
+        "sha256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "byteCount": 332,
+        "sha256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "byteCount": 351,
+        "sha256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "byteCount": 5899,
+        "sha256": "927b137d1f84bc632829626e9f9f87e2925bf822efe97254b42666b449fd6de4"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "byteCount": 5880,
+        "sha256": "056313e7cd376b94c08440344397452e99f382b8b4cbfaa44005ea8af652cba4"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "byteCount": 17009,
+        "sha256": "b14427b561938a17712632e6730b0f31ba01341d125f69cf129787f4217e9de9"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustError.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustError.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustError.swift",
+        "byteCount": 1250,
+        "sha256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "byteCount": 438,
+        "sha256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "byteCount": 492,
+        "sha256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "byteCount": 7001,
+        "sha256": "8670c086236e1987a27d4f966b823340f6ff5d693bd5b5d862ada97f886be672"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "byteCount": 315,
+        "sha256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "byteCount": 105,
+        "sha256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "byteCount": 12936,
+        "sha256": "4c8d636cf20bc88a32036624452e575d79b055677a579678bdfc5bae059024e9"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "byteCount": 682,
+        "sha256": "513056adc6b708ba2e020d00d56557a05479c42d46ae943a7c29f557a99b2e8a"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "byteCount": 8018,
+        "sha256": "53a722a0e5c4565405ee2e93ac38a9563784e1326b4c6edd42d7997c6a957722"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "byteCount": 1732,
+        "sha256": "a7eb275ecccf824e24cfd084b8e6a4d91a3aed216251d3f89aaa6fa5549201f8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "byteCount": 607,
+        "sha256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "byteCount": 635,
+        "sha256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "byteCount": 2484,
+        "sha256": "775e95e4a6b42b0ac9e25126ecccb34f24253353252dc4506d8ffcaccc5aa644"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "byteCount": 367,
+        "sha256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustResult.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustResult.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustResult.swift",
+        "byteCount": 5576,
+        "sha256": "4ac4c379e2c102b85deded3cc9c5b51f71cca97ba5b9e4c68e0e96a47615debf"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "byteCount": 2535,
+        "sha256": "4e0488052bf023c7c4e66fe9a85e564e404e9b419543c8dc36ba7e07cee9f56c"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "byteCount": 1237,
+        "sha256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "byteCount": 400,
+        "sha256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSession.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSession.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSession.swift",
+        "byteCount": 2699,
+        "sha256": "23e522e08f06c0915f41098a44b6dcd7eb2c64da24de834114c8dd3fd7e29d50"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "byteCount": 1401,
+        "sha256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "byteCount": 2881,
+        "sha256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "byteCount": 6500,
+        "sha256": "4672fc812c0f530dd6708c1d6510240eb89324a42df2fd58220f5254726b1a02"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "byteCount": 677,
+        "sha256": "6ea0eea71ddff4252bfaae4e88141ef4a7f5c176c9cbca5f9d25a4b73c66a4fe"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "byteCount": 4275,
+        "sha256": "5d496b5b99815fd295cf99c34ddf55d87c82751b9abd704411beeee97e572233"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "byteCount": 768,
+        "sha256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "byteCount": 934,
+        "sha256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "byteCount": 2104,
+        "sha256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Tests/ArkTraceRustRuntimeTests/DirectoryPageTests.swift",
+        "byteCount": 15542,
+        "sha256": "47b2b7eae033cfa8f6d1cf9b7bec1b76dbf562bd610afc03e66db78c5403b0fa"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/JSONShapeTests.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Tests/ArkTraceRustRuntimeTests/JSONShapeTests.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Tests/ArkTraceRustRuntimeTests/JSONShapeTests.swift",
+        "byteCount": 1781,
+        "sha256": "087ecfae50968c0da875d0459e6b396390d39ca77935a28c476e931b7d9da69d"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/OpenViewTests.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Tests/ArkTraceRustRuntimeTests/OpenViewTests.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Tests/ArkTraceRustRuntimeTests/OpenViewTests.swift",
+        "byteCount": 12183,
+        "sha256": "727b75a43b7deeaa0f3669454f2ceda03c669e885286bdc92ec3b7582c9d45db"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/RetainedStorageTests.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Tests/ArkTraceRustRuntimeTests/RetainedStorageTests.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Tests/ArkTraceRustRuntimeTests/RetainedStorageTests.swift",
+        "byteCount": 4076,
+        "sha256": "a93c04f28f7d916d68064de08154af38beed4cbba293323ceff9b1df7dd98c01"
+      },
+      {
+        "path": "Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/arktrace/workspace/Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift",
+        "byteCount": 13150,
+        "sha256": "7a5b3b16ed30129aa06a7abc6f1b80689ebaa56be0d2a897a39e9e2f683a71be"
+      },
+      {
+        "path": "scripts/swift-sdk-conformance/Consumer.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Sources/Consumer/Consumer.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/scripts/swift-sdk-conformance/Consumer.swift",
+        "byteCount": 13501,
+        "sha256": "256f29afa3ca95389326dc3be0fed316e4fd741a9903f137ead5e6fb0c09f872"
+      },
+      {
+        "path": "scripts/swift-sdk-conformance/GeneratedRecords.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Sources/Consumer/GeneratedRecords.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/scripts/swift-sdk-conformance/GeneratedRecords.swift",
+        "byteCount": 3598,
+        "sha256": "eaa08204b346ccd03441edc984aaeaa7b35ca6d50ea74dbd106ab05fea759424"
+      },
+      {
+        "path": "scripts/swift-sdk-conformance/OpeningOwnership.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Sources/Consumer/OpeningOwnership.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/scripts/swift-sdk-conformance/OpeningOwnership.swift",
+        "byteCount": 5218,
+        "sha256": "0d6c67a81c347a3c1eb7d7ef44b0edff0ad84aa4f695662fcbf3eb2d676fc8a0"
+      },
+      {
+        "path": "scripts/swift-sdk-directory/DirectoryOwnership.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Sources/DirectoryOwnership/DirectoryOwnership.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/scripts/swift-sdk-directory/DirectoryOwnership.swift",
+        "byteCount": 14508,
+        "sha256": "f33ec393cf7f32695d2bbd7558c90d75e722faeea1221d18d1c342436204862c"
+      },
+      {
+        "path": "scripts/swift-sdk-lifecycle/Lifecycle.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Sources/Lifecycle/Lifecycle.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/scripts/swift-sdk-lifecycle/Lifecycle.swift",
+        "byteCount": 10231,
+        "sha256": "fa57645865bd989b5c4a1a7093042d47f86a32a6cd75c96c6b55d26e58cc34f7"
+      },
+      {
+        "path": "scripts/swift-sdk-summary/SummaryOwnership.swift",
+        "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Sources/SummaryOwnership/SummaryOwnership.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/scripts/swift-sdk-summary/SummaryOwnership.swift",
+        "byteCount": 10947,
+        "sha256": "6e1b8d5ebc469d854a1854974346375b26e9510f7a292111445a90ee31e4273e"
+      }
+    ],
+    "allActualCompiledCopiesEqual": true,
+    "consumerManifest": {
+      "compilerInputPath": "/private/tmp/arktrace-summary-sdk-consumer/consumer/Package.swift",
+      "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/consumer-Package.swift",
+      "sha256": "7726fbeafbf63be2d9f3e4c0bcf7d3249efbdd04340ca1b9da0a97176a903198"
+    }
+  },
+  "frozenConsumerReceipts": {
+    "actualFinalProducerExit": 0,
+    "logs": [
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/sdk-build.log",
+        "byteCount": 280,
+        "sha256": "b0f6fd0baa9544f3c31baa9b07908f57c0df1a2e30a57b9728f28631aa56c613"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/sdk-unit-tests.log",
+        "byteCount": 14949,
+        "sha256": "a70495cf7197ae02f9af26410206b893cd18c2d63f00164a4c6d851dc8375076"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/consumer-build.log",
+        "byteCount": 863,
+        "sha256": "bd44d2a60f9a88e578dd326036aa9ae0e705654b6251e671ac2085dafa41399f"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/BorrowCapture.swift.invalid.log",
+        "byteCount": 6982,
+        "sha256": "8d6ec9a12996ab8d4390ecc7bb8dd2d6d86343cc5d096ab8d3f2430f22648f85"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/BorrowEscape.swift.invalid.log",
+        "byteCount": 7060,
+        "sha256": "cf807cb8a3a97957d2eb39e867c58dd07bc16e67675550531e0acf04c5fc5cdf"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/TextBorrowCapture.swift.invalid.log",
+        "byteCount": 6843,
+        "sha256": "ee3bdadb9dfc396889e88a0a5a4a0b91f1035a27fc38fe7cb1eab8f1e5e08c82"
+      },
+      {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/consumer-receipts/TextBorrowEscape.swift.invalid.log",
+        "byteCount": 7024,
+        "sha256": "a0648550c5d2c4f51fcc4dd42d1eb9a220459d0a8ba12666b486ed0070cb726c"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.922,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "rust-build",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "build",
+        "--workspace"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 12.029,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/rust-build.log",
+        "byteCount": 289,
+        "sha256": "5dd0b64012bf6ae442ed20cdf81f1f213623a3f9382ce85983a985f185e6e9a7"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.353,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/clippy.log",
+        "byteCount": 72,
+        "sha256": "c54bca416b8a09e3c2018b0ada16771065b3b9b5469242539af42bc53077e2cf"
+      }
+    },
+    {
+      "name": "rust-smoke",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "run",
+        "--bin",
+        "arktrace-migration-smoke"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.497,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/rust-smoke.log",
+        "byteCount": 216,
+        "sha256": "71b60604b2a3b07a157b82cfedc71f7d285ac4472348aa85aab1b0eeaaa2a0d8"
+      }
+    },
+    {
+      "name": "viewer-roundtrip",
+      "command": [
+        "python3",
+        "scripts/test_viewer_json_roundtrip.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 43.065,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/viewer-roundtrip.log",
+        "byteCount": 6941,
+        "sha256": "bd576d700f63c381780976b675764903355a205faecf93e41e796237b8960665"
+      }
+    },
+    {
+      "name": "ffi-contract",
+      "command": [
+        "python3",
+        "scripts/test_ffi_contract.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 9.173,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/ffi-contract.log",
+        "byteCount": 613,
+        "sha256": "1aa5c40b02ce663e452568c184a8850915702d2d0e7137453ddc75fb915fcd0e"
+      }
+    },
+    {
+      "name": "workspace",
+      "command": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.424,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/workspace.log",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      }
+    },
+    {
+      "name": "ffi-bindings",
+      "command": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.21,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/ffi-bindings.log",
+        "byteCount": 105,
+        "sha256": "6a3c1928de3bb377c982957d69d18c942ae564f8fda270487e0f993c4fbd1534"
+      }
+    },
+    {
+      "name": "licenses",
+      "command": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.721,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/licenses.log",
+        "byteCount": 102,
+        "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+      }
+    },
+    {
+      "name": "parser-lock",
+      "command": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.141,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/parser-lock.log",
+        "byteCount": 120,
+        "sha256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f"
+      }
+    },
+    {
+      "name": "palette",
+      "command": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.514,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/palette.log",
+        "byteCount": 3450,
+        "sha256": "5b513cdcede959bc5372e81faea29b98994f6a8f78dff20589f0dd03e0efe7a3"
+      }
+    },
+    {
+      "name": "palette-regressions",
+      "command": [
+        "python3",
+        "scripts/test_palette_verifier.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 9.545,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/palette-regressions.log",
+        "byteCount": 120,
+        "sha256": "4a481c16c99c4b01d583a62b8bc394de39fc5bddc655111866e115662f64a1ba"
+      }
+    },
+    {
+      "name": "phase6-offline",
+      "command": [
+        "sh",
+        "scripts/test_phase6.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.18,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/phase6-offline.log",
+        "byteCount": 676,
+        "sha256": "00ca77f6ce36abee9b86d82a5c0563c393ba3ce847cf7029c15e46dfc181ddd0"
+      }
+    },
+    {
+      "name": "planner-regressions",
+      "command": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.329,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/planner-regressions.log",
+        "byteCount": 3741,
+        "sha256": "0d239565866ae8069a9857c23d1143246135fef2593792fcc6d6468f1c36984f"
+      }
+    },
+    {
+      "name": "runner-swift",
+      "command": [
+        "python3",
+        "scripts/test_run_swiftpm.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.852,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/runner-swift.log",
+        "byteCount": 503,
+        "sha256": "b9301f60e97cdf36fe429ac5cd47d50d37912c5c3a06858181f102fcf3765c16"
+      }
+    },
+    {
+      "name": "runner-xcode",
+      "command": [
+        "python3",
+        "scripts/test_run_xcodebuild.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.889,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/runner-xcode.log",
+        "byteCount": 496,
+        "sha256": "e581bb113fd7e9e2d3410382f908529891ef039aee47d477edae2fc4d8474d5c"
+      }
+    },
+    {
+      "name": "runner-cargo",
+      "command": [
+        "python3",
+        "scripts/test_run_cargo.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.402,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/runner-cargo.log",
+        "byteCount": 110,
+        "sha256": "7d5306b885288013a480574922869f11facefe192aa403040e4c9f20bd65c0f6"
+      }
+    },
+    {
+      "name": "sdk-staging",
+      "command": [
+        "python3",
+        "scripts/test_stage_macos_rust_sdk.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.187,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/sdk-staging.log",
+        "byteCount": 103,
+        "sha256": "357761de973a080051958068d7b5f0deecdc3b826c553a14de7fe86480760eff"
+      }
+    },
+    {
+      "name": "migration-contract",
+      "command": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.528,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/migration-contract.log",
+        "byteCount": 1319,
+        "sha256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983"
+      }
+    },
+    {
+      "name": "migration-encoding",
+      "command": [
+        "python3",
+        "scripts/test_migration_contracts.py"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.761,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/migration-encoding.log",
+        "byteCount": 400,
+        "sha256": "11e40ea3cea1dfd238fbff80080ccc6d90c15f577cf10e6a4a8e6ec3fe01b17e"
+      }
+    },
+    {
+      "name": "rust-tests-second",
+      "exitCode": 0,
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/rust-tests-second.log",
+        "byteCount": 53436,
+        "sha256": "5c860d031c130b90035945f6821cba3da6db9b8114f3bc09b1418ebcea1117e8"
+      }
+    },
+    {
+      "name": "sdk-units-second",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/sdk-units-second.log",
+        "byteCount": 15360,
+        "sha256": "2b36e4ad25ce6c30a85fa9d74754d0e50266f20ced50f42c0b39528d420f7637"
+      }
+    },
+    {
+      "name": "sdk-summary-first",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/sdk-summary-first.log",
+        "byteCount": 72,
+        "sha256": "0b53209db424367e80c52cd8cde8b75e37af110438a0efde777104a1463956de"
+      }
+    },
+    {
+      "name": "production-sdk",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/production-sdk.log",
+        "byteCount": 451,
+        "sha256": "af20c1808f273ce71f2722d341beec7d1009a1fbb0505da6af442365620e1f80"
+      }
+    },
+    {
+      "name": "api-baseline",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/api-baseline.log",
+        "byteCount": 172,
+        "sha256": "e128e75d848b33770e9123d600308165035bd170fb72e686613ee555807cf3b6"
+      }
+    },
+    {
+      "name": "default-swift-native-desktop",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/default-swift-native-desktop.log",
+        "byteCount": 174300,
+        "sha256": "e529dd2bf92c47a8acc0b3813a43dd4f71186cf437e291c841034c83a292787f"
+      }
+    },
+    {
+      "name": "app-build",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/app-build.log",
+        "byteCount": 6834,
+        "sha256": "755dfe3b9e1c52d3efd5d5f6ce26085252161c33056e3e23a3d00d14f4647c9a"
+      }
+    },
+    {
+      "name": "app-doctypes",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/app-doctypes.log",
+        "byteCount": 68,
+        "sha256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011"
+      }
+    },
+    {
+      "name": "process-marker-targeted",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/process-marker-targeted.log",
+        "byteCount": 396,
+        "sha256": "46787a66f7e7887b0aa43dcff0242ec2255c33a8587ba4fc6a9867db56cb79fd"
+      }
+    },
+    {
+      "name": "migration-final",
+      "exitCode": 0,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/migration-final.log",
+        "byteCount": 1319,
+        "sha256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983"
+      }
+    }
+  ],
+  "negativeEvidence": [
+    {
+      "name": "initial-sdk-tests-compile",
+      "exitCode": 1,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/sdk-units-first.log",
+        "byteCount": 13417,
+        "sha256": "7cdf1b8770de4fc4c0ecf30b6bcc5422044272a2ad5536605707c64fbe07237b"
+      },
+      "resolution": "Correct test enum, throwing range construction and safe zero padding; no product-policy relaxation"
+    },
+    {
+      "name": "initial-full-rust",
+      "exitCode": 101,
+      "log": {
+        "path": ".build/agent-coordination/arktrace/summary-typed-20261004/rust-tests.log",
+        "byteCount": 21724,
+        "sha256": "d1ad58daf30428411a53f731e7d6f1c06aa06558f3168c08a293a3b865e6d90b"
+      },
+      "resolution": "Marker child.pid absent within existing 4s before SIGKILL assertion. Exact targeted test and fresh full workspace passed; cause unconfirmed; deadlines/test unchanged"
+    }
+  ],
+  "nativeSummarySDK": {
+    "nativeSummarySDK": true,
+    "typedSummaryFacade": true,
+    "fullSDKAcceptance": false,
+    "comparison": "Independent original Swift frozen facts; explicit machine projection omits human prose only and preserves ordered quality, count, nulls and bounds",
+    "goldenSHA256": "a4858a859387d35314c0dd12e901d057050f848961c52135c29f6d763a0935e2",
+    "receipt": {
+      "artifactIdentity": "fa0c3e9337ff35622b9be44c5317467893ef52c568d1baa37a78b05b4fde2184",
+      "artifactReceipt": {
+        "abiVersion": 1,
+        "contractSHA256": "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e",
+        "developmentFixtures": true,
+        "deploymentTarget": "26.0",
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+        "library": {
+          "byteCount": 29646640,
+          "sha256": "243b681554839b3f4207a3793875a528342008bf5397445e0754bc497e862818"
+        },
+        "headers": [
+          {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661"
+          },
+          {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+          }
+        ],
+        "files": [
+          {
+            "byteCount": 761,
+            "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+            "relativePath": "CArkTrace.xcframework/Info.plist"
+          },
+          {
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+          },
+          {
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+          },
+          {
+            "byteCount": 29646640,
+            "sha256": "243b681554839b3f4207a3793875a528342008bf5397445e0754bc497e862818",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+          }
+        ],
+        "releaseAcceptance": false
+      },
+      "consumerExecutable": {
+        "byteCount": 11847664,
+        "sha256": "4d716284c653d5f61fd7d091fd4a6b4b54285dc9f0873d9703d9063adddee4aa"
+      },
+      "lifecycleExecutable": {
+        "byteCount": 11534128,
+        "sha256": "19fd812a2b939680228a47d322e925d8f5d950038134170d4221cf5eccd6c21a"
+      },
+      "directoryExecutable": {
+        "byteCount": 11622112,
+        "sha256": "e42b9a6d6a586f8afe69dfea23f5b2918a9e621ec7f5fd73b4745bd93c049efc"
+      },
+      "summaryExecutable": {
+        "byteCount": 11392576,
+        "sha256": "650b598ef5d87a9ff4a0ffcaf1fb689302db338916cce4a2facb4ad6a9b1e0e6"
+      },
+      "sdkBuildLogSHA256": "b0f6fd0baa9544f3c31baa9b07908f57c0df1a2e30a57b9728f28631aa56c613",
+      "consumerBuildLogSHA256": "bd44d2a60f9a88e578dd326036aa9ae0e705654b6251e671ac2085dafa41399f",
+      "sdkUnitTests": {
+        "passed": 35,
+        "failed": 0,
+        "skipped": 0,
+        "logSHA256": "a70495cf7197ae02f9af26410206b893cd18c2d63f00164a4c6d851dc8375076"
+      },
+      "borrowCompileRejections": [
+        {
+          "case": "BorrowCapture.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "8d6ec9a12996ab8d4390ecc7bb8dd2d6d86343cc5d096ab8d3f2430f22648f85"
+        },
+        {
+          "case": "BorrowEscape.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "cf807cb8a3a97957d2eb39e867c58dd07bc16e67675550531e0acf04c5fc5cdf"
+        },
+        {
+          "case": "TextBorrowCapture.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "ee3bdadb9dfc396889e88a0a5a4a0b91f1035a27fc38fe7cb1eab8f1e5e08c82"
+        },
+        {
+          "case": "TextBorrowEscape.swift.invalid",
+          "exitCode": 1,
+          "logSHA256": "a0648550c5d2c4f51fcc4dd42d1eb9a220459d0a8ba12666b486ed0070cb726c"
+        }
+      ]
+    },
+    "runtimeTools": {
+      "helper": "b34415d8541d89b4e6707cd96b52e92fb21821d87ca15e2f92cd77cec99b4c01",
+      "parser": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a"
+    },
+    "parserIdentity": {
+      "name": "trace_streamer",
+      "reportedVersion": "4.3.7",
+      "binarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+      "upstreamRepository": "https://gitcode.com/openharmony/developtools_smartperf_host.git",
+      "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6",
+      "architecture": "arm64",
+      "adapterVersion": "1",
+      "buildRecipeVersion": "a2e47752e1353d627b442e607eed513564aa66a94c54f2660042383a0f6f3b20"
+    },
+    "sources": [
+      {
+        "source": {
+          "byteCount": 67837,
+          "path": "Fixtures/traces/zlib.htrace",
+          "sha256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe"
+        },
+        "output": {
+          "invalidLimitAdmission": 3,
+          "finalOwners": 0,
+          "peakOwners": 256,
+          "heldBytes": 1096,
+          "pastDurationStage": "request",
+          "heldOwners": 2,
+          "finalBytes": 0,
+          "pastDurationCode": "INVALID_ARGUMENT",
+          "ownersAfterViewDrop": 1,
+          "preCancelledOutcome": "swiftCancellationError",
+          "finalStagingOwners": 0,
+          "finalStagingBytes": 0,
+          "queryRejectedAfterClose": true,
+          "textSurvivesViewsAndRecords": true,
+          "responses": [
+            {
+              "id": "zlib-full",
+              "utf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967809,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":100,\"truncated\":false},\"threadCount\":{\"value\":198,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":{\"value\":3067,\"truncated\":false},\"counterSeriesCount\":null,\"eventCountBySource\":{\"items\":[{\"source\":\"trace\",\"count\":6138}],\"truncated\":false},\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":1,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":198,\"message\":null}]}}",
+              "afterShutdownUTF8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967809,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":100,\"truncated\":false},\"threadCount\":{\"value\":198,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":{\"value\":3067,\"truncated\":false},\"counterSeriesCount\":null,\"eventCountBySource\":{\"items\":[{\"source\":\"trace\",\"count\":6138}],\"truncated\":false},\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":1,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":198,\"message\":null}]}}",
+              "typedAfterShutdownBodyUTF8": "{\"counterSeriesCount\":null,\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":1,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":198,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":{\"items\":[{\"count\":6138,\"source\":\"trace\"}],\"truncated\":false},\"namedSliceCount\":{\"truncated\":false,\"value\":3067},\"processCount\":{\"truncated\":false,\"value\":100},\"threadCount\":{\"truncated\":false,\"value\":198},\"threadStateCount\":null}",
+              "typedBodyUTF8": "{\"counterSeriesCount\":null,\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":1,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":198,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":{\"items\":[{\"count\":6138,\"source\":\"trace\"}],\"truncated\":false},\"namedSliceCount\":{\"truncated\":false,\"value\":3067},\"processCount\":{\"truncated\":false,\"value\":100},\"threadCount\":{\"truncated\":false,\"value\":198},\"threadStateCount\":null}"
+            },
+            {
+              "id": "zlib-explicit-full",
+              "utf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968321,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":100,\"truncated\":false},\"threadCount\":{\"value\":198,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":{\"value\":3067,\"truncated\":false},\"counterSeriesCount\":null,\"eventCountBySource\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":1,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":198,\"message\":null}]}}",
+              "afterShutdownUTF8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968321,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":100,\"truncated\":false},\"threadCount\":{\"value\":198,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":{\"value\":3067,\"truncated\":false},\"counterSeriesCount\":null,\"eventCountBySource\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":1,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":198,\"message\":null}]}}",
+              "typedAfterShutdownBodyUTF8": "{\"counterSeriesCount\":null,\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":1,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":198,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":null,\"namedSliceCount\":{\"truncated\":false,\"value\":3067},\"processCount\":{\"truncated\":false,\"value\":100},\"threadCount\":{\"truncated\":false,\"value\":198},\"threadStateCount\":null}",
+              "typedBodyUTF8": "{\"counterSeriesCount\":null,\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":1,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":198,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":null,\"namedSliceCount\":{\"truncated\":false,\"value\":3067},\"processCount\":{\"truncated\":false,\"value\":100},\"threadCount\":{\"truncated\":false,\"value\":198},\"threadStateCount\":null}"
+            }
+          ],
+          "sharedCapAndRecovery": true
+        },
+        "outputByteCount": 5215,
+        "outputSHA256": "996ed6ca6e7562a01ec248b409023f79b9eebcdff69bfb7c25c42111b443228b",
+        "rawTraceUnchanged": true,
+        "ownedReadyDatabaseRemoved": true
+      },
+      {
+        "source": {
+          "byteCount": 557542,
+          "path": "Fixtures/traces/hiprofiler_data_ability.htrace",
+          "sha256": "226842aa4456050d86578e38e649f1a51a4d51b992e42128e3dcd40edeb5333b"
+        },
+        "output": {
+          "preCancelledOutcome": "swiftCancellationError",
+          "heldOwners": 2,
+          "pastDurationCode": "INVALID_ARGUMENT",
+          "peakOwners": 256,
+          "heldBytes": 1152,
+          "pastDurationStage": "request",
+          "finalBytes": 0,
+          "responses": [
+            {
+              "afterShutdownUTF8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967809,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":250,\"truncated\":false},\"threadCount\":{\"value\":250,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":null,\"counterSeriesCount\":{\"value\":2250,\"truncated\":false},\"eventCountBySource\":{\"items\":[{\"source\":\"trace\",\"count\":12396}],\"truncated\":false},\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":250,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":250,\"message\":null}]}}",
+              "id": "ability-full",
+              "typedBodyUTF8": "{\"counterSeriesCount\":{\"truncated\":false,\"value\":2250},\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":{\"items\":[{\"count\":12396,\"source\":\"trace\"}],\"truncated\":false},\"namedSliceCount\":null,\"processCount\":{\"truncated\":false,\"value\":250},\"threadCount\":{\"truncated\":false,\"value\":250},\"threadStateCount\":null}",
+              "utf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294967809,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":250,\"truncated\":false},\"threadCount\":{\"value\":250,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":null,\"counterSeriesCount\":{\"value\":2250,\"truncated\":false},\"eventCountBySource\":{\"items\":[{\"source\":\"trace\",\"count\":12396}],\"truncated\":false},\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":250,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":250,\"message\":null}]}}",
+              "typedAfterShutdownBodyUTF8": "{\"counterSeriesCount\":{\"truncated\":false,\"value\":2250},\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":{\"items\":[{\"count\":12396,\"source\":\"trace\"}],\"truncated\":false},\"namedSliceCount\":null,\"processCount\":{\"truncated\":false,\"value\":250},\"threadCount\":{\"truncated\":false,\"value\":250},\"threadStateCount\":null}"
+            },
+            {
+              "afterShutdownUTF8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968321,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":250,\"truncated\":false},\"threadCount\":{\"value\":250,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":null,\"counterSeriesCount\":{\"value\":1,\"truncated\":true},\"eventCountBySource\":{\"items\":[{\"source\":\"trace\",\"count\":0}],\"truncated\":true},\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":250,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":250,\"message\":null}]}}",
+              "id": "ability-event-budget-1",
+              "typedBodyUTF8": "{\"counterSeriesCount\":{\"truncated\":true,\"value\":1},\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":{\"items\":[{\"count\":0,\"source\":\"trace\"}],\"truncated\":true},\"namedSliceCount\":null,\"processCount\":{\"truncated\":false,\"value\":250},\"threadCount\":{\"truncated\":false,\"value\":250},\"threadStateCount\":null}",
+              "utf8": "{\"formatVersion\":1,\"session\":4294967552,\"request\":4294968321,\"body\":{\"cpuCount\":null,\"processCount\":{\"value\":250,\"truncated\":false},\"threadCount\":{\"value\":250,\"truncated\":false},\"cpuSliceCount\":null,\"threadStateCount\":null,\"namedSliceCount\":null,\"counterSeriesCount\":{\"value\":1,\"truncated\":true},\"eventCountBySource\":{\"items\":[{\"source\":\"trace\",\"count\":0}],\"truncated\":true},\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"scope\":\"process.start_ts\",\"count\":250,\"message\":null},{\"category\":\"unavailableValue\",\"scope\":\"thread.start_ts\",\"count\":250,\"message\":null}]}}",
+              "typedAfterShutdownBodyUTF8": "{\"counterSeriesCount\":{\"truncated\":true,\"value\":1},\"cpuCount\":null,\"cpuSliceCount\":null,\"dataQualityIssues\":[{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"process.start_ts\"},{\"category\":\"unavailableValue\",\"count\":250,\"message\":null,\"scope\":\"thread.start_ts\"}],\"eventCountBySource\":{\"items\":[{\"count\":0,\"source\":\"trace\"}],\"truncated\":true},\"namedSliceCount\":null,\"processCount\":{\"truncated\":false,\"value\":250},\"threadCount\":{\"truncated\":false,\"value\":250},\"threadStateCount\":null}"
+            }
+          ],
+          "finalStagingBytes": 0,
+          "finalOwners": 0,
+          "queryRejectedAfterClose": true,
+          "invalidLimitAdmission": 3,
+          "ownersAfterViewDrop": 1,
+          "finalStagingOwners": 0,
+          "sharedCapAndRecovery": true,
+          "textSurvivesViewsAndRecords": true
+        },
+        "outputByteCount": 5478,
+        "outputSHA256": "e635e6415df4c756ef62a7c3ac9a4845f2aff5b44f5c43f87a8abcedc5c33f58",
+        "rawTraceUnchanged": true,
+        "ownedReadyDatabaseRemoved": true
+      }
+    ]
+  },
+  "rustTests": {
+    "passed": 455,
+    "runtime": 449,
+    "compileFail": 6,
+    "failed": 0,
+    "ignored": 0,
+    "warnings": 0
+  },
+  "defaultSwiftTests": {
+    "executed": 607,
+    "passed": 601,
+    "skipped": 6,
+    "failed": 0,
+    "warnings": 0,
+    "skipTargets": [
+      "ArkTraceIntegrationTests"
+    ]
+  },
+  "defaultAppBuild": {
+    "exitCode": 0,
+    "documentTypesExitCode": 0,
+    "rustAppCutover": false
+  },
+  "artifactReuse": {
+    "nativeCodeUnchangedFrom": "90f8d3bf4519f21a49fc992e106c9d462e3d8d88",
+    "sourceProof": {
+      "path": "docs/migration-runs/AT-RUST-007-012-2026-10-04-native-summary-facts.json",
+      "byteCount": 132550,
+      "sha256": "e879ebd1e20b77420fe3a59dd2c397d647b01e8631528beefc340065683b10bb"
+    },
+    "fixtures": {
+      "xcframework": "/private/tmp/arktrace-rust-sdk-artifacts/243b681554839b3f4207a3793875a528342008bf5397445e0754bc497e862818/CArkTrace.xcframework",
+      "receipt": {
+        "abiVersion": 1,
+        "contractSHA256": "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e",
+        "developmentFixtures": true,
+        "deploymentTarget": "26.0",
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+        "library": {
+          "byteCount": 29646640,
+          "sha256": "243b681554839b3f4207a3793875a528342008bf5397445e0754bc497e862818"
+        },
+        "headers": [
+          {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661"
+          },
+          {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+          }
+        ],
+        "files": [
+          {
+            "byteCount": 761,
+            "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+            "relativePath": "CArkTrace.xcframework/Info.plist"
+          },
+          {
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+          },
+          {
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+          },
+          {
+            "byteCount": 29646640,
+            "sha256": "243b681554839b3f4207a3793875a528342008bf5397445e0754bc497e862818",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+          }
+        ],
+        "releaseAcceptance": false
+      }
+    },
+    "production": {
+      "xcframework": "/private/tmp/arktrace-rust-sdk-artifacts/33a38fab85ee6811fbf9aff5003c1009243bdedb37f2b4fee2dd578bd7f59343/CArkTrace.xcframework",
+      "receipt": {
+        "abiVersion": 1,
+        "contractSHA256": "3c1b296ea7ed662932995bae5054263d7b92d1bc3fff5d87b976ba3c4094844e",
+        "developmentFixtures": false,
+        "deploymentTarget": "26.0",
+        "xcode": "Xcode 27.0\nBuild version 27A266a",
+        "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+        "library": {
+          "byteCount": 29593472,
+          "sha256": "33a38fab85ee6811fbf9aff5003c1009243bdedb37f2b4fee2dd578bd7f59343"
+        },
+        "headers": [
+          {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661"
+          },
+          {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+          }
+        ],
+        "files": [
+          {
+            "byteCount": 761,
+            "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+            "relativePath": "CArkTrace.xcframework/Info.plist"
+          },
+          {
+            "byteCount": 21956,
+            "sha256": "ee10ef1e136cfa9b1cf0c3db1a6d76cb0027f5373cb16d29f5f79228d3373661",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+          },
+          {
+            "byteCount": 62,
+            "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+          },
+          {
+            "byteCount": 29593472,
+            "sha256": "33a38fab85ee6811fbf9aff5003c1009243bdedb37f2b4fee2dd578bd7f59343",
+            "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+          }
+        ],
+        "releaseAcceptance": false
+      }
+    },
+    "newNativeArchiveBuilt": false
+  },
+  "budgetScopes": {
+    "retainedBytes": 134217728,
+    "retainedOwners": 256,
+    "stagingBytes": 134217728,
+    "stagingOwners": 768,
+    "jsonCopyBytes": 67108864,
+    "summaryMaximumItems": 1000000,
+    "summaryMaximumWireBytes": 67108864,
+    "foundationScratchMeasured": false,
+    "rssAcceptance": false,
+    "byteAndStagingCapsReached": false
+  },
+  "ci": {
+    "sourceBaseObservation": {
+      "conclusion": "cancelled",
+      "headSha": "90f8d3bf4519f21a49fc992e106c9d462e3d8d88",
+      "jobs": [
+        {
+          "completedAt": "2026-10-04T09:33:54Z",
+          "conclusion": "success",
+          "databaseId": 111407636494,
+          "name": "Plan lanes",
+          "startedAt": "2026-10-04T09:33:49Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-04T09:33:50Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-04T09:33:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:33:52Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-04T09:33:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:33:52Z",
+              "conclusion": "success",
+              "name": "Planner self-test",
+              "number": 3,
+              "startedAt": "2026-10-04T09:33:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:33:52Z",
+              "conclusion": "success",
+              "name": "Compute changed paths and lanes",
+              "number": 4,
+              "startedAt": "2026-10-04T09:33:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:33:52Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 8,
+              "startedAt": "2026-10-04T09:33:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:33:53Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-10-04T09:33:52Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407636494"
+        },
+        {
+          "completedAt": "2026-10-04T09:33:46Z",
+          "conclusion": "skipped",
+          "databaseId": 111407637215,
+          "name": "Medium benchmark (slow lane)",
+          "startedAt": "2026-10-04T09:33:47Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407637215"
+        },
+        {
+          "completedAt": "2026-10-04T09:45:56Z",
+          "conclusion": "cancelled",
+          "databaseId": 111407657067,
+          "name": "Rust macOS native",
+          "startedAt": "2026-10-04T09:33:54Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407657067"
+        },
+        {
+          "completedAt": "2026-10-04T09:36:24Z",
+          "conclusion": "success",
+          "databaseId": 111407657085,
+          "name": "Rust Windows native",
+          "startedAt": "2026-10-04T09:33:57Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-04T09:33:58Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-04T09:33:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:34:04Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-04T09:33:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:34:19Z",
+              "conclusion": "success",
+              "name": "Install exact Rust toolchain",
+              "number": 3,
+              "startedAt": "2026-10-04T09:34:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:34:21Z",
+              "conclusion": "success",
+              "name": "Install C# consumer SDK",
+              "number": 4,
+              "startedAt": "2026-10-04T09:34:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:34:21Z",
+              "conclusion": "success",
+              "name": "Set external Cargo cache",
+              "number": 5,
+              "startedAt": "2026-10-04T09:34:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:34:29Z",
+              "conclusion": "success",
+              "name": "Format, architecture, licenses and contract checks",
+              "number": 6,
+              "startedAt": "2026-10-04T09:34:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:36:21Z",
+              "conclusion": "success",
+              "name": "Build, lint and native tests",
+              "number": 7,
+              "startedAt": "2026-10-04T09:34:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:36:21Z",
+              "conclusion": "success",
+              "name": "Post Install C# consumer SDK",
+              "number": 13,
+              "startedAt": "2026-10-04T09:36:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:36:23Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 14,
+              "startedAt": "2026-10-04T09:36:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:36:23Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-10-04T09:36:23Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407657085"
+        },
+        {
+          "completedAt": "2026-10-04T09:45:56Z",
+          "conclusion": "cancelled",
+          "databaseId": 111407657092,
+          "name": "App build and bundle checks",
+          "startedAt": "2026-10-04T09:33:54Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407657092"
+        },
+        {
+          "completedAt": "2026-10-04T09:45:56Z",
+          "conclusion": "cancelled",
+          "databaseId": 111407657118,
+          "name": "SwiftPM build, test and skip audit",
+          "startedAt": "2026-10-04T09:33:54Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407657118"
+        },
+        {
+          "completedAt": "2026-10-04T09:45:56Z",
+          "conclusion": "cancelled",
+          "databaseId": 111407657137,
+          "name": "Offline release gates",
+          "startedAt": "2026-10-04T09:33:54Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111407657137"
+        },
+        {
+          "completedAt": "2026-10-04T09:46:03Z",
+          "conclusion": "failure",
+          "databaseId": 111409533501,
+          "name": "CI required",
+          "startedAt": "2026-10-04T09:45:59Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-04T09:46:00Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-04T09:46:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:46:00Z",
+              "conclusion": "failure",
+              "name": "Evaluate lane results against the plan",
+              "number": 2,
+              "startedAt": "2026-10-04T09:46:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-04T09:46:00Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 3,
+              "startedAt": "2026-10-04T09:46:00Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/ArkDeck/ArkTrace/actions/runs/37192557369/job/111409533501"
+        }
+      ],
+      "status": "completed"
+    },
+    "sourceBaseObservationPin": {
+      "path": ".build/agent-coordination/arktrace/summary-typed-20261004/base-ci-current.json",
+      "byteCount": 5369,
+      "sha256": "5bea9575da261101d08cebcc69098d3afbd35b1103226de536dc3420f51ac2a7"
+    },
+    "plannedLanes": {
+      "lane_swiftpm": "false",
+      "lane_app": "false",
+      "lane_contracts": "true",
+      "lane_rust_macos": "true",
+      "lane_rust_windows": "false"
+    },
+    "currentSliceCI": "pending-themed-commit; full frozen CI is not claimed",
+    "completeDiffFiles": [
+      "Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+      "Sources/ArkTraceRustRuntime/RustEngine.swift",
+      "Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+      "Sources/ArkTraceRustRuntime/RustResult.swift",
+      "Sources/ArkTraceRustRuntime/RustSession.swift",
+      "Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+      "Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+      "Tests/ArkTraceRustRuntimeTests/SummaryViewTests.swift",
+      "docs/RUST_CORE_MIGRATION_TASKS.md",
+      "docs/migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.json",
+      "docs/migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md",
+      "scripts/swift-sdk-summary/SummaryOwnership.swift",
+      "scripts/test_macos_rust_sdk.py",
+      "scripts/test_macos_summary_sdk.py"
+    ],
+    "completeDiffCount": 14
+  },
+  "fullSDKAcceptance": false,
+  "macOSAcceptance": false,
+  "remaining": [
+    "Core machine quality/warning materialization",
+    "Other retained typed responses",
+    "Repository and Rust App integration",
+    "Persistent cache and full context/analyze",
+    "Whole-product allocation and RSS budgets",
+    "Medium/large SLO and macOS 26 acceptance",
+    "Native Windows product/C# owners",
+    "Signing/distribution and ArkDeck consumption",
+    "Unconfirmed non-reproduced process-marker startup failure"
+  ],
+  "productionSDKCompiledInputs": {
+    "sourceCount": 70,
+    "sourcePins": [
+      {
+        "path": "Package.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Package.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Package.swift",
+        "byteCount": 7220,
+        "sha256": "fd25a3f9657083f184dda44a62286ca7eef0338f40fc5a1744c352b6ba2ea369"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+        "byteCount": 11275,
+        "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+        "byteCount": 4367,
+        "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+      },
+      {
+        "path": "Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+        "byteCount": 1042,
+        "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+        "byteCount": 375,
+        "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+        "byteCount": 862,
+        "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+        "byteCount": 17503,
+        "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+        "byteCount": 1526,
+        "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceModels.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Model/TraceModels.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceModels.swift",
+        "byteCount": 11916,
+        "sha256": "9a3f401b0b7cbc4dbc82076da24591280fe12e050f6b66de07eb66d36d4b7626"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+        "byteCount": 5258,
+        "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Parser/TraceParser.swift",
+        "byteCount": 8071,
+        "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+        "byteCount": 3147,
+        "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+        "byteCount": 16011,
+        "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+        "byteCount": 1186,
+        "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceDensity.swift",
+        "byteCount": 3873,
+        "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+        "byteCount": 9752,
+        "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+        "byteCount": 863,
+        "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Query/TraceQueries.swift",
+        "byteCount": 16274,
+        "sha256": "11f809f3b9c5e9871c72a658831ddbbd06604411281bd6a34fddddf0573cc770"
+      },
+      {
+        "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceCore/Time/TraceTime.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceCore/Time/TraceTime.swift",
+        "byteCount": 2757,
+        "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+        "byteCount": 403,
+        "sha256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+        "byteCount": 1907,
+        "sha256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+        "byteCount": 511,
+        "sha256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+        "byteCount": 334,
+        "sha256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+        "byteCount": 1002,
+        "sha256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+        "byteCount": 636,
+        "sha256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+        "byteCount": 324,
+        "sha256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+        "byteCount": 619,
+        "sha256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCleanup.swift",
+        "byteCount": 1255,
+        "sha256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+        "byteCount": 560,
+        "sha256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+        "byteCount": 6350,
+        "sha256": "b941cdb63249938460023750fe753a9a434ac743f59d876d4cddc9be99f176a0"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+        "byteCount": 1986,
+        "sha256": "6cabbaa83999d51432e170824d21f8274f17d90c59f435599a720eae9cf0adc5"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+        "byteCount": 951,
+        "sha256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+        "byteCount": 97,
+        "sha256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+        "byteCount": 349,
+        "sha256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+        "byteCount": 136,
+        "sha256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+        "byteCount": 612,
+        "sha256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+        "byteCount": 1159,
+        "sha256": "0818dcba3c867ffe4b3a5baad2fc90c4722cb828c0af1c2df85196cc457265d0"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+        "byteCount": 376,
+        "sha256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+        "byteCount": 332,
+        "sha256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+        "byteCount": 351,
+        "sha256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+        "byteCount": 5899,
+        "sha256": "927b137d1f84bc632829626e9f9f87e2925bf822efe97254b42666b449fd6de4"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+        "byteCount": 5880,
+        "sha256": "056313e7cd376b94c08440344397452e99f382b8b4cbfaa44005ea8af652cba4"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustEngine.swift",
+        "byteCount": 17009,
+        "sha256": "b14427b561938a17712632e6730b0f31ba01341d125f69cf129787f4217e9de9"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustError.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustError.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustError.swift",
+        "byteCount": 1250,
+        "sha256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+        "byteCount": 438,
+        "sha256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustInspection.swift",
+        "byteCount": 492,
+        "sha256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+        "byteCount": 7001,
+        "sha256": "8670c086236e1987a27d4f966b823340f6ff5d693bd5b5d862ada97f886be672"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+        "byteCount": 315,
+        "sha256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+        "byteCount": 105,
+        "sha256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+        "byteCount": 12936,
+        "sha256": "4c8d636cf20bc88a32036624452e575d79b055677a579678bdfc5bae059024e9"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+        "byteCount": 682,
+        "sha256": "513056adc6b708ba2e020d00d56557a05479c42d46ae943a7c29f557a99b2e8a"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOpenView.swift",
+        "byteCount": 8018,
+        "sha256": "53a722a0e5c4565405ee2e93ac38a9563784e1326b4c6edd42d7997c6a957722"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+        "byteCount": 1732,
+        "sha256": "a7eb275ecccf824e24cfd084b8e6a4d91a3aed216251d3f89aaa6fa5549201f8"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+        "byteCount": 607,
+        "sha256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+        "byteCount": 635,
+        "sha256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustRequest.swift",
+        "byteCount": 2484,
+        "sha256": "775e95e4a6b42b0ac9e25126ecccb34f24253353252dc4506d8ffcaccc5aa644"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+        "byteCount": 367,
+        "sha256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustResult.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustResult.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustResult.swift",
+        "byteCount": 5576,
+        "sha256": "4ac4c379e2c102b85deded3cc9c5b51f71cca97ba5b9e4c68e0e96a47615debf"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+        "byteCount": 2535,
+        "sha256": "4e0488052bf023c7c4e66fe9a85e564e404e9b419543c8dc36ba7e07cee9f56c"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustRetry.swift",
+        "byteCount": 1237,
+        "sha256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+        "byteCount": 400,
+        "sha256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSession.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSession.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSession.swift",
+        "byteCount": 2699,
+        "sha256": "23e522e08f06c0915f41098a44b6dcd7eb2c64da24de834114c8dd3fd7e29d50"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+        "byteCount": 1401,
+        "sha256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+        "byteCount": 2881,
+        "sha256": "b4dd3f9c37ff7595e1f522f0f24605246942b97c2fb22c22c82d5f89f11e90b2"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+        "byteCount": 6500,
+        "sha256": "4672fc812c0f530dd6708c1d6510240eb89324a42df2fd58220f5254726b1a02"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+        "byteCount": 677,
+        "sha256": "6ea0eea71ddff4252bfaae4e88141ef4a7f5c176c9cbca5f9d25a4b73c66a4fe"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+        "byteCount": 4275,
+        "sha256": "5d496b5b99815fd295cf99c34ddf55d87c82751b9abd704411beeee97e572233"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+        "byteCount": 768,
+        "sha256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+        "byteCount": 934,
+        "sha256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3"
+      },
+      {
+        "path": "Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "compilerInputPath": "/private/tmp/arktrace-metadata-production/workspace/Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "durableCopyPath": ".build/agent-coordination/arktrace/summary-typed-20261004/compiled-inputs/Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+        "byteCount": 2104,
+        "sha256": "4b5289f83f4385044c0b4ef616a0e722a8affd18fdffa9ed831130af6934d979"
+      }
+    ],
+    "allActualCompiledCopiesEqual": true
+  }
+}

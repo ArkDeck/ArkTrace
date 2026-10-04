@@ -6,11 +6,13 @@ import Foundation
 /// Key admission is bounded logical storage, not a Foundation allocator/RSS
 /// measurement. The typed decoder remains responsible for values and schema.
 enum RustJSONShape {
-    static func validate(_ data: Data, staging: RustRetainedStorage, integerNumbersOnly: Bool = false) throws {
-        guard (1...(16 * 1024 * 1024)).contains(data.count) else { throw RustAdmission.invalidBuffer }
+    static func validate(_ data: Data, staging: RustRetainedStorage, integerNumbersOnly: Bool = false,
+                         maximumInputBytes: Int = 16 * 1024 * 1024, maximumArrayElements: Int = 100_000) throws {
+        guard (1...(64 * 1024 * 1024)).contains(maximumInputBytes), (1...1_000_000).contains(maximumArrayElements),
+              (1...maximumInputBytes).contains(data.count) else { throw RustAdmission.invalidBuffer }
         let credit = try staging.reserve(min(data.count, 16 * 1024) * 2 + 4096)
         defer { withExtendedLifetime(credit) {} }
-        let scanner = Scanner(data, integerNumbersOnly: integerNumbersOnly)
+        let scanner = Scanner(data, integerNumbersOnly: integerNumbersOnly, maximumArrayElements: maximumArrayElements)
         try scanner.value(depth: 0)
         try scanner.whitespace()
         guard scanner.offset == data.count else { throw RustAdmission.invalidBuffer }
@@ -21,7 +23,10 @@ enum RustJSONShape {
         var offset = 0
         private var activeKeyBytes = 0
         private let integerNumbersOnly: Bool
-        init(_ data: Data, integerNumbersOnly: Bool) { self.data = data; self.integerNumbersOnly = integerNumbersOnly }
+        private let maximumArrayElements: Int
+        init(_ data: Data, integerNumbersOnly: Bool, maximumArrayElements: Int) {
+            self.data = data; self.integerNumbersOnly = integerNumbersOnly; self.maximumArrayElements = maximumArrayElements
+        }
         private var next: UInt8? { offset < data.count ? data[data.startIndex + offset] : nil }
 
         private func advance() throws {
@@ -74,7 +79,7 @@ enum RustJSONShape {
             if next == 93 { try advance(); return }
             var count = 0
             while true {
-                guard count < 100_000 else { throw RustAdmission.outputLimit }
+                guard count < maximumArrayElements else { throw RustAdmission.outputLimit }
                 try value(depth: depth); count += 1; try whitespace()
                 if next == 93 { try advance(); return }
                 try take(44); try whitespace()
@@ -121,7 +126,7 @@ enum RustJSONShape {
             let start = offset
             if next == 45 { try advance() }
             if next == 48 { try advance() } else { try digits() }
-            // These two typed cold schemas have no floating fields.
+            // These typed cold schemas have no floating fields.
             // Foundation would otherwise accept 1.0/1e0 as an integer.
             if integerNumbersOnly, next == 46 || next == 101 || next == 69 { throw RustAdmission.invalidBuffer }
             if next == 46 { try advance(); try digits() }

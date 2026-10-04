@@ -21,8 +21,10 @@ final class RustColdContext: Sendable {
     let staging: RustRetainedStorage
     var bytes: [UInt8] { state.withLock { $0.bytes } }
 
-    init(limit: Int, session: UInt64, request: UInt64, inputBytes: Int, staging: RustRetainedStorage) throws {
-        guard (1...100_000).contains(limit), (1...(16 * 1024 * 1024)).contains(inputBytes) else {
+    init(limit: Int, session: UInt64, request: UInt64, inputBytes: Int, staging: RustRetainedStorage,
+         maximumItems: Int = 100_000, maximumInputBytes: Int = 16 * 1024 * 1024) throws {
+        guard (1...1_000_000).contains(maximumItems), (1...(64 * 1024 * 1024)).contains(maximumInputBytes),
+              (1...maximumItems).contains(limit), (1...maximumInputBytes).contains(inputBytes) else {
             throw RustAdmission.invalidBuffer
         }
         self.limit = limit

@@ -67,10 +67,19 @@ public struct RustResult: Sendable {
         let data = unsafe Data(bytes: lease.pointer, count: count)
         return try await RustDirectoryDecoder.threads(data, identity: identity, request: requestIdentity, limit: limit)
     }
+    @concurrent
+    func summaryView(identity: RustSessionIdentity, query: RustSummaryQuery) async throws -> RustSummaryView {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustSummaryDecoder.decode(data, identity: identity, request: requestIdentity, query: query)
+    }
     /// Caller-directed materialization. Returned DTOs and allocations made by
     /// the caller's Decodable implementation are caller-owned; only the
     /// explicit temporary JSON copy is charged here. Product directory paths
-    /// use RustSession.processes/threads and their retained packed owners.
+    /// use RustSession.processes/threads/summaryFacts and retained packed owners.
     @concurrent
     public func decode<Body: Decodable & Sendable>(_ type: Body.Type) async throws -> Body {
         precondition(!Thread.isMainThread)

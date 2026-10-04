@@ -304,7 +304,7 @@ public actor RustEngine {
     public static func developmentDirectoryStorageCounts() -> (bytes: Int, owners: Int, stagingBytes: Int, stagingOwners: Int) {
         developmentColdStorageCounts()
     }
-    /// The shared counters include all typed directory and opening owners;
+    /// The shared counters include typed directory, opening and summary owners;
     /// legacy directory diagnostics above preserve their existing call shape.
     public static func developmentColdStorageCounts() -> (bytes: Int, owners: Int, stagingBytes: Int, stagingOwners: Int) {
         let staging = RustDirectoryDecoder.developmentStagingCounts

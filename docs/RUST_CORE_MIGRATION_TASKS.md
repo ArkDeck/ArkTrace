@@ -436,8 +436,9 @@ Windows、性能与 App 验收仍未完成。详见[batch 与读池记录](migra
 typed request，保持各领域不同的前缀/匹配/DISTINCT 语义及缺失能力；独立跨语句 SQL
 VM work policy 与 decoded credit 约束工作。4 份冻结 DB 的 9 个成功事实和 5 个预期
 失败、两条真实 Trace 的 4 次包外 SDK 查询通过。机器质量明确移除人类 prose 并保留
-有序结构化事实；typed retained summary、Core warning/repository/App 适配与完整
-009/012 验收继续待办，见[native summaryFacts 记录](migration-runs/AT-RUST-007-012-2026-10-04-native-summary-facts.md)。
+有序结构化事实；Core warning/repository/App 适配与完整 009/012 验收继续待办，
+见[native summaryFacts 记录](migration-runs/AT-RUST-007-012-2026-10-04-native-summary-facts.md)。
+随后接通共享保留预算的 typed summary views，见[typed summary SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
 
 交付：
 
@@ -754,6 +755,14 @@ nil，未冒充文本检查。其它响应、aggregate/RSS、App 切换与发布
 真实 trace 的完整 native opening 对照及18页目录回归通过。独立同DB原Swift metadata
 对照、Core machine quality 适配、其他 typed responses、summaryFacts 与 App/发行/
 最终验收仍未完成，见[typed opening SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-opening-sdk.md)。
+
+同日新增 `RustSession.summaryFacts()` 的闭合 typed 保留视图：七类 bounded count、
+来源集合/记录/UTF-8 和有序质量事实共用 opening/directory 的 ARC credit。35 项 SDK
+测试、四个实际借用编译反例、两条真实 Trace 的 4 次独立原 Swift golden 对照通过；
+256-owner 跨三类拒绝、释放后恢复、close/shutdown 后视图与提取文本不变、最终
+配额归零已实测。million-item native 查询边界保留，SDK 存储 admission 可更早拒绝。
+Core warning materialization、其他响应、repository/App 接线与完整 012/013/macOS
+验收仍未完成，见[typed summary SDK 记录](migration-runs/AT-RUST-012-2026-10-04-typed-summary-sdk.md)。
 
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 

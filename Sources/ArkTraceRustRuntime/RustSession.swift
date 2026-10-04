@@ -29,6 +29,10 @@ public final class RustSession: Sendable {
     public func snapshot(_ query: RustViewportQuery, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustSnapshot? {
         try await engine.snapshot(handle, query: query, timeoutMilliseconds: timeoutMilliseconds)
     }
+    public func summaryFacts(_ query: RustSummaryQuery = RustSummaryQuery(), timeoutMilliseconds: UInt32 = 30_000) async throws -> RustSummaryView {
+        let result = try await engine.query(handle, request: .summaryFacts(query), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.summaryView(identity: RustSessionIdentity(engine: engine.identity, session: handle), query: query)
+    }
     public func close() async throws { try await engine.closeSession(handle) }
     deinit {
         let engine = engine, handle = handle
