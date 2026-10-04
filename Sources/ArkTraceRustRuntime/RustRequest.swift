@@ -29,6 +29,7 @@ public struct RustRequest: Encodable, Sendable {
     public static func batch(_ query: RustBatchQuery) -> Self { Self("batch", query) }
     static func batchDetails(_ query: RustBatchQuery) -> Self { Self("batchDetails", query) }
     static func batchDetailsWithDeadlines(_ query: RustWireDeadlineBatch) -> Self { Self("batchDetailsWithDeadlines", query) }
+    static func queryWithDeadline(_ query: RustWireDeadlineQuery) -> Self { Self("queryWithDeadline", query) }
     public static func search(_ query: RustSearchQuery) -> Self { Self("search", query) }
     public static func analyze(_ query: RustAnalysisQuery) -> Self { Self("analyze", query) }
     public static func cpuSlices(_ query: RustCPUQuery) -> Self { Self("cpuSlices", query) }

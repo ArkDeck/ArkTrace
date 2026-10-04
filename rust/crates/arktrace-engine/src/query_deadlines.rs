@@ -2,6 +2,55 @@ use arktrace_contract::{ContractError, TraceRepositoryEventBatch};
 use arktrace_platform::ContinuousDeadline;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(
+    tag = "operation",
+    content = "query",
+    rename_all = "camelCase",
+    deny_unknown_fields
+)]
+pub enum DeadlineRepositoryQuery {
+    Processes(arktrace_contract::ProcessQuery),
+    SummaryFacts(arktrace_contract::TraceSummaryQuery),
+    Frames(arktrace_contract::TraceFrameQuery),
+    Arguments(arktrace_contract::TraceArgumentQuery),
+}
+impl DeadlineRepositoryQuery {
+    pub fn validate(&self) -> Result<(), ContractError> {
+        match self {
+            Self::Processes(q) => q.validate(),
+            Self::SummaryFacts(q) => q.validate(),
+            Self::Frames(q) => q.validate(),
+            Self::Arguments(q) => q.validate(),
+        }
+    }
+}
+fn required_deadline<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Option<ContinuousDeadline>, D::Error> {
+    Option::deserialize(deserializer)
+}
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct DeadlineQuery {
+    pub clock: QueryClock,
+    // A null processes deadline is explicit; missing policy is not inferred.
+    #[serde(deserialize_with = "required_deadline")]
+    pub deadline: Option<ContinuousDeadline>,
+    pub query: DeadlineRepositoryQuery,
+}
+impl DeadlineQuery {
+    pub fn validate(&self) -> Result<(), ContractError> {
+        if self.deadline.is_some_and(|d| !d.is_valid())
+            || (self.deadline.is_none()
+                && !matches!(self.query, DeadlineRepositoryQuery::Processes(_)))
+        {
+            return Err(ContractError::InvalidEventQuery);
+        }
+        self.query.validate()
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum QueryClock {
@@ -91,6 +140,66 @@ impl DeadlineBatch {
 mod tests {
     use super::*;
     use serde_json::{Value, json};
+    #[test]
+    fn scalar_resource_policy_is_explicit_and_only_processes_may_have_nil() {
+        for (operation, query) in [
+            ("processes", json!({"nameMatch":"exact","limit":1})),
+            (
+                "summaryFacts",
+                json!({"range":null,"maximumRowsPerSection":1,"maximumEventsPerSection":2}),
+            ),
+            ("frames", json!({"range":{"startNs":0,"endNs":1},"limit":1})),
+            ("arguments", json!({"argSetID":i64::MIN,"limit":64})),
+        ] {
+            let value = json!({"clock":"hostContinuousEpochV1","deadline":{"seconds":i64::MAX,"attoseconds":1},"query":{"operation":operation,"query":query}});
+            let request: DeadlineQuery = serde_json::from_value(value.clone()).unwrap();
+            request.validate().unwrap();
+            let mut nil = value.clone();
+            nil["deadline"] = Value::Null;
+            let request: DeadlineQuery = serde_json::from_value(nil).unwrap();
+            assert_eq!(request.validate().is_ok(), operation == "processes");
+            let mut missing = value.clone();
+            missing.as_object_mut().unwrap().remove("deadline");
+            assert!(serde_json::from_value::<DeadlineQuery>(missing).is_err());
+            let mut malformed = value;
+            malformed["query"]["query"]["rawSQL"] = json!("SELECT 1");
+            assert!(serde_json::from_value::<DeadlineQuery>(malformed).is_err());
+        }
+    }
+    #[test]
+    fn scalar_deadline_envelope_cannot_recurse_or_accept_unknown_clocks_or_float_parts() {
+        let original = json!({"clock":"hostContinuousEpochV1","deadline":{"seconds":0,"attoseconds":1},"query":{"operation":"processes","query":{"nameMatch":"exact","limit":1}}});
+        for op in [
+            "queryWithDeadline",
+            "batchDetailsWithDeadlines",
+            "threads",
+            "cpuSlices",
+            "search",
+        ] {
+            let mut value = original.clone();
+            value["query"]["operation"] = json!(op);
+            assert!(serde_json::from_value::<DeadlineQuery>(value).is_err());
+        }
+        for malformed in [
+            json!({"seconds":1.0,"attoseconds":0}),
+            json!({"seconds":0,"attoseconds":0,"relativeMilliseconds":1}),
+        ] {
+            let mut value = original.clone();
+            value["deadline"] = malformed;
+            assert!(serde_json::from_value::<DeadlineQuery>(value).is_err());
+        }
+        let mut value = original.clone();
+        value["clock"] = json!("wall");
+        assert!(serde_json::from_value::<DeadlineQuery>(value).is_err());
+        let mut value = original;
+        value["deadline"] = json!({"seconds":-1,"attoseconds":1});
+        assert!(
+            serde_json::from_value::<DeadlineQuery>(value)
+                .unwrap()
+                .validate()
+                .is_err()
+        );
+    }
     fn fixture() -> DeadlineBatch {
         serde_json::from_value(json!({
             "batch": {

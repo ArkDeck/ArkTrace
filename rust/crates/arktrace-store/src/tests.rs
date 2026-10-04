@@ -950,6 +950,112 @@ mod native_indexing {
         );
     }
     #[test]
+    fn scalar_deadlines_keep_directory_nil_and_summary_validation_order() {
+        use arktrace_contract::*;
+        let fixture = Fixture::new("INSERT INTO process VALUES(1,10,'p',100);");
+        let reader = ready_reader(&fixture);
+        let past = Some(arktrace_platform::ContinuousDeadline {
+            seconds: 0,
+            attoseconds: 1,
+        });
+        let process = ProcessQuery {
+            process_key: None,
+            pid: None,
+            name: None,
+            name_match: DirectoryNameMatch::Exact,
+            limit: 1,
+        };
+        assert_eq!(
+            reader
+                .with_query_deadline(past, || reader.processes(&process, &budget()))
+                .unwrap_err(),
+            StoreError::DeadlineExceeded
+        );
+        assert_eq!(
+            reader
+                .with_query_deadline(None, || reader.processes(&process, &budget()))
+                .unwrap()
+                .items
+                .len(),
+            1
+        );
+        let summary = TraceSummaryQuery {
+            range: None,
+            maximum_rows_per_section: 1,
+            maximum_events_per_section: 1,
+        };
+        assert_eq!(
+            reader
+                .with_query_deadline(past, || reader.summary_facts(&summary, &budget()))
+                .unwrap_err(),
+            StoreError::DeadlineExceeded
+        );
+        let invalid = TraceSummaryQuery {
+            range: Some(TraceTimeRange::query(0, 901).unwrap()),
+            ..summary
+        };
+        assert_eq!(
+            reader
+                .with_query_deadline(past, || reader.summary_facts(&invalid, &budget()))
+                .unwrap_err(),
+            StoreError::InvalidSummaryQuery
+        );
+        assert_eq!(
+            reader
+                .summary_facts(&summary, &budget())
+                .unwrap()
+                .process_count
+                .value,
+            1
+        );
+    }
+    #[test]
+    fn frame_and_argument_expired_deadlines_respect_capability_before_sql() {
+        use arktrace_contract::*;
+        let enabled = "INSERT INTO process VALUES(1,10,'p',100);
+            CREATE TABLE frame_slice(id INTEGER,ts INTEGER,dur INTEGER,vsync INTEGER,ipid INTEGER,type INTEGER,flag INTEGER);
+            INSERT INTO frame_slice VALUES(1,100,20,1,1,0,1);
+            ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+            INSERT INTO callstack VALUES(1,100,20,0,'slice',7);
+            CREATE TABLE args(key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);
+            CREATE TABLE data_dict(id INTEGER,data TEXT);
+            CREATE TABLE data_type(typeId INTEGER,desc TEXT);
+            INSERT INTO data_dict VALUES(1,'key'),(2,'text');
+            INSERT INTO data_type VALUES(1,'string');
+            INSERT INTO args VALUES(1,1,2,7);";
+        for (extra, available) in [("", false), (enabled, true)] {
+            let fixture = Fixture::new(extra);
+            let reader = ready_reader(&fixture);
+            let past = Some(arktrace_platform::ContinuousDeadline {
+                seconds: 0,
+                attoseconds: 0,
+            });
+            let frame = TraceFrameQuery {
+                range: TraceTimeRange::query(0, 900).unwrap(),
+                process_key: None,
+                limit: 1,
+            };
+            let argument = TraceArgumentQuery {
+                arg_set_id: 7,
+                limit: 64,
+            };
+            let frames = reader.with_query_deadline(past, || reader.frames(&frame, &budget()));
+            let args = reader.with_query_deadline(past, || reader.arguments(&argument, &budget()));
+            if available {
+                assert_eq!(frames.unwrap_err(), StoreError::DeadlineExceeded);
+                assert_eq!(args.unwrap_err(), StoreError::DeadlineExceeded);
+                assert_eq!(reader.frames(&frame, &budget()).unwrap().items.len(), 1);
+                assert_eq!(
+                    reader.arguments(&argument, &budget()).unwrap().items.len(),
+                    1
+                );
+            } else {
+                assert!(!frames.unwrap().capability_available);
+                assert!(!args.unwrap().capability_available);
+            }
+        }
+    }
+    #[test]
     fn native_descriptor_reopens_are_stable_under_concurrent_worker_churn() {
         use std::sync::{Arc, Barrier};
         let fixture = Fixture::new("");

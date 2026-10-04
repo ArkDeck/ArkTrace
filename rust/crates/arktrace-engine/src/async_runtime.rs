@@ -277,6 +277,7 @@ pub enum RepositoryRequest {
     Batch(TraceRepositoryEventBatch),
     BatchDetails(TraceRepositoryEventBatch),
     BatchDetailsWithDeadlines(crate::DeadlineBatch),
+    QueryWithDeadline(crate::DeadlineQuery),
     Search(TraceSearchRequest),
     Analyze {
         request: crate::BoundedAnalysisRequest,
@@ -334,6 +335,7 @@ impl RepositoryRequest {
             }
             Self::Batch(q) | Self::BatchDetails(q) => q.validate(),
             Self::BatchDetailsWithDeadlines(q) => q.validate(),
+            Self::QueryWithDeadline(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::Analyze { request, scope } => {
                 return request
@@ -959,6 +961,30 @@ fn query(
     }
     let b = &command.budget;
     match query {
+        RepositoryRequest::QueryWithDeadline(q) => match &q.query {
+            crate::DeadlineRepositoryQuery::Processes(query) => {
+                read!(session.processes_with_deadline(query, q.deadline, b))
+            }
+            crate::DeadlineRepositoryQuery::SummaryFacts(query) => {
+                read!(session.summary_facts_with_deadline(
+                    query,
+                    q.deadline.ok_or(RuntimeFailure::InvalidRequest)?,
+                    b
+                ))
+            }
+            crate::DeadlineRepositoryQuery::Frames(query) => read!(session.frames_with_deadline(
+                query,
+                q.deadline.ok_or(RuntimeFailure::InvalidRequest)?,
+                b
+            )),
+            crate::DeadlineRepositoryQuery::Arguments(query) => {
+                read!(session.arguments_with_deadline(
+                    query,
+                    q.deadline.ok_or(RuntimeFailure::InvalidRequest)?,
+                    b
+                ))
+            }
+        },
         RepositoryRequest::SummaryFacts(q) => read!(session.summary_facts(q, b)),
         RepositoryRequest::Processes(q) => read!(session.processes(q, b)),
         RepositoryRequest::Threads(q) => read!(session.threads(q, b)),

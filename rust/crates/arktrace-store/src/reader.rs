@@ -241,7 +241,9 @@ impl StoreReader {
             )
         })
     }
-    pub(crate) fn with_query_deadline<T>(
+    /// Scoped same-host query policy. It does not replace the caller's whole
+    /// operation budget, nor recheck a completed value during serialization.
+    pub fn with_query_deadline<T>(
         &self,
         deadline: Option<ContinuousDeadline>,
         body: impl FnOnce() -> Result<T, StoreError>,

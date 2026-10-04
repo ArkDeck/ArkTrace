@@ -184,6 +184,7 @@ pub(crate) enum Operation {
     Batch(TraceRepositoryEventBatch),
     BatchDetails(TraceRepositoryEventBatch),
     BatchDetailsWithDeadlines(arktrace_engine::DeadlineBatch),
+    QueryWithDeadline(arktrace_engine::DeadlineQuery),
     Search(TraceSearchRequest),
     Analyze(Analyze),
 }
@@ -231,6 +232,7 @@ impl Operation {
             Self::Density(q) => q.validate(),
             Self::Batch(q) | Self::BatchDetails(q) => q.validate(),
             Self::BatchDetailsWithDeadlines(q) => q.validate(),
+            Self::QueryWithDeadline(q) => q.validate(),
             Self::Search(q) => q.validate(),
             Self::ViewerDetails(q) => {
                 return arktrace_viewer::detail_query(&q.source, q.range, q.limit)
@@ -297,6 +299,7 @@ impl Operation {
             Self::Batch(q) => Q::Batch(q),
             Self::BatchDetails(q) => Q::BatchDetails(q),
             Self::BatchDetailsWithDeadlines(q) => Q::BatchDetailsWithDeadlines(q),
+            Self::QueryWithDeadline(q) => Q::QueryWithDeadline(q),
             Self::Search(q) => Q::Search(q),
             Self::Analyze(q) => Q::Analyze {
                 request: q.request,
@@ -317,6 +320,19 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
+    #[test]
+    fn scalar_deadline_operation_uses_closed_native_admission() {
+        let valid = serde_json::json!({"operation":"queryWithDeadline","query":{"clock":"hostContinuousEpochV1","deadline":null,"query":{"operation":"processes","query":{"nameMatch":"exact","limit":1}}}});
+        let value: Operation = decode(&serde_json::to_vec(&valid).unwrap()).unwrap();
+        value.validate().unwrap();
+        let mut malformed = valid.clone();
+        malformed["query"]["query"]["query"]["limit"] = 100001.into();
+        let value: Operation = decode(&serde_json::to_vec(&malformed).unwrap()).unwrap();
+        assert_eq!(value.validate(), Err(STATUS_INVALID_INPUT));
+        let mut malformed = valid;
+        malformed["query"]["query"]["operation"] = "queryWithDeadline".into();
+        assert!(decode::<Operation>(&serde_json::to_vec(&malformed).unwrap()).is_err());
+    }
 
     #[test]
     fn timed_detail_batch_admission_requires_paired_closed_absolute_deadlines() {

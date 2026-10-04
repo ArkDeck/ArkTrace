@@ -17,7 +17,7 @@ from test_macos_rust_sdk import ROOT
 
 
 def build_reference(kind="event"):
-    assert kind in ("event", "density", "batch", "deadline")
+    assert kind in ("event", "density", "batch", "deadline", "repository")
     name = kind.title() + "OriginalOracle"
     cache = Path(os.environ.get("ARKTRACE_EVENT_ORACLE_CACHE_ROOT", "/private/tmp/arktrace-" + kind + "-reference"))
     assert cache.is_absolute() and not cache.resolve().is_relative_to(ROOT) and not cache.is_symlink()
@@ -30,12 +30,14 @@ def build_reference(kind="event"):
     target = source / "Sources" / name
     target.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(ROOT / "scripts/swift-sdk-core/EventProofModel.swift", target / "EventProofModel.swift")
-    if kind in ("density", "batch", "deadline"):
+    if kind in ("density", "batch", "deadline", "repository"):
         shutil.copyfile(ROOT / "scripts/swift-sdk-core/DensityProofModel.swift", target / "DensityProofModel.swift")
-    if kind in ("batch", "deadline"):
+    if kind in ("batch", "deadline", "repository"):
         shutil.copyfile(ROOT / "scripts/swift-sdk-core/BatchProofModel.swift", target / "BatchProofModel.swift")
-    if kind == "deadline":
+    if kind in ("deadline", "repository"):
         shutil.copyfile(ROOT / "scripts/swift-sdk-core/DeadlineProofModel.swift", target / "DeadlineProofModel.swift")
+    if kind == "repository":
+        shutil.copyfile(ROOT / "scripts/swift-sdk-core/RepositoryProofModel.swift", target / "RepositoryProofModel.swift")
     main = kind.title() + "SDKOriginal.swift"
     shutil.copyfile(ROOT / "rust/crates/arktrace-store/oracle" / main, target / main)
     shutil.copytree(ROOT / "scripts", source / "scripts", dirs_exist_ok=True)

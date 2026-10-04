@@ -93,8 +93,8 @@ impl SummarySchema {
         query
             .validate()
             .map_err(|_| StoreError::InvalidSummaryQuery)?;
-        db.check()?;
         let window = Window::new(inspection, query)?;
+        db.check()?;
         let db = db.summary_request(SUMMARY_VM_STEPS)?;
         let event_limit = query.maximum_events_per_section;
         let mut issues = Vec::new();

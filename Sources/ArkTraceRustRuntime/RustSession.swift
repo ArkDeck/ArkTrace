@@ -7,6 +7,7 @@ public final class RustSession: Sendable {
     private let engine: RustEngine
     private let handle: UInt64
     public let opening: RustResult
+    var identity: RustSessionIdentity { RustSessionIdentity(engine: engine.identity, session: handle) }
     init(engine: RustEngine, handle: UInt64, opening: RustResult) {
         self.engine = engine; self.handle = handle; self.opening = opening
     }

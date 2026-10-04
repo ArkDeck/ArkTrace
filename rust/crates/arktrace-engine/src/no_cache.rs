@@ -353,6 +353,60 @@ impl NoCacheSession {
         self.query_reader(budget)?;
         result
     }
+    fn read_with_deadline<T>(
+        &self,
+        deadline: Option<arktrace_platform::ContinuousDeadline>,
+        budget: &EngineBudget,
+        query: impl FnOnce(&StoreReader, &arktrace_store::ValidationBudget) -> Result<T, StoreError>,
+    ) -> Result<T, EngineError> {
+        let reader = self.query_reader(budget)?;
+        let validation = budget.validation();
+        let result = reader.with_query_deadline(deadline, || query(reader, &validation));
+        // Restore slot policy before revalidating the session, so a completed
+        // value cannot retroactively time out during final Ready validation.
+        self.query_reader(budget)?;
+        result.map_err(|e| failure(EngineStage::Querying, EngineFailure::Store(e)))
+    }
+    pub fn processes_with_deadline(
+        &self,
+        query: &ProcessQuery,
+        deadline: Option<arktrace_platform::ContinuousDeadline>,
+        budget: &EngineBudget,
+    ) -> Result<DirectoryPage<TraceProcess>, EngineError> {
+        self.read_with_deadline(deadline, budget, |reader, budget| {
+            reader.processes(query, budget)
+        })
+    }
+    pub fn summary_facts_with_deadline(
+        &self,
+        query: &arktrace_contract::TraceSummaryQuery,
+        deadline: arktrace_platform::ContinuousDeadline,
+        budget: &EngineBudget,
+    ) -> Result<arktrace_contract::TraceSummaryFacts, EngineError> {
+        self.read_with_deadline(Some(deadline), budget, |reader, budget| {
+            reader.summary_facts(query, budget)
+        })
+    }
+    pub fn frames_with_deadline(
+        &self,
+        query: &TraceFrameQuery,
+        deadline: arktrace_platform::ContinuousDeadline,
+        budget: &EngineBudget,
+    ) -> Result<EventPage<TraceFrame>, EngineError> {
+        self.read_with_deadline(Some(deadline), budget, |reader, budget| {
+            reader.frames(query, budget)
+        })
+    }
+    pub fn arguments_with_deadline(
+        &self,
+        query: &TraceArgumentQuery,
+        deadline: arktrace_platform::ContinuousDeadline,
+        budget: &EngineBudget,
+    ) -> Result<EventPage<TraceEventArgument>, EngineError> {
+        self.read_with_deadline(Some(deadline), budget, |reader, budget| {
+            reader.arguments(query, budget)
+        })
+    }
     pub fn threads(
         &self,
         query: &ThreadQuery,

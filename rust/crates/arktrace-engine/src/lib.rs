@@ -9,7 +9,9 @@ pub use async_runtime::{
     RuntimeConfiguration, RuntimeFailure, RuntimeLimits, SessionState, SessionStatus,
     WorkerBoundary,
 };
-pub use query_deadlines::{BatchQueryDeadlines, DeadlineBatch, QueryClock};
+pub use query_deadlines::{
+    BatchQueryDeadlines, DeadlineBatch, DeadlineQuery, DeadlineRepositoryQuery, QueryClock,
+};
 mod handles;
 #[cfg(any(target_os = "macos", test))]
 mod owned_result;
