@@ -1073,6 +1073,8 @@ CI
 记录随实现提交，不为了回填状态单独制造任务或改写已签名历史 evidence。
 缺某个发布输入时继续可独立推进的软件，最终 020 保留其验收缺口。
 
+2026-10-05 原生产品运行时增量：显式 SDK 图下同一固定 Engine 接入 document controller、后台维护和 Settings inventory/purge。真实 Trace 的模型机器事实、双窗口保护、标注/收藏重开及 purge/reparse 通过；修复 sidecar 0644 导致 native Ready 拒绝，并把兼容 IO 移出 MainActor、在关闭前排空。500 Rust、78 SDK、92 原生 AppSupport、609 默认 Swift（6 opt-in skips）和适用 API/App/contract gates 通过。默认 App、native held-FD sidecar、旧 cache import、hot snapshot、性能/发行/ArkDeck 和 macOS 总验收未完成；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)，goal 保持 active。
+
 2026-10-04 typed event SDK 增量：七类 cold page 与 Core 兼容复制已接入 retained owner；SDK `sliceDetails` 保留 nullable Inspector handle，旧机器输出保持原形状。50 SDK tests、三份真实 Trace 42 次同 Ready DB 原 Swift 对照、457 Rust all-features tests、production SDK/API/default Swift/App 构建通过。实际语料的非空 frames/arguments 与非 null Inspector handle、App cutover 和整体 macOS 验收仍未通过。实际告警、失败与 CI 状态见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-event-sdk.md)；goal 保持 active。
 
 2026-10-04 density SDK 增量：retained sparse bucket/color identity/quality 与 Core 复制已接通；56 SDK tests、110 独立原 Swift 成功向量、最小真实 Trace 14 次同 Ready DB 对照及关闭后读取通过。逐 query deadline/batch、共享 repository、App cutover 和 macOS 总验收仍未完成。新增私有 immutable Ready supplement；工具告警、输入边界与实际 CI 状态见 [本轮记录](migration-runs/AT-RUST-012-2026-10-04-density-sdk.md)，goal 保持 active。

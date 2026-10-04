@@ -35,8 +35,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 92567,
-      "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65"
+      "byteCount": 94072,
+      "sha256": "d44ca739c91fec01a2b7615dc8307e9a17d8da2fde206c927ecd191996e58928"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -54,14 +54,24 @@
       "sha256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622"
     },
     {
+      "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
+      "byteCount": 7691,
+      "sha256": "074b2649ae6a2131ee1714f7fb73190449474802d8439cef947d15fb6dda12bc"
+    },
+    {
       "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
       "byteCount": 9117,
       "sha256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e"
     },
     {
+      "path": "Sources/ArkTraceAppSupport/TraceViewStateAccess.swift",
+      "byteCount": 1568,
+      "sha256": "4689eb3423a5792f56bb66679745341eb2ffcf2be5f509938d98123ee26558fb"
+    },
+    {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
-      "byteCount": 4911,
-      "sha256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b"
+      "byteCount": 5677,
+      "sha256": "4507f5d6058f3c822d42f4e42b826675d0f98ab97f73d18be096cd2a6b022778"
     },
     {
       "path": "Sources/ArkTraceCore/Error/ArkTraceError.swift",
@@ -277,8 +287,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "5d3c96ec64e68235051ece7c7a72b282c12c4b1931a00e25fd8be442666b418b",
-      "byteCount": 94038
+      "sha256": "864899a1a83627c6f5c867547d5c823713243c3432b6222c91e79ef30a91f7b2",
+      "byteCount": 95543
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -288,15 +298,15 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "e8438374c5fb9fb9db851e3d60ce0284fb4f3662862831b854e1029f48f96090",
-    "byteCount": 5385
+    "sha256": "c35b31921ff449538f741b41b146d101dfbe5d4a1a04bfebb5b8dbc33dce7c45",
+    "byteCount": 5547
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "9b57fb3ff108ce78601aeef59e34a1982a3ca76463c21513b39dcdb99d276e65",
-      "byteCount": 92567
+      "sha256": "d44ca739c91fec01a2b7615dc8307e9a17d8da2fde206c927ecd191996e58928",
+      "byteCount": 94072
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -305,8 +315,8 @@
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
-      "sha256": "6e64a50a50b080bc217b376a9cf8d419639faa21b9675eb034d94b12c821777b",
-      "byteCount": 4911
+      "sha256": "4507f5d6058f3c822d42f4e42b826675d0f98ab97f73d18be096cd2a6b022778",
+      "byteCount": 5677
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineModels.swift",
@@ -380,6 +390,6 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "f1ba02030316d10a046847ffdf055f1627757a9b",
-  "previousReceiptSHA256": "741e13810c42e610b0f89adf151c7790570471d2e4c08e38615062507869aef8"
+  "revalidatedBaseCommit": "10d805ad398a067ecfd925d05dbdce84ff358e7c",
+  "previousReceiptSHA256": "61e77f35778d61bd602aec2ce2ad14d6d6e32e6627db4e4d58f5a4650038f844"
 }

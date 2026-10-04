@@ -6,6 +6,7 @@ private enum AnnotationOracleProbe {
     static var reveals: [TraceTimeRange] = []
 }
 extension TraceDocumentController {
+    func annotationOracleFlushPersistence() async { await viewStateWriter?.flush() }
     var annotationOracleNextID: Int { nextAnnotationID }
     static func annotationOracleBegin() {
         AnnotationOracleProbe.enabled = true

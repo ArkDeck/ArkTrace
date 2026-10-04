@@ -127,7 +127,10 @@ public actor RustEngine {
         return result
     }
 
-    public func open(_ source: URL, format: RustSourceFormat, timeoutMilliseconds: UInt32 = 60_000) async throws -> RustSession {
+    /// Coarse native poll stages; the current ABI carries no within-stage
+    /// fraction and combines cache lookup with the opening preparation phase.
+    public func open(_ source: URL, format: RustSourceFormat, timeoutMilliseconds: UInt32 = 60_000,
+                     progress: RustOpenProgressHandler? = nil) async throws -> RustSession {
         guard !draining else { throw RustAdmission.closed }
         guard source.isFileURL else { throw RustAdmission.invalidInput }
         let data = Data(source.path.utf8)
@@ -149,7 +152,7 @@ public actor RustEngine {
         let ticket = (out.session, out.request)
         sessions[ticket.0] = false; requests.insert(ticket.1)
         do {
-            let result = try await finishResult(ticket.1)
+            let result = try await finishResult(ticket.1, progress: progress)
             if result.kind == ARKTRACE_RESULT_FAILURE { _ = try await result.decode(RustOpenResult.self) }
             return RustSession(engine: self, handle: ticket.0, opening: result)
         } catch {
@@ -211,16 +214,24 @@ public actor RustEngine {
             try checkAdmission(code); requests.insert(id); return id
         }
     }
-    private func wait(_ request: UInt64) async throws -> UInt32 {
+    private func wait(_ request: UInt64, progress: TraceProgressHandler? = nil) async throws -> UInt32 {
         let handle = lease.handle
         let deadline = ContinuousClock.now.advanced(by: .seconds(360))
+        var lastProgress: TraceLoadingProgress?
         while true {
             try Task.checkCancellation()
-            let state = try await retryAdmission(until: deadline) {
+            let status: (UInt32, UInt32) = try await retryAdmission(until: deadline) {
                 var out = ArkTracePollStatus()
                 try unsafe checkAdmission(arktrace_request_poll(handle, request, &out, UInt64(MemoryLayout<ArkTracePollStatus>.size)))
-                return out.state
+                guard out.struct_size == UInt32(MemoryLayout<ArkTracePollStatus>.size), out.reserved == 0,
+                      (ARKTRACE_REQUEST_QUEUED...ARKTRACE_REQUEST_FAILED).contains(out.state) else { throw RustAdmission.invalidBuffer }
+                return (out.state, out.progress)
             }
+            if let progress, let next = try RustOpeningProgress.decode(status.1), next != lastProgress {
+                lastProgress = next
+                progress(next)
+            }
+            let state = status.0
             if state == ARKTRACE_REQUEST_SUCCEEDED || state == ARKTRACE_REQUEST_FAILED { return state }
             guard ContinuousClock.now < deadline else { throw RustAdmission.busy }
             try await Task.sleep(for: .milliseconds(1))
@@ -235,9 +246,9 @@ public actor RustEngine {
             catch { let owner = unsafe out.owner; RustCleanup.schedule { try await releaseResultOwner(owner) }; throw error }
         }
     }
-    private func finishResult(_ request: UInt64) async throws -> RustResult {
+    private func finishResult(_ request: UInt64, progress: TraceProgressHandler? = nil) async throws -> RustResult {
         do {
-            _ = try await wait(request)
+            _ = try await wait(request, progress: progress)
             let result = try await acquireResult(request)
             try await releaseRequest(request)
             try Task.checkCancellation()

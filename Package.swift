@@ -21,6 +21,7 @@ let firstPartySwiftSettings: [SwiftSetting] = [
 // frozen with the release artifact; there is no floating network fallback.
 let nativeSDKPath = ProcessInfo.processInfo.environment["ARKTRACE_RUST_XCFRAMEWORK"]
 let nativeSDKFixtures = ProcessInfo.processInfo.environment["ARKTRACE_RUST_SDK_FIXTURES"] == "1"
+let nativeAppSupportDependencies: [Target.Dependency] = nativeSDKPath == nil ? [] : ["ArkTraceRustRuntime"]
 let nativeProducts: [Product] = nativeSDKPath == nil ? [] : [
     .library(name: "ArkTraceRustRuntime", targets: ["ArkTraceRustRuntime"])
 ] + (nativeSDKFixtures ? [.executable(name: "ArkTraceRustCoreConformance", targets: ["ArkTraceRustCoreConformance"])] : [])
@@ -35,7 +36,7 @@ let nativeTargets: [Target] = if let nativeSDKPath {
     ] + (nativeSDKFixtures ? [
         // Package-scoped Core DTOs are intentionally not promoted for tests.
         // This development-only consumer exercises the actual shared adapter.
-        .executableTarget(name: "ArkTraceRustCoreConformance", dependencies: ["ArkTraceCore", "ArkTraceRustRuntime"],
+        .executableTarget(name: "ArkTraceRustCoreConformance", dependencies: ["ArkTraceCore", "ArkTraceRustRuntime", "ArkTraceAppSupport"],
             path: "scripts/swift-sdk-core", swiftSettings: firstPartySwiftSettings + [.unsafeFlags(["-parse-as-library"])])
     ] : [])
 } else { [] }
@@ -89,8 +90,8 @@ let package = Package(
             dependencies: [
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering",
-            ],
-            swiftSettings: firstPartySwiftSettings
+            ] + nativeAppSupportDependencies,
+            swiftSettings: firstPartySwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
         ),
         // Deliberately isolated from Core/Runtime/CLI. Device discovery and
         // capture are an explicit GUI capability; analysis products never
@@ -147,7 +148,7 @@ let package = Package(
             dependencies: [
                 "ArkTraceAppSupport", "ArkTraceCore", "ArkTraceParser",
                 "ArkTraceRuntime", "ArkTraceAnalysis", "ArkTraceRendering",
-            ]
+            ] + nativeAppSupportDependencies
         ),
         .testTarget(
             name: "ArkTraceCaptureTests",

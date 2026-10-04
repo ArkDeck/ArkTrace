@@ -2819,18 +2819,22 @@ public struct TraceCacheMaintenanceReport: Hashable, Sendable {
 /// engine. Original trace inputs are not part of this cache and can never be
 /// selected by this service.
 public actor TraceCacheMaintenanceService {
-    private let maintenance: TraceCacheMaintenance
+    private let maintenance: TraceCacheMaintenanceOperations
 
     public init(
         cacheDirectory: URL,
         stagingDirectory: URL,
         maximumEntries: Int = 4_096
     ) throws {
-        maintenance = try TraceCacheMaintenance(
+        maintenance = TraceCacheMaintenanceOperations(try TraceCacheMaintenance(
             cacheDirectory: cacheDirectory,
             stagingDirectory: stagingDirectory,
             maximumEntries: maximumEntries
-        )
+        ))
+    }
+
+    package init(operations: TraceCacheMaintenanceOperations) {
+        maintenance = operations
     }
 
     public func inventory() async throws -> TraceCacheInventory {

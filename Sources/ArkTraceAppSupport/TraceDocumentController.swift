@@ -471,11 +471,12 @@ public final class TraceDocumentController {
     public private(set) var timelineScrollRequest: TimelineScrollRequest?
 
     @ObservationIgnored private let opener: TraceDocumentOpener
-    @ObservationIgnored private let maintenance: TraceCacheMaintenance?
+    @ObservationIgnored private let maintenance: TraceCacheMaintenanceOperations?
     @ObservationIgnored private let recentStore: TraceRecentDocumentStore
     @ObservationIgnored private let signposts: TraceAppSignposts
     @ObservationIgnored private let loader = TimelineSnapshotLoader()
     @ObservationIgnored private var document: TraceOpenedDocument?
+    @ObservationIgnored private var viewStateWriter: TraceViewStateWriteQueue?
     @ObservationIgnored private var openTask: Task<Void, Never>?
     @ObservationIgnored private var viewportTask: Task<Void, Never>?
     @ObservationIgnored private var searchTask: Task<Void, Never>?
@@ -568,7 +569,7 @@ public final class TraceDocumentController {
         )
     }
 
-    init(
+    convenience init(
         recentStore: TraceRecentDocumentStore,
         maintenance: TraceCacheMaintenance?,
         signposts: TraceAppSignposts = TraceAppSignposts(
@@ -577,8 +578,24 @@ public final class TraceDocumentController {
         beforeCacheMaintenance: (@Sendable () async -> Void)? = nil,
         opener: @escaping TraceDocumentOpener
     ) {
+        self.init(
+            recentStore: recentStore,
+            maintenanceOperations: maintenance.map(TraceCacheMaintenanceOperations.init),
+            signposts: signposts,
+            beforeCacheMaintenance: beforeCacheMaintenance,
+            opener: opener
+        )
+    }
+
+    init(
+        recentStore: TraceRecentDocumentStore,
+        maintenanceOperations: TraceCacheMaintenanceOperations?,
+        signposts: TraceAppSignposts,
+        beforeCacheMaintenance: (@Sendable () async -> Void)? = nil,
+        opener: @escaping TraceDocumentOpener
+    ) {
         self.recentStore = recentStore
-        self.maintenance = maintenance
+        maintenance = maintenanceOperations
         self.signposts = signposts
         self.beforeCacheMaintenance = beforeCacheMaintenance
         self.opener = opener
@@ -613,6 +630,7 @@ public final class TraceDocumentController {
 
     deinit {
         let closing = document
+        let writer = viewStateWriter
         openTask?.cancel()
         viewportTask?.cancel()
         searchTask?.cancel()
@@ -621,7 +639,7 @@ public final class TraceDocumentController {
         argumentsTask?.cancel()
         densityResolutionTask?.cancel()
         if let closing {
-            Task { try? await closing.close() }
+            Task { await writer?.flush(); try? await closing.close() }
         }
     }
 
@@ -662,13 +680,20 @@ public final class TraceDocumentController {
     public func close() async {
         cancelOutstandingWork()
         documentGeneration &+= 1
+        let generation = documentGeneration
         let closing = document
+        let writer = viewStateWriter
+        viewStateWriter = nil
         do {
+            await writer?.flush()
             if let closing { try await closing.close() }
+            guard generation == documentGeneration else { return }
             document = nil
+            viewStateWriter = nil
             resetDocumentState()
             announce(.traceClosed)
         } catch {
+            guard generation == documentGeneration else { return }
             let typed = Self.typed(error, stage: .openingDatabase)
             errorPresentation = TraceAppErrorPresentation(error: typed)
             phase = .failed
@@ -1166,13 +1191,11 @@ public final class TraceDocumentController {
         persistViewState()
     }
 
-    /// One funnel for every mutation. The payload is a handful of records, so
-    /// writing straight through keeps "what is on disk" trivially equal to
-    /// "what is on screen" — no debounce window in which a crash loses edits.
+    /// IO runs outside MainActor. The queue retains only the active and latest
+    /// snapshots and begins immediately; document close/replacement drains it.
     private func persistViewState() {
-        document?.viewStateStore?.save(
-            annotations: annotations, favoriteTrackIDs: favoriteTrackIDs
-        )
+        viewStateWriter?.submit(TraceViewStateStore.Restored(
+            annotations: annotations, favoriteTrackIDs: favoriteTrackIDs))
     }
 
     // MARK: - Favourite tracks
@@ -1378,7 +1401,7 @@ public final class TraceDocumentController {
     /// Joins the background housekeeping task. Internal test seam so a test
     /// can assert maintenance still runs after an open without polling; it is
     /// deliberately not part of the public API.
-    func awaitCacheMaintenanceForTesting() async {
+    package func awaitCacheMaintenanceForTesting() async {
         await maintenanceTask?.value
     }
 
@@ -1394,11 +1417,14 @@ public final class TraceDocumentController {
 
     private func performOpen(_ url: URL, generation: UInt64) async {
         let previous = document
+        let previousWriter = viewStateWriter
         var opened: TraceOpenedDocument?
         do {
+            await previousWriter?.flush()
             if let previous { try await previous.close() }
             guard generation == documentGeneration, !Task.isCancelled else { return }
             document = nil
+            viewStateWriter = nil
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             let progress: TraceProgressHandler = { [weak self] progress in
@@ -1451,10 +1477,19 @@ public final class TraceDocumentController {
                 try? await opened.close()
                 return
             }
+            let access = opened.viewStateStore.map(TraceViewStateAccess.init)
+            let restored = await access?.load()
+            guard generation == documentGeneration, !Task.isCancelled else {
+                try? await opened.close()
+                return
+            }
             document = opened
+            viewStateWriter = access.map { access in
+                TraceViewStateWriteQueue(save: { await access.save($0) })
+            }
             // Restore this trace's bookmarks. Keyed by content hash, so the
             // same bytes bring back the same annotations wherever they live now.
-            if let restored = opened.viewStateStore?.load(), !restored.isEmpty {
+            if let restored, !restored.isEmpty {
                 annotations = restored.annotations
                 nextAnnotationID = (restored.annotations.flags.map(\.id)
                     + restored.annotations.marks.map(\.id)).max().map { $0 + 1 } ?? 1

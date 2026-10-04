@@ -43,10 +43,18 @@ struct TraceViewStateStore: Sendable {
     /// in which case annotations simply stay session-scoped.
     init?(cacheDirectory: URL, metadata: TraceCacheMetadata?) {
         guard let metadata else { return nil }
-        traceSHA256 = metadata.cacheKey.traceSHA256
+        self.init(cacheDirectory: cacheDirectory, traceSHA256: metadata.cacheKey.traceSHA256,
+                  parserKey: metadata.cacheKey.parserKey)
+    }
+
+    /// Identity comes from a validated opening result. This initializer only
+    /// composes the compatibility sidecar location; it grants no Ready authority.
+    init?(cacheDirectory: URL, traceSHA256: String, parserKey: String) {
+        guard ArkTraceIdentityGrammar.isSHA256(traceSHA256), ArkTraceIdentityGrammar.isSHA256(parserKey) else { return nil }
+        self.traceSHA256 = traceSHA256
         entryURL = cacheDirectory
-            .appending(path: metadata.cacheKey.traceSHA256, directoryHint: .isDirectory)
-            .appending(path: metadata.cacheKey.parserKey, directoryHint: .isDirectory)
+            .appending(path: traceSHA256, directoryHint: .isDirectory)
+            .appending(path: parserKey, directoryHint: .isDirectory)
     }
 
     private var fileURL: URL { entryURL.appending(path: Self.fileName) }
@@ -108,7 +116,10 @@ struct TraceViewStateStore: Sendable {
         )
         do {
             try data.write(to: temporary, options: .atomic)
-            _ = try FileManager.default.replaceItemAt(fileURL, withItemAt: temporary)
+            // Native Ready admits only owner-private members. Apply this to
+            // our fresh candidate, and retain it when replacing an older file.
+            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: temporary.path)
+            _ = try FileManager.default.replaceItemAt(fileURL, withItemAt: temporary, options: .usingNewMetadataOnly)
         } catch {
             try? FileManager.default.removeItem(at: temporary)
         }

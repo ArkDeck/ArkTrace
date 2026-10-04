@@ -10,6 +10,24 @@ import XCTest
 /// where the trace came from, and degrading to "no annotations" rather than
 /// failing an open.
 final class TraceViewStateStoreTests: XCTestCase {
+    func testNewAndReplacedSidecarsRemainOwnerPrivate() throws {
+        let root = try makeRoot()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = try makeStore(root: root)
+        let file = store.entryURL.appending(path: TraceViewStateStore.fileName)
+        let first = TimelineAnnotations(flags: [TimelineFlag(id: 1, timestampNs: 0, label: "first", colorIndex: 0)])
+        let second = TimelineAnnotations(flags: [TimelineFlag(id: 1, timestampNs: 0, label: "saved 🦀", colorIndex: 1)])
+        store.save(annotations: first, favoriteTrackIDs: [])
+        var attributes = try FileManager.default.attributesOfItem(atPath: file.path)
+        XCTAssertEqual((attributes[.posixPermissions] as? NSNumber)?.intValue, 0o600)
+        // Simulate the earlier compatible writer's non-private file mode.
+        try FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: file.path)
+        store.save(annotations: second, favoriteTrackIDs: [])
+        attributes = try FileManager.default.attributesOfItem(atPath: file.path)
+        XCTAssertEqual((attributes[.posixPermissions] as? NSNumber)?.intValue, 0o600)
+        XCTAssertEqual(store.load().annotations, second)
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: store.entryURL.path), [TraceViewStateStore.fileName])
+    }
     func makeStore(root: URL) throws -> TraceViewStateStore {
         let metadata = TraceCacheMetadata(
             cacheKey: try TraceCacheKey(

@@ -92,6 +92,9 @@ extension TraceDocumentControllerTests {
                 case "replaceSession":
                     // Actual open() clears synchronously; the same content then
                     // legitimately restores the saved persistent projection.
+                    // External fixture deletion follows the real async write
+                    // barrier, just as it previously followed synchronous IO.
+                    await controller.annotationOracleFlushPersistence()
                     try? FileManager.default.removeItem(at: store.entryURL.appending(path: TraceViewStateStore.fileName))
                     controller.open(source)
                     for _ in 0..<100000 where controller.phase != .ready { await Task.yield() }

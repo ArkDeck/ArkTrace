@@ -30,6 +30,9 @@ public struct RustConfiguration: Encodable, Sendable {
     let helperSHA256: String
     let parserIdentity: TraceParserIdentity
     let publisher: RustPublisher?
+    package var configuredNamespace: URL { URL(filePath: namespace) }
+    package var configuredCacheDirectory: URL? { cacheDirectory.map { URL(filePath: $0) } }
+    package var configuredParser: URL { URL(filePath: parser) }
     public init(namespace: URL, helper: URL, parser: URL, helperSHA256: String, parserIdentity: TraceParserIdentity, publisher: RustPublisher, storagePolicy: RustStoragePolicy = .ephemeral) {
         switch storagePolicy {
         case .ephemeral: cachePolicy = "ephemeral"; cacheDirectory = nil

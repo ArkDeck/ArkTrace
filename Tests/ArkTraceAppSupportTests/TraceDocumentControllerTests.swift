@@ -180,6 +180,49 @@ final class TraceDocumentControllerTests: XCTestCase {
         func count() -> Int { attempts }
     }
 
+    private actor FirstCloseBarrier {
+        private var continuation: CheckedContinuation<Void, Never>?
+        private var attempts = 0
+        func close() async {
+            attempts += 1
+            guard attempts == 1 else { return }
+            await withCheckedContinuation { continuation = $0 }
+        }
+        func waitUntilReached() async {
+            while continuation == nil { await Task.yield() }
+        }
+        func release() { continuation?.resume(); continuation = nil }
+    }
+
+    func testLateCloseDoesNotClearAReplacementDocument() async throws {
+        let suite = "ArkTraceCloseGenerationTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let barrier = FirstCloseBarrier()
+        let controller = TraceDocumentController(recentStore: TraceRecentDocumentStore(defaults: defaults),
+            maintenance: nil, opener: { source, _ in
+                let first = source.lastPathComponent == "first.htrace"
+                return TraceOpenedDocument(repository: Repository(identity: first ? "a" : "e"),
+                    cacheHit: false, cacheMetadata: nil, close: { if first { await barrier.close() } })
+            })
+        let root = FileManager.default.temporaryDirectory.appending(path: "arktrace-close-generation-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let first = root.appending(path: "first.htrace"), second = root.appending(path: "second.htrace")
+        try Data().write(to: first); try Data().write(to: second)
+        controller.open(first)
+        while controller.phase != .ready { await Task.yield() }
+        let closing = Task { await controller.close() }
+        await barrier.waitUntilReached()
+        controller.open(second)
+        while controller.phase != .ready { await Task.yield() }
+        await barrier.release(); await closing.value
+        XCTAssertEqual(controller.phase, .ready)
+        XCTAssertEqual(controller.sourceURL, second)
+        XCTAssertEqual(controller.metadata?.traceSHA256, String(repeating: "e", count: 64))
+        await controller.close()
+    }
+
     private actor MaintenanceGate {
         private var released = false
         private var continuation: CheckedContinuation<Void, Never>?

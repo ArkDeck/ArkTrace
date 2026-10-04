@@ -663,6 +663,12 @@ ArkDeck 共同确定，fixture 拒绝路径不能充当成功路径。
 
 ### 11.1 Viewer 共享语义
 
+2026-10-05 已有显式 SDK 图下的 `TraceRustProductRuntime`，固定 Engine 同时供 document
+controllers 与 cache maintenance 使用；原 catalog/Rendering 通过 Core adapter 复用。
+标注兼容 IO 在 MainActor 外，close 前排空，sidecar 保持 owner-private。默认 App、native
+held-FD persistence 和 Rust hot snapshot 仍未切换；实际边界见
+[运行时接线记录](migration-runs/AT-RUST-008-012-2026-10-05-native-product-runtime.md)。
+
 Rust 输出 immutable snapshot：viewport generation、logical dimensions、track/depth layout、
 event key、primitive bounds、LOD/density、color slot、label facts、truncation/quality。
 绘制与命中使用同一 snapshot；物理像素的最小宽度只改变 visual bounds，不改 domain time。

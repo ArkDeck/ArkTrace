@@ -15,10 +15,16 @@ package actor RustTraceRepository: TraceRepositoryProtocol {
     }
     @concurrent package static func create(session: RustSession, sourceFormat: RustSourceFormat,
                                           operationTimeoutMilliseconds: UInt32) async throws -> RustTraceRepository {
+        try await create(session: session, opening: session.openingView(), sourceFormat: sourceFormat,
+                         operationTimeoutMilliseconds: operationTimeoutMilliseconds)
+    }
+    @concurrent package static func create(session: RustSession, opening: RustOpenView, sourceFormat: RustSourceFormat,
+                                          operationTimeoutMilliseconds: UInt32) async throws -> RustTraceRepository {
         guard (1...300_000).contains(operationTimeoutMilliseconds) else {
             throw ArkTraceError(code: .invalidArgument, stage: .request, message: "Operation timeout must be within 1...300000 ms")
         }
-        let metadata = try await session.openingView().copyTraceMetadata(sourceFormat: sourceFormat)
+        guard opening.sessionIdentity == session.identity else { throw RustAdmission.invalidBuffer }
+        let metadata = try await opening.copyTraceMetadata(sourceFormat: sourceFormat)
         return RustTraceRepository(session: session, metadata: metadata, operationTimeoutMilliseconds: operationTimeoutMilliseconds)
     }
     package func metadata() async throws -> TraceMetadata { loadedMetadata }
@@ -40,7 +46,7 @@ package actor RustTraceRepository: TraceRepositoryProtocol {
             throw Self.admissionError(error)
         }
     }
-    nonisolated static func admissionError(_ error: RustAdmission) -> ArkTraceError {
+    package nonisolated static func admissionError(_ error: RustAdmission) -> ArkTraceError {
         let code: ArkTraceError.Code = switch error {
         case .invalidInput: .invalidArgument
         case .cancelled: .cancelled

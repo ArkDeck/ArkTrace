@@ -39,6 +39,7 @@ def main():
     parser.add_argument("--sdk", action="store_true")
     parser.add_argument("--maintenance", action="store_true")
     parser.add_argument("--sdk-maintenance", action="store_true")
+    parser.add_argument("--product-runtime", action="store_true")
     options = parser.parse_args()
     base = options.evidence_dir
     assert base.is_absolute() and not base.exists() and not base.parent.is_symlink()
@@ -87,7 +88,7 @@ def main():
         assert [r["window"]["point"] for r in m["interruptedPurges"]] == [0, 1, 2, 3, 4]
         assert all(not r["exitSuccess"] and r["signal"] == 9 for r in m["interruptedPurges"])
     sdk = sdk_receipt = sdk_command = None
-    if options.sdk or options.sdk_maintenance:
+    if options.sdk or options.sdk_maintenance or options.product_runtime:
         _, sdk_receipt = consumer(Path(os.environ["ARKTRACE_RUST_XCFRAMEWORK"]))
         cache = Path(os.environ.get("ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT", "/private/tmp/arktrace-rust-sdk-consumer"))
         executable = cache / "arktrace/build/out/Products/Debug/ArkTraceRustCoreConformance"
@@ -97,6 +98,7 @@ def main():
         persistent = base / "sdk-cache"; persistent.mkdir(mode=0o700)
         input_path = base / "sdk-input.json"
         input_path.write_text(json.dumps(dict(source=str(source), format=1, vectors=[], namespace=str(namespace), cacheDirectory=str(persistent), maintenance=options.sdk_maintenance,
+            productRuntime=options.product_runtime, manifest=str(ROOT / "ThirdParty/TraceStreamer/macx/manifest.json"),
             helper=str(tools / "helper"), parser=str(tools / "parser"), helperSHA256=sha(tools / "helper"), parserIdentity=identity), indent=2) + "\n")
         input_path.chmod(0o400)
         sdk, sdk_command = execute([str(saved), str(input_path)], base, "sdk")
@@ -104,7 +106,13 @@ def main():
         if options.sdk_maintenance:
             assert all(sdk[k] for k in ("runtimeSDKMaintenanceConnected", "cacheMaintenanceBeforeOpen", "cacheMaintenanceActiveProtected",
                 "cacheMaintenanceOneReaderProtected", "cacheMaintenancePurgeAndReparse", "cacheMaintenancePreCancelledPreservesReady"))
-        assert len(list(persistent.rglob("trace.sqlite"))) == 1
+        if options.product_runtime:
+            assert all(sdk[k] for k in ("productRuntimeConnected", "controllerMachineModelsEqualToSwift", "controllerSettingsPurgeAndReparse",
+                "annotationsAndFavoritesRoundTrip", "persistenceDrainedBeforeClose"))
+            assert len(list((base / "product-runtime/native/traces").rglob("trace.sqlite"))) == 1
+            assert not list((base / "product-runtime/native/staging/.actors").glob("owner-*"))
+        else:
+            assert len(list(persistent.rglob("trace.sqlite"))) == 1
         assert not list(namespace.rglob("trace.db")) and not list(namespace.rglob("trace.sqlite"))
         assert not list((namespace / ".actors").glob("owner-*"))
     assert sha(source) == sha(original_source)
