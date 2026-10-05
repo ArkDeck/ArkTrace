@@ -16,7 +16,7 @@ class NativeStageTests(unittest.TestCase):
         (slice/'libarktrace_ffi.a').write_bytes(b'test archive; not native acceptance')
         for name in ('arktrace_ffi.h','module.modulemap'):(headers/name).write_bytes((ROOT/'bindings/c'/name).read_bytes())
         (artifact/'Info.plist').write_bytes(plistlib.dumps({'AvailableLibraries':[{'LibraryIdentifier':'macos-arm64','LibraryPath':'libarktrace_ffi.a','HeadersPath':'Headers','SupportedPlatform':'macos','SupportedArchitectures':['arm64']}]}))
-        receipt={'abiVersion':1,'contractSHA256':(ROOT/'contracts/ffi-v1.sha256').read_text().strip(),'developmentFixtures':True,'deploymentTarget':'26.0','rust':'rustc 1.99.0 test','xcode':'Xcode 27.0','library':{'sha256':hashlib.sha256((slice/'libarktrace_ffi.a').read_bytes()).hexdigest()},'files':[]}
+        receipt={'abiVersion':json.loads((ROOT/'contracts/ffi-v1.json').read_text())['abiVersion'],'contractSHA256':(ROOT/'contracts/ffi-v1.sha256').read_text().strip(),'developmentFixtures':True,'deploymentTarget':'26.0','rust':'rustc 1.99.0 test','xcode':'Xcode 27.0','library':{'sha256':hashlib.sha256((slice/'libarktrace_ffi.a').read_bytes()).hexdigest()},'files':[]}
         for p in sorted(artifact.rglob('*')):
             if p.is_file():receipt['files'].append({'relativePath':p.relative_to(artifact.parent).as_posix(),'byteCount':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
         (artifact.parent/'receipt.json').write_text(json.dumps(receipt))

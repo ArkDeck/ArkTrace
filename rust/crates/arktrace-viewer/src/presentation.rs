@@ -375,6 +375,7 @@ fn primitive(
         depth,
         style,
         is_open_ended,
+        render_facts: None,
     })
 }
 /// Counts every referenced source-string occurrence (not unique strings), then

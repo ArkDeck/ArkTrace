@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 namespace ArkTrace.Native;
 public static unsafe partial class NativeMethods
 {
-    public const uint ABI_VERSION = 1;
-    public const string CONTRACT_DIGEST = "ae714f859fdd5f71f747a726d41d701f3691679a589aa06a62de45c2a610d2f8";
+    public const uint ABI_VERSION = 2;
+    public const string CONTRACT_DIGEST = "76202167ecccdb715f4bf56108c9ac6738bb79f3e738ac2bba5171f1a933629e";
     public const uint STATUS_OK = 0;
     public const uint STATUS_BUSY = 1;
     public const uint STATUS_CAPACITY = 2;
@@ -136,6 +136,24 @@ public static unsafe partial class NativeMethods
     public const uint MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES = 16777216;
     public const uint CAP_VIEW_STATE_BACKUP = 128;
     public const uint VIEW_STATE_BACKUP = 5;
+    public const uint FLAG_RENDER_FACTS = 32;
+    public const uint FLAG_LABEL = 64;
+    public const uint FLAG_CATEGORY = 128;
+    public const uint FLAG_NAME = 256;
+    public const uint FLAG_PROCESS_NAME = 512;
+    public const uint FLAG_THREAD_NAME = 1024;
+    public const uint FLAG_INSPECTOR_CATEGORY = 2048;
+    public const uint FLAG_STATE = 4096;
+    public const uint FLAG_UNIT = 8192;
+    public const uint FLAG_SEMANTIC_DURATION = 16384;
+    public const uint FLAG_PROCESS_KEY = 32768;
+    public const uint FLAG_THREAD_KEY = 65536;
+    public const uint FLAG_PID = 131072;
+    public const uint FLAG_TID = 262144;
+    public const uint FLAG_CPU = 524288;
+    public const uint FLAG_VALUE = 1048576;
+    public const uint FLAG_PRIORITY = 2097152;
+    public const uint FLAG_COLOR = 4194304;
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_abi_identity")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_abi_identity(AbiIdentity* output, ulong output_bytes);
@@ -321,6 +339,33 @@ public unsafe struct PrimitiveRecord
     public uint text_length;
     public uint reserved;
     public long dominant_value;
+    public uint event_kind;
+    public uint color_rgb;
+    public long jank_tag;
+    public long semantic_duration_ns;
+    public long process_key;
+    public long thread_key;
+    public long pid;
+    public long tid;
+    public long cpu;
+    public long value;
+    public long priority;
+    public uint label_offset;
+    public uint label_length;
+    public uint category_offset;
+    public uint category_length;
+    public uint name_offset;
+    public uint name_length;
+    public uint process_name_offset;
+    public uint process_name_length;
+    public uint thread_name_offset;
+    public uint thread_name_length;
+    public uint inspector_category_offset;
+    public uint inspector_category_length;
+    public uint state_offset;
+    public uint state_length;
+    public uint unit_offset;
+    public uint unit_length;
 }
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct QualityRecord

@@ -20,6 +20,13 @@ product-neutral document engine. ArkDeck should consume a pinned ArkTrace packag
 keep only its Artifact/Runtime bridge and product UI locally; it should not maintain renamed
 copies of those shared modules.
 
+The 2026-10-06 native Rendering migration uses ABI/snapshot format **2**. The
+contract retains the filename `contracts/ffi-v1.json`, but an SDK consumer must
+rebuild with the matching generated headers/records and static library; format 1
+is rejected. The current ArkTrace App and public consumer were checked against
+the new SDK. No ArkDeck SDK cutover or App acceptance is implied by that result;
+see the [native rendering run](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md).
+
 `TraceProductConfiguration` is the composition boundary for legitimate product differences. It
 fixes the consumer bundle, cache/staging roots, recent-document preference key, signpost subsystem
 and bundle-relative parser/manifest locations before any trace is opened. The default factory is

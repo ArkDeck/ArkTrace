@@ -264,7 +264,17 @@ impl StoreReader {
         batch.validate().map_err(|_| StoreError::InvalidQuery)?;
         limits.validate()?;
         self.with_database(budget, |_| {
-            crate::read_pool::run(self.verified_snapshot(), batch, budget, limits)
+            if let Some(deadline) = self.query_deadline.get() {
+                crate::read_pool::run_with_deadlines(
+                    self.verified_snapshot(),
+                    batch,
+                    &vec![Some(deadline); batch.query_count()],
+                    budget,
+                    limits,
+                )
+            } else {
+                crate::read_pool::run(self.verified_snapshot(), batch, budget, limits)
+            }
         })
     }
     pub fn event_batch_with_deadlines(

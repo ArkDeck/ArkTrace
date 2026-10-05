@@ -23,7 +23,7 @@ def verified_receipt(artifact, fixtures):
     receipt_path = artifact.parent / "receipt.json"
     require(not receipt_path.is_symlink() and receipt_path.is_file(), "regular receipt required")
     receipt = json.loads(receipt_path.read_text())
-    require(receipt["abiVersion"] == 1 and receipt["contractSHA256"] == (ROOT / "contracts/ffi-v1.sha256").read_text().strip(), "ABI or contract digest mismatch")
+    require(receipt["abiVersion"] == json.loads((ROOT / "contracts/ffi-v1.json").read_text())["abiVersion"] and receipt["contractSHA256"] == (ROOT / "contracts/ffi-v1.sha256").read_text().strip(), "ABI or contract digest mismatch")
     require(receipt["developmentFixtures"] is fixtures and receipt["deploymentTarget"] == "26.0", "artifact configuration mismatch")
     require(receipt["rust"].startswith("rustc 1.99.0 ") and receipt["xcode"].startswith("Xcode 27."), "toolchain pin mismatch")
     wanted = set()

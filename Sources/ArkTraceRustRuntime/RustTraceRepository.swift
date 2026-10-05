@@ -67,6 +67,9 @@ package actor RustTraceRepository: TraceRepositoryProtocol {
             message: "Native trace query could not complete",
             retryable: [.cancelled, .queryTimeout, .queryLimitExceeded, .outputLimitExceeded].contains(code))
     }
+    package func snapshot(_ query: RustViewportQuery) async throws -> RustSnapshot? {
+        try await invoke { try await $0.snapshot(query, timeoutMilliseconds: self.operationTimeoutMilliseconds) }
+    }
     package func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess> {
         try await invoke { try await $0.coreProcesses(query, timeoutMilliseconds: self.operationTimeoutMilliseconds) }
     }

@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from ffi_test_support import ABI, K, ROOT, TYPES
+from ffi_test_support import ABI, CONTRACT, K, ROOT, TYPES
 sys.path.insert(0,str(ROOT/'rust/crates/arktrace-viewer/oracle'))
 from build_native_viewport_oracle import build
 
@@ -65,7 +65,7 @@ def scene(view):
         q=view.quality[i];quality.append({'category':categories[q.category],'scope':text(q.scope_offset,q.scope_length) if q.flags & K['QUALITY_SCOPE'] else None,'count':q.count if q.flags & K['QUALITY_COUNT'] else None,'message':None})
     vp=view.viewport
     projected={'viewport':{'range':{'startNs':vp.start_ns,'endNs':vp.end_ns},'nsPerPoint':vp.ns_per_point,'widthPoints':vp.width_points,'heightPoints':vp.height_points,'verticalOffsetPoints':vp.vertical_offset_points,'generation':vp.generation},'sourceGeneration':vp.source_generation,'backingScale':vp.backing_scale,'tracks':tracks,'dataQuality':{'status':'ok' if view.quality_status==K['QUALITY_STATUS_OK'] else 'warnings','warnings':quality}}
-    assert view.format_version==1 and view.reserved==0
+    assert view.format_version==2 and view.reserved==0
     assert view.quality_status in (K['QUALITY_STATUS_OK'],K['QUALITY_STATUS_WARNINGS'])
     return projected,{'viewport':record(vp),'tracks':[record(view.tracks[i]) for i in range(view.track_count)],'primitives':primitives,'quality':[record(view.quality[i]) for i in range(view.quality_count)],'stringsUtf8':strings.decode(),'retainedBytes':view.retained_bytes,'qualityStatus':view.quality_status}
 
@@ -96,10 +96,10 @@ def main():
         for source,name in [(target/'arktrace-host-process','helper'),(parser,'parser')]:shutil.copyfile(source,tools/name);(tools/name).chmod(0o500)
         def config(name):
             namespace=base/name;namespace.mkdir(mode=0o700)
-            return {'abiVersion':1,'contractDigest':bytes(identity.contract_digest).hex(),'cachePolicy':'ephemeral','namespace':str(namespace),'helper':str(tools/'helper'),'parser':str(tools/'parser'),'helperSHA256':digest(tools/'helper'),'parserIdentity':parser_identity}
+            return {'abiVersion':CONTRACT['abiVersion'],'contractDigest':bytes(identity.contract_digest).hex(),'cachePolicy':'ephemeral','namespace':str(namespace),'helper':str(tools/'helper'),'parser':str(tools/'parser'),'helperSHA256':digest(tools/'helper'),'parserIdentity':parser_identity}
         def create(c):return abi.input('engine_create_fixture',c,'u64').value
         invalid=config('invalid')
-        for change,code in [({'abiVersion':2},'STATUS_ABI_MISMATCH'),({'contractDigest':'0'*64},'STATUS_ABI_MISMATCH'),({'cachePolicy':'persistent'},'STATUS_UNSUPPORTED_OPERATION'),({'sql':'SELECT 1'},'STATUS_INVALID_INPUT')]:
+        for change,code in [({'abiVersion':CONTRACT['abiVersion']+1},'STATUS_ABI_MISMATCH'),({'contractDigest':'0'*64},'STATUS_ABI_MISMATCH'),({'cachePolicy':'persistent'},'STATUS_UNSUPPORTED_OPERATION'),({'sql':'SELECT 1'},'STATUS_INVALID_INPUT')]:
             abi.input('engine_create_fixture',{**invalid,**change},'u64',expected=K[code])
         abi.input('engine_create',invalid,'u64',expected=K['STATUS_INVALID_INPUT'])
         for index,(fixture,historical) in enumerate(zip(corpus,previous)):
@@ -126,7 +126,7 @@ def main():
             swift_records=json.loads(swift_run.stdout)
             responses=[];owners=[open_view.owner];held=[];old_request=None
             for vector,expected in zip(vectors,swift_records):
-                operation={'operation':'viewport','query':{'request':vector['request'],'backingScale':vector['backingScale']}} if 'request' in vector else {'operation':'resolveDensity','query':vector['resolution']}
+                operation={'operation':'viewport','query':{'request':vector['request'],'backingScale':vector['backingScale'],'clock':'hostContinuousEpochV1','deadline':None}} if 'request' in vector else {'operation':'resolveDensity','query':vector['resolution']}
                 request=abi.submit(engine,ticket.session,operation);view,encoded=abi.result(engine,request)
                 document=json.loads(encoded);assert document['formatVersion']==1 and view.kind==K['RESULT_SUCCESS']
                 record_result={'input':vector,'responseUtf8':encoded.decode(),'swift':expected}
@@ -188,6 +188,6 @@ def main():
         assert failed.kind==K['RESULT_FAILURE'] and str(base).encode() not in payload
         abi.call('result_release',failed.owner);abi.call('request_release',healthy,ticket.request)
         abi.drain(healthy);assert abi.out('engine_retained_result_bytes','u64',healthy).value==0;abi.call('engine_release',healthy)
-        report={'abiVersion':1,'contractSHA256':bytes(identity.contract_digest).hex(),'nativeMacOSCABI':True,'swiftSDKAcceptance':False,'windowsEngineAcceptance':False,'panicCaughtAndEngineDrained':True,'otherEngineSurvivesPanic':True,'pathFreeOwnedFailure':payload.decode(),'sources':results,'swiftOracle':swift_receipt,'inputVectorsSource':{'path':str(vectors_source.relative_to(ROOT)),'sha256':digest(vectors_source)},'parser':parser_identity,'retainedExactRunArtifacts':artifacts}
+        report={'abiVersion':CONTRACT['abiVersion'],'contractSHA256':bytes(identity.contract_digest).hex(),'nativeMacOSCABI':True,'swiftSDKAcceptance':False,'windowsEngineAcceptance':False,'panicCaughtAndEngineDrained':True,'otherEngineSurvivesPanic':True,'pathFreeOwnedFailure':payload.decode(),'sources':results,'swiftOracle':swift_receipt,'inputVectorsSource':{'path':str(vectors_source.relative_to(ROOT)),'sha256':digest(vectors_source)},'parser':parser_identity,'retainedExactRunArtifacts':artifacts}
     print(json.dumps(report,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

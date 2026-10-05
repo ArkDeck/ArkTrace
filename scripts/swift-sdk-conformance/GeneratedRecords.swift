@@ -76,6 +76,33 @@ struct ProbePrimitiveRecord: Codable, Sendable {
     let text_length: UInt32
     let reserved: UInt32
     let dominant_value: Int64
+    let event_kind: UInt32
+    let color_rgb: UInt32
+    let jank_tag: Int64
+    let semantic_duration_ns: Int64
+    let process_key: Int64
+    let thread_key: Int64
+    let pid: Int64
+    let tid: Int64
+    let cpu: Int64
+    let value: Int64
+    let priority: Int64
+    let label_offset: UInt32
+    let label_length: UInt32
+    let category_offset: UInt32
+    let category_length: UInt32
+    let name_offset: UInt32
+    let name_length: UInt32
+    let process_name_offset: UInt32
+    let process_name_length: UInt32
+    let thread_name_offset: UInt32
+    let thread_name_length: UInt32
+    let inspector_category_offset: UInt32
+    let inspector_category_length: UInt32
+    let state_offset: UInt32
+    let state_length: UInt32
+    let unit_offset: UInt32
+    let unit_length: UInt32
     init(_ record: ArkTracePrimitiveRecord) {
         kind = record.kind
         flags = record.flags
@@ -99,6 +126,33 @@ struct ProbePrimitiveRecord: Codable, Sendable {
         text_length = record.text_length
         reserved = record.reserved
         dominant_value = record.dominant_value
+        event_kind = record.event_kind
+        color_rgb = record.color_rgb
+        jank_tag = record.jank_tag
+        semantic_duration_ns = record.semantic_duration_ns
+        process_key = record.process_key
+        thread_key = record.thread_key
+        pid = record.pid
+        tid = record.tid
+        cpu = record.cpu
+        value = record.value
+        priority = record.priority
+        label_offset = record.label_offset
+        label_length = record.label_length
+        category_offset = record.category_offset
+        category_length = record.category_length
+        name_offset = record.name_offset
+        name_length = record.name_length
+        process_name_offset = record.process_name_offset
+        process_name_length = record.process_name_length
+        thread_name_offset = record.thread_name_offset
+        thread_name_length = record.thread_name_length
+        inspector_category_offset = record.inspector_category_offset
+        inspector_category_length = record.inspector_category_length
+        state_offset = record.state_offset
+        state_length = record.state_length
+        unit_offset = record.unit_offset
+        unit_length = record.unit_length
     }
 }
 struct ProbeQualityRecord: Codable, Sendable {

@@ -244,6 +244,9 @@ pub struct DetailInput {
     pub depth: i64,
     pub style: DetailStyle,
     pub is_open_ended: bool,
+    /// Session-origin adjunct; geometry JSON cannot construct display facts.
+    #[serde(skip)]
+    pub render_facts: Option<crate::RenderDetailFacts>,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]

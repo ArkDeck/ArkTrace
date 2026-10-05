@@ -7,6 +7,10 @@
 > 加入不依赖 Rust 的下游解阻项、ArkDeck 已裁定的 `trace.inspect` 路线及 Windows 取消/运行时/分发要求。
 > 实施已开始：001/002/004/005/006/007/010 为 in-progress，0 项完整 done；本轮优先推进 macOS 验收。
 > 实际记录：[首轮基线与 workspace](migration-runs/AT-RUST-001-002-2026-10-02.md)。
+> 2026-10-06 增量：011/012/013 的生产 Rust hot snapshot → macOS Rendering 接线已实现，
+> ABI/snapshot format 2、完整 Inspector facts、原始 deadline 与有界 retained copies 已验证。
+> GUI、large/performance、完整进程树、下游和适用发行验收仍 open；不改写完整任务状态。
+> 见[原生渲染记录](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
 
 ## 1. 执行规则与完成语义
 

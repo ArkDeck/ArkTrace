@@ -3,6 +3,7 @@ use arktrace_viewer::{DensityResolutionRequest, DetailPreference, Viewport, View
 
 fn viewport(generation: u64) -> RepositoryRequest {
     RepositoryRequest::ViewerViewport {
+        deadline: None,
         request: Box::new(ViewportRequest {
             viewport: Viewport::new(
                 TraceTimeRange::query(0, 100).unwrap(),
@@ -202,6 +203,7 @@ fn viewport_and_resolution_bounds_are_checked_before_dispatch() {
             engine.submit(
                 session,
                 RepositoryRequest::ViewerViewport {
+                    deadline: None,
                     request,
                     backing_scale: scale
                 },
@@ -213,6 +215,7 @@ fn viewport_and_resolution_bounds_are_checked_before_dispatch() {
     let RepositoryRequest::ViewerViewport {
         mut request,
         backing_scale,
+        ..
     } = viewport(1)
     else {
         unreachable!()
@@ -223,7 +226,8 @@ fn viewport_and_resolution_bounds_are_checked_before_dispatch() {
             session,
             RepositoryRequest::ViewerViewport {
                 request,
-                backing_scale
+                backing_scale,
+                deadline: None,
             },
             Duration::from_secs(1)
         ),

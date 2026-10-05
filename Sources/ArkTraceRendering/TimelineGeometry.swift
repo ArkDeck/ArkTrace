@@ -137,8 +137,10 @@ package enum TimelineGeometry {
         let detail: TimelineDetailPrimitive
         switch primitive {
         case .detail(let value):
+            if let frame = value.projection?.frame(in: viewport, scale: backingScale) { return frame }
             detail = value
         case .density(let density):
+            if let frame = density.projection?.frame(in: viewport, scale: backingScale) { return frame }
             // A density bucket summarizes the whole track, so it spans every
             // reserved row rather than sitting in one.
             return bandFrame(

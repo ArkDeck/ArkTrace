@@ -43,3 +43,13 @@ Comparison levels follow the migration design: T0 exact canonical bytes for
 the same identity; T1 explicitly selected semantic comparison with actual
 provenance verified separately; T2 host/presentation differences. Never discard
 whole provenance, quality or truncation sections to obtain parity.
+
+`ffi-v1.json` retains its original filename; its current contract is ABI 2 and
+snapshot format 2. Consumers must rebuild against the generated C, Swift and C#
+records and the matching SDK. Format 1 is rejected. The 288-byte primitive record
+now transports Rust presentation colors, labels and the complete typed Inspector
+projection. Explicit presence bits distinguish nil from zero and empty strings.
+Viewport requests preserve the original host continuous-clock deadline in addition
+to the independent whole-operation timeout. The native macOS Rendering adapter
+copies borrowed spans under retained storage credits and keeps the snapshot owner
+until its converted scene is released. See the [native rendering run](../docs/migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md).

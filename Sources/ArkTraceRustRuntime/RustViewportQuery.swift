@@ -37,5 +37,20 @@ public struct RustViewportRequest: Codable, Sendable {
 public struct RustViewportQuery: Codable, Sendable {
     public let request: RustViewportRequest
     public let backingScale: Double
-    public init(request: RustViewportRequest, backingScale: Double) { self.request = request; self.backingScale = backingScale }
+    private let clock: String
+    private let deadline: RustWireContinuousDeadline?
+    public init(request: RustViewportRequest, backingScale: Double, deadline: ContinuousClock.Instant? = nil) {
+        self.request = request
+        self.backingScale = backingScale
+        self.clock = "hostContinuousEpochV1"
+        self.deadline = deadline.map(RustWireContinuousDeadline.init)
+    }
+    private enum CodingKeys: String, CodingKey { case request, backingScale, clock, deadline }
+    public func encode(to encoder: any Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(request, forKey: .request)
+        try values.encode(backingScale, forKey: .backingScale)
+        try values.encode(clock, forKey: .clock)
+        try values.encode(deadline, forKey: .deadline)
+    }
 }

@@ -247,6 +247,14 @@ pub(crate) struct Details {
 pub(crate) struct ViewportInput {
     request: Box<arktrace_viewer::ViewportRequest>,
     backing_scale: f64,
+    clock: arktrace_engine::QueryClock,
+    #[serde(deserialize_with = "viewport_deadline")]
+    deadline: Option<arktrace_engine::ContinuousDeadline>,
+}
+fn viewport_deadline<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<Option<arktrace_engine::ContinuousDeadline>, D::Error> {
+    Option::deserialize(d)
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -287,6 +295,10 @@ impl Operation {
                     .map_err(|_| STATUS_INVALID_INPUT);
             }
             Self::Viewport(q) => {
+                let _ = q.clock;
+                if q.deadline.is_some_and(|d| !d.is_valid()) {
+                    return Err(STATUS_INVALID_INPUT);
+                }
                 return q
                     .request
                     .effective_budget()
@@ -341,6 +353,7 @@ impl Operation {
             Self::Viewport(q) => Q::ViewerViewport {
                 request: q.request,
                 backing_scale: q.backing_scale,
+                deadline: q.deadline,
             },
             Self::ResolveDensity(q) => Q::ViewerResolveDensity(q),
             Self::Batch(q) => Q::Batch(q),
@@ -367,6 +380,51 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
+    #[test]
+    fn viewport_requires_explicit_clock_and_nullable_exact_deadline() {
+        let request = arktrace_viewer::ViewportRequest {
+            viewport: arktrace_viewer::Viewport::new(
+                TraceTimeRange::query(0, 100).unwrap(),
+                200.0,
+                80.0,
+                0.0,
+                1,
+            )
+            .unwrap(),
+            tracks: vec![],
+            pixel_width: 400,
+            generation: 1,
+            preference: arktrace_viewer::DetailPreference::Automatic,
+            maximum_primitives: Some(20_000),
+            focused_event_key: None,
+        };
+        let valid = serde_json::json!({"operation":"viewport","query":{
+            "request":request,"backingScale":2.0,"clock":"hostContinuousEpochV1","deadline":null}});
+        let decode_operation =
+            |value: &serde_json::Value| decode::<Operation>(&serde_json::to_vec(value).unwrap());
+        decode_operation(&valid).unwrap().validate().unwrap();
+        for field in ["clock", "deadline"] {
+            let mut value = valid.clone();
+            value["query"].as_object_mut().unwrap().remove(field);
+            assert!(decode_operation(&value).is_err());
+        }
+        let mut value = valid.clone();
+        value["query"]["clock"] = serde_json::json!("wallClock");
+        assert!(decode_operation(&value).is_err());
+        for deadline in [
+            serde_json::json!({"seconds":0,"attoseconds":0}),
+            serde_json::json!({"seconds":i64::MAX,"attoseconds":999_999_999_999_999_999i64}),
+        ] {
+            value = valid.clone();
+            value["query"]["deadline"] = deadline;
+            decode_operation(&value).unwrap().validate().unwrap();
+        }
+        value["query"]["deadline"]["attoseconds"] = serde_json::json!(1_000_000_000_000_000_000i64);
+        assert_eq!(
+            decode_operation(&value).unwrap().validate(),
+            Err(STATUS_INVALID_INPUT)
+        );
+    }
     #[cfg(target_os = "macos")]
     #[test]
     fn backup_configuration_is_closed_fixed_and_disjoint_before_native_creation() {

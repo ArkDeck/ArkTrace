@@ -88,6 +88,7 @@ impl ViewportQueries for Repository<'_> {
                 .take(limit)
                 .enumerate()
                 .map(|(j, depth)| DetailInput {
+                    render_facts: None,
                     event_key: EventKey {
                         table: EventTable::Callstack,
                         row_id: (index * 100 + j + 1) as i64,

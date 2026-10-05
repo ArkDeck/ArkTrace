@@ -10,8 +10,8 @@ extern "C" {
 #define ARKTRACE_LAYOUT_ASSERT _Static_assert
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
-#define ARKTRACE_ABI_VERSION 1u
-#define ARKTRACE_CONTRACT_DIGEST "ae714f859fdd5f71f747a726d41d701f3691679a589aa06a62de45c2a610d2f8"
+#define ARKTRACE_ABI_VERSION 2u
+#define ARKTRACE_CONTRACT_DIGEST "76202167ecccdb715f4bf56108c9ac6738bb79f3e738ac2bba5171f1a933629e"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_STATUS_OK 0u
@@ -144,6 +144,24 @@ ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host
 #define ARKTRACE_MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES 16777216u
 #define ARKTRACE_CAP_VIEW_STATE_BACKUP 128u
 #define ARKTRACE_VIEW_STATE_BACKUP 5u
+#define ARKTRACE_FLAG_RENDER_FACTS 32u
+#define ARKTRACE_FLAG_LABEL 64u
+#define ARKTRACE_FLAG_CATEGORY 128u
+#define ARKTRACE_FLAG_NAME 256u
+#define ARKTRACE_FLAG_PROCESS_NAME 512u
+#define ARKTRACE_FLAG_THREAD_NAME 1024u
+#define ARKTRACE_FLAG_INSPECTOR_CATEGORY 2048u
+#define ARKTRACE_FLAG_STATE 4096u
+#define ARKTRACE_FLAG_UNIT 8192u
+#define ARKTRACE_FLAG_SEMANTIC_DURATION 16384u
+#define ARKTRACE_FLAG_PROCESS_KEY 32768u
+#define ARKTRACE_FLAG_THREAD_KEY 65536u
+#define ARKTRACE_FLAG_PID 131072u
+#define ARKTRACE_FLAG_TID 262144u
+#define ARKTRACE_FLAG_CPU 524288u
+#define ARKTRACE_FLAG_VALUE 1048576u
+#define ARKTRACE_FLAG_PRIORITY 2097152u
+#define ARKTRACE_FLAG_COLOR 4194304u
 typedef struct ArkTraceAbiIdentity {
     uint32_t struct_size;
     uint32_t abi_version;
@@ -294,8 +312,35 @@ typedef struct ArkTracePrimitiveRecord {
     uint32_t text_length;
     uint32_t reserved;
     int64_t dominant_value;
+    uint32_t event_kind;
+    uint32_t color_rgb;
+    int64_t jank_tag;
+    int64_t semantic_duration_ns;
+    int64_t process_key;
+    int64_t thread_key;
+    int64_t pid;
+    int64_t tid;
+    int64_t cpu;
+    int64_t value;
+    int64_t priority;
+    uint32_t label_offset;
+    uint32_t label_length;
+    uint32_t category_offset;
+    uint32_t category_length;
+    uint32_t name_offset;
+    uint32_t name_length;
+    uint32_t process_name_offset;
+    uint32_t process_name_length;
+    uint32_t thread_name_offset;
+    uint32_t thread_name_length;
+    uint32_t inspector_category_offset;
+    uint32_t inspector_category_length;
+    uint32_t state_offset;
+    uint32_t state_length;
+    uint32_t unit_offset;
+    uint32_t unit_length;
 } ArkTracePrimitiveRecord;
-ARKTRACE_LAYOUT_ASSERT(sizeof(ArkTracePrimitiveRecord) == 136, "PrimitiveRecord size");
+ARKTRACE_LAYOUT_ASSERT(sizeof(ArkTracePrimitiveRecord) == 280, "PrimitiveRecord size");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, kind) == 0, "PrimitiveRecord.kind offset");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, flags) == 4, "PrimitiveRecord.flags offset");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, track_index) == 8, "PrimitiveRecord.track_index offset");
@@ -318,6 +363,33 @@ ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, text_offset) == 116, "P
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, text_length) == 120, "PrimitiveRecord.text_length offset");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, reserved) == 124, "PrimitiveRecord.reserved offset");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, dominant_value) == 128, "PrimitiveRecord.dominant_value offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, event_kind) == 136, "PrimitiveRecord.event_kind offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, color_rgb) == 140, "PrimitiveRecord.color_rgb offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, jank_tag) == 144, "PrimitiveRecord.jank_tag offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, semantic_duration_ns) == 152, "PrimitiveRecord.semantic_duration_ns offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, process_key) == 160, "PrimitiveRecord.process_key offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, thread_key) == 168, "PrimitiveRecord.thread_key offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, pid) == 176, "PrimitiveRecord.pid offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, tid) == 184, "PrimitiveRecord.tid offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, cpu) == 192, "PrimitiveRecord.cpu offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, value) == 200, "PrimitiveRecord.value offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, priority) == 208, "PrimitiveRecord.priority offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, label_offset) == 216, "PrimitiveRecord.label_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, label_length) == 220, "PrimitiveRecord.label_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, category_offset) == 224, "PrimitiveRecord.category_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, category_length) == 228, "PrimitiveRecord.category_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, name_offset) == 232, "PrimitiveRecord.name_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, name_length) == 236, "PrimitiveRecord.name_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, process_name_offset) == 240, "PrimitiveRecord.process_name_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, process_name_length) == 244, "PrimitiveRecord.process_name_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, thread_name_offset) == 248, "PrimitiveRecord.thread_name_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, thread_name_length) == 252, "PrimitiveRecord.thread_name_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, inspector_category_offset) == 256, "PrimitiveRecord.inspector_category_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, inspector_category_length) == 260, "PrimitiveRecord.inspector_category_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, state_offset) == 264, "PrimitiveRecord.state_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, state_length) == 268, "PrimitiveRecord.state_length offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, unit_offset) == 272, "PrimitiveRecord.unit_offset offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTracePrimitiveRecord, unit_length) == 276, "PrimitiveRecord.unit_length offset");
 typedef struct ArkTraceQualityRecord {
     uint32_t category;
     uint32_t flags;

@@ -66,7 +66,7 @@ def main():
         cache = base / 'cache'
         if cached:
             cache.mkdir(mode=0o700, exist_ok=True)
-        config = dict(abiVersion=1, contractDigest=bytes(identity.contract_digest).hex(),
+        config = dict(abiVersion=json.loads((ROOT/'contracts/ffi-v1.json').read_text())['abiVersion'], contractDigest=bytes(identity.contract_digest).hex(),
                       cachePolicy='contentAddressed' if cached else 'ephemeral', namespace=str(namespace),
                       helper=str(tools / 'helper'), parser=str(tools / 'parser'), helperSHA256=sha(tools / 'helper'),
                       parserIdentity=parser_identity, limits=dict(workers=1, queuePerWorker=8))

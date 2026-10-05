@@ -122,9 +122,105 @@ impl HotSnapshot {
                         if detail.is_open_ended {
                             record.flags |= WIRE_FLAG_OPEN_ENDED;
                         }
+                        if let Some(facts) = &detail.render_facts {
+                            let f = facts.inspector();
+                            if f.key() != detail.event_key || f.range() != detail.range {
+                                return Err(ViewerError::InvalidEvidence);
+                            }
+                            record.flags |= WIRE_FLAG_RENDER_FACTS | WIRE_FLAG_COLOR;
+                            record.event_kind = f.kind() as u32;
+                            record.color_rgb = rgb(facts.presentation().color.fill);
+                            record.jank_tag = facts.presentation().jank_tag;
+                            macro_rules! scalar {
+                                ($value:expr,$field:ident,$flag:ident) => {
+                                    if let Some(value) = $value {
+                                        record.flags |= $flag;
+                                        record.$field = value;
+                                    }
+                                };
+                            }
+                            scalar!(
+                                f.semantic_duration_ns(),
+                                semantic_duration_ns,
+                                WIRE_FLAG_SEMANTIC_DURATION
+                            );
+                            scalar!(
+                                f.process_key().map(|p| p.ipid),
+                                process_key,
+                                WIRE_FLAG_PROCESS_KEY
+                            );
+                            scalar!(
+                                f.thread_key().map(|t| t.itid),
+                                thread_key,
+                                WIRE_FLAG_THREAD_KEY
+                            );
+                            scalar!(f.pid(), pid, WIRE_FLAG_PID);
+                            scalar!(f.tid(), tid, WIRE_FLAG_TID);
+                            scalar!(f.cpu(), cpu, WIRE_FLAG_CPU);
+                            scalar!(f.value(), value, WIRE_FLAG_VALUE);
+                            scalar!(f.priority(), priority, WIRE_FLAG_PRIORITY);
+                            macro_rules! text {
+                                ($value:expr,$offset:ident,$length:ident,$flag:ident) => {
+                                    if let Some(value) = $value {
+                                        record.flags |= $flag;
+                                        (record.$offset, record.$length) =
+                                            scene.intern(value, &mut names, maximum_bytes)?;
+                                    }
+                                };
+                            }
+                            text!(facts.label(), label_offset, label_length, WIRE_FLAG_LABEL);
+                            text!(
+                                facts.category(),
+                                category_offset,
+                                category_length,
+                                WIRE_FLAG_CATEGORY
+                            );
+                            text!(
+                                facts.inspector_text(f.name()),
+                                name_offset,
+                                name_length,
+                                WIRE_FLAG_NAME
+                            );
+                            text!(
+                                facts.inspector_text(f.process_name()),
+                                process_name_offset,
+                                process_name_length,
+                                WIRE_FLAG_PROCESS_NAME
+                            );
+                            text!(
+                                facts.inspector_text(f.thread_name()),
+                                thread_name_offset,
+                                thread_name_length,
+                                WIRE_FLAG_THREAD_NAME
+                            );
+                            text!(
+                                facts.inspector_text(f.category()),
+                                inspector_category_offset,
+                                inspector_category_length,
+                                WIRE_FLAG_INSPECTOR_CATEGORY
+                            );
+                            text!(
+                                facts.inspector_text(f.state()),
+                                state_offset,
+                                state_length,
+                                WIRE_FLAG_STATE
+                            );
+                            text!(
+                                facts.inspector_text(f.unit()),
+                                unit_offset,
+                                unit_length,
+                                WIRE_FLAG_UNIT
+                            );
+                        }
                     }
                     PrimitiveInput::Density { bucket } => {
                         record.kind = WIRE_PRIMITIVE_DENSITY;
+                        record.flags |= WIRE_FLAG_COLOR;
+                        record.color_rgb =
+                            rgb(
+                                density_color(bucket.dominant.as_ref(), &track.descriptor, check)?
+                                    .fill,
+                            );
                         record.event_count = bucket.event_count;
                         if let Some(ns) = bucket.occupied_ns {
                             record.flags |= WIRE_FLAG_OCCUPANCY;
@@ -248,6 +344,9 @@ impl HotSnapshot {
         names.insert(name.to_owned(), entry);
         Ok(entry)
     }
+}
+fn rgb(value: Rgb) -> u32 {
+    (u32::from(value.red) << 16) | (u32::from(value.green) << 8) | u32::from(value.blue)
 }
 fn source(value: &TraceDensitySource) -> (u32, i64, i64, i64, bool) {
     match value {

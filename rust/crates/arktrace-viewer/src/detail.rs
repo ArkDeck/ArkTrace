@@ -138,7 +138,8 @@ pub fn map_detail_page(
             }
         }};
     }
-    let output = match (source, page) {
+    let facts = crate::render_facts::project_render_page(&page, query_range, check)?;
+    let mut output = match (source, page) {
         (TraceDensitySource::Cpu { cpu }, RepositoryDetailPage::Cpu(page)) => {
             map!(page, |event: CpuSlice| {
                 if event.cpu != *cpu {
@@ -289,6 +290,16 @@ pub fn map_detail_page(
         }
         _ => return Err(ViewerError::InvalidEvidence),
     };
+    if output.items.len() != facts.len() {
+        return Err(ViewerError::InvalidEvidence);
+    }
+    for (detail, fact) in output.items.iter_mut().zip(facts) {
+        check()?;
+        if detail.event_key != fact.inspector().key() || detail.range != fact.inspector().range() {
+            return Err(ViewerError::InvalidEvidence);
+        }
+        detail.render_facts = Some(fact);
+    }
     check()?;
     Ok(output)
 }
@@ -319,5 +330,6 @@ fn input(
         depth,
         style,
         is_open_ended,
+        render_facts: None,
     })
 }

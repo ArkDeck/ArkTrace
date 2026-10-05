@@ -4,7 +4,7 @@
   "vectors": 7,
   "xcode": "Xcode 27.0\nBuild version 27A266a",
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
-  "executableSHA256": "b659b2ec055feca8697ece66712e1656015106378af9897a7eee4fc7e466f9f5",
+  "executableSHA256": "65229f532a7b6399a4ae36606b6bc81954b97a2c25d59e2fe5f32ef1fbfffc05",
   "database": {
     "byteCount": 57344,
     "sha256": "df37d645cd9c9062390ec1714945597e0ee86af46421adf6a0f7d861c3fb74d0",
@@ -152,39 +152,49 @@
       "byteCount": 49595
     },
     {
+      "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
+      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a",
+      "byteCount": 16950
+    },
+    {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
       "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56",
       "byteCount": 6608
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0",
-      "byteCount": 29018
+      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197",
+      "byteCount": 29092
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
-      "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5",
-      "byteCount": 8131
+      "sha256": "ef5c1239ba6fc8e780f0fcd1932a8c49049a1bd1454811dd961bea82aa137ac8",
+      "byteCount": 8339
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
-      "byteCount": 24339
+      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3",
+      "byteCount": 26221
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
-      "byteCount": 101313
+      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39",
+      "byteCount": 101342
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
+      "sha256": "ba28a4379320e72ed2ee861dc5055aff911bf779f73ecc7fecb810acdf126773",
+      "byteCount": 1003
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
-      "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e",
-      "byteCount": 40541
+      "sha256": "81e784d31a7b24b224213ea4fc12cc494191b90ab5a533f90c5862887210b1e9",
+      "byteCount": 41220
     }
   ],
   "retainedExactRunArtifact": {
-    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-counters-b659b2ec055feca8697ece66712e1656015106378af9897a7eee4fc7e466f9f5.executable",
-    "sha256": "b659b2ec055feca8697ece66712e1656015106378af9897a7eee4fc7e466f9f5",
-    "byteCount": 4838848
+    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-counters-65229f532a7b6399a4ae36606b6bc81954b97a2c25d59e2fe5f32ef1fbfffc05.executable",
+    "sha256": "65229f532a7b6399a4ae36606b6bc81954b97a2c25d59e2fe5f32ef1fbfffc05",
+    "byteCount": 4867968
   }
 }

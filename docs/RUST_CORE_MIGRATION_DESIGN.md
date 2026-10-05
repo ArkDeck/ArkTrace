@@ -694,6 +694,15 @@ event key、primitive bounds、LOD/density、color slot、label facts、truncati
 绘制与命中使用同一 snapshot；物理像素的最小宽度只改变 visual bounds，不改 domain time。
 只在视口局部转换为浮点坐标，先做相对时间减法，避免大 Int64 直接转 Double 丢失精度。
 
+2026-10-06 生产接线增量：SDK 图中的 `TimelineSnapshotLoader` 已直接调用 Rust viewport
+操作，经 ABI/snapshot format 2 传输 Rust frame/RGB、label/category/jank 与完整 Inspector
+事实；默认 native runtime 不再用 Swift query adapter 生成该快照。借用 Span 只在同步
+closure 内访问，转换前预留有界 copy credit，scene 同时保留 Rust owner。原始 continuous
+deadline 传到 Store 的所有并行查询；独立操作预算继续由产品配置注入，`load.total` 保留。
+相同 viewport/backing scale 使用 Rust frame，交互中的视口变换继续复用平台 geometry。
+真实 medium 的生产 Controller 与只读原始行核对通过，GUI/性能/large 等整体验收继续
+待办。此前运行时记录描述的是当时的 Swift adapter 边界；见[当前原生渲染记录](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
+
 可见 lanes、overscan、32 depth-row 上限、density cache 等现有行为先由向量冻结，
 后续性能调优显式验证。批次按颜色 slot 组织；hover 是 overlay，不触发 SQL 或基础批次重建。
 应用不得把每个 event 做成一个 SwiftUI/XAML 控件。

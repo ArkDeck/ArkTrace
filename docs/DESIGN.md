@@ -248,6 +248,13 @@ ArkTraceApp        → Core + Analysis + Rendering + AppSupport + Capture
 需要报告 parser identity 与 SQLite runtime 事实，`--no-cache` 需要选择 storage
 policy；这些都不经过 `Runtime` 的 session 编排。
 
+上述图保留 Swift reference 路径。2026-10-06 的 Rust SDK 图增加条件依赖：
+`ArkTraceRendering → ArkTraceRustRuntime + CArkTrace`，`ArkTraceRustRuntime → Core + CArkTrace`，
+`ArkTraceAppSupport → ArkTraceRustRuntime`。Rendering 从注入的 repository 获取 Rust
+immutable snapshot，复制到有界平台 scene；parser/SQLite/Session 的 owner 仍在 Rust，
+不引入 Swift Parser/Store 或 Capture 依赖。真实生产接线及剩余验收见
+[原生渲染记录](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
+
 `ArkTraceAppSupport` 本身不拥有产品身份。组合根必须用 `TraceProductConfiguration`
 一次性固定 bundle URL、cache/staging 兄弟目录、最近文档 preferences key、signpost
 subsystem 与 bundle 内 parser/manifest 的相对位置。`TraceDocumentController()` 只是

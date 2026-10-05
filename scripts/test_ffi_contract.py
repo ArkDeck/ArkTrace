@@ -27,7 +27,7 @@ def main():
         typ=TYPES[r['name']];assert C.sizeof(typ)==r['size'] and C.alignment(typ)==r['alignment']
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
     identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
-    assert bytes(identity.contract_digest)==expected and identity.abi_version==1
+    assert bytes(identity.contract_digest)==expected and identity.abi_version==CONTRACT['abiVersion']
     assert identity.capabilities==(183 if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
@@ -97,6 +97,6 @@ def main():
             if sys.platform=='darwin':
                 files.append({'frozenPath':str(executable),'byteCount':executable.stat().st_size,'sha256':hashlib.sha256(executable.read_bytes()).hexdigest()})
             (base/'manifest.json').write_text(json.dumps(files,indent=2)+'\n')
-    assert consumer['abiVersion']==1 and consumer['nativeEngineAcceptance'] is False
-    print(json.dumps({'abiVersion':1,'contractSHA256':expected.hex(),'records':len(layouts),'fields':fields,'exports':len(CONTRACT['functions']),'consumer':consumer,'nativeEngineAcceptance':False,'validAllocationFuzzCases':1000},sort_keys=True))
+    assert consumer['abiVersion']==CONTRACT['abiVersion'] and consumer['nativeEngineAcceptance'] is False
+    print(json.dumps({'abiVersion':CONTRACT['abiVersion'],'contractSHA256':expected.hex(),'records':len(layouts),'fields':fields,'exports':len(CONTRACT['functions']),'consumer':consumer,'nativeEngineAcceptance':False,'validAllocationFuzzCases':1000},sort_keys=True))
 if __name__=='__main__':main()

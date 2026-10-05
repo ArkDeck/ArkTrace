@@ -10,8 +10,8 @@
   "sourceDigests": [
     {
       "path": "Package.swift",
-      "byteCount": 8144,
-      "sha256": "caa9667604d0e04b894d0ed16d37e9f44239e73297271ad3ed31e047532fea4a"
+      "byteCount": 8460,
+      "sha256": "fb84141336ce238f0d03abfc3c4a7b9a3fc82fe09c5ced8d360adfbbaef72217"
     },
     {
       "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
@@ -174,34 +174,44 @@
       "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
     },
     {
+      "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
+      "byteCount": 16950,
+      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a"
+    },
+    {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
       "byteCount": 6608,
       "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29018,
-      "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0"
+      "byteCount": 29092,
+      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
-      "byteCount": 8131,
-      "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5"
+      "byteCount": 8339,
+      "sha256": "ef5c1239ba6fc8e780f0fcd1932a8c49049a1bd1454811dd961bea82aa137ac8"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "byteCount": 24339,
-      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8"
+      "byteCount": 26221,
+      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101313,
-      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9"
+      "byteCount": 101342,
+      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
+      "byteCount": 1003,
+      "sha256": "ba28a4379320e72ed2ee861dc5055aff911bf779f73ecc7fecb810acdf126773"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
-      "byteCount": 40541,
-      "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e"
+      "byteCount": 41220,
+      "sha256": "81e784d31a7b24b224213ea4fc12cc494191b90ab5a533f90c5862887210b1e9"
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
@@ -337,18 +347,18 @@
     "environment": {
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-counter-mainline-swift",
       "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
-      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-swift-counter-oracle.json",
+      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-hot-rendering-20261006/oracle-refresh-final/fresh-swift-counter-oracle.json",
       "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
-      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-swift-counter-reveal.json",
+      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-hot-rendering-20261006/oracle-refresh-final/fresh-swift-counter-reveal.json",
       "COUNTER_REVEAL_DATABASES": "/private/tmp/arktrace-counter-mainline-swift/databases",
       "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
     },
     "exitCode": 0,
-    "elapsedSeconds": 23.39293733300292,
+    "elapsedSeconds": 11.45532412501052,
     "log": {
-      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-swift-canonical-and-regressions.log",
-      "byteCount": 7582,
-      "sha256": "fa91f3d54d59f7215b2787ae1ac7144b592a1ca5a4e58abb6d4f1c10e986e7c8"
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-hot-rendering-20261006/oracle-refresh-final/fresh-swift-canonical-and-regressions.log",
+      "byteCount": 6197,
+      "sha256": "72c02b921250e0514252419bf932d497f49e73ecdbea42043ae055516d091fe2"
     }
   },
   "databases": [
@@ -375,6 +385,6 @@
   "setupLimitations": [
     "Prior mainline setup limitations remain in the previous receipt; this fresh replay uses its independently audited access seams and unchanged frozen DBs."
   ],
-  "previousReceiptSHA256": "5838bff1d8e39dbe0783b75b8342d768c7672feae9b1d7dcfbe382372bbd324a",
-  "revalidatedBaseCommit": "d9459b4"
+  "previousReceiptSHA256": "10f46ac879fc1d56748ba672e4f39b303d97a33427a4950778e7af2ead303806",
+  "revalidatedBaseCommit": "91368f9"
 }

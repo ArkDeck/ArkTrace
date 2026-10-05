@@ -444,6 +444,20 @@ package struct ViewportRequest: Sendable {
 }
 
 public struct TimelineDetailPrimitive: Hashable, Codable, Sendable {
+    package var projection: TimelinePrimitiveProjection? = nil
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.trackID == rhs.trackID && lhs.eventKey == rhs.eventKey && lhs.range == rhs.range
+            && lhs.label == rhs.label && lhs.category == rhs.category && lhs.inspector == rhs.inspector
+            && lhs.depth == rhs.depth && lhs.jankTag == rhs.jankTag
+    }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(trackID); hasher.combine(eventKey); hasher.combine(range)
+        hasher.combine(label); hasher.combine(category); hasher.combine(inspector)
+        hasher.combine(depth); hasher.combine(jankTag)
+    }
+    private enum CodingKeys: String, CodingKey {
+        case trackID, eventKey, range, label, category, inspector, depth, jankTag
+    }
     public let trackID: TimelineTrackID
     public let eventKey: EventKey
     public let range: TraceTimeRange
@@ -481,6 +495,10 @@ public struct TimelineDetailPrimitive: Hashable, Codable, Sendable {
 }
 
 public struct TimelineDensityPrimitive: Hashable, Codable, Sendable {
+    package var projection: TimelinePrimitiveProjection? = nil
+    public static func == (lhs: Self, rhs: Self) -> Bool { lhs.trackID == rhs.trackID && lhs.bucket == rhs.bucket }
+    public func hash(into hasher: inout Hasher) { hasher.combine(trackID); hasher.combine(bucket) }
+    private enum CodingKeys: String, CodingKey { case trackID, bucket }
     public let trackID: TimelineTrackID
     public let bucket: TraceDensityBucket
 
@@ -594,6 +612,17 @@ public struct TimelineTrackSnapshot: Hashable, Codable, Sendable {
 }
 
 public struct TimelineSnapshot: Hashable, Codable, Sendable {
+    private var retainedNativeOwner: (any Sendable)? = nil
+    private enum CodingKeys: String, CodingKey { case viewport, tracks, generation, dataQuality, isLoading }
+    package mutating func retainNativeProjection(_ owner: any Sendable) { retainedNativeOwner = owner }
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.viewport == rhs.viewport && lhs.tracks == rhs.tracks && lhs.generation == rhs.generation
+            && lhs.dataQuality == rhs.dataQuality && lhs.isLoading == rhs.isLoading
+    }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(viewport); hasher.combine(tracks); hasher.combine(generation)
+        hasher.combine(dataQuality); hasher.combine(isLoading)
+    }
     public let viewport: TimelineViewport
     public let tracks: [TimelineTrackSnapshot]
     public let generation: UInt64

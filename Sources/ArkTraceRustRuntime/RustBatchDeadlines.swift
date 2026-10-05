@@ -15,7 +15,7 @@ public struct RustBatchDeadlines: Sendable {
     }
 }
 
-struct RustWireContinuousDeadline: Encodable, Sendable {
+struct RustWireContinuousDeadline: Codable, Sendable {
     let seconds: Int64
     let attoseconds: Int64
     init(_ deadline: ContinuousClock.Instant) {

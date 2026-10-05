@@ -501,6 +501,7 @@ package enum TimelineDetailPalette {
     ///   them as area charts with no comparable per-sample fill, and hashing
     ///   the series name at least gives each series a stable identity.
     public static func color(for detail: TimelineDetailPrimitive) -> TimelineColor {
+        if let projection = detail.projection { return projection.color }
         // The inspector's type is the unambiguous discriminator. `category` is
         // overloaded across sources -- a thread state's category is its
         // normalized state name, while a named slice's is whatever the trace

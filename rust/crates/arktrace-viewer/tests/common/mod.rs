@@ -19,6 +19,7 @@ pub fn descriptor(cpu: i64) -> TrackDescriptor {
 }
 pub fn detail(row: i64, a: i64, b: i64, depth: i64, style: DetailStyle) -> DetailInput {
     DetailInput {
+        render_facts: None,
         event_key: EventKey {
             table: EventTable::SchedSlice,
             row_id: row,

@@ -17,6 +17,15 @@ impl NoCacheSession {
         backing_scale: f64,
         budget: &EngineBudget,
     ) -> Result<Option<AssembledSnapshot>, EngineError> {
+        self.viewer_viewport_with_deadline(request, backing_scale, None, budget)
+    }
+    pub fn viewer_viewport_with_deadline(
+        &self,
+        request: &ViewportRequest,
+        backing_scale: f64,
+        deadline: Option<arktrace_platform::ContinuousDeadline>,
+        budget: &EngineBudget,
+    ) -> Result<Option<AssembledSnapshot>, EngineError> {
         self.query_reader(budget)?;
         let mut state = self
             .viewer
@@ -26,11 +35,21 @@ impl NoCacheSession {
             session: self,
             budget,
         };
-        let result = state
-            .load(request, backing_scale, &mut repository, &mut || {
-                check(budget)
+        let reader = self.query_reader(budget)?;
+        let result = reader
+            .with_query_deadline(deadline, || {
+                Ok(state
+                    .load(request, backing_scale, &mut repository, &mut || {
+                        check(budget)?;
+                        if deadline.is_some_and(|d| d.expired().unwrap_or(true)) {
+                            Err(arktrace_viewer::ViewerError::DeadlineReached)
+                        } else {
+                            Ok(())
+                        }
+                    })
+                    .map_err(execution_error))
             })
-            .map_err(execution_error);
+            .map_err(|e| failure(EngineStage::Querying, EngineFailure::Store(e)))?;
         self.query_reader(budget)?;
         result
     }

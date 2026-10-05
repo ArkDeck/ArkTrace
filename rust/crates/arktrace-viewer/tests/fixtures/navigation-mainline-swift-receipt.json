@@ -184,34 +184,44 @@
       "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
     },
     {
+      "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
+      "byteCount": 16950,
+      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a"
+    },
+    {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
       "byteCount": 6608,
       "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
-      "byteCount": 29018,
-      "sha256": "86af0ba5ce3e89248b7106c07dcf7c77d715e17a652e51129966a057ac1630d0"
+      "byteCount": 29092,
+      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineGeometry.swift",
-      "byteCount": 8131,
-      "sha256": "1b290c0a4e5ce8c960d192867ad84eb506783f5701a09ce61ba0fc181fc858b5"
+      "byteCount": 8339,
+      "sha256": "ef5c1239ba6fc8e780f0fcd1932a8c49049a1bd1454811dd961bea82aa137ac8"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "byteCount": 24339,
-      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8"
+      "byteCount": 26221,
+      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101313,
-      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9"
+      "byteCount": 101342,
+      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39"
+    },
+    {
+      "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
+      "byteCount": 1003,
+      "sha256": "ba28a4379320e72ed2ee861dc5055aff911bf779f73ecc7fecb810acdf126773"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
-      "byteCount": 40541,
-      "sha256": "d2c6fd2ad3e27141015eab3f2be71bbc567618eaae9b6830888d9b5814d73e6e"
+      "byteCount": 41220,
+      "sha256": "81e784d31a7b24b224213ea4fc12cc494191b90ab5a533f90c5862887210b1e9"
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
@@ -312,14 +322,14 @@
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "ebe6242e02fe550c8bd380330e4f9f4f1d596d84757cca660bb80d8fd6519d54",
-      "byteCount": 101876
+      "sha256": "98ca32f26668070e38a8611c437670327e5883c519379f34c301e3245cbcfe17",
+      "byteCount": 101905
     }
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "0070316653048d024914a5b88d01bc856a56e829eefdaefb64188a6315387a0b",
-    "byteCount": 8428
+    "sha256": "2702ba3ddebc3d0ce14951168937ad7157ff1a232fc5feac0ee0edcd0460e85a",
+    "byteCount": 5596
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
@@ -330,8 +340,8 @@
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "b2df54572adcf6e3d5087c652b3f3854d3dd5c918c131f517198e782b3de44f9",
-      "byteCount": 101313
+      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39",
+      "byteCount": 101342
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -340,8 +350,8 @@
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineModels.swift",
-      "sha256": "0e03bbe5e36de89838fffc719bfb69cdbbd5473379ff2559f00884aa3dd858d8",
-      "byteCount": 24339
+      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3",
+      "byteCount": 26221
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceModels.swift",
@@ -410,7 +420,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "d9459b4",
-  "previousReceiptSHA256": "a1f9cd75ef2f7a770d1f6298c0f9ec581bd3c0ca9bdfc81718819503fcea9c96",
+  "revalidatedBaseCommit": "91368f9",
+  "previousReceiptSHA256": "f8622f92653c0ad7f867b341699316351090b5a94ee6cc5c2f328a087688c7ee",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

@@ -89,10 +89,14 @@ App、CLI 与 ArkDeck adapter 必须共享 ArkTrace Core/Runtime/Store/Analysis�
 Core → SwiftUI/AppKit/SQLite/Process/ArkDeck
 Store → App/Rendering/ArkDeck
 Analysis → App/ArkDeck/LLM SDK
-Rendering → TraceStreamer Process/SQLite
+Rendering → Parser/Store，直接执行 TraceStreamer Process/SQLite
 CLI → App
 CLI/Core/Runtime/ArkDeck adapter → ArkTraceCapture/HDC
 ```
+
+启用 Rust SDK 的 macOS Rendering 可以消费 `ArkTraceRustRuntime` 返回的有界 immutable
+snapshot；解析、SQL、取消与资源生命周期仍由注入的共享 Rust Engine/Session 负责。
+Rendering 不选择或启动 parser、不执行 SQL、不拥有数据库连接，也不获得 Capture 依赖。
 
 ## 4. 时间与身份规格
 

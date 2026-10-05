@@ -61,3 +61,4 @@ pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {
     let range = TraceTimeRange::query(i64::MAX - 1, i64::MAX)?;
     Ok((native_host(), range.duration_ns()))
 }
+pub use arktrace_platform::ContinuousDeadline;

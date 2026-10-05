@@ -42,6 +42,24 @@ pub const WIRE_QUALITY_UNCLASSIFIED: u32 = 7;
 pub const WIRE_DOMINANT_IDENTITY: u32 = 1;
 pub const WIRE_QUALITY_STATUS_OK: u32 = 1;
 pub const WIRE_QUALITY_STATUS_WARNINGS: u32 = 2;
+pub const WIRE_FLAG_RENDER_FACTS: u32 = 32;
+pub const WIRE_FLAG_LABEL: u32 = 64;
+pub const WIRE_FLAG_CATEGORY: u32 = 128;
+pub const WIRE_FLAG_NAME: u32 = 256;
+pub const WIRE_FLAG_PROCESS_NAME: u32 = 512;
+pub const WIRE_FLAG_THREAD_NAME: u32 = 1024;
+pub const WIRE_FLAG_INSPECTOR_CATEGORY: u32 = 2048;
+pub const WIRE_FLAG_STATE: u32 = 4096;
+pub const WIRE_FLAG_UNIT: u32 = 8192;
+pub const WIRE_FLAG_SEMANTIC_DURATION: u32 = 16384;
+pub const WIRE_FLAG_PROCESS_KEY: u32 = 32768;
+pub const WIRE_FLAG_THREAD_KEY: u32 = 65536;
+pub const WIRE_FLAG_PID: u32 = 131072;
+pub const WIRE_FLAG_TID: u32 = 262144;
+pub const WIRE_FLAG_CPU: u32 = 524288;
+pub const WIRE_FLAG_VALUE: u32 = 1048576;
+pub const WIRE_FLAG_PRIORITY: u32 = 2097152;
+pub const WIRE_FLAG_COLOR: u32 = 4194304;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct ViewportRecord {
@@ -129,10 +147,37 @@ pub struct PrimitiveRecord {
     pub text_length: u32,
     pub reserved: u32,
     pub dominant_value: i64,
+    pub event_kind: u32,
+    pub color_rgb: u32,
+    pub jank_tag: i64,
+    pub semantic_duration_ns: i64,
+    pub process_key: i64,
+    pub thread_key: i64,
+    pub pid: i64,
+    pub tid: i64,
+    pub cpu: i64,
+    pub value: i64,
+    pub priority: i64,
+    pub label_offset: u32,
+    pub label_length: u32,
+    pub category_offset: u32,
+    pub category_length: u32,
+    pub name_offset: u32,
+    pub name_length: u32,
+    pub process_name_offset: u32,
+    pub process_name_length: u32,
+    pub thread_name_offset: u32,
+    pub thread_name_length: u32,
+    pub inspector_category_offset: u32,
+    pub inspector_category_length: u32,
+    pub state_offset: u32,
+    pub state_length: u32,
+    pub unit_offset: u32,
+    pub unit_length: u32,
 }
 #[cfg(target_pointer_width = "64")]
 const _: () = {
-    assert!(std::mem::size_of::<PrimitiveRecord>() == 136);
+    assert!(std::mem::size_of::<PrimitiveRecord>() == 280);
     assert!(std::mem::align_of::<PrimitiveRecord>() == 8);
     assert!(std::mem::offset_of!(PrimitiveRecord, kind) == 0);
     assert!(std::mem::offset_of!(PrimitiveRecord, flags) == 4);
@@ -156,6 +201,33 @@ const _: () = {
     assert!(std::mem::offset_of!(PrimitiveRecord, text_length) == 120);
     assert!(std::mem::offset_of!(PrimitiveRecord, reserved) == 124);
     assert!(std::mem::offset_of!(PrimitiveRecord, dominant_value) == 128);
+    assert!(std::mem::offset_of!(PrimitiveRecord, event_kind) == 136);
+    assert!(std::mem::offset_of!(PrimitiveRecord, color_rgb) == 140);
+    assert!(std::mem::offset_of!(PrimitiveRecord, jank_tag) == 144);
+    assert!(std::mem::offset_of!(PrimitiveRecord, semantic_duration_ns) == 152);
+    assert!(std::mem::offset_of!(PrimitiveRecord, process_key) == 160);
+    assert!(std::mem::offset_of!(PrimitiveRecord, thread_key) == 168);
+    assert!(std::mem::offset_of!(PrimitiveRecord, pid) == 176);
+    assert!(std::mem::offset_of!(PrimitiveRecord, tid) == 184);
+    assert!(std::mem::offset_of!(PrimitiveRecord, cpu) == 192);
+    assert!(std::mem::offset_of!(PrimitiveRecord, value) == 200);
+    assert!(std::mem::offset_of!(PrimitiveRecord, priority) == 208);
+    assert!(std::mem::offset_of!(PrimitiveRecord, label_offset) == 216);
+    assert!(std::mem::offset_of!(PrimitiveRecord, label_length) == 220);
+    assert!(std::mem::offset_of!(PrimitiveRecord, category_offset) == 224);
+    assert!(std::mem::offset_of!(PrimitiveRecord, category_length) == 228);
+    assert!(std::mem::offset_of!(PrimitiveRecord, name_offset) == 232);
+    assert!(std::mem::offset_of!(PrimitiveRecord, name_length) == 236);
+    assert!(std::mem::offset_of!(PrimitiveRecord, process_name_offset) == 240);
+    assert!(std::mem::offset_of!(PrimitiveRecord, process_name_length) == 244);
+    assert!(std::mem::offset_of!(PrimitiveRecord, thread_name_offset) == 248);
+    assert!(std::mem::offset_of!(PrimitiveRecord, thread_name_length) == 252);
+    assert!(std::mem::offset_of!(PrimitiveRecord, inspector_category_offset) == 256);
+    assert!(std::mem::offset_of!(PrimitiveRecord, inspector_category_length) == 260);
+    assert!(std::mem::offset_of!(PrimitiveRecord, state_offset) == 264);
+    assert!(std::mem::offset_of!(PrimitiveRecord, state_length) == 268);
+    assert!(std::mem::offset_of!(PrimitiveRecord, unit_offset) == 272);
+    assert!(std::mem::offset_of!(PrimitiveRecord, unit_length) == 276);
 };
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]

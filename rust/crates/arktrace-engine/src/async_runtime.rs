@@ -311,6 +311,7 @@ pub enum RepositoryRequest {
     ViewerViewport {
         request: Box<arktrace_viewer::ViewportRequest>,
         backing_scale: f64,
+        deadline: Option<arktrace_platform::ContinuousDeadline>,
     },
     ViewerResolveDensity(arktrace_viewer::DensityResolutionRequest),
     Batch(TraceRepositoryEventBatch),
@@ -355,7 +356,11 @@ impl RepositoryRequest {
             Self::ViewerViewport {
                 request,
                 backing_scale,
+                deadline,
             } => {
+                if deadline.is_some_and(|d| !d.is_valid()) {
+                    return Err(RuntimeFailure::InvalidRequest);
+                }
                 return request
                     .effective_budget()
                     .and_then(|_| {
@@ -1190,9 +1195,10 @@ fn query(
         RepositoryRequest::ViewerViewport {
             request,
             backing_scale,
+            deadline,
         } => {
             let loaded = session
-                .viewer_viewport(request, *backing_scale, b)
+                .viewer_viewport_with_deadline(request, *backing_scale, *deadline, b)
                 .map_err(RuntimeFailure::Engine)?;
             let scene = loaded
                 .as_ref()
@@ -1203,7 +1209,9 @@ fn query(
                         &mut || {
                             if b.cancellation.is_cancelled() {
                                 Err(arktrace_viewer::ViewerError::Cancelled)
-                            } else if Instant::now() >= b.deadline {
+                            } else if deadline.is_some_and(|d| d.expired().unwrap_or(true))
+                                || Instant::now() >= b.deadline
+                            {
                                 Err(arktrace_viewer::ViewerError::DeadlineReached)
                             } else {
                                 Ok(())

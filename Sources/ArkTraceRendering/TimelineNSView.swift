@@ -1016,7 +1016,7 @@ public final class TimelineNSView: NSView {
                     guard case .density(let density) = primitive,
                         TimelineGeometry.isVisible(primitive, in: snapshot.viewport)
                     else { continue }
-                    let color = TimelineDensityPalette.color(
+                    let color = density.projection?.color ?? TimelineDensityPalette.color(
                         for: density.bucket, fallback: fallback
                     )
                     let intensity = min(7, Int(log2(Double(max(1, density.bucket.eventCount)))))

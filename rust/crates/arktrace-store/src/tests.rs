@@ -933,6 +933,36 @@ mod native_indexing {
         }
     }
     #[test]
+    fn viewport_scope_deadline_reaches_density_workers_and_restores_for_retry() {
+        let fixture = Fixture::new("INSERT INTO sched_slice VALUES(1,100,20,0,NULL,NULL);");
+        let reader = ready_reader(&fixture);
+        let mut queries = batch();
+        queries.cpu_slices.clear();
+        queries.threads.clear();
+        queries.densities.truncate(2);
+        let past = Some(arktrace_platform::ContinuousDeadline {
+            seconds: 0,
+            attoseconds: 0,
+        });
+        assert_eq!(
+            reader
+                .with_query_deadline(past, || {
+                    reader.event_batch(&queries, &budget(), ReadPoolLimits::default())
+                })
+                .unwrap_err(),
+            StoreError::DeadlineExceeded
+        );
+        let retry = reader
+            .event_batch(&queries, &budget(), ReadPoolLimits::default())
+            .unwrap();
+        assert_eq!(retry.result.densities.len(), 2);
+        assert_eq!(retry.statistics.completed_queries, 2);
+        assert_eq!(
+            retry.statistics.workers_opened,
+            retry.statistics.connections_closed
+        );
+    }
+    #[test]
     fn scoped_deadline_restores_on_error_panic_and_nested_nil_override() {
         use arktrace_platform::ContinuousDeadline;
         let fixture = Fixture::new("INSERT INTO thread VALUES(1,11,'t',100,NULL);");

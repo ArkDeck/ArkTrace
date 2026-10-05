@@ -127,6 +127,8 @@ pub use annotations::*;
 
 mod inspector_projection;
 pub use inspector_projection::*;
+mod render_facts;
+pub use render_facts::{MAXIMUM_RENDER_FACT_BYTES, RenderDetailFacts};
 
 mod snapshot_event_index;
 pub use snapshot_event_index::*;

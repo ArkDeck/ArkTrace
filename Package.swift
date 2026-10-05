@@ -82,8 +82,8 @@ let package = Package(
         ),
         .target(
             name: "ArkTraceRendering",
-            dependencies: ["ArkTraceCore"],
-            swiftSettings: firstPartySwiftSettings
+            dependencies: ["ArkTraceCore"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
+            swiftSettings: firstPartySwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
         ),
         .target(
             name: "ArkTraceAppSupport",
@@ -143,7 +143,8 @@ let package = Package(
         .testTarget(name: "ArkTraceAnalysisTests", dependencies: ["ArkTraceAnalysis"]),
         .testTarget(
             name: "ArkTraceRenderingTests",
-            dependencies: ["ArkTraceRendering"]
+            dependencies: ["ArkTraceRendering"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
+            swiftSettings: nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")]
         ),
         .testTarget(
             name: "ArkTraceAppSupportTests",

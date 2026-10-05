@@ -520,6 +520,7 @@ mod native {
                     (
                         serde_json::to_vec(&snapshot)?,
                         RepositoryRequest::ViewerViewport {
+                            deadline: None,
                             request: Box::new(request),
                             backing_scale: 2.0,
                         },
@@ -555,6 +556,7 @@ mod native {
                 &engine,
                 ticket.session,
                 RepositoryRequest::ViewerViewport {
+                    deadline: None,
                     request: Box::new(viewport_request(
                         &lanes,
                         range,
@@ -582,6 +584,7 @@ mod native {
                 &engine,
                 ticket.session,
                 RepositoryRequest::ViewerViewport {
+                    deadline: None,
                     request: Box::new(latest_request.clone()),
                     backing_scale: 2.0,
                 },
@@ -612,6 +615,7 @@ mod native {
                 retry(|| engine.submit(
                     ticket.session,
                     RepositoryRequest::ViewerViewport {
+                        deadline: None,
                         request: Box::new(viewport_request(
                             &lanes,
                             range,

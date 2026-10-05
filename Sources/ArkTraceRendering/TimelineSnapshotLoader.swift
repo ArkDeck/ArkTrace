@@ -1,4 +1,7 @@
 import ArkTraceCore
+#if ARKTRACE_NATIVE_RUNTIME
+import ArkTraceRustRuntime
+#endif
 
 /// Actor-isolated viewport loader. Every completion is checked against the
 /// latest generation, so an older pan/zoom request can never overwrite a new
@@ -43,6 +46,21 @@ package actor TimelineSnapshotLoader {
         let loadStartedAt = ContinuousClock.now
         latestGeneration = max(latestGeneration, request.generation)
         guard request.generation == latestGeneration else { return nil }
+        #if ARKTRACE_NATIVE_RUNTIME
+        if let repository = repository as? RustTraceRepository {
+            defer {
+                TracePerformanceMetrics.record(
+                    scope: "timelineSnapshot",
+                    operation: "load.total",
+                    startedAt: loadStartedAt,
+                    observer: performanceObserver
+                )
+            }
+            let snapshot = try await NativeTimelineSnapshot.load(request, repository: repository)
+            guard request.generation == latestGeneration else { return nil }
+            return snapshot
+        }
+        #endif
 
         let expanded = request.tracks.filter { !$0.isCollapsed }
         let queriedIndices = Self.queriedTrackIndices(

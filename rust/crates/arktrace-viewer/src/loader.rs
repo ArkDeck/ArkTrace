@@ -280,6 +280,8 @@ fn execute<R: ViewportQueries>(
         .map(|(index, result)| (*index, result))
         .collect::<BTreeMap<_, _>>();
     let mut details = BTreeMap::new();
+    let mut fact_batches = std::collections::BTreeSet::new();
+    let mut fact_bytes = 0;
     let mut remaining = plan.maximum_primitives;
     let mut queried_remaining = plan.queried_indices.len();
     let mut budgets = Vec::with_capacity(plan.lanes.len());
@@ -331,6 +333,11 @@ fn execute<R: ViewportQueries>(
                         return Err(ViewerError::InputBudgetExceeded.into());
                     }
                     count = page.items.len();
+                    crate::render_facts::charge_render_facts(
+                        page.items.iter(),
+                        &mut fact_batches,
+                        &mut fact_bytes,
+                    )?;
                     details.insert(index, page);
                 }
             }
