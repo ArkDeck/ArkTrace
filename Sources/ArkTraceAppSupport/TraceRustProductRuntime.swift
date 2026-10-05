@@ -96,7 +96,7 @@ public final class TraceRustProductRuntime: Sendable {
                 operationTimeoutMilliseconds: queryTimeoutMilliseconds)
             let trace = await opening.metadata.cacheKey.traceSHA256.copyString()
             let access = TraceViewStateAccess(session: session, traceSHA256: trace, timeoutMilliseconds: queryTimeoutMilliseconds,
-                backupDirectory: configuration.viewStateMigration?.backupDirectory)
+                backupDirectory: configuration.viewStateBackup?.backupDirectory)
             try Task.checkCancellation()
             return TraceOpenedDocument(repository: repository, cacheHit: opening.cacheHit, cacheMetadata: nil,
                 viewStateAccess: access, close: { try await repository.close() })
@@ -109,18 +109,17 @@ public final class TraceRustProductRuntime: Sendable {
 
     private static func validate(_ product: TraceProductConfiguration, _ runtime: RustConfiguration,
                                  _ openTimeout: UInt32, _ queryTimeout: UInt32) throws {
-        let migrationMatches: Bool
-        switch (product.viewStateMigration, runtime.configuredViewStateMigration) {
-        case (nil, nil): migrationMatches = true
+        let backupMatches: Bool
+        switch (product.viewStateBackup, runtime.configuredViewStateBackup) {
+        case (nil, nil): backupMatches = true
         case (let product?, let runtime?):
-            migrationMatches = product.legacyCacheDirectory == runtime.configuredLegacyCacheDirectory.standardizedFileURL
-                && product.backupDirectory == runtime.configuredBackupDirectory.standardizedFileURL
-        default: migrationMatches = false
+            backupMatches = product.backupDirectory == runtime.configuredBackupDirectory.standardizedFileURL
+        default: backupMatches = false
         }
         guard runtime.configuredNamespace.standardizedFileURL == product.stagingDirectory,
               runtime.configuredCacheDirectory?.standardizedFileURL == product.cacheDirectory,
               runtime.configuredParser.standardizedFileURL == product.bundledParser.executableURL(in: product.bundleURL),
-              migrationMatches,
+              backupMatches,
               (1...300_000).contains(openTimeout), (1...300_000).contains(queryTimeout) else {
             throw ArkTraceError(code: .invalidArgument, stage: .preparing,
                 message: "Native trace product configuration does not match its fixed profile")

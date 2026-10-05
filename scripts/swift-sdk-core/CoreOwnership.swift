@@ -16,7 +16,6 @@ private struct Input: Decodable, Sendable {
     let repositoryOracle: String?
     let cacheDirectory: String?
     let productRuntime: Bool?
-    let productMigration: Bool?
 }
 private struct Response: Codable, Sendable { let id, nativeBodyUTF8, coreBodyUTF8, afterShutdownCoreBodyUTF8: String }
 private struct UnsortedOrderProbe: Codable, Sendable { let beforeUTF8, afterUTF8: String; let sameJSONValue: Bool }
@@ -113,7 +112,6 @@ private struct Report: Codable, Sendable {
 @MainActor @main private struct CoreOwnership {
     static func main() async throws {
         let input = try await load(CommandLine.arguments[1])
-        if input.productMigration == true { try await runProductMigrationOwnership(); return }
         if input.productRuntime == true { try await runProductRuntimeOwnership(); return }
         if input.cacheDirectory != nil { try await runCacheOwnership(); return }
         let configuration = RustConfiguration.developmentFixture(namespace: URL(filePath: input.namespace), helper: URL(filePath: input.helper),

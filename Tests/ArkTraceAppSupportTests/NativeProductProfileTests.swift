@@ -15,7 +15,7 @@ final class NativeProductProfileTests: XCTestCase {
             bundledParser: TraceBundledParserLocation(executableRelativePath: "parser", manifestRelativePath: "manifest.json"))
     }
     private func runtime(_ product: TraceProductConfiguration, namespace: URL? = nil,
-                         parser: URL? = nil, storage: RustStoragePolicy? = nil, migration: RustViewStateMigrationConfiguration? = nil) -> RustConfiguration {
+                         parser: URL? = nil, storage: RustStoragePolicy? = nil, backup: RustViewStateBackupConfiguration? = nil) -> RustConfiguration {
         RustConfiguration(namespace: namespace ?? product.stagingDirectory,
             helper: product.bundleURL.appending(path: "helper"),
             parser: parser ?? product.bundledParser.executableURL(in: product.bundleURL),
@@ -24,7 +24,7 @@ final class NativeProductProfileTests: XCTestCase {
                 upstreamRepository: "https://example.invalid", upstreamRevision: String(repeating: "c", count: 40),
                 architecture: "arm64", adapterVersion: "1", buildRecipeVersion: "1"),
             publisher: RustPublisher(teamIdentifier: "TESTTEAM", helperCodeIdentifier: "test.helper", parserCodeIdentifier: "test.parser"),
-            storagePolicy: storage ?? .contentAddressed(cacheDirectory: product.cacheDirectory), viewStateMigration: migration)
+            storagePolicy: storage ?? .contentAddressed(cacheDirectory: product.cacheDirectory), viewStateBackup: backup)
     }
     private func reject(_ product: TraceProductConfiguration, _ native: RustConfiguration,
                         open: UInt32 = 60_000, query: UInt32 = 30_000) async {
@@ -51,22 +51,19 @@ final class NativeProductProfileTests: XCTestCase {
         await reject(product, native, query: 0)
         await reject(product, native, query: 300_001)
     }
-    func testMigrationRootsMustMatchFixedProductProfileBeforeToolIO() async throws {
+    func testBackupRootMustMatchFixedProductProfileBeforeToolIO() async throws {
         let product = try profile()
-        let migration = try TraceProductViewStateMigrationConfiguration(
-            legacyCacheDirectory: URL(filePath: "/private/tmp/old-product/traces"),
+        let backup = try TraceProductViewStateBackupConfiguration(
             backupDirectory: URL(filePath: "/private/tmp/new-product/backups"))
         let configured = try TraceProductConfiguration(bundleURL: product.bundleURL,
             cacheDirectory: product.cacheDirectory, stagingDirectory: product.stagingDirectory,
             recentDocumentsKey: product.recentDocumentsKey, signpostSubsystem: product.signpostSubsystem,
-            bundledParser: product.bundledParser, viewStateMigration: migration)
+            bundledParser: product.bundledParser, viewStateBackup: backup)
         await reject(configured, runtime(configured))
-        await reject(product, runtime(product, migration: RustViewStateMigrationConfiguration(
-            legacyCacheDirectory: migration.legacyCacheDirectory, backupDirectory: migration.backupDirectory)))
-        await reject(configured, runtime(configured, migration: RustViewStateMigrationConfiguration(
-            legacyCacheDirectory: migration.legacyCacheDirectory.appending(path: "other"), backupDirectory: migration.backupDirectory)))
-        await reject(configured, runtime(configured, migration: RustViewStateMigrationConfiguration(
-            legacyCacheDirectory: migration.legacyCacheDirectory, backupDirectory: migration.backupDirectory.appending(path: "other"))))
+        await reject(product, runtime(product, backup: RustViewStateBackupConfiguration(
+            backupDirectory: backup.backupDirectory)))
+        await reject(configured, runtime(configured, backup: RustViewStateBackupConfiguration(
+            backupDirectory: backup.backupDirectory.appending(path: "other"))))
     }
 
 }

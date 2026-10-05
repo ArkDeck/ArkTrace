@@ -17,7 +17,6 @@ struct TraceViewStateBackupButton: View {
                 .focusable()
                 .focused($backupFocused)
                 .onKeyPress(keys: [.space, .return], phases: .down) { _ in show(); return .handled }
-                .disabled(controller.isImportingLegacyViewState)
                 .sheet(item: $review, onDismiss: { backupFocused = true }) { item in
                     TraceViewStateBackupReview(controller: controller, sessionID: item.id)
                 }
@@ -36,7 +35,7 @@ private struct TraceViewStateBackupReview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Saved State Backup").font(.title2).accessibilityAddTraits(.isHeader)
-            Text("A backup contains saved flags, persistent marks, and favorites. To use new saved state after returning to an older app, restore the backup separately. The older app does not read it automatically.")
+            Text("Create a separate copy of saved flags, persistent marks, and favorites. Backups stay available after the trace cache is cleared.")
                 .fixedSize(horizontal: false, vertical: true)
             if sessionID == controller.annotationSessionID {
                 if controller.isBackingUpViewState {
@@ -81,7 +80,7 @@ private struct TraceViewStateBackupReview: View {
         switch status {
         case .backedUp, .alreadyBackedUp: Text("Saved State Backup Is Ready")
         case .missing: Text("No saved state to back up. Add a flag, persistent mark, or favorite first.")
-        case .preserved: Text("The saved state could not be read. Its original file was kept. No rollback backup was created.")
+        case .preserved: Text("The saved state could not be read. Its original file was kept. No backup was created.")
         case .notConfigured, .sessionScoped: Text("Saved state backups are unavailable for this document.")
         }
     }

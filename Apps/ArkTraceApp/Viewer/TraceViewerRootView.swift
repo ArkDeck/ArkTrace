@@ -141,9 +141,6 @@ struct TraceViewerRootView: View {
             controller.open(first)
             return true
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            TraceViewStateMigrationOverlay(controller: controller)
-        }
         .overlay(alignment: .bottomLeading) {
             TraceErrorBannerOverlay(
                 controller: controller,

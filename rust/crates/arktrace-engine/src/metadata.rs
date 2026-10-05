@@ -124,9 +124,6 @@ pub(crate) fn utc_from_unix_seconds(seconds: u64) -> Result<String, InvalidMetad
 }
 impl CacheMetadata {
     pub fn validate(&self) -> Result<(), InvalidMetadata> {
-        self.validate_format_one(true)
-    }
-    fn validate_format_one(&self, current_versions: bool) -> Result<(), InvalidMetadata> {
         self.parser.validate().map_err(|_| InvalidMetadata)?;
         let preparation = &self.database_preparation;
         let key = TraceCacheKey::new(
@@ -145,10 +142,9 @@ impl CacheMetadata {
             || !digest(&self.schema_fingerprint)
             || !digest(&preparation.upstream_database_sha256)
             || preparation.upstream_database_byte_count <= 0
-            || (current_versions
-                && (self.schema_adapter_version != arktrace_contract::SCHEMA_ADAPTER_VERSION
-                    || self.index_schema_version != arktrace_contract::INDEX_SCHEMA_VERSION
-                    || self.parser.adapter_version != arktrace_contract::PARSER_ADAPTER_VERSION))
+            || self.schema_adapter_version != arktrace_contract::SCHEMA_ADAPTER_VERSION
+            || self.index_schema_version != arktrace_contract::INDEX_SCHEMA_VERSION
+            || self.parser.adapter_version != arktrace_contract::PARSER_ADAPTER_VERSION
             || preparation.schema_adapter_version != self.schema_adapter_version
             || preparation.schema_fingerprint != self.schema_fingerprint
             || preparation.index_version != self.index_schema_version
@@ -166,17 +162,6 @@ impl CacheMetadata {
         }
         let result: Self = serde_json::from_slice(bytes).map_err(|_| InvalidMetadata)?;
         result.validate()?;
-        Ok(result)
-    }
-    /// Annotation import may retain an older parser/index identity. This is
-    /// never Ready/database authority: only format-1 field coherence is read.
-    #[cfg(any(target_os = "macos", test))]
-    pub(crate) fn decode_legacy_view_state(bytes: &[u8]) -> Result<Self, InvalidMetadata> {
-        if bytes.is_empty() || bytes.len() > MAXIMUM_METADATA_BYTES {
-            return Err(InvalidMetadata);
-        }
-        let result: Self = serde_json::from_slice(bytes).map_err(|_| InvalidMetadata)?;
-        result.validate_format_one(false)?;
         Ok(result)
     }
     pub fn encode(&self) -> Result<Vec<u8>, InvalidMetadata> {

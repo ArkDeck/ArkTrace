@@ -35,8 +35,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 101470,
-      "sha256": "700dd544c6d40e43135e39b4be6d2519f37a4331d59a2e07a827bc142e2a3dbc"
+      "byteCount": 98611,
+      "sha256": "0fce255320ae6962401e1882efa9ef8c479bb0c6066af0a4d4f2fcd8c915006d"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -45,8 +45,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
-      "byteCount": 9065,
-      "sha256": "b1d231c74993660ee0cfff65bebaaff7105da534bbfbb52e5a57ea4bc769c1d4"
+      "byteCount": 8664,
+      "sha256": "1ec06f18f9c440f30da0ce1627debcbe93d6e71b50c0a31025fdb5ff6a52ed8c"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
@@ -55,8 +55,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
-      "byteCount": 8215,
-      "sha256": "9a3ec0159dff4fc97564a341a8eac216a35e39f3194144efe6a00c254be17673"
+      "byteCount": 8081,
+      "sha256": "dc2e326e012c1896ac674f567ccb1497cb1c941f48888f929b01470e97abbbc8"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
@@ -65,18 +65,13 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateAccess.swift",
-      "byteCount": 9267,
-      "sha256": "8f570309b959f2e3b998dbb365e0cfd1ef4384abfa5d30d40cf9ef85577de1d1"
+      "byteCount": 8310,
+      "sha256": "93d02e9931a3cc218b6db9d9b56028ea8c3a1b87ab1367614a2f3358b51b2791"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateBackupPresentation.swift",
       "byteCount": 2518,
       "sha256": "718fecb9e149c6cd5b6006e0c08c29b85937ed6dbbdd58609cd5da98d28ba58c"
-    },
-    {
-      "path": "Sources/ArkTraceAppSupport/TraceViewStateMigrationPresentation.swift",
-      "byteCount": 3342,
-      "sha256": "8b7c6e60e666616659b2a690d629917dd26bc231dc29175825eeadfb15181f56"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -297,8 +292,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "8c31c048389277a41c322892471b8dfa2510a35fca1094f008be2f79beeca41d",
-      "byteCount": 102941
+      "sha256": "f0e466c21764a3da27d0afeee785e572292483a226dc4a64abab6f37b49eff9e",
+      "byteCount": 100082
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -308,15 +303,15 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "a55b658fc388eab1315d874dcba7789e27a15ad8b4e81a79a7f8b1b69362c79f",
-    "byteCount": 5950
+    "sha256": "cfaa54ed001a8e9c3c0f9c5a19d61c926cba1dcdefe72ad704a367881a2109cc",
+    "byteCount": 5860
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "700dd544c6d40e43135e39b4be6d2519f37a4331d59a2e07a827bc142e2a3dbc",
-      "byteCount": 101470
+      "sha256": "0fce255320ae6962401e1882efa9ef8c479bb0c6066af0a4d4f2fcd8c915006d",
+      "byteCount": 98611
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -400,7 +395,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "fda7a89b100990431f1c6eadb971bae1e5d4807e",
-  "previousReceiptSHA256": "77cd0cf5b92cb48608808dac6f2e13106e35e3515693beee89f57825e3716aa9",
+  "revalidatedBaseCommit": "04538fd3af7e5ab78c2d12990d8483efb3120113",
+  "previousReceiptSHA256": "048a88e143129f8b24abc2980e595ccb551fd7092683184eff02c63e0fe532e2",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

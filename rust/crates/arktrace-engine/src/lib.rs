@@ -5,12 +5,11 @@ mod metadata;
 mod query_deadlines;
 mod view_state;
 mod view_state_backup;
-mod view_state_migration;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
     AsyncEngine, CacheRequest, DrainStatus, MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES, OpenTicket,
     RepositoryRequest, RequestState, RequestStatus, RuntimeConfiguration, RuntimeFailure,
-    RuntimeLimits, RuntimeViewStateMigration, SessionState, SessionStatus, ViewStateRequest,
+    RuntimeLimits, RuntimeViewStateBackup, SessionState, SessionStatus, ViewStateRequest,
     WorkerBoundary,
 };
 pub use query_deadlines::{
@@ -21,11 +20,6 @@ pub use view_state::{
     ViewStateRead, ViewStateWrite,
 };
 pub use view_state_backup::{ViewStateBackupReceipt, ViewStateBackupReport, ViewStateBackupStatus};
-pub use view_state_migration::{
-    LegacyViewStateCandidateSummary, LegacyViewStateIssue, LegacyViewStateMigrationReport,
-    LegacyViewStateMigrationStatus, LegacyViewStateSource, MAXIMUM_LEGACY_BACKUP_FILE_BYTES,
-    MAXIMUM_LEGACY_BACKUP_SCAN_BYTES, MAXIMUM_LEGACY_VIEW_STATE_ENTRIES,
-};
 mod handles;
 #[cfg(any(target_os = "macos", test))]
 mod owned_input;
@@ -58,9 +52,9 @@ pub use cache_maintenance::{
 #[cfg(target_os = "macos")]
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
-    EngineSession, EngineStage, LegacyViewStateMigration, NoCacheRecoveryOutcome,
-    NoCacheRecoveryRow, NoCacheSession, ParserTools, SourceFormat, ViewStateBackupStore,
-    ViewerFailure, open_cached, open_no_cache, recover_no_cache,
+    EngineSession, EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession,
+    ParserTools, SourceFormat, ViewStateBackupStore, ViewerFailure, open_cached, open_no_cache,
+    recover_no_cache,
 };
 
 pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {

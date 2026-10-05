@@ -69,7 +69,7 @@ def main():
     abi = ABI(tools / 'library.dylib')
     identity = abi.out('abi_identity', 'AbiIdentity')
     contract = sha(ROOT / 'contracts/ffi-v1.json')
-    assert identity.abi_version == 1 and identity.capabilities == 255
+    assert identity.abi_version == 1 and identity.capabilities == 191
     assert bytes(identity.contract_digest).hex() == contract
     manifest = json.loads((ROOT / 'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
     assert sha(tools / 'parser') == manifest['binarySHA256']
@@ -97,7 +97,7 @@ def main():
             config = dict(abiVersion=1, contractDigest=contract, cachePolicy='contentAddressed',
                 cacheDirectory=str(cache), namespace=str(namespace), helper=str(tools / 'helper'),
                 parser=str(tools / 'parser'), helperSHA256=sha(tools / 'helper'), parserIdentity=parser_identity,
-                viewStateMigration=dict(legacyCacheDirectory=str(base / 'absent-legacy'), backupDirectory=str(backup)),
+                viewStateBackup=dict(backupDirectory=str(backup)),
                 limits=dict(workers=1, queuePerWorker=8))
             (base / (label + '-config.json')).write_text(json.dumps(config, indent=2) + '\n')
             self.handle = abi.input('engine_create_fixture', config, 'u64').value

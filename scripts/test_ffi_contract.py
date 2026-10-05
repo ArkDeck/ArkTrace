@@ -28,7 +28,7 @@ def main():
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
     identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
     assert bytes(identity.contract_digest)==expected and identity.abi_version==1
-    assert identity.capabilities==(247 if sys.platform=='darwin' else 0)
+    assert identity.capabilities==(183 if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
     storage=(C.c_uint64*8)();bad=C.cast(C.byref(storage,1),C.POINTER(TYPES['AbiIdentity']))
@@ -57,13 +57,6 @@ def main():
         abi.call('view_state_request_submit',0,0,K['VIEW_STATE_WRITE'],pointer,length,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
     oversize=(C.c_uint8*(K['MAXIMUM_VIEW_STATE_BYTES']+1))()
     abi.call('view_state_request_submit',0,0,K['VIEW_STATE_WRITE'],oversize,len(oversize),1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
-    for pointer,length in ((None,64),(payload,0)):
-        abi.call('view_state_request_submit',0,0,K['VIEW_STATE_IMPORT'],pointer,length,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
-    for value in (b'a'*63,b'G'*64,b'0'*63+b'\xff'):
-        data=(C.c_uint8*len(value)).from_buffer_copy(value)
-        abi.call('view_state_request_submit',0,0,K['VIEW_STATE_IMPORT'],data,len(value),1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
-    data=(C.c_uint8*65)(*([97]*65))
-    abi.call('view_state_request_submit',0,0,K['VIEW_STATE_IMPORT'],data,65,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
     # Bounded arbitrary bytes are valid allocations, never dangling pointers.
     for payload in (b'{}',b'null',b'[]',b'\xff',b'{"sql":"SELECT *"}'):
         abi.input('engine_create',payload,'u64',expected=K['STATUS_INVALID_INPUT'])

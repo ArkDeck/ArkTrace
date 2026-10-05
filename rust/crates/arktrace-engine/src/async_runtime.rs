@@ -164,8 +164,7 @@ impl RuntimeLimits {
 }
 /// Fixed product/engine configuration, never supplied in a repository request.
 #[derive(Clone, Debug)]
-pub struct RuntimeViewStateMigration {
-    pub legacy_cache_directory: PathBuf,
+pub struct RuntimeViewStateBackup {
     pub backup_directory: PathBuf,
 }
 
@@ -174,7 +173,7 @@ pub struct RuntimeConfiguration {
     pub namespace: PathBuf,
     /// Isolated persistent native root. None keeps per-session ephemeral storage.
     pub cache_directory: Option<PathBuf>,
-    pub view_state_migration: Option<RuntimeViewStateMigration>,
+    pub view_state_backup: Option<RuntimeViewStateBackup>,
     pub helper: PathBuf,
     pub parser: PathBuf,
     pub helper_sha256: String,
@@ -198,7 +197,7 @@ impl RuntimeConfiguration {
         Self {
             namespace,
             cache_directory: None,
-            view_state_migration: None,
+            view_state_backup: None,
             helper,
             parser,
             helper_sha256,
@@ -233,17 +232,12 @@ impl RuntimeConfiguration {
                 return Err(RuntimeFailure::InvalidRequest);
             }
         }
-        if let Some(migration) = &self.view_state_migration {
+        if let Some(backup) = &self.view_state_backup {
             let cache = self
                 .cache_directory
                 .as_ref()
                 .ok_or(RuntimeFailure::InvalidRequest)?;
-            let roots = [
-                &migration.legacy_cache_directory,
-                &migration.backup_directory,
-                cache,
-                &self.namespace,
-            ];
+            let roots = [&backup.backup_directory, cache, &self.namespace];
             for (index, path) in roots.iter().enumerate() {
                 validate_path(path)?;
                 if path.parent().is_none()
@@ -443,8 +437,6 @@ pub enum ViewStateRequest<'a> {
     Read,
     Write(&'a [u8]),
     Remove,
-    /// None selects an unambiguous source; Some is an exact 64-byte digest.
-    Import(Option<&'a [u8]>),
     /// No caller path or bytes; snapshot the Session's held current sidecar.
     Backup,
 }
@@ -453,7 +445,6 @@ enum ViewStateOperation {
     Read,
     Write(OwnedInput),
     Remove,
-    Import(Option<OwnedInput>),
     Backup(InputCharge),
 }
 /// Engine-scoped requests use only the fixed configured cache root. They do
@@ -748,11 +739,6 @@ impl AsyncEngine {
         {
             return Err(RuntimeFailure::InvalidRequest);
         }
-        if matches!(&request, ViewStateRequest::Import(Some(bytes)) if bytes.len() != 64
-            || !bytes.iter().all(|v| v.is_ascii_digit() || (b'a'..=b'f').contains(v)))
-        {
-            return Err(RuntimeFailure::InvalidRequest);
-        }
         self.check_running()?;
         let budget = self.budget(timeout)?;
         let mut registry = self.registry()?;
@@ -780,14 +766,6 @@ impl AsyncEngine {
                     .view_state_input_budget
                     .charge(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES)
                     .map_err(|_| RuntimeFailure::Capacity)?,
-            ),
-            ViewStateRequest::Import(selection) => ViewStateOperation::Import(
-                selection
-                    .map(|bytes| {
-                        OwnedInput::copy(bytes, self.shared.view_state_input_budget.clone())
-                            .map_err(|_| RuntimeFailure::Capacity)
-                    })
-                    .transpose()?,
             ),
             ViewStateRequest::Write(bytes) => ViewStateOperation::Write(
                 OwnedInput::copy(bytes, self.shared.view_state_input_budget.clone())
@@ -1032,7 +1010,6 @@ struct Tools {
     identity: TraceParserIdentity,
     owners: OwnerStore,
     cache_root: Option<HeldDirectory>,
-    migration: Option<crate::LegacyViewStateMigration>,
     backup: Option<crate::ViewStateBackupStore>,
 }
 fn engine_failure(stage: EngineStage, failure: EngineFailure) -> RuntimeFailure {
@@ -1078,7 +1055,6 @@ fn load_tools(
         )?,
         identity: config.parser_identity.clone(),
         owners,
-        migration: None,
         backup: None,
         cache_root: config
             .cache_directory
@@ -1571,7 +1547,7 @@ fn process(
                         )
                         .map(Some);
                     }
-                    let Some(profile) = &config.view_state_migration else {
+                    let Some(profile) = &config.view_state_backup else {
                         return response(
                             &Report::empty(Status::NotConfigured),
                             command,
@@ -1657,107 +1633,6 @@ fn process(
                     response(
                         &session
                             .write_view_state(Some(&document), &command.budget)
-                            .map_err(RuntimeFailure::Engine)?,
-                        command,
-                        shared,
-                        config,
-                    )
-                }
-                ViewStateOperation::Import(selection) => {
-                    use crate::{
-                        LegacyViewStateMigrationReport as Report,
-                        LegacyViewStateMigrationStatus as Status,
-                    };
-                    if config.cache_directory.is_none() {
-                        return response(
-                            &Report::empty(Status::SessionScoped),
-                            command,
-                            shared,
-                            config,
-                        )
-                        .map(Some);
-                    }
-                    let Some(profile) = &config.view_state_migration else {
-                        return response(
-                            &Report::empty(Status::NotConfigured),
-                            command,
-                            shared,
-                            config,
-                        )
-                        .map(Some);
-                    };
-                    let owner = tools.as_mut().ok_or(RuntimeFailure::WorkerPanicked)?;
-                    if owner.migration.is_none() {
-                        let io = command.budget.io(crate::MAXIMUM_LEGACY_BACKUP_FILE_BYTES);
-                        let legacy =
-                            match HeldDirectory::open_private(&profile.legacy_cache_directory) {
-                                Ok(legacy) => legacy,
-                                Err(arktrace_platform::HostError::NotFound) => {
-                                    return response(
-                                        &Report::empty(Status::Missing),
-                                        command,
-                                        shared,
-                                        config,
-                                    )
-                                    .map(Some);
-                                }
-                                Err(error) => {
-                                    return Err(engine_failure(
-                                        EngineStage::Querying,
-                                        EngineFailure::Host(error),
-                                    ));
-                                }
-                            };
-                        let parent = HeldDirectory::open_private(
-                            profile
-                                .backup_directory
-                                .parent()
-                                .ok_or(RuntimeFailure::InvalidRequest)?,
-                        )
-                        .map_err(|e| {
-                            engine_failure(EngineStage::Querying, EngineFailure::Host(e))
-                        })?;
-                        let name = profile
-                            .backup_directory
-                            .file_name()
-                            .and_then(|v| v.to_str())
-                            .ok_or(RuntimeFailure::InvalidRequest)?;
-                        let backup = parent.ensure_private_child(name).map_err(|e| {
-                            engine_failure(EngineStage::Querying, EngineFailure::Host(e))
-                        })?;
-                        owner.migration = Some(
-                            crate::LegacyViewStateMigration::new(
-                                legacy,
-                                owner
-                                    .cache_root
-                                    .as_ref()
-                                    .ok_or(RuntimeFailure::InvalidRequest)?
-                                    .clone(),
-                                backup,
-                                &io,
-                            )
-                            .map_err(|e| {
-                                engine_failure(EngineStage::Querying, EngineFailure::Host(e))
-                            })?,
-                        );
-                    }
-                    let selection = selection
-                        .as_ref()
-                        .map(|bytes| {
-                            std::str::from_utf8(bytes.bytes())
-                                .map_err(|_| RuntimeFailure::InvalidRequest)
-                        })
-                        .transpose()?;
-                    response(
-                        &session
-                            .migrate_legacy_view_state(
-                                owner
-                                    .migration
-                                    .as_ref()
-                                    .ok_or(RuntimeFailure::WorkerPanicked)?,
-                                selection,
-                                &command.budget,
-                            )
                             .map_err(RuntimeFailure::Engine)?,
                         command,
                         shared,

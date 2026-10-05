@@ -462,7 +462,7 @@ VM work policy 与 decoded credit 约束工作。4 份冻结 DB 的 9 个成功�
 - 平台/输入：APFS/NTFS、多进程测试；无设备。
 - 需求：AT-CACHE-*、AT-APP-002/003/004、AT-ERR-003、AT-SYS-002、AT-SEC-007、
   AT-PARSE-006/008/009、设计 §6/9。
-- 路径：`arktrace-engine`；cache/migration fixtures；Swift cache/view-state 来源录制。
+- 路径：`arktrace-engine`；cache/view-state fixtures；Swift 当前 cache/view-state 来源录制。
 
 交付：
 
@@ -470,9 +470,9 @@ VM work policy 与 decoded credit 约束工作。4 份冻结 DB 的 9 个成功�
 2. content-addressed cache key、metadata 严格 reader、hit validation、同 key 单 builder、
    active shared lease、exclusive mutation、corrupt quarantine/最多重建一次、LRU/purge。
 3. 产品配置固定 roots；开发期新 namespace；跨产品无隐式共享或互相清理。
-4. 只读旧格式导入：flags/marks/favorites 原 bytes 备份、digest 记录、幂等导入、
-   多 parser entry 冲突与 unmatched identity 保留；独立数据迁移测试。常规 LRU/purge 仍按
-   AT-APP-004 随 entry 回收 `view-state.json`，导入只解决换实现/namespace/parserKey 造成的不可见。
+4. 最新格式的 flags/marks/favorites 读写与手动备份：固定独立备份目录、原值保留、
+   digest 记录、幂等发布、取消与预算验证。常规 LRU/purge 仍按 AT-APP-004 随 entry
+   回收 `view-state.json`；手动备份在 cache 外保留，不自动恢复或导入历史状态。
 5. 与 ArkDeck 现有 purge 移植的接入方案（维护 crate 依赖或发布格式/锁向量），供 017/018 落地。
 
 验收：
@@ -481,8 +481,9 @@ VM work policy 与 decoded credit 约束工作。4 份冻结 DB 的 9 个成功�
   crash 断点、打开后身份变化、低磁盘和重启恢复。
 - close 一个窗口不影响另一 Session；取消后 lease/DB/staging 都完成清理；Failed Session 的 close
   释放全部可释放资源，残留有记录并在下次启动回收。
-- 旧标注迁移后重新打开能恢复；半写、损坏、版本未知、同 trace 多份冲突不会被覆盖删除。
-- 回滚前的旧 root 不变；新旧进程不能写同 namespace；原始 Trace 从不被 purge。
+- 最新格式的标注和收藏重新打开能恢复；半写、损坏、未知数据不会被覆盖删除；
+  手动备份在 purge 后保留，重复导出验证同一完整 bundle。
+- 产品 namespace 固定隔离，未知原件与手动备份受到保护；原始 Trace 从不被 purge。
 
 2026-10-04 已将真实 no-cache parser/Store 接到固定 Session worker 的异步运行时：
 generation handles、有界 queue/results、nonblocking poll/cancel、预留 close control、
@@ -825,7 +826,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 
 - SwiftPM targeted tests + API baseline + App build，实际 medium/large 打开和交互。
 - 键盘、VoiceOver、Reduce Motion、暗/亮模式、最小窗口、焦点恢复；语义 ID 与 screenshots。
-- 同 source 旧标注导入成功；reload/快速开关/取消/两窗口关闭不串结果。
+- 同 source 当前标注和收藏保存、恢复、手动备份成功；reload/快速开关/取消/两窗口关闭不串结果。
 - Instruments/等价实测证明主线程无整阶段 IO，绘制与 hit-test 一致；完整 SLO 由 019/020 验收。
 
 ## 16. AT-RUST-014 — Windows 原生 Viewer
@@ -1033,7 +1034,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 验收清单：
 
 - [ ] macOS、Windows 九命令与完整 Viewer 都调用同一个 Rust 语义内核。
-- [ ] 原始 Trace digest 不变；flags/marks/favorites 正向迁移与回滚备份已验证。
+- [ ] 原始 Trace digest 不变；最新格式 flags/marks/favorites 保存、恢复与手动备份已验证。
 - [ ] 现有 macOS 公开 API/快捷键/无障碍/多窗口/Capture 未回退。
 - [ ] Windows offline/Viewer/Capture 分别有 native 成功记录，不以 unavailable 填补。
 - [ ] 两端 install→doctor→parse→query/analyze→close，以及 upgrade/uninstall/rollback 成功。
@@ -1102,3 +1103,5 @@ CI
 2026-10-05 旧状态迁移 transport 增量：fixed roots、bounded async、C ABI import 与 typed Swift SDK 已接通，candidate 摘要与既有不可变 backup records 分离。557 Rust、94 SDK、617 默认 Swift（6 既有 opt-in skips）、包外 API、两种 unsigned App 依赖图与 16 次实际 parser/SDK consumer 通过；包含旧 key-lock 下 Swift Task 取消后 64-byte 输入 credit 归零、新状态保留与 IO 失败后恢复。ABI digest 更新；旧 library 不覆盖新 wire。App migration 提示/冲突选择、回滚导出、默认 native viewer、签名/性能/实际 GUI/Windows 与 macOS 总验收仍未完成，goal 保持 active。见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-legacy-view-state-transport.md)。
 
 2026-10-05 原生手动备份增量：固定独立根的完整不可变 snapshot、typed SDK、Controller flush/busy/cancel 与生产审阅 sheet 已接通。566 Rust、98 SDK、727 native Swift/626 默认 Swift（各 6 项既有 opt-in skip）、包外 API 与最终两种 unsigned App 构建通过；实际 native 键盘首次打开/导出/幂等重试/Escape/焦点恢复及公开 ABI 取消/异常目标/并发发布/purge 保留通过。详见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-rollback-backup.md)。macOS 总目标未完成。用户最新决定不保留未发布历史兼容：下一增量先独立手动备份配置，再移除旧 import/API/op/cap/UI 链；默认 native bootstrap/drain、CPU 目录预算、Viewer/analysis/Inspector 与整体 macOS 验收继续推进。
+
+2026-10-05 最新规则增量：按用户明确“尚未发布，不保留历史兼容逻辑”删除旧状态导入的配置/API/codec/Engine/operation/capability/UI/current probes，独立保留当前状态 read/write/remove/manual backup。543 Rust、91 SDK、716 native Swift / 622 default Swift passed（各 6 既有 opt-in skips）、API 与 unsigned App、真实公开备份 ABI、当前 Swift oracle 重放通过。默认 native bootstrap/drain 与完整 macOS 验收仍未完成；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-latest-view-state-only.md)。

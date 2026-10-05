@@ -2,10 +2,10 @@
 use arktrace_viewer::{PrimitiveRecord, QualityRecord, TrackRecord, ViewportRecord};
 pub const ABI_VERSION: u32 = 1;
 pub const CONTRACT_DIGEST_HEX: &str =
-    "6428361918b24e60c9321d12ca15c4a2e70577fd5f405dbd156c868a1e30b338";
+    "39b9981a74b3bf293319231fbbccad890e930e4f14f2aa1b6e5703370799cd6b";
 pub const CONTRACT_DIGEST: [u8; 32] = [
-    100, 40, 54, 25, 24, 178, 78, 96, 201, 50, 29, 18, 202, 21, 196, 162, 231, 5, 119, 253, 95, 64,
-    93, 189, 21, 108, 134, 138, 30, 48, 179, 56,
+    57, 185, 152, 26, 116, 179, 191, 41, 51, 25, 35, 31, 187, 204, 173, 137, 14, 147, 14, 79, 20,
+    242, 170, 27, 110, 87, 3, 55, 7, 153, 205, 107,
 ];
 pub const STATUS_OK: u32 = 0;
 pub const STATUS_BUSY: u32 = 1;
@@ -135,8 +135,6 @@ pub const VIEW_STATE_WRITE: u32 = 2;
 pub const VIEW_STATE_REMOVE: u32 = 3;
 pub const MAXIMUM_VIEW_STATE_BYTES: u32 = 4194304;
 pub const MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES: u32 = 16777216;
-pub const CAP_VIEW_STATE_MIGRATION: u32 = 64;
-pub const VIEW_STATE_IMPORT: u32 = 4;
 pub const CAP_VIEW_STATE_BACKUP: u32 = 128;
 pub const VIEW_STATE_BACKUP: u32 = 5;
 #[repr(C)]

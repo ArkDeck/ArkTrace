@@ -8,7 +8,7 @@ pub(crate) struct EngineConfig {
     pub contract_digest: String,
     pub cache_policy: String,
     pub cache_directory: Option<String>,
-    pub view_state_migration: Option<ViewStateMigration>,
+    pub view_state_backup: Option<ViewStateBackup>,
     pub namespace: String,
     pub helper: String,
     pub parser: String,
@@ -22,8 +22,7 @@ pub(crate) struct EngineConfig {
 /// Product-owned roots; session requests select content identities only.
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct ViewStateMigration {
-    legacy_cache_directory: String,
+pub(crate) struct ViewStateBackup {
     backup_directory: String,
 }
 /// Immutable product signing expectations, separate from every query.
@@ -96,14 +95,9 @@ impl EngineConfig {
             "ephemeral" | "contentAddressed" => return Err(STATUS_INVALID_INPUT),
             _ => return Err(STATUS_UNSUPPORTED_OPERATION),
         }
-        if let Some(migration) = &self.view_state_migration {
+        if let Some(backup) = &self.view_state_backup {
             let cache = self.cache_directory.as_ref().ok_or(STATUS_INVALID_INPUT)?;
-            let roots = [
-                &migration.legacy_cache_directory,
-                &migration.backup_directory,
-                cache,
-                &self.namespace,
-            ];
+            let roots = [&backup.backup_directory, cache, &self.namespace];
             for (index, value) in roots.iter().enumerate() {
                 let path = std::path::Path::new(value);
                 if value.is_empty()
@@ -192,11 +186,10 @@ impl EngineConfig {
         );
         c.helper_trust = helper_trust;
         c.cache_directory = self.cache_directory.map(Into::into);
-        c.view_state_migration =
-            self.view_state_migration
-                .map(|migration| arktrace_engine::RuntimeViewStateMigration {
-                    legacy_cache_directory: migration.legacy_cache_directory.into(),
-                    backup_directory: migration.backup_directory.into(),
+        c.view_state_backup =
+            self.view_state_backup
+                .map(|backup| arktrace_engine::RuntimeViewStateBackup {
+                    backup_directory: backup.backup_directory.into(),
                 });
         let l = self.limits;
         c.limits = RuntimeLimits {
@@ -376,7 +369,7 @@ mod sdk_slice_tests {
     use super::*;
     #[cfg(target_os = "macos")]
     #[test]
-    fn migration_configuration_is_closed_fixed_and_disjoint_before_native_creation() {
+    fn backup_configuration_is_closed_fixed_and_disjoint_before_native_creation() {
         let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../../../contracts/ready-metadata.json"
@@ -385,17 +378,17 @@ mod sdk_slice_tests {
         let value = serde_json::json!({"abiVersion": ABI_VERSION, "contractDigest": CONTRACT_DIGEST_HEX,
             "cachePolicy":"contentAddressed", "cacheDirectory":"/private/tmp/native/traces", "namespace":"/private/tmp/native/staging", "helper":"/private/tmp/tools/helper",
             "parser":"/private/tmp/tools/parser", "helperSHA256":"a".repeat(64), "parserIdentity": metadata["parser"],
-            "viewStateMigration":{"legacyCacheDirectory":"/private/tmp/old/traces", "backupDirectory":"/private/tmp/native/import-backup"}});
+            "viewStateBackup":{"backupDirectory":"/private/tmp/native/view-state-backups"}});
         let configuration: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
         configuration.validate(true).unwrap();
         assert_eq!(
             configuration
                 .native(true)
                 .unwrap()
-                .view_state_migration
+                .view_state_backup
                 .unwrap()
-                .legacy_cache_directory,
-            std::path::PathBuf::from("/private/tmp/old/traces")
+                .backup_directory,
+            std::path::PathBuf::from("/private/tmp/native/view-state-backups")
         );
         for path in [
             "/",
@@ -403,13 +396,12 @@ mod sdk_slice_tests {
             "/private/tmp/native",
             "/private/tmp/native/traces/nested",
             "/private/tmp/native/staging",
-            "/private/tmp/old/traces",
             "/private/tmp/../backup",
             "/private/tmp/./backup",
             "/private/tmp/a\0b",
         ] {
             let mut invalid = value.clone();
-            invalid["viewStateMigration"]["backupDirectory"] = path.into();
+            invalid["viewStateBackup"]["backupDirectory"] = path.into();
             assert_eq!(
                 decode::<EngineConfig>(&serde_json::to_vec(&invalid).unwrap())
                     .unwrap()
@@ -419,7 +411,7 @@ mod sdk_slice_tests {
             );
         }
         let mut invalid = value.clone();
-        invalid["viewStateMigration"]["requestPath"] = "/private/tmp/untrusted".into();
+        invalid["viewStateBackup"]["requestPath"] = "/private/tmp/untrusted".into();
         assert!(decode::<EngineConfig>(&serde_json::to_vec(&invalid).unwrap()).is_err());
         let mut invalid = value;
         invalid["cachePolicy"] = "ephemeral".into();

@@ -6,24 +6,21 @@ import ArkTraceRustRuntime
 #endif
 
 /// One document's persistence authority. Native products use their held
-/// Session; the legacy product uses its existing compatibility store.
+/// Session; reference products use their injected state store.
 struct TraceViewStateAccess: Sendable {
     struct Restoration: Sendable {
         let state: TraceViewStateStore.Restored?
-        let migration: TraceViewStateMigrationPresentation?
         let error: (any Error)?
     }
     private let read: @Sendable () async throws -> TraceViewStateStore.Restored
     private let write: @Sendable (TraceViewStateStore.Restored) async throws -> Void
-    private let migrate: (@Sendable (String?) async throws -> TraceViewStateMigrationPresentation)?
     private let backup: (@Sendable () async throws -> TraceViewStateBackupPresentation)?
     var canBackup: Bool { backup != nil }
 
     init(load: @escaping @Sendable () async throws -> TraceViewStateStore.Restored,
          save: @escaping @Sendable (TraceViewStateStore.Restored) async throws -> Void,
-         migrate: (@Sendable (String?) async throws -> TraceViewStateMigrationPresentation)? = nil,
          backup: (@Sendable () async throws -> TraceViewStateBackupPresentation)? = nil) {
-        read = load; write = save; self.migrate = migrate; self.backup = backup
+        read = load; write = save; self.backup = backup
     }
     init(store: TraceViewStateStore) {
         self.init(load: { store.load() }, save: { store.save(annotations: $0.annotations, favoriteTrackIDs: $0.favoriteTrackIDs) })
@@ -35,21 +32,17 @@ struct TraceViewStateAccess: Sendable {
         do { return try await read() } catch { throw Self.mapped(error) }
     }
 
-    /// Failed migration does not suppress restoration of the current native
-    /// destination. Cancellation remains a document-lifecycle barrier.
+    /// Restore current saved state. Cancellation remains a document-lifecycle barrier.
     @concurrent
-    func restore(selection: String? = nil) async throws -> Restoration {
+    func restore() async throws -> Restoration {
         precondition(!Thread.isMainThread)
-        var report: TraceViewStateMigrationPresentation?
         var notice: (any Error)?
-        do { report = try await migrate?(selection) }
-        catch { let error = Self.mapped(error); try Self.rethrowCancellation(error); notice = error }
         try Task.checkCancellation()
         var state: TraceViewStateStore.Restored?
         do { state = try await load() }
         catch { try Self.rethrowCancellation(error); notice = error }
         try Task.checkCancellation()
-        return Restoration(state: state, migration: report, error: notice)
+        return Restoration(state: state, error: notice)
     }
 
     private static func rethrowCancellation(_ error: any Error) throws {
@@ -135,10 +128,6 @@ struct TraceViewStateAccess: Sendable {
                     message: "Annotations and favorites could not be saved. The existing file was kept.",
                     details: ["reason": "viewStatePreserved"])
             }
-        }, migrate: { selection in
-            let choice = try selection.map { try RustViewStateMigrationSelection(snapshotIdentifier: $0) }
-            let report = try await session.importLegacyViewState(selection: choice, timeoutMilliseconds: timeoutMilliseconds)
-            return try await TraceViewStateMigrationPresentation(report: report)
         }, backup: backup)
     }
     #endif

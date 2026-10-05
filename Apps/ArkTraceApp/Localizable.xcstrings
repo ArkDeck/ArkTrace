@@ -397,125 +397,6 @@
         }
       }
     },
-    "Some saved favorites could not be matched to this parser. Their identities were kept.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einige gespeicherte Favoriten konnten diesem Parser nicht zugeordnet werden. Ihre Kennungen wurden beibehalten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Some saved favorites could not be matched to this parser. Their identities were kept."
-          }
-        }
-      }
-    },
-    "Some older saved states could not be imported. Their original files were kept.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einige ältere gespeicherte Zustände konnten nicht importiert werden. Ihre Originaldateien wurden beibehalten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Some older saved states could not be imported. Their original files were kept."
-          }
-        }
-      }
-    },
-    "Review Saved State…": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gespeicherten Zustand prüfen …"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Review Saved State…"
-          }
-        }
-      }
-    },
-    "Choose an Older Saved State": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Älteren gespeicherten Zustand auswählen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose an Older Saved State"
-          }
-        }
-      }
-    },
-    "Older Saved State Needs Attention": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Älterer gespeicherter Zustand erfordert Aufmerksamkeit"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Older Saved State Needs Attention"
-          }
-        }
-      }
-    },
-    "Current Saved State Was Kept": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktueller gespeicherter Zustand wurde beibehalten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Current Saved State Was Kept"
-          }
-        }
-      }
-    },
-    "Older Saved State Imported": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Älterer gespeicherter Zustand importiert"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Older Saved State Imported"
-          }
-        }
-      }
-    },
     "Saved State": {
       "extractionState": "manual",
       "localizations": {
@@ -529,23 +410,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saved State"
-          }
-        }
-      }
-    },
-    "Several older states contain different annotations. Choose one to import. The trace stays open, and all original files and backups are kept.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mehrere ältere Zustände enthalten unterschiedliche Anmerkungen. Wählen Sie einen zum Importieren aus. Der Trace bleibt geöffnet und alle Originaldateien und Sicherungen werden beibehalten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Several older states contain different annotations. Choose one to import. The trace stays open, and all original files and backups are kept."
           }
         }
       }
@@ -601,125 +465,6 @@
         }
       }
     },
-    "Favorites from this parser will be kept as unmatched identities.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Favoriten dieses Parsers werden als nicht zugeordnete Kennungen beibehalten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Favorites from this parser will be kept as unmatched identities."
-          }
-        }
-      }
-    },
-    "Older Saved States": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ältere gespeicherte Zustände"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Older Saved States"
-          }
-        }
-      }
-    },
-    "Unmatched Saved Favorites": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nicht zugeordnete gespeicherte Favoriten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unmatched Saved Favorites"
-          }
-        }
-      }
-    },
-    "These identities are retained without assigning them to a different track.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diese Kennungen werden beibehalten, ohne sie einer anderen Spur zuzuordnen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "These identities are retained without assigning them to a different track."
-          }
-        }
-      }
-    },
-    "Importing Saved State…": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gespeicherter Zustand wird importiert …"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importing Saved State…"
-          }
-        }
-      }
-    },
-    "Choose Later": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Später auswählen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose Later"
-          }
-        }
-      }
-    },
-    "Import Selected State": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ausgewählten Zustand importieren"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Import Selected State"
-          }
-        }
-      }
-    },
     "This document has been closed or replaced.": {
       "extractionState": "manual",
       "localizations": {
@@ -750,23 +495,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gespeicherten Zustand sichern…"
-          }
-        }
-      }
-    },
-    "A backup contains saved flags, persistent marks, and favorites. To use new saved state after returning to an older app, restore the backup separately. The older app does not read it automatically.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A backup contains saved flags, persistent marks, and favorites. To use new saved state after returning to an older app, restore the backup separately. The older app does not read it automatically."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eine Sicherung enthält gespeicherte Flags, dauerhafte Markierungen und Favoriten. Stellen Sie die Sicherung separat wieder her, um neue Zustände nach der Rückkehr zu einer älteren App zu nutzen. Die ältere App liest die Sicherung nicht automatisch."
           }
         }
       }
@@ -856,23 +584,6 @@
         }
       }
     },
-    "The saved state could not be read. Its original file was kept. No rollback backup was created.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The saved state could not be read. Its original file was kept. No rollback backup was created."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der gespeicherte Zustand konnte nicht gelesen werden. Die ursprüngliche Datei wurde beibehalten. Es wurde keine Sicherung für die Rückkehr zur älteren Version erstellt."
-          }
-        }
-      }
-    },
     "Saved state backups are unavailable for this document.": {
       "extractionState": "manual",
       "localizations": {
@@ -937,6 +648,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sicherung erstellen"
+          }
+        }
+      }
+    },
+    "Create a separate copy of saved flags, persistent marks, and favorites. Backups stay available after the trace cache is cleared.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a separate copy of saved flags, persistent marks, and favorites. Backups stay available after the trace cache is cleared."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erstelle eine separate Kopie gespeicherter Markierungen, dauerhafter Bereiche und Favoriten. Backups bleiben nach dem Leeren des Trace-Caches verfügbar."
+          }
+        }
+      }
+    },
+    "The saved state could not be read. Its original file was kept. No backup was created.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved state could not be read. Its original file was kept. No backup was created."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der gespeicherte Zustand konnte nicht gelesen werden. Die Originaldatei wurde beibehalten. Es wurde kein Backup erstellt."
           }
         }
       }

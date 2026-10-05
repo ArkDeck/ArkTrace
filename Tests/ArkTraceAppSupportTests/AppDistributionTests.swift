@@ -589,23 +589,21 @@ final class AppDistributionTests: XCTestCase {
         }
         return TraceStreamerResolver.appBundleManifestURL(bundleURL: bundle)
     }
-    func testProductMigrationRootsRejectContainmentAndCurrentStorage() throws {
-        let legacy = URL(filePath: "/private/tmp/migration-profile/legacy")
-        XCTAssertThrowsError(try TraceProductViewStateMigrationConfiguration(legacyCacheDirectory: legacy, backupDirectory: legacy))
-        XCTAssertThrowsError(try TraceProductViewStateMigrationConfiguration(legacyCacheDirectory: legacy,
-            backupDirectory: legacy.appending(path: "backup")))
-        XCTAssertThrowsError(try TraceProductViewStateMigrationConfiguration(legacyCacheDirectory: URL(filePath: "/"),
-            backupDirectory: URL(filePath: "/private/tmp/migration-backup")))
-        XCTAssertThrowsError(try TraceProductViewStateMigrationConfiguration(legacyCacheDirectory: URL(string: "https://example.invalid/legacy")!,
-            backupDirectory: URL(filePath: "/private/tmp/migration-backup")))
-        let migration = try TraceProductViewStateMigrationConfiguration(legacyCacheDirectory: legacy,
-            backupDirectory: URL(filePath: "/private/tmp/migration-profile/current/traces/backup"))
-        XCTAssertThrowsError(try TraceProductConfiguration(bundleURL: URL(filePath: "/Applications/Consumer.app"),
-            cacheDirectory: URL(filePath: "/private/tmp/migration-profile/current/traces"),
-            stagingDirectory: URL(filePath: "/private/tmp/migration-profile/current/staging"),
-            recentDocumentsKey: "Consumer.Trace.Recent.v1", signpostSubsystem: "com.example.consumer.trace",
-            bundledParser: TraceBundledParserLocation(executableRelativePath: "parser", manifestRelativePath: "manifest.json"),
-            viewStateMigration: migration))
+    func testProductBackupRootRejectsUnsafeLocationsAndCurrentStorage() throws {
+        for location in [URL(filePath: "/"), FileManager.default.homeDirectoryForCurrentUser,
+                         URL(string: "https://example.invalid/backup")!, URL(filePath: "/private/tmp/a/../backup")] {
+            XCTAssertThrowsError(try TraceProductViewStateBackupConfiguration(backupDirectory: location))
+        }
+        let root = URL(filePath: "/private/tmp/backup-profile")
+        for location in [root, root.appending(path: "traces"), root.appending(path: "traces/backup"),
+                         root.appending(path: "staging/backup")] {
+            let backup = try TraceProductViewStateBackupConfiguration(backupDirectory: location)
+            XCTAssertThrowsError(try TraceProductConfiguration(bundleURL: URL(filePath: "/Applications/Consumer.app"),
+                cacheDirectory: root.appending(path: "traces"), stagingDirectory: root.appending(path: "staging"),
+                recentDocumentsKey: "Consumer.Trace.Recent.v1", signpostSubsystem: "com.example.consumer.trace",
+                bundledParser: TraceBundledParserLocation(executableRelativePath: "parser", manifestRelativePath: "manifest.json"),
+                viewStateBackup: backup))
+        }
     }
 
 }

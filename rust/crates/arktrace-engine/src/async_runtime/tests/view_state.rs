@@ -220,87 +220,7 @@ fn drain_cancels_queued_documents_and_unwind_drops_their_owned_credits() {
 }
 
 #[test]
-fn import_choices_are_closed_bounded_and_share_admission_credits() {
-    let (engine, receiver, session) = fixture(8);
-    for invalid in [
-        b"../private".as_slice(),
-        b"".as_slice(),
-        &[b'a'; 65],
-        &[b'A'; 64],
-    ] {
-        assert_eq!(
-            engine.submit_view_state(
-                session,
-                ViewStateRequest::Import(Some(invalid)),
-                Duration::from_secs(1)
-            ),
-            Err(RuntimeFailure::InvalidRequest)
-        );
-    }
-    assert_eq!(engine.retained_view_state_input_bytes(), 0);
-    engine
-        .submit_view_state(
-            session,
-            ViewStateRequest::Import(None),
-            Duration::from_secs(1),
-        )
-        .unwrap();
-    let request = engine
-        .submit_view_state(
-            session,
-            ViewStateRequest::Import(Some(&[b'a'; 64])),
-            Duration::from_secs(1),
-        )
-        .unwrap();
-    assert_eq!(engine.retained_view_state_input_bytes(), 64);
-    let automatic = receiver.recv().unwrap();
-    assert!(matches!(
-        automatic.operation,
-        Operation::ViewState(ViewStateOperation::Import(None))
-    ));
-    let selected = receiver.recv().unwrap();
-    let Operation::ViewState(ViewStateOperation::Import(Some(input))) = &selected.operation else {
-        panic!("missing copied selection")
-    };
-    assert_eq!(input.bytes(), &[b'a'; 64]);
-    engine.cancel(request).unwrap();
-    assert!(selected.budget.cancellation.is_cancelled());
-    drop(selected);
-    assert_eq!(engine.retained_view_state_input_bytes(), 0);
-}
-
-#[test]
-fn explicit_import_selection_cannot_bypass_shared_document_capacity() {
-    let (engine, receiver, session) = fixture(8);
-    let bytes = vec![0; crate::MAXIMUM_VIEW_STATE_BYTES];
-    for _ in 0..4 {
-        submit(&engine, session, &bytes).unwrap();
-    }
-    assert_eq!(
-        engine.submit_view_state(
-            session,
-            ViewStateRequest::Import(Some(&[b'a'; 64])),
-            Duration::from_secs(1)
-        ),
-        Err(RuntimeFailure::Capacity)
-    );
-    assert_eq!(
-        engine.retained_view_state_input_bytes(),
-        MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES
-    );
-    engine
-        .submit_view_state(
-            session,
-            ViewStateRequest::Import(None),
-            Duration::from_secs(1),
-        )
-        .unwrap();
-    drop(receiver);
-    assert_eq!(engine.retained_view_state_input_bytes(), 0);
-}
-
-#[test]
-fn migration_roots_are_fixed_disjoint_and_require_persistent_storage() {
+fn backup_root_is_fixed_disjoint_and_requires_persistent_storage() {
     let metadata = crate::CacheMetadata::decode(include_bytes!(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/../../../contracts/ready-metadata.json"
@@ -314,9 +234,8 @@ fn migration_roots_are_fixed_disjoint_and_require_persistent_storage() {
         metadata.parser,
         CodeTrustPolicy::DevelopmentPinned,
     );
-    configuration.view_state_migration = Some(RuntimeViewStateMigration {
-        legacy_cache_directory: "/private/tmp/legacy/traces".into(),
-        backup_directory: "/private/tmp/native/view-state-migration".into(),
+    configuration.view_state_backup = Some(RuntimeViewStateBackup {
+        backup_directory: "/private/tmp/native/view-state-backups".into(),
     });
     assert_eq!(
         configuration.validate(),
@@ -329,15 +248,10 @@ fn migration_roots_are_fixed_disjoint_and_require_persistent_storage() {
         "/private/tmp/native",
         "/private/tmp/native/traces/nested",
         "/private/tmp/native/staging/nested",
-        "/private/tmp/legacy/traces",
         "relative/backup",
     ] {
         let mut invalid = configuration.clone();
-        invalid
-            .view_state_migration
-            .as_mut()
-            .unwrap()
-            .backup_directory = path.into();
+        invalid.view_state_backup.as_mut().unwrap().backup_directory = path.into();
         assert_eq!(
             invalid.validate(),
             Err(RuntimeFailure::InvalidRequest),
