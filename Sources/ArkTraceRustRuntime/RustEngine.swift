@@ -35,6 +35,9 @@ private func finishNativeDrain(_ handle: UInt64) async throws {
 }
 
 public enum RustSourceFormat: UInt32, Sendable { case htrace = 1, systrace = 2 }
+enum RustViewStateOperation: Sendable {
+    case read, write(RustEncodedViewState), remove
+}
 
 /// Native Engine operations are actor-isolated. Polling suspends this actor;
 /// independent sessions and cancellation remain able to make progress.
@@ -71,7 +74,8 @@ public actor RustEngine {
             }
             guard identity.abi_version == ARKTRACE_ABI_VERSION, digest == ARKTRACE_CONTRACT_DIGEST,
                 identity.capabilities & UInt64(ARKTRACE_CAP_MACOS_ENGINE) != 0,
-                identity.capabilities & UInt64(ARKTRACE_CAP_CACHE_MAINTENANCE) != 0 else { throw RustAdmission.abiMismatch }
+                identity.capabilities & UInt64(ARKTRACE_CAP_CACHE_MAINTENANCE) != 0,
+                identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE) != 0 else { throw RustAdmission.abiMismatch }
             var handle: UInt64 = 0
             try unsafe data.withUnsafeBytes { buffer in
                 let p = unsafe buffer.bindMemory(to: UInt8.self).baseAddress
@@ -191,6 +195,39 @@ public actor RustEngine {
             try Task.checkCancellation()
             return result
         } catch { try await cancelAndRelease(id); throw error }
+    }
+    func viewState(_ session: UInt64, operation: RustViewStateOperation, timeoutMilliseconds: UInt32) async throws -> RustResult {
+        guard (1...300_000).contains(timeoutMilliseconds) else { throw RustAdmission.invalidInput }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(60))
+        let request: UInt64
+        while true {
+            try Task.checkCancellation()
+            guard !draining, sessions[session] == false else { throw RustAdmission.closed }
+            var out: UInt64 = 0
+            let code: UInt32
+            switch operation {
+            case .write(let input):
+                code = withExtendedLifetime(input.credit) {
+                    input.bytes.withUnsafeBufferPointer { buffer in
+                        unsafe arktrace_view_state_request_submit(lease.handle, session, UInt32(ARKTRACE_VIEW_STATE_WRITE),
+                            buffer.baseAddress, UInt64(buffer.count), timeoutMilliseconds, &out, UInt64(MemoryLayout<UInt64>.size))
+                    }
+                }
+            case .read, .remove:
+                let tag = operation.isRead ? ARKTRACE_VIEW_STATE_READ : ARKTRACE_VIEW_STATE_REMOVE
+                code = unsafe arktrace_view_state_request_submit(lease.handle, session, UInt32(tag), nil, 0,
+                    timeoutMilliseconds, &out, UInt64(MemoryLayout<UInt64>.size))
+            }
+            if code == ARKTRACE_STATUS_BUSY {
+                guard ContinuousClock.now < deadline else { throw RustAdmission.busy }
+                try await Task.sleep(for: .milliseconds(1)); continue
+            }
+            try checkAdmission(code)
+            requests.insert(out); request = out; break
+        }
+        let result = try await finishResult(request)
+        if result.kind == ARKTRACE_RESULT_FAILURE { _ = try await result.decode(RustOpenResult.self) }
+        return result
     }
     private func submit(_ session: UInt64, request: RustRequest, timeoutMilliseconds: UInt32) async throws -> UInt64 {
         guard !draining, sessions[session] == false else { throw RustAdmission.closed }
@@ -342,6 +379,16 @@ public actor RustEngine {
             return bytes
         }
     }
+    /// Native queued/active sidecar input capacity, independently of result
+    /// owners and the SDK's transient encoding credits.
+    public func retainedViewStateInputBytes() async throws -> UInt64 {
+        let handle = lease.handle
+        return try await retryAdmission(until: .now.advanced(by: .seconds(60))) {
+            var bytes: UInt64 = 0
+            try unsafe checkAdmission(arktrace_engine_retained_view_state_input_bytes(handle, &bytes, UInt64(MemoryLayout<UInt64>.size)))
+            return bytes
+        }
+    }
     #if ARKTRACE_RUST_PROCESS_FIXTURES
     /// Test-only acknowledgement of successful native admission. This does
     /// not stand in for the pending native event/metric batch contract.
@@ -360,5 +407,12 @@ public actor RustEngine {
         let staging = RustDirectoryDecoder.developmentStagingCounts
         return (RustRetainedStorage.shared.retainedBytes, RustRetainedStorage.shared.retainedOwners, staging.bytes, staging.owners)
     }
+    public static func developmentViewStateInputCounts() -> (bytes: Int, owners: Int) {
+        (rustViewStateInputs.retainedBytes, rustViewStateInputs.retainedOwners)
+    }
     #endif
+}
+
+private extension RustViewStateOperation {
+    var isRead: Bool { if case .read = self { true } else { false } }
 }

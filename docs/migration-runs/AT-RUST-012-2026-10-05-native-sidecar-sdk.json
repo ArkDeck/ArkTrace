@@ -1,0 +1,493 @@
+{
+  "formatVersion": 1,
+  "date": "2026-10-05",
+  "baseCommit": "3fb1cf16540523170bdd9bc259c22ae3f8164138",
+  "scope": "Typed bounded Swift sidecar SDK; native controller integration remains pending",
+  "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28) / Xcode 27.0\nBuild version 27A266a / Swift 6.4 language mode 6",
+  "nativeArtifact": {
+    "abiVersion": 1,
+    "contractSHA256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+    "developmentFixtures": true,
+    "deploymentTarget": "26.0",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "library": {
+      "byteCount": 30661472,
+      "sha256": "1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54"
+    },
+    "headers": [
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+        "byteCount": 22839,
+        "sha256": "9f45d570fd0093443ba4f6c9926a11846795466680303f1ad6457fec2bc0cd8b"
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+        "byteCount": 62,
+        "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+      }
+    ],
+    "files": [
+      {
+        "byteCount": 761,
+        "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+        "relativePath": "CArkTrace.xcframework/Info.plist"
+      },
+      {
+        "byteCount": 22839,
+        "sha256": "9f45d570fd0093443ba4f6c9926a11846795466680303f1ad6457fec2bc0cd8b",
+        "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+      },
+      {
+        "byteCount": 62,
+        "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+        "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+      },
+      {
+        "byteCount": 30661472,
+        "sha256": "1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54",
+        "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+      }
+    ],
+    "releaseAcceptance": false
+  },
+  "nativeArtifactIdentity": "eb570949c0284c0c796169aeefc114e5a300857c5e44941ebd9965b5e0f34ffe",
+  "sdkUnitTests": {
+    "passed": 87,
+    "failed": 0,
+    "skipped": 0,
+    "logSHA256": "2cfd33963a056db699605edce561dd0db3f0eca3665e6fa214f77b52d3007f54"
+  },
+  "borrowCompileRejections": [
+    {
+      "case": "BorrowCapture.swift.invalid",
+      "exitCode": 1,
+      "logSHA256": "dbdd902eb8a2a0d7128307f1d6cf32a4564fa19d93556a8d2baf7f92fe98bf7b"
+    },
+    {
+      "case": "BorrowEscape.swift.invalid",
+      "exitCode": 1,
+      "logSHA256": "d1c89059f874b3cf8008817ca86eb18c7542248c981989c74a87eba310abff0e"
+    },
+    {
+      "case": "TextBorrowCapture.swift.invalid",
+      "exitCode": 1,
+      "logSHA256": "1ddc319a212dcb9d1340a711f8a49cf1c31b3a7210526b18caba97bf7b16090c"
+    },
+    {
+      "case": "TextBorrowEscape.swift.invalid",
+      "exitCode": 1,
+      "logSHA256": "80f79e013b12ff129dfc2da2c13642c5edbc1381e77a19be1374735c6a721590"
+    }
+  ],
+  "nativeSDK": {
+    "contractSHA256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+    "artifactIdentity": "eb570949c0284c0c796169aeefc114e5a300857c5e44941ebd9965b5e0f34ffe",
+    "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+    "databaseSHA256": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+    "events": [
+      {
+        "parserKey": "9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095",
+        "phase": "ready"
+      },
+      {
+        "persistentMarks": "1",
+        "phase": "small-complete",
+        "favorites": "4"
+      },
+      {
+        "phase": "exact-byte-cap",
+        "favorites": "1024"
+      },
+      {
+        "phase": "prepare-lock"
+      },
+      {
+        "queuedInputBytes": "2098831",
+        "phase": "lock-complete",
+        "refunded": "true"
+      },
+      {
+        "phase": "prepare-future"
+      },
+      {
+        "phase": "future-complete",
+        "write": "preserved",
+        "remove": "preserved"
+      },
+      {
+        "finalColdOwners": "0",
+        "phase": "complete",
+        "afterEngineFacets": "true",
+        "closedRejected": "true",
+        "uiTicks": "4195",
+        "finalInputBytes": "0",
+        "finalColdBytes": "0"
+      }
+    ],
+    "originalFuturePreserved": true,
+    "rawSourceUnchanged": true,
+    "databaseUnchanged": true,
+    "processExitCode": 0,
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "finalGates": [
+    {
+      "name": "sdk-consumer-v4",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/sdk-consumer-v4.receipt.json",
+      "receiptSHA256": "28c7459c0cd9319498b50ab87bc74a7e53346ea148e543017e930f9cfc03fac9",
+      "argv": [
+        "python3",
+        "scripts/test_macos_rust_sdk.py",
+        "--build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer",
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "startedAtUnix": 1791164000.5430279,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164020.803499,
+      "stdoutSHA256": "2ae9af4b744f63439afb444d169b7e754fe968a0255635e24adffb46985e7d1b",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "actual-sdk-v3",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/actual-sdk-v3.receipt.json",
+      "receiptSHA256": "53cc5f90f24a9976f3e4c5094cf824b2c818a6b3aa76e8f1db7c52f6b1c3931a",
+      "argv": [
+        "python3",
+        "scripts/test_macos_view_state_sdk.py",
+        "--executable",
+        "/private/tmp/arktrace-cache-session-final-consumer/build/out/Products/Debug/ViewState",
+        "--sdk-receipt",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-sdk-20261005/sdk-consumer-v4.stdout",
+        "--artifact",
+        "/private/tmp/arktrace-cache-session-artifacts/1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54/CArkTrace.xcframework",
+        "--helper",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/tools/helper",
+        "--parser",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/tools/parser",
+        "--source",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/source.htrace",
+        "--evidence-dir",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-sdk-20261005/actual-sdk-v3"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164081.221874,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164090.300698,
+      "stdoutSHA256": "c7aa3978d2ae3cc1f80f42595d01f41c6c00e6627a1c7975bb8a4619b1fda26f",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "api-baseline-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/api-baseline-v1.receipt.json",
+      "receiptSHA256": "21d8524af971c623d0fbd025099de9805cf44657d2cc9c35ad6fea574a3e9c17",
+      "argv": [
+        "sh",
+        "scripts/test_api_baseline.sh",
+        "--scratch-path",
+        "/private/tmp/arktrace-event-api-baseline/build",
+        "--cache-path",
+        "/private/tmp/arktrace-event-api-baseline/dependencies",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-event-api-baseline/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-event-api-baseline/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "CLANG_MODULE_CACHE_PATH": "/private/tmp/arktrace-event-api-baseline/ModuleCache",
+        "SWIFTPM_MODULECACHE_OVERRIDE": "/private/tmp/arktrace-event-api-baseline/ModuleCache"
+      },
+      "startedAtUnix": 1791164046.216125,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164056.572254,
+      "stdoutSHA256": "f4b74bd6e09935783f1dbfa422f4b04d99389502479e22eee47f231e34ae6242",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "migration-contracts-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/migration-contracts-v1.receipt.json",
+      "receiptSHA256": "ec3772431d29550200bb4fb136b9f2f432242c7340923c5d47754963042645fd",
+      "argv": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164758.827212,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164759.1122801,
+      "stdoutSHA256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "migration-tests-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/migration-tests-v1.receipt.json",
+      "receiptSHA256": "585da4fa6fd28fd92a599a9adfde07eefc71c86e34cae3215d974cae537de3c2",
+      "argv": [
+        "python3",
+        "scripts/test_migration_contracts.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164758.827222,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164759.180233,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "fb91f8d1e060a7c4a4c95131df8d9395601a8a70ee2eaf558ac1b05d6942cfb0"
+    },
+    {
+      "name": "bindings-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/bindings-v1.receipt.json",
+      "receiptSHA256": "8b7aec07a96d57fbb1455e90ca26dd5c6a30ed3ab1b1f7fbbc9de3d52559880f",
+      "argv": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164758.827213,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164759.1044638,
+      "stdoutSHA256": "e5ce5d3d599e23330b5341138606486352b2e1fd5a667586ffab9a0977526adc",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ci-planner-tests-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/ci-planner-tests-v1.receipt.json",
+      "receiptSHA256": "07364e8a35cc05ed43ebd9903d1dda6c15d217d735c47c133e52751574527b14",
+      "argv": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164012.2823,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164012.756652,
+      "stdoutSHA256": "6051c596f71980160f28390ff7ef62c0d1c7c7743119909ba0051b52454d9963",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "licenses-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/licenses-v1.receipt.json",
+      "receiptSHA256": "4889d1b3c7f82e314bbf853bb4622f7523bb010a34ecdf1a3f9390ea2143c8b0",
+      "argv": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164012.28178,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164012.8751948,
+      "stdoutSHA256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "parser-lock-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/parser-lock-v1.receipt.json",
+      "receiptSHA256": "121efee75becd364037c419ff3a11024ddc41bbf0c940966be6c179b852008ae",
+      "argv": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164012.2950149,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164012.463022,
+      "stdoutSHA256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "palette-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/palette-v1.receipt.json",
+      "receiptSHA256": "7bba85d3f1ed51368f0e090f6a68cc832c230a1c3766e77bf6854250d4737ccd",
+      "argv": [
+        "python3",
+        "scripts/verify_palette.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164012.272249,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164012.769415,
+      "stdoutSHA256": "91cfa5f59a551556561d5f806bc1dda97293f3d92d809fa154d03897580a703e",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "sdk-stage-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-sdk-20261005/sdk-stage-v1.receipt.json",
+      "receiptSHA256": "e2a39baca92eb53a3c8b3d0ff1e32c09a38a118f324d3eac50abf5d9d3afb79b",
+      "argv": [
+        "python3",
+        "scripts/test_stage_macos_rust_sdk.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791164012.2909598,
+      "exitCode": 0,
+      "finishedAtUnix": 1791164012.4419541,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "aae2ede6a13ece0aa9b78816b166018b79291fffb53ce0c201e5691c216d798c"
+    }
+  ],
+  "failedAttempts": [
+    {
+      "name": "sdk-unit-v1",
+      "receiptSHA256": "1060145ab35a6930124dbffd0f179a896372783c67809f1bd8b686713651720b",
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-cache-session-final-consumer/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-cache-session-final-consumer/security",
+        "--filter",
+        "ViewStateTests",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1"
+      },
+      "startedAtUnix": 1791163275.199492,
+      "exitCode": 1,
+      "finishedAtUnix": 1791163282.68465,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "23a87d5648994ff102fcc951ec59a14af7f1ad9fdf8a0dbc615a229fcda8396e"
+    },
+    {
+      "name": "sdk-unit-v2",
+      "receiptSHA256": "77c5a5ffd61916b4350e5608fecfcb48d91e7e034d31d579585980b5db225bc0",
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-cache-session-final-consumer/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-cache-session-final-consumer/security",
+        "--filter",
+        "ViewStateTests",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1"
+      },
+      "startedAtUnix": 1791163324.3135831,
+      "exitCode": 1,
+      "finishedAtUnix": 1791163330.439728,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "388442cb7710f8c22d5045ffc62eccdc45adfab3cd8408e48154b404aaf114bd"
+    },
+    {
+      "name": "sdk-consumer-v1",
+      "receiptSHA256": "746756f760536e503afb26804b3ccd970beb8c85b6e0db1db4c7f71422978ef2",
+      "argv": [
+        "python3",
+        "scripts/test_macos_rust_sdk.py",
+        "--build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer",
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "startedAtUnix": 1791163568.4628649,
+      "exitCode": 1,
+      "finishedAtUnix": 1791163586.0011368,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "22fe66a75878d1477920d93f5b8b79f8bf6e81c7c9f8225e1124cb362c6b89d1"
+    },
+    {
+      "name": "actual-sdk-v1",
+      "receiptSHA256": "7fb2dc93d95df61182887d01a937244558fd1bee6efa0571d89a8be8d69db751",
+      "argv": [
+        "python3",
+        "scripts/test_macos_view_state_sdk.py",
+        "--executable",
+        "/private/tmp/arktrace-cache-session-final-consumer/build/out/Products/Debug/ViewState",
+        "--sdk-receipt",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-sdk-20261005/sdk-consumer-v2.stdout",
+        "--artifact",
+        "/private/tmp/arktrace-cache-session-artifacts/1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54/CArkTrace.xcframework",
+        "--helper",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/tools/helper",
+        "--parser",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/tools/parser",
+        "--source",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/source.htrace",
+        "--evidence-dir",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-sdk-20261005/actual-sdk-v1"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "startedAtUnix": 1791163734.413179,
+      "exitCode": 1,
+      "finishedAtUnix": 1791163739.073783,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "eba4b00a591ea6e1b58a3a652e6a0861d7f74be3da0f7b7e5bc59b0dbf80e874"
+    }
+  ],
+  "frozenInputs": {
+    "sdkFileLists": 30,
+    "sdkSourceRows": 327,
+    "sdkMissingSourceRows": [
+      {
+        "fileList": "/private/tmp/arktrace-cache-session-final-consumer/build/out/Intermediates.noindex/ArkTraceSDKConsumer.build/Debug/Consumer-p.build/Objects-normal/arm64/Consumer.SwiftFileList",
+        "compilerPath": "/private/tmp/arktrace-cache-session-final-consumer/consumer/Sources/Consumer/Invalid.swift"
+      }
+    ],
+    "apiFileLists": 8,
+    "apiSourceRows": 52,
+    "apiMissingSourceRows": [],
+    "sdkInputManifestSHA256": "398ac2006e3daf389a2ebcdc6dce35e88c4f8917ceea16798ae90688c1ac4534",
+    "sdkBinaryManifestSHA256": "0142a20e268c82c8d45ecd4a4c5d0b2ddeef04c8cd862ba5e460584e7e9c7205",
+    "sdkSourceAuditSHA256": "93844629f7f1c0ec67b2a1e01fee47d6e6b9129d7ac16f5538c70e91ca210702"
+  },
+  "unchangedRustEvidence": {
+    "previousRecord": "docs/migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-wire.json",
+    "previousSourceAuditSHA256": "bf5ea6d2b6f8dbd7bd41af1350ccb51621b9185dd1f8c64b67235be911f2c298",
+    "recompiledInThisIncrement": false,
+    "currentSourceRows": 472,
+    "currentSourceAuditSHA256": "f6e52b5603537168a41a779383c713ef65fada2ae3f691b2c008e50bf0a109e2"
+  },
+  "limitations": [
+    "Fixture artifact and fixed-parser SDK gate; no new production publisher or signed release acceptance",
+    "Controller native adapter, visible save errors, flush/close/generation handling and compatibility URL IO replacement pending",
+    "Default Swift full tests and App build not rerun for this SDK-only increment; no default App or hot snapshot cutover acceptance",
+    "No Windows native or current-head remote CI pass",
+    "Initial two failed compiler mirrors were reused; original diagnostics retained but complete failed source closures were not frozen",
+    "Only the intentional deleted negative-compile Invalid.swift is missing; original .invalid sources and diagnostics are frozen",
+    "Main fast-forward/push auto-review requires current direct human authorization; no retry in this increment"
+  ],
+  "ciPlan": {
+    "baseCommit": "5a234a2cad465cf7f0ef3fcd5db57c9469d4e925",
+    "lanes": [
+      "lane_swiftpm=true",
+      "lane_app=true",
+      "lane_contracts=true",
+      "lane_rust_macos=true",
+      "lane_rust_windows=true"
+    ],
+    "receiptSHA256": "31c0f28b947a508318e56017f4c3edc0dca221f827a1e5cc1a3c41935ca9c7aa",
+    "remoteCIExecuted": false
+  }
+}

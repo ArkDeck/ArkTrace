@@ -16,6 +16,22 @@ public final class RustSession: Sendable {
     public func openingView() async throws -> RustOpenView {
         try await opening.openView(identity: RustSessionIdentity(engine: engine.identity, session: handle))
     }
+    public func readViewState(timeoutMilliseconds: UInt32 = 30_000) async throws -> RustViewStateRead {
+        let opening = try await openingView()
+        let hash = await opening.metadata.cacheKey.traceSHA256.copyString()
+        let result = try await engine.viewState(handle, operation: .read, timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.viewState(identity: identity, expectedTraceSHA256: hash)
+    }
+    public func writeViewState(_ document: RustViewStateDocument, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustViewStateWrite {
+        let input = try await RustViewStateEncoder.encode(document)
+        let result = try await engine.viewState(handle, operation: .write(input), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.viewStateWrite(identity: identity)
+    }
+    /// Unknown/corrupt/future files return preserved and remain unchanged.
+    public func removeViewState(timeoutMilliseconds: UInt32 = 30_000) async throws -> RustViewStateWrite {
+        let result = try await engine.viewState(handle, operation: .remove, timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.viewStateWrite(identity: identity)
+    }
     public func query(_ request: RustRequest, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustResult {
         try await engine.query(handle, request: request, timeoutMilliseconds: timeoutMilliseconds)
     }

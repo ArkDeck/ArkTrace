@@ -36,8 +36,27 @@ directory and lease. Existing unknown/corrupt bytes return `preserved`.
 Read returns a closed status/document object; write/remove return a closed status
 string. Post-publication cancellation or output failure may accompany a committed
 save/remove, so refresh via read. ABI v1 retains its record layouts and uses a
-new contract digest and `CAP_VIEW_STATE`; the Swift sidecar SDK/controller ports
-are still pending. This counter bounds copied payload capacities, not process RSS.
+new contract digest and `CAP_VIEW_STATE`. This counter bounds copied payload
+capacities, not process RSS.
+
+Swift `RustSession.readViewState`, `writeViewState` and `removeViewState` use this
+transport and its ordinary cancellation/close barriers. Format-1 inputs keep
+signed IDs/timestamps/colors, instant marks, UTF-8/NUL, order, duplicate favorites
+and unmatched track IDs. Flags plus marks and favorites are each bounded to 4096;
+individual text fields are bounded to 4096 UTF-8 bytes. The concurrent encoder
+counts the complete JSON, including escapes, before allocating its output.
+Encoded arrays have a separate conservative 32 MiB process credit pool and 256
+owner limit; caller input arrays/Strings and allocator/RSS are outside this count.
+Native operation timeout starts at submission; the bounded SDK encoding phase
+checks task cancellation independently.
+
+Typed restored views, flag/mark records and text facets retain a shared packed
+owner, charged to the SDK's existing 128 MiB/256-owner pool. Closed envelope,
+session/request/trace identity and original JSON shape are checked before return;
+`missing`, `sessionScoped` and `preserved` remain distinct. Foundation decoding
+scratch, explicit result copies and native input/result credits are separate.
+No sidecar URL is exposed. The document controller's native adapter and removal
+of its compatibility URL IO remain pending.
 
 `result_acquire` retains immutable UTF-8; failed requests expose the closed,
 path-free public error envelope. `snapshot_acquire` retains arrays of tracks,
@@ -92,6 +111,15 @@ Verification:
   in a fresh `--evidence-dir`. Build the production helper after all-feature
   tests; a fixture helper is not a product helper. This gate does not attest the
   Swift sidecar SDK, default App, performance or a release package.
+
+- `scripts/test_macos_view_state_sdk.py`: caller-supplied compiled package-external
+  Swift consumer and matching immutable SDK receipt. Uses a fixed parser and
+  actual Trace for format-1 round trips, persistent filtering, exact 4 MiB
+  write/read, session reopen, external key-lock cancellation/deadline/refund,
+  future byte preservation, empty/remove, closed/ephemeral status and retained
+  facets after Engine release. Fresh `--evidence-dir` retains original inputs,
+  protocol events, binaries and failures. This is SDK acceptance; the document
+  controller, default App and release remain separate gates.
 
 - `scripts/test_macos_rust_sdk.py`: package-external async Swift consumer,
   actual parser/Swift parity, ARC owners and observable cleanup failures,
