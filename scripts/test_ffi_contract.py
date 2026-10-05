@@ -98,5 +98,6 @@ def main():
                 files.append({'frozenPath':str(executable),'byteCount':executable.stat().st_size,'sha256':hashlib.sha256(executable.read_bytes()).hexdigest()})
             (base/'manifest.json').write_text(json.dumps(files,indent=2)+'\n')
     assert consumer['abiVersion']==CONTRACT['abiVersion'] and consumer['nativeEngineAcceptance'] is False
+    assert consumer['snapshotFormatVersion']==CONTRACT['snapshotFormatVersion']==2
     print(json.dumps({'abiVersion':CONTRACT['abiVersion'],'contractSHA256':expected.hex(),'records':len(layouts),'fields':fields,'exports':len(CONTRACT['functions']),'consumer':consumer,'nativeEngineAcceptance':False,'validAllocationFuzzCases':1000},sort_keys=True))
 if __name__=='__main__':main()

@@ -14,7 +14,7 @@ import time
 import re
 from stage_macos_rust_sdk import verified_receipt
 from test_macos_ffi_owner import compare, scene
-from ffi_test_support import TYPES
+from ffi_test_support import CONTRACT, TYPES
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT/'rust/crates/arktrace-viewer/oracle'))
 from build_native_viewport_oracle import build as build_oracle
@@ -98,7 +98,7 @@ def projection(records):
         return result
     tracks=array('TrackRecord',records['tracks']);primitives=array('PrimitiveRecord',records['primitives']);quality=array('QualityRecord',records['quality'])
     encoded=records['stringsUtf8'].encode('utf8');strings=(C.c_uint8*len(encoded)).from_buffer_copy(encoded)
-    view=TYPES['SnapshotView']();view.owner=1;view.format_version=2
+    view=TYPES['SnapshotView']();view.owner=1;view.format_version=CONTRACT['snapshotFormatVersion']
     for key,value in records['viewport'].items():setattr(view.viewport,key,value)
     view.tracks=tracks;view.track_count=len(tracks);view.primitives=primitives;view.primitive_count=len(primitives)
     view.quality=quality;view.quality_count=len(quality);view.strings=strings;view.string_bytes=len(encoded)

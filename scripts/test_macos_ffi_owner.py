@@ -65,7 +65,7 @@ def scene(view):
         q=view.quality[i];quality.append({'category':categories[q.category],'scope':text(q.scope_offset,q.scope_length) if q.flags & K['QUALITY_SCOPE'] else None,'count':q.count if q.flags & K['QUALITY_COUNT'] else None,'message':None})
     vp=view.viewport
     projected={'viewport':{'range':{'startNs':vp.start_ns,'endNs':vp.end_ns},'nsPerPoint':vp.ns_per_point,'widthPoints':vp.width_points,'heightPoints':vp.height_points,'verticalOffsetPoints':vp.vertical_offset_points,'generation':vp.generation},'sourceGeneration':vp.source_generation,'backingScale':vp.backing_scale,'tracks':tracks,'dataQuality':{'status':'ok' if view.quality_status==K['QUALITY_STATUS_OK'] else 'warnings','warnings':quality}}
-    assert view.format_version==2 and view.reserved==0
+    assert view.format_version==CONTRACT['snapshotFormatVersion']==2 and view.reserved==0
     assert view.quality_status in (K['QUALITY_STATUS_OK'],K['QUALITY_STATUS_WARNINGS'])
     return projected,{'viewport':record(vp),'tracks':[record(view.tracks[i]) for i in range(view.track_count)],'primitives':primitives,'quality':[record(view.quality[i]) for i in range(view.quality_count)],'stringsUtf8':strings.decode(),'retainedBytes':view.retained_bytes,'qualityStatus':view.quality_status}
 

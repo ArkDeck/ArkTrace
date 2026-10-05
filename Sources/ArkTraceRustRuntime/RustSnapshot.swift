@@ -17,7 +17,7 @@ public struct RustSnapshot: Sendable {
     private let lease: SnapshotLease
     init(_ view: ArkTraceSnapshotView) throws {
         guard unsafe view.struct_size == UInt32(MemoryLayout<ArkTraceSnapshotView>.size),
-            unsafe view.retained_bytes <= 256 * 1024 * 1024, unsafe view.owner != 0, unsafe view.format_version == 2, unsafe view.track_count <= 10_000,
+            unsafe view.retained_bytes <= 256 * 1024 * 1024, unsafe view.owner != 0, unsafe view.format_version == ARKTRACE_SNAPSHOT_FORMAT_VERSION, unsafe view.track_count <= 10_000,
             unsafe view.primitive_count <= 20_000, unsafe view.quality_count <= 4096,
             unsafe view.string_bytes <= 16 * 1024 * 1024, unsafe view.reserved == 0,
             unsafe view.quality_status == ARKTRACE_QUALITY_STATUS_OK || view.quality_status == ARKTRACE_QUALITY_STATUS_WARNINGS,

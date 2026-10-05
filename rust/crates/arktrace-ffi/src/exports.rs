@@ -682,7 +682,7 @@ fn snapshot_view(owner: u64, r: &registry::ResultOwner) -> Result<SnapshotView, 
     let scene = r.data.snapshot().ok_or(STATUS_UNSUPPORTED_OPERATION)?;
     Ok(SnapshotView {
         struct_size: size_of::<SnapshotView>() as u32,
-        format_version: 2,
+        format_version: SNAPSHOT_FORMAT_VERSION,
         owner,
         viewport: scene.viewport,
         tracks: scene.tracks.as_ptr(),

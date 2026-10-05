@@ -5,7 +5,8 @@ namespace ArkTrace.Native;
 public static unsafe partial class NativeMethods
 {
     public const uint ABI_VERSION = 2;
-    public const string CONTRACT_DIGEST = "76202167ecccdb715f4bf56108c9ac6738bb79f3e738ac2bba5171f1a933629e";
+    public const string CONTRACT_DIGEST = "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617";
+    public const uint SNAPSHOT_FORMAT_VERSION = 2;
     public const uint STATUS_OK = 0;
     public const uint STATUS_BUSY = 1;
     public const uint STATUS_CAPACITY = 2;

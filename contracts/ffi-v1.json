@@ -1,6 +1,6 @@
 {
   "abiVersion": 2,
-  "snapshotFormatVersion": 1,
+  "snapshotFormatVersion": 2,
   "records": [
     {
       "name": "AbiIdentity",

@@ -15,6 +15,9 @@
 > 仅测试/向量变化，生产 bytes 未变。见[wire 回归记录](migration-runs/AT-RUST-011-013-2026-10-06-wire-regressions.md)。
 > 当前 ABI 2 字符串准入新增 103 个变体与 85 次拒绝后恢复，实际 native converter 通过；
 > native load/copy owner 生命周期与整体验收仍 open。见[字符串边界记录](migration-runs/AT-RUST-012-013-2026-10-06-string-admission.md)。
+> 修正契约声明仍为格式 1、实际 producer/consumer 已为格式 2 的不一致，统一生成常量；
+> 当前新 SDK/App、真实 medium cold/cache/Inspector 及适用 macOS checks 通过。
+> 见[快照格式契约记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-format-contract.md)；总验收仍 open。
 
 ## 1. 执行规则与完成语义
 

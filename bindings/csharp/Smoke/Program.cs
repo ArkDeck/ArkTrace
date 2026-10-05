@@ -26,12 +26,13 @@ internal static class Program
             AbiIdentity identity = default;
             Check(NativeMethods.arktrace_abi_identity(&identity, (ulong)sizeof(AbiIdentity)) == NativeMethods.STATUS_OK);
             Check(identity.abi_version == NativeMethods.ABI_VERSION);
+            Check(NativeMethods.SNAPSHOT_FORMAT_VERSION == 2);
             Check(Convert.ToHexString(new ReadOnlySpan<byte>(identity.contract_digest, 32)).ToLowerInvariant() == NativeMethods.CONTRACT_DIGEST);
             Check(NativeMethods.arktrace_abi_identity(null, (ulong)sizeof(AbiIdentity)) == NativeMethods.STATUS_INVALID_BUFFER);
             Check(NativeMethods.arktrace_abi_identity(&identity, 0) == NativeMethods.STATUS_INVALID_BUFFER);
             Check(NativeMethods.arktrace_engine_drain(ulong.MaxValue) == NativeMethods.STATUS_INVALID_HANDLE);
             Check(NativeMethods.arktrace_result_release(ulong.MaxValue) == NativeMethods.STATUS_INVALID_HANDLE);
-            Console.WriteLine(JsonSerializer.Serialize(new { consumer = "C# LibraryImport", records = layouts.RootElement.GetArrayLength(), fields, abiVersion = identity.abi_version, capabilities = identity.capabilities, nativeEngineAcceptance = false }));
+            Console.WriteLine(JsonSerializer.Serialize(new { consumer = "C# LibraryImport", records = layouts.RootElement.GetArrayLength(), fields, abiVersion = identity.abi_version, snapshotFormatVersion = NativeMethods.SNAPSHOT_FORMAT_VERSION, capabilities = identity.capabilities, nativeEngineAcceptance = false }));
         }
         finally { NativeLibrary.Free(library); }
         return 0;
