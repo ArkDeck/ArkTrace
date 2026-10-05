@@ -95,7 +95,8 @@ public final class TraceRustProductRuntime: Sendable {
                 sourceFormatHint: source.pathExtension.isEmpty ? nil : source.pathExtension,
                 operationTimeoutMilliseconds: queryTimeoutMilliseconds)
             let trace = await opening.metadata.cacheKey.traceSHA256.copyString()
-            let access = TraceViewStateAccess(session: session, traceSHA256: trace, timeoutMilliseconds: queryTimeoutMilliseconds)
+            let access = TraceViewStateAccess(session: session, traceSHA256: trace, timeoutMilliseconds: queryTimeoutMilliseconds,
+                backupDirectory: configuration.viewStateMigration?.backupDirectory)
             try Task.checkCancellation()
             return TraceOpenedDocument(repository: repository, cacheHit: opening.cacheHit, cacheMetadata: nil,
                 viewStateAccess: access, close: { try await repository.close() })

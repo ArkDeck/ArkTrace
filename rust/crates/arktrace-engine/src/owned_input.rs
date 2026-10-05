@@ -19,6 +19,15 @@ impl InputBudget {
     pub(crate) fn used(&self) -> usize {
         self.used.load(Ordering::Relaxed)
     }
+    /// Reserve a bounded worker pipeline before enqueue, without allocating a
+    /// dummy buffer. The queued command owns this credit through completion.
+    pub(crate) fn charge(self: &Arc<Self>, bytes: usize) -> Result<InputCharge, ()> {
+        self.reserve(bytes)?;
+        Ok(InputCharge {
+            budget: self.clone(),
+            bytes,
+        })
+    }
     fn reserve(&self, bytes: usize) -> Result<(), ()> {
         self.used
             .try_update(Ordering::Relaxed, Ordering::Relaxed, |used| {
@@ -28,25 +37,25 @@ impl InputBudget {
             .map_err(|_| ())
     }
 }
-struct Charge {
+pub(crate) struct InputCharge {
     budget: Arc<InputBudget>,
     bytes: usize,
 }
-impl Drop for Charge {
+impl Drop for InputCharge {
     fn drop(&mut self) {
         self.budget.used.fetch_sub(self.bytes, Ordering::Relaxed);
     }
 }
 pub(crate) struct OwnedInput {
     bytes: Vec<u8>,
-    _charge: Charge,
+    _charge: InputCharge,
 }
 impl OwnedInput {
     /// Reserve before allocation or copying, including allocator rounding.
     /// No waiting and no retained caller pointers, even on admission failure.
     pub(crate) fn copy(bytes: &[u8], budget: Arc<InputBudget>) -> Result<Self, ()> {
         budget.reserve(bytes.len())?;
-        let mut charge = Charge {
+        let mut charge = InputCharge {
             budget,
             bytes: bytes.len(),
         };
@@ -69,6 +78,20 @@ impl OwnedInput {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn worker_reservation_does_not_allocate_input_and_checked_add_refunds() {
+        let budget = InputBudget::new(8);
+        let held = budget.charge(8).unwrap();
+        assert_eq!(budget.used(), 8);
+        assert!(budget.charge(1).is_err());
+        assert!(budget.charge(usize::MAX).is_err());
+        assert_eq!(budget.used(), 8);
+        drop(held);
+        assert_eq!(budget.used(), 0);
+        let held = budget.charge(8).unwrap();
+        drop(held);
+        assert_eq!(budget.used(), 0);
+    }
     #[test]
     fn copied_bytes_are_independent_and_capacity_is_refunded_on_every_drop() {
         let budget = InputBudget::new(8);

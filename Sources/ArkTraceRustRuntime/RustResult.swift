@@ -80,6 +80,17 @@ public struct RustResult: Sendable {
         return try await RustCacheDecoder.inventory(data, request: requestIdentity)
     }
     @concurrent
+    func viewStateBackup(identity: RustSessionIdentity, expectedTraceSHA256: String, expectedParserKey: String) async throws -> RustViewStateBackupReport {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity,
+              count <= rustBackupMaximumBytes else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustViewStateBackupDecoder.decode(data, identity: identity, request: requestIdentity,
+            expectedTraceSHA256: expectedTraceSHA256, expectedParserKey: expectedParserKey)
+    }
+    @concurrent
     func cacheReport() async throws -> RustCacheMaintenanceReport {
         precondition(!Thread.isMainThread)
         guard kind == ARKTRACE_RESULT_SUCCESS, engineIdentity != 0, count <= 4096 else { throw RustAdmission.invalidBuffer }

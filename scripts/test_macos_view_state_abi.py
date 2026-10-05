@@ -45,7 +45,7 @@ def main():
     (base / 'input-manifest.json').write_text(json.dumps(inputs, indent=2) + '\n')
     abi = ABI(tools / 'library.dylib')
     identity = abi.out('abi_identity', 'AbiIdentity')
-    assert identity.capabilities == 127  # native capabilities plus explicit fixtures
+    assert identity.capabilities == 255  # native capabilities plus explicit fixtures
     assert bytes(identity.contract_digest).hex() == sha(ROOT / 'contracts/ffi-v1.json')
     manifest = json.loads((ROOT / 'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
     assert sha(tools / 'parser') == manifest['binarySHA256']

@@ -38,6 +38,7 @@ public enum RustSourceFormat: UInt32, Sendable { case htrace = 1, systrace = 2 }
 enum RustViewStateOperation: Sendable {
     case read, write(RustEncodedViewState), remove
     case importLegacy(RustEncodedViewState?)
+    case backup
 }
 
 /// Native Engine operations are actor-isolated. Polling suspends this actor;
@@ -77,7 +78,8 @@ public actor RustEngine {
                 identity.capabilities & UInt64(ARKTRACE_CAP_MACOS_ENGINE) != 0,
                 identity.capabilities & UInt64(ARKTRACE_CAP_CACHE_MAINTENANCE) != 0,
                 identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE) != 0,
-                identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE_MIGRATION) != 0 else { throw RustAdmission.abiMismatch }
+                identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE_MIGRATION) != 0,
+                identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE_BACKUP) != 0 else { throw RustAdmission.abiMismatch }
             var handle: UInt64 = 0
             try unsafe data.withUnsafeBytes { buffer in
                 let p = unsafe buffer.bindMemory(to: UInt8.self).baseAddress
@@ -227,6 +229,9 @@ public actor RustEngine {
                             buffer.baseAddress, UInt64(buffer.count), timeoutMilliseconds, &out, UInt64(MemoryLayout<UInt64>.size))
                     }
                 }
+            case .backup:
+                code = unsafe arktrace_view_state_request_submit(lease.handle, session, UInt32(ARKTRACE_VIEW_STATE_BACKUP), nil, 0,
+                    timeoutMilliseconds, &out, UInt64(MemoryLayout<UInt64>.size))
             case .read, .remove:
                 let tag = operation.isRead ? ARKTRACE_VIEW_STATE_READ : ARKTRACE_VIEW_STATE_REMOVE
                 code = unsafe arktrace_view_state_request_submit(lease.handle, session, UInt32(tag), nil, 0,

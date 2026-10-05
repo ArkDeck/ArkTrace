@@ -35,8 +35,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 95937,
-      "sha256": "c32e15331c7eedba5e00f45018722b56605ddbd8f12f841c14b4bd29cf8826b7"
+      "byteCount": 101470,
+      "sha256": "700dd544c6d40e43135e39b4be6d2519f37a4331d59a2e07a827bc142e2a3dbc"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -45,8 +45,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
-      "byteCount": 7009,
-      "sha256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39"
+      "byteCount": 9065,
+      "sha256": "b1d231c74993660ee0cfff65bebaaff7105da534bbfbb52e5a57ea4bc769c1d4"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
@@ -55,8 +55,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
-      "byteCount": 7621,
-      "sha256": "ff54fe61f75436825eede18410247fa762b2fddf85daceffe3a8f52d44f6aee3"
+      "byteCount": 8215,
+      "sha256": "9a3ec0159dff4fc97564a341a8eac216a35e39f3194144efe6a00c254be17673"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
@@ -65,8 +65,18 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateAccess.swift",
-      "byteCount": 6347,
-      "sha256": "a55771fb0bc11cfc1766cc0334e8a7efd317d782ff1ce51c7579eedaac81ba09"
+      "byteCount": 9267,
+      "sha256": "8f570309b959f2e3b998dbb365e0cfd1ef4384abfa5d30d40cf9ef85577de1d1"
+    },
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceViewStateBackupPresentation.swift",
+      "byteCount": 2518,
+      "sha256": "718fecb9e149c6cd5b6006e0c08c29b85937ed6dbbdd58609cd5da98d28ba58c"
+    },
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceViewStateMigrationPresentation.swift",
+      "byteCount": 3342,
+      "sha256": "8b7c6e60e666616659b2a690d629917dd26bc231dc29175825eeadfb15181f56"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -282,13 +292,13 @@
     "restore": 3,
     "whitespaceScalars": 26
   },
-  "outputsByteIdenticalToReviewed": false,
+  "outputsByteIdenticalToReviewed": true,
   "note": "Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.",
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "65405c86362e35790f9fdaf65b20ac0b89e5ad4bf8be638a83e2b5e03dbcb0e6",
-      "byteCount": 97408
+      "sha256": "8c31c048389277a41c322892471b8dfa2510a35fca1094f008be2f79beeca41d",
+      "byteCount": 102941
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -298,15 +308,15 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "85c295cc8b6e027d18a4c39010bcae554e97b7227e5e0b9b9981c05d93dca614",
-    "byteCount": 7542
+    "sha256": "a55b658fc388eab1315d874dcba7789e27a15ad8b4e81a79a7f8b1b69362c79f",
+    "byteCount": 5950
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "c32e15331c7eedba5e00f45018722b56605ddbd8f12f841c14b4bd29cf8826b7",
-      "byteCount": 95937
+      "sha256": "700dd544c6d40e43135e39b4be6d2519f37a4331d59a2e07a827bc142e2a3dbc",
+      "byteCount": 101470
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -390,7 +400,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "44e85c002db3bcf2f9b4b3aba55905fe28ae742a",
-  "previousReceiptSHA256": "b9789c8da35cff07876bc5f682cb1955fa1a536799825fd88ca816fd50975038",
+  "revalidatedBaseCommit": "fda7a89b100990431f1c6eadb971bae1e5d4807e",
+  "previousReceiptSHA256": "77cd0cf5b92cb48608808dac6f2e13106e35e3515693beee89f57825e3716aa9",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

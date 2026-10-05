@@ -68,6 +68,19 @@ private func pinAppSupportSurface(
     controller.recentDocuments.first.map(controller.removeRecentDocument)
     _ = controller.errorPresentation
     _ = controller.isImportingLegacyViewState
+    _ = controller.canBackupViewState
+    _ = controller.isBackingUpViewState
+    _ = controller.viewStateBackupError?.reason
+    controller.backupViewState(sessionID: controller.annotationSessionID)
+    controller.cancelViewStateBackup(sessionID: controller.annotationSessionID)
+    controller.viewStateBackup.map { backup in
+        _ = backup.status.rawValue
+        _ = backup.directory
+        backup.receipt.map { receipt in
+            _ = receipt.backupIdentifier; _ = receipt.documentSHA256; _ = receipt.documentByteCount
+            _ = receipt.flagCount; _ = receipt.persistentMarkCount; _ = receipt.favoriteTrackCount
+        }
+    }
     controller.viewStateMigration.map { report in
         _ = report.status.rawValue
         _ = report.shouldPresent

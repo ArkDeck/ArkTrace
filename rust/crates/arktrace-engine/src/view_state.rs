@@ -113,6 +113,44 @@ fn optional_records<'de, D: Deserializer<'de>, T: Deserialize<'de>>(
 }
 
 impl ViewStateDocument {
+    /// Borrow the existing arrays and filter transient marks while encoding.
+    /// The IO owner supplies the bounded, cancellable writer; this does not
+    /// clone labels/favorites or normalize their order or optional presence.
+    #[cfg(target_os = "macos")]
+    pub(crate) fn write_persisted<W: std::io::Write>(
+        &self,
+        trace_sha256: &str,
+        writer: &mut W,
+    ) -> Result<(), ViewStateEncodeError> {
+        use serde::ser::{SerializeSeq, SerializeStruct};
+        struct Marks<'a>(&'a [AnnotationMark]);
+        impl Serialize for Marks<'_> {
+            fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+                let mut seq = serializer.serialize_seq(None)?;
+                for mark in self.0.iter().filter(|mark| mark.is_persistent) {
+                    seq.serialize_element(mark)?;
+                }
+                seq.end()
+            }
+        }
+        struct Persisted<'a>(&'a ViewStateDocument);
+        impl Serialize for Persisted<'_> {
+            fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+                let mut value = serializer.serialize_struct("ViewStateDocument", 5)?;
+                value.serialize_field("formatVersion", &self.0.format_version)?;
+                value.serialize_field("traceSHA256", &self.0.trace_sha256)?;
+                value.serialize_field("flags", &self.0.flags)?;
+                value.serialize_field("marks", &Marks(&self.0.marks))?;
+                value.serialize_field("favoriteTrackIDs", &self.0.favorite_track_ids)?;
+                value.end()
+            }
+        }
+        if !self.valid(trace_sha256) {
+            return Err(ViewStateEncodeError::InvalidDocument);
+        }
+        serde_json::to_writer(writer, &Persisted(self))
+            .map_err(|_| ViewStateEncodeError::InputBudgetExceeded)
+    }
     fn valid(&self, trace_sha256: &str) -> bool {
         self.format_version == 1
             && self.trace_sha256 == trace_sha256

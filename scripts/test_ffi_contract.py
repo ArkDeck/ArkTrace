@@ -28,7 +28,7 @@ def main():
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
     identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
     assert bytes(identity.contract_digest)==expected and identity.abi_version==1
-    assert identity.capabilities==(119 if sys.platform=='darwin' else 0)
+    assert identity.capabilities==(247 if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
     storage=(C.c_uint64*8)();bad=C.cast(C.byref(storage,1),C.POINTER(TYPES['AbiIdentity']))
@@ -47,10 +47,10 @@ def main():
     # rejected input ranges use actual live allocations, never invalid pointers.
     assert K['MAXIMUM_REQUEST_BYTES']==1048576 and K['MAXIMUM_VIEW_STATE_BYTES']==4194304
     abi.call('view_state_request_submit',2**64-1,0,K['VIEW_STATE_READ'],None,0,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_HANDLE'])
-    for operation in (0,5,2**32-1):
+    for operation in (0,6,2**32-1):
         abi.call('view_state_request_submit',0,0,operation,None,0,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
     payload=(C.c_uint8*1)(0)
-    for operation in (K['VIEW_STATE_READ'],K['VIEW_STATE_REMOVE']):
+    for operation in (K['VIEW_STATE_READ'],K['VIEW_STATE_REMOVE'],K['VIEW_STATE_BACKUP']):
         abi.call('view_state_request_submit',0,0,operation,payload,0,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
         abi.call('view_state_request_submit',0,0,operation,None,1,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
     for pointer,length in ((None,1),(payload,0)):

@@ -4,6 +4,7 @@ mod async_runtime;
 mod metadata;
 mod query_deadlines;
 mod view_state;
+mod view_state_backup;
 mod view_state_migration;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
@@ -19,6 +20,7 @@ pub use view_state::{
     MAXIMUM_VIEW_STATE_BYTES, MAXIMUM_VIEW_STATE_RECORDS, ViewStateDocument, ViewStateEncodeError,
     ViewStateRead, ViewStateWrite,
 };
+pub use view_state_backup::{ViewStateBackupReceipt, ViewStateBackupReport, ViewStateBackupStatus};
 pub use view_state_migration::{
     LegacyViewStateCandidateSummary, LegacyViewStateIssue, LegacyViewStateMigrationReport,
     LegacyViewStateMigrationStatus, LegacyViewStateSource, MAXIMUM_LEGACY_BACKUP_FILE_BYTES,
@@ -57,8 +59,8 @@ pub use cache_maintenance::{
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
     EngineSession, EngineStage, LegacyViewStateMigration, NoCacheRecoveryOutcome,
-    NoCacheRecoveryRow, NoCacheSession, ParserTools, SourceFormat, ViewerFailure, open_cached,
-    open_no_cache, recover_no_cache,
+    NoCacheRecoveryRow, NoCacheSession, ParserTools, SourceFormat, ViewStateBackupStore,
+    ViewerFailure, open_cached, open_no_cache, recover_no_cache,
 };
 
 pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {

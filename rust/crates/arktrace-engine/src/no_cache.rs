@@ -29,6 +29,8 @@ mod legacy_view_state;
 mod persistent;
 pub use legacy_view_state::LegacyViewStateMigration;
 mod view_state;
+mod view_state_backup;
+pub use view_state_backup::ViewStateBackupStore;
 mod viewer;
 pub use persistent::open_cached;
 

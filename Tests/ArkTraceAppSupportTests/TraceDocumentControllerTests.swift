@@ -2150,4 +2150,124 @@ final class TraceDocumentControllerTests: XCTestCase {
         await controller.close()
     }
 
+    private actor BackupSink {
+        var state = TraceViewStateStore.Restored()
+        var snapshots: [TraceViewStateStore.Restored] = []
+        func save(_ value: TraceViewStateStore.Restored) { state = value }
+        func backup() -> TraceViewStateBackupPresentation {
+            snapshots.append(state)
+            return TraceViewStateBackupPresentation(status: .backedUp,
+                receipt: .init(backupIdentifier: String(repeating: "a", count: 64), documentSHA256: String(repeating: "b", count: 64),
+                    documentByteCount: 100, flagCount: state.annotations.flags.count, persistentMarkCount: 0, favoriteTrackCount: nil))
+        }
+        func captured() -> [TraceViewStateStore.Restored] { snapshots }
+    }
+    func testBackupFlushesLatestOwnedEditAndBlocksMutationUntilSnapshotCompletes() async throws {
+        let sink = BackupSink(), gate = FirstCloseBarrier()
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { value in
+            await gate.close(); await sink.save(value)
+        }, backup: { await sink.backup() })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: {})
+        })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        let session = controller.annotationSessionID
+        XCTAssertTrue(controller.canBackupViewState)
+        controller.addFlag(atNs: 10, label: "latest owned edit")
+        await gate.waitUntilReached()
+        controller.backupViewState(sessionID: session &- 1); XCTAssertFalse(controller.isBackingUpViewState)
+        controller.backupViewState(sessionID: session)
+        XCTAssertTrue(controller.isBackingUpViewState)
+        XCTAssertNil(controller.addFlag(atNs: 20))
+        controller.toggleFavorite(TimelineTrackID(rawValue: "cpu:1"))
+        XCTAssertTrue(controller.favoriteTrackIDs.isEmpty)
+        controller.backupViewState(sessionID: session)
+        let before = await sink.captured(); XCTAssertTrue(before.isEmpty)
+        await gate.release()
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        while controller.isBackingUpViewState {
+            guard ContinuousClock.now < deadline else { return XCTFail("backup did not finish") }
+            await Task.yield()
+        }
+        let captured = await sink.captured(); XCTAssertEqual(captured.count, 1)
+        XCTAssertEqual(captured.first?.annotations.flags.first?.label, "latest owned edit")
+        XCTAssertEqual(controller.viewStateBackup?.status, .backedUp)
+        XCTAssertNil(controller.viewStateBackup?.receipt?.favoriteTrackCount)
+        await controller.close()
+        XCTAssertFalse(controller.canBackupViewState); XCTAssertNil(controller.viewStateBackup)
+    }
+    func testFailedSaveCannotProduceBackupOrFalseSuccess() async throws {
+        let sink = BackupSink()
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { _ in
+            throw ArkTraceError(code: .queryFailed, stage: .querying, message: "save refused")
+        }, backup: { await sink.backup() })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: {})
+        })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        controller.addFlag(atNs: 10)
+        controller.backupViewState(sessionID: controller.annotationSessionID)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        while controller.isBackingUpViewState {
+            guard ContinuousClock.now < deadline else { return XCTFail("backup did not finish") }
+            await Task.yield()
+        }
+        let captured = await sink.captured(); XCTAssertTrue(captured.isEmpty)
+        XCTAssertNil(controller.viewStateBackup); XCTAssertEqual(controller.viewStateBackupError?.reason, "save refused")
+        XCTAssertEqual(controller.phase, .ready)
+        await controller.close()
+    }
+    func testReplacementDiscardsLateBackupEvenWhenProviderIgnoresCancellation() async throws {
+        let sink = BackupSink(), gate = FirstCloseBarrier()
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { _ in }, backup: {
+            await gate.close(); return await sink.backup()
+        })
+        let first = try viewStateSource(), second = try viewStateSource()
+        defer { try? FileManager.default.removeItem(at: first); try? FileManager.default.removeItem(at: second) }
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { source, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: source == first ? access : nil, close: {})
+        })
+        controller.open(first); try await waitForViewStateDocument(controller)
+        controller.backupViewState(sessionID: controller.annotationSessionID)
+        await gate.waitUntilReached()
+        controller.open(second); try await waitForViewStateDocument(controller)
+        await gate.release()
+        for _ in 0..<100 { await Task.yield() }
+        XCTAssertFalse(controller.canBackupViewState); XCTAssertFalse(controller.isBackingUpViewState)
+        XCTAssertNil(controller.viewStateBackup); XCTAssertNil(controller.viewStateBackupError)
+        XCTAssertNil(controller.errorPresentation); XCTAssertEqual(controller.sourceURL, second)
+        await controller.close()
+    }
+    func testCancellingBackupDuringFlushKeepsSaveAndDoesNotSubmitExport() async throws {
+        let sink = BackupSink(), gate = FirstCloseBarrier()
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { value in
+            await gate.close(); await sink.save(value)
+        }, backup: { await sink.backup() })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: {})
+        })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        controller.addFlag(atNs: 10)
+        await gate.waitUntilReached()
+        let session = controller.annotationSessionID
+        controller.backupViewState(sessionID: session); controller.cancelViewStateBackup(sessionID: session)
+        await gate.release()
+        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+        while controller.isBackingUpViewState {
+            guard ContinuousClock.now < deadline else { return XCTFail("backup did not cancel") }
+            await Task.yield()
+        }
+        let captured = await sink.captured(); XCTAssertTrue(captured.isEmpty)
+        XCTAssertNil(controller.viewStateBackup); XCTAssertNil(controller.viewStateBackupError)
+        XCTAssertEqual(controller.annotations.flags.count, 1)
+        await controller.close()
+    }
+
 }

@@ -89,7 +89,8 @@ pub unsafe extern "C" fn arktrace_abi_identity(out: *mut AbiIdentity, bytes: u64
                         | CAP_VIEWPORT_RECORDS
                         | CAP_CACHE_MAINTENANCE
                         | CAP_VIEW_STATE
-                        | CAP_VIEW_STATE_MIGRATION,
+                        | CAP_VIEW_STATE_MIGRATION
+                        | CAP_VIEW_STATE_BACKUP,
                 )
             } else {
                 0
@@ -398,7 +399,7 @@ pub unsafe extern "C" fn arktrace_cache_request_submit(
 }
 /// # Safety
 /// Write input is a live readable allocation for the exact bounded byte range;
-/// read/remove require a null pointer and zero bytes. Output is a live aligned
+/// read/remove/backup require a null pointer and zero bytes. Output is a live aligned
 /// Import accepts null/zero for automatic selection or a live exact 64-byte
 /// lowercase SHA256 selection; paths are fixed in Engine configuration.
 /// uint64_t record, sized exactly and disjoint from input.
@@ -432,7 +433,7 @@ pub unsafe extern "C" fn arktrace_view_state_request_submit(
                     Some(selection)
                 }
             }
-            VIEW_STATE_READ | VIEW_STATE_REMOVE => {
+            VIEW_STATE_READ | VIEW_STATE_REMOVE | VIEW_STATE_BACKUP => {
                 if !p.is_null() || n != 0 {
                     return Err(STATUS_INVALID_BUFFER);
                 }
@@ -448,6 +449,7 @@ pub unsafe extern "C" fn arktrace_view_state_request_submit(
             let operation = match operation {
                 VIEW_STATE_READ => arktrace_engine::ViewStateRequest::Read,
                 VIEW_STATE_REMOVE => arktrace_engine::ViewStateRequest::Remove,
+                VIEW_STATE_BACKUP => arktrace_engine::ViewStateRequest::Backup,
                 VIEW_STATE_IMPORT => arktrace_engine::ViewStateRequest::Import(data),
                 VIEW_STATE_WRITE => {
                     arktrace_engine::ViewStateRequest::Write(data.ok_or(STATUS_INVALID_BUFFER)?)

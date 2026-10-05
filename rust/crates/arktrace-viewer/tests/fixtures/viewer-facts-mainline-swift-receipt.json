@@ -208,9 +208,19 @@
       "sha256": "9b0cddea6df19d028358284aae93ee52285de35aaaf206e7300cb860f2ae6275"
     },
     {
+      "path": "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+      "byteCount": 4621,
+      "sha256": "660bdaa031a37db9d1c8b29ff72e17cf2f284fa8aa244a1e765fd0dd5beb1af4"
+    },
+    {
+      "path": "Apps/ArkTraceApp/Viewer/TraceViewStateMigrationOverlay.swift",
+      "byteCount": 7460,
+      "sha256": "04527b5d9199545213435d029826eca6306d0929cb8ecf23f91c1c8820f2c04c"
+    },
+    {
       "path": "Apps/ArkTraceApp/Viewer/TraceViewerRootView.swift",
-      "byteCount": 13961,
-      "sha256": "80de3a48313a56d2c8e5bc7ce911738bd9288f6a7f862d955c25c4a93c37250c"
+      "byteCount": 14209,
+      "sha256": "d848411aa67c18e5fef2b353b904a043bca0ff3fce21198ebffacccdb9d41fa1"
     },
     {
       "path": "Apps/ArkTraceApp/Viewer/TraceZoomInButton.swift",
@@ -229,8 +239,8 @@
     },
     {
       "path": "Package.swift",
-      "byteCount": 8043,
-      "sha256": "ee2702c7b8847c03d74cf2495028de6b911fd35159e4c0802871e1f8c286d02d"
+      "byteCount": 8144,
+      "sha256": "caa9667604d0e04b894d0ed16d37e9f44239e73297271ad3ed31e047532fea4a"
     },
     {
       "path": "README.md",
@@ -279,8 +289,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 95937,
-      "sha256": "c32e15331c7eedba5e00f45018722b56605ddbd8f12f841c14b4bd29cf8826b7"
+      "byteCount": 101470,
+      "sha256": "700dd544c6d40e43135e39b4be6d2519f37a4331d59a2e07a827bc142e2a3dbc"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -289,8 +299,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
-      "byteCount": 7009,
-      "sha256": "fb52b6feb681f2d0fcfb13fb6c8f8a3bb8d07337841622baf744976423d85d39"
+      "byteCount": 9065,
+      "sha256": "b1d231c74993660ee0cfff65bebaaff7105da534bbfbb52e5a57ea4bc769c1d4"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
@@ -299,8 +309,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
-      "byteCount": 7621,
-      "sha256": "ff54fe61f75436825eede18410247fa762b2fddf85daceffe3a8f52d44f6aee3"
+      "byteCount": 8215,
+      "sha256": "9a3ec0159dff4fc97564a341a8eac216a35e39f3194144efe6a00c254be17673"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
@@ -309,8 +319,18 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateAccess.swift",
-      "byteCount": 6347,
-      "sha256": "a55771fb0bc11cfc1766cc0334e8a7efd317d782ff1ce51c7579eedaac81ba09"
+      "byteCount": 9267,
+      "sha256": "8f570309b959f2e3b998dbb365e0cfd1ef4384abfa5d30d40cf9ef85577de1d1"
+    },
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceViewStateBackupPresentation.swift",
+      "byteCount": 2518,
+      "sha256": "718fecb9e149c6cd5b6006e0c08c29b85937ed6dbbdd58609cd5da98d28ba58c"
+    },
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceViewStateMigrationPresentation.swift",
+      "byteCount": 3342,
+      "sha256": "8b7c6e60e666616659b2a690d629917dd26bc231dc29175825eeadfb15181f56"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -504,8 +524,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppDistributionTests.swift",
-      "byteCount": 28387,
-      "sha256": "ad4ece41c495262955927204501d77a57feff9b04763584b96b701efc8301fc0"
+      "byteCount": 30061,
+      "sha256": "54c0a4d628f628225b254fce30855f614b036c47a215e2f402093bda8096dc5f"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/AppSource.swift",
@@ -524,13 +544,13 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/NativeProductProfileTests.swift",
-      "byteCount": 3415,
-      "sha256": "1aa37d52c1fac2984f6624109ed251bfdf906feecf572036cdc17240d554c83a"
+      "byteCount": 4971,
+      "sha256": "1e124292a9306d61b6ad06162dd7349f2db8023ea4f21226837789615a0ea627"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/ObservationBoundaryTests.swift",
-      "byteCount": 4758,
-      "sha256": "d4b1f02de7ef71bf00e3f39b1d4f4ae6b7a6d9b0e1a754f345410128f5cecd26"
+      "byteCount": 4949,
+      "sha256": "787aad47daba5f92790d51133e9ba416f5739f193f87196c822dfbdc6c2ef648"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/ShortcutCatalogTests.swift",
@@ -544,8 +564,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 92689,
-      "sha256": "1569ffcb2aef3f795ec7744dab8259bd9d6f90f0f9b382baffd24ea318e76958"
+      "byteCount": 109696,
+      "sha256": "f145a918f49be07a01ae5bd30ae16af129c117d4032b13bfeac24fb2a6258881"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceOfflineInspectionServiceTests.swift",
@@ -838,19 +858,19 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 19.507997584005352,
+      "elapsedSeconds": 10.437999374989886,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-swift-canonical.log",
-        "byteCount": 6771,
-        "sha256": "d5e03728030fad388d53e839579e008b81e59d54ddbe1da1cb2b8a02a9ff7870"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-swift-canonical.log",
+        "byteCount": 6066,
+        "sha256": "bbd35b3672ce45d7e21165c4a6ca36cb1123c06e6d5dc4613dc9fe8f7851dd0f"
       }
     },
     {
@@ -870,27 +890,27 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 6.106228666991228,
+      "elapsedSeconds": 4.322846625000238,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-swift-regressions.log",
-        "byteCount": 16667,
-        "sha256": "0e3f17fa3cc52b3faa42911b1035be81da1909dd50e5fc68229242aa361539fc"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-rollback-backup-20261005/oracle-refresh-sheet/fresh-swift-regressions.log",
+        "byteCount": 15701,
+        "sha256": "1778c3b3bd470c4792f1ec15785d308c9bf8dac98a881260a01f3cb6f55152cd"
       }
     }
   ],
   "augmentedSources": [
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 96724,
-      "sha256": "e5953802401b4a3f89e89a6a1770c711c5e31ec7f8567c08687f0f624279905d"
+      "byteCount": 102257,
+      "sha256": "0629f80759d53a054c007f190380d8eddda3789e81c721403bb59778744ba016"
     },
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -914,6 +934,6 @@
     "Native-key recordings do not prove user IME/focus/menu acceptance",
     "Independent module capacity accounting excludes owner aggregate, allocator and scratch"
   ],
-  "previousReceiptSHA256": "b32127ab5bfe8f148a8c5adaa0012707f6f22c72abd6f06258f46164e332defb",
-  "revalidatedBaseCommit": "44e85c002db3bcf2f9b4b3aba55905fe28ae742a"
+  "previousReceiptSHA256": "006a9862d759fbdd547ae60fe334e9208a8ae48153f6426b20ec2742ab5dfdd3",
+  "revalidatedBaseCommit": "fda7a89b100990431f1c6eadb971bae1e5d4807e"
 }

@@ -736,6 +736,210 @@
           }
         }
       }
+    },
+    "Back Up Saved State…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back Up Saved State…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeicherten Zustand sichern…"
+          }
+        }
+      }
+    },
+    "A backup contains saved flags, persistent marks, and favorites. To use new saved state after returning to an older app, restore the backup separately. The older app does not read it automatically.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A backup contains saved flags, persistent marks, and favorites. To use new saved state after returning to an older app, restore the backup separately. The older app does not read it automatically."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Sicherung enthält gespeicherte Flags, dauerhafte Markierungen und Favoriten. Stellen Sie die Sicherung separat wieder her, um neue Zustände nach der Rückkehr zu einer älteren App zu nutzen. Die ältere App liest die Sicherung nicht automatisch."
+          }
+        }
+      }
+    },
+    "Backing Up Saved State…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backing Up Saved State…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeicherten Zustand sichern…"
+          }
+        }
+      }
+    },
+    "Show Backup in Finder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Backup in Finder"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung im Finder anzeigen"
+          }
+        }
+      }
+    },
+    "Cancel Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel Backup"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung abbrechen"
+          }
+        }
+      }
+    },
+    "Saved State Backup Is Ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved State Backup Is Ready"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung des gespeicherten Zustands ist bereit"
+          }
+        }
+      }
+    },
+    "No saved state to back up. Add a flag, persistent mark, or favorite first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No saved state to back up. Add a flag, persistent mark, or favorite first."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein gespeicherter Zustand zum Sichern vorhanden. Fügen Sie zuerst ein Flag, eine dauerhafte Markierung oder einen Favoriten hinzu."
+          }
+        }
+      }
+    },
+    "The saved state could not be read. Its original file was kept. No rollback backup was created.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved state could not be read. Its original file was kept. No rollback backup was created."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der gespeicherte Zustand konnte nicht gelesen werden. Die ursprüngliche Datei wurde beibehalten. Es wurde keine Sicherung für die Rückkehr zur älteren Version erstellt."
+          }
+        }
+      }
+    },
+    "Saved state backups are unavailable for this document.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved state backups are unavailable for this document."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherungen des gespeicherten Zustands sind für dieses Dokument nicht verfügbar."
+          }
+        }
+      }
+    },
+    "Saved State Backup Could Not Be Created": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved State Backup Could Not Be Created"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Sicherung des gespeicherten Zustands konnte nicht erstellt werden"
+          }
+        }
+      }
+    },
+    "Saved State Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved State Backup"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung des gespeicherten Zustands"
+          }
+        }
+      }
+    },
+    "Create Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Backup"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherung erstellen"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

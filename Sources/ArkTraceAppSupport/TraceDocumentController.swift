@@ -459,6 +459,10 @@ public final class TraceDocumentController {
     public private(set) var errorPresentation: TraceAppErrorPresentation?
     public private(set) var viewStateMigration: TraceViewStateMigrationPresentation?
     public private(set) var isImportingLegacyViewState = false
+    public private(set) var canBackupViewState = false
+    public private(set) var isBackingUpViewState = false
+    public private(set) var viewStateBackup: TraceViewStateBackupPresentation?
+    public private(set) var viewStateBackupError: TraceAppErrorPresentation?
     public private(set) var cacheHit = false
     public private(set) var accessibilityAnnouncement: TraceAccessibilityAnnouncement?
     public private(set) var timelineFocusRequestID: UInt64 = 0
@@ -482,6 +486,7 @@ public final class TraceDocumentController {
     @ObservationIgnored private var viewStateWriter: TraceViewStateWriteQueue?
     @ObservationIgnored private var openTask: Task<Void, Never>?
     @ObservationIgnored private var migrationTask: Task<Void, Never>?
+    @ObservationIgnored private var backupTask: Task<Void, Never>?
     @ObservationIgnored private var viewportTask: Task<Void, Never>?
     @ObservationIgnored private var searchTask: Task<Void, Never>?
     @ObservationIgnored private var analysisTask: Task<Void, Never>?
@@ -637,6 +642,7 @@ public final class TraceDocumentController {
         let writer = viewStateWriter
         openTask?.cancel()
         migrationTask?.cancel()
+        backupTask?.cancel()
         viewportTask?.cancel()
         searchTask?.cancel()
         analysisTask?.cancel()
@@ -679,7 +685,7 @@ public final class TraceDocumentController {
     /// Flush current edits first; the native importer keeps an existing
     /// destination rather than replacing it with an older source.
     public func importLegacyViewState(snapshotIdentifier: String, sessionID: UInt64) {
-        guard sessionID == documentGeneration, phase == .ready, !isImportingLegacyViewState,
+        guard sessionID == documentGeneration, phase == .ready, !isImportingLegacyViewState, !isBackingUpViewState,
               let report = viewStateMigration, report.needsSelection,
               report.candidates.contains(where: { $0.id == snapshotIdentifier }),
               let access = document?.viewStateAccess else { return }
@@ -713,12 +719,49 @@ public final class TraceDocumentController {
         guard sessionID == documentGeneration, !isImportingLegacyViewState else { return }
         viewStateMigration = nil
     }
+    /// Flush owned edits before taking the native snapshot. This busy barrier
+    /// serializes local persistence/import/export, without rebuilding a sidecar
+    /// from the viewer's normalized favorite array.
+    public func backupViewState(sessionID: UInt64) {
+        guard sessionID == documentGeneration, phase == .ready, canBackupViewState,
+              !isBackingUpViewState, !isImportingLegacyViewState,
+              let access = document?.viewStateAccess else { return }
+        let generation = documentGeneration, writer = viewStateWriter
+        isBackingUpViewState = true
+        viewStateBackup = nil
+        viewStateBackupError = nil
+        backupTask = Task { [weak self] in
+            guard let self else { return }
+            defer {
+                if generation == self.documentGeneration { self.isBackingUpViewState = false; self.backupTask = nil }
+            }
+            do {
+                try await writer?.flush()
+                try Task.checkCancellation()
+                let report = try await access.backupSnapshot()
+                guard generation == self.documentGeneration, !Task.isCancelled else { return }
+                self.viewStateBackup = report
+            } catch {
+                guard generation == self.documentGeneration, !Task.isCancelled else { return }
+                self.viewStateBackupError = TraceAppErrorPresentation(error: Self.typed(error, stage: .querying))
+                self.presentNonfatal(error, generation: generation)
+            }
+        }
+    }
+    public func cancelViewStateBackup(sessionID: UInt64) {
+        guard sessionID == documentGeneration else { return }
+        backupTask?.cancel()
+    }
 
     public func cancel() {
         cancelOutstandingWork()
         documentGeneration &+= 1
         viewStateMigration = nil
         isImportingLegacyViewState = false
+        viewStateBackup = nil
+        viewStateBackupError = nil
+        canBackupViewState = false
+        isBackingUpViewState = false
         phase = sourceURL == nil ? .idle : .loading(.cancelled)
         announce(.openingCancelled)
     }
@@ -728,6 +771,10 @@ public final class TraceDocumentController {
         documentGeneration &+= 1
         viewStateMigration = nil
         isImportingLegacyViewState = false
+        viewStateBackup = nil
+        viewStateBackupError = nil
+        canBackupViewState = false
+        isBackingUpViewState = false
         let generation = documentGeneration
         let closing = document
         let writer = viewStateWriter
@@ -1184,7 +1231,7 @@ public final class TraceDocumentController {
     /// distinguishable without asking the user to pick one.
     @discardableResult
     public func addFlag(atNs timestampNs: Int64, label: String? = nil) -> TimelineFlag? {
-        guard !isImportingLegacyViewState else { return nil }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return nil }
         guard let bounds = try? traceBounds() else { return nil }
         let clamped = min(max(timestampNs, bounds.startNs), bounds.endNs)
         let flag = TimelineFlag(
@@ -1199,7 +1246,7 @@ public final class TraceDocumentController {
     }
 
     public func updateFlag(id: Int, label: String? = nil, colorIndex: Int? = nil) {
-        guard !isImportingLegacyViewState else { return }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return }
         guard let index = annotations.flags.firstIndex(where: { $0.id == id }) else {
             return
         }
@@ -1209,7 +1256,7 @@ public final class TraceDocumentController {
     }
 
     public func removeFlag(id: Int) {
-        guard !isImportingLegacyViewState else { return }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return }
         annotations.flags.removeAll { $0.id == id }
         persistViewState()
     }
@@ -1219,7 +1266,7 @@ public final class TraceDocumentController {
     /// mark; `Shift+m` accumulates.
     @discardableResult
     public func addMark(isPersistent: Bool, label: String? = nil) -> TimelineMark? {
-        guard !isImportingLegacyViewState else { return nil }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return nil }
         let range = selectedRange ?? selectedEvent.map(\.range)
         guard let range, range.startNs < range.endNs else { return nil }
         if !isPersistent { annotations.marks.removeAll { !$0.isPersistent } }
@@ -1236,7 +1283,7 @@ public final class TraceDocumentController {
     }
 
     public func updateMark(id: Int, label: String? = nil, colorIndex: Int? = nil) {
-        guard !isImportingLegacyViewState else { return }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return }
         guard let index = annotations.marks.firstIndex(where: { $0.id == id }) else {
             return
         }
@@ -1246,7 +1293,7 @@ public final class TraceDocumentController {
     }
 
     public func removeMark(id: Int) {
-        guard !isImportingLegacyViewState else { return }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return }
         annotations.marks.removeAll { $0.id == id }
         persistViewState()
     }
@@ -1275,7 +1322,7 @@ public final class TraceDocumentController {
     /// Pins or unpins a lane. Pinning also makes it visible — pinning a hidden
     /// lane and then not seeing it would be a trap.
     public func toggleFavorite(_ id: TimelineTrackID) {
-        guard !isImportingLegacyViewState else { return }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return }
         if favoriteTrackIDs.contains(id) {
             favoriteTrackIDs.removeAll { $0 == id }
         } else {
@@ -1296,7 +1343,7 @@ public final class TraceDocumentController {
     /// Reorders the pinned set. Upstream lets the user drag pinned rows; the
     /// order is the whole point of pinning several at once.
     public func moveFavorite(from source: Int, to destination: Int) {
-        guard !isImportingLegacyViewState else { return }
+        guard !isImportingLegacyViewState, !isBackingUpViewState else { return }
         let visible = favoriteTracks().map(\.id)
         guard visible.indices.contains(source), (0...visible.count).contains(destination)
         else { return }
@@ -1571,6 +1618,7 @@ public final class TraceDocumentController {
             // same bytes bring back the same annotations wherever they live now.
             if let state = restoration?.state { applyRestoredViewState(state) }
             viewStateMigration = restoration?.migration
+            canBackupViewState = access?.canBackup ?? false
             metadata = catalog.metadata
             catalogThreads = catalog.threads
             trackGroups = catalog.groups
@@ -1749,6 +1797,7 @@ public final class TraceDocumentController {
     private func cancelOutstandingWork() {
         openTask?.cancel()
         migrationTask?.cancel()
+        backupTask?.cancel()
         viewportTask?.cancel()
         searchTask?.cancel()
         analysisTask?.cancel()
@@ -1757,6 +1806,7 @@ public final class TraceDocumentController {
         densityResolutionTask = nil
         openTask = nil
         migrationTask = nil
+        backupTask = nil
         viewportTask = nil
         searchTask = nil
         analysisTask = nil
@@ -1772,6 +1822,10 @@ public final class TraceDocumentController {
     }
 
     private func clearViewerStateForReplacement() {
+        viewStateBackup = nil
+        viewStateBackupError = nil
+        canBackupViewState = false
+        isBackingUpViewState = false
         viewStateMigration = nil
         isImportingLegacyViewState = false
         metadata = nil

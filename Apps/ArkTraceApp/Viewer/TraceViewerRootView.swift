@@ -224,6 +224,9 @@ struct TraceViewerRootView: View {
             TraceZoomOutButton(controller: controller)
             TraceResetZoomButton(controller: controller)
         }
+        ToolbarItem(placement: .primaryAction) {
+            TraceViewStateBackupButton(controller: controller)
+        }
         // Its own item rather than another member of the group above: the
         // group's generic content type is already large enough that adding one
         // more member crashed the Swift 6.3 frontend in IRGen.

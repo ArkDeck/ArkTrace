@@ -6,7 +6,7 @@ use crate::{
     NoCacheSession, OwnedResult, ParserTools, ReadPoolLimits, RuntimeHandle, SourceFormat,
     handles::HandleTable,
     open_no_cache,
-    owned_input::{InputBudget, OwnedInput},
+    owned_input::{InputBudget, InputCharge, OwnedInput},
     owned_result::{self, ResultBudget},
     recover_no_cache,
 };
@@ -445,6 +445,8 @@ pub enum ViewStateRequest<'a> {
     Remove,
     /// None selects an unambiguous source; Some is an exact 64-byte digest.
     Import(Option<&'a [u8]>),
+    /// No caller path or bytes; snapshot the Session's held current sidecar.
+    Backup,
 }
 pub const MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES: usize = 16 * 1024 * 1024;
 enum ViewStateOperation {
@@ -452,6 +454,7 @@ enum ViewStateOperation {
     Write(OwnedInput),
     Remove,
     Import(Option<OwnedInput>),
+    Backup(InputCharge),
 }
 /// Engine-scoped requests use only the fixed configured cache root. They do
 /// not create a trace session, load parser tools or accept request paths.
@@ -772,6 +775,12 @@ impl AsyncEngine {
         let operation = match request {
             ViewStateRequest::Read => ViewStateOperation::Read,
             ViewStateRequest::Remove => ViewStateOperation::Remove,
+            ViewStateRequest::Backup => ViewStateOperation::Backup(
+                self.shared
+                    .view_state_input_budget
+                    .charge(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES)
+                    .map_err(|_| RuntimeFailure::Capacity)?,
+            ),
             ViewStateRequest::Import(selection) => ViewStateOperation::Import(
                 selection
                     .map(|bytes| {
@@ -1024,6 +1033,7 @@ struct Tools {
     owners: OwnerStore,
     cache_root: Option<HeldDirectory>,
     migration: Option<crate::LegacyViewStateMigration>,
+    backup: Option<crate::ViewStateBackupStore>,
 }
 fn engine_failure(stage: EngineStage, failure: EngineFailure) -> RuntimeFailure {
     RuntimeFailure::Engine(EngineError { stage, failure })
@@ -1069,6 +1079,7 @@ fn load_tools(
         identity: config.parser_identity.clone(),
         owners,
         migration: None,
+        backup: None,
         cache_root: config
             .cache_directory
             .as_ref()
@@ -1549,6 +1560,77 @@ fn process(
                 .map_err(RuntimeFailure::Engine)?;
             observe(config, WorkerBoundary::Querying);
             match operation {
+                ViewStateOperation::Backup(_credit) => {
+                    use crate::{ViewStateBackupReport as Report, ViewStateBackupStatus as Status};
+                    if config.cache_directory.is_none() {
+                        return response(
+                            &Report::empty(Status::SessionScoped),
+                            command,
+                            shared,
+                            config,
+                        )
+                        .map(Some);
+                    }
+                    let Some(profile) = &config.view_state_migration else {
+                        return response(
+                            &Report::empty(Status::NotConfigured),
+                            command,
+                            shared,
+                            config,
+                        )
+                        .map(Some);
+                    };
+                    let owner = tools.as_mut().ok_or(RuntimeFailure::WorkerPanicked)?;
+                    if owner.backup.is_none() {
+                        let parent = HeldDirectory::open_private(
+                            profile
+                                .backup_directory
+                                .parent()
+                                .ok_or(RuntimeFailure::InvalidRequest)?,
+                        )
+                        .map_err(|e| {
+                            engine_failure(EngineStage::Querying, EngineFailure::Host(e))
+                        })?;
+                        let name = profile
+                            .backup_directory
+                            .file_name()
+                            .and_then(|v| v.to_str())
+                            .ok_or(RuntimeFailure::InvalidRequest)?;
+                        let backup = parent.ensure_private_child(name).map_err(|e| {
+                            engine_failure(EngineStage::Querying, EngineFailure::Host(e))
+                        })?;
+                        owner.backup = Some(
+                            crate::ViewStateBackupStore::new(
+                                owner
+                                    .cache_root
+                                    .as_ref()
+                                    .ok_or(RuntimeFailure::InvalidRequest)?
+                                    .clone(),
+                                backup,
+                                &command
+                                    .budget
+                                    .io(crate::MAXIMUM_VIEW_STATE_BYTES as u64 + 1024),
+                            )
+                            .map_err(|e| {
+                                engine_failure(EngineStage::Querying, EngineFailure::Host(e))
+                            })?,
+                        );
+                    }
+                    response(
+                        &session
+                            .backup_view_state(
+                                owner
+                                    .backup
+                                    .as_ref()
+                                    .ok_or(RuntimeFailure::WorkerPanicked)?,
+                                &command.budget,
+                            )
+                            .map_err(RuntimeFailure::Engine)?,
+                        command,
+                        shared,
+                        config,
+                    )
+                }
                 ViewStateOperation::Read => response(
                     &session
                         .read_view_state(&command.budget)

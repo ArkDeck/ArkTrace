@@ -1,5 +1,58 @@
 use super::*;
 
+#[test]
+fn backup_reserves_worker_pipeline_without_copy_and_refunds_on_cancel_unwind() {
+    let (engine, receiver, session) = fixture(8);
+    let request = engine
+        .submit_view_state(session, ViewStateRequest::Backup, Duration::from_secs(1))
+        .unwrap();
+    assert_eq!(
+        engine.retained_view_state_input_bytes(),
+        MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES
+    );
+    assert_eq!(
+        submit(&engine, session, b"x"),
+        Err(RuntimeFailure::Capacity)
+    );
+    assert_eq!(
+        engine.submit_view_state(session, ViewStateRequest::Backup, Duration::from_secs(1)),
+        Err(RuntimeFailure::Capacity)
+    );
+    let command = receiver.recv().unwrap();
+    engine.cancel(request).unwrap();
+    assert!(command.budget.cancellation.is_cancelled());
+    assert!(
+        catch_unwind(AssertUnwindSafe(move || {
+            let _held = command;
+            panic!("backup worker");
+        }))
+        .is_err()
+    );
+    assert_eq!(engine.retained_view_state_input_bytes(), 0);
+    submit(&engine, session, b"x").unwrap();
+    assert_eq!(receiver.try_iter().count(), 1);
+    assert_eq!(engine.retained_view_state_input_bytes(), 0);
+}
+
+#[test]
+fn failed_backup_enqueue_refunds_all_pipeline_credit() {
+    let (engine, receiver, session) = fixture(1);
+    engine
+        .submit_view_state(session, ViewStateRequest::Read, Duration::from_secs(1))
+        .unwrap();
+    assert_eq!(
+        engine.submit_view_state(session, ViewStateRequest::Backup, Duration::from_secs(1)),
+        Err(RuntimeFailure::Capacity)
+    );
+    assert_eq!(engine.retained_view_state_input_bytes(), 0);
+    drop(receiver);
+    assert_eq!(
+        engine.submit_view_state(session, ViewStateRequest::Backup, Duration::from_secs(1)),
+        Err(RuntimeFailure::WorkerPanicked)
+    );
+    assert_eq!(engine.retained_view_state_input_bytes(), 0);
+}
+
 fn fixture(queue_slots: usize) -> (AsyncEngine, Receiver<Command>, RuntimeHandle) {
     let limits = RuntimeLimits {
         workers: 1,

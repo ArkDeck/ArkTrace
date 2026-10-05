@@ -50,7 +50,7 @@ final class ObservationBoundaryTests: XCTestCase {
                 "searchResults", "searchFieldText", "isSearching", "rangeAnalysis",
                 "errorPresentation", "accessibilityAnnouncement", "cacheInventory",
                 "metadata", "recentDocuments", "trackGroups", "timelineFocusRequestID",
-                "viewStateMigration", "isImportingLegacyViewState",
+                "viewStateMigration", "isImportingLegacyViewState", "canBackupViewState", "isBackingUpViewState", "viewStateBackup", "viewStateBackupError",
             ],
             in: "TraceViewerRootView"
         )

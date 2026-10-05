@@ -41,6 +41,15 @@ public final class RustSession: Sendable {
         let result = try await engine.viewState(handle, operation: .importLegacy(input), timeoutMilliseconds: timeoutMilliseconds)
         return try await result.viewStateMigration(identity: identity)
     }
+    /// Immutable format-1 rollback snapshot in the fixed product backup root.
+    /// A failure/cancellation can follow publication; retry verifies the bundle.
+    public func backupViewState(timeoutMilliseconds: UInt32 = 30_000) async throws -> RustViewStateBackupReport {
+        let opening = try await openingView()
+        let trace = await opening.metadata.cacheKey.traceSHA256.copyString()
+        let parser = await opening.metadata.cacheKey.parserKey.copyString()
+        let result = try await engine.viewState(handle, operation: .backup, timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.viewStateBackup(identity: identity, expectedTraceSHA256: trace, expectedParserKey: parser)
+    }
     public func query(_ request: RustRequest, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustResult {
         try await engine.query(handle, request: request, timeoutMilliseconds: timeoutMilliseconds)
     }

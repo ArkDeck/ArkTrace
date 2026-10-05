@@ -16,11 +16,14 @@ struct TraceViewStateAccess: Sendable {
     private let read: @Sendable () async throws -> TraceViewStateStore.Restored
     private let write: @Sendable (TraceViewStateStore.Restored) async throws -> Void
     private let migrate: (@Sendable (String?) async throws -> TraceViewStateMigrationPresentation)?
+    private let backup: (@Sendable () async throws -> TraceViewStateBackupPresentation)?
+    var canBackup: Bool { backup != nil }
 
     init(load: @escaping @Sendable () async throws -> TraceViewStateStore.Restored,
          save: @escaping @Sendable (TraceViewStateStore.Restored) async throws -> Void,
-         migrate: (@Sendable (String?) async throws -> TraceViewStateMigrationPresentation)? = nil) {
-        read = load; write = save; self.migrate = migrate
+         migrate: (@Sendable (String?) async throws -> TraceViewStateMigrationPresentation)? = nil,
+         backup: (@Sendable () async throws -> TraceViewStateBackupPresentation)? = nil) {
+        read = load; write = save; self.migrate = migrate; self.backup = backup
     }
     init(store: TraceViewStateStore) {
         self.init(load: { store.load() }, save: { store.save(annotations: $0.annotations, favoriteTrackIDs: $0.favoriteTrackIDs) })
@@ -58,6 +61,19 @@ struct TraceViewStateAccess: Sendable {
         precondition(!Thread.isMainThread)
         do { try await write(state) } catch { throw Self.mapped(error) }
     }
+    @concurrent
+    func backupSnapshot() async throws -> TraceViewStateBackupPresentation {
+        precondition(!Thread.isMainThread)
+        try Task.checkCancellation()
+        guard let backup else {
+            return TraceViewStateBackupPresentation(status: .notConfigured)
+        }
+        do {
+            let result = try await backup()
+            try Task.checkCancellation()
+            return result
+        } catch { throw Self.mapped(error) }
+    }
 
     private static func mapped(_ error: any Error) -> any Error {
         #if ARKTRACE_NATIVE_RUNTIME
@@ -67,7 +83,14 @@ struct TraceViewStateAccess: Sendable {
     }
 
     #if ARKTRACE_NATIVE_RUNTIME
-    init(session: RustSession, traceSHA256: String, timeoutMilliseconds: UInt32) {
+    init(session: RustSession, traceSHA256: String, timeoutMilliseconds: UInt32, backupDirectory: URL? = nil) {
+        let backup: (@Sendable () async throws -> TraceViewStateBackupPresentation)?
+        if let backupDirectory {
+            backup = {
+                let report = try await session.backupViewState(timeoutMilliseconds: timeoutMilliseconds)
+                return try await TraceViewStateBackupPresentation(report: report, backupDirectory: backupDirectory)
+            }
+        } else { backup = nil }
         self.init(load: {
             switch try await session.readViewState(timeoutMilliseconds: timeoutMilliseconds) {
             case .missing, .sessionScoped: return TraceViewStateStore.Restored()
@@ -116,7 +139,7 @@ struct TraceViewStateAccess: Sendable {
             let choice = try selection.map { try RustViewStateMigrationSelection(snapshotIdentifier: $0) }
             let report = try await session.importLegacyViewState(selection: choice, timeoutMilliseconds: timeoutMilliseconds)
             return try await TraceViewStateMigrationPresentation(report: report)
-        })
+        }, backup: backup)
     }
     #endif
 }
