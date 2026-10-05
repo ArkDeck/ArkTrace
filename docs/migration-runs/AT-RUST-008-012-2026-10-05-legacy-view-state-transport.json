@@ -1,0 +1,720 @@
+{
+  "formatVersion": 1,
+  "date": "2026-10-05",
+  "goalStatus": "active",
+  "scope": "fixed product migration configuration / bounded async / C ABI / typed Swift SDK",
+  "nativeSourceSHA256": "32acd65c37e6325d9e3333230b378caca7db37f3f9316e5648c4a6b3c6a66597",
+  "contractSHA256": "5244bd797884271ec242ece5c2912eb3ccfd1b07c9de67127e4a296e93aa91d9",
+  "abi": {
+    "version": 1,
+    "records": 10,
+    "fields": 95,
+    "exports": 26,
+    "defaultMacCapabilities": 119,
+    "fixtureMacCapabilities": 127
+  },
+  "tests": {
+    "rustAllFeatures": {
+      "passed": 557,
+      "failed": 0,
+      "ignored": 0,
+      "groups": 59
+    },
+    "sdk": {
+      "passed": 94,
+      "failed": 0,
+      "skipped": 0,
+      "newMigrationTests": 7
+    },
+    "defaultSwift": {
+      "passed": 617,
+      "failed": 0,
+      "skipped": 6
+    }
+  },
+  "sdk": {
+    "artifactPath": "/private/tmp/arktrace-cache-session-artifacts/3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796/CArkTrace.xcframework",
+    "library": {
+      "byteCount": 30912264,
+      "sha256": "3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796"
+    },
+    "artifactIdentity": "b1c15df77ab8a4260b4affea6daf40179c6371f322e0b3faebe507c931dc785c",
+    "frozenProducerManifestSHA256": "c0606a43f1a365f9abeb9e06488d91283d213d211f1f04fb7064326f6c42b2f1"
+  },
+  "nativeSDKConsumers": [
+    {
+      "case": "normal",
+      "name": "cold",
+      "exitCode": 0,
+      "stdoutSHA256": "1d792d465d522a6c10f2a55c6eb60b3cc9e3c15ce0c713c8fb0a4979fe5d64c9",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "imported",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "normal",
+      "name": "warm",
+      "exitCode": 0,
+      "stdoutSHA256": "b8c42caceeea88c8a1881ceb38b2f435803fbeb5511328378c8d5380aa1c0fe8",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "alreadyCompleted",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "normal",
+      "name": "nonprivate-backup",
+      "exitCode": 0,
+      "stdoutSHA256": "41373d66c3b03eed10623f096de1f5309e859a4c220c276e0b5d07fe2405aaae",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": null,
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "normal",
+      "name": "cleared",
+      "exitCode": 0,
+      "stdoutSHA256": "e11b7ddd1e02eb7fd8d8b461c8adbdd9743d4ab82945d053ff5db4f0989144f4",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "alreadyCompleted",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "normal",
+      "name": "no-profile",
+      "exitCode": 0,
+      "stdoutSHA256": "0e9f97b573dd42c1be53fa01521228f50cc8732fe993dbe49e17582a5df86f0c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "notConfigured",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "missing-legacy",
+      "name": "missing",
+      "exitCode": 0,
+      "stdoutSHA256": "f563b91d8471a4c5476a3f63f0c0ff62c661fc33326794982a7588f930863b28",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "missing",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "ephemeral",
+      "name": "ephemeral",
+      "exitCode": 0,
+      "stdoutSHA256": "b625850d48957f1858484527dc1381c7ed23a5db6511d941ab20a74bacd93ff3",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "sessionScoped",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "future",
+      "name": "future",
+      "exitCode": 0,
+      "stdoutSHA256": "0bf3520de950869abc018e01d628c46e2b59ccda89d192157b5906ff2c20fb8a",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "preservedSource",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "conflict",
+      "name": "conflict",
+      "exitCode": 0,
+      "stdoutSHA256": "759bb709965307225dec52e6da08628e5b1d73717fee45eebccb61d7e88f95e7",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "conflict",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "conflict",
+      "name": "invalid-selection",
+      "exitCode": 0,
+      "stdoutSHA256": "ad2f9861373daa88178a0c4a716828f134601fe9fdb3e5d71fdf913c66be9e0f",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "invalidSelection",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "conflict",
+      "name": "selected",
+      "exitCode": 0,
+      "stdoutSHA256": "1e6a9aaae216ae9f6166e8169ac2796a13837e5389c530f8d00873f8e2d23079",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "imported",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "conflict",
+      "name": "completed-other-selection",
+      "exitCode": 0,
+      "stdoutSHA256": "9d8fb9d0b6f08589badd2ab2e1f35518eda2e0e939cda829124d9cbb6e16861d",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "alreadyCompleted",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "destination-kept",
+      "name": "kept",
+      "exitCode": 0,
+      "stdoutSHA256": "57ac0180e529ad451aced90559d61a80bff70f804c240bd31d27d06b9bfc8a55",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "destinationKept",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "destination-kept",
+      "name": "kept-again",
+      "exitCode": 0,
+      "stdoutSHA256": "77a8f7b86d1c25a32ba955f9304c1183c0c45f168bebb34a7687c10b9727a12c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "alreadyCompleted",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "sdk-blocked-cancel",
+      "name": "cancelled",
+      "exitCode": 0,
+      "stdoutSHA256": "44413ddf4265f09375b12b9e189aeadd320055737816746bb77dddb8ab499ff6",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": null,
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    },
+    {
+      "case": "sdk-blocked-cancel",
+      "name": "after-cancel",
+      "exitCode": 0,
+      "stdoutSHA256": "12b454271c21a475f877339f2b492af7f3a207bd6a15a8f4f6e9f11bad85b6b3",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "imported",
+      "legacyUnchanged": true,
+      "rawTraceUnchanged": true,
+      "resourcesClosed": true
+    }
+  ],
+  "actualCompletedConsumers": 16,
+  "actualBlockedSDKCancellation": {
+    "admittedInputBytes": 64,
+    "remainingInputBytesAfterRefund": 0,
+    "requestFinished": true,
+    "readySessionUsable": true,
+    "subsequentImport": true
+  },
+  "frozenOriginals": {
+    "originalFixture": "historical Swift-writer format-1 fixture, not a fresh Swift writer this round",
+    "legacyBytesSizesModesInodesMtimeCtimeUnchanged": true,
+    "rawTraceSHA256Unchanged": true,
+    "newNativeDestinationKept": true,
+    "backupsOutsideCache": true
+  },
+  "limits": {
+    "nativeSharedInputBytes": 16777216,
+    "sdkReportInputBytes": 8388608,
+    "sources": 64,
+    "candidates": 64,
+    "unmatchedFavorites": 4096,
+    "labelPreviews": 3,
+    "labelPreviewUTF8Bytes": 256,
+    "creditScope": "logical retained arrays/text, transient SDK input and Data copy credits; Foundation internal scratch/allocator/RSS not measured"
+  },
+  "gates": [
+    {
+      "name": "12-sdk-artifact",
+      "argv": [
+        "python3",
+        "scripts/build_macos_rust_sdk.py",
+        "--fixtures"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0",
+        "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "f6fc6005612c8e1454fcd49df03e78c39fd968c5176ab8b63a74b8872bf0b32e"
+    },
+    {
+      "name": "13-sdk-consumer-build",
+      "argv": [
+        "python3",
+        "scripts/test_macos_rust_sdk.py",
+        "--build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0",
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "f70f3587b29e1d28e33491418712d0924532b0f16393309cb7a36f322d92ae08"
+    },
+    {
+      "name": "14-actual-sdk",
+      "argv": [
+        "python3",
+        "scripts/test_macos_view_state_migration_sdk.py",
+        "--executable",
+        "/private/tmp/arktrace-cache-session-final-consumer/build/out/Products/Debug/ViewStateMigration",
+        "--consumer-receipt",
+        "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-transport-20261005/13-sdk-consumer-build.receipt.json",
+        "--artifact",
+        "/private/tmp/arktrace-cache-session-artifacts/3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796/CArkTrace.xcframework",
+        "--helper",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/tools/helper",
+        "--parser",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/tools/parser",
+        "--source",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3/source.htrace",
+        "--old-metadata",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/actual-controller-v4/product-runtime/legacy/traces/eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe/9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095/metadata.json",
+        "--old-database",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/actual-controller-v4/product-runtime/legacy/traces/eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe/9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095/database.sqlite",
+        "--old-sidecar",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-engine/tests/fixtures/swift-view-state-v1.json",
+        "--evidence-dir",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-transport-20261005/actual-sdk-v2"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0",
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "087dbc0a3a106ed66458af1a1ff2e8b9083252ea21e80762a998f93698b1fd54"
+    },
+    {
+      "name": "15-clippy",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "886926b37363695297b4ebcb201be35b68e215e7eeda5977e1e46a742065ec41"
+    },
+    {
+      "name": "16-fmt-check",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "1b17d66c6d18a8fdd48ba6af88eef7a52623d73fe24604fd226299558a01a8ff"
+    },
+    {
+      "name": "17-rust-final-tests",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "0372344873719e1c761f4e71436d64d230f021b98f4e3081f4611835b475372c"
+    },
+    {
+      "name": "18-bindings",
+      "argv": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "bdc05807ed6c95448f3c5fb1923486a9e7daa28b0e4a925a1ac4a8adbec96398"
+    },
+    {
+      "name": "19-migration-contracts",
+      "argv": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "a8e2395a24c0036a70aeb93b7ba07b85777f34652da199eeb628b176272ef35c"
+    },
+    {
+      "name": "20-migration-regressions",
+      "argv": [
+        "python3",
+        "scripts/test_migration_contracts.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "f2c03aab76afd18e4a17a43b1de13ad67be6a073e2f175dd211dceec5da047a1"
+    },
+    {
+      "name": "21-licenses",
+      "argv": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "609deb5d7939db8d46b79516cca810b6abed627ae299933c0cf24e387c80151f"
+    },
+    {
+      "name": "22-rust-verifier",
+      "argv": [
+        "python3",
+        "scripts/verify_rust_workspace.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "5562567134421e2c65e194fa1e8e7bf6a715827ef249f871eaeed101f90580fe"
+    },
+    {
+      "name": "23-default-swift",
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-swiftpm-current/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-swiftpm-current/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-swiftpm-current"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "b2650fff8d6ccfa3107482ee694d6ccbef8b8786caf0e3a85e325ada93c6b613"
+    },
+    {
+      "name": "24-api-native",
+      "argv": [
+        "sh",
+        "scripts/test_api_baseline.sh",
+        "--scratch-path",
+        "/private/tmp/arktrace-event-api-baseline/build",
+        "--cache-path",
+        "/private/tmp/arktrace-event-api-baseline/dependencies",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-event-api-baseline/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-event-api-baseline/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0",
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+        "ARKTRACE_RUST_XCFRAMEWORK": ".arktrace-native/b1c15df77ab8a4260b4affea6daf40179c6371f322e0b3faebe507c931dc785c/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer",
+        "CLANG_MODULE_CACHE_PATH": "/private/tmp/arktrace-event-api-baseline/ModuleCache",
+        "SWIFTPM_MODULECACHE_OVERRIDE": "/private/tmp/arktrace-event-api-baseline/ModuleCache"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "3f52379ad3436e74d51bc6c764b137c0adcdafe6f65e3ab30d1843f7871004be"
+    },
+    {
+      "name": "25-ffi",
+      "argv": [
+        "python3",
+        "scripts/test_ffi_contract.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0",
+        "ARKTRACE_FFI_CONSUMER_EVIDENCE_DIR": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-transport-20261005/ffi-default-25"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "e916bb5d52c2943f69d4868d9af5649d92e42978cba938211d14a62046d866fa"
+    },
+    {
+      "name": "26-rust-build",
+      "argv": [
+        "python3",
+        "scripts/run-cargo.py",
+        "build",
+        "--workspace"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "cde2065d865a240e6a3595019050b59d3bfa149ccc2d91fb73ec50c086007c18"
+    },
+    {
+      "name": "27-app-default",
+      "argv": [
+        "sh",
+        "scripts/run-xcodebuild.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_XCODE_CACHE_ROOT": "/private/tmp/arktrace-lifecycle-xcode",
+        "ARKTRACE_XCODE_OUTPUT_ROOT": "/private/tmp/arktrace-lifecycle-xcode-output"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "cbb7620369561dd9f0bc76fa7c6a53c46ddaed1ad6846eca28502b409d03eb00"
+    },
+    {
+      "name": "28-app-stage",
+      "argv": [
+        "python3",
+        "scripts/stage_macos_rust_sdk.py",
+        "/private/tmp/arktrace-cache-session-artifacts/3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796/CArkTrace.xcframework",
+        "/private/tmp/arktrace-lifecycle-xcode/workspace"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_XCODE_CACHE_ROOT": "/private/tmp/arktrace-lifecycle-xcode",
+        "ARKTRACE_XCODE_OUTPUT_ROOT": "/private/tmp/arktrace-lifecycle-xcode-output",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "ffb82b6370248e839cc91cda3937b29f407c7c33f5a08fcc9f172a922e0b05c6"
+    },
+    {
+      "name": "29-app-native",
+      "argv": [
+        "sh",
+        "scripts/run-xcodebuild.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_XCODE_CACHE_ROOT": "/private/tmp/arktrace-lifecycle-xcode",
+        "ARKTRACE_XCODE_OUTPUT_ROOT": "/private/tmp/arktrace-lifecycle-xcode-output",
+        "ARKTRACE_RUST_XCFRAMEWORK": ".arktrace-native/b1c15df77ab8a4260b4affea6daf40179c6371f322e0b3faebe507c931dc785c/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_FIXTURES": "1"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "f1bd47223a435a2d43995f916e65c59315f2f9729c79bc613512b2056d58dcda"
+    },
+    {
+      "name": "30-app-document-types",
+      "argv": [
+        "sh",
+        "scripts/verify_app_document_types.sh",
+        "/private/tmp/arktrace-lifecycle-xcode-output/Debug/ArkTrace.app"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "90cbe6688aa9adbc3cfb08e102a8bd2e6f13708f7d40205ccd6be65a1e2198f4"
+    },
+    {
+      "name": "31-palette",
+      "argv": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "d5fcf330f652b942e1d74846d54e151281a7dfaa4b8c4bf819a6ba4eb4827374"
+    },
+    {
+      "name": "32-ci-planner-tests",
+      "argv": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "11adec9ce2fcad309c934cb4802fb35695a1312597dc0d5a0cc6f4e2bc6e0be2"
+    },
+    {
+      "name": "33-parser-lock",
+      "argv": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "db010f0f1e2bd99e9f77da33ebfe90beb6ede9949c8f0409307da768d415f51b"
+    },
+    {
+      "name": "34-cache-rebind",
+      "argv": [
+        "python3",
+        "scripts/cargo_cache.py",
+        "rebind",
+        "--cache-root",
+        "/private/tmp/arktrace-migration-cargo",
+        "--owner",
+        "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "--source-root",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "--source-sha256",
+        "32acd65c37e6325d9e3333230b378caca7db37f3f9316e5648c4a6b3c6a66597"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "receiptSHA256": "c8d6c29fffadfc2d8e5a3f3b57cf65acf05f06e0c42e20ce07a66921180009d6"
+    }
+  ],
+  "knownMetadataExtractorNote": [
+    "2026-10-05 13:43:21.484 appintentsmetadataprocessor[84612:15519502] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+  ],
+  "evidenceRoot": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-transport-20261005",
+  "migrationControllerConnected": false,
+  "productRollbackExportConnected": false,
+  "defaultAppNativeCutover": false,
+  "signedReleaseAcceptance": false,
+  "actualGUIAcceptance": false,
+  "windowsNativeAcceptance": false,
+  "fullMacOSAcceptance": false,
+  "actualCachesRetired": 0,
+  "actualReclaimedBytes": 0,
+  "completeDiffBase": "5a234a2cad465cf7f0ef3fcd5db57c9469d4e925",
+  "completeDiffPathCount": 139,
+  "ciPlan": {
+    "lane_swiftpm": true,
+    "lane_app": true,
+    "lane_contracts": true,
+    "lane_rust_macos": true,
+    "lane_rust_windows": true
+  }
+}

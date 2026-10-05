@@ -11,7 +11,7 @@ extern "C" {
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
 #define ARKTRACE_ABI_VERSION 1u
-#define ARKTRACE_CONTRACT_DIGEST "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2"
+#define ARKTRACE_CONTRACT_DIGEST "5244bd797884271ec242ece5c2912eb3ccfd1b07c9de67127e4a296e93aa91d9"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_STATUS_OK 0u
@@ -142,6 +142,8 @@ ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host
 #define ARKTRACE_VIEW_STATE_REMOVE 3u
 #define ARKTRACE_MAXIMUM_VIEW_STATE_BYTES 4194304u
 #define ARKTRACE_MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES 16777216u
+#define ARKTRACE_CAP_VIEW_STATE_MIGRATION 64u
+#define ARKTRACE_VIEW_STATE_IMPORT 4u
 typedef struct ArkTraceAbiIdentity {
     uint32_t struct_size;
     uint32_t abi_version;

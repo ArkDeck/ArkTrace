@@ -88,10 +88,16 @@ fn require_readonly_backup(file: &HeldFile) -> Result<(), HostError> {
         }
     })
 }
-fn report(status: Status, sources: Vec<Source>, intent: Option<&ImportIntent>) -> Report {
+fn report(
+    status: Status,
+    sources: Vec<Candidate>,
+    intent: Option<&ImportIntent>,
+    target: &CacheMetadata,
+) -> Report {
     Report {
         status,
-        sources,
+        candidates: sources.iter().filter_map(|v| v.summary(target)).collect(),
+        sources: sources.into_iter().map(|v| v.source).collect(),
         selected_snapshot_identifier: intent.map(|v| v.source_snapshot_identifier.clone()),
         unmatched_favorite_track_ids: intent
             .map(|v| v.unmatched_favorite_track_ids.clone())
@@ -571,6 +577,7 @@ impl LegacyViewStateMigration {
                 Status::AlreadyCompleted,
                 vec![],
                 Some(&completed.intent),
+                target,
             ));
         }
         let (sources, intent, bytes) =
@@ -585,11 +592,10 @@ impl LegacyViewStateMigration {
                 (vec![], intent, None)
             } else {
                 let candidates = self.scan(target, io)?;
-                let sources: Vec<_> = candidates.iter().map(|v| v.source.clone()).collect();
                 let index = match model::decide(&candidates, target, selected) {
                     Decision::Stop(status) => {
                         migration_lock.revalidate()?;
-                        return Ok(report(status, sources, None));
+                        return Ok(report(status, candidates, None, target));
                     }
                     Decision::Import(index) => index,
                 };
@@ -608,10 +614,15 @@ impl LegacyViewStateMigration {
                     imported_document_sha256: model::digest(&bytes),
                     unmatched_favorite_track_ids: unmatched,
                 };
-                (sources, intent, Some(bytes))
+                (candidates, intent, Some(bytes))
             };
         if selected.is_some_and(|selected| selected != intent.source_snapshot_identifier) {
-            return Ok(report(Status::InvalidSelection, sources, Some(&intent)));
+            return Ok(report(
+                Status::InvalidSelection,
+                sources,
+                Some(&intent),
+                target,
+            ));
         }
         let key = Lease::acquire(
             locks,
@@ -624,12 +635,22 @@ impl LegacyViewStateMigration {
             recovered,
             SidecarRecovery::Preserved | SidecarRecovery::Active
         ) {
-            return Ok(report(Status::PreservedDestination, sources, Some(&intent)));
+            return Ok(report(
+                Status::PreservedDestination,
+                sources,
+                Some(&intent),
+                target,
+            ));
         }
         let existing = super::view_state::read_directory(directory, &target.trace_sha256, io)?;
         let outcome = match existing {
             ViewStateRead::Preserved => {
-                return Ok(report(Status::PreservedDestination, sources, Some(&intent)));
+                return Ok(report(
+                    Status::PreservedDestination,
+                    sources,
+                    Some(&intent),
+                    target,
+                ));
             }
             ViewStateRead::Restored(document) => {
                 if bytes.is_none()
@@ -682,6 +703,7 @@ impl LegacyViewStateMigration {
             },
             sources,
             Some(&completed.intent),
+            target,
         ))
     }
 
@@ -724,7 +746,7 @@ impl EngineSession {
             sidecars,
         } = &self.storage
         else {
-            return Ok(report(Status::SessionScoped, vec![], None));
+            return Ok(Report::empty(Status::SessionScoped));
         };
         let io = budget.io(MAXIMUM_LEGACY_BACKUP_FILE_BYTES);
         let result = migration

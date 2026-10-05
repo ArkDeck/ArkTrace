@@ -88,7 +88,8 @@ pub unsafe extern "C" fn arktrace_abi_identity(out: *mut AbiIdentity, bytes: u64
                         | CAP_COLD_JSON
                         | CAP_VIEWPORT_RECORDS
                         | CAP_CACHE_MAINTENANCE
-                        | CAP_VIEW_STATE,
+                        | CAP_VIEW_STATE
+                        | CAP_VIEW_STATE_MIGRATION,
                 )
             } else {
                 0
@@ -398,6 +399,8 @@ pub unsafe extern "C" fn arktrace_cache_request_submit(
 /// # Safety
 /// Write input is a live readable allocation for the exact bounded byte range;
 /// read/remove require a null pointer and zero bytes. Output is a live aligned
+/// Import accepts null/zero for automatic selection or a live exact 64-byte
+/// lowercase SHA256 selection; paths are fixed in Engine configuration.
 /// uint64_t record, sized exactly and disjoint from input.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn arktrace_view_state_request_submit(
@@ -414,6 +417,21 @@ pub unsafe extern "C" fn arktrace_view_state_request_submit(
         let out = unsafe { output(out, bytes) }?;
         let data = match operation {
             VIEW_STATE_WRITE => Some(unsafe { borrowed_input(p, n, MAXIMUM_VIEW_STATE_BYTES) }?),
+            VIEW_STATE_IMPORT => {
+                if p.is_null() && n == 0 {
+                    None
+                } else {
+                    let selection = unsafe { borrowed_input(p, n, 64) }?;
+                    if selection.len() != 64
+                        || !selection
+                            .iter()
+                            .all(|v| v.is_ascii_digit() || (b'a'..=b'f').contains(v))
+                    {
+                        return Err(STATUS_INVALID_INPUT);
+                    }
+                    Some(selection)
+                }
+            }
             VIEW_STATE_READ | VIEW_STATE_REMOVE => {
                 if !p.is_null() || n != 0 {
                     return Err(STATUS_INVALID_BUFFER);
@@ -430,6 +448,7 @@ pub unsafe extern "C" fn arktrace_view_state_request_submit(
             let operation = match operation {
                 VIEW_STATE_READ => arktrace_engine::ViewStateRequest::Read,
                 VIEW_STATE_REMOVE => arktrace_engine::ViewStateRequest::Remove,
+                VIEW_STATE_IMPORT => arktrace_engine::ViewStateRequest::Import(data),
                 VIEW_STATE_WRITE => {
                     arktrace_engine::ViewStateRequest::Write(data.ok_or(STATUS_INVALID_BUFFER)?)
                 }

@@ -32,6 +32,15 @@ public final class RustSession: Sendable {
         let result = try await engine.viewState(handle, operation: .remove, timeoutMilliseconds: timeoutMilliseconds)
         return try await result.viewStateWrite(identity: identity)
     }
+    /// One-way import from fixed product roots. Conflict/preservation is a
+    /// typed report and does not invalidate this Ready trace session.
+    public func importLegacyViewState(selection: RustViewStateMigrationSelection? = nil,
+                                      timeoutMilliseconds: UInt32 = 30_000) async throws -> RustViewStateMigrationReport {
+        let input: RustEncodedViewState?
+        if let selection { input = try await RustViewStateEncoder.selection(selection) } else { input = nil }
+        let result = try await engine.viewState(handle, operation: .importLegacy(input), timeoutMilliseconds: timeoutMilliseconds)
+        return try await result.viewStateMigration(identity: identity)
+    }
     public func query(_ request: RustRequest, timeoutMilliseconds: UInt32 = 30_000) async throws -> RustResult {
         try await engine.query(handle, request: request, timeoutMilliseconds: timeoutMilliseconds)
     }

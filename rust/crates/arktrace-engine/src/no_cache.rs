@@ -147,7 +147,7 @@ pub struct EngineBudget {
     pub cancellation: CancellationToken,
 }
 impl EngineBudget {
-    fn io(&self, maximum_bytes: u64) -> IoBudget {
+    pub(crate) fn io(&self, maximum_bytes: u64) -> IoBudget {
         IoBudget {
             maximum_bytes,
             deadline: self.deadline,

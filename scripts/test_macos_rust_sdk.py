@@ -37,6 +37,8 @@ def consumer(artifact):
     shutil.copyfile(ROOT/'scripts/swift-sdk-summary/SummaryOwnership.swift',summary_sources/'SummaryOwnership.swift')
     sidecar_sources=package/'Sources/ViewState';sidecar_sources.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(ROOT/'scripts/swift-sdk-view-state/ViewState.swift',sidecar_sources/'ViewState.swift')
+    migration_sources=package/'Sources/ViewStateMigration';migration_sources.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(ROOT/'scripts/swift-sdk-view-state-migration/Migration.swift',migration_sources/'Migration.swift')
     mirror=cache/'arktrace/workspace'
     env=os.environ.copy();env.update(ARKTRACE_SWIFTPM_CACHE_ROOT=str(cache/'arktrace'),ARKTRACE_RUST_XCFRAMEWORK=str(artifact),ARKTRACE_RUST_SDK_FIXTURES='1')
     log=cache/'sdk-build.log'
@@ -48,7 +50,7 @@ def consumer(artifact):
         subprocess.run(['sh','scripts/run-swiftpm.sh','test','--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'--filter','ArkTraceRustRuntimeTests','-Xswiftc','-warnings-as-errors'],cwd=ROOT,env=env,stdout=output,stderr=subprocess.STDOUT,check=True)
     unit_output=unit_log.read_text(encoding='utf-8')
     unit_tests=re.findall(r"Test Case '.*ArkTraceRustRuntimeTests.*' passed",unit_output)
-    assert len(unit_tests)==87 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
+    assert len(unit_tests)==94 and not re.search(r'warning:|error:|Test Case .*skipped',unit_output),unit_output[-6000:]
     core_log=cache/'core-consumer-build.log'
     with core_log.open('w') as output:
         subprocess.run(['sh','scripts/run-swiftpm.sh','build','--product','ArkTraceRustCoreConformance','--disable-sandbox',
@@ -65,7 +67,8 @@ let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], de
  .executableTarget(name: "Lifecycle", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety()]),
  .executableTarget(name: "DirectoryOwnership", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])]),
  .executableTarget(name: "SummaryOwnership", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])]),
- .executableTarget(name: "ViewState", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])])
+ .executableTarget(name: "ViewState", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])]),
+ .executableTarget(name: "ViewStateMigration", dependencies: [.product(name: "ArkTraceRustRuntime", package: "ArkTrace"), .product(name: "ArkTraceCore", package: "ArkTrace")], swiftSettings: [.strictMemorySafety(), .unsafeFlags(["-parse-as-library"])])
 ], swiftLanguageModes: [.v6])
 ''' % json.dumps(str(mirror)))
     invocation=['swift','build','--package-path',str(package),'--scratch-path',str(cache/'build'),'--cache-path',str(cache/'dependencies'),'--disable-sandbox','--config-path',str(cache/'configuration'),'--security-path',str(cache/'security'),'-Xswiftc','-warnings-as-errors']
@@ -88,7 +91,8 @@ let package = Package(name: "ArkTraceSDKConsumer", platforms: [.macOS(.v26)], de
     summary=cache/'build/out/Products/Debug/SummaryOwnership'
     core=cache/'arktrace/build/out/Products/Debug/ArkTraceRustCoreConformance'
     sidecar=cache/'build/out/Products/Debug/ViewState'
-    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'summaryExecutable':{'byteCount':summary.stat().st_size,'sha256':sha(summary)},'coreExecutable':{'byteCount':core.stat().st_size,'sha256':sha(core)},'viewStateExecutable':{'byteCount':sidecar.stat().st_size,'sha256':sha(sidecar)},'coreConsumerBuildLogSHA256':sha(core_log),'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
+    migration=cache/'build/out/Products/Debug/ViewStateMigration'
+    return executable,{'artifactIdentity':identity,'artifactReceipt':receipt,'consumerExecutable':{'byteCount':executable.stat().st_size,'sha256':sha(executable)},'lifecycleExecutable':{'byteCount':lifecycle.stat().st_size,'sha256':sha(lifecycle)},'directoryExecutable':{'byteCount':directory.stat().st_size,'sha256':sha(directory)},'summaryExecutable':{'byteCount':summary.stat().st_size,'sha256':sha(summary)},'coreExecutable':{'byteCount':core.stat().st_size,'sha256':sha(core)},'viewStateExecutable':{'byteCount':sidecar.stat().st_size,'sha256':sha(sidecar)},'viewStateMigrationExecutable':{'byteCount':migration.stat().st_size,'sha256':sha(migration)},'coreConsumerBuildLogSHA256':sha(core_log),'sdkBuildLogSHA256':sha(log),'consumerBuildLogSHA256':sha(cache/'consumer-build.log'),'sdkUnitTests':{'passed':len(unit_tests),'failed':0,'skipped':0,'logSHA256':sha(unit_log)},'borrowCompileRejections':rejected}
 
 def projection(records):
     def array(name, values):

@@ -8,6 +8,7 @@ pub(crate) struct EngineConfig {
     pub contract_digest: String,
     pub cache_policy: String,
     pub cache_directory: Option<String>,
+    pub view_state_migration: Option<ViewStateMigration>,
     pub namespace: String,
     pub helper: String,
     pub parser: String,
@@ -17,6 +18,13 @@ pub(crate) struct EngineConfig {
     pub publisher: Option<Publisher>,
     #[serde(default)]
     pub limits: Limits,
+}
+/// Product-owned roots; session requests select content identities only.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct ViewStateMigration {
+    legacy_cache_directory: String,
+    backup_directory: String,
 }
 /// Immutable product signing expectations, separate from every query.
 #[derive(Deserialize)]
@@ -88,6 +96,38 @@ impl EngineConfig {
             "ephemeral" | "contentAddressed" => return Err(STATUS_INVALID_INPUT),
             _ => return Err(STATUS_UNSUPPORTED_OPERATION),
         }
+        if let Some(migration) = &self.view_state_migration {
+            let cache = self.cache_directory.as_ref().ok_or(STATUS_INVALID_INPUT)?;
+            let roots = [
+                &migration.legacy_cache_directory,
+                &migration.backup_directory,
+                cache,
+                &self.namespace,
+            ];
+            for (index, value) in roots.iter().enumerate() {
+                let path = std::path::Path::new(value);
+                if value.is_empty()
+                    || value.len() > MAXIMUM_PATH_BYTES as usize
+                    || value.contains('\0')
+                    || !path.is_absolute()
+                    || path.parent().is_none()
+                    || path.components().any(|part| {
+                        matches!(
+                            part,
+                            std::path::Component::CurDir | std::path::Component::ParentDir
+                        )
+                    })
+                    || value
+                        .split(std::path::MAIN_SEPARATOR)
+                        .any(|part| part == "." || part == "..")
+                    || roots[index + 1..].iter().any(|other| {
+                        path.starts_with(other) || std::path::Path::new(other).starts_with(path)
+                    })
+                {
+                    return Err(STATUS_INVALID_INPUT);
+                }
+            }
+        }
         if let Some(publisher) = &self.publisher {
             publisher.validate()?;
         } else if !fixture {
@@ -152,6 +192,12 @@ impl EngineConfig {
         );
         c.helper_trust = helper_trust;
         c.cache_directory = self.cache_directory.map(Into::into);
+        c.view_state_migration =
+            self.view_state_migration
+                .map(|migration| arktrace_engine::RuntimeViewStateMigration {
+                    legacy_cache_directory: migration.legacy_cache_directory.into(),
+                    backup_directory: migration.backup_directory.into(),
+                });
         let l = self.limits;
         c.limits = RuntimeLimits {
             workers: l.workers,
@@ -328,6 +374,63 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn migration_configuration_is_closed_fixed_and_disjoint_before_native_creation() {
+        let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../../contracts/ready-metadata.json"
+        )))
+        .unwrap();
+        let value = serde_json::json!({"abiVersion": ABI_VERSION, "contractDigest": CONTRACT_DIGEST_HEX,
+            "cachePolicy":"contentAddressed", "cacheDirectory":"/private/tmp/native/traces", "namespace":"/private/tmp/native/staging", "helper":"/private/tmp/tools/helper",
+            "parser":"/private/tmp/tools/parser", "helperSHA256":"a".repeat(64), "parserIdentity": metadata["parser"],
+            "viewStateMigration":{"legacyCacheDirectory":"/private/tmp/old/traces", "backupDirectory":"/private/tmp/native/import-backup"}});
+        let configuration: EngineConfig = decode(&serde_json::to_vec(&value).unwrap()).unwrap();
+        configuration.validate(true).unwrap();
+        assert_eq!(
+            configuration
+                .native(true)
+                .unwrap()
+                .view_state_migration
+                .unwrap()
+                .legacy_cache_directory,
+            std::path::PathBuf::from("/private/tmp/old/traces")
+        );
+        for path in [
+            "/",
+            "relative",
+            "/private/tmp/native",
+            "/private/tmp/native/traces/nested",
+            "/private/tmp/native/staging",
+            "/private/tmp/old/traces",
+            "/private/tmp/../backup",
+            "/private/tmp/./backup",
+            "/private/tmp/a\0b",
+        ] {
+            let mut invalid = value.clone();
+            invalid["viewStateMigration"]["backupDirectory"] = path.into();
+            assert_eq!(
+                decode::<EngineConfig>(&serde_json::to_vec(&invalid).unwrap())
+                    .unwrap()
+                    .validate(true),
+                Err(STATUS_INVALID_INPUT),
+                "{path}"
+            );
+        }
+        let mut invalid = value.clone();
+        invalid["viewStateMigration"]["requestPath"] = "/private/tmp/untrusted".into();
+        assert!(decode::<EngineConfig>(&serde_json::to_vec(&invalid).unwrap()).is_err());
+        let mut invalid = value;
+        invalid["cachePolicy"] = "ephemeral".into();
+        invalid.as_object_mut().unwrap().remove("cacheDirectory");
+        assert_eq!(
+            decode::<EngineConfig>(&serde_json::to_vec(&invalid).unwrap())
+                .unwrap()
+                .validate(true),
+            Err(STATUS_INVALID_INPUT)
+        );
+    }
     #[test]
     fn storage_policy_is_fixed_closed_and_requires_a_matching_root() {
         let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(concat!(

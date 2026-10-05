@@ -74,6 +74,16 @@ private struct ViewStateJSON {
 
 enum RustViewStateEncoder {
     @concurrent
+    static func selection(_ selection: RustViewStateMigrationSelection, storage: RustRetainedStorage = rustViewStateInputs) async throws -> RustEncodedViewState {
+        precondition(!Thread.isMainThread)
+        try Task.checkCancellation()
+        let credit = try storage.reserve(256)
+        let bytes = Array(selection.digest.utf8)
+        guard bytes.count == 64, bytes.capacity <= credit.bytes else { throw RustAdmission.outputLimit }
+        try Task.checkCancellation()
+        return RustEncodedViewState(bytes: bytes, credit: credit)
+    }
+    @concurrent
     static func encode(_ document: RustViewStateDocument, storage: RustRetainedStorage = rustViewStateInputs) async throws -> RustEncodedViewState {
         precondition(!Thread.isMainThread)
         try Task.checkCancellation()

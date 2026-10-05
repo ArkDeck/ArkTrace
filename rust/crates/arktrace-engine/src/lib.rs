@@ -9,7 +9,8 @@ mod view_state_migration;
 pub use async_runtime::{
     AsyncEngine, CacheRequest, DrainStatus, MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES, OpenTicket,
     RepositoryRequest, RequestState, RequestStatus, RuntimeConfiguration, RuntimeFailure,
-    RuntimeLimits, SessionState, SessionStatus, ViewStateRequest, WorkerBoundary,
+    RuntimeLimits, RuntimeViewStateMigration, SessionState, SessionStatus, ViewStateRequest,
+    WorkerBoundary,
 };
 pub use query_deadlines::{
     BatchQueryDeadlines, DeadlineBatch, DeadlineQuery, DeadlineRepositoryQuery, QueryClock,
@@ -19,9 +20,9 @@ pub use view_state::{
     ViewStateRead, ViewStateWrite,
 };
 pub use view_state_migration::{
-    LegacyViewStateIssue, LegacyViewStateMigrationReport, LegacyViewStateMigrationStatus,
-    LegacyViewStateSource, MAXIMUM_LEGACY_BACKUP_FILE_BYTES, MAXIMUM_LEGACY_BACKUP_SCAN_BYTES,
-    MAXIMUM_LEGACY_VIEW_STATE_ENTRIES,
+    LegacyViewStateCandidateSummary, LegacyViewStateIssue, LegacyViewStateMigrationReport,
+    LegacyViewStateMigrationStatus, LegacyViewStateSource, MAXIMUM_LEGACY_BACKUP_FILE_BYTES,
+    MAXIMUM_LEGACY_BACKUP_SCAN_BYTES, MAXIMUM_LEGACY_VIEW_STATE_ENTRIES,
 };
 mod handles;
 #[cfg(any(target_os = "macos", test))]

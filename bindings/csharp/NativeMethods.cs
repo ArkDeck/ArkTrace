@@ -5,7 +5,7 @@ namespace ArkTrace.Native;
 public static unsafe partial class NativeMethods
 {
     public const uint ABI_VERSION = 1;
-    public const string CONTRACT_DIGEST = "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2";
+    public const string CONTRACT_DIGEST = "5244bd797884271ec242ece5c2912eb3ccfd1b07c9de67127e4a296e93aa91d9";
     public const uint STATUS_OK = 0;
     public const uint STATUS_BUSY = 1;
     public const uint STATUS_CAPACITY = 2;
@@ -134,6 +134,8 @@ public static unsafe partial class NativeMethods
     public const uint VIEW_STATE_REMOVE = 3;
     public const uint MAXIMUM_VIEW_STATE_BYTES = 4194304;
     public const uint MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES = 16777216;
+    public const uint CAP_VIEW_STATE_MIGRATION = 64;
+    public const uint VIEW_STATE_IMPORT = 4;
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_abi_identity")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_abi_identity(AbiIdentity* output, ulong output_bytes);

@@ -61,6 +61,16 @@ public struct RustResult: Sendable {
         return try await RustViewStateDecoder.write(data, identity: identity, request: requestIdentity)
     }
     @concurrent
+    func viewStateMigration(identity: RustSessionIdentity) async throws -> RustViewStateMigrationReport {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity,
+              count <= rustMigrationMaximumBytes else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustViewStateMigrationDecoder.decode(data, identity: identity, request: requestIdentity)
+    }
+    @concurrent
     func cacheInventory() async throws -> RustCacheInventory {
         precondition(!Thread.isMainThread)
         guard kind == ARKTRACE_RESULT_SUCCESS, engineIdentity != 0, count <= 4096 else { throw RustAdmission.invalidBuffer }

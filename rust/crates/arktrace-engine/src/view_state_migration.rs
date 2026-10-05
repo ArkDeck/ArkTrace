@@ -39,6 +39,7 @@ pub struct LegacyViewStateSource {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum LegacyViewStateMigrationStatus {
+    NotConfigured,
     Missing,
     Conflict,
     PreservedSource,
@@ -55,11 +56,39 @@ pub enum LegacyViewStateMigrationStatus {
 pub struct LegacyViewStateMigrationReport {
     pub status: LegacyViewStateMigrationStatus,
     pub sources: Vec<LegacyViewStateSource>,
+    pub candidates: Vec<LegacyViewStateCandidateSummary>,
     pub selected_snapshot_identifier: Option<String>,
     /// Cross-parser identities retain their original order and duplicates.
     /// They are backup records, never guessed or projected into another lane.
     #[serde(rename = "unmatchedFavoriteTrackIDs")]
     pub unmatched_favorite_track_ids: Vec<String>,
+}
+
+/// Presentation facts are derived from validated bytes, separate from the
+/// immutable source backup record so existing receipts remain byte-stable.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LegacyViewStateCandidateSummary {
+    pub snapshot_identifier: String,
+    pub parser_reported_version: String,
+    pub flag_count: usize,
+    pub persistent_mark_count: usize,
+    pub favorite_track_count: Option<usize>,
+    pub exact_parser_identity: bool,
+    pub label_previews: Vec<String>,
+}
+
+#[cfg(target_os = "macos")]
+impl LegacyViewStateMigrationReport {
+    pub(crate) fn empty(status: LegacyViewStateMigrationStatus) -> Self {
+        Self {
+            status,
+            sources: vec![],
+            candidates: vec![],
+            selected_snapshot_identifier: None,
+            unmatched_favorite_track_ids: vec![],
+        }
+    }
 }
 
 #[cfg(any(target_os = "macos", test))]
@@ -68,6 +97,51 @@ pub(crate) struct Candidate {
     pub source: LegacyViewStateSource,
     pub metadata: Option<CacheMetadata>,
     pub document: Option<ViewStateDocument>,
+}
+
+#[cfg(any(target_os = "macos", test))]
+impl Candidate {
+    pub(crate) fn summary(
+        &self,
+        target: &CacheMetadata,
+    ) -> Option<LegacyViewStateCandidateSummary> {
+        if self.source.issue.is_some() || !self.source.backed_up {
+            return None;
+        }
+        let metadata = self.metadata.as_ref()?;
+        let document = self.document.as_ref()?;
+        let previews = document
+            .flags
+            .iter()
+            .map(|v| &v.label)
+            .chain(
+                document
+                    .marks
+                    .iter()
+                    .filter(|v| v.is_persistent)
+                    .map(|v| &v.label),
+            )
+            .filter(|label| !label.is_empty())
+            .take(3)
+            .map(|label| {
+                let mut end = label.len().min(256);
+                while !label.is_char_boundary(end) {
+                    end -= 1;
+                }
+                label[..end].to_owned()
+            })
+            .collect();
+        Some(LegacyViewStateCandidateSummary {
+            snapshot_identifier: self.source.snapshot_identifier.clone()?,
+            parser_reported_version: metadata.parser.reported_version.clone(),
+            flag_count: document.flags.len(),
+            persistent_mark_count: document.marks.iter().filter(|v| v.is_persistent).count(),
+            favorite_track_count: document.favorite_track_ids.as_ref().map(Vec::len),
+            exact_parser_identity: metadata.parser == target.parser
+                && metadata.cache_key == target.cache_key,
+            label_previews: previews,
+        })
+    }
 }
 
 #[cfg(any(target_os = "macos", test))]
@@ -214,6 +288,22 @@ mod tests {
         )
         .unwrap();
         metadata
+    }
+    #[test]
+    fn candidate_presentation_uses_validated_bytes_and_bounded_utf8_previews() {
+        let target = metadata();
+        let mut source = candidate(old_parser(target.clone()), &"🦀".repeat(100));
+        let summary = source.summary(&target).unwrap();
+        assert!(!summary.exact_parser_identity);
+        assert_eq!(summary.flag_count, 1);
+        assert_eq!(summary.persistent_mark_count, 0);
+        assert_eq!(summary.favorite_track_count, Some(3));
+        assert_eq!(summary.label_previews, vec!["🦀".repeat(64)]);
+        source.source.issue = Some(LegacyViewStateIssue::MetadataPreserved);
+        assert!(source.summary(&target).is_none());
+        source.source.issue = None;
+        source.source.backed_up = false;
+        assert!(source.summary(&target).is_none());
     }
     #[test]
     fn different_annotations_require_choice_and_no_timestamp_winner() {
