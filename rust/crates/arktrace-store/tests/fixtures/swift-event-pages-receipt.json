@@ -227,8 +227,8 @@
     },
     {
       "path": "scripts/run-swiftpm.sh",
-      "sha256": "797b51daddf9efe5bc06debde72013582cbee8f0b7cd8730117aa7174fa5b524",
-      "byteCount": 8226
+      "sha256": "fac7ca17ad065d576c0caa3fde681c95bf4375d7f41b964288a2d472ede285ce",
+      "byteCount": 8418
     },
     {
       "path": "rust/crates/arktrace-store/tests/fixtures/event-pages-input.json",

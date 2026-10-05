@@ -168,13 +168,16 @@ if [ "$workspace_ready" = false ] || ! cmp -s "$source_state" "$source_state_can
     git -C "$repository_root" ls-files --others --ignored --exclude-standard --directory -z \
         > "$ignored_paths"
     if [ -s "$ignored_paths" ]; then
-        /usr/bin/xargs -0 /usr/bin/printf '/%s\0' < "$ignored_paths" \
+        /usr/bin/xargs -0 /usr/bin/printf 'H /%s\0' < "$ignored_paths" \
             > "$ignored_paths.anchored"
         mv -f "$ignored_paths.anchored" "$ignored_paths"
     fi
-    /usr/bin/rsync -ac --no-times --delete --delete-excluded --from0 \
-        --filter='P /.arktrace-native/' --exclude=/.arktrace-native/ \
-        --exclude=.git --exclude-from="$ignored_paths" \
+    # Hide source-owned exclusions only on the sender, so stale ignored mirror
+    # files are still deleted. Exclude the cache-owned SDK on both sides to keep
+    # its complete tree: macOS openrsync's --delete-excluded defeats protection.
+    /usr/bin/rsync -ac --no-times --delete --from0 \
+        --exclude=/.arktrace-native/ --filter='H .git' \
+        --filter=". $ignored_paths" \
         "$repository_root/" "$workspace_path/"
     mv -f "$source_state_candidate" "$source_state"
 else

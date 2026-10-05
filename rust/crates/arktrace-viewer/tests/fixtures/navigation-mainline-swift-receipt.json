@@ -328,8 +328,8 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "2702ba3ddebc3d0ce14951168937ad7157ff1a232fc5feac0ee0edcd0460e85a",
-    "byteCount": 5596
+    "sha256": "68834c5ba3bb504506a77bbcb7db03465727fc27be13b5a7d19ec13f18600977",
+    "byteCount": 5632
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
@@ -420,7 +420,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "91368f9",
-  "previousReceiptSHA256": "f8622f92653c0ad7f867b341699316351090b5a94ee6cc5c2f328a087688c7ee",
+  "revalidatedBaseCommit": "dbb7c97a6ab1a420c1b25afcae167dc0eabef77a",
+  "previousReceiptSHA256": "6c736b47b4ff8754870e693809210887389d7052bb04129ad6b849352773f89c",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

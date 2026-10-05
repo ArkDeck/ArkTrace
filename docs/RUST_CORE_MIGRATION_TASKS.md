@@ -20,6 +20,10 @@
 > 见[快照格式契约记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-format-contract.md)；总验收仍 open。
 > 后续实际 Rust pack → Swift convert 的 5 个 scenes / 598 字段回归通过，默认 CI 同时核对
 > producer 与冻结 records。见[packed conversion 记录](migration-runs/AT-RUST-011-013-2026-10-06-packed-conversion.md)。
+> 当前 ABI 的真实 native load 新增 3 组 / 7 次 load 持有期、共享 copies、Codable 与
+> byte/owner 拒绝后恢复验证；同时修复 SwiftPM 源码同步删除缓存 SDK 的问题。
+> 见[snapshot load 记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-load-ownership.md)；
+> 小 trace 有界验证已通过，取消/deadline、GUI、性能及其余完整任务验收仍 open。
 
 ## 1. 执行规则与完成语义
 

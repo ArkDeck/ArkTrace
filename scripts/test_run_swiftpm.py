@@ -137,6 +137,61 @@ class RunSwiftPMTests(unittest.TestCase):
             "public let value = 2\n",
         )
 
+    def test_source_sync_preserves_nested_native_staging(self) -> None:
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        script, source = self.make_repo(
+            temporary / "repo", "public let value = 1\n", 1_700_000_000
+        )
+        repository = script.parent.parent
+        (repository / ".gitignore").write_text(".arktrace-native/\nignored/\n")
+        ignored = repository / "ignored"
+        ignored.mkdir()
+        (ignored / "source.txt").write_text("ignored source\n")
+        cache_root = temporary / "cache"
+        swift = self.make_fake_swift(temporary)
+        first = self.invoke(script, cache_root, swift, "build")
+        self.assertEqual(first.returncode, 0, first.stderr)
+
+        staging = cache_root / "workspace/.arktrace-native/identity"
+        members = {
+            "receipt.json": b"registered receipt",
+            "CArkTrace.xcframework/Info.plist": b"registered manifest",
+            "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a": b"registered library",
+            "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h": b"registered header",
+        }
+        original = {}
+        for relative, content in members.items():
+            path = staging / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+            path.chmod(0o400)
+            original[relative] = path.stat()
+        # Source-owned ignored files must not populate the managed SDK tree.
+        alien = repository / ".arktrace-native/alien"
+        alien.mkdir(parents=True)
+        (alien / "unverified.a").write_bytes(b"unverified source artifact")
+        stale = cache_root / "workspace/ignored/stale.txt"
+        stale.parent.mkdir(exist_ok=True)
+        stale.write_text("stale ignored mirror\n")
+        source.write_text("public let value = 2\n")
+
+        second = self.invoke(script, cache_root, swift, "build")
+        self.assertEqual(second.returncode, 0, second.stderr)
+        for relative, content in members.items():
+            path = staging / relative
+            self.assertTrue(path.is_file(), relative)
+            self.assertEqual(path.read_bytes(), content)
+            current = path.stat()
+            self.assertEqual(current.st_ino, original[relative].st_ino)
+            self.assertEqual(current.st_mtime_ns, original[relative].st_mtime_ns)
+            self.assertEqual(current.st_mode, original[relative].st_mode)
+        self.assertFalse((cache_root / "workspace/.arktrace-native/alien").exists())
+        self.assertFalse(stale.exists())
+        self.assertEqual(
+            (cache_root / "workspace/Sources/Example/Example.swift").read_text(),
+            "public let value = 2\n",
+        )
+
     def test_runner_owned_paths_and_unsafe_cache_roots_are_rejected(self) -> None:
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         script, _ = self.make_repo(

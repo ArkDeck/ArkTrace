@@ -94,8 +94,8 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "2702ba3ddebc3d0ce14951168937ad7157ff1a232fc5feac0ee0edcd0460e85a",
-    "byteCount": 5596
+    "sha256": "68834c5ba3bb504506a77bbcb7db03465727fc27be13b5a7d19ec13f18600977",
+    "byteCount": 5632
   },
   "note": "Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.",
   "outputs": [

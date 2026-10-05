@@ -1,0 +1,613 @@
+{
+  "baseCommit": "dbb7c97a6ab1a420c1b25afcae167dc0eabef77a",
+  "toolchain": {
+    "rust": "1.99.0",
+    "edition": 2024,
+    "xcode": "27.0",
+    "swift": "6.4",
+    "languageMode": 6
+  },
+  "finalSelectedMacOSGates": [
+    "16-default-build",
+    "17-default-full-test",
+    "18b-native-full-test",
+    "19-normal-swift-build",
+    "20-normal-api",
+    "21-app-debug",
+    "22-offline-01",
+    "22-offline-02",
+    "22-offline-03",
+    "22-offline-04",
+    "22-offline-05",
+    "22-offline-06",
+    "22-offline-07",
+    "22-offline-08",
+    "22-offline-09",
+    "22-offline-10",
+    "22-offline-11",
+    "22-offline-12",
+    "22b-offline-13",
+    "22-offline-14",
+    "22-offline-15",
+    "23-fmt",
+    "24-clippy",
+    "25-rust-workspace",
+    "26-rust-build",
+    "27-migration-smoke",
+    "28-json-roundtrip",
+    "29b-ffi-contract",
+    "30-sdk-consumer",
+    "31-rust-workspace-verifier",
+    "32-generator",
+    "33-sdk-reference-1",
+    "33-sdk-reference-2",
+    "33-sdk-reference-3",
+    "33-sdk-reference-4",
+    "33-sdk-reference-5",
+    "34-app-document-types"
+  ],
+  "allFinalGatesPassed": true,
+  "rootReceipts": [
+    {
+      "label": "01-before-native-staging",
+      "exitCode": 1,
+      "startedAtUnix": 1791235312.4892359,
+      "finishedAtUnix": 1791235313.200754,
+      "receiptSHA256": "25e0bd383ac5d321a94b75f3227d23a9d9a14d53a73f0f593b7ffcf9a8c87a6c"
+    },
+    {
+      "label": "02-after-native-staging",
+      "exitCode": 1,
+      "startedAtUnix": 1791235352.3260002,
+      "finishedAtUnix": 1791235354.936105,
+      "receiptSHA256": "1f3960cdd32b570b03448c647a761e351ee70b5a8c1dad56bb6f6ef4de2fc3d1"
+    },
+    {
+      "label": "03-after-native-staging",
+      "exitCode": 0,
+      "startedAtUnix": 1791235466.814042,
+      "finishedAtUnix": 1791235469.202543,
+      "receiptSHA256": "f30eb72b6c9abae53814b6df9bff2797e5571d04df12d9a4112472e53c47a096"
+    },
+    {
+      "label": "04-old-chain-replay",
+      "exitCode": 1,
+      "startedAtUnix": 1791235547.2656279,
+      "finishedAtUnix": 1791235547.8922849,
+      "receiptSHA256": "caca3d53edafdc7c4d57cb29becef5c0ef5963a8f5d0776dc4e34eeaba8fbff7"
+    },
+    {
+      "label": "05-build-process-probe",
+      "exitCode": 0,
+      "startedAtUnix": 1791235580.5905879,
+      "finishedAtUnix": 1791235581.547986,
+      "receiptSHA256": "d50318fe039989d23b2abe19464edce6919c6af535718257339fc823794deb39"
+    },
+    {
+      "label": "06-old-tools-process-probe",
+      "exitCode": 0,
+      "startedAtUnix": 1791235581.579394,
+      "finishedAtUnix": 1791235588.968559,
+      "receiptSHA256": "023280747a1a4c8d107e56c58efcca3fba9c6ae5ffe6e244e3cceae912c6c646"
+    },
+    {
+      "label": "07-real-native-staging",
+      "exitCode": 0,
+      "startedAtUnix": 1791235701.4320982,
+      "finishedAtUnix": 1791235706.629405,
+      "receiptSHA256": "8fbb31f5ee4b25d3820ba8145f6a6606f4b5f5f6593524f0c84157746b7ffafb"
+    },
+    {
+      "label": "08-current-SDK-probe-build",
+      "exitCode": 1,
+      "startedAtUnix": 1791235875.77357,
+      "finishedAtUnix": 1791235879.4119139,
+      "receiptSHA256": "636943c844b026c088df3cb57edeec46518dba348c31ed57f931b141d2f65e08"
+    },
+    {
+      "label": "08b-current-SDK-probe-build",
+      "exitCode": 0,
+      "startedAtUnix": 1791235906.549803,
+      "finishedAtUnix": 1791235910.423813,
+      "receiptSHA256": "200d55f526bf4b18f2dd6a886bae4217ff8c596a9c05a8243b77f32b74b69441"
+    },
+    {
+      "label": "09-current-SDK-old-tools",
+      "exitCode": 0,
+      "startedAtUnix": 1791235928.7374568,
+      "finishedAtUnix": 1791235929.115794,
+      "receiptSHA256": "b6270324113636ae313c85ae833726f9ffcda654e367d7856697cc3e41da1f81"
+    },
+    {
+      "label": "10-current-SDK-current-tools",
+      "exitCode": 0,
+      "startedAtUnix": 1791235939.943237,
+      "finishedAtUnix": 1791235939.9736278,
+      "receiptSHA256": "257e712460f79a3db46833ad5bc268cd7e22edb0a6b92b78ff37a2fd56fc7ec4"
+    },
+    {
+      "label": "11-actual-engine-fixture",
+      "exitCode": 1,
+      "startedAtUnix": 1791235964.247981,
+      "finishedAtUnix": 1791235965.612104,
+      "receiptSHA256": "50942fa4687068d2b4ef7019e1ca747a7804518a5a8d938afe42604837ed8219"
+    },
+    {
+      "label": "11b-actual-engine-fixture",
+      "exitCode": 0,
+      "startedAtUnix": 1791235989.403685,
+      "finishedAtUnix": 1791236019.6443279,
+      "receiptSHA256": "6d4f51289cbd459ff70d56a02c3d2959fe1aaab2ad5561205a5883d28613d4b3"
+    },
+    {
+      "label": "12-private-fixture-old-tools",
+      "exitCode": 0,
+      "startedAtUnix": 1791236059.620492,
+      "finishedAtUnix": 1791236061.174529,
+      "receiptSHA256": "6e709370a733377cf6546a2ae86eebed989535a7d2c7020a575c68a7d7736640"
+    },
+    {
+      "label": "13-private-fixture-current-tools",
+      "exitCode": 0,
+      "startedAtUnix": 1791236078.5051038,
+      "finishedAtUnix": 1791236079.839513,
+      "receiptSHA256": "b022fab4e1e37623e53cc2cafd7b011532eddfbb9f3189466fb2b2b4760cd662"
+    },
+    {
+      "label": "14-current-snapshot-load",
+      "exitCode": 0,
+      "startedAtUnix": 1791236135.74122,
+      "finishedAtUnix": 1791236148.594191,
+      "receiptSHA256": "89cc044ba9671c3a9e0fb1881ee76b84be15a8b6c7585d707e4f37b69693b69c"
+    },
+    {
+      "label": "14b-current-snapshot-load",
+      "exitCode": 0,
+      "startedAtUnix": 1791236181.473182,
+      "finishedAtUnix": 1791236193.57452,
+      "receiptSHA256": "a620d38d770044a8ca1ce7d4aac4da12b61712c8fee3bd8f1ab1e0bdec74ecaf"
+    },
+    {
+      "label": "15-refresh-facts",
+      "exitCode": 0,
+      "startedAtUnix": 1791236231.017355,
+      "finishedAtUnix": 1791236257.1065972,
+      "receiptSHA256": "0d1107b046e9e16c6b8160d7e28f6fd7ef7e24655c3a755089ebf399d5d9af7e"
+    },
+    {
+      "label": "16-default-build",
+      "exitCode": 0,
+      "startedAtUnix": 1791236292.382695,
+      "finishedAtUnix": 1791236301.052162,
+      "receiptSHA256": "e749ba86917f3f6d047dc87de62e8be4558f25928a2285f2dee359dc6a52a658"
+    },
+    {
+      "label": "17-default-full-test",
+      "exitCode": 0,
+      "startedAtUnix": 1791236301.086015,
+      "finishedAtUnix": 1791236369.7081559,
+      "receiptSHA256": "96794720bd30a61e17ab0b8e9b788a5c399f8b287d3a510616878e2a8823c0fa"
+    },
+    {
+      "label": "18-native-full-test",
+      "exitCode": 1,
+      "startedAtUnix": 1791236369.739997,
+      "finishedAtUnix": 1791236438.0813289,
+      "receiptSHA256": "6ad161f67540c06df383f447909d6c0b25a4a8e4ac68ce163b6e66be404ede89"
+    },
+    {
+      "label": "18b-native-full-test",
+      "exitCode": 0,
+      "startedAtUnix": 1791236472.560331,
+      "finishedAtUnix": 1791236540.097915,
+      "receiptSHA256": "fa44ee95632fe4f8d275aaa92ed6a2ed878c459f989dc3d73c590c012f026608"
+    },
+    {
+      "label": "19-normal-swift-build",
+      "exitCode": 0,
+      "startedAtUnix": 1791236540.1292632,
+      "finishedAtUnix": 1791236549.229399,
+      "receiptSHA256": "5e24481051d398dc2b614c0ce7d9f4dae940bce4a287c5db27af05989c8764fb"
+    },
+    {
+      "label": "20-normal-api",
+      "exitCode": 0,
+      "startedAtUnix": 1791236549.2624278,
+      "finishedAtUnix": 1791236550.93206,
+      "receiptSHA256": "403996878a559380b0865a1d499e36145c15515584ea6f2f942d8dea1de04746"
+    },
+    {
+      "label": "21-app-debug",
+      "exitCode": 0,
+      "startedAtUnix": 1791236550.963493,
+      "finishedAtUnix": 1791236559.5643678,
+      "receiptSHA256": "458a1d9c6051cc51e9664697f13a13d7c330ae1421052c5cb66b263b738e85e9"
+    },
+    {
+      "label": "22-offline-01",
+      "exitCode": 0,
+      "startedAtUnix": 1791236559.599243,
+      "finishedAtUnix": 1791236559.971242,
+      "receiptSHA256": "bd698d9fab6d5d578c9972e648a6ba30d27411ea4c8faaf8bfcdac46d97b69cb"
+    },
+    {
+      "label": "22-offline-02",
+      "exitCode": 0,
+      "startedAtUnix": 1791236560.000372,
+      "finishedAtUnix": 1791236560.0830731,
+      "receiptSHA256": "41fb7be61adb170457208ac29f8e159eb607c6fca82b8fffe354f1486de629dd"
+    },
+    {
+      "label": "22-offline-03",
+      "exitCode": 0,
+      "startedAtUnix": 1791236560.1118941,
+      "finishedAtUnix": 1791236560.380717,
+      "receiptSHA256": "3cb6b72db06e56fd71958b3854396dcb7b310c24a77d5a31ad0c8c7c553a7771"
+    },
+    {
+      "label": "22-offline-04",
+      "exitCode": 0,
+      "startedAtUnix": 1791236560.4096231,
+      "finishedAtUnix": 1791236565.438325,
+      "receiptSHA256": "5df86c02b7613b26c8b5e1c0da26c2be4ed7654b4ce0c4720ac7372b695f0e6e"
+    },
+    {
+      "label": "22-offline-05",
+      "exitCode": 0,
+      "startedAtUnix": 1791236565.46865,
+      "finishedAtUnix": 1791236565.569736,
+      "receiptSHA256": "a470143f6bff342b79acbff5b87ef54170bf90835a4218dcd630509743cdd313"
+    },
+    {
+      "label": "22-offline-06",
+      "exitCode": 0,
+      "startedAtUnix": 1791236565.598721,
+      "finishedAtUnix": 1791236565.8468952,
+      "receiptSHA256": "fdb8285e53eb54002c6a1674a7a6ea7d5abf8267cee0f5611096482070c0fa18"
+    },
+    {
+      "label": "22-offline-07",
+      "exitCode": 0,
+      "startedAtUnix": 1791236565.87787,
+      "finishedAtUnix": 1791236568.380835,
+      "receiptSHA256": "43723661c4adb7a072e1ea67d19b1090a155e961a306f79e65ed8f3bd15988a4"
+    },
+    {
+      "label": "22-offline-08",
+      "exitCode": 0,
+      "startedAtUnix": 1791236568.41398,
+      "finishedAtUnix": 1791236571.5336902,
+      "receiptSHA256": "2711ea295867e2670a3bb8ddf5426c19338b138a8c09e55bd3c468e3afa4b668"
+    },
+    {
+      "label": "22-offline-09",
+      "exitCode": 0,
+      "startedAtUnix": 1791236571.573086,
+      "finishedAtUnix": 1791236571.63395,
+      "receiptSHA256": "5bb11e72d3749463d72b7939b39707411384e92a198fb1999825271d4191f5a2"
+    },
+    {
+      "label": "22-offline-10",
+      "exitCode": 0,
+      "startedAtUnix": 1791236571.663842,
+      "finishedAtUnix": 1791236571.843053,
+      "receiptSHA256": "7f17faaa550b7a55836d7431091c6e1be9fc8fa04b3461fb7717e0505249d784"
+    },
+    {
+      "label": "22-offline-11",
+      "exitCode": 0,
+      "startedAtUnix": 1791236571.872284,
+      "finishedAtUnix": 1791236572.664379,
+      "receiptSHA256": "f95f6cd667f02de8f43391cb68d0deaaec987197700c6069d1cfa41e46f41ec3"
+    },
+    {
+      "label": "22-offline-12",
+      "exitCode": 0,
+      "startedAtUnix": 1791236572.693287,
+      "finishedAtUnix": 1791236572.761399,
+      "receiptSHA256": "dddec377583da35bdf469281db32ec04ec3c63d6b3b7c61d7634109887fdf9cb"
+    },
+    {
+      "label": "22-offline-13",
+      "exitCode": 1,
+      "startedAtUnix": 1791236572.7903411,
+      "finishedAtUnix": 1791236572.888001,
+      "receiptSHA256": "19a3b91185ec7135643d1a51921def54ab4c462f5d2ba0147f8900eba5d79c44"
+    },
+    {
+      "label": "22-offline-14",
+      "exitCode": 0,
+      "startedAtUnix": 1791236746.373487,
+      "finishedAtUnix": 1791236746.686523,
+      "receiptSHA256": "7ec0882bcee7182d64bf9ec60ae3d80da0a3e224b9f69160504bb941611d73df"
+    },
+    {
+      "label": "22-offline-15",
+      "exitCode": 0,
+      "startedAtUnix": 1791236746.717715,
+      "finishedAtUnix": 1791236746.770926,
+      "receiptSHA256": "d57f0c86d32fdf5eb6ff84e5414ab71c2fa0ef9716906916a1d2560e72a7384a"
+    },
+    {
+      "label": "22a-refresh-module-oracles",
+      "exitCode": 0,
+      "startedAtUnix": 1791236621.730659,
+      "finishedAtUnix": 1791236676.290544,
+      "receiptSHA256": "ae953c4fd741fc216ef126dbf60495e293cc768dfa6a5aea38ac0975bd01de3e"
+    },
+    {
+      "label": "22b-offline-13",
+      "exitCode": 0,
+      "startedAtUnix": 1791236746.071452,
+      "finishedAtUnix": 1791236746.3344939,
+      "receiptSHA256": "cdb3bdec2d3e242ce850c380cabaed3405d22a732379e4b0c126ce2f55e6f9d1"
+    },
+    {
+      "label": "22c-refresh-navigation",
+      "exitCode": 0,
+      "startedAtUnix": 1791236706.334146,
+      "finishedAtUnix": 1791236715.5064871,
+      "receiptSHA256": "ccc0135e7d4f30992287c0209aec5eadf36b52fba7576c7242eed2d2ddeeec73"
+    },
+    {
+      "label": "23-fmt",
+      "exitCode": 0,
+      "startedAtUnix": 1791236746.802197,
+      "finishedAtUnix": 1791236747.9377868,
+      "receiptSHA256": "722411fe67eb1c95f8d5366a485cab3943bd58fdb70900ba31f76f7eb3b02ad7"
+    },
+    {
+      "label": "24-clippy",
+      "exitCode": 0,
+      "startedAtUnix": 1791236747.9667819,
+      "finishedAtUnix": 1791236748.6090891,
+      "receiptSHA256": "712235a7152fc4bd0dcd8f3cec624d2d57f2941806450e54b864a28c5bb2a0cd"
+    },
+    {
+      "label": "25-rust-workspace",
+      "exitCode": 0,
+      "startedAtUnix": 1791236748.6376908,
+      "finishedAtUnix": 1791236775.321054,
+      "receiptSHA256": "55cec78c190ce25f0ce7c55913e77ef866a847cdf583276edfe5ef3d9acaaae7"
+    },
+    {
+      "label": "26-rust-build",
+      "exitCode": 0,
+      "startedAtUnix": 1791236775.354487,
+      "finishedAtUnix": 1791236776.752713,
+      "receiptSHA256": "3eb3d3d0ffb5534ff4b5eab617fd88ca660f0377cecb91355312426c0ebe23fc"
+    },
+    {
+      "label": "27-migration-smoke",
+      "exitCode": 0,
+      "startedAtUnix": 1791236776.782367,
+      "finishedAtUnix": 1791236777.419018,
+      "receiptSHA256": "6511702845c0ee0b50b4b31ed29851d494a838d580285bd848baf6da7b6350b9"
+    },
+    {
+      "label": "28-json-roundtrip",
+      "exitCode": 0,
+      "startedAtUnix": 1791236777.461438,
+      "finishedAtUnix": 1791236778.754381,
+      "receiptSHA256": "326e20893d74c4da5fb63e90a6fad0e660c47884f7d972a7dc81bff6f85ac899"
+    },
+    {
+      "label": "29-ffi-contract",
+      "exitCode": 1,
+      "startedAtUnix": 1791236778.783147,
+      "finishedAtUnix": 1791236780.0732071,
+      "receiptSHA256": "186bc38f9eec1245543253f0c08ab55965978fb0a5010cdc4a68e39f188012ad"
+    },
+    {
+      "label": "29b-ffi-contract",
+      "exitCode": 0,
+      "startedAtUnix": 1791236835.0539808,
+      "finishedAtUnix": 1791236839.104332,
+      "receiptSHA256": "49e564d937349c5845d13ddb8a7a09b533a77c1a4175542f7784985c19628801"
+    },
+    {
+      "label": "30-sdk-consumer",
+      "exitCode": 0,
+      "startedAtUnix": 1791236839.139335,
+      "finishedAtUnix": 1791236883.687296,
+      "receiptSHA256": "54201a3a6112cddbd9547416dc364d66a8dc0c916fbdbbde44f3fc3188ee8cd8"
+    },
+    {
+      "label": "31-rust-workspace-verifier",
+      "exitCode": 0,
+      "startedAtUnix": 1791236883.7202492,
+      "finishedAtUnix": 1791236884.4950771,
+      "receiptSHA256": "338b7c1efb26b3e694541c7002cbbed4f83657f7e143d59baccf0012eddf0d0a"
+    },
+    {
+      "label": "32-generator",
+      "exitCode": 0,
+      "startedAtUnix": 1791236884.524108,
+      "finishedAtUnix": 1791236884.628586,
+      "receiptSHA256": "a0d211797c9e3b55e32870e9e3ce001a58855b4dcb9d2d177e2ee5225d3fd599"
+    },
+    {
+      "label": "33-sdk-reference-1",
+      "exitCode": 0,
+      "startedAtUnix": 1791236884.657274,
+      "finishedAtUnix": 1791236889.278722,
+      "receiptSHA256": "6b58d54a2d00adc18738cee06ce89b7e3de9541b2e6079c6cb31cdceeaeb65fd"
+    },
+    {
+      "label": "33-sdk-reference-2",
+      "exitCode": 0,
+      "startedAtUnix": 1791236889.313069,
+      "finishedAtUnix": 1791236893.439858,
+      "receiptSHA256": "82914dd29e273e07a232a295ad9124c766ec0cc13644224f0dbe62aa080aa05c"
+    },
+    {
+      "label": "33-sdk-reference-3",
+      "exitCode": 0,
+      "startedAtUnix": 1791236893.472241,
+      "finishedAtUnix": 1791236897.588657,
+      "receiptSHA256": "76af38e9d05e14240b9f3132d737df7f6b6cad6e15ec050691d9b121770ef136"
+    },
+    {
+      "label": "33-sdk-reference-4",
+      "exitCode": 0,
+      "startedAtUnix": 1791236897.624386,
+      "finishedAtUnix": 1791236901.9818728,
+      "receiptSHA256": "63bc333ac0b705c36fb3e08ecbc38a4b1f46ac26223490f24fbd509f82e5dab9"
+    },
+    {
+      "label": "33-sdk-reference-5",
+      "exitCode": 0,
+      "startedAtUnix": 1791236902.013036,
+      "finishedAtUnix": 1791236906.063414,
+      "receiptSHA256": "40aadc91e65aca71c5ed088839645489c3defe4be5661e72c354e042cdc49b90"
+    },
+    {
+      "label": "34-app-document-types",
+      "exitCode": 0,
+      "startedAtUnix": 1791236906.099288,
+      "finishedAtUnix": 1791236906.119494,
+      "receiptSHA256": "311230ab6c68339c5d471c7a1372b8204d50c2167451f54d7ff2007c6228c7e8"
+    }
+  ],
+  "receiptCount": 60,
+  "nonzeroDiagnosticOrHarnessExits": 8,
+  "zeroCaseGateNotPass": "14-current-snapshot-load",
+  "swift": {
+    "17-default-full-test": {
+      "passed": 638,
+      "skipped": 6,
+      "failed": 0,
+      "skippedLines": [
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]' skipped ("
+      ]
+    },
+    "18b-native-full-test": {
+      "passed": 755,
+      "skipped": 6,
+      "failed": 0,
+      "skippedLines": [
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]' skipped (",
+        "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]' skipped ("
+      ]
+    }
+  },
+  "rust": {
+    "passed": 570,
+    "perHarness": [
+      5,
+      19,
+      2,
+      2,
+      16,
+      0,
+      0,
+      12,
+      2,
+      3,
+      4,
+      65,
+      17,
+      7,
+      55,
+      0,
+      0,
+      23,
+      16,
+      20,
+      124,
+      3,
+      2,
+      3,
+      8,
+      1,
+      4,
+      14,
+      5,
+      4,
+      1,
+      3,
+      3,
+      3,
+      4,
+      1,
+      8,
+      10,
+      4,
+      6,
+      6,
+      3,
+      2,
+      5,
+      1,
+      11,
+      28,
+      1,
+      1,
+      1,
+      11,
+      1,
+      1,
+      2,
+      4,
+      7,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6
+    ],
+    "includesDocTests": 6
+  },
+  "sourceChanges": [
+    "Package.swift",
+    "Tests/ArkTraceRenderingTests/NativeSnapshotLoadOwnershipTests.swift",
+    "docs/RUST_CORE_MIGRATION_TASKS.md",
+    "docs/migration-runs/AT-RUST-012-013-2026-10-06-snapshot-load-ownership.json",
+    "docs/migration-runs/AT-RUST-012-013-2026-10-06-snapshot-load-ownership.md",
+    "rust/crates/arktrace-store/tests/fixtures/swift-argument-pages-receipt.json",
+    "rust/crates/arktrace-store/tests/fixtures/swift-density-pages-receipt.json",
+    "rust/crates/arktrace-store/tests/fixtures/swift-event-pages-receipt.json",
+    "rust/crates/arktrace-store/tests/fixtures/swift-search-pages-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+    "scripts/run-swiftpm.sh",
+    "scripts/test_run_swiftpm.py"
+  ],
+  "currentSDKDigest": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+  "loadAttemptsPerFreshExecution": 7,
+  "loadSuccesses": 5,
+  "expectedRefusals": 2,
+  "productionInputsUnchanged": 348,
+  "oldSealedManifestUnchanged": true,
+  "actualLoad": true,
+  "GUIAcceptance": false,
+  "WindowsNativeAcceptance": false,
+  "completeProcessForest": false,
+  "RSSPressureAcceptance": false,
+  "goalComplete": false,
+  "remaining": [
+    "GUI",
+    "Rust hit to C ABI/SDK",
+    "stale keyboard focus regression",
+    "cancellation/deadline load coverage",
+    "large/performance",
+    "complete process forest",
+    "real Capture",
+    "ArkDeck schema-4",
+    "applicable release/install/rollback"
+  ]
+}

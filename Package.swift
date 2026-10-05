@@ -144,7 +144,8 @@ let package = Package(
         .testTarget(
             name: "ArkTraceRenderingTests",
             dependencies: ["ArkTraceRendering"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
-            swiftSettings: nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")]
+            swiftSettings: (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
+                + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
         ),
         .testTarget(
             name: "ArkTraceAppSupportTests",
