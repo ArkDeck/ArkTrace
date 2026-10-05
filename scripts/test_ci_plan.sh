@@ -179,6 +179,8 @@ lane_rust_windows=true' 'scripts/test_viewer_json_roundtrip.py'
 expect "Rust documentation does not build" "$docs_only" 'rust/README.md'
 
 expect "cargo runner change fails closed" "$all_lanes" 'scripts/run-cargo.py'
+expect "cargo cache management selects every lane" "$all_lanes" 'scripts/cargo_cache.py'
+expect "cargo cache regression gate selects every lane" "$all_lanes" 'scripts/test_cargo_cache.py'
 
 expect "Swift native SDK selects macOS artifact and contract gates" \
     'lane_swiftpm=false

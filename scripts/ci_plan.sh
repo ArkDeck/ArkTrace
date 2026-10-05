@@ -38,7 +38,7 @@ while IFS= read -r path; do
     [ -n "$path" ] || continue
     saw_any=true
     case "$path" in
-        .github/workflows/*|scripts/ci_plan.sh|scripts/test_ci_plan.sh|scripts/run-swiftpm.sh|scripts/test_run_swiftpm.py|scripts/run-xcodebuild.sh|scripts/test_run_xcodebuild.py|scripts/run-cargo.py|scripts/test_run_cargo.py|scripts/verify_rust_workspace.py)
+        .github/workflows/*|scripts/ci_plan.sh|scripts/test_ci_plan.sh|scripts/run-swiftpm.sh|scripts/test_run_swiftpm.py|scripts/run-xcodebuild.sh|scripts/test_run_xcodebuild.py|scripts/run-cargo.py|scripts/cargo_cache.py|scripts/test_cargo_cache.py|scripts/test_run_cargo.py|scripts/verify_rust_workspace.py)
             # The planner cannot prove anything about a change to itself.
             select_all
             ;;

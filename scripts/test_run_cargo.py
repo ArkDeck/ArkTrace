@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Hermetic checks for stable caches, formatting and fail-closed toolchains."""
 import importlib.util
+import contextlib
 import os
 from pathlib import Path
 import subprocess
@@ -22,33 +23,43 @@ class CargoRunnerTests(unittest.TestCase):
         self.root = self.base / "checkout"
         (self.root / "rust/crates/example/src").mkdir(parents=True)
         (self.root / "rust/rust-toolchain.toml").write_text('[toolchain]\nchannel = "1.99.0"\n')
+        (self.root / "rust/Cargo.lock").write_text('version = 4\n')
         self.source = self.root / "rust/crates/example/src/lib.rs"
         self.source.write_text("pub fn example() {}\n")
         self.cache = self.base / "external-cache"
         self.calls = []
         self.compiler_version = "rustc 1.99.0 (test)"
         self.xcode_version = "Xcode 27.0\nBuild version 27A266a\n"
+        self.compiler_host = None
 
     def fake_run(self, arguments, **kwargs):
         if arguments == ["/usr/bin/xcodebuild", "-version"]:
             return subprocess.CompletedProcess(arguments, 0, stdout=self.xcode_version, stderr="")
         if arguments[-1] == "--version":
             return subprocess.CompletedProcess(arguments, 0, stdout=self.compiler_version, stderr="")
+        if arguments[-1] == "-vV":
+            host = self.compiler_host or ("aarch64-apple-darwin" if RUNNER.platform.system() == "Darwin" else "x86_64-pc-windows-msvc")
+            return subprocess.CompletedProcess(arguments, 0, stdout="host: " + host + "\n", stderr="")
         self.calls.append((arguments, kwargs))
         if "fmt" in arguments and "--check" not in arguments:
             (kwargs["cwd"] / "crates/example/src/lib.rs").write_text("pub fn formatted() {}\n")
         return subprocess.CompletedProcess(arguments, 0)
 
-    def invoke(self, *arguments, environment=None):
+    @contextlib.contextmanager
+    def mocked_tools(self, environment=None):
         env = {"ARKTRACE_CARGO_CACHE_ROOT": str(self.cache)}
         if environment:
             env.update(environment)
         paths = [p.relative_to(self.root).as_posix() for p in self.root.rglob("*") if p.is_file()]
         listed = ("\0".join(paths) + "\0").encode()
-        with patch.object(RUNNER, "ROOT", self.root), patch.object(sys, "argv", ["runner", *arguments]), \
+        with patch.object(RUNNER, "ROOT", self.root), \
              patch.dict(os.environ, env, clear=True), patch.object(RUNNER.shutil, "which", return_value="tool"), \
              patch.object(RUNNER.subprocess, "run", side_effect=self.fake_run), \
-             patch.object(RUNNER.subprocess, "check_output", return_value=listed):
+             patch.object(RUNNER.subprocess, "check_output", side_effect=lambda args, **kw: (str(kw['cwd']) + '\n').encode() if 'rev-parse' in args else listed):
+            yield
+
+    def invoke(self, *arguments, environment=None):
+        with self.mocked_tools(environment), patch.object(sys, 'argv', ['runner', *arguments]):
             return RUNNER.main()
 
     def test_cache_and_source_identity_survive_repeated_invocations(self):
@@ -86,6 +97,93 @@ class CargoRunnerTests(unittest.TestCase):
     def test_native_mismatch_does_not_execute_tests(self):
         with self.assertRaisesRegex(SystemExit, "native runner mismatch"):
             self.invoke("test", environment={"ARKTRACE_EXPECT_NATIVE_HOST": "impossible-host"})
+        self.assertFalse(self.calls)
+
+    def test_compiler_host_must_match_actual_native_machine(self):
+        self.compiler_host = 'x86_64-unknown-linux-gnu'
+        with self.assertRaisesRegex(SystemExit, 'rustc host triple'):
+            self.invoke('check', '-p', 'example')
+        self.assertFalse(self.calls)
+
+    def test_explicit_target_overrides_are_rejected_before_cargo(self):
+        for args, environment in [(('check', '--target', 'aarch64-apple-darwin'), {}),
+                                  (('check', '--target=x86_64-pc-windows-msvc'), {}),
+                                  (('test',), {'CARGO_BUILD_TARGET': ''})]:
+            with self.subTest(args=args, environment=environment), self.assertRaisesRegex(SystemExit, 'native host builds only'):
+                self.invoke(*args, environment=environment)
+        self.assertFalse(self.calls)
+        self.assertEqual(self.invoke('clippy', '--all-targets'), 0)
+
+    def test_ambient_compiler_and_target_configuration_cannot_bypass_native_guard(self):
+        for environment in [{'RUSTC':'foreign-rustc'}, {'RUSTFLAGS':'--target x86_64-pc-windows-msvc'},
+                            {'CARGO_ENCODED_RUSTFLAGS':'--target\x1fx86_64-pc-windows-msvc'},
+                            {'CARGO_TARGET_AARCH64_APPLE_DARWIN_RUSTFLAGS':'--target=x86_64-pc-windows-msvc'}]:
+            with self.subTest(environment=environment), self.assertRaisesRegex(SystemExit, 'override'):
+                self.invoke('check', environment=environment)
+        config = self.cache / 'dependencies/config.toml'
+        config.parent.mkdir(parents=True)
+        config.write_text('[build]\ntarget="aarch64-apple-darwin"\n')
+        with self.assertRaisesRegex(SystemExit, 'build.target'):
+            self.invoke('check')
+        self.assertFalse(self.calls)
+
+    def test_windows_requires_msvc_host_and_no_cross_target_layout(self):
+        with patch.object(RUNNER.platform, 'system', return_value='Windows'), patch.object(RUNNER.platform, 'machine', return_value='AMD64'):
+            self.assertEqual(self.invoke('check', '-p', 'example'), 0)
+            self.assertEqual(self.calls[-1][1]['env']['ARKTRACE_EXPECT_NATIVE_HOST'], 'windows-x64')
+            self.assertNotIn('--target', self.calls[-1][0])
+            self.compiler_host = 'x86_64-pc-windows-gnu'
+            with self.assertRaisesRegex(SystemExit, 'rustc host triple'):
+                self.invoke('check')
+
+    def test_symlinked_mirror_ancestor_fails_before_copy_or_unlink(self):
+        outside = self.base / 'outside'
+        outside.mkdir()
+        mirror = self.cache / 'workspace/rust'
+        mirror.parent.mkdir(parents=True)
+        mirror.symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, 'link'):
+            self.invoke('check')
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_consumer_retains_independent_root_and_entire_gate_lock(self):
+        from cargo_cache import runner_lock
+        files = lambda root: {'Cargo.toml': b'[package]\nname="consumer"\n', 'src/main.rs': b'fn main() {}\n'}
+        with self.mocked_tools():
+            with RUNNER.managed_consumer('wire', files) as consumer:
+                with self.assertRaisesRegex(ValueError, 'lock is active'):
+                    with runner_lock(self.cache):
+                        self.fail('consumer must hold its lock across every invocation')
+                for command in ['generate-lockfile', 'run', 'metadata']:
+                    consumer.run(command, ['--offline'])
+                    argv, kw = self.calls[-1]
+                    self.assertEqual(kw['cwd'], self.cache / 'workspace/consumers/wire')
+                    self.assertEqual(kw['env']['CARGO_TARGET_DIR'], str(self.cache / 'target'))
+                    self.assertEqual('--locked' in argv, command != 'generate-lockfile')
+                original = (consumer.root / 'src/main.rs').stat().st_mtime_ns
+            with self.assertRaisesRegex(SystemExit, 'lock scope has ended'):
+                consumer.run('run', [])
+            with RUNNER.managed_consumer('wire', files) as second:
+                self.assertEqual((second.root / 'src/main.rs').stat().st_mtime_ns, original)
+
+    def test_source_override_requires_exact_identity_and_cannot_write(self):
+        with self.mocked_tools():
+            identity = RUNNER.source_identity(self.root)['sourceSHA256']
+        environment = {'ARKTRACE_CARGO_SOURCE_ROOT': str(self.root), 'ARKTRACE_CARGO_SOURCE_SHA256': identity}
+        self.assertEqual(self.invoke('check', environment=environment), 0)
+        for command in [('fmt', '--all'), ('generate-lockfile',)]:
+            with self.assertRaisesRegex(SystemExit, 'cannot be rewritten'):
+                self.invoke(*command, environment=environment)
+        with self.assertRaisesRegex(SystemExit, 'exact source-identity'):
+            self.invoke('check', environment=environment | {'ARKTRACE_CARGO_SOURCE_SHA256': '0' * 64})
+
+    def test_registered_cache_rejects_ended_owner_before_cargo(self):
+        from cargo_cache import transition
+        with self.mocked_tools():
+            RUNNER.register(self.cache, 'fixed', self.root)
+        transition(self.cache, 'fixed', 'ended')
+        with self.assertRaisesRegex(SystemExit, 'must be active'):
+            self.invoke('check', environment={'ARKTRACE_CARGO_OWNER': 'fixed'})
         self.assertFalse(self.calls)
 
     def test_managed_paths_cannot_be_overridden(self):

@@ -29,7 +29,7 @@ unsafe_code = "forbid"
 [workspace.lints.clippy]
 all = "deny"
 
-# Each agent task owns a Cargo target; incremental caches and full debuginfo
+# Each session reuses a stable Cargo target; incremental caches and full debuginfo
 # made those targets fill the host disk. Line tables keep file:line in panics.
 [profile.dev]
 incremental = false

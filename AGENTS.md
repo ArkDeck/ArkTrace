@@ -52,13 +52,14 @@ ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库
 sh scripts/run-swiftpm.sh build
 sh scripts/run-swiftpm.sh test --filter '<相关测试套件>'
 sh scripts/run-xcodebuild.sh
-python3 scripts/run-cargo.py build --workspace
-python3 scripts/run-cargo.py test --workspace
+python3 scripts/run-cargo.py check -p '<相关crate>'
+python3 scripts/run-cargo.py test -p '<相关crate>'
 ```
 
 按改动选择命令，不要求每次全部运行。runner 管理稳定 source mirror 与缓存；不要给 SwiftPM runner 传它禁止的 `--package-path`、`--scratch-path` 或 `--cache-path`。
 Rust workspace 使用 exact 1.99.0 / edition 2024；Cargo runner 同样管理仓库外稳定缓存，使用 `--locked`。
-受限环境用 `ARKTRACE_CARGO_CACHE_ROOT` 指定可写根；Rust 改动运行 fmt、clippy、相关测试及 `verify_rust_workspace.py`。
+Rust 日常按 crate 做 `check -p` 和相关 `test -p`；需要链接或执行时再构建具体 bin/example。SDK 静态库使用 `build -p arktrace-ffi --release`，提交前保留所选 CI 的 workspace/all-targets/all-features 检查。
+受限环境用 `ARKTRACE_CARGO_CACHE_ROOT` 指定固定可写根。同一会话复用一个 owner 的 mirror/target；已有缓存原位登记、源码快照切换与结束后的归档回收见 [CARGO_CACHE.md](docs/CARGO_CACHE.md)。Rust 改动运行 fmt、clippy、相关测试及 `verify_rust_workspace.py`。
 Windows 产品验证必须在 Windows x64 原生 runner 执行；macOS 交叉编译不形成 Windows 通过证据。
 受限环境可使用 runner 文档中的 `ARKTRACE_SWIFTPM_CACHE_ROOT` / `ARKTRACE_XCODE_CACHE_ROOT` 指定仓库外可写缓存，或按环境流程申请访问。
 

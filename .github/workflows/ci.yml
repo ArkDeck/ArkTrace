@@ -416,6 +416,7 @@ jobs:
           python3 scripts/test_run_swiftpm.py
           python3 scripts/test_run_xcodebuild.py
           python3 scripts/test_run_cargo.py
+          python3 scripts/test_cargo_cache.py
           python3 scripts/test_stage_macos_rust_sdk.py
           python3 scripts/verify_migration_contracts.py
           python3 scripts/test_migration_contracts.py

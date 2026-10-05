@@ -1,0 +1,1439 @@
+{
+  "formatVersion": 1,
+  "recordedAtUTC": "2026-10-05",
+  "status": "cache increment complete; macOS migration goal active",
+  "sourceBase": "bf94b84c9d3cea6e13be957f58baf6df4fa03e62",
+  "completeDiffBase": "5a234a2cad465cf7f0ef3fcd5db57c9469d4e925",
+  "scope": [
+    "stable owner-specific default Cargo cache; legacy explicit cache compatibility and original adoption",
+    "independent Git source identity/pin/rebind without target migration",
+    "actual native rustc/Xcode/target guards and SQLite invariants",
+    "independent consumer shares stable target, full lifecycle lock and independent feature graph",
+    "full-plan/evidence binding, verified durable archive and ended-owner retirement with recoverable failure state",
+    "targeted daily commands, exact release SDK only when needed, complete selected CI coverage"
+  ],
+  "interfaces": {
+    "v1": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/interface-v1/interface.json",
+      "sha256": "e52ce88c87050288cdd3d4fb403379e7f2d09d96f209548722d65adf00ab9c38"
+    },
+    "v2": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/interface-v2/interface.json",
+      "sha256": "a448c879a4d4115598c73fb6f5f0736c395819fa73efcf31ecbf6739c5a2d02e"
+    }
+  },
+  "gates": [
+    {
+      "name": "api-baseline",
+      "command": [
+        "sh",
+        "scripts/test_api_baseline.sh",
+        "--scratch-path",
+        "/private/tmp/arktrace-event-api-baseline/build",
+        "--cache-path",
+        "/private/tmp/arktrace-event-api-baseline/dependencies",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-event-api-baseline/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-event-api-baseline/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "CLANG_MODULE_CACHE_PATH": "/private/tmp/arktrace-event-api-baseline/ModuleCache",
+        "SWIFTPM_MODULECACHE_OVERRIDE": "/private/tmp/arktrace-event-api-baseline/ModuleCache"
+      },
+      "exitCode": 0,
+      "seconds": 1.6379010677337646,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/api-baseline.stdout",
+        "sha256": "ba7ba92081999d7f7899a5b567462b6525a4b21b139efbc7b4af70e63260ff6a"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/api-baseline.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "app-document-types",
+      "command": [
+        "sh",
+        "scripts/verify_app_document_types.sh",
+        "/private/tmp/arktrace-lifecycle-xcode-output/Debug/ArkTrace.app"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {},
+      "exitCode": 0,
+      "seconds": 0.02566814422607422,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/app-document-types.stdout",
+        "sha256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/app-document-types.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "bindings",
+      "command": [
+        "python3",
+        "scripts/generate_ffi_bindings.py",
+        "--check"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.5231220722198486,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/bindings.stdout",
+        "sha256": "e5ce5d3d599e23330b5341138606486352b2e1fd5a667586ffab9a0977526adc"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/bindings.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "cache-tests",
+      "command": [
+        "python3",
+        "scripts/test_cargo_cache.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 1.6378870010375977,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/cache-tests.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/cache-tests.log",
+        "sha256": "dc477cd789ab664516f1bfe0c8a7ae7c39639e6dc0b6cbe7c42240c16e408d76"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "ci-planner",
+      "command": [
+        "sh",
+        "scripts/test_ci_plan.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.979888916015625,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/ci-planner.stdout",
+        "sha256": "83fdde05c58b9102fac14adbef0e45d5d144e191ba89a46c947c5bb4fe2569f7"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/ci-planner.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "default-app",
+      "command": [
+        "sh",
+        "scripts/run-xcodebuild.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_XCODE_CACHE_ROOT": "/private/tmp/arktrace-lifecycle-xcode",
+        "ARKTRACE_XCODE_OUTPUT_ROOT": "/private/tmp/arktrace-lifecycle-xcode-output"
+      },
+      "exitCode": 0,
+      "seconds": 4.177893877029419,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/default-app.stdout",
+        "sha256": "42b45928808baf7fcb0aa22fe9e490d7aa5698de83ade9d019493af305d659a1"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/default-app.log",
+        "sha256": "22b8d85ee014544c08f8404726c85d97164f5999e8c745c5be3169ed1b5860af"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "default-swift-full",
+      "command": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-swiftpm-current/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-swiftpm-current/security",
+        "-Xswiftc",
+        "-warnings-as-errors"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-swiftpm-current"
+      },
+      "exitCode": 0,
+      "seconds": 60.0549898147583,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/default-swift-full.stdout",
+        "sha256": "7a9c30bce1577efb1ec458399a35c12d862b58ae0df8432f2a52d33432de1738"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/default-swift-full.log",
+        "sha256": "a5f758755dbff81b37621dcd515c06b15b7580061dea217f50b57bb85e8078e2"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "ffi-contract",
+      "command": [
+        "python3",
+        "scripts/test_ffi_contract.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 6.542758941650391,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/ffi-contract.stdout",
+        "sha256": "531c14ba4b81bf148e5d91651bcd2e69011438b26afec37366ce97d54662e42d"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/ffi-contract.log",
+        "sha256": "e6cf0a0c66a8ee9216552bee3e8aba57b71fa788f81d59294043265e6335aa32"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "licenses",
+      "command": [
+        "sh",
+        "scripts/verify_licenses.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.9734818935394287,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/licenses.stdout",
+        "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/licenses.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "main-check-1",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+        "check",
+        "-p",
+        "arktrace-viewer",
+        "--verbose"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 2.612734794616699,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/main-check-1.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/main-check-1.log",
+        "sha256": "d170d459dc5c6104fe1774226ed472887cb025074628b93013be2f7228326229"
+      },
+      "cacheInterface": "v1"
+    },
+    {
+      "name": "main-check-2",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+        "check",
+        "-p",
+        "arktrace-viewer",
+        "--verbose"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.7538690567016602,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/main-check-2.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/main-check-2.log",
+        "sha256": "e9becca973da8ca06c0a4abdf3f9bb379db57da712f6d4cfcd37c63b916a9fca"
+      },
+      "cacheInterface": "v1"
+    },
+    {
+      "name": "main-check-restored",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+        "check",
+        "-p",
+        "arktrace-viewer",
+        "--verbose"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 1.7396581172943115,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/main-check-restored.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/main-check-restored.log",
+        "sha256": "e257c4cfd88f3cc3ee125bc1a6ce267f6590862ecac946fc4b2b133b7d4d9780"
+      },
+      "cacheInterface": "v1"
+    },
+    {
+      "name": "migration-contracts",
+      "command": [
+        "python3",
+        "scripts/verify_migration_contracts.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.9200458526611328,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/migration-contracts.stdout",
+        "sha256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/migration-contracts.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "migration-tests",
+      "command": [
+        "python3",
+        "scripts/test_migration_contracts.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.9943299293518066,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/migration-tests.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/migration-tests.log",
+        "sha256": "079f27706a211ce7a9781f05c8d16ea2684a0f675c29c9ce3edf22af43ab25e7"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "palette-tests",
+      "command": [
+        "python3",
+        "scripts/test_palette_verifier.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 5.8578760623931885,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/palette-tests.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/palette-tests.log",
+        "sha256": "ad12e2640beebdcddee3ff14b311c5870d60be741d000ece19b8903097dd76a2"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "palette",
+      "command": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.8321337699890137,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/palette.stdout",
+        "sha256": "5b513cdcede959bc5372e81faea29b98994f6a8f78dff20589f0dd03e0efe7a3"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/palette.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "parser-lock",
+      "command": [
+        "sh",
+        "scripts/verify_trace_streamer_lock.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.2620539665222168,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/parser-lock.stdout",
+        "sha256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/parser-lock.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "phase6-contracts",
+      "command": [
+        "sh",
+        "scripts/test_phase6.sh"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.36197376251220703,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/phase6-contracts.stdout",
+        "sha256": "00ca77f6ce36abee9b86d82a5c0563c393ba3ce847cf7029c15e46dfc181ddd0"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/phase6-contracts.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "runner-tests",
+      "command": [
+        "python3",
+        "scripts/test_run_cargo.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.8315529823303223,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/runner-tests.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/runner-tests.log",
+        "sha256": "b099de60f8490e7725e28363432779d95382df1a27fa3fb9b40c7f25fcf2484e"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "rust-build",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "build",
+        "--workspace"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 3.5423879623413086,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-build.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-build.log",
+        "sha256": "91043f5d902a8883ffb3ae0343aa31cd6677afa2811d856e2a0f111a9f31719c"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "rust-clippy",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 4.640377759933472,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-clippy.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-clippy.log",
+        "sha256": "ffb05239ed606403a2d79c7f76999bddba29926c3128acc99c9f5cde23453c71"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "rust-fmt",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 1.3371527194976807,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-fmt.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-fmt.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "rust-smoke",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "run",
+        "--bin",
+        "arktrace-migration-smoke"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 1.2581567764282227,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-smoke.stdout",
+        "sha256": "071b32eea36b5e931369d008981f210927a332e72a5595774ac8a258526a652e"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-smoke.log",
+        "sha256": "75fa071e5aed40e5334db3eb3175df32c0123d5caed00a08f6f8ef38e8fef0c8"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "rust-tests",
+      "command": [
+        "python3",
+        "scripts/run-cargo.py",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 40.067248821258545,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-tests.stdout",
+        "sha256": "82acda8b3c35520a51dbda166375d4f1786def3b3f70854f076381f2807a2ab8"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-tests.log",
+        "sha256": "dfc675ae0cc6ac05db0b3fe8cf622270a3b7259f8821012a73a5a7ae40a4771b"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "rust-verifier",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/verify_rust_workspace.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.8999030590057373,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-verifier.stdout",
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/rust-verifier.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-compile-consumer",
+      "command": [
+        "python3",
+        "scripts/test_macos_rust_sdk.py",
+        "--build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0/CArkTrace.xcframework",
+        "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 24.20592498779297,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-compile-consumer.stdout",
+        "sha256": "133927e6cf432603142e008629dad1cdb4a878e4119ec9df2dc72c57b44013a5"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-compile-consumer.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-fixture-build",
+      "command": [
+        "python3",
+        "scripts/build_macos_rust_sdk.py",
+        "--fixtures"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 8.031710863113403,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-fixture-build.stdout",
+        "sha256": "973e46fd68916619f461b4d29edcfd5f37ffd0751588c81e466a439d238c9c52"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-fixture-build.log",
+        "sha256": "0da73a5528f9d0956eb1003d9f76c1c50aba1bf9e9b0c16607daa3fb566c4a58"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-reference-batch",
+      "command": [
+        "python3",
+        "scripts/test_macos_batch_sdk.py",
+        "--reference-build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0/CArkTrace.xcframework",
+        "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "/private/tmp/arktrace-batch-reference"
+      },
+      "exitCode": 0,
+      "seconds": 8.748902797698975,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-batch.stdout",
+        "sha256": "cc1be656691e89868713b5c8753726210ba44d8809aa608a4e656eadfad2d985"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-batch.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-reference-deadline",
+      "command": [
+        "python3",
+        "scripts/test_macos_deadline_sdk.py",
+        "--reference-build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0/CArkTrace.xcframework",
+        "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "/private/tmp/arktrace-deadline-reference"
+      },
+      "exitCode": 0,
+      "seconds": 8.520173072814941,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-deadline.stdout",
+        "sha256": "39090146115b464a2f03a41df055d2efb83ca4a9d0a444e83671affabaec97c4"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-deadline.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-reference-density",
+      "command": [
+        "python3",
+        "scripts/test_macos_density_sdk.py",
+        "--reference-build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0/CArkTrace.xcframework",
+        "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "/private/tmp/arktrace-density-reference"
+      },
+      "exitCode": 0,
+      "seconds": 8.746755123138428,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-density.stdout",
+        "sha256": "4e1767a82cdeecd0bf2ed04c1bf933515cdf33dde3239a036b4ff97e3aeffc51"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-density.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-reference-event",
+      "command": [
+        "python3",
+        "scripts/test_macos_event_sdk.py",
+        "--reference-build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0/CArkTrace.xcframework",
+        "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "/private/tmp/arktrace-event-reference"
+      },
+      "exitCode": 0,
+      "seconds": 8.748329162597656,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-event.stdout",
+        "sha256": "9f87d7742329841e3aac8682f12f6b4484fa03ae28a2a128f34db3a387217e71"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-event.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-reference-repository",
+      "command": [
+        "python3",
+        "scripts/test_macos_repository_sdk.py",
+        "--reference-build-only"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0/CArkTrace.xcframework",
+        "ARKTRACE_EVENT_ORACLE_CACHE_ROOT": "/private/tmp/arktrace-repository-reference"
+      },
+      "exitCode": 0,
+      "seconds": 7.529520034790039,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-repository.stdout",
+        "sha256": "1feff332136614318b03745e6f8a9fb30b400b9284a829459e6442d654cd42cb"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-reference-repository.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "sdk-stage-tests",
+      "command": [
+        "python3",
+        "scripts/test_stage_macos_rust_sdk.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.2792229652404785,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-stage-tests.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/sdk-stage-tests.log",
+        "sha256": "884ae734946814c0dbc2bd5af83098848b94b0f83df33bafe5ff150b0b096756"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "source-next-changed",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+        "check",
+        "-p",
+        "arktrace-viewer",
+        "--verbose"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_SOURCE_ROOT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/source-next",
+        "ARKTRACE_CARGO_SOURCE_SHA256": "ee33a096cbdf7d2d97339f21e4ea53c40bb2a7a3258caed6be3687b1359b7051",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 1.9131360054016113,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/source-next-changed.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/source-next-changed.log",
+        "sha256": "55043644bf0e70acdf253c603f1d6ee717f61735d7ba91a183c96084cf2b364c"
+      },
+      "cacheInterface": "v1"
+    },
+    {
+      "name": "source-next-same",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+        "check",
+        "-p",
+        "arktrace-viewer",
+        "--verbose"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_SOURCE_ROOT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/source-next",
+        "ARKTRACE_CARGO_SOURCE_SHA256": "062c74ebf4b21f53ab2f184823d998c7f799fc62bfc550744688711f081b6de0",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 0.9218771457672119,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/source-next-same.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/source-next-same.log",
+        "sha256": "d9d72ce8053baad6726460624080edca2a8a95a647e76c08beb8803695ece773"
+      },
+      "cacheInterface": "v1"
+    },
+    {
+      "name": "swift-runner",
+      "command": [
+        "python3",
+        "scripts/test_run_swiftpm.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 2.545897960662842,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/swift-runner.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/swift-runner.log",
+        "sha256": "f7b3bc4545b1da973748321f2aa606992574cecd5e7c8428e0b2ad8e12075952"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "viewer-consumer-1",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/test_viewer_json_roundtrip.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 4.594727039337158,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/viewer-consumer-1.stdout",
+        "sha256": "689119089d5bd0d17e038eddaa5d8a028893e164b768a8abdcec2794ca4e477d"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/viewer-consumer-1.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v1"
+    },
+    {
+      "name": "viewer-consumer-2",
+      "command": [
+        "python3",
+        "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/test_viewer_json_roundtrip.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 3.46345591545105,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/viewer-consumer-2.stdout",
+        "sha256": "588ff0b01f9d63c4058bd77d7248625812aa295a69aafd40a96fe4b9808239a8"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/viewer-consumer-2.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cacheInterface": "v2"
+    },
+    {
+      "name": "xcode-runner",
+      "command": [
+        "python3",
+        "scripts/test_run_xcodebuild.py"
+      ],
+      "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+      "environmentOverrides": {
+        "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+        "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exitCode": 0,
+      "seconds": 2.9341788291931152,
+      "stdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/xcode-runner.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/xcode-runner.log",
+        "sha256": "546db2729ffbc2d9c120800b9245122810ea53fa47595ce6b6a0dc72865b8932"
+      },
+      "cacheInterface": "v2"
+    }
+  ],
+  "gateCount": 39,
+  "counts": {
+    "runnerRegression": 19,
+    "cacheRegression": 16,
+    "rustPassed": 530,
+    "rustFailed": 0,
+    "rustIgnored": 0,
+    "defaultSwiftPassed": 617,
+    "defaultSwiftSkipped": 6
+  },
+  "actualNativeVersions": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+    "xcode": "Xcode 27.0\nBuild version 27A266a\n",
+    "host": "Darwin arm64\n"
+  },
+  "observedWarnings": [
+    "AppIntents metadata extraction skipped: no AppIntents.framework dependency (unsigned App only)"
+  ],
+  "explicitSwiftSkips": [
+    "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]' skipped (0.001 seconds).",
+    "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]' skipped (0.000 seconds).",
+    "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]' skipped (0.000 seconds).",
+    "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]' skipped (0.001 seconds).",
+    "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]' skipped (0.000 seconds).",
+    "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]' skipped (0.000 seconds)."
+  ],
+  "experiments": {
+    "mainSecondCheck": {
+      "fresh": 23,
+      "recompiled": 0
+    },
+    "sameSourceRebind": {
+      "fresh": 23,
+      "recompiled": 0,
+      "stableMirrorFiles": 472,
+      "unchangedRoots": [
+        {
+          "path": "/private/tmp/arktrace-migration-cargo/workspace",
+          "inode": 261984219,
+          "mtimeNs": 1791170220395894773
+        },
+        {
+          "path": "/private/tmp/arktrace-migration-cargo/target",
+          "inode": 261987893,
+          "mtimeNs": 1791079234961922153
+        },
+        {
+          "path": "/private/tmp/arktrace-migration-cargo/runner.lock",
+          "inode": 261984220,
+          "mtimeNs": 1791077251580376465
+        }
+      ],
+      "independentIndexFilesCompared": 472
+    },
+    "ownedSourceChange": {
+      "necessaryRecompiledCrates": [
+        "arktrace-viewer"
+      ],
+      "freshUnits": 22
+    },
+    "sameProductConsumerRepeat": {
+      "results": [
+        {
+          "argv": [
+            "/Users/fuhanfeng/.cargo/bin/cargo",
+            "+1.99.0",
+            "run",
+            "--locked",
+            "--features",
+            "product-json",
+            "--offline",
+            "--verbose"
+          ],
+          "cwd": "/private/tmp/arktrace-migration-cargo/workspace/consumers/viewer-json",
+          "seconds": 0.6914680004119873,
+          "exitCode": 0,
+          "fresh": 24,
+          "compiled": [],
+          "cases": 10000,
+          "rejected": 0
+        },
+        {
+          "argv": [
+            "/Users/fuhanfeng/.cargo/bin/cargo",
+            "+1.99.0",
+            "run",
+            "--locked",
+            "--features",
+            "product-json",
+            "--offline",
+            "--verbose"
+          ],
+          "cwd": "/private/tmp/arktrace-migration-cargo/workspace/consumers/viewer-json",
+          "seconds": 0.3480989933013916,
+          "exitCode": 0,
+          "fresh": 24,
+          "compiled": [],
+          "cases": 10000,
+          "rejected": 0
+        }
+      ],
+      "stableSourceInputs": {
+        "Cargo.toml": {
+          "sha256": "38353f49397451d1f6d9045c7eb0a87eab50f3396a43211f42c1d65dd0efd851",
+          "inode": 270869035,
+          "mtimeNs": 1791170220396039398
+        },
+        "Cargo.lock": {
+          "sha256": "2517b61a796732e01b2acdd2122e28a2a498dcc1ee075bb9667b7eb17773893b",
+          "inode": 270869038,
+          "mtimeNs": 1791170220485598085
+        },
+        "src/main.rs": {
+          "sha256": "3c02c870a4499e207b0147a85abbb7b3716f741a936bfd1e11879bc3a1230c09",
+          "inode": 270869037,
+          "mtimeNs": 1791170220396234106
+        }
+      },
+      "product": {
+        "originalPath": "/private/tmp/arktrace-migration-cargo/target/debug/arktrace-viewer-wire-consumer",
+        "preservedPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/native-consumer/arktrace-viewer-wire-consumer",
+        "byteCount": 1237552,
+        "sha256": "df70d171e7e7472cf043f78f9293fe5723e9107e60d9dafb582586658ef9c362",
+        "format": "Mach-O64",
+        "architecture": "arm64"
+      },
+      "actualReclaimedBytes": 0
+    },
+    "actualNegativeCases": [
+      {
+        "name": "foreign-owner",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check",
+          "-p",
+          "arktrace-viewer"
+        ],
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_OWNER": "foreign-owner"
+        },
+        "exitCode": 1,
+        "expectedReason": "another owner",
+        "seconds": 0.3762197494506836
+      },
+      {
+        "name": "wrong-native-host",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check"
+        ],
+        "environmentOverrides": {
+          "ARKTRACE_EXPECT_NATIVE_HOST": "windows-x64"
+        },
+        "exitCode": 1,
+        "expectedReason": "native runner mismatch",
+        "seconds": 0.08018803596496582
+      },
+      {
+        "name": "target-argument",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check",
+          "--target",
+          "aarch64-apple-darwin"
+        ],
+        "environmentOverrides": {},
+        "exitCode": 1,
+        "expectedReason": "native host builds only",
+        "seconds": 0.04202103614807129
+      },
+      {
+        "name": "ambient-target",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check"
+        ],
+        "environmentOverrides": {
+          "CARGO_BUILD_TARGET": "aarch64-apple-darwin"
+        },
+        "exitCode": 1,
+        "expectedReason": "native host builds only",
+        "seconds": 0.04180288314819336
+      },
+      {
+        "name": "encoded-rustflags-target",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check"
+        ],
+        "environmentOverrides": {
+          "CARGO_ENCODED_RUSTFLAGS": "--target\u001fx86_64-pc-windows-msvc"
+        },
+        "exitCode": 1,
+        "expectedReason": "rustflags target overrides",
+        "seconds": 0.042060136795043945
+      },
+      {
+        "name": "compiler-override",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check"
+        ],
+        "environmentOverrides": {
+          "RUSTC": "foreign"
+        },
+        "exitCode": 1,
+        "expectedReason": "RUSTC override",
+        "seconds": 0.04422569274902344
+      },
+      {
+        "name": "wrong-source-hash",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/run-cargo.py",
+          "check"
+        ],
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_SOURCE_ROOT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+          "ARKTRACE_CARGO_SOURCE_SHA256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "exitCode": 1,
+        "expectedReason": "exact source-identity",
+        "seconds": 0.22428083419799805
+      },
+      {
+        "name": "active-lock-end",
+        "argv": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/cargo_cache.py",
+          "end",
+          "--owner",
+          "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "--cache-root",
+          "/private/tmp/arktrace-migration-cargo"
+        ],
+        "exitCode": 1,
+        "expectedReason": "runner lock is active"
+      }
+    ]
+  },
+  "parallelV1Readback": {
+    "parallel": [
+      {
+        "owner": "01a0ff9d-69c0-7760-a824-330620e0369a",
+        "interfaceVersion": "v1",
+        "report": {
+          "path": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/cargo-cache-adoption-analysis-20261005/new-policy-adoption-v1/reports/adoption-report.json",
+          "byteCount": 72103,
+          "sha256": "2e5ce14350e9f418f1e225cfe62cb85cebd1f25ab27cb60b20de89ced8abc215"
+        },
+        "actualLogReadback": [
+          {
+            "path": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/cargo-cache-adoption-analysis-20261005/new-policy-adoption-v1/verification/03-first-check.stderr.log",
+            "byteCount": 1118,
+            "sha256": "7ffd018b4d71fa0048b527d54a53918203a373dcb7b999d0f141dd1b6f3937ea",
+            "fresh": 26
+          },
+          {
+            "path": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/cargo-cache-adoption-analysis-20261005/new-policy-adoption-v1/verification/04-repeat-check.stderr.log",
+            "byteCount": 1118,
+            "sha256": "e8d3d95a451b748be0c1cf1693fab86b7c081191cccb957c41a8f092de7964a3",
+            "fresh": 26
+          }
+        ],
+        "actualCacheState": {
+          "formatVersion": 1,
+          "owner": "01a0ff9d-69c0-7760-a824-330620e0369a",
+          "cacheRoot": "/private/tmp/arktrace-cargo-agents/01a0ff9d-69c0-7760-a824-330620e0369a",
+          "sourceRoot": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/cargo-cache-adoption-analysis-20261005/source/pinned-primary",
+          "registeredSourceSHA256": "d629c40ca8c5d58caa0e28d0e1f17e8af4ff339c4aef8f7ff17048a3cb783551",
+          "lifecycle": "active",
+          "epoch": "fcbddd2f7be5401b9eb0cf4ab15b4abb",
+          "adoptedExisting": true
+        },
+        "realReclaimedBytes": 0,
+        "fullClosureIndependentlyReviewedByCoordinator": true
+      },
+      {
+        "owner": "01a10493-9d12-75e2-83ae-994f0b53adfa",
+        "interfaceVersion": "v1",
+        "report": {
+          "path": "/Users/fuhanfeng/.codex/visualizations/2026/10/04/01a10493-9d12-75e2-83ae-994f0b53adfa/cargo-cache-adoption-navigation-20261005/new-policy-adoption-v1/adoption-result.json",
+          "byteCount": 59398,
+          "sha256": "d238828eba7f830bcfd25fb775d4fb807bba640e640b2cd091bfa116a0c4505e"
+        },
+        "actualLogReadback": [
+          {
+            "path": "/Users/fuhanfeng/.codex/visualizations/2026/10/04/01a10493-9d12-75e2-83ae-994f0b53adfa/cargo-cache-adoption-navigation-20261005/new-policy-adoption-v1/receipts/policy-platform-check-01.stderr",
+            "byteCount": 1216,
+            "sha256": "cf4f97bc0cbbf71e75f8f47caf9c09257e233a78ce78d221b2ad3bfc4d3b87ab",
+            "fresh": 33
+          },
+          {
+            "path": "/Users/fuhanfeng/.codex/visualizations/2026/10/04/01a10493-9d12-75e2-83ae-994f0b53adfa/cargo-cache-adoption-navigation-20261005/new-policy-adoption-v1/receipts/policy-platform-check-02.stderr",
+            "byteCount": 1216,
+            "sha256": "e245da5c567125e9c57fa8ab92a3082cf17d6e76fa8d6cbb5ea41677cd508ab1",
+            "fresh": 33
+          }
+        ],
+        "actualCacheState": {
+          "formatVersion": 1,
+          "owner": "01a10493-9d12-75e2-83ae-994f0b53adfa",
+          "cacheRoot": "/private/tmp/arktrace-cargo-agents/01a10493-9d12-75e2-83ae-994f0b53adfa",
+          "sourceRoot": "/Users/fuhanfeng/.codex/visualizations/2026/10/04/01a10493-9d12-75e2-83ae-994f0b53adfa/cargo-cache-adoption-navigation-20261005/source-origin",
+          "registeredSourceSHA256": "d629c40ca8c5d58caa0e28d0e1f17e8af4ff339c4aef8f7ff17048a3cb783551",
+          "lifecycle": "active",
+          "epoch": "c92d597c8f9647589be84e5c4c994949",
+          "adoptedExisting": true
+        },
+        "realReclaimedBytes": 0,
+        "fullClosureIndependentlyReviewedByCoordinator": true
+      }
+    ],
+    "coordinatorReview": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/build/agent-coordination-recovery/arktrace/coordinator-20261005-015934/new-cache-adoption-v1-root-review-20261005.json",
+      "byteCount": 6493,
+      "sha256": "f1ae467724b66007fbe3ab44aed7c81f78f42db273b678e3aaab8d4e9facba09"
+    },
+    "noProvidedOwnerScriptExecuted": true,
+    "noForeignCacheOrSnapshotChanged": true
+  },
+  "parallelV2IndependentCoordinatorReview": {
+    "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/build/agent-coordination-recovery/arktrace/coordinator-20261005-015934/new-cache-adoption-v1-v2-root-review-20261005.json",
+    "byteCount": 9220,
+    "sha256": "659b8d1dc433283b9a964efdf84f1772b8c727c304551de63b6e9a9af0c7e964"
+  },
+  "actualCurrentOwnerState": {
+    "formatVersion": 1,
+    "owner": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+    "cacheRoot": "/private/tmp/arktrace-migration-cargo",
+    "sourceRoot": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+    "registeredSourceSHA256": "062c74ebf4b21f53ab2f184823d998c7f799fc62bfc550744688711f081b6de0",
+    "lifecycle": "active",
+    "epoch": "3e93d7edbba249338cc4db8424e48403",
+    "adoptedExisting": true
+  },
+  "preservation": {
+    "compilationSources": 472,
+    "dependencyRecords": 781,
+    "actualNativeProducts": 3,
+    "fullTargetNotCopied": true,
+    "closurePath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/actual-source-dependency-product-closure.json"
+  },
+  "retirement": {
+    "realActiveCacheRetirements": 0,
+    "actualReclaimedBytes": 0,
+    "allThreeOwnerCachesActive": true,
+    "eligibleVerifiedEndedProductionCaches": 0,
+    "synthetic": "16 cache unit tests include full archive/retire plus missing/corrupt/self-consistent-truncated/stale/foreign/active/link/fsync/partial-delete failures; fixtures are synthetic temporary files, not production retirement or migration evidence",
+    "windowsDirectoryDurability": "unqualified; Windows archive/retire fail closed, native builds remain supported"
+  },
+  "developmentCollectorFailures": [
+    "readback v1 wrong navigation array key: checks",
+    "readback v2 wrong nested receipt key: actual; corrected v3 succeeded; scripts/failures retained, no cache/source changes"
+  ],
+  "CI": {
+    "selected": [
+      "swiftpm",
+      "app",
+      "contracts",
+      "rust-macos",
+      "rust-windows"
+    ],
+    "macOSLocalExecuted": true,
+    "windowsNativeExecuted": false,
+    "referenceSDKGates": "compile-only; no new real trace runtime or signed release acceptance claim"
+  },
+  "remaining": [
+    "default App native hot snapshot and range analysis mapping/cutover",
+    "legacy sidecar byte backup/import and rollback",
+    "signed distribution, performance, actual GUI/Capture/ArkDeck and complete macOS acceptance",
+    "Windows native selected lane pending its own host"
+  ],
+  "nextIndependentWork": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cargo-cache-policy-20261005/next-macos-work.md",
+    "sha256": "e5a60bc8881801e2302267bd738f40907c9aaf56aa65f76e0da17e21a8d38f6e"
+  },
+  "gitPublication": "local work only; main merge/push remained blocked by automatic review pending direct human authorization in this chat"
+}
