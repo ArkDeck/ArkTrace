@@ -13,6 +13,8 @@
 > 见[原生渲染记录](migration-runs/AT-RUST-011-013-2026-10-06-native-rendering.md)。
 > 后续加入当前 ABI 2 的 488 字段呈现对照与 99 变体实际 Swift converter 回归；
 > 仅测试/向量变化，生产 bytes 未变。见[wire 回归记录](migration-runs/AT-RUST-011-013-2026-10-06-wire-regressions.md)。
+> 当前 ABI 2 字符串准入新增 103 个变体与 85 次拒绝后恢复，实际 native converter 通过；
+> native load/copy owner 生命周期与整体验收仍 open。见[字符串边界记录](migration-runs/AT-RUST-012-013-2026-10-06-string-admission.md)。
 
 ## 1. 执行规则与完成语义
 
