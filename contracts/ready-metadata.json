@@ -1,8 +1,8 @@
 {
   "cacheKey": {
-    "indexSchemaVersion": 3,
+    "indexSchemaVersion": 4,
     "parserBinarySHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
-    "parserKey": "9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095",
+    "parserKey": "9248ddf345afb1d92177ffd84219b34a6c54935f5916eb44471b1992fa2cd7ae",
     "schemaAdapterVersion": "2",
     "traceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
     "upstreamRevision": "447a0a49a7b3b914d6e9bd00648ba5a340f6fbf6"
@@ -10,14 +10,14 @@
   "createdAt": "2026-10-03T00:00:00Z",
   "databaseByteCount": 2351104,
   "databasePreparation": {
-    "indexVersion": 3,
+    "indexVersion": 4,
     "schemaAdapterVersion": "2",
     "schemaFingerprint": "cb34d8b668c21d9a5f50949338e0f4777fcd113f1ecfac4446afcb6ddf25bfc3",
     "upstreamDatabaseByteCount": 917504,
     "upstreamDatabaseSHA256": "a4816d67e7e3d239365ac648a94b33645600eea4b2f314761b0c0f7a87fad3e9"
   },
   "formatVersion": 1,
-  "indexSchemaVersion": 3,
+  "indexSchemaVersion": 4,
   "lastAccessedAt": "2026-10-03T00:00:00Z",
   "parser": {
     "adapterVersion": "1",

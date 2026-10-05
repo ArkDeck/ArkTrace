@@ -65,7 +65,7 @@ final class OpenViewTests: XCTestCase {
         XCTAssertEqual(view!.inspection.processCounterSampleTable(at: 1), .measure)
         XCTAssertEqual(view!.metadata.sourceByteCount, 67837)
         XCTAssertEqual(view!.metadata.databasePreparation.upstreamDatabaseByteCount, 917504)
-        XCTAssertEqual(view!.metadata.cacheKey.indexSchemaVersion, 3)
+        XCTAssertEqual(view!.metadata.cacheKey.indexSchemaVersion, 4)
         let name = await view!.metadata.parser.name.copyString()
         XCTAssertEqual(name, "trace_streamer")
         XCTAssertEqual(staging.retainedBytes, 0)

@@ -514,8 +514,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "byteCount": 32838,
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+      "byteCount": 33831,
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11"
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
@@ -878,19 +878,19 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 36.13733658401179,
+      "elapsedSeconds": 19.55158637498971,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-swift-canonical.log",
-        "byteCount": 6813,
-        "sha256": "5879814b335bb4b875a474718275f5b907fe50a82a14451c392c3a863c7ad340"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-swift-canonical.log",
+        "byteCount": 6937,
+        "sha256": "2b70c1015a48c2a739d433a66aa0a92d6295491c619d84cf31a5aed811c7ca40"
       }
     },
     {
@@ -910,19 +910,19 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 9.555204959004186,
+      "elapsedSeconds": 4.4420504580193665,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/argument-deadline-20261006/oracle-refresh-xcode-retry1/fresh-swift-regressions.log",
-        "byteCount": 15701,
-        "sha256": "70d881d0766e28f33a2cd53f652e7c94305a43745be49a90e7fbcfd42896bb4b"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-medium-query-indexes-20261006/oracle-refresh/fresh-swift-regressions.log",
+        "byteCount": 16438,
+        "sha256": "72e8e446261e21ea5642ba5edf42c4912a4a2b87f8e35aa0b9555b6cc628726d"
       }
     }
   ],
@@ -954,6 +954,6 @@
     "Native-key recordings do not prove user IME/focus/menu acceptance",
     "Independent module capacity accounting excludes owner aggregate, allocator and scratch"
   ],
-  "previousReceiptSHA256": "4e4b40dfb5e4d722f1195f384581f1e9e1813b1d404daa73f6e21c4378d15982",
-  "revalidatedBaseCommit": "298c8db"
+  "previousReceiptSHA256": "23a2e052649803c9ad41f858c3b7243c1c4011e1d3dfdeed454ecab9be15524d",
+  "revalidatedBaseCommit": "d9459b4"
 }

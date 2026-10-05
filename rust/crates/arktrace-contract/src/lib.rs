@@ -54,7 +54,7 @@ pub use time::TraceTimeRange;
 pub const MACHINE_JSON_VERSION: &str = "1.0";
 pub const PARSER_ADAPTER_VERSION: &str = "1";
 pub const SCHEMA_ADAPTER_VERSION: &str = "2";
-pub const INDEX_SCHEMA_VERSION: u32 = 3;
+pub const INDEX_SCHEMA_VERSION: u32 = 4;
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

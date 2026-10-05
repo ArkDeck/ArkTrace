@@ -225,8 +225,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "byteCount": 32838,
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+      "byteCount": 33831,
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11"
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
@@ -318,8 +318,8 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "d69e0984cfa5ce9f685cfbe16b4facb8e70e8ca191ecc18dc89e343124d98482",
-    "byteCount": 6018
+    "sha256": "0070316653048d024914a5b88d01bc856a56e829eefdaefb64188a6315387a0b",
+    "byteCount": 8428
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
@@ -410,7 +410,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "298c8db",
-  "previousReceiptSHA256": "c1a9d3c221d1d843318ca873667803012e399abc7302edd9879cb6b842bac570",
+  "revalidatedBaseCommit": "d9459b4",
+  "previousReceiptSHA256": "a1f9cd75ef2f7a770d1f6298c0f9ec581bd3c0ca9bdfc81718819503fcea9c96",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

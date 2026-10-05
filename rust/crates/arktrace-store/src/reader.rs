@@ -30,6 +30,28 @@ pub struct StoreReader {
     resources: Option<Arc<crate::query_resources::QueryResources>>,
     query_deadline: Cell<Option<ContinuousDeadline>>,
 }
+
+/// Created only by a fully opened reader. Workers may reuse its inspection
+/// only for this exact held immutable file, after the usual host checks.
+#[derive(Clone)]
+pub(crate) struct VerifiedReadSnapshot<'a> {
+    snapshot: Arc<HeldFile>,
+    inspection: &'a IndexedDatabaseInspection,
+}
+impl VerifiedReadSnapshot<'_> {
+    pub(crate) fn open_worker(
+        &self,
+        budget: &ValidationBudget,
+        resources: Arc<crate::query_resources::QueryResources>,
+    ) -> Result<StoreReader, StoreError> {
+        StoreReader::open_internal(
+            self.snapshot.clone(),
+            budget,
+            Some(resources),
+            Some(self.inspection),
+        )
+    }
+}
 impl StoreReader {
     pub fn cpu_catalog(
         &self,
@@ -45,20 +67,26 @@ impl StoreReader {
         self.snapshot.clone()
     }
     pub fn open(snapshot: Arc<HeldFile>, budget: &ValidationBudget) -> Result<Self, StoreError> {
-        Self::open_bounded(snapshot, budget, None)
+        Self::open_internal(snapshot, budget, None, None)
     }
-    pub(crate) fn open_bounded(
+    fn open_internal(
         snapshot: Arc<HeldFile>,
         budget: &ValidationBudget,
         resources: Option<Arc<crate::query_resources::QueryResources>>,
+        verified_inspection: Option<&IndexedDatabaseInspection>,
     ) -> Result<Self, StoreError> {
         let connection = open_snapshot_connection(&snapshot, budget)?;
         let prepared = (|| {
             let db =
                 Database::borrow_readonly(&connection, budget)?.with_resources(resources.clone());
-            let inspection = IndexedDatabaseInspection {
-                inspection: db.inspect()?,
-                applicable_index_names: indexes::validate(&db)?,
+            let inspection = if let Some(verified) = verified_inspection {
+                db.check()?;
+                verified.clone()
+            } else {
+                IndexedDatabaseInspection {
+                    inspection: db.inspect()?,
+                    applicable_index_names: indexes::validate(&db)?,
+                }
             };
             let directory = DirectorySchema::read(&db)?;
             let events = EventSchema::read(&db)?;
@@ -97,11 +125,24 @@ impl StoreReader {
             query_deadline: Cell::new(None),
         })
     }
+    pub(crate) fn verified_snapshot(&self) -> VerifiedReadSnapshot<'_> {
+        VerifiedReadSnapshot {
+            snapshot: self.snapshot.clone(),
+            inspection: &self.inspection,
+        }
+    }
     pub fn inspection(&self) -> &DatabaseInspection {
         &self.inspection.inspection
     }
     pub fn indexed_inspection(&self) -> &IndexedDatabaseInspection {
         &self.inspection
+    }
+    /// Reuse the inspection established by `open` for this exact immutable
+    /// held file. Every call still checks size, mode, identity, mtime/ctime,
+    /// parent binding, absent journal/WAL siblings and the caller's budget.
+    /// A changed file is rejected; it never refreshes the cached inspection.
+    pub fn verify_snapshot(&self, budget: &ValidationBudget) -> Result<(), StoreError> {
+        self.with_database(budget, |db| db.check())
     }
     pub fn verify(&self, budget: &ValidationBudget) -> Result<(), StoreError> {
         self.with_database(budget, |db| {
@@ -223,13 +264,7 @@ impl StoreReader {
         batch.validate().map_err(|_| StoreError::InvalidQuery)?;
         limits.validate()?;
         self.with_database(budget, |_| {
-            crate::read_pool::run(
-                self.snapshot.clone(),
-                &self.inspection,
-                batch,
-                budget,
-                limits,
-            )
+            crate::read_pool::run(self.verified_snapshot(), batch, budget, limits)
         })
     }
     pub fn event_batch_with_deadlines(
@@ -241,8 +276,7 @@ impl StoreReader {
     ) -> Result<crate::ReadPoolOutput, StoreError> {
         self.with_database(budget, |_| {
             crate::read_pool::run_with_deadlines(
-                self.snapshot.clone(),
-                &self.inspection,
+                self.verified_snapshot(),
                 batch,
                 deadlines,
                 budget,

@@ -384,7 +384,7 @@ impl EngineSession {
             .as_ref()
             .ok_or_else(|| failure(EngineStage::Validating, EngineFailure::InvalidMetadata))?;
         reader
-            .verify(&budget.validation())
+            .verify_snapshot(&budget.validation())
             .map_err(|e| failure(EngineStage::Validating, EngineFailure::Store(e)))?;
         if reader.inspection() != &self.inspection {
             return Err(failure(

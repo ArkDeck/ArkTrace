@@ -26,11 +26,12 @@ These are the first AT-RUST-001 vectors. Query, analysis, lifecycle, Viewer,
 distribution and ABI contracts will be added when those capabilities migrate.
 This directory does not claim those contracts are already frozen or implemented.
 
-`index-definitions.json` freezes all 24 current Swift index definitions in their
+`index-definitions.json` freezes all 28 current Swift index definitions in their
 existing creation order, with columns, bootstrap/required flags and nonunique,
 nonpartial shape. `verify_migration_contracts.py` checks the current Swift source;
 Rust consumes the same corpus for private preparation and full index introspection.
-Index schema version remains 3. Five definitions bootstrap schema validation,
+Index schema version is 4. The args lookup and dictionary indexes are optional
+when their concrete columns are absent. Five definitions bootstrap schema validation,
 17 are required; absent optional columns disable the corresponding optional index.
 
 `ready-metadata.json` is the format-1 codec fixture. Its 13 root, 8 parser, 6 key

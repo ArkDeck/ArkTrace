@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "indexSchemaVersion": 3,
+  "indexSchemaVersion": 4,
   "definitions": [
     {
       "name": "arktrace_v1_process_pid",
@@ -317,6 +317,59 @@
         "id"
       ],
       "bootstrap": true,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v4_args_argset_id_values",
+      "table": "args",
+      "columns": [
+        "argset",
+        "id",
+        "key",
+        "datatype",
+        "value"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v4_args_argset_values",
+      "table": "args",
+      "columns": [
+        "argset",
+        "key",
+        "datatype",
+        "value"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v4_data_dict_id_data",
+      "table": "data_dict",
+      "columns": [
+        "id",
+        "data"
+      ],
+      "bootstrap": false,
+      "required": false,
+      "unique": false,
+      "partial": false
+    },
+    {
+      "name": "arktrace_v4_data_type_id_desc",
+      "table": "data_type",
+      "columns": [
+        "typeId",
+        "desc"
+      ],
+      "bootstrap": false,
       "required": false,
       "unique": false,
       "partial": false

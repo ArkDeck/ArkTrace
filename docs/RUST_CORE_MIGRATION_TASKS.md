@@ -47,7 +47,7 @@
 | 010 | Rust CLI 九命令与取消/资源契约 | 001、002 | 005–009；Windows 加 003 | in-progress | L |
 | 011 | 共享时间线投影、LOD、命中与导航 | 001、002 | 007、009 | in-progress | L |
 | 012 | C ABI、Swift/C# SDK 与生命周期 | 001、002 | 008、009、011 | in-progress | L |
-| 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | planned | L |
+| 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | in-progress | L |
 | 014 | Windows 原生 Viewer | 002、012 接口冻结 | 003、008、011、012 | planned | L |
 | 015 | 独立 GUI Capture 共享实现 | 002、004、005 | 004、005、013、014 | planned | L |
 | 016 | 两平台 CLI/SDK/App 发行契约与打包 | 002；Windows recipe 待 003 | 003、005、010、012；GUI 包加 013–015 | planned | L |
@@ -804,7 +804,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 
 ## 15. AT-RUST-013 — macOS 原生 App 使用 Rust
 
-- 状态：planned；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。
+- 状态：in-progress；开工依赖：012 的最小可编译 SDK；完成依赖：008、011、012。
 - 平台/输入：macOS 26+ arm64 图形会话、真实 medium/large；Capture 此时可保留 Swift。
 - 需求：AT-APP-*、AT-RENDER-*、AT-LOD-005/006、AT-SYS-004、AT-SEC-008、AT-CACHE-006、
   AT-PERF-002/007；现有功能不回退。
@@ -1107,3 +1107,5 @@ CI
 2026-10-05 最新规则增量：按用户明确“尚未发布，不保留历史兼容逻辑”删除旧状态导入的配置/API/codec/Engine/operation/capability/UI/current probes，独立保留当前状态 read/write/remove/manual backup。543 Rust、91 SDK、716 native Swift / 622 default Swift passed（各 6 既有 opt-in skips）、API 与 unsigned App、真实公开备份 ABI、当前 Swift oracle 重放通过。默认 native bootstrap/drain 与完整 macOS 验收仍未完成；见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-latest-view-state-only.md)。
 
 2026-10-05 默认 native App 增量：默认 bootstrap、Controller 全部 owned tasks 的 join/flush/close 与 App Quit drain、正常 SDK 和实际只读 Developer ID helper/parser 接线完成。545 Rust、629 default Swift / 727 native Swift（各 6 既有 gate skips）、91 SDK、包外 API、当前 oracle、实际 Debug/优化签名 Release 与独立 native compile gate通过。真实打开仍因 CPU catalog 查询预算返回 QUERY_LIMIT；失败后的 active cache leases 归零及 native shutdown 已确认，桌面再次锁定，GUI/整体 macOS 未通过。96 份 receipts 和所有原失败留存；签名 candidate 未公证或发布，五 CI 车道 selected 不代表 Windows native 已执行。goal 管理器仍 blocked，继续已授权的独立迁移工作。见[本轮记录](migration-runs/AT-RUST-013-016-2026-10-05-native-default-bootstrap.md)。
+
+2026-10-06：真实 265 MB medium 的 density 全行流式聚合、args covering indexes/schema 4、Session/worker 的 held immutable Ready inspection 复用完成。558 Rust、635 default Swift / 736 fixture-native Swift（各 6 既有 opt-in skips）、正常 SDK API 与当前 Debug/优化 Release App 构建及本地签名通过；真实 cold/cache Controller 的精确事件、12 条参数、close/active0/shutdown 及只读原行核对通过。桌面仍锁定，>500 MiB 输入、GUI/性能/完整进程树及 ArkDeck schema-4 联调和适用发行验收仍 open；goal 管理器保持 blocked。见[当前 medium 查询记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)。

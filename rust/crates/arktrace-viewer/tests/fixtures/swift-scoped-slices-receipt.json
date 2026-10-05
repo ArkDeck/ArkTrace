@@ -4,7 +4,7 @@
   "vectors": 6,
   "xcode": "Xcode 27.0\nBuild version 27A266a",
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
-  "executableSHA256": "eb135436f6b74d83d255c473d4494bc23e0c1d2ebd65c8a1df35e47369aa1a8c",
+  "executableSHA256": "b659b2ec055feca8697ece66712e1656015106378af9897a7eee4fc7e466f9f5",
   "database": {
     "byteCount": 40960,
     "sha256": "9cc51daf713cd88936acf5e4f1d9db0d43a9ec9b5ce4d062a98b2aa9387a426e",
@@ -138,8 +138,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
-      "byteCount": 32838
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11",
+      "byteCount": 33831
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
@@ -183,8 +183,8 @@
     }
   ],
   "retainedExactRunArtifact": {
-    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-slices-eb135436f6b74d83d255c473d4494bc23e0c1d2ebd65c8a1df35e47369aa1a8c.executable",
-    "sha256": "eb135436f6b74d83d255c473d4494bc23e0c1d2ebd65c8a1df35e47369aa1a8c",
-    "byteCount": 4838832
+    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-slices-b659b2ec055feca8697ece66712e1656015106378af9897a7eee4fc7e466f9f5.executable",
+    "sha256": "b659b2ec055feca8697ece66712e1656015106378af9897a7eee4fc7e466f9f5",
+    "byteCount": 4838848
   }
 }

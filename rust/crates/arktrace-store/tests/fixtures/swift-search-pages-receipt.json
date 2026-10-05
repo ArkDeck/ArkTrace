@@ -5,7 +5,7 @@
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
   "vectors": 138,
   "recordedSourceCalls": 570,
-  "executableSHA256": "089863840fe1dd05bfa4ca754225a0d053cdf74b4c616fb80bc3a2e1ac5be862",
+  "executableSHA256": "c4253ecbfa5b621c950895dccf69bb241bfd5bb82ce91cf42da05562f8425351",
   "databases": [
     {
       "fixture": "search-full",
@@ -134,8 +134,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
-      "byteCount": 32838
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11",
+      "byteCount": 33831
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",

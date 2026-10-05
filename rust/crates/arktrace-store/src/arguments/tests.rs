@@ -37,6 +37,39 @@ fn arguments(
     let db = Database::borrow_readonly(c, &b)?;
     ArgumentSchema::read(&db)?.arguments(&db, q)
 }
+
+#[test]
+fn ready_indexes_find_a_small_argument_set_without_scanning_unrelated_rows() {
+    let disk = crate::tests::SQLiteDiskFixture::new(
+        "ALTER TABLE callstack ADD COLUMN argsetid INTEGER;
+        CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);
+        CREATE TABLE data_dict(id INTEGER,data TEXT);
+        CREATE TABLE data_type(typeId INTEGER,desc TEXT);
+        INSERT INTO data_dict VALUES(10,'key'),(11,'');
+        INSERT INTO data_type VALUES(0,'int32_t');
+        WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<800000)
+        INSERT INTO args SELECT i+100,10,0,i,99 FROM n;
+        INSERT INTO args VALUES(1,10,0,9,5),(2,10,0,2,5),(3,11,0,3,5);",
+    );
+    let c = disk.connection.as_ref().unwrap();
+    assert_eq!(
+        arguments(c, &query(5, 64)),
+        Err(StoreError::VmBudgetExceeded)
+    );
+    let b = budget();
+    let db = Database::borrow_writable(c, &b).unwrap();
+    crate::indexes::prepare(&db, |_| {}).unwrap();
+    let p = arguments(c, &query(5, 64)).unwrap();
+    assert_eq!(
+        p.items.iter().map(|v| v.value.as_str()).collect::<Vec<_>>(),
+        ["9", "2"]
+    );
+    assert!(!p.truncated && p.capability_available);
+    let p = arguments(c, &query(5, 1)).unwrap();
+    assert_eq!(p.items[0].value, "9");
+    assert!(p.truncated);
+    assert!(arguments(c, &query(7, 64)).unwrap().items.is_empty());
+}
 #[test]
 fn only_integer_datatype_one_resolves_a_dictionary_value() {
     let c = fixture(

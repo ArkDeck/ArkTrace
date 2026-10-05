@@ -523,12 +523,12 @@ fn runtime_identity_and_private_readonly_configuration_are_enforced() {
     ));
 }
 
-struct SQLiteDiskFixture {
-    connection: Option<Connection>,
+pub(super) struct SQLiteDiskFixture {
+    pub(super) connection: Option<Connection>,
     directory: std::path::PathBuf,
 }
 impl SQLiteDiskFixture {
-    fn new(extra: &str) -> Self {
+    pub(super) fn new(extra: &str) -> Self {
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let directory = std::env::temp_dir().join(format!(
             "arktrace-sqlite-unit-{}-{}",
@@ -616,13 +616,16 @@ fn optional_index_inputs_enable_full_closure_and_missing_required_inputs_fail() 
         ALTER TABLE callstack ADD COLUMN parent_id INTEGER;ALTER TABLE callstack ADD COLUMN cookie INTEGER;
         CREATE TABLE measure(filter_id INTEGER,ts INTEGER,value INTEGER);
         CREATE TABLE cpu_measure_filter(id INTEGER,name TEXT,cpu INTEGER);
-        CREATE TABLE process_measure_filter(id INTEGER,name TEXT,ipid INTEGER);";
+        CREATE TABLE process_measure_filter(id INTEGER,name TEXT,ipid INTEGER);
+        CREATE TABLE args(id INTEGER,key INTEGER,datatype INTEGER,value INTEGER,argset INTEGER);
+        CREATE TABLE data_dict(id INTEGER,data TEXT);
+        CREATE TABLE data_type(typeId INTEGER,desc TEXT);";
     let request = budget();
     let disk = SQLiteDiskFixture::new(extra);
     let connection = disk.connection.as_ref().unwrap();
     let db = Database::borrow_writable(connection, &request).unwrap();
     let (_, names) = crate::indexes::prepare(&db, |_| {}).unwrap();
-    assert_eq!(names.len(), 24);
+    assert_eq!(names.len(), 28);
     let bad = SQLiteDiskFixture::new(
         "DROP TABLE sched_slice;CREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER)",
     );
@@ -753,6 +756,94 @@ mod native_indexing {
         StoreReader::open(std::sync::Arc::new(prepared.snapshot), &budget()).unwrap()
     }
     #[test]
+    fn verified_snapshot_rejects_budget_cancellation_and_expiry_without_refreshing() {
+        let fixture = Fixture::new("INSERT INTO sched_slice VALUES(1,100,20,0,NULL,NULL);");
+        let reader = ready_reader(&fixture);
+        reader.verify_snapshot(&budget()).unwrap();
+        let verified = reader.verified_snapshot();
+        let resources = || {
+            std::sync::Arc::new(
+                crate::query_resources::QueryResources::new(ReadPoolLimits::default()).unwrap(),
+            )
+        };
+        let cancelled = budget();
+        cancelled.cancellation.cancel();
+        assert_eq!(
+            reader.verify_snapshot(&cancelled),
+            Err(StoreError::Cancelled)
+        );
+        assert_eq!(
+            verified.open_worker(&cancelled, resources()).err(),
+            Some(StoreError::Cancelled)
+        );
+        let expired = ValidationBudget {
+            deadline: Instant::now() - Duration::from_millis(1),
+            ..budget()
+        };
+        assert_eq!(
+            reader.verify_snapshot(&expired),
+            Err(StoreError::DeadlineExceeded)
+        );
+        assert_eq!(
+            verified.open_worker(&expired, resources()).err(),
+            Some(StoreError::DeadlineExceeded)
+        );
+        let small = ValidationBudget {
+            maximum_database_bytes: 1,
+            ..budget()
+        };
+        assert_eq!(
+            reader.verify_snapshot(&small),
+            Err(StoreError::Host(
+                arktrace_platform::HostError::LimitExceeded
+            ))
+        );
+        assert_eq!(
+            verified.open_worker(&small, resources()).err(),
+            Some(StoreError::Host(
+                arktrace_platform::HostError::LimitExceeded
+            ))
+        );
+        let worker = verified.open_worker(&budget(), resources()).unwrap();
+        assert_eq!(worker.indexed_inspection(), reader.indexed_inspection());
+        worker.close().unwrap();
+        reader.verify_snapshot(&budget()).unwrap();
+        reader.close().unwrap();
+    }
+    #[test]
+    fn verified_snapshot_rejects_in_place_changes_even_after_readonly_mode_is_restored() {
+        use std::os::unix::{fs::FileExt, fs::PermissionsExt};
+        let fixture = Fixture::new("INSERT INTO sched_slice VALUES(1,100,20,0,NULL,NULL);");
+        let reader = ready_reader(&fixture);
+        reader.verify_snapshot(&budget()).unwrap();
+        let verified = reader.verified_snapshot();
+        let snapshot = reader.snapshot_for_test();
+        let path = snapshot.path();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
+        let file = fs::OpenOptions::new().write(true).open(&path).unwrap();
+        file.write_all_at(&[0], 24).unwrap();
+        file.sync_all().unwrap();
+        drop(file);
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o400)).unwrap();
+        assert_eq!(
+            reader.verify_snapshot(&budget()),
+            Err(StoreError::Host(arktrace_platform::HostError::Changed))
+        );
+        assert_eq!(
+            verified
+                .open_worker(
+                    &budget(),
+                    std::sync::Arc::new(
+                        crate::query_resources::QueryResources::new(ReadPoolLimits::default())
+                            .unwrap(),
+                    ),
+                )
+                .err(),
+            Some(StoreError::Host(arktrace_platform::HostError::Changed))
+        );
+        reader.close().unwrap();
+    }
+    #[test]
     fn completed_slot_deadline_is_not_rechecked_while_a_later_slot_waits() {
         let fixture = Fixture::new("INSERT INTO sched_slice VALUES(1,100,20,0,NULL,NULL);");
         let reader = ready_reader(&fixture);
@@ -763,8 +854,7 @@ mod native_indexing {
         let first_deadline = deadline_after_seconds(2);
         let deadlines = [Some(first_deadline), Some(deadline_after_seconds(7))];
         let result = crate::read_pool::run_inner_with_deadlines(
-            reader.snapshot_for_test(),
-            reader.indexed_inspection(),
+            reader.verified_snapshot(),
             &queries,
             Some(&deadlines),
             &budget(),
@@ -1148,8 +1238,7 @@ mod native_indexing {
         }
         assert_eq!(
             crate::read_pool::run_inner(
-                snapshot.clone(),
-                reader.indexed_inspection(),
+                reader.verified_snapshot(),
                 &batch,
                 &request,
                 ReadPoolLimits::default(),
@@ -1168,8 +1257,7 @@ mod native_indexing {
         assert_eq!(
             reader
                 .with_database(&cancelled_panic, |_| crate::read_pool::run_inner(
-                    snapshot.clone(),
-                    reader.indexed_inspection(),
+                    reader.verified_snapshot(),
                     &batch,
                     &cancelled_panic,
                     ReadPoolLimits::default(),
@@ -1263,8 +1351,7 @@ mod native_indexing {
         let active = budget();
         assert_eq!(
             crate::read_pool::run_inner(
-                reader.snapshot_for_test(),
-                reader.indexed_inspection(),
+                reader.verified_snapshot(),
                 &batch,
                 &active,
                 ReadPoolLimits::default(),

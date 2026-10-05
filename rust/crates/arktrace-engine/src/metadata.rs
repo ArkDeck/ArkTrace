@@ -222,8 +222,8 @@ mod tests {
                 "\"formatVersion\": 1,\"formatVersion\": 1",
             ),
             (
-                "\"indexVersion\": 3",
-                "\"indexVersion\": 3,\"indexVersion\": 3",
+                "\"indexVersion\": 4",
+                "\"indexVersion\": 4,\"indexVersion\": 4",
             ),
             (
                 "\"name\": \"trace_streamer\"",

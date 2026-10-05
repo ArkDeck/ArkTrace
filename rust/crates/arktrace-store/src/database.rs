@@ -401,7 +401,55 @@ impl<'a> Database<'a> {
         mut map: impl FnMut(&Row<'_>) -> Result<T, StoreError>,
     ) -> Result<Vec<T>, StoreError> {
         self.check()?;
-        if maximum_rows == 0 || vm_budget == 0 {
+        if maximum_rows == 0 {
+            return Err(StoreError::SchemaBudgetExceeded);
+        }
+        let mut result = Vec::new();
+        self.visit(sql, params, vm_budget, |row| {
+            if result.len() == maximum_rows {
+                return Err(StoreError::SchemaBudgetExceeded);
+            }
+            if self.resources.is_some() {
+                // Credit before the mapper can copy strings. Four copies cover
+                // Vec growth and typed-page/group conversion.
+                let mut bytes = (std::mem::size_of::<T>() as u64)
+                    .checked_add(64)
+                    .ok_or(StoreError::DecodedBudgetExceeded)?;
+                for index in 0..row.as_ref().column_count() {
+                    let value = row.get_ref(index).map_err(sqlite_error)?;
+                    let dynamic = match value {
+                        ValueRef::Text(v) | ValueRef::Blob(v) => v.len() as u64,
+                        _ => 0,
+                    };
+                    bytes = bytes
+                        .checked_add(dynamic)
+                        .and_then(|b| b.checked_add(32))
+                        .ok_or(StoreError::DecodedBudgetExceeded)?;
+                }
+                self.reserve_decoded(
+                    bytes
+                        .checked_mul(4)
+                        .ok_or(StoreError::DecodedBudgetExceeded)?,
+                )?;
+            }
+            result.push(map(row)?);
+            Ok(())
+        })?;
+        Ok(result)
+    }
+
+    /// Streams borrowed rows under the same cancellation, inode, deadline and
+    /// VM checks. The visitor must pre-credit its bounded aggregate state and
+    /// must not retain a row or allocate a collection of source events.
+    pub(crate) fn visit(
+        &self,
+        sql: &str,
+        params: impl Params,
+        vm_budget: u64,
+        mut visit: impl FnMut(&Row<'_>) -> Result<(), StoreError>,
+    ) -> Result<(), StoreError> {
+        self.check()?;
+        if vm_budget == 0 {
             return Err(StoreError::SchemaBudgetExceeded);
         }
         let reason = Arc::new(AtomicU8::new(0));
@@ -489,38 +537,11 @@ impl<'a> Database<'a> {
             let mut statement = self.connection.prepare(sql).map_err(sqlite_error)?;
             let outcome = (|| {
                 let mut rows = statement.query(params).map_err(sqlite_error)?;
-                let mut result = Vec::new();
                 while let Some(row) = rows.next().map_err(sqlite_error)? {
                     self.check_deadline()?;
-                    if result.len() == maximum_rows {
-                        return Err(StoreError::SchemaBudgetExceeded);
-                    }
-                    if self.resources.is_some() {
-                        // Credit before the mapper can copy input strings. Four
-                        // copies cover Vec growth and typed-page/group conversion.
-                        let mut bytes = (std::mem::size_of::<T>() as u64)
-                            .checked_add(64)
-                            .ok_or(StoreError::DecodedBudgetExceeded)?;
-                        for index in 0..row.as_ref().column_count() {
-                            let value = row.get_ref(index).map_err(sqlite_error)?;
-                            let dynamic = match value {
-                                ValueRef::Text(v) | ValueRef::Blob(v) => v.len() as u64,
-                                _ => 0,
-                            };
-                            bytes = bytes
-                                .checked_add(dynamic)
-                                .and_then(|b| b.checked_add(32))
-                                .ok_or(StoreError::DecodedBudgetExceeded)?;
-                        }
-                        self.reserve_decoded(
-                            bytes
-                                .checked_mul(4)
-                                .ok_or(StoreError::DecodedBudgetExceeded)?,
-                        )?;
-                    }
-                    result.push(map(row)?);
+                    visit(row)?;
                 }
-                Ok(result)
+                Ok(())
             })();
             if let Some(work) = &self.vm_work {
                 // Progress checks account for complete intervals; include the

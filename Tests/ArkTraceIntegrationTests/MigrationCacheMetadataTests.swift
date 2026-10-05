@@ -19,7 +19,7 @@ final class MigrationCacheMetadataTests: XCTestCase {
         XCTAssertEqual(metadata.formatVersion, 1)
         XCTAssertEqual(metadata.sourceByteCount, 67_837)
         XCTAssertEqual(metadata.schemaAdapterVersion, "2")
-        XCTAssertEqual(metadata.indexSchemaVersion, 3)
+        XCTAssertEqual(metadata.indexSchemaVersion, 4)
         XCTAssertEqual(metadata.traceSHA256, metadata.cacheKey.traceSHA256)
         XCTAssertEqual(metadata.parser.binarySHA256, metadata.cacheKey.parserBinarySHA256)
         let encoder = JSONEncoder()

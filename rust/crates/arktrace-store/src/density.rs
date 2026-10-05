@@ -1,10 +1,11 @@
-//! Aggregate only in SQLite. At most one identity per bucket is read back;
-//! identities are attributes used for colour, never invented selectable events.
+//! Stream all matching rows into fixed bucket state under one SQL VM budget.
+//! At most one identity per bucket survives; identities are attributes used
+//! for colour, never invented selectable events.
 use crate::{
     CounterSampleTable, DatabaseInspection, StoreError,
-    counters::{CounterSchema, time_filter},
+    counters::CounterSchema,
     database::{DEFAULT_VM_BUDGET, Database},
-    events::{intersection, optional_integer, optional_text},
+    events::{absolute_bounds, optional_integer, optional_text},
     frames::FrameSchema,
 };
 use arktrace_contract::{
@@ -12,7 +13,10 @@ use arktrace_contract::{
     TraceDensityIdentity, TraceDensityQuery, TraceDensityResult, TraceDensitySource,
     TraceTimeRange,
 };
-use rusqlite::{params_from_iter, types::Value};
+use rusqlite::{
+    params_from_iter,
+    types::{Value, ValueRef},
+};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub(crate) fn density(
@@ -25,14 +29,10 @@ pub(crate) fn density(
     db.check()?;
     query.validate().map_err(|_| StoreError::InvalidQuery)?;
     // Density validates absolute bounds even when the source is unavailable.
-    let (intersection, time_values) = intersection(inspection, query.range)?;
+    let (start, _) = absolute_bounds(inspection, query.range)?;
     let duration = query.range.duration_ns();
     let width =
         duration / query.bucket_count as i64 + i64::from(duration % query.bucket_count as i64 != 0);
-    let start = inspection
-        .trace_start_ts
-        .checked_add(query.range.start_ns())
-        .ok_or(StoreError::InvalidQuery)?;
     let caps = &inspection.capabilities;
     let (available, scope) = match query.source {
         TraceDensitySource::Cpu { .. } => (caps.cpu_scheduling, "sched_slice.ts"),
@@ -59,7 +59,6 @@ pub(crate) fn density(
             inspection,
             counters,
             query,
-            width,
             filter_id,
             cpu,
             &inspection.cpu_counter_sample_tables,
@@ -75,7 +74,6 @@ pub(crate) fn density(
             inspection,
             counters,
             query,
-            width,
             filter_id,
             process_key.map(|v| v.ipid),
             &inspection.process_counter_sample_tables,
@@ -83,95 +81,9 @@ pub(crate) fn density(
             "ipid",
             &mut bindings,
         )?,
-        _ => {
-            let (table, index, alias, condition, filter) = match query.source {
-                TraceDensitySource::Cpu { cpu } => (
-                    "sched_slice",
-                    " INDEXED BY arktrace_v3_sched_slice_cpu_ts_dur",
-                    "s",
-                    "AND typeof(s.cpu)='integer' AND s.cpu=?",
-                    Some(cpu),
-                ),
-                TraceDensitySource::ThreadState { thread } => (
-                    "thread_state",
-                    " INDEXED BY arktrace_v3_thread_state_itid_ts_dur",
-                    "s",
-                    "AND typeof(s.itid)='integer' AND s.itid=?",
-                    Some(thread.itid),
-                ),
-                TraceDensitySource::NamedSlice {
-                    thread: Some(thread),
-                } => (
-                    "callstack",
-                    " INDEXED BY arktrace_v3_callstack_callid_ts_dur",
-                    "s",
-                    "AND typeof(s.callid)='integer' AND s.callid=?",
-                    Some(thread.itid),
-                ),
-                TraceDensitySource::NamedSlice { thread: None } => (
-                    "callstack",
-                    " INDEXED BY arktrace_v3_callstack_callid_ts_dur",
-                    "s",
-                    "AND (s.callid IS NULL OR s.callid=0)",
-                    None,
-                ),
-                TraceDensitySource::Frame {
-                    process_key: Some(key),
-                } => (
-                    "frame_slice",
-                    "",
-                    "f",
-                    "AND typeof(f.ipid)='integer' AND f.ipid=?",
-                    Some(key.ipid),
-                ),
-                TraceDensitySource::Frame { process_key: None } => {
-                    ("frame_slice", "", "f", "", None)
-                }
-                _ => return Err(StoreError::InvalidQuery),
-            };
-            bindings.extend(
-                [
-                    start,
-                    start,
-                    width,
-                    inspection.trace_start_ts,
-                    inspection.trace_end_ts,
-                ]
-                .map(Value::Integer),
-            );
-            bindings.extend(time_values);
-            if let Some(v) = filter {
-                bindings.push(Value::Integer(v));
-            }
-            let bucket = bucket_sql(alias, query.bucket_count);
-            let predicate = intersection[0].replace("s.", &format!("{alias}."));
-            format!(
-                "SELECT {bucket} AS bucket, CASE WHEN {alias}.ts<? OR {alias}.ts>? THEN 1 ELSE 0 END AS clamped, 0 AS invalid_duration, 0 AS clamped_duration, {alias}.rowid AS identity_row, {alias}.dur AS weight FROM {table} AS {alias}{index} WHERE {predicate} {condition}"
-            )
-        }
+        _ => interval_source(inspection, query, &mut bindings)?,
     };
-    // SQLite's single MAX selects the real witness row for each bucket,
-    // including its established tie behaviour. No LIMIT is applied to events.
-    let sql = format!(
-        "WITH sampled AS ({source_sql}) SELECT bucket,COUNT(*),identity_row,MAX(weight),SUM(clamped),SUM(invalid_duration),SUM(clamped_duration) FROM sampled GROUP BY bucket ORDER BY bucket ASC LIMIT {}",
-        query.bucket_count
-    );
-    let rows = db.query(
-        &sql,
-        params_from_iter(bindings),
-        query.bucket_count,
-        DEFAULT_VM_BUDGET,
-        |r| {
-            Ok(Aggregate {
-                bucket: optional_integer(r, 0)?,
-                count: optional_integer(r, 1)?,
-                identity: optional_integer(r, 2)?,
-                clamped: optional_integer(r, 4)?,
-                invalid_duration: optional_integer(r, 5)?,
-                clamped_duration: optional_integer(r, 6)?,
-            })
-        },
-    )?;
+    let rows = aggregate_rows(db, inspection, query, start, width, &source_sql, bindings)?;
     let mut buckets = Vec::with_capacity(rows.len());
     let mut counts = [0i64; 3];
     for (index, row) in rows.iter().enumerate() {
@@ -256,19 +168,76 @@ pub(crate) fn density(
     result(buckets, true, issues)
 }
 
+#[cfg(test)]
 fn bucket_sql(alias: &str, count: usize) -> String {
     format!(
         "MIN({},MAX(0,CASE WHEN {alias}.ts<=? THEN 0 ELSE ({alias}.ts-?)/? END))",
         count - 1
     )
 }
+
+fn interval_source(
+    inspection: &DatabaseInspection,
+    query: &TraceDensityQuery,
+    bindings: &mut Vec<Value>,
+) -> Result<String, StoreError> {
+    let (table, index, condition, filter) = match query.source {
+        TraceDensitySource::Cpu { cpu } => (
+            "sched_slice",
+            " INDEXED BY arktrace_v3_sched_slice_cpu_ts_dur",
+            "AND typeof(s.cpu)='integer' AND s.cpu=?",
+            Some(cpu),
+        ),
+        TraceDensitySource::ThreadState { thread } => (
+            "thread_state",
+            " INDEXED BY arktrace_v3_thread_state_itid_ts_dur",
+            "AND typeof(s.itid)='integer' AND s.itid=?",
+            Some(thread.itid),
+        ),
+        TraceDensitySource::NamedSlice {
+            thread: Some(thread),
+        } => (
+            "callstack",
+            " INDEXED BY arktrace_v3_callstack_callid_ts_dur",
+            "AND typeof(s.callid)='integer' AND s.callid=?",
+            Some(thread.itid),
+        ),
+        TraceDensitySource::NamedSlice { thread: None } => (
+            "callstack",
+            " INDEXED BY arktrace_v3_callstack_callid_ts_dur",
+            "AND (s.callid IS NULL OR s.callid=0)",
+            None,
+        ),
+        TraceDensitySource::Frame {
+            process_key: Some(key),
+        } => (
+            "frame_slice",
+            "",
+            "AND typeof(s.ipid)='integer' AND s.ipid=?",
+            Some(key.ipid),
+        ),
+        TraceDensitySource::Frame { process_key: None } => ("frame_slice", "", "", None),
+        _ => return Err(StoreError::InvalidQuery),
+    };
+    let (start, end) = absolute_bounds(inspection, query.range)?;
+    bindings.extend([end, start, start].map(Value::Integer));
+    if let Some(value) = filter {
+        bindings.push(Value::Integer(value));
+    }
+    // The validated trace-relative query ends at or before trace_end. This is
+    // the shared half-open intersection with redundant branches removed; no
+    // ts+dur arithmetic, event LIMIT or event sample is introduced.
+    Ok(format!("SELECT s.rowid,s.ts,s.dur FROM {table} s{index}
+        WHERE typeof(s.ts)='integer' AND(s.dur IS NULL OR typeof(s.dur)='integer')
+        AND s.ts<? AND(s.ts>=? OR s.dur IS NULL OR s.dur<0 OR(s.dur>0 AND s.dur>?-s.ts)) {condition}"))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn counter_source(
     db: &Database<'_>,
     inspection: &DatabaseInspection,
     schema: &CounterSchema,
     query: &TraceDensityQuery,
-    width: i64,
     filter_id: i64,
     scope: Option<i64>,
     tables: &[CounterSampleTable],
@@ -276,52 +245,43 @@ fn counter_source(
     column: &str,
     bindings: &mut Vec<Value>,
 ) -> Result<String, StoreError> {
-    let start = inspection
-        .trace_start_ts
-        .checked_add(query.range.start_ns())
-        .ok_or(StoreError::InvalidQuery)?;
+    let (start, end) = absolute_bounds(inspection, query.range)?;
     let mut branches = Vec::new();
     for table in tables {
         db.check()?;
         let duration = schema.has_duration(*table)?;
-        let (time, values) = time_filter(inspection, query.range, duration)?;
-        bindings.extend(
-            [
-                start,
-                start,
-                width,
-                inspection.trace_start_ts,
-                inspection.trace_end_ts,
-            ]
-            .map(Value::Integer),
-        );
-        let (invalid, clamped) = if duration {
-            bindings.extend([inspection.duration_ns, inspection.trace_end_ts].map(Value::Integer));
+        let (time, raw_duration) = if duration {
+            bindings.extend([end, start, start].map(Value::Integer));
+            // Malformed durations count as instants. NULL/negative INTEGER
+            // durations remain open-ended, including before the query start.
             (
-                "CASE WHEN m.dur IS NOT NULL AND typeof(m.dur)<>'integer' THEN 1 ELSE 0 END",
-                "CASE WHEN typeof(m.dur)='integer' AND m.dur>0 AND (m.dur>? OR m.ts+m.dur>?) THEN 1 ELSE 0 END",
+                "m.ts<? AND(m.ts>=? OR m.dur IS NULL OR(typeof(m.dur)='integer' AND(m.dur<0 OR(m.dur>0 AND m.dur>?-m.ts))))",
+                "m.dur",
             )
         } else {
-            ("0", "0")
+            bindings.extend([start, end].map(Value::Integer));
+            ("m.ts>=? AND m.ts<?", "NULL")
         };
-        bindings.extend(values);
         bindings.push(Value::Integer(filter_id));
-        if let Some(v) = scope {
-            bindings.push(Value::Integer(v));
+        if let Some(value) = scope {
+            bindings.push(Value::Integer(value));
         }
-        let bucket = bucket_sql("m", query.bucket_count);
         let scoped = if scope.is_some() {
             format!("AND f.{column}=?")
         } else {
             String::new()
         };
-        branches.push(format!("SELECT {bucket} AS bucket, CASE WHEN m.ts<? OR m.ts>? THEN 1 ELSE 0 END AS clamped, {invalid} AS invalid_duration, {clamped} AS clamped_duration, NULL AS identity_row,0 AS weight FROM {} AS m INNER JOIN {filter} AS f ON f.id=m.filter_id WHERE typeof(m.ts)='integer' AND typeof(m.filter_id)='integer' AND typeof(f.id)='integer' AND typeof(f.{column})='integer' AND ({time}) AND f.id=? {scoped}", table.name()));
+        branches.push(format!("SELECT NULL,m.ts,{raw_duration} FROM {} m INNER JOIN {filter} f ON f.id=m.filter_id
+            WHERE typeof(m.ts)='integer' AND typeof(m.filter_id)='integer' AND typeof(f.id)='integer'
+            AND typeof(f.{column})='integer' AND({time}) AND f.id=? {scoped}", table.name()));
     }
     if branches.is_empty() {
         return Err(StoreError::InvalidDatabase);
     }
+    // One statement retains one VM credit across both process sample tables.
     Ok(branches.join(" UNION ALL "))
 }
+
 struct Aggregate {
     bucket: Option<i64>,
     count: Option<i64>,
@@ -330,6 +290,118 @@ struct Aggregate {
     invalid_duration: Option<i64>,
     clamped_duration: Option<i64>,
 }
+#[derive(Clone, Copy, Default)]
+struct Accumulator {
+    count: i64,
+    identity: Option<i64>,
+    weight: Option<i64>,
+    clamped: i64,
+    invalid_duration: i64,
+    clamped_duration: i64,
+}
+
+fn aggregate_rows(
+    db: &Database<'_>,
+    inspection: &DatabaseInspection,
+    query: &TraceDensityQuery,
+    start: i64,
+    width: i64,
+    sql: &str,
+    bindings: Vec<Value>,
+) -> Result<Vec<Aggregate>, StoreError> {
+    let counter = matches!(
+        query.source,
+        TraceDensitySource::CpuCounter { .. } | TraceDensitySource::ProcessCounter { .. }
+    );
+    // The caller credited bucket state before allocation. No event Vec or
+    // decoded strings survive a source row, and VM credit is not reset.
+    let mut state = vec![Accumulator::default(); query.bucket_count];
+    db.visit(sql, params_from_iter(bindings), DEFAULT_VM_BUDGET, |row| {
+        let identity = optional_integer(row, 0)?;
+        let timestamp = optional_integer(row, 1)?.ok_or(StoreError::InvalidDatabase)?;
+        let duration = optional_integer(row, 2)?;
+        let weight = if counter { Some(0) } else { duration };
+        let index = if timestamp <= start {
+            0
+        } else {
+            timestamp
+                .checked_sub(start)
+                .ok_or(StoreError::InvalidDatabase)?
+                / width
+        }
+        .min(query.bucket_count as i64 - 1) as usize;
+        let aggregate = &mut state[index];
+        // SQLite's single MAX retains the first equal non-null maximum; when
+        // every weight is NULL, its bare witness comes from the last row.
+        if aggregate.count == 0
+            || aggregate.weight.is_none()
+            || weight.is_some_and(|value| aggregate.weight.is_some_and(|old| value > old))
+        {
+            aggregate.identity = identity;
+            aggregate.weight = weight;
+        }
+        aggregate.count = aggregate
+            .count
+            .checked_add(1)
+            .ok_or(StoreError::InvalidDatabase)?;
+        if timestamp < inspection.trace_start_ts || timestamp > inspection.trace_end_ts {
+            aggregate.clamped = aggregate
+                .clamped
+                .checked_add(1)
+                .ok_or(StoreError::InvalidDatabase)?;
+        }
+        if counter {
+            let malformed = !matches!(
+                row.get_ref(2).map_err(crate::database::sqlite_error)?,
+                ValueRef::Integer(_) | ValueRef::Null
+            );
+            let clamped = duration.is_some_and(|value| {
+                value > 0
+                    && (value > inspection.duration_ns
+                        || i128::from(timestamp) + i128::from(value)
+                            > i128::from(inspection.trace_end_ts))
+            });
+            aggregate.invalid_duration = aggregate
+                .invalid_duration
+                .checked_add(i64::from(malformed))
+                .ok_or(StoreError::InvalidDatabase)?;
+            aggregate.clamped_duration = aggregate
+                .clamped_duration
+                .checked_add(i64::from(clamped))
+                .ok_or(StoreError::InvalidDatabase)?;
+        }
+        Ok(())
+    })?;
+    Ok(state
+        .into_iter()
+        .enumerate()
+        .filter(|(_, value)| value.count > 0)
+        .map(|(bucket, value)| Aggregate {
+            bucket: Some(bucket as i64),
+            count: Some(value.count),
+            identity: value.identity,
+            clamped: Some(value.clamped),
+            invalid_duration: Some(value.invalid_duration),
+            clamped_duration: Some(value.clamped_duration),
+        })
+        .collect())
+}
+
+#[cfg(test)]
+fn cpu_aggregate(
+    db: &Database<'_>,
+    inspection: &DatabaseInspection,
+    query: &TraceDensityQuery,
+    cpu: i64,
+    width: i64,
+) -> Result<Vec<Aggregate>, StoreError> {
+    assert_eq!(query.source, TraceDensitySource::Cpu { cpu });
+    let mut bindings = Vec::new();
+    let sql = interval_source(inspection, query, &mut bindings)?;
+    let (start, _) = absolute_bounds(inspection, query.range)?;
+    aggregate_rows(db, inspection, query, start, width, &sql, bindings)
+}
+
 fn resolve_identities(
     db: &Database<'_>,
     source: &TraceDensitySource,
@@ -423,4 +495,185 @@ fn result(
         data_quality: DataQuality::machine(status, issues)
             .map_err(|_| StoreError::InvalidQualityContract)?,
     })
+}
+
+#[cfg(test)]
+mod cpu_stream_tests {
+    use super::*;
+    use crate::ValidationBudget;
+    use arktrace_platform::CancellationToken;
+    use rusqlite::Connection;
+    use std::time::{Duration, Instant};
+
+    fn fixture(extra: &str) -> (Connection, DatabaseInspection) {
+        let c = Connection::open_in_memory().unwrap();
+        c.execute_batch("CREATE TABLE trace_range(start_ts INTEGER,end_ts INTEGER); INSERT INTO trace_range VALUES(1000,1000000);
+            CREATE TABLE process(ipid INTEGER,pid INTEGER,name TEXT,start_ts INTEGER); INSERT INTO process VALUES(1,42,'process',1000);
+            CREATE TABLE thread(itid INTEGER,tid INTEGER,name TEXT,start_ts INTEGER,ipid INTEGER); INSERT INTO thread VALUES(1,43,'thread',1000,1);
+            CREATE TABLE sched_slice(id INTEGER,ts INTEGER,dur INTEGER,cpu INTEGER,itid INTEGER,ipid INTEGER);
+            CREATE INDEX arktrace_v3_sched_slice_cpu_ts_dur ON sched_slice(cpu,ts,dur);
+            CREATE TABLE thread_state(id INTEGER,ts INTEGER,dur INTEGER,itid INTEGER,state TEXT);
+            CREATE TABLE callstack(id INTEGER,ts INTEGER,dur INTEGER,callid INTEGER,name TEXT);").unwrap();
+        c.execute_batch(extra).unwrap();
+        let b = budget();
+        let inspection = Database::borrow_writable(&c, &b)
+            .unwrap()
+            .inspect()
+            .unwrap();
+        (c, inspection)
+    }
+    fn budget() -> ValidationBudget {
+        ValidationBudget {
+            maximum_database_bytes: 256 * 1024 * 1024,
+            deadline: Instant::now() + Duration::from_secs(10),
+            cancellation: CancellationToken::default(),
+        }
+    }
+    fn request(start: i64, end: i64, buckets: usize) -> TraceDensityQuery {
+        TraceDensityQuery {
+            range: TraceTimeRange::query(start, end).unwrap(),
+            source: TraceDensitySource::Cpu { cpu: 0 },
+            bucket_count: buckets,
+        }
+    }
+    type ReferenceRow = (Option<i64>, Option<i64>, Option<i64>, Option<i64>);
+
+    // Independent SQLite aggregate reference retains its MAX/bare-witness
+    // behavior; a larger reference-only budget does not change product credit.
+    fn reference(
+        db: &Database<'_>,
+        inspection: &DatabaseInspection,
+        q: &TraceDensityQuery,
+        steps: u64,
+    ) -> Result<Vec<ReferenceRow>, StoreError> {
+        let (start, end) = absolute_bounds(inspection, q.range)?;
+        let width = q.range.duration_ns() / q.bucket_count as i64
+            + i64::from(q.range.duration_ns() % q.bucket_count as i64 != 0);
+        let (predicate, time) =
+            crate::events::absolute_intersection(start, end, inspection.trace_end_ts);
+        let mut values = vec![
+            Value::Integer(start),
+            Value::Integer(start),
+            Value::Integer(width),
+            Value::Integer(inspection.trace_start_ts),
+            Value::Integer(inspection.trace_end_ts),
+        ];
+        values.extend(time);
+        db.query(&format!("WITH sampled AS (SELECT {} AS bucket,
+            CASE WHEN s.ts<? OR s.ts>? THEN 1 ELSE 0 END AS clamped,s.rowid AS witness,s.dur AS weight
+            FROM sched_slice s INDEXED BY arktrace_v3_sched_slice_cpu_ts_dur
+            WHERE {predicate} AND typeof(s.cpu)='integer' AND s.cpu=0)
+            SELECT bucket,COUNT(*),witness,MAX(weight),SUM(clamped) FROM sampled GROUP BY bucket ORDER BY bucket", bucket_sql("s",q.bucket_count)),
+            params_from_iter(values), q.bucket_count, steps,
+            |r| Ok((optional_integer(r,0)?,optional_integer(r,1)?,optional_integer(r,2)?,optional_integer(r,4)?)))
+    }
+    fn compared(rows: Vec<Aggregate>) -> Vec<ReferenceRow> {
+        rows.into_iter()
+            .map(|r| (r.bucket, r.count, r.identity, r.clamped))
+            .collect()
+    }
+    #[test]
+    fn full_cpu_density_fits_existing_credit_and_matches_sqlite_without_sampling() {
+        let (c, inspection) = fixture(
+            "WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<60000)
+            INSERT INTO sched_slice SELECT i,1000+i*10,1,0,1,1 FROM n;",
+        );
+        let b = budget();
+        let db = Database::borrow_writable(&c, &b).unwrap();
+        let q = request(0, 999000, 150);
+        assert_eq!(
+            reference(&db, &inspection, &q, DEFAULT_VM_BUDGET),
+            Err(StoreError::VmBudgetExceeded)
+        );
+        let expected = reference(&db, &inspection, &q, 20_000_000).unwrap();
+        let width = q.range.duration_ns() / 150;
+        let actual = cpu_aggregate(&db, &inspection, &q, 0, width).unwrap();
+        assert_eq!(actual.iter().map(|r| r.count.unwrap()).sum::<i64>(), 60000);
+        assert_eq!(compared(actual), expected);
+    }
+    #[test]
+    fn cpu_witness_ties_nulls_instants_open_ends_and_clamping_match_sqlite() {
+        let (c, inspection) = fixture(
+            "INSERT INTO sched_slice VALUES
+            (1,900,NULL,0,1,1),(2,1000,NULL,0,1,1),(3,1000,NULL,0,1,1),
+            (4,1100,10,0,1,1),(5,1100,10,0,1,1),(6,1200,0,0,1,1),
+            (7,1299,-1,0,1,1),(8,1300,0,0,1,1),(9,1400,1.5,0,1,1),
+            (10,1450,1,'bad',1,1),(11,'bad',1,0,1,1),
+            (12,-9223372036854775808,9223372036854775807,0,1,1);",
+        );
+        let b = budget();
+        let db = Database::borrow_writable(&c, &b).unwrap();
+        for (start, end, buckets) in [
+            (0, 600, 6),
+            (0, 100, 1),
+            (100, 300, 2),
+            (200, 300, 1),
+            (0, 999000, 150),
+        ] {
+            let q = request(start, end, buckets);
+            let width = q.range.duration_ns() / buckets as i64
+                + i64::from(q.range.duration_ns() % buckets as i64 != 0);
+            assert_eq!(
+                compared(cpu_aggregate(&db, &inspection, &q, 0, width).unwrap()),
+                reference(&db, &inspection, &q, DEFAULT_VM_BUDGET).unwrap()
+            );
+        }
+    }
+    #[test]
+    fn busy_cpu_thread_slice_and_counter_results_keep_every_row_and_identity() {
+        let (c, inspection) = fixture(
+            "CREATE INDEX arktrace_v3_thread_state_itid_ts_dur ON thread_state(itid,ts,dur);
+            CREATE INDEX arktrace_v3_callstack_callid_ts_dur ON callstack(callid,ts,dur);
+            CREATE TABLE measure(ts INTEGER,value INTEGER,filter_id INTEGER,dur INTEGER);
+            CREATE INDEX counter_filter_time ON measure(filter_id,ts);
+            CREATE TABLE cpu_measure_filter(id INTEGER,name TEXT,cpu INTEGER);
+            INSERT INTO cpu_measure_filter VALUES(1,'counter',0);
+            WITH RECURSIVE n(i) AS(VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<60000)
+            INSERT INTO sched_slice SELECT i,1000+i*10,1,0,1,1 FROM n;
+            INSERT INTO thread_state SELECT id,ts,dur,itid,'Running' FROM sched_slice;
+            INSERT INTO callstack SELECT id,ts,dur,itid,'busy' FROM sched_slice;
+            INSERT INTO measure SELECT ts,1,1,dur FROM sched_slice;",
+        );
+        let b = budget();
+        let db = Database::borrow_writable(&c, &b).unwrap();
+        let counters = CounterSchema::read(&db, &inspection).unwrap();
+        let frames = FrameSchema::read(&db).unwrap();
+        for source in [
+            TraceDensitySource::Cpu { cpu: 0 },
+            TraceDensitySource::ThreadState {
+                thread: arktrace_contract::ThreadKey { itid: 1 },
+            },
+            TraceDensitySource::NamedSlice {
+                thread: Some(arktrace_contract::ThreadKey { itid: 1 }),
+            },
+            TraceDensitySource::CpuCounter {
+                filter_id: 1,
+                cpu: Some(0),
+            },
+        ] {
+            let q = TraceDensityQuery {
+                source: source.clone(),
+                ..request(0, 999000, 150)
+            };
+            let result = density(&db, &inspection, &counters, frames, &q).unwrap();
+            assert!(result.capability_available);
+            assert_eq!(
+                result.buckets.iter().map(|v| v.event_count).sum::<i64>(),
+                60000
+            );
+            let expected = match source {
+                TraceDensitySource::Cpu { .. } => {
+                    Some(TraceDensityIdentity::ProcessOrThread { identity: 42 })
+                }
+                TraceDensitySource::ThreadState { .. } => Some(TraceDensityIdentity::ThreadState {
+                    state: "Running".into(),
+                }),
+                TraceDensitySource::NamedSlice { .. } => Some(TraceDensityIdentity::Name {
+                    name: "busy".into(),
+                }),
+                _ => None,
+            };
+            assert!(result.buckets.iter().all(|v| v.dominant == expected));
+        }
+    }
 }

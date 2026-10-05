@@ -73,6 +73,16 @@ pin that predates the bump, so it surfaces only when the distribution is rebuilt
 `95ab38d` moved the index schema from 2 to 3; ArkDeck PR #1340 carried the matching change. Diff a
 candidate's `provenance` block against those three literals before re-pinning.
 
+The current Rust migration moves ArkTrace's index schema to **4** for bounded args and
+dictionary lookup. The inspected ArkDeck Rust profile loader still sets `index_schema_version: 3`
+in `rust/crates/arkdeck-hoststore/src/arktrace_profile.rs`; summary and analysis validators compare
+the returned value exactly. Its Swift offline inspection adapter also compares an explicitly
+injected contract. A new schema-4 CLI candidate therefore needs a matching ArkDeck contract and
+fresh consumer validation before it can replace the reviewed distribution. This increment has
+not changed ArkDeck or re-pinned its distribution; its existing schema-3 fixtures and release
+records do not prove the new candidate compatible. See the
+[current migration record](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md).
+
 ## Real Artifact chain
 
 The reviewed Phase 5 run exercised the production path:

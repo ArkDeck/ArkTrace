@@ -278,8 +278,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "byteCount": 32838,
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a"
+      "byteCount": 33831,
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11"
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
@@ -384,6 +384,6 @@
     "sha256": "7c889e65791fd29cc7a90bfd5e7a25a732bb9b8559a1d9556b03bee3689eae83"
   },
   "rawReceiptSHA256": "e96998afbb88e3ae7dfc4ed3facd12898b2760907fb1d025689bfe24d969918a",
-  "revalidatedBaseCommit": "298c8db",
-  "previousReceiptSHA256": "8f9b4bde2443ee77e807be31fad27eea565c8dddc5d00c4c3c66397702d2d299"
+  "revalidatedBaseCommit": "d9459b4",
+  "previousReceiptSHA256": "96ab73bc537da6813a4a6eeecb1c55c4bb86e1104b1b820fc0c76205d4d45ed6"
 }

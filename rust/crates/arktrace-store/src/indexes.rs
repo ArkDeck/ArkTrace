@@ -40,7 +40,7 @@ fn definitions() -> Result<&'static [Definition], StoreError> {
         };
         if corpus.version != 1
             || corpus.index_schema_version != arktrace_contract::INDEX_SCHEMA_VERSION
-            || corpus.definitions.len() != 24
+            || corpus.definitions.len() != 28
             || corpus.definitions.iter().any(|d| {
                 !safe(&d.name)
                     || !safe(&d.table)

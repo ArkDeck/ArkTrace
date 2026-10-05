@@ -339,6 +339,15 @@ small 九份输出仅实际 executable SHA 与已知 C++ DB digest 变化允许 
 它尚未接到生产 argv/resource/signal/error route，也不构成所有 typed queries/完整 CLI/SDK
 或 App 替换。证据见 [007/010 记录](migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.md)。
 
+当前 Ready reader 在首次 open 完整执行 quick_check、schema 与索引校验。后续 Session
+preflight 和 request-scoped worker 只复用该 reader 所持同一个不可变文件的 inspection；worker
+入口由私有 `VerifiedReadSnapshot` 绑定，不能由调用者传入 inspection 代替验证。每次仍检查
+文件大小、只读权限、inode、mtime/ctime、父目录/名称绑定、无 journal/WAL/shm、取消与期限；
+变化直接失败，不更新缓存 inspection。连接在各自 worker 创建和关闭，查询及内存预算不变。
+Density 在一条 SQL 的原 2,000,000 VM-step budget 内流式折叠全部匹配行，只保留固定 bucket
+状态，不采样、不积累事件数组。索引 schema 4 与真实 medium 验证见
+[当前记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)。
+
 ## 7. FFI、SDK 与数据所有权
 
 ### 7.1 选定接口

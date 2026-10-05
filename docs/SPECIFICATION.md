@@ -915,7 +915,7 @@ budget、单 document commit 与 typed exit contract。
   },
   "provenance": {
     "schemaAdapterVersion": "2",
-    "indexSchemaVersion": 3,
+    "indexSchemaVersion": 4,
     "parserAdapterVersion": "1",
     "parserBuildRecipeVersion": "64-lowercase-hex",
     "upstreamDatabaseSha256": "64-lowercase-hex",

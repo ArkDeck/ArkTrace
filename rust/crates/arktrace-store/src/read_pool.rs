@@ -1,9 +1,9 @@
 use crate::{
-    IndexedDatabaseInspection, ReadPoolLimits, StoreError, StoreReader, ValidationBudget,
-    query_resources::QueryResources,
+    ReadPoolLimits, StoreError, StoreReader, ValidationBudget, query_resources::QueryResources,
+    reader::VerifiedReadSnapshot,
 };
 use arktrace_contract::*;
-use arktrace_platform::{ContinuousDeadline, HeldFile};
+use arktrace_platform::ContinuousDeadline;
 use serde::Serialize;
 use std::{
     panic::{AssertUnwindSafe, catch_unwind},
@@ -83,48 +83,36 @@ impl Drop for Active<'_> {
 }
 
 pub(crate) fn run(
-    snapshot: Arc<HeldFile>,
-    expected: &IndexedDatabaseInspection,
+    snapshot: VerifiedReadSnapshot<'_>,
     batch: &TraceRepositoryEventBatch,
     budget: &ValidationBudget,
     limits: ReadPoolLimits,
 ) -> Result<ReadPoolOutput, StoreError> {
-    run_inner(snapshot, expected, batch, budget, limits, &|_| {})
+    run_inner(snapshot, batch, budget, limits, &|_| {})
 }
 
 // Observer is private and used by fault tests; product query requests never
 // supply executable code, raw SQL, paths or worker policy in their JSON.
 pub(crate) fn run_inner(
-    snapshot: Arc<HeldFile>,
-    expected: &IndexedDatabaseInspection,
+    snapshot: VerifiedReadSnapshot<'_>,
     batch: &TraceRepositoryEventBatch,
     budget: &ValidationBudget,
     limits: ReadPoolLimits,
     observer: &(impl Fn(usize) + Sync),
 ) -> Result<ReadPoolOutput, StoreError> {
-    run_inner_with_deadlines(snapshot, expected, batch, None, budget, limits, observer)
+    run_inner_with_deadlines(snapshot, batch, None, budget, limits, observer)
 }
 pub(crate) fn run_with_deadlines(
-    snapshot: Arc<HeldFile>,
-    expected: &IndexedDatabaseInspection,
+    snapshot: VerifiedReadSnapshot<'_>,
     batch: &TraceRepositoryEventBatch,
     deadlines: &[Option<ContinuousDeadline>],
     budget: &ValidationBudget,
     limits: ReadPoolLimits,
 ) -> Result<ReadPoolOutput, StoreError> {
-    run_inner_with_deadlines(
-        snapshot,
-        expected,
-        batch,
-        Some(deadlines),
-        budget,
-        limits,
-        &|_| {},
-    )
+    run_inner_with_deadlines(snapshot, batch, Some(deadlines), budget, limits, &|_| {})
 }
 pub(crate) fn run_inner_with_deadlines(
-    snapshot: Arc<HeldFile>,
-    expected: &IndexedDatabaseInspection,
+    snapshot: VerifiedReadSnapshot<'_>,
     batch: &TraceRepositoryEventBatch,
     deadlines: Option<&[Option<ContinuousDeadline>]>,
     budget: &ValidationBudget,
@@ -182,16 +170,9 @@ pub(crate) fn run_inner_with_deadlines(
                     let mut reader = None;
                     let work = catch_unwind(AssertUnwindSafe(|| {
                         resources.reserve(1024 * 1024)?;
-                        reader = Some(StoreReader::open_bounded(
-                            snapshot,
-                            budget,
-                            Some(resources.clone()),
-                        )?);
+                        reader = Some(snapshot.open_worker(budget, resources.clone())?);
                         counters.opened.fetch_add(1, Ordering::Relaxed);
                         let reader = reader.as_ref().ok_or(StoreError::WorkerFailed)?;
-                        if reader.indexed_inspection() != expected {
-                            return Err(StoreError::InvalidDatabase);
-                        }
                         loop {
                             budget.check()?;
                             resources.check()?;

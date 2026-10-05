@@ -260,3 +260,5 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 2026-10-05：native controller 已接通旧状态导入、非致命恢复、代次绑定冲突选择与未匹配收藏界面。Fresh Swift producer → actual native controller 冷导入/重开/新编辑保存与资源释放通过；719 Swift passed、6 既有 skip，默认/原生 App 与包外 API 通过。默认 cutover、回滚产品导出与完整 macOS 验收仍未完成，goal active；见 [本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-migration-controller.md)。
 
 2026-10-06：当前未发布产品继续只保留最新状态规则。默认 native catalog 已使用有界 CPU 身份目录，真实 signed bundle 的空根冷解析、缓存重开和默认 bundled 工厂均到 Ready，close/shutdown 通过；Rust 549、默认 Swift 631、native Swift 732 passed。GUI、性能、完整 process forest 及适用发行验收未完成，goal 管理器仍 blocked；见 [CPU 目录增量记录](migration-runs/AT-RUST-007-013-2026-10-06-cpu-catalog.md)。
+
+2026-10-06：真实 265 MB medium 的 density 全行流式聚合、args covering indexes/schema 4、Session/worker 的 held immutable Ready inspection 复用完成。558 Rust、635 default Swift / 736 fixture-native Swift（各 6 既有 opt-in skips）、正常 SDK API 与当前 Debug/优化 Release App 构建及本地签名通过；真实 cold/cache Controller 的精确事件、12 条参数、close/active0/shutdown 及只读原行核对通过。桌面仍锁定，>500 MiB 输入、GUI/性能/完整进程树及 ArkDeck schema-4 联调和适用发行验收仍 open；goal 管理器保持 blocked。见[当前 medium 查询记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)。

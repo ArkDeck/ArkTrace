@@ -214,7 +214,7 @@ def main():
     assert protocol["windows"] == {"primitive": "LockFileEx", "offsetDecimal": str(2**64 - 2), "lengthBytes": 1}
     assert protocol["lockOrder"] == ["keyLock", "exclusiveEntryLease", "ownerLock"]
     definitions = json.loads((ROOT / "contracts/index-definitions.json").read_text(encoding="utf-8"))
-    assert definitions["version"] == 1 and definitions["indexSchemaVersion"] == 3
+    assert definitions["version"] == 1 and definitions["indexSchemaVersion"] == 4
     preparer = (ROOT / "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift").read_text(encoding="utf-8")
     block = preparer.split("private static let indexes = [", 1)[1].split("\n    ]", 1)[0]
     frozen = []
@@ -234,8 +234,8 @@ def main():
             "required": bool_field("requiredForReady"),
             "unique": bool_field("unique", False), "partial": bool_field("partial", False),
         })
-    assert len(frozen) == 24 and definitions["definitions"] == frozen, "Swift/Rust index definition drift"
-    assert len({d["name"] for d in frozen}) == 24
+    assert len(frozen) == 28 and definitions["definitions"] == frozen, "Swift/Rust index definition drift"
+    assert len({d["name"] for d in frozen}) == 28
     metadata = json.loads((ROOT / "contracts/ready-metadata.json").read_text(encoding="utf-8"))
     runtime = (ROOT / "Sources/ArkTraceRuntime/TraceCache.swift").read_text(encoding="utf-8")
     keys = runtime.split("private enum CodingKeys: String, CodingKey, CaseIterable {", 1)[1].split("\n    }", 1)[0]

@@ -6,7 +6,7 @@
   "vectors": 62,
   "frames": 50,
   "agentViews": 12,
-  "executableSHA256": "a2b312e1cc8191e211be2838e99139f27b977cc7c472f792958bd2631e9be82e",
+  "executableSHA256": "92741b0d545bd6331d4661b2f450c9e8a1ce190be5f103c4cfb06b0a1bd02928",
   "databases": [
     {
       "fixture": "frame-full",
@@ -177,8 +177,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
-      "sha256": "4c3779da3f8f2c4edfb79dc9f5807c7a669a8f94b755d3d21d6898ab5bfa815a",
-      "byteCount": 32838
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11",
+      "byteCount": 33831
     },
     {
       "path": "Sources/ArkTraceStore/TraceEventIntersection.swift",
