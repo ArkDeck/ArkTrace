@@ -1,0 +1,559 @@
+{
+  "date": "2026-10-05",
+  "baseCommit": "f436d6c7ec20cec92c98c55882155479f49a6288",
+  "scope": "Native asynchronous and C ABI session-owned sidecar transport; existing Swift SDK compatibility verification, no sidecar Swift SDK/controller API yet",
+  "toolchain": {
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "host": "native macOS arm64",
+    "swift": "6.4 / language mode 6"
+  },
+  "contract": {
+    "abiVersion": 1,
+    "sha256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+    "records": 10,
+    "fields": 95,
+    "exports": 26,
+    "productionCapabilities": 55,
+    "fixtureCapabilities": 63,
+    "ordinaryRequestBytes": 1048576,
+    "sidecarBytes": 4194304,
+    "retainedSidecarInputBytes": 16777216
+  },
+  "implementation": [
+    "Dedicated read/write/remove C export with null+zero control input, original bounded closed JSON write input, no request paths/envelope overhead",
+    "Try-lock/try-send admission reserves actual copied Vec capacity before copying; all queued/running raw inputs share fixed engine credits, refunded on command drop including queue refusal, cancel, drain and unwind",
+    "Original JSON shape/version/hash/count/text validation occurs on session worker before native sidecar mutation; uses held opening directory/entry lease, ordinary request handles/provenance/deadline/cancel/result ownership",
+    "Original unsupported existing bytes preserved; ephemeral state remains sessionScoped; post-publication cancel/output failure may accompany commit, refresh via read",
+    "Generated C/Rust/C# bindings and exact digest refreshed; record layouts unchanged; existing Swift conformance materializer now includes exact cacheHit"
+  ],
+  "rustTests": {
+    "passed": 529,
+    "failed": 0,
+    "ignored": 0,
+    "newTests": 5
+  },
+  "sdk": {
+    "unitTests": {
+      "passed": 79,
+      "failed": 0,
+      "skipped": 0,
+      "logSHA256": "65a44701e20091bb874db20cbd30435803a3aa5985d5f2d5709fe33eb0757eaf"
+    },
+    "borrowCompileRejections": [
+      {
+        "case": "BorrowCapture.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "58a995217e2e6a3854d89f21e2eee4588547452dc7e13e5add2e052c9042746c"
+      },
+      {
+        "case": "BorrowEscape.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "a065b876470d6b177699161baabc670b15a2410d811af14f698693322136bdf1"
+      },
+      {
+        "case": "TextBorrowCapture.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "2226ad1f8292a93a950641ad02f558ae071455324c2e09e63ca3dc678d36b0a0"
+      },
+      {
+        "case": "TextBorrowEscape.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "c3cc017a2a67dd4407cb83ea53c14f0a248899fc8c0c462633678581cf4e1502"
+      }
+    ],
+    "artifactIdentity": "eb570949c0284c0c796169aeefc114e5a300857c5e44941ebd9965b5e0f34ffe",
+    "artifactReceipt": {
+      "abiVersion": 1,
+      "contractSHA256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30661472,
+        "sha256": "1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54"
+      },
+      "headers": [
+        {
+          "path": "bindings/c/arktrace_ffi.h",
+          "byteCount": 22839,
+          "sha256": "9f45d570fd0093443ba4f6c9926a11846795466680303f1ad6457fec2bc0cd8b"
+        },
+        {
+          "path": "bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 22839,
+          "sha256": "9f45d570fd0093443ba4f6c9926a11846795466680303f1ad6457fec2bc0cd8b",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30661472,
+          "sha256": "1bf49132a15a1bddf8cb5febeca7c52108a62ec6eef4ee10f87a81700f62cf54",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    },
+    "currentExistingAdapterSmoke": {
+      "actualExistingSDKAdapter": true,
+      "sidecarSDKAcceptance": false,
+      "source": "zlib.htrace",
+      "responses": 1,
+      "uiTicks": 1880,
+      "finalOwnerRefundBytes": 0
+    },
+    "sidecarAPIConnected": false
+  },
+  "actualSidecarABI": {
+    "contractSHA256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+    "capabilities": 63,
+    "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+    "databaseSHA256": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+    "events": [
+      {
+        "name": "cold-open",
+        "session": 4294967552,
+        "cacheHit": false
+      },
+      {
+        "name": "second-open",
+        "session": 4294967809,
+        "cacheHit": true
+      },
+      {
+        "name": "large-original-transport",
+        "inputBytes": 2099065,
+        "normalQueryCap": 1048576
+      },
+      {
+        "name": "invalid-original-preserved",
+        "cases": 7,
+        "beforeSHA256": "2b512f56498758334db00694dd9eb444bae38e8145ec5ffe19e9357a0a139177"
+      },
+      {
+        "name": "reopened",
+        "session": 4294967808,
+        "cacheHit": true
+      },
+      {
+        "name": "actual-input-quota-cancellation",
+        "admitted": 4,
+        "bytes": 16777216,
+        "refused": 1,
+        "refunded": 0
+      },
+      {
+        "name": "future-original-preserved",
+        "sha256": "0347911e1e09d4bf22a15879b49584c2e557965018ffa7caf9919653117a288f",
+        "write": "preserved",
+        "remove": "preserved"
+      },
+      {
+        "name": "ephemeral-open",
+        "session": 8589934848,
+        "cacheHit": false
+      },
+      {
+        "name": "drain-open",
+        "session": 4294968064,
+        "cacheHit": true
+      },
+      {
+        "name": "result-owner-survives-request-session-and-engine-release",
+        "bytes": 2099167,
+        "retainedBytes": 2341440
+      },
+      {
+        "name": "poisoned-open",
+        "session": 12884902144,
+        "cacheHit": true
+      },
+      {
+        "name": "panic-containment-refunds-input",
+        "refusedAfterPoison": true,
+        "remainingInputBytes": 0
+      }
+    ],
+    "inputBudgetRefunded": true,
+    "nativeEngineAcceptance": false,
+    "defaultAppAcceptance": false
+  },
+  "gates": [
+    {
+      "name": "rust-tests-v2",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/rust-tests-v2.receipt.json",
+      "receiptSHA256": "0f7d9b16dc501b66c6773a22f8ece05bee96238ca72b6084eb5cd7139935e6e6",
+      "exitCode": 0,
+      "startedAtUnix": 1791160435.952311,
+      "finishedAtUnix": 1791160462.314548,
+      "stdoutSHA256": "e0db3bdee2af6be9a751b8b39596308cc4e5b1dd9dd129c688ec63e2ce77f830",
+      "stderrSHA256": "2a11871a9b219aafeece661dd14b40ca7ab1a547c98d8cd578a84c841a2d2435"
+    },
+    {
+      "name": "rust-clippy-v2",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/rust-clippy-v2.receipt.json",
+      "receiptSHA256": "f74ed1f8a4f3de330a519d141b04945dbd33a3518fdde61154414366889d0d83",
+      "exitCode": 0,
+      "startedAtUnix": 1791160519.286596,
+      "finishedAtUnix": 1791160520.1493251,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "b83ac8b20185bfe1c8de07749874af99ebca540ef8ca718ae8a265b108d6babe"
+    },
+    {
+      "name": "rust-build-v2",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/rust-build-v2.receipt.json",
+      "receiptSHA256": "9d584b4cb9dbdce98f21ad5f0a5ab15f383a98399bc1a033a2a37c29b0d790d0",
+      "exitCode": 0,
+      "startedAtUnix": 1791161203.192779,
+      "finishedAtUnix": 1791161205.068639,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "fe9a745341463b5bd43e9c4898088e6e984b6fbf5a4c36c4acb351d379f5ade4"
+    },
+    {
+      "name": "rust-fmt-check-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/rust-fmt-check-v1.receipt.json",
+      "receiptSHA256": "d113e97036f3e66f2aaf2a8a7bb7ff2af1e90b75b9ab339f04a9f0f5523fadfa",
+      "exitCode": 0,
+      "startedAtUnix": 1791161325.804534,
+      "finishedAtUnix": 1791161326.438734,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rust-smoke-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/rust-smoke-v1.receipt.json",
+      "receiptSHA256": "94b5c6f414257e39837915b0808d3e7e0a6996cada737d8fe386c9aa6b61e6d1",
+      "exitCode": 0,
+      "startedAtUnix": 1791161322.878549,
+      "finishedAtUnix": 1791161323.8957691,
+      "stdoutSHA256": "071b32eea36b5e931369d008981f210927a332e72a5595774ac8a258526a652e",
+      "stderrSHA256": "8349d4afce2618905c2bcb8fb5e44d7e81f76e507a18a2f3297688e4b886f652"
+    },
+    {
+      "name": "workspace-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/workspace-v1.receipt.json",
+      "receiptSHA256": "7b7682b361cf1c46749b4bf32c22371f394da5235f3df17a644f1eeff9038522",
+      "exitCode": 0,
+      "startedAtUnix": 1791161259.970269,
+      "finishedAtUnix": 1791161260.461824,
+      "stdoutSHA256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ffi-contract-v2",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/ffi-contract-v2.receipt.json",
+      "receiptSHA256": "61a5701b985416b9819fae837cc9f0a9e896882eb126b7ca9d423cd31225cc81",
+      "exitCode": 0,
+      "startedAtUnix": 1791160564.170208,
+      "finishedAtUnix": 1791160571.638138,
+      "stdoutSHA256": "531c14ba4b81bf148e5d91651bcd2e69011438b26afec37366ce97d54662e42d",
+      "stderrSHA256": "3355ad48682cea170907744a4c0421c0da044ff2f3845805950c9ed6b3b3ee69"
+    },
+    {
+      "name": "sdk-fixture-build-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/sdk-fixture-build-v1.receipt.json",
+      "receiptSHA256": "7e162ebf38b2fbd319888385920f828e3b59848680963ff44aa23cb417ee7122",
+      "exitCode": 0,
+      "startedAtUnix": 1791160670.9045272,
+      "finishedAtUnix": 1791160687.280106,
+      "stdoutSHA256": "01370028c624812d517c7730237f9776a918eb2527473fa756c427ea6b703ad1",
+      "stderrSHA256": "46262ab878dc8aa07c836d992bb3ac83b4ca30143bd8492c7f8fc652985db48b"
+    },
+    {
+      "name": "sdk-consumer-v2",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/sdk-consumer-v2.receipt.json",
+      "receiptSHA256": "7356c2c1453ea1b598f1889a6ee5467d135704b4b30959ca54472fac0f863095",
+      "exitCode": 0,
+      "startedAtUnix": 1791161321.7178612,
+      "finishedAtUnix": 1791161340.550294,
+      "stdoutSHA256": "89c98ee37a385e03e756c37b2562f02921719b8b1e243a805fadce75464ce1df",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rust-fixture-build-v2",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/rust-fixture-build-v2.receipt.json",
+      "receiptSHA256": "3fe8a66255014e76b1b0444e43f4d1171850767210fce5d060873bbcf2c22630",
+      "exitCode": 0,
+      "startedAtUnix": 1791160818.496911,
+      "finishedAtUnix": 1791160820.3023639,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "958013bbd44762108f756938a279437b16ed987a86d1d3f9c4476e73c2e50709"
+    },
+    {
+      "name": "production-helper-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/production-helper-v1.receipt.json",
+      "receiptSHA256": "cd363518c1e32aca9c6d78d7ab1036297cd9b69b629093824156f0cda9d50980",
+      "exitCode": 0,
+      "startedAtUnix": 1791161019.7224488,
+      "finishedAtUnix": 1791161020.477781,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "c92508a29848820f033cd2ea015c85dde0953c88b07cc967ce34b7c08f610549"
+    },
+    {
+      "name": "actual-abi-v3",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/actual-abi-v3.receipt.json",
+      "receiptSHA256": "bf91e50e030ca582938069e3002443a2f491c727609b27d40f4716f6f8d0d322",
+      "exitCode": 0,
+      "startedAtUnix": 1791161106.0249019,
+      "finishedAtUnix": 1791161114.913192,
+      "stdoutSHA256": "f171559ea10ea8edf848229ff4095c0ce7690a6ebd3a34d81ba48005653ddbf8",
+      "stderrSHA256": "b99dbe21e64a670df7cdec7b396d85a917c169faa10e350081c020114afe6034"
+    },
+    {
+      "name": "sdk-native-smoke-v3",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/sdk-native-smoke-v3.receipt.json",
+      "receiptSHA256": "7641bed256a8c3938e2af779ba9fc79f41f88911d4633fa3cfd265957874076d",
+      "exitCode": 0,
+      "startedAtUnix": 1791161630.453921,
+      "finishedAtUnix": 1791161634.799773,
+      "stdoutSHA256": "f2007c99e3a101bfa49fb639a6420a6b6e5dc3c56e539893130412ab3f7440b6",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "bindings-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/bindings-v1.receipt.json",
+      "receiptSHA256": "b857b3defeb0abce2b8a79cd1c5e6da3d9b7ce62352dbebc9d92980b087b6cb8",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.468506,
+      "finishedAtUnix": 1791160565.724803,
+      "stdoutSHA256": "e5ce5d3d599e23330b5341138606486352b2e1fd5a667586ffab9a0977526adc",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "migration-contracts-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/migration-contracts-v1.receipt.json",
+      "receiptSHA256": "807e2afd969ec7d3f0a67ba61deb00286b6506554c8068a36f8ad409f89b9b71",
+      "exitCode": 0,
+      "startedAtUnix": 1791161776.681721,
+      "finishedAtUnix": 1791161776.936737,
+      "stdoutSHA256": "0c04adc9dd525f640f1bede46ace3ec23c1ef04bb2db677eed983e3ce7e7c983",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "migration-tests-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/migration-tests-v1.receipt.json",
+      "receiptSHA256": "ce63fdbc918de4bad9f1d6c3561344cd51c71bdcd3e0da351bf594c22872775b",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.463674,
+      "finishedAtUnix": 1791160566.239063,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "dc0b41226be57c05453dc15d72203e227b5a9dc3b6a1ce304eab223576a6eacc"
+    },
+    {
+      "name": "ci-planner-tests-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/ci-planner-tests-v1.receipt.json",
+      "receiptSHA256": "1e055705ba20e66ce77bcdb9d14c24c674c5c03190516aa6c5ff43b122115e17",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.4824588,
+      "finishedAtUnix": 1791160566.064571,
+      "stdoutSHA256": "6051c596f71980160f28390ff7ef62c0d1c7c7743119909ba0051b52454d9963",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "licenses-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/licenses-v1.receipt.json",
+      "receiptSHA256": "38f8219153627103b08d9cbdcb64fac5d31669ff5a2975e875b33cd97c18a478",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.492457,
+      "finishedAtUnix": 1791160566.22536,
+      "stdoutSHA256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "parser-lock-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/parser-lock-v1.receipt.json",
+      "receiptSHA256": "080ff8b1ab0878a7245cd354f185e310d8bd4b64ad7dc57662964ee388605a88",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.516014,
+      "finishedAtUnix": 1791160565.675699,
+      "stdoutSHA256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "palette-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/palette-v1.receipt.json",
+      "receiptSHA256": "3b26e53a51d98e9ee8427098dd90ebed62954d14f9b28daeb6062d77df2e6e7b",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.5367439,
+      "finishedAtUnix": 1791160566.268954,
+      "stdoutSHA256": "5b513cdcede959bc5372e81faea29b98994f6a8f78dff20589f0dd03e0efe7a3",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "palette-tests-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/palette-tests-v1.receipt.json",
+      "receiptSHA256": "2d90b804bf65c761e0dd0dbcc09cdfe27f0a75f0a5ac7ed1d1b99a1f358ac1d7",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.518844,
+      "finishedAtUnix": 1791160571.144715,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "b7a3ce046c67fe446f662bcd8838fbe62511b2c770ac0b711372a072731678c4"
+    },
+    {
+      "name": "cargo-runner-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/cargo-runner-v1.receipt.json",
+      "receiptSHA256": "3905016ae4beb4f7f684d81762ff3acb7fe35070febe08cebdcd7766a56106a7",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.5947258,
+      "finishedAtUnix": 1791160565.99383,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "88358856e63244d8092240477fb5911b0f93a22dc6096ab7c42541b97d40d331"
+    },
+    {
+      "name": "sdk-stage-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/sdk-stage-v1.receipt.json",
+      "receiptSHA256": "7028976c4d2ce2f8a52bba07da3e66fc04325a2f7880c98e057b70e92845fc7b",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.657019,
+      "finishedAtUnix": 1791160565.882345,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "f242b01baa943cade05575bd5e5dca9aa16e976ecf5fa164eb079ae115bda24c"
+    },
+    {
+      "name": "phase6-history-v1",
+      "receiptPath": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005/phase6-history-v1.receipt.json",
+      "receiptSHA256": "76ae9c34f29ab9817b610b79aa582ceb34cd795ce6097a35794763acb3451bca",
+      "exitCode": 0,
+      "startedAtUnix": 1791160565.6909618,
+      "finishedAtUnix": 1791160565.903608,
+      "stdoutSHA256": "00ca77f6ce36abee9b86d82a5c0563c393ba3ce847cf7029c15e46dfc181ddd0",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sourceProof": {
+    "nativeClosures": [
+      {
+        "gate": "rust-tests-v2",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "rust-clippy-v2",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "rust-build-v2",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "ffi-contract-v2",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "sdk-fixture-build-v1",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "rust-fixture-build-v2",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "production-helper-v1",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "rust-fmt-check-v1",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "rust-smoke-v1",
+        "sourceRows": 472,
+        "mismatches": []
+      },
+      {
+        "gate": "workspace-v1",
+        "sourceRows": 472,
+        "mismatches": []
+      }
+    ],
+    "nativeTestExecutableCopies": 51,
+    "swiftFileLists": 29,
+    "swiftSourceRows": 319,
+    "deletedNegativeSourceRows": 1,
+    "deletedNegativeSourceNote": "Only the expected Consumer/Invalid.swift temporary from the negative compiler probe is absent; exact original .invalid sources and diagnostics are retained.",
+    "nativeCachedTopLevelDepfiles": 12,
+    "nativeDepfileSourceRows": 103,
+    "nativeDepfileMissing": 0,
+    "depinfoNote": "Includes cached targets; does not assert that every depfile belongs to a final executable. Per-producer source closures and exact executable/library manifests are separate.",
+    "privateEvidenceRoot": ".build/agent-coordination/arktrace/native-sidecar-wire-20261005"
+  },
+  "failures": [
+    {
+      "run": "actual-abi-v2",
+      "exitCode": 1,
+      "facts": "All-feature-test helper left in debug cache was rejected at cold open, public code 7/stage 2. Frozen bad helper/library/input/log preserved. Explicit production helper build and pin restored final v3 success."
+    },
+    {
+      "run": "sdk-native-smoke-v1",
+      "exitCode": 1,
+      "facts": "Actual Consumer SIGTRAP at complete opening-object comparison: conformance materializer omitted cacheHit. Exact executable/source/output preserved; helper fixed without removing comparison."
+    },
+    {
+      "run": "sdk-native-smoke-v2",
+      "exitCode": 1,
+      "facts": "Actual Consumer exited 0; wrapper wrongly required a retained snapshot after the existing zlib branch explicitly dropped the last owner and checked zero native bytes before shutdown. Final v3 asserts the intended false survival flag and zero refund, preserves original lifecycle assertions, and passed fresh actual execution."
+    },
+    {
+      "run": "sdk-consumer-v1-inputs freeze",
+      "exitCode": 1,
+      "facts": "Initial direct freeze failed on deleted temporary Invalid.swift from negative compilation. Partial remains; fresh snapshots explicitly list this sole expected missing input and archive original negative source bytes."
+    }
+  ],
+  "warningAudit": {
+    "rustCompilerWarnings": 0,
+    "sdkCompilerWarnings": 0,
+    "toolDiagnostics": "Xcode create-xcframework emitted sandbox/CoreSimulator host-service diagnostics; successful artifact receipt preserved. Actual ABI v3 stderr includes the expected controlled fixture panic hook text; the export contained it and refunded input credits."
+  },
+  "ci": {
+    "planner": [
+      "lane_swiftpm=true",
+      "lane_app=true",
+      "lane_contracts=true",
+      "lane_rust_macos=true",
+      "lane_rust_windows=true"
+    ],
+    "currentHeadRemoteCI": "not run",
+    "windowsNative": "not run",
+    "defaultSwiftAndAppThisIncrement": "not rerun; no default App source or Swift public API changed; current native SDK compiled and exercised separately"
+  },
+  "acceptance": {
+    "nativeSidecarTransport": true,
+    "sidecarSwiftSDK": false,
+    "sidecarController": false,
+    "defaultApp": false,
+    "macOSCrossPlatform": false,
+    "release": false,
+    "goal": "active"
+  },
+  "remaining": [
+    "Typed Swift sidecar response/input budgeting and native controller access with visible errors, flush/close/generation barriers; replace compatibility URL IO",
+    "Preserve signed annotation identity/extrema and unmatched favorites during product restore/save",
+    "Legacy sidecar backup/import, default App and native hot snapshot cutover",
+    "Actual GUI, performance, distribution/signing and ArkDeck acceptance; applicable native Windows/remote CI still pending",
+    "Import approved finite Root-document/builder tests or modules with exact hunks/current-source validation when their integration stage is reached"
+  ],
+  "mainPublication": "Still denied by automatic approval review pending current trusted direct human authorization; no retry this increment"
+}

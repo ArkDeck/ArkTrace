@@ -23,6 +23,22 @@ change Engine configuration, signing policy or parser identity. This JSON
 operation schema has typed Swift request factories; its published SDK schema
 and C# wrappers remain pending.
 
+`view_state_request_submit` is a separate session-owned read/write/remove
+transport. Read/remove require null input and zero bytes. Write accepts the
+original closed format-1 sidecar JSON, up to 4 MiB, without a query envelope;
+ordinary `request_submit` remains capped at 1 MiB. Rust reserves credits before
+copying caller memory. Actual copied capacities across queued/running documents
+share a fixed 16 MiB Engine quota, exposed by
+`engine_retained_view_state_input_bytes`; rejection, cancellation, close/drain
+and contained unwind refund credits when the owned commands drop. Parsing and
+fixed-name sidecar IO run on the opening session's owner worker, using its held
+directory and lease. Existing unknown/corrupt bytes return `preserved`.
+Read returns a closed status/document object; write/remove return a closed status
+string. Post-publication cancellation or output failure may accompany a committed
+save/remove, so refresh via read. ABI v1 retains its record layouts and uses a
+new contract digest and `CAP_VIEW_STATE`; the Swift sidecar SDK/controller ports
+are still pending. This counter bounds copied payload capacities, not process RSS.
+
 `result_acquire` retains immutable UTF-8; failed requests expose the closed,
 path-free public error envelope. `snapshot_acquire` retains arrays of tracks,
 primitives, complete machine quality and a UTF-8 string table, packed by the
@@ -66,6 +82,16 @@ Verification:
   traces, fresh independent Swift repository/loader/geometry parity, retained
   arrays/UTF-8 ownership, cancellation of stale generations, last-owner budget
   refund, cleanup, FD/raw-source checks and controlled export panic isolation.
+
+- `scripts/test_macos_view_state_abi.py`: caller-supplied frozen fixture library,
+  production helper, fixed parser and actual Trace. Checks save/replace/reopen,
+  exact byte cap, a payload larger than the ordinary query cap, invalid/future
+  byte preservation, four-document quota/refusal under actual key-lock
+  contention, cancellation/drain/panic refund, ephemeral state and result owners
+  after Engine release. All inputs, original responses and artifacts are retained
+  in a fresh `--evidence-dir`. Build the production helper after all-feature
+  tests; a fixture helper is not a product helper. This gate does not attest the
+  Swift sidecar SDK, default App, performance or a release package.
 
 - `scripts/test_macos_rust_sdk.py`: package-external async Swift consumer,
   actual parser/Swift parity, ARC owners and observable cleanup failures,

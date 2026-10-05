@@ -11,7 +11,7 @@ extern "C" {
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
 #define ARKTRACE_ABI_VERSION 1u
-#define ARKTRACE_CONTRACT_DIGEST "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8"
+#define ARKTRACE_CONTRACT_DIGEST "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_STATUS_OK 0u
@@ -136,6 +136,12 @@ ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host
 #define ARKTRACE_CACHE_INVENTORY 1u
 #define ARKTRACE_CACHE_MAINTAIN 2u
 #define ARKTRACE_CACHE_PURGE_UNUSED 3u
+#define ARKTRACE_CAP_VIEW_STATE 32u
+#define ARKTRACE_VIEW_STATE_READ 1u
+#define ARKTRACE_VIEW_STATE_WRITE 2u
+#define ARKTRACE_VIEW_STATE_REMOVE 3u
+#define ARKTRACE_MAXIMUM_VIEW_STATE_BYTES 4194304u
+#define ARKTRACE_MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES 16777216u
 typedef struct ArkTraceAbiIdentity {
     uint32_t struct_size;
     uint32_t abi_version;
@@ -367,6 +373,7 @@ uint32_t arktrace_session_poll(uint64_t engine, uint64_t session, ArkTraceSessio
 uint32_t arktrace_session_close(uint64_t engine, uint64_t session);
 uint32_t arktrace_session_release(uint64_t engine, uint64_t session);
 uint32_t arktrace_cache_request_submit(uint64_t engine, uint32_t operation, uint32_t timeout_ms, uint64_t * output, uint64_t output_bytes);
+uint32_t arktrace_view_state_request_submit(uint64_t engine, uint64_t session, uint32_t operation, const uint8_t * input, uint64_t input_bytes, uint32_t timeout_ms, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_request_submit(uint64_t engine, uint64_t session, const uint8_t * input, uint64_t input_bytes, uint32_t timeout_ms, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_request_poll(uint64_t engine, uint64_t request, ArkTracePollStatus * output, uint64_t output_bytes);
 uint32_t arktrace_request_cancel(uint64_t engine, uint64_t request);
@@ -379,6 +386,7 @@ uint32_t arktrace_snapshot_acquire(uint64_t engine, uint64_t request, ArkTraceSn
 uint32_t arktrace_snapshot_view(uint64_t owner, ArkTraceSnapshotView * output, uint64_t output_bytes);
 uint32_t arktrace_fixture_panic(uint64_t engine);
 uint32_t arktrace_engine_retained_result_bytes(uint64_t engine, uint64_t * output, uint64_t output_bytes);
+uint32_t arktrace_engine_retained_view_state_input_bytes(uint64_t engine, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_session_error_acquire(uint64_t engine, uint64_t session, ArkTraceResultView * output, uint64_t output_bytes);
 #undef ARKTRACE_LAYOUT_ASSERT
 #ifdef __cplusplus

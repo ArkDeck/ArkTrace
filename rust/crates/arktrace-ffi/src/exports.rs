@@ -8,6 +8,13 @@ use std::{
     mem::{align_of, size_of},
     panic::{AssertUnwindSafe, catch_unwind},
 };
+const _: () =
+    assert!(MAXIMUM_VIEW_STATE_BYTES as usize == arktrace_engine::MAXIMUM_VIEW_STATE_BYTES);
+#[cfg(target_os = "macos")]
+const _: () = assert!(
+    MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES as usize
+        == arktrace_engine::MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES
+);
 fn guard(engine: u64, body: impl FnOnce() -> Result<(), u32>) -> u32 {
     // Retain the panic context before entering the body. Containment must not
     // depend on acquiring the process registry again during an unwind.
@@ -45,12 +52,20 @@ unsafe fn output<'a, T: Default>(pointer: *mut T, bytes: u64) -> Result<&'a mut 
     }
 }
 unsafe fn input(pointer: *const u8, bytes: u64, maximum: u32) -> Result<Vec<u8>, u32> {
+    Ok(unsafe { borrowed_input(pointer, bytes, maximum) }?.to_vec())
+}
+unsafe fn borrowed_input<'a>(
+    pointer: *const u8,
+    bytes: u64,
+    maximum: u32,
+) -> Result<&'a [u8], u32> {
     if pointer.is_null() || bytes == 0 || bytes > u64::from(maximum) || bytes > isize::MAX as u64 {
         return Err(STATUS_INVALID_BUFFER);
     }
     // SAFETY: caller guarantees the validated range is readable and live.
-    // Copy before return; no worker retains caller memory.
-    Ok(unsafe { std::slice::from_raw_parts(pointer, bytes as usize) }.to_vec())
+    // The borrow stays inside this call. The async front end reserves credits
+    // before copying; no worker retains caller memory.
+    Ok(unsafe { std::slice::from_raw_parts(pointer, bytes as usize) })
 }
 macro_rules! simple {
     ($name:ident($engine:ident $(,$arg:ident:$type:ty)*),$body:expr)=>{
@@ -69,7 +84,11 @@ pub unsafe extern "C" fn arktrace_abi_identity(out: *mut AbiIdentity, bytes: u64
             abi_version: ABI_VERSION,
             capabilities: if cfg!(target_os = "macos") {
                 u64::from(
-                    CAP_MACOS_ENGINE | CAP_COLD_JSON | CAP_VIEWPORT_RECORDS | CAP_CACHE_MAINTENANCE,
+                    CAP_MACOS_ENGINE
+                        | CAP_COLD_JSON
+                        | CAP_VIEWPORT_RECORDS
+                        | CAP_CACHE_MAINTENANCE
+                        | CAP_VIEW_STATE,
                 )
             } else {
                 0
@@ -178,6 +197,29 @@ pub unsafe extern "C" fn arktrace_engine_retained_result_bytes(
         #[cfg(target_os = "macos")]
         {
             *out = host.engine.retained_result_bytes() as u64;
+            Ok(())
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (out, host);
+            Err(STATUS_UNSUPPORTED_HOST)
+        }
+    })
+}
+/// # Safety
+/// Output is a live, aligned writable uint64_t of exactly eight bytes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn arktrace_engine_retained_view_state_input_bytes(
+    engine: u64,
+    out: *mut u64,
+    bytes: u64,
+) -> u32 {
+    guard(engine, || {
+        let out = unsafe { output(out, bytes) }?;
+        let host = registry::host(engine)?;
+        #[cfg(target_os = "macos")]
+        {
+            *out = host.engine.retained_view_state_input_bytes() as u64;
             Ok(())
         }
         #[cfg(not(target_os = "macos"))]
@@ -349,6 +391,60 @@ pub unsafe extern "C" fn arktrace_cache_request_submit(
         #[cfg(not(target_os = "macos"))]
         {
             let _ = (operation, timeout, host, out);
+            Err(STATUS_UNSUPPORTED_HOST)
+        }
+    })
+}
+/// # Safety
+/// Write input is a live readable allocation for the exact bounded byte range;
+/// read/remove require a null pointer and zero bytes. Output is a live aligned
+/// uint64_t record, sized exactly and disjoint from input.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn arktrace_view_state_request_submit(
+    engine: u64,
+    session: u64,
+    operation: u32,
+    p: *const u8,
+    n: u64,
+    ms: u32,
+    out: *mut u64,
+    bytes: u64,
+) -> u32 {
+    guard(engine, || {
+        let out = unsafe { output(out, bytes) }?;
+        let data = match operation {
+            VIEW_STATE_WRITE => Some(unsafe { borrowed_input(p, n, MAXIMUM_VIEW_STATE_BYTES) }?),
+            VIEW_STATE_READ | VIEW_STATE_REMOVE => {
+                if !p.is_null() || n != 0 {
+                    return Err(STATUS_INVALID_BUFFER);
+                }
+                None
+            }
+            _ => return Err(STATUS_INVALID_INPUT),
+        };
+        let timeout = timeout(ms)?;
+        let host = registry::host(engine)?;
+        host.active()?;
+        #[cfg(target_os = "macos")]
+        {
+            let operation = match operation {
+                VIEW_STATE_READ => arktrace_engine::ViewStateRequest::Read,
+                VIEW_STATE_REMOVE => arktrace_engine::ViewStateRequest::Remove,
+                VIEW_STATE_WRITE => {
+                    arktrace_engine::ViewStateRequest::Write(data.ok_or(STATUS_INVALID_BUFFER)?)
+                }
+                _ => return Err(STATUS_INVALID_INPUT),
+            };
+            *out = host
+                .engine
+                .submit_view_state(RuntimeHandle::from_raw(session), operation, timeout)
+                .map_err(registry::failure)?
+                .raw();
+            Ok(())
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (data, timeout, host, out, session);
             Err(STATUS_UNSUPPORTED_HOST)
         }
     })

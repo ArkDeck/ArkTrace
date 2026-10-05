@@ -883,3 +883,5 @@ Windows x64、独立 GUI Capture、隔离 cache、CLI 优先。普通实现不�
 不创建发行包、不操作设备、不修改 ArkDeck。相应行为由配套任务实际交付。
 
 2026-10-05 Session-held sidecar 写入已作为 native 后端增量实现：Ready 外固定 journal 与 owner-bound scratch，先记录 intent、以 held parents 原子替换，再记录 completion 后清理；固定 retirement 名称和已知 cleanup 中断可恢复。Warm lookup/purge 复核 journal，未知 evidence 保留。format-1 codec 有界编码并遵循 persistent marks/empty-delete。524 Rust 与 30 个受控原生 SIGKILL、实际 Trace save/reopen/delete 通过；C ABI/async/Swift SDK/controller 尚未连接，默认 App 和整体验收仍待完成。见[写入增量记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-write.md)。
+
+2026-10-05 native sidecar transport 增量：异步与 C ABI read/write/remove 使用独立 4 MiB 原始文档通道，普通请求保留 1 MiB；排队/运行输入共享 16 MiB actual-capacity credit，worker 校验与 IO 复用 Session-held authority。529 Rust、实际锁竞争额度/取消/drain/panic、save/reopen/delete/future 保留、79 现有 SDK tests 和本轮包外 SDK 实际消费通过，24 个最终 gates exit 0。ABI digest 更新、26 exports/record 布局不变。Swift sidecar SDK/controller、兼容 URL IO 替换、默认 App 与 macOS 总验收仍待完成；全部失败及实际 source/bin 记录见[本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-sidecar-wire.md)，goal 保持 active。

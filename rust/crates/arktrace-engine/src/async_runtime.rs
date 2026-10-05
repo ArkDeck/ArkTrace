@@ -6,6 +6,7 @@ use crate::{
     NoCacheSession, OwnedResult, ParserTools, ReadPoolLimits, RuntimeHandle, SourceFormat,
     handles::HandleTable,
     open_no_cache,
+    owned_input::{InputBudget, OwnedInput},
     owned_result::{self, ResultBudget},
     recover_no_cache,
 };
@@ -384,6 +385,7 @@ struct Shared {
     stopping: AtomicBool,
     alive: AtomicUsize,
     result_budget: Arc<ResultBudget>,
+    view_state_input_budget: Arc<InputBudget>,
 }
 struct Command {
     session: RuntimeHandle,
@@ -398,7 +400,21 @@ enum Operation {
     },
     Query(Box<RepositoryRequest>),
     Cache(CacheRequest),
+    ViewState(ViewStateOperation),
     Close,
+}
+/// Dedicated bounded transport. Write borrows the original format-1 JSON for
+/// admission only; validation and sidecar IO occur on the session owner worker.
+pub enum ViewStateRequest<'a> {
+    Read,
+    Write(&'a [u8]),
+    Remove,
+}
+pub const MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES: usize = 16 * 1024 * 1024;
+enum ViewStateOperation {
+    Read,
+    Write(OwnedInput),
+    Remove,
 }
 /// Engine-scoped requests use only the fixed configured cache root. They do
 /// not create a trace session, load parser tools or accept request paths.
@@ -430,6 +446,7 @@ impl AsyncEngine {
             stopping: AtomicBool::new(false),
             alive: AtomicUsize::new(0),
             result_budget: ResultBudget::new(limits.maximum_retained_result_bytes),
+            view_state_input_budget: InputBudget::new(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES),
         });
         let mut senders = Vec::new();
         for index in 0..limits.workers {
@@ -678,6 +695,54 @@ impl AsyncEngine {
         }
         Ok(handle)
     }
+    /// Shares ordinary session provenance, request capacity, cancellation,
+    /// close/drain and result ownership. Credits bound all queued/running raw
+    /// documents together; no parsing, path IO or publication wait occurs here.
+    pub fn submit_view_state(
+        &self,
+        session: RuntimeHandle,
+        request: ViewStateRequest<'_>,
+        timeout: Duration,
+    ) -> Result<RuntimeHandle, RuntimeFailure> {
+        if matches!(&request, ViewStateRequest::Write(bytes) if bytes.is_empty() || bytes.len() > crate::MAXIMUM_VIEW_STATE_BYTES)
+        {
+            return Err(RuntimeFailure::InvalidRequest);
+        }
+        self.check_running()?;
+        let budget = self.budget(timeout)?;
+        let mut registry = self.registry()?;
+        self.check_running()?;
+        let worker = match registry.table.get(session)? {
+            Record::Session(s) if s.status.state == SessionState::Ready => s.worker,
+            Record::Session(_) => return Err(RuntimeFailure::Closed),
+            _ => return Err(RuntimeFailure::InvalidHandle),
+        };
+        if registry.queued[worker] >= self.limits.queue_per_worker
+            || registry
+                .table
+                .values()
+                .filter(|r| matches!(r, Record::Request(_)))
+                .count()
+                >= self.limits.requests
+        {
+            return Err(RuntimeFailure::Capacity);
+        }
+        let operation = match request {
+            ViewStateRequest::Read => ViewStateOperation::Read,
+            ViewStateRequest::Remove => ViewStateOperation::Remove,
+            ViewStateRequest::Write(bytes) => ViewStateOperation::Write(
+                OwnedInput::copy(bytes, self.shared.view_state_input_budget.clone())
+                    .map_err(|_| RuntimeFailure::Capacity)?,
+            ),
+        };
+        self.enqueue(
+            &mut registry,
+            worker,
+            session,
+            budget,
+            Operation::ViewState(operation),
+        )
+    }
     pub fn poll(&self, request: RuntimeHandle) -> Result<RequestStatus, RuntimeFailure> {
         let registry = self.registry()?;
         match registry.table.get(request)? {
@@ -887,6 +952,9 @@ impl AsyncEngine {
     }
     pub fn retained_result_bytes(&self) -> usize {
         self.shared.result_budget.used()
+    }
+    pub fn retained_view_state_input_bytes(&self) -> usize {
+        self.shared.view_state_input_budget.used()
     }
 }
 impl Drop for AsyncEngine {
@@ -1415,6 +1483,55 @@ fn process(
             observe(config, WorkerBoundary::Querying);
             query(session, q, command, shared, config).map(Some)
         }
+        Operation::ViewState(operation) => {
+            if !matches!(background_registry(shared).table.get(command.session),Ok(Record::Session(s)) if s.status.state==SessionState::Ready)
+            {
+                return Err(RuntimeFailure::Closed);
+            }
+            let session = sessions
+                .get(&command.session)
+                .and_then(|actor| actor.session.as_ref())
+                .ok_or(RuntimeFailure::Closed)?;
+            session
+                .verify(&command.budget)
+                .map_err(RuntimeFailure::Engine)?;
+            observe(config, WorkerBoundary::Querying);
+            match operation {
+                ViewStateOperation::Read => response(
+                    &session
+                        .read_view_state(&command.budget)
+                        .map_err(RuntimeFailure::Engine)?,
+                    command,
+                    shared,
+                    config,
+                ),
+                ViewStateOperation::Remove => response(
+                    &session
+                        .write_view_state(None, &command.budget)
+                        .map_err(RuntimeFailure::Engine)?,
+                    command,
+                    shared,
+                    config,
+                ),
+                ViewStateOperation::Write(bytes) => {
+                    let crate::ViewStateRead::Restored(document) = crate::ViewStateDocument::decode(
+                        bytes.bytes(),
+                        &session.metadata().trace_sha256,
+                    ) else {
+                        return Err(RuntimeFailure::InvalidRequest);
+                    };
+                    response(
+                        &session
+                            .write_view_state(Some(&document), &command.budget)
+                            .map_err(RuntimeFailure::Engine)?,
+                        command,
+                        shared,
+                        config,
+                    )
+                }
+            }
+            .map(Some)
+        }
         Operation::Close => {
             observe(config, WorkerBoundary::Closing);
             let (error, residue) =
@@ -1753,6 +1870,7 @@ mod tests {
             assert_eq!(sdk, legacy);
         }
     }
+    mod view_state;
     mod viewport;
     #[test]
     fn retained_session_cleanup_error_preserves_reason_after_handle_release() {
@@ -1766,6 +1884,7 @@ mod tests {
             stopping: AtomicBool::new(false),
             alive: AtomicUsize::new(0),
             result_budget: ResultBudget::new(4096),
+            view_state_input_budget: InputBudget::new(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES),
         });
         let engine = AsyncEngine {
             cache_enabled: false,
@@ -1883,6 +2002,7 @@ mod tests {
             stopping: AtomicBool::new(false),
             alive: AtomicUsize::new(0),
             result_budget: ResultBudget::new(128),
+            view_state_input_budget: InputBudget::new(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES),
         });
         let engine = AsyncEngine {
             cache_enabled: false,
@@ -1916,6 +2036,7 @@ mod tests {
             stopping: AtomicBool::new(false),
             alive: AtomicUsize::new(0),
             result_budget: ResultBudget::new(128),
+            view_state_input_budget: InputBudget::new(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES),
         });
         let (sender, _receiver) = mpsc::sync_channel(2);
         let engine = AsyncEngine {
@@ -1971,6 +2092,7 @@ mod tests {
             stopping: AtomicBool::new(false),
             alive: AtomicUsize::new(0),
             result_budget: ResultBudget::new(1),
+            view_state_input_budget: InputBudget::new(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES),
         });
         let (sender, receiver) = mpsc::sync_channel(2);
         let engine = AsyncEngine {

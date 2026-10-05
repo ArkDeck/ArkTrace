@@ -6,9 +6,9 @@ mod query_deadlines;
 mod view_state;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
-    AsyncEngine, CacheRequest, DrainStatus, OpenTicket, RepositoryRequest, RequestState,
-    RequestStatus, RuntimeConfiguration, RuntimeFailure, RuntimeLimits, SessionState,
-    SessionStatus, WorkerBoundary,
+    AsyncEngine, CacheRequest, DrainStatus, MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES, OpenTicket,
+    RepositoryRequest, RequestState, RequestStatus, RuntimeConfiguration, RuntimeFailure,
+    RuntimeLimits, SessionState, SessionStatus, ViewStateRequest, WorkerBoundary,
 };
 pub use query_deadlines::{
     BatchQueryDeadlines, DeadlineBatch, DeadlineQuery, DeadlineRepositoryQuery, QueryClock,
@@ -18,6 +18,8 @@ pub use view_state::{
     ViewStateRead, ViewStateWrite,
 };
 mod handles;
+#[cfg(any(target_os = "macos", test))]
+mod owned_input;
 #[cfg(any(target_os = "macos", test))]
 mod owned_result;
 #[cfg(target_os = "macos")]

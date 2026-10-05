@@ -2,10 +2,10 @@
 use arktrace_viewer::{PrimitiveRecord, QualityRecord, TrackRecord, ViewportRecord};
 pub const ABI_VERSION: u32 = 1;
 pub const CONTRACT_DIGEST_HEX: &str =
-    "f4e2de45217e79f20dda5f16b23250e06345f6ac83b909ab30335f17ddcf57d8";
+    "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2";
 pub const CONTRACT_DIGEST: [u8; 32] = [
-    244, 226, 222, 69, 33, 126, 121, 242, 13, 218, 95, 22, 178, 50, 80, 224, 99, 69, 246, 172, 131,
-    185, 9, 171, 48, 51, 95, 23, 221, 207, 87, 216,
+    30, 56, 24, 27, 12, 146, 132, 105, 156, 86, 205, 10, 85, 199, 86, 129, 46, 67, 234, 66, 108,
+    43, 221, 106, 78, 68, 217, 61, 140, 193, 28, 210,
 ];
 pub const STATUS_OK: u32 = 0;
 pub const STATUS_BUSY: u32 = 1;
@@ -129,6 +129,12 @@ pub const CAP_CACHE_MAINTENANCE: u32 = 16;
 pub const CACHE_INVENTORY: u32 = 1;
 pub const CACHE_MAINTAIN: u32 = 2;
 pub const CACHE_PURGE_UNUSED: u32 = 3;
+pub const CAP_VIEW_STATE: u32 = 32;
+pub const VIEW_STATE_READ: u32 = 1;
+pub const VIEW_STATE_WRITE: u32 = 2;
+pub const VIEW_STATE_REMOVE: u32 = 3;
+pub const MAXIMUM_VIEW_STATE_BYTES: u32 = 4194304;
+pub const MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES: u32 = 16777216;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct AbiIdentity {

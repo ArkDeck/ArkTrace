@@ -71,7 +71,7 @@ struct RustSessionIdentityProbe: Codable, Sendable {
         let scope: Any = if let text = issue.scope { await text.copyString() } else { NSNull() }
         quality.append(["category": issue.category.rawValue, "scope": scope, "count": issue.count.map { $0 as Any } ?? NSNull(), "message": NSNull()])
     }
-    let body: [String: Any] = ["metadata": meta, "inspection": ["capabilities": capabilities,
+    let body: [String: Any] = ["cacheHit": view.cacheHit, "metadata": meta, "inspection": ["capabilities": capabilities,
         "schemaFingerprint": await inspection.schemaFingerprint.copyString(), "traceStartTs": inspection.traceStartTs,
         "traceEndTs": inspection.traceEndTs, "durationNs": inspection.durationNs,
         "dataQuality": ["status": inspection.qualityStatus.rawValue, "warnings": quality] as [String: Any],

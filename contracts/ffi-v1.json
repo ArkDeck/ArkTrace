@@ -555,7 +555,13 @@
     "CAP_CACHE_MAINTENANCE": 16,
     "CACHE_INVENTORY": 1,
     "CACHE_MAINTAIN": 2,
-    "CACHE_PURGE_UNUSED": 3
+    "CACHE_PURGE_UNUSED": 3,
+    "CAP_VIEW_STATE": 32,
+    "VIEW_STATE_READ": 1,
+    "VIEW_STATE_WRITE": 2,
+    "VIEW_STATE_REMOVE": 3,
+    "MAXIMUM_VIEW_STATE_BYTES": 4194304,
+    "MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES": 16777216
   },
   "functions": [
     {
@@ -748,6 +754,44 @@
         {
           "name": "operation",
           "type": "u32"
+        },
+        {
+          "name": "timeout_ms",
+          "type": "u32"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
+      "name": "arktrace_view_state_request_submit",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "session",
+          "type": "u64"
+        },
+        {
+          "name": "operation",
+          "type": "u32"
+        },
+        {
+          "name": "input",
+          "type": "const u8*"
+        },
+        {
+          "name": "input_bytes",
+          "type": "u64"
         },
         {
           "name": "timeout_ms",
@@ -985,6 +1029,24 @@
       "returns": "u32"
     },
     {
+      "name": "arktrace_engine_retained_view_state_input_bytes",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "u64"
+        },
+        {
+          "name": "output",
+          "type": "u64*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
+    },
+    {
       "name": "arktrace_session_error_acquire",
       "parameters": [
         {
@@ -1033,5 +1095,6 @@
     "parserIdentity": "TraceParserIdentity; SHA256 and recipe/schema identity remain pinned",
     "publisher": "Normal create requires teamIdentifier, helperCodeIdentifier and parserCodeIdentifier. Fixture create is feature-gated DevelopmentPinned and still checks Mach-O signatures and SHA256."
   },
-  "cacheMaintenance": "Engine-scoped bounded background request using only the configured content-addressed held root; no session or request path. Operations are CACHE_INVENTORY, CACHE_MAINTAIN (20/16 GiB), CACHE_PURGE_UNUSED. Poll/result envelope session is zero. Cancel/release/drain and retained result budgets use ordinary request ownership; cancellation after a durable deletion intent may have removed data before returning cancellation."
+  "cacheMaintenance": "Engine-scoped bounded background request using only the configured content-addressed held root; no session or request path. Operations are CACHE_INVENTORY, CACHE_MAINTAIN (20/16 GiB), CACHE_PURGE_UNUSED. Poll/result envelope session is zero. Cancel/release/drain and retained result budgets use ordinary request ownership; cancellation after a durable deletion intent may have removed data before returning cancellation.",
+  "viewState": "Session-scoped background transport using only the opening held Ready directory and active lease. VIEW_STATE_READ and VIEW_STATE_REMOVE require null input with zero bytes; VIEW_STATE_WRITE copies original format-1 JSON, 1..4194304 bytes, without envelope overhead. All queued/running copied input capacities share a fixed 16777216-byte engine admission budget; CAPACITY precedes copying when exhausted and credits refund when commands drop, including rejection/cancel/close/drain/panic. Original closed JSON, traceSHA256, combined flags+marks <=4096, favorites <=4096 and each UTF-8 label/favorite <=4096 bytes are validated by the owner worker before mutation; invalid data is a terminal INVALID_ARGUMENT request error. Read body is {status: sessionScoped|missing|restored|preserved, document only for restored}; write/remove body is sessionScoped|saved|removed|preserved. Unknown/corrupt existing sidecar is preserved; uncached sessions do not persist. Uses ordinary request handles, result ownership/budgets, provenance and cancellation. A cancellation or output failure after durable publication can accompany a committed save/remove; refresh via READ. Ordinary request input remains capped at 1048576 bytes. No caller paths, raw SQL or Swift fallback."
 }

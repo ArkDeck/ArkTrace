@@ -36,6 +36,7 @@ fn fixture() -> (AsyncEngine, Receiver<Command>, [RuntimeHandle; 2]) {
         stopping: AtomicBool::new(false),
         alive: AtomicUsize::new(0),
         result_budget: ResultBudget::new(4096),
+        view_state_input_budget: InputBudget::new(MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES),
     });
     let handles = std::array::from_fn(|_| {
         background_registry(&shared)

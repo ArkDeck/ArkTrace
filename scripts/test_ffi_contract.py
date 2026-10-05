@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Real native library / generated records / Swift or C# admission smoke."""
 import ctypes as C
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -27,7 +28,7 @@ def main():
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
     identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
     assert bytes(identity.contract_digest)==expected and identity.abi_version==1
-    assert identity.capabilities==(23 if sys.platform=='darwin' else 0)
+    assert identity.capabilities==(55 if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
     storage=(C.c_uint64*8)();bad=C.cast(C.byref(storage,1),C.POINTER(TYPES['AbiIdentity']))
@@ -42,6 +43,20 @@ def main():
         abi.call('cache_request_submit',0,operation,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
     abi.call('cache_request_submit',0,K['CACHE_INVENTORY'],0,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
     abi.call('cache_request_submit',0,K['CACHE_INVENTORY'],1,None,C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
+    # Dedicated sidecar transport keeps normal query bounds unchanged. All
+    # rejected input ranges use actual live allocations, never invalid pointers.
+    assert K['MAXIMUM_REQUEST_BYTES']==1048576 and K['MAXIMUM_VIEW_STATE_BYTES']==4194304
+    abi.call('view_state_request_submit',2**64-1,0,K['VIEW_STATE_READ'],None,0,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_HANDLE'])
+    for operation in (0,4,2**32-1):
+        abi.call('view_state_request_submit',0,0,operation,None,0,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_INPUT'])
+    payload=(C.c_uint8*1)(0)
+    for operation in (K['VIEW_STATE_READ'],K['VIEW_STATE_REMOVE']):
+        abi.call('view_state_request_submit',0,0,operation,payload,0,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
+        abi.call('view_state_request_submit',0,0,operation,None,1,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
+    for pointer,length in ((None,1),(payload,0)):
+        abi.call('view_state_request_submit',0,0,K['VIEW_STATE_WRITE'],pointer,length,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
+    oversize=(C.c_uint8*(K['MAXIMUM_VIEW_STATE_BYTES']+1))()
+    abi.call('view_state_request_submit',0,0,K['VIEW_STATE_WRITE'],oversize,len(oversize),1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
     # Bounded arbitrary bytes are valid allocations, never dangling pointers.
     for payload in (b'{}',b'null',b'[]',b'\xff',b'{"sql":"SELECT *"}'):
         abi.input('engine_create',payload,'u64',expected=K['STATUS_INVALID_INPUT'])
@@ -52,7 +67,10 @@ def main():
     # Every byte in the rejected oversize buffer is genuinely allocated.
     abi.input('engine_create',b'x'*(K['MAXIMUM_CONFIG_BYTES']+1),'u64',expected=K['STATUS_INVALID_BUFFER'])
     consumer={}
-    with tempfile.TemporaryDirectory(prefix='arktrace-ffi-consumer-') as folder:
+    retained=os.environ.get('ARKTRACE_FFI_CONSUMER_EVIDENCE_DIR')
+    if retained:
+        Path(retained).mkdir(mode=0o700)
+    with (nullcontext(retained) if retained else tempfile.TemporaryDirectory(prefix='arktrace-ffi-consumer-')) as folder:
         base=Path(folder)
         if sys.platform=='darwin':
             assert subprocess.check_output(['xcodebuild','-version'],text=True).startswith('Xcode 27.')
@@ -66,6 +84,19 @@ def main():
             consumer=json.loads(subprocess.check_output(['dotnet',str(base/'out/Smoke.dll'),str(library),str(ROOT/'bindings/ffi-layouts.json')],text=True))
             assert consumer['records']==len(layouts) and consumer['fields']==fields
         else:raise SystemExit('native macOS/Windows required for foreign consumer; no simulated PASS')
+        if retained:
+            files=[]
+            for source in [library, target/'libarktrace_ffi.a', ROOT/'contracts/ffi-v1.json',
+                           ROOT/'bindings/c/arktrace_ffi.h', ROOT/'bindings/c/module.modulemap',
+                           ROOT/'bindings/swift/Smoke.swift', ROOT/'bindings/swift/GeneratedLayouts.swift']:
+                if source.exists():
+                    frozen=base/source.name
+                    shutil.copyfile(source,frozen);frozen.chmod(0o400)
+                    data=frozen.read_bytes();assert data==source.read_bytes()
+                    files.append({'sourcePath':str(source),'frozenPath':str(frozen),'byteCount':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+            if sys.platform=='darwin':
+                files.append({'frozenPath':str(executable),'byteCount':executable.stat().st_size,'sha256':hashlib.sha256(executable.read_bytes()).hexdigest()})
+            (base/'manifest.json').write_text(json.dumps(files,indent=2)+'\n')
     assert consumer['abiVersion']==1 and consumer['nativeEngineAcceptance'] is False
     print(json.dumps({'abiVersion':1,'contractSHA256':expected.hex(),'records':len(layouts),'fields':fields,'exports':len(CONTRACT['functions']),'consumer':consumer,'nativeEngineAcceptance':False,'validAllocationFuzzCases':1000},sort_keys=True))
 if __name__=='__main__':main()
