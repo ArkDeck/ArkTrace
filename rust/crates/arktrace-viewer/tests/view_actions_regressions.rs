@@ -125,7 +125,7 @@ fn cancellation_deadline_and_output_over_budget_are_transactional_and_recoverabl
     );
 }
 #[test]
-fn restoration_skips_unknown_ids_preserves_duplicates_order_and_hidden_depth() {
+fn restoration_preserves_unknown_ids_duplicates_order_and_hidden_depth() {
     let mut state = state();
     state
         .tree
@@ -145,7 +145,17 @@ fn restoration_skips_unknown_ids_preserves_duplicates_order_and_hidden_depth() {
     let restored = apply(&state, ViewAction::RestoreFavorites { ids });
     assert_eq!(
         restored.state.favorite_track_ids,
-        ["thread-state:1008", "cpu:0", "thread-state:1008"]
+        ["missing", "thread-state:1008", "cpu:0", "thread-state:1008"]
+    );
+    assert_eq!(
+        restored
+            .state
+            .favorite_tracks(&mut || Ok(()))
+            .unwrap()
+            .iter()
+            .map(|t| t.id())
+            .collect::<Vec<_>>(),
+        ["thread-state:1008", "cpu:0"]
     );
     assert_eq!(restored.state.tree, state.tree);
     assert!(!restored.intents.persist_favorites);
@@ -166,7 +176,50 @@ fn restoration_skips_unknown_ids_preserves_duplicates_order_and_hidden_depth() {
     );
     assert_eq!(
         removed.state.favorite_track_ids,
-        ["cpu:0", "thread-state:1008", "named-slice:1008"]
+        ["missing", "cpu:0", "named-slice:1008"]
+    );
+}
+#[test]
+fn favorite_reorder_uses_visible_indices_and_keeps_unknown_records() {
+    let mut state = state();
+    state.favorite_track_ids = [
+        "missing",
+        "thread-state:1000",
+        "missing",
+        "cpu:0",
+        "thread-state:1000",
+    ]
+    .map(String::from)
+    .to_vec();
+    let reordered = apply(
+        &state,
+        ViewAction::MoveFavorite {
+            source: 1,
+            destination: 0,
+        },
+    );
+    assert!(reordered.intents.persist_favorites);
+    assert_eq!(
+        reordered.state.favorite_track_ids,
+        [
+            "missing",
+            "cpu:0",
+            "thread-state:1000",
+            "missing",
+            "thread-state:1000"
+        ]
+    );
+    let invalid = apply(
+        &reordered.state,
+        ViewAction::MoveFavorite {
+            source: 2,
+            destination: 0,
+        },
+    );
+    assert!(!invalid.applied && !invalid.intents.persist_favorites);
+    assert_eq!(
+        invalid.state.favorite_track_ids,
+        reordered.state.favorite_track_ids
     );
 }
 #[test]
@@ -200,7 +253,20 @@ fn restoring_after_directory_change_uses_stable_identity_and_never_pid_or_title(
     let ids = vec!["thread-state:1000".into(), "thread-state:1001".into()];
     state.tree.groups.retain(|g| g.id != "process:0");
     let restored = apply(&state, ViewAction::RestoreFavorites { ids });
-    assert_eq!(restored.state.favorite_track_ids, ["thread-state:1001"]);
+    assert_eq!(
+        restored.state.favorite_track_ids,
+        ["thread-state:1000", "thread-state:1001"]
+    );
+    assert_eq!(
+        restored
+            .state
+            .favorite_tracks(&mut || Ok(()))
+            .unwrap()
+            .iter()
+            .map(|t| t.id())
+            .collect::<Vec<_>>(),
+        ["thread-state:1001"]
+    );
 }
 #[test]
 fn malformed_wire_extra_fields_and_unbounded_inputs_are_rejected() {

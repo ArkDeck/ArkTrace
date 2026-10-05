@@ -26,9 +26,10 @@ public struct TimelineFlag: Hashable, Codable, Sendable, Identifiable {
     }
 
     /// A flag is an instant; range-based reveal needs a non-empty interval, so
-    /// it borrows one nanosecond rather than a magic window.
+    /// it borrows one nanosecond, preceding the largest representable instant.
     public var pointRange: TraceTimeRange {
-        (try? TraceTimeRange.query(startNs: timestampNs, endNs: timestampNs + 1))
+        if timestampNs == .max { return try! TraceTimeRange.query(startNs: .max - 1, endNs: .max) }
+        return (try? TraceTimeRange.query(startNs: timestampNs, endNs: timestampNs + 1))
             ?? (try! TraceTimeRange.query(startNs: 0, endNs: 1))
     }
 }
@@ -140,6 +141,12 @@ package enum TimelineAnnotationPalette {
 /// to draw the swatch that index stands for.
 public enum TimelineAnnotationColor {
     public static var count: Int { TimelineAnnotationPalette.colors.count }
+
+    /// Keep ordinary stored indices, but advance the visible palette at MAX
+    /// without overflowing a valid restored signed color index.
+    public static func nextIndex(after index: Int) -> Int {
+        index == .max ? (index % count + 1) % count : index + 1
+    }
 
     public static func cgColor(at index: Int) -> CGColor {
         TimelineAnnotationPalette.color(at: index).cgColor

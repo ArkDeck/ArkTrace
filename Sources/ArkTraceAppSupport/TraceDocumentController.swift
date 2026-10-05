@@ -359,7 +359,7 @@ struct TraceOpenedDocument: Sendable {
     let cacheMetadata: TraceCacheMetadata?
     /// Nil when this open has no cache entry, in which case view state stays
     /// session-scoped instead of failing.
-    var viewStateStore: TraceViewStateStore?
+    let viewStateAccess: TraceViewStateAccess?
     let close: @Sendable () async throws -> Void
 
     init(
@@ -367,12 +367,13 @@ struct TraceOpenedDocument: Sendable {
         cacheHit: Bool,
         cacheMetadata: TraceCacheMetadata?,
         viewStateStore: TraceViewStateStore? = nil,
+        viewStateAccess: TraceViewStateAccess? = nil,
         close: @escaping @Sendable () async throws -> Void
     ) {
         self.repository = repository
         self.cacheHit = cacheHit
         self.cacheMetadata = cacheMetadata
-        self.viewStateStore = viewStateStore
+        self.viewStateAccess = viewStateAccess ?? viewStateStore.map(TraceViewStateAccess.init)
         self.close = close
     }
 }
@@ -639,7 +640,7 @@ public final class TraceDocumentController {
         argumentsTask?.cancel()
         densityResolutionTask?.cancel()
         if let closing {
-            Task { await writer?.flush(); try? await closing.close() }
+            Task { try? await writer?.flush(); try? await closing.close() }
         }
     }
 
@@ -685,8 +686,7 @@ public final class TraceDocumentController {
         let writer = viewStateWriter
         viewStateWriter = nil
         do {
-            await writer?.flush()
-            if let closing { try await closing.close() }
+            try await Self.flushAndClose(writer, document: closing)
             guard generation == documentGeneration else { return }
             document = nil
             viewStateWriter = nil
@@ -699,6 +699,15 @@ public final class TraceDocumentController {
             phase = .failed
             announce(errorAnnouncement(fallback: .traceCloseFailed), priority: .urgent)
         }
+    }
+
+    /// A failed save remains visible, but cannot prevent native lease cleanup.
+    /// Cleanup failure takes priority so the caller can retry that barrier.
+    private static func flushAndClose(_ writer: TraceViewStateWriteQueue?, document: TraceOpenedDocument?) async throws {
+        var persistenceError: (any Error)?
+        do { try await writer?.flush() } catch { persistenceError = error }
+        if let document { try await document.close() }
+        if let persistenceError { throw persistenceError }
     }
 
     /// Re-reads the recent list from its bookmarks.
@@ -1131,12 +1140,11 @@ public final class TraceDocumentController {
         guard let bounds = try? traceBounds() else { return nil }
         let clamped = min(max(timestampNs, bounds.startNs), bounds.endNs)
         let flag = TimelineFlag(
-            id: nextAnnotationID,
+            id: allocateAnnotationID(),
             timestampNs: clamped,
             label: label ?? "Flag \(annotations.flags.count + 1)",
             colorIndex: annotations.flags.count
         )
-        nextAnnotationID += 1
         annotations.flags.append(flag)
         persistViewState()
         return flag
@@ -1165,13 +1173,12 @@ public final class TraceDocumentController {
         guard let range, range.startNs < range.endNs else { return nil }
         if !isPersistent { annotations.marks.removeAll { !$0.isPersistent } }
         let mark = TimelineMark(
-            id: nextAnnotationID,
+            id: allocateAnnotationID(),
             range: range,
             label: label ?? (isPersistent ? "Mark \(annotations.marks.count + 1)" : "Mark"),
             colorIndex: annotations.marks.count,
             isPersistent: isPersistent
         )
-        nextAnnotationID += 1
         annotations.marks.append(mark)
         persistViewState()
         return mark
@@ -1198,6 +1205,14 @@ public final class TraceDocumentController {
             annotations: annotations, favoriteTrackIDs: favoriteTrackIDs))
     }
 
+    private func allocateAnnotationID() -> Int {
+        let used = Set(annotations.flags.map(\.id) + annotations.marks.map(\.id))
+        while used.contains(nextAnnotationID) { nextAnnotationID = nextAnnotationID == .max ? 1 : nextAnnotationID + 1 }
+        let result = nextAnnotationID
+        nextAnnotationID = result == .max ? 1 : result + 1
+        return result
+    }
+
     // MARK: - Favourite tracks
 
     public func isFavorite(_ id: TimelineTrackID) -> Bool {
@@ -1207,8 +1222,8 @@ public final class TraceDocumentController {
     /// Pins or unpins a lane. Pinning also makes it visible — pinning a hidden
     /// lane and then not seeing it would be a trap.
     public func toggleFavorite(_ id: TimelineTrackID) {
-        if let index = favoriteTrackIDs.firstIndex(of: id) {
-            favoriteTrackIDs.remove(at: index)
+        if favoriteTrackIDs.contains(id) {
+            favoriteTrackIDs.removeAll { $0 == id }
         } else {
             guard favoriteTracks().count < Self.maximumFavoriteTracks else { return }
             favoriteTrackIDs.append(id)
@@ -1227,12 +1242,17 @@ public final class TraceDocumentController {
     /// Reorders the pinned set. Upstream lets the user drag pinned rows; the
     /// order is the whole point of pinning several at once.
     public func moveFavorite(from source: Int, to destination: Int) {
-        guard favoriteTrackIDs.indices.contains(source),
-            (0...favoriteTrackIDs.count).contains(destination)
+        let visible = favoriteTracks().map(\.id)
+        guard visible.indices.contains(source), (0...visible.count).contains(destination)
         else { return }
-        let id = favoriteTrackIDs.remove(at: source)
+        let id = visible[source]
+        let count = favoriteTrackIDs.count { $0 == id }
+        favoriteTrackIDs.removeAll { $0 == id }
+        var reordered = visible
+        reordered.remove(at: source)
         let index = destination > source ? destination - 1 : destination
-        favoriteTrackIDs.insert(id, at: min(max(0, index), favoriteTrackIDs.count))
+        let target = reordered.indices.contains(index) ? favoriteTrackIDs.firstIndex(of: reordered[index]) : nil
+        favoriteTrackIDs.insert(contentsOf: repeatElement(id, count: count), at: target ?? favoriteTrackIDs.count)
         persistViewState()
     }
 
@@ -1243,7 +1263,11 @@ public final class TraceDocumentController {
             trackGroups.flatMap(\.tracks).map { ($0.id, $0) },
             uniquingKeysWith: { first, _ in first }
         )
-        return favoriteTrackIDs.compactMap { byID[$0] }
+        var seen = Set<TimelineTrackID>()
+        return Array(favoriteTrackIDs.compactMap { id -> TrackDescriptor? in
+            guard let track = byID[id], seen.insert(id).inserted else { return nil }
+            return track
+        }.prefix(Self.maximumFavoriteTracks))
     }
 
     /// A pinned area only helps while it stays scannable; past this it is just
@@ -1420,8 +1444,7 @@ public final class TraceDocumentController {
         let previousWriter = viewStateWriter
         var opened: TraceOpenedDocument?
         do {
-            await previousWriter?.flush()
-            if let previous { try await previous.close() }
+            try await Self.flushAndClose(previousWriter, document: previous)
             guard generation == documentGeneration, !Task.isCancelled else { return }
             document = nil
             viewStateWriter = nil
@@ -1477,26 +1500,33 @@ public final class TraceDocumentController {
                 try? await opened.close()
                 return
             }
-            let access = opened.viewStateStore.map(TraceViewStateAccess.init)
-            let restored = await access?.load()
+            let access = opened.viewStateAccess
+            var restored: TraceViewStateStore.Restored?
+            var restoreError: (any Error)?
+            do { restored = try await access?.load() }
+            catch {
+                if error is CancellationError || (error as? ArkTraceError)?.code == .cancelled { throw error }
+                restoreError = error
+            }
             guard generation == documentGeneration, !Task.isCancelled else {
                 try? await opened.close()
                 return
             }
             document = opened
             viewStateWriter = access.map { access in
-                TraceViewStateWriteQueue(save: { await access.save($0) })
+                TraceViewStateWriteQueue(save: { try await access.save($0) }, failed: { [weak self] error in
+                    self?.presentNonfatal(error, generation: generation)
+                })
             }
             // Restore this trace's bookmarks. Keyed by content hash, so the
             // same bytes bring back the same annotations wherever they live now.
             if let restored, !restored.isEmpty {
                 annotations = restored.annotations
-                nextAnnotationID = (restored.annotations.flags.map(\.id)
-                    + restored.annotations.marks.map(\.id)).max().map { $0 + 1 } ?? 1
-                // Only pin lanes this trace actually has: a stale id from an
-                // earlier parse must not create a phantom row.
-                let known = Set(catalog.groups.flatMap(\.tracks).map(\.id))
-                favoriteTrackIDs = restored.favoriteTrackIDs.filter(known.contains)
+                let maximum = (restored.annotations.flags.map(\.id) + restored.annotations.marks.map(\.id)).max()
+                nextAnnotationID = maximum.map { $0 == .max ? 1 : $0 + 1 } ?? 1
+                // Preserve unknown and duplicate identities for later parses.
+                // favoriteTracks() projects only known, distinct visible lanes.
+                favoriteTrackIDs = restored.favoriteTrackIDs
             }
             metadata = catalog.metadata
             catalogThreads = catalog.threads
@@ -1515,6 +1545,7 @@ public final class TraceDocumentController {
                         catalog.groups.flatMap(\.tracks).filter { !$0.isCollapsed }.count
                     )
             )
+            if let restoreError { presentNonfatal(restoreError, generation: generation) }
             scheduleCacheMaintenance()
         } catch {
             if let opened { try? await opened.close() }

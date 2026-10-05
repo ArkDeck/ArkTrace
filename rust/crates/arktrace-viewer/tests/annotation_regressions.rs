@@ -93,7 +93,7 @@ fn stale_deferred_edit_cannot_change_reused_id_in_replacement_session() {
     }
 }
 #[test]
-fn transient_replacement_rolls_back_on_exhausted_id_and_color_overflow() {
+fn transient_replacement_advances_maximum_id_and_color_without_overflow() {
     let mut s = state();
     let old = AnnotationMark {
         id: i64::MAX - 1,
@@ -104,36 +104,36 @@ fn transient_replacement_rolls_back_on_exhausted_id_and_color_overflow() {
     };
     s.restore(1, 1, &[], std::slice::from_ref(&old), &mut || Ok(()))
         .unwrap();
-    let context = AnnotationContext {
-        selected_range: Some(range(10, 20)),
-        ..Default::default()
-    };
-    assert_eq!(
-        run(
-            &mut s,
-            AnnotationAction::AddMark {
-                is_persistent: false,
-                label: None
-            },
-            context
-        ),
-        Err(AnnotationError::IdentityExhausted)
-    );
-    assert_eq!(s.marks(), std::slice::from_ref(&old));
-    assert_eq!(s.next_id(), i64::MAX);
-    assert_eq!(
-        run(
-            &mut s,
-            AnnotationAction::CycleMarkColor { id: old.id },
-            Default::default()
-        ),
-        Err(AnnotationError::ArithmeticOverflow)
-    );
-    assert_eq!(s.marks(), [old]);
+    run(
+        &mut s,
+        AnnotationAction::CycleMarkColor { id: old.id },
+        Default::default(),
+    )
+    .unwrap();
+    assert_eq!(s.marks()[0].color_index, 2);
+    run(
+        &mut s,
+        AnnotationAction::AddMark {
+            is_persistent: false,
+            label: None,
+        },
+        AnnotationContext {
+            selected_range: Some(range(10, 20)),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(s.marks().len(), 1);
+    assert_eq!(s.marks()[0].id, i64::MAX);
+    assert_eq!(s.marks()[0].range, range(10, 20));
+    assert_eq!(s.next_id(), 1);
 }
 #[test]
-fn maximum_id_restore_and_maximum_point_range_are_typed_errors() {
+fn maximum_id_restore_keeps_records_and_allocates_an_unused_identity() {
     let mut s = state();
+    let original = [flag(i64::MAX, i64::MAX, "end"), flag(1, 30, "occupied")];
+    s.restore(1, 1, &original, &[], &mut || Ok(())).unwrap();
+    assert_eq!(s.next_id(), 1);
     run(
         &mut s,
         AnnotationAction::AddFlag {
@@ -143,14 +143,12 @@ fn maximum_id_restore_and_maximum_point_range_are_typed_errors() {
         Default::default(),
     )
     .unwrap();
+    assert_eq!(&s.flags()[..2], &original);
+    assert_eq!(s.flags()[2].id, 2);
+    assert_eq!(s.next_id(), 3);
     assert_eq!(
-        s.restore(1, 1, &[flag(i64::MAX, 30, "invalid")], &[], &mut || Ok(())),
-        Err(AnnotationError::IdentityExhausted)
-    );
-    assert_eq!(s.flags()[0].timestamp_ns, 10);
-    assert_eq!(
-        flag(1, i64::MAX, "end").point_range(),
-        Err(AnnotationError::ArithmeticOverflow)
+        flag(1, i64::MAX, "end").point_range().unwrap(),
+        range(i64::MAX - 1, i64::MAX)
     );
     assert_eq!(flag(1, -10, "negative").point_range().unwrap(), range(0, 1));
 }

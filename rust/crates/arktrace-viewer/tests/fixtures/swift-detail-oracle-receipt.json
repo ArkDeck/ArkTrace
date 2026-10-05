@@ -7,8 +7,8 @@
   "sourceDigests": [
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
-      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
-      "byteCount": 6210
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56",
+      "byteCount": 6608
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
@@ -162,12 +162,12 @@
     "renderer": "append access method that calls actual private visualStyle; no copied mapping",
     "augmentedSources": [
       {
-        "path": "/private/tmp/arktrace-viewer-main-swiftpm-20261004/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+        "path": "/private/tmp/arktrace-viewer-swiftpm/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
         "sha256": "fd8c71d34cff045b045cd35d4d1a0546363650979a5361ecaec438334704d549",
         "byteCount": 132406
       },
       {
-        "path": "/private/tmp/arktrace-viewer-main-swiftpm-20261004/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+        "path": "/private/tmp/arktrace-viewer-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
         "sha256": "260d7a05b56154a57e2f5a3a1dfbdd61d712a2f4e68de7b15c49433dfd0d76cd",
         "byteCount": 101554
       }

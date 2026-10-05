@@ -34,8 +34,8 @@
     },
     {
       "path": "Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
-      "byteCount": 2747,
-      "sha256": "56712697ef4261a6ca84456e59257aec810f5d3eb89ed3c594b8d267c7c96420"
+      "byteCount": 2848,
+      "sha256": "a2d2765aecbe794ec7b385a5ec6a5f6042b461a6caf7544a91f33555e2dadf02"
     },
     {
       "path": "Apps/ArkTraceApp/Inspector/AnnotationRow.swift",
@@ -204,8 +204,8 @@
     },
     {
       "path": "Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
-      "byteCount": 11684,
-      "sha256": "b126d3f827ddda96def3122f5f6cf3498dc5195ad508c85454227013059a2dee"
+      "byteCount": 11722,
+      "sha256": "9b0cddea6df19d028358284aae93ee52285de35aaaf206e7300cb860f2ae6275"
     },
     {
       "path": "Apps/ArkTraceApp/Viewer/TraceViewerRootView.swift",
@@ -279,8 +279,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 94072,
-      "sha256": "d44ca739c91fec01a2b7615dc8307e9a17d8da2fde206c927ecd191996e58928"
+      "byteCount": 95937,
+      "sha256": "c32e15331c7eedba5e00f45018722b56605ddbd8f12f841c14b4bd29cf8826b7"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -299,8 +299,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
-      "byteCount": 7762,
-      "sha256": "e43b38f67943edf93ce4bbfc7b9a67cf91d8bdd05378fad0013570a37629d1a0"
+      "byteCount": 7621,
+      "sha256": "ff54fe61f75436825eede18410247fa762b2fddf85daceffe3a8f52d44f6aee3"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
@@ -309,8 +309,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateAccess.swift",
-      "byteCount": 1568,
-      "sha256": "4689eb3423a5792f56bb66679745341eb2ffcf2be5f509938d98123ee26558fb"
+      "byteCount": 6347,
+      "sha256": "a55771fb0bc11cfc1766cc0334e8a7efd317d782ff1ce51c7579eedaac81ba09"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -424,8 +424,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
-      "byteCount": 6210,
-      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24"
+      "byteCount": 6608,
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
@@ -544,8 +544,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 83820,
-      "sha256": "9fed121dc55d4e42b19dada96b0ead3cdc3400b7205617e5b9064301c076a72c"
+      "byteCount": 92689,
+      "sha256": "1569ffcb2aef3f795ec7744dab8259bd9d6f90f0f9b382baffd24ea318e76958"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceOfflineInspectionServiceTests.swift",
@@ -559,8 +559,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/ViewStateWriteQueueTests.swift",
-      "byteCount": 2382,
-      "sha256": "76fd3b04c5b0fced831c55d6e8276fca88979b209282ede918671dbd03412699"
+      "byteCount": 3918,
+      "sha256": "28c6f448e2cb2ae83b1cf78dfd83a867c954108af2c46c7988650bb89421911b"
     },
     {
       "path": "Tests/ArkTraceCoreTests/ArkTraceErrorContractTests.swift",
@@ -601,6 +601,11 @@
       "path": "Tests/ArkTraceCoreTests/TraceTimeTests.swift",
       "byteCount": 4756,
       "sha256": "cef5992375591128abe8d787cd7a979665698dfe4103cc13ac001acc3d0ac671"
+    },
+    {
+      "path": "Tests/ArkTraceRenderingTests/TimelineAnnotationExtremaTests.swift",
+      "byteCount": 929,
+      "sha256": "e6a279bc79604af35aeb8671523a6c09a6fb3c95a650878a5316fc36d561514a"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelineAnnotationKeyTests.swift",
@@ -833,19 +838,19 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 11.238354291999713,
+      "elapsedSeconds": 19.507997584005352,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-swift-canonical.log",
-        "byteCount": 6157,
-        "sha256": "83bbda8a2b04b35af33c247b36a32c60cc6e413185c10eb6235e6c86a28189aa"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-swift-canonical.log",
+        "byteCount": 6771,
+        "sha256": "d5e03728030fad388d53e839579e008b81e59d54ddbe1da1cb2b8a02a9ff7870"
       }
     },
     {
@@ -865,27 +870,27 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 4.283698541999911,
+      "elapsedSeconds": 6.106228666991228,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/source-format-hints-20261005/oracle-refresh-v1/fresh-swift-regressions.log",
-        "byteCount": 15716,
-        "sha256": "f2d805e8a97f6d5b136b9304b5856e3032f04f393b2a2b59f90d6d253603b56e"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracle-refresh-v1/fresh-swift-regressions.log",
+        "byteCount": 16667,
+        "sha256": "0e3f17fa3cc52b3faa42911b1035be81da1909dd50e5fc68229242aa361539fc"
       }
     }
   ],
   "augmentedSources": [
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 94859,
-      "sha256": "64cf9df97cba869758079bb70400ddc4b5bdec239b15cf320eb26af034838194"
+      "byteCount": 96724,
+      "sha256": "e5953802401b4a3f89e89a6a1770c711c5e31ec7f8567c08687f0f624279905d"
     },
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -909,6 +914,6 @@
     "Native-key recordings do not prove user IME/focus/menu acceptance",
     "Independent module capacity accounting excludes owner aggregate, allocator and scratch"
   ],
-  "previousReceiptSHA256": "6c601caaf750790062c0ee4d2cf2f99311a9d5a8d80b24d8d2a89a493963d167",
-  "revalidatedBaseCommit": "aa24479718713a63e4f6ca6d6469d50e22ae7294"
+  "previousReceiptSHA256": "b32127ab5bfe8f148a8c5adaa0012707f6f22c72abd6f06258f46164e332defb",
+  "revalidatedBaseCommit": "44e85c002db3bcf2f9b4b3aba55905fe28ae742a"
 }

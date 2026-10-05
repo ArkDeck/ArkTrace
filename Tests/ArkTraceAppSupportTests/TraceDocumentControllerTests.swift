@@ -1876,4 +1876,136 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertNil(controller.selectedEvent)
         await controller.close()
     }
+
+    private actor ViewStateSink {
+        private var values: [TraceViewStateStore.Restored] = []
+        private var closeCount = 0
+        func save(_ state: TraceViewStateStore.Restored) { values.append(state) }
+        func close() { closeCount += 1 }
+        func snapshot() -> ([TraceViewStateStore.Restored], Int) { (values, closeCount) }
+    }
+    private func viewStateRecentStore() throws -> TraceRecentDocumentStore {
+        let suite = "ArkTraceViewStateTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        addTeardownBlock { defaults.removePersistentDomain(forName: suite) }
+        return TraceRecentDocumentStore(defaults: defaults)
+    }
+    private func viewStateSource() throws -> URL {
+        let source = FileManager.default.temporaryDirectory.appending(path: "arktrace-view-state-\(UUID().uuidString).htrace")
+        try Data().write(to: source)
+        return source
+    }
+    private func waitForViewStateDocument(_ controller: TraceDocumentController) async throws {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        while controller.phase != .ready {
+            guard controller.phase != .failed, ContinuousClock.now < deadline else {
+                throw ArkTraceError(code: .internalError, stage: .openingDatabase, message: "controller did not become ready")
+            }
+            await Task.yield()
+        }
+    }
+    func testViewStateReadFailureKeepsTraceOpenAndLatestSaveFailureStillClosesSession() async throws {
+        let sink = ViewStateSink()
+        let readError = ArkTraceError(code: .queryFailed, stage: .querying, message: "restore refused")
+        let saveError = ArkTraceError(code: .queryFailed, stage: .querying, message: "save refused")
+        let access = TraceViewStateAccess(load: { throw readError }, save: { _ in throw saveError })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: { await sink.close() })
+        })
+        let source = try viewStateSource()
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        XCTAssertEqual(controller.errorPresentation?.reason, "restore refused")
+        XCTAssertTrue(controller.annotations.isEmpty)
+        XCTAssertNotNil(controller.addFlag(atNs: 10, label: "unsaved"))
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        while controller.errorPresentation?.reason != "save refused" {
+            guard ContinuousClock.now < deadline else { return XCTFail("save failure was hidden") }
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.phase, .ready)
+        await controller.close()
+        XCTAssertEqual(controller.phase, .failed)
+        XCTAssertEqual(controller.errorPresentation?.reason, "save refused")
+        let (_, count) = await sink.snapshot()
+        XCTAssertEqual(count, 1, "persistence error must not prevent lease cleanup")
+        XCTAssertEqual(controller.annotations.flags.first?.label, "unsaved")
+    }
+    func testViewStateRestoreKeepsExtremaAndUnmatchedDuplicatesAcrossAnnotationEdits() async throws {
+        let sink = ViewStateSink()
+        let unknown = TimelineTrackID(rawValue: "missing"), first = TimelineTrackID(rawValue: "thread-state:1"), second = TimelineTrackID(rawValue: "thread-state:2")
+        let original = TraceViewStateStore.Restored(annotations: TimelineAnnotations(
+            flags: [TimelineFlag(id: .max, timestampNs: .max, label: "end", colorIndex: .min),
+                    TimelineFlag(id: 1, timestampNs: .min, label: "start", colorIndex: .max)]),
+            favoriteTrackIDs: [unknown, first, unknown, second, first])
+        let access = TraceViewStateAccess(load: { original }, save: { await sink.save($0) })
+        let threads = [Self.makeThread(itid: 1, ipid: 1, name: "one"), Self.makeThread(itid: 2, ipid: 2, name: "two")]
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a", capabilities: TraceCapabilities(cpuScheduling: false, threadStates: true, namedSlices: false, cpuCounters: false, processCounters: false),
+                threads: threads), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: { await sink.close() })
+        })
+        let source = try viewStateSource()
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        XCTAssertEqual(controller.annotations, original.annotations)
+        XCTAssertEqual(controller.favoriteTrackIDs, original.favoriteTrackIDs)
+        XCTAssertEqual(controller.favoriteTracks().map(\.id), [first, second])
+        let added = try XCTUnwrap(controller.addFlag(atNs: 10, label: "new"))
+        XCTAssertEqual(added.id, 2)
+        await controller.close()
+        let (saved, _) = await sink.snapshot()
+        XCTAssertEqual(saved.last?.favoriteTrackIDs, original.favoriteTrackIDs)
+        XCTAssertEqual(Array(saved.last!.annotations.flags.prefix(2)), original.annotations.flags)
+    }
+    func testFavoriteReorderingUsesVisibleIndicesAndPreservesUnknownRecordOrder() async throws {
+        let unknown = TimelineTrackID(rawValue: "missing"), a = TimelineTrackID(rawValue: "thread-state:1"), b = TimelineTrackID(rawValue: "thread-state:2")
+        let original = TraceViewStateStore.Restored(favoriteTrackIDs: [unknown, a, unknown, b, a])
+        let threads = [Self.makeThread(itid: 1, ipid: 1, name: "one"), Self.makeThread(itid: 2, ipid: 2, name: "two")]
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a", capabilities: TraceCapabilities(cpuScheduling: false, threadStates: true, namedSlices: false, cpuCounters: false, processCounters: false),
+                threads: threads), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: TraceViewStateAccess(load: { original }, save: { _ in }), close: {})
+        })
+        let source = try viewStateSource()
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        controller.moveFavorite(from: 1, to: 0)
+        XCTAssertEqual(controller.favoriteTracks().map(\.id), [b, a])
+        XCTAssertEqual(controller.favoriteTrackIDs, [unknown, b, a, unknown, a])
+        controller.toggleFavorite(a)
+        XCTAssertFalse(controller.isFavorite(a))
+        XCTAssertEqual(controller.favoriteTrackIDs.filter { $0 == unknown }, [unknown, unknown])
+        await controller.close()
+    }
+    func testOldGenerationSaveFailureDoesNotOverwriteReplacementBanner() async throws {
+        let gate = FirstCloseBarrier()
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { _ in
+            await gate.close()
+            throw ArkTraceError(code: .queryFailed, stage: .querying, message: "old save refused")
+        })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { source, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: source.lastPathComponent.contains("first") ? access : nil, close: {})
+        })
+        let folder = FileManager.default.temporaryDirectory.appending(path: "arktrace-generation-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let first = folder.appending(path: "first.htrace"), second = folder.appending(path: "second.htrace")
+        try Data().write(to: first); try Data().write(to: second)
+        controller.open(first); try await waitForViewStateDocument(controller)
+        controller.addFlag(atNs: 10)
+        await gate.waitUntilReached()
+        let priorGeneration = controller.annotationSessionID
+        let closing = Task { await controller.close() }
+        while controller.annotationSessionID == priorGeneration { await Task.yield() }
+        controller.open(second)
+        controller.cancel()
+        await gate.release(); await closing.value
+        await Task.yield()
+        XCTAssertNil(controller.errorPresentation)
+        XCTAssertEqual(controller.phase, .loading(.cancelled))
+        await controller.close()
+    }
 }

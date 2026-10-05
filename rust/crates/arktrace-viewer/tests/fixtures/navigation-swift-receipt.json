@@ -17,8 +17,8 @@
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "d44ca739c91fec01a2b7615dc8307e9a17d8da2fde206c927ecd191996e58928",
-      "byteCount": 94072
+      "sha256": "c32e15331c7eedba5e00f45018722b56605ddbd8f12f841c14b4bd29cf8826b7",
+      "byteCount": 95937
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -49,8 +49,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "864899a1a83627c6f5c867547d5c823713243c3432b6222c91e79ef30a91f7b2",
-      "byteCount": 95543
+      "sha256": "65405c86362e35790f9fdaf65b20ac0b89e5ad4bf8be638a83e2b5e03dbcb0e6",
+      "byteCount": 97408
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -94,15 +94,15 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "201a02fad84d00478d447748cce3fb95b78357ee0de1bc84553bd1565ff2c1c9",
-    "byteCount": 5428
+    "sha256": "85c295cc8b6e027d18a4c39010bcae554e97b7227e5e0b9b9981c05d93dca614",
+    "byteCount": 7542
   },
   "note": "Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.",
   "outputs": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-oracle.json",
-      "sha256": "78cd3c72a4ccec350defa471255e7fe1a9fffa8e025971c0af0af9ffa00f9486",
-      "byteCount": 1299042
+      "sha256": "23374b2445cd0f3017fbb26c0db9f749889bd51e041d16da39ee16eb2f818deb",
+      "byteCount": 1299044
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-swift-oracle.json",
@@ -111,8 +111,8 @@
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-swift-oracle.json",
-      "sha256": "36556ddac2178441a911fe647adc84a8052cb7e1072fe98404ced48a8add3af4",
-      "byteCount": 57427
+      "sha256": "0513a9064dbf8898332111e5b9b225029a6d22c56c494c855adec281da42e1de",
+      "byteCount": 57471
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-whitespace-swift-oracle.json",

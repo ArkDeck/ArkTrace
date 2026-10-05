@@ -4,7 +4,7 @@
   "vectors": 6,
   "xcode": "Xcode 27.0\nBuild version 27A266a",
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
-  "executableSHA256": "d1d9785826c837f8f9b8f178e3b50e99cf1eb7453f968ce91f306d3905569d14",
+  "executableSHA256": "7c6d51b9d8d47acab63000dafdfe31ab33e8fa567eba6714ce4ceb9a56cda7f7",
   "database": {
     "byteCount": 40960,
     "sha256": "9cc51daf713cd88936acf5e4f1d9db0d43a9ec9b5ce4d062a98b2aa9387a426e",
@@ -148,8 +148,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
-      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
-      "byteCount": 6210
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56",
+      "byteCount": 6608
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
@@ -178,8 +178,8 @@
     }
   ],
   "retainedExactRunArtifact": {
-    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-slices-d1d9785826c837f8f9b8f178e3b50e99cf1eb7453f968ce91f306d3905569d14.executable",
-    "sha256": "d1d9785826c837f8f9b8f178e3b50e99cf1eb7453f968ce91f306d3905569d14",
-    "byteCount": 4805376
+    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-slices-7c6d51b9d8d47acab63000dafdfe31ab33e8fa567eba6714ce4ceb9a56cda7f7.executable",
+    "sha256": "7c6d51b9d8d47acab63000dafdfe31ab33e8fa567eba6714ce4ceb9a56cda7f7",
+    "byteCount": 4805552
   }
 }

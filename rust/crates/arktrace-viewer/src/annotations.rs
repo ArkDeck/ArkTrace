@@ -4,6 +4,16 @@ use arktrace_contract::TraceTimeRange;
 use serde::{Deserialize, Serialize};
 use std::mem::size_of;
 
+fn next_color_index(value: i64) -> i64 {
+    if value == i64::MAX {
+        let count =
+            i64::try_from(crate::ANNOTATION_COLORS.len()).expect("bounded annotation palette");
+        (value % count + 1) % count
+    } else {
+        value + 1
+    }
+}
+
 pub const ANNOTATION_API_VERSION: u32 = 1;
 pub const MAXIMUM_ANNOTATION_RECORDS: u32 = 4096;
 pub const MAXIMUM_ANNOTATION_LABEL_BYTES: u32 = 4096;
@@ -79,9 +89,12 @@ pub struct AnnotationFlag {
     pub color_index: i64,
 }
 impl AnnotationFlag {
-    /// Same one-nanosecond target and invalid-negative fallback as Swift,
-    /// but MAX + 1 is a typed error rather than a trap.
+    /// Same one-nanosecond target and invalid-negative fallback as Swift.
+    /// The largest instant borrows the preceding nanosecond.
     pub fn point_range(&self) -> Result<TraceTimeRange, AnnotationError> {
+        if self.timestamp_ns == i64::MAX {
+            return Ok(TraceTimeRange::query(i64::MAX - 1, i64::MAX).expect("constant valid range"));
+        }
         let end = self
             .timestamp_ns
             .checked_add(1)
@@ -439,7 +452,8 @@ impl AnnotationState {
         Ok(())
     }
     /// Restore host-validated records. Duplicate/negative IDs retain Swift's
-    /// first-update/all-delete behavior; next ID is max across both arrays + 1.
+    /// first-update/all-delete behavior. At MAX, new IDs search from 1 without
+    /// renumbering restored records or colliding with their identities.
     pub fn restore(
         &mut self,
         api_version: u32,
@@ -469,9 +483,7 @@ impl AnnotationState {
             .chain(marks.iter().map(|m| m.id))
             .max();
         let next_id = match max_id {
-            Some(id) => id
-                .checked_add(1)
-                .ok_or(AnnotationError::IdentityExhausted)?,
+            Some(id) => id.checked_add(1).unwrap_or(1),
             None => 1,
         };
         let candidate = Self {
@@ -653,12 +665,17 @@ impl AnnotationState {
         *self = candidate;
         Ok(outcome)
     }
-    fn allocate_id(&mut self) -> Result<i64, AnnotationError> {
-        let id = self.next_id;
-        self.next_id = id
-            .checked_add(1)
-            .ok_or(AnnotationError::IdentityExhausted)?;
-        Ok(id)
+    fn allocate_id(&mut self, check: &mut AnnotationCheck<'_>) -> Result<i64, AnnotationError> {
+        // Finite bounded records cannot exhaust Int64. No scratch collection
+        // is allocated; checks run before each bounded candidate scan.
+        loop {
+            check()?;
+            let id = self.next_id;
+            self.next_id = id.checked_add(1).unwrap_or(1);
+            if !self.flags.iter().any(|f| f.id == id) && !self.marks.iter().any(|m| m.id == id) {
+                return Ok(id);
+            }
+        }
     }
     fn add_mark(
         &mut self,
@@ -683,7 +700,7 @@ impl AnnotationState {
             "Mark".into()
         };
         let text = owned_label(input_label.unwrap_or(&default_label), check)?;
-        let id = self.allocate_id()?;
+        let id = self.allocate_id(check)?;
         reserve(&mut self.marks, 1)?;
         self.marks.push(AnnotationMark {
             id,
@@ -794,7 +811,7 @@ impl AnnotationState {
                 };
                 let default_label = format!("Flag {}", self.flags.len() + 1);
                 let text = owned_label(input_label.unwrap_or(&default_label), check)?;
-                let id = self.allocate_id()?;
+                let id = self.allocate_id(check)?;
                 reserve(&mut self.flags, 1)?;
                 self.flags.push(AnnotationFlag {
                     id,
@@ -871,10 +888,7 @@ impl AnnotationState {
                 let Some(f) = self.flags.iter_mut().find(|f| f.id == id) else {
                     return Ok(AnnotationOutcome::default());
                 };
-                f.color_index = f
-                    .color_index
-                    .checked_add(1)
-                    .ok_or(AnnotationError::ArithmeticOverflow)?;
+                f.color_index = next_color_index(f.color_index);
                 Ok(AnnotationOutcome {
                     persistence: AnnotationPersistenceIntent::Save,
                     ..Default::default()
@@ -884,10 +898,7 @@ impl AnnotationState {
                 let Some(m) = self.marks.iter_mut().find(|m| m.id == id) else {
                     return Ok(AnnotationOutcome::default());
                 };
-                m.color_index = m
-                    .color_index
-                    .checked_add(1)
-                    .ok_or(AnnotationError::ArithmeticOverflow)?;
+                m.color_index = next_color_index(m.color_index);
                 Ok(AnnotationOutcome {
                     persistence: AnnotationPersistenceIntent::Save,
                     ..Default::default()

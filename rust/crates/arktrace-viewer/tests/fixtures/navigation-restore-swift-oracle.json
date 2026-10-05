@@ -1,6 +1,7 @@
 [
   {
     "favoriteTrackIDs" : [
+      "unknown",
       "thread-state:1008",
       "cpu:0",
       "thread-state:1008"
@@ -2079,6 +2080,7 @@
   },
   {
     "favoriteTrackIDs" : [
+      "thread-state:1000",
       "thread-state:1001"
     ],
     "name" : "restore-directory-removed-identity",

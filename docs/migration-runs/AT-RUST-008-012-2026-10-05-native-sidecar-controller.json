@@ -1,0 +1,403 @@
+{
+  "formatVersion": 1,
+  "goalStatus": "active",
+  "baseCommit": "44e85c002db3bcf2f9b4b3aba55905fe28ae742a",
+  "nativeHost": "macOS arm64",
+  "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "xcode": "Xcode 27.0\nBuild version 27A266a",
+  "nativeControllerAdapterConnected": true,
+  "compatibilityURLIONativeProduct": false,
+  "gates": [
+    {
+      "name": "controller-tests-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/controller-tests-v2.receipt.json",
+        "byteCount": 838,
+        "sha256": "5d3291a8b3993235cd9decc29c42d71256297cc4451bddbfa522e46e6e6d22b9"
+      }
+    },
+    {
+      "name": "rust-viewer-tests-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/rust-viewer-tests-v2.receipt.json",
+        "byteCount": 687,
+        "sha256": "6a430900b555ea7c3e9ffdf09cc96efd4f5ece0875e6c3b01ee496daaa5f3865"
+      }
+    },
+    {
+      "name": "sdk-fixture-build-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/sdk-fixture-build-v2.receipt.json",
+        "byteCount": 671,
+        "sha256": "dc0181a4d9cf843b1591ca06e0c20e0ff7e21503af14853fec898f0e9ac5cd95"
+      }
+    },
+    {
+      "name": "sdk-consumer-v4",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/sdk-consumer-v4.receipt.json",
+        "byteCount": 979,
+        "sha256": "3ad4f2e83df438b887cc4cf0631c100cc8e17b7415f6bd95025facd9754c4868"
+      }
+    },
+    {
+      "name": "actual-controller-v4",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/actual-controller-v4.receipt.json",
+        "byteCount": 1367,
+        "sha256": "77c1f4fd04ef1792c6ab3216222b2bc085558148190c8484e51b8f2d4e25213f"
+      }
+    },
+    {
+      "name": "api-baseline-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/api-baseline-v2.receipt.json",
+        "byteCount": 991,
+        "sha256": "e18f826de9349907426fa1bf6bc6a24c26719930fa910e4c96988fe62ebccda9"
+      }
+    },
+    {
+      "name": "default-swift-full-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/default-swift-full-v2.receipt.json",
+        "byteCount": 731,
+        "sha256": "7df81c28e831b35cbb8db9261e74c968b7b6f39c74748fb711b37ac5a7af9386"
+      }
+    },
+    {
+      "name": "default-app-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/default-app-v2.receipt.json",
+        "byteCount": 576,
+        "sha256": "8c86e2e436a27b152361ed42497a85ce195e5b7c2494d35a35959a881de5eabd"
+      }
+    },
+    {
+      "name": "native-swift-viewer-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/native-swift-viewer-v1.receipt.json",
+        "byteCount": 1379,
+        "sha256": "df83467fa53f62dbe54eb557a37047d6b3371f64437b02047a04c83dbaa485ef"
+      }
+    },
+    {
+      "name": "production-sdk-build-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/production-sdk-build-v1.receipt.json",
+        "byteCount": 652,
+        "sha256": "e26ad0637c39f83e3888b2f8ea5edc531a1f7a37a11f1aeb1242549624159970"
+      }
+    },
+    {
+      "name": "native-app-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/native-app-v2.receipt.json",
+        "byteCount": 717,
+        "sha256": "68ca74863feeafd8ad5ee0e0685814fbb49ba76fcb81f9d5b60e5706ed519cc5"
+      }
+    },
+    {
+      "name": "migration-contracts-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/migration-contracts-v1.receipt.json",
+        "byteCount": 574,
+        "sha256": "e74fcb418ee89fe45afee9330a54340d00007bf7260c0f7abd77216ecadf37ce"
+      }
+    },
+    {
+      "name": "rust-fmt-check-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/rust-fmt-check-v1.receipt.json",
+        "byteCount": 606,
+        "sha256": "bc6febbd1f032e25362ed7953432d70a1fb3f7c7f83580fe378cc6948b54df8e"
+      }
+    },
+    {
+      "name": "rust-clippy-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/rust-clippy-v1.receipt.json",
+        "byteCount": 669,
+        "sha256": "af45fdf2a08ff840c2d5384ad49a578ce120486908413f2a4c4fc0ee76cd49f5"
+      }
+    },
+    {
+      "name": "rust-workspace-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/rust-workspace-tests-v1.receipt.json",
+        "byteCount": 611,
+        "sha256": "f778d38faaf93cce1e105a39d6285372e79947c3473436534106b297dac984e8"
+      }
+    },
+    {
+      "name": "rust-verifier-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/rust-verifier-v1.receipt.json",
+        "byteCount": 569,
+        "sha256": "36dd71ef46c014f203be84a9a8983156e2ade0e306259e51819c2632a073903c"
+      }
+    },
+    {
+      "name": "ffi-contract-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/ffi-contract-v1.receipt.json",
+        "byteCount": 566,
+        "sha256": "50e1561b63610eaccc85f6338b2680759a77bbfb5f480403a7d4af9f483ec9de"
+      }
+    },
+    {
+      "name": "viewer-json-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/viewer-json-v1.receipt.json",
+        "byteCount": 575,
+        "sha256": "3568daac4d95cecb8c3b6d01e88bbe1700146afb3c8d6c05981d1d0623b0f8b3"
+      }
+    },
+    {
+      "name": "migration-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/migration-tests-v1.receipt.json",
+        "byteCount": 404,
+        "sha256": "113dbc2f523ee3e93d3cb061c961c11f209c98ec8f9381a407896399ec5ff278"
+      }
+    },
+    {
+      "name": "bindings-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/bindings-v1.receipt.json",
+        "byteCount": 415,
+        "sha256": "01eff5a36356ca13496c43700ab726bc842de2c691200f56a8398b54bdf92209"
+      }
+    },
+    {
+      "name": "ci-planner-tests-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/ci-planner-tests-v1.receipt.json",
+        "byteCount": 386,
+        "sha256": "dbbde021c9a796690f99535dd9daa0193b467c35aee5d1a5a74fc96038a5256a"
+      }
+    },
+    {
+      "name": "licenses-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/licenses-v1.receipt.json",
+        "byteCount": 389,
+        "sha256": "fabd951ba3e280fafc3840338b418c870a357ac6c144cc17bfe9e4ee7635082b"
+      }
+    },
+    {
+      "name": "parser-lock-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/parser-lock-v1.receipt.json",
+        "byteCount": 400,
+        "sha256": "c71657f6656fc4386a57b3331a6aaba96fe80398ea5570b05370106b91ef405e"
+      }
+    },
+    {
+      "name": "palette-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/palette-v1.receipt.json",
+        "byteCount": 393,
+        "sha256": "46424cb697205672e128540b510cdf768def53c8e529cc68772fcf3f6a4f9af1"
+      }
+    },
+    {
+      "name": "default-helper-build-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/default-helper-build-v1.receipt.json",
+        "byteCount": 732,
+        "sha256": "30711f98288e1a0b82e907ec089b9182634a1c1963fb8c4ddc301f5b77a90dc8"
+      }
+    },
+    {
+      "name": "oracles-modules-v1",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracles-modules-v1.receipt.json",
+        "byteCount": 551,
+        "sha256": "d9c8adfa3d630fbbccd8634ee4231173f0b1885c134199d0160f76d9226c971f"
+      }
+    },
+    {
+      "name": "oracles-facts-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracles-facts-v2.receipt.json",
+        "byteCount": 551,
+        "sha256": "5aa562953a4e1bc69feeedf5769105f2be736e400ddfa804c487bf7de6196d21"
+      }
+    },
+    {
+      "name": "oracles-viewer-v2",
+      "receipt": {
+        "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/oracles-viewer-v2.receipt.json",
+        "byteCount": 552,
+        "sha256": "17ed13ef7c3b0d95828efa155eb91ce1e39eeabcb0a11bfed2daaeb503a386d5"
+      }
+    }
+  ],
+  "tests": {
+    "rustWorkspace": {
+      "passed": 530,
+      "failed": 0,
+      "ignored": 0
+    },
+    "swiftSDK": {
+      "passed": 87,
+      "failed": 0,
+      "skipped": 0
+    },
+    "defaultSwift": {
+      "passed": 617,
+      "failed": 0,
+      "skipped": 6,
+      "skipScope": "Existing explicitly requested integration gates; parser-dependent tests executed"
+    },
+    "nativeAppSupportAndRendering": {
+      "passed": 211,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "actualController": {
+    "artifactIdentity": "2b207ac4515f061f57acbb6820217c27904487d4150a98f9785789bf74e76a10",
+    "contractSHA256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+    "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+    "databaseSHA256BeforeLock": "004cca580c192cb04d940d1e275dfffc9ff667c0b851e91dfaa2710242299a4a",
+    "events": [
+      {
+        "parserKey": "9ffcc71e62cf6bc2520d5ebf0b7c176ec527de3cc3ee2267104ddcb2e7e58095",
+        "phase": "controller-lock-ready"
+      },
+      {
+        "closeBounded": "true",
+        "phase": "controller-lock-complete",
+        "saveTimeoutVisible": "true",
+        "uiTicks": "565"
+      },
+      {
+        "allStorageCreditsReleased": true,
+        "annotationsAndFavoritesRoundTrip": true,
+        "appCutover": false,
+        "cacheMaintenanceActiveProtected": true,
+        "cacheMaintenanceBeforeOpen": true,
+        "cacheMaintenanceOneReaderProtected": true,
+        "controllerFutureSidecarPreserved": true,
+        "controllerMachineModelsEqualToSwift": true,
+        "controllerSettingsPurgeAndReparse": true,
+        "controllerViewStateExtremaAndUnknownFavorites": true,
+        "failedSaveStillReleasesSession": true,
+        "fullCacheAcceptance": false,
+        "persistenceDrainedBeforeClose": true,
+        "productRuntimeConnected": true,
+        "sourceFormatAliasMetadataEqualToSwift": true
+      }
+    ],
+    "rawTraceUnchanged": true,
+    "lockTimeoutPreservedOriginalSidecar": true,
+    "processExitCode": 0,
+    "appCutover": false,
+    "fullMacOSAcceptance": false
+  },
+  "actualControllerEvidence": {
+    "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/actual-controller-v4/report.json",
+    "byteCount": 1517,
+    "sha256": "cafc8c5255866de0d2a48652b02e8005d015058be3960c5d97fb923dd53badaf"
+  },
+  "fixtureNativeArtifact": {
+    "artifactIdentity": "2b207ac4515f061f57acbb6820217c27904487d4150a98f9785789bf74e76a10",
+    "library": {
+      "byteCount": 30638688,
+      "sha256": "ca5cb44b188e3e8b3053fb3c0fca4f7958af18feb476683679ed4900a59ae2c0"
+    }
+  },
+  "productionNativeArtifact": {
+    "artifactIdentity": "cb119b91f04775dd13802135e481c73e84c941e12449bc2a4bc9de2609e97db0",
+    "library": {
+      "byteCount": 30579240,
+      "sha256": "17e49d1854174639a7d677d14957011245c9116cde2be1fed1a1e4182316c5c0"
+    }
+  },
+  "AppBuildWarnings": [
+    "AppIntents metadata extraction skipped: no AppIntents.framework dependency"
+  ],
+  "sourceOracleChange": "Preserve unknown favorite records; visible unique known lanes define reorder indices and the twelve-lane display bound. Seven actual Swift navigation differences were reviewed and Rust behavior/tests updated. Other current oracles rerun with byte-identical outputs.",
+  "preservedFailures": [
+    {
+      "gate": "controller-tests-v1",
+      "reason": "Test did not enter close generation barrier before replacement/cancel; added explicit barrier. Source closure frozen, failed binary not separately retained."
+    },
+    {
+      "gate": "sdk-consumer-v1",
+      "reason": "Probe missed await in event encoder; compiler source/log frozen."
+    },
+    {
+      "gate": "oracles-facts-v1",
+      "reason": "Parallel evidence freeze raced with chmod; serialized freeze writes."
+    },
+    {
+      "gate": "oracles-viewer-v1",
+      "reason": "Seven intended navigation facts changed; reviewed individually and synchronized Rust behavior."
+    },
+    {
+      "gate": "rust-viewer-tests-v1",
+      "reason": "Directory-change test still expected unknown IDs discarded; asserts stored IDs and visible lanes separately now. Exact failed executable/source retained."
+    },
+    {
+      "gate": "actual-controller-v1",
+      "reason": "Probe configuration omitted Core format field."
+    },
+    {
+      "gate": "actual-controller-v2",
+      "reason": "Probe required legacy 0600; native committed sidecar is sealed read-only 0400."
+    },
+    {
+      "gate": "actual-controller-v3",
+      "reason": "Probe attempted a negative query range, which remains invalid. Kept signed ID/color/flag times; mark uses maximum valid endpoint range."
+    },
+    {
+      "gate": "default-swift-full-v1",
+      "reason": "Two AppKit paint tests failed inside restricted sandbox; same sources pass outside sandbox."
+    },
+    {
+      "gate": "default-app-v1",
+      "reason": "Restricted system manifest cache access; same build passes outside sandbox."
+    },
+    {
+      "gate": "native-app-v1",
+      "reason": "Xcode binary target requires relative package path; staged verified artifact and reran."
+    },
+    {
+      "gate": "api-baseline-v1",
+      "reason": "Initial invocation lacked writable explicit manifest/module cache arguments."
+    }
+  ],
+  "ciPlan": {
+    "mergeBase": "5a234a2cad465cf7f0ef3fcd5db57c9469d4e925",
+    "paths": {
+      "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/ci-complete-diff-paths.txt",
+      "byteCount": 5993,
+      "sha256": "12d2b8c33464467d8154bfaf806d1cca831ae1806db87040fd1d0feca9ccce3a"
+    },
+    "plan": {
+      "path": ".build/agent-coordination/arktrace/native-sidecar-controller-20261005/ci-complete-diff-plan.txt",
+      "byteCount": 96,
+      "sha256": "a41e416f562ad54be2bca4f3f476e13ceb0a4fdd3116c7f3f1ee2896fe3fd267"
+    },
+    "selectedLanes": [
+      "swiftpm",
+      "app",
+      "contracts",
+      "rust-macos",
+      "rust-windows"
+    ],
+    "WindowsNativeExecuted": false
+  },
+  "macOSFinalAcceptanceComplete": false,
+  "remaining": [
+    "Owner-isolated stable Cargo cache, native target guard and verified archive-before-retire workflow",
+    "Default App cutover and native hot snapshot",
+    "Old cache and annotation backup/import",
+    "Signed production runtime, distribution and whole-product performance checks",
+    "Actual GUI and applicable ArkDeck/capture acceptance",
+    "Independent current-source test deliveries and full planned CI verification"
+  ],
+  "mainPublication": "No retry; auto-review requires current direct human authorization"
+}

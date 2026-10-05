@@ -7,8 +7,8 @@
   "sourceDigests": [
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
-      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
-      "byteCount": 6210
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56",
+      "byteCount": 6608
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",

@@ -100,8 +100,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
-      "sha256": "8ca7fe808486bb727df285c5563b1f9d10a189482c0f2309c923ca9f37284f24",
-      "byteCount": 6210
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56",
+      "byteCount": 6608
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineColorPalette.swift",
@@ -176,17 +176,17 @@
   ],
   "cacheOnlyAugmentedSources": [
     {
-      "path": "/private/tmp/arktrace-presentation-core-refresh/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
+      "path": "/private/tmp/arktrace-presentation-swiftpm/oracle-source/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
       "sha256": "346f123925aa5dfb4301e4602300d92c839492939a6beedd3e89d8760ddc0669",
       "byteCount": 140706
     },
     {
-      "path": "/private/tmp/arktrace-presentation-core-refresh/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "path": "/private/tmp/arktrace-presentation-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
       "sha256": "f1a68242314235445c67914174359ed339d9c49b9bc4e71f20c0676cbbbfd6e1",
       "byteCount": 102724
     },
     {
-      "path": "/private/tmp/arktrace-presentation-core-refresh/oracle-source/Sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "path": "/private/tmp/arktrace-presentation-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineColorPalette.swift",
       "sha256": "86d41d14771842658661f25b31356eac010cec8a75627225f9d776689c50d79c",
       "byteCount": 29218
     }

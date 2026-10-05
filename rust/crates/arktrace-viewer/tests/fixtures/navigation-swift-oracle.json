@@ -3391,12 +3391,12 @@
       },
       {
         "focusTimeline" : false,
-        "persistFavorites" : true,
+        "persistFavorites" : false,
         "projection" : {
           "favoriteTrackIDs" : [
-            "thread-state:200",
             "named-slice:100",
-            "missing"
+            "missing",
+            "thread-state:200"
           ],
           "pendingSelectionKey" : null,
           "processFilterText" : "",
@@ -3812,7 +3812,7 @@
       },
       {
         "focusTimeline" : false,
-        "persistFavorites" : true,
+        "persistFavorites" : false,
         "projection" : {
           "favoriteTrackIDs" : [
             "named-slice:100",

@@ -121,10 +121,16 @@ impl ViewState {
             .map(|t| (t.id(), t))
             .collect();
         let mut tracks = Vec::new();
+        let mut seen = BTreeSet::new();
         for (i, id) in self.favorite_track_ids.iter().enumerate() {
             checkpoint(i, check)?;
-            if let Some(t) = by_id.get(id) {
+            if let Some(t) = by_id.get(id)
+                && seen.insert(id)
+            {
                 tracks.push(*t);
+                if tracks.len() == MAXIMUM_FAVORITE_TRACKS {
+                    break;
+                }
             }
         }
         let mut bytes = std::mem::size_of::<Vec<&SidebarTrack>>();
@@ -511,8 +517,8 @@ pub fn reduce_view_action(
             }
         }
         ViewAction::ToggleFavorite { id } => {
-            if let Some(index) = next.favorite_track_ids.iter().position(|i| i == id) {
-                next.favorite_track_ids.remove(index);
+            if next.favorite_track_ids.contains(id) {
+                next.favorite_track_ids.retain(|i| i != id);
                 reduction.applied = true;
             } else if next.favorite_tracks(check)?.len() < MAXIMUM_FAVORITE_TRACKS {
                 next.favorite_track_ids.push(id.clone());
@@ -528,39 +534,52 @@ pub fn reduce_view_action(
             source,
             destination,
         } => {
+            let visible: Vec<_> = next
+                .favorite_tracks(check)?
+                .iter()
+                .map(|t| t.id())
+                .collect();
             if let (Ok(source), Ok(destination)) =
                 (usize::try_from(*source), usize::try_from(*destination))
-                && source < next.favorite_track_ids.len()
-                && destination <= next.favorite_track_ids.len()
+                && source < visible.len()
+                && destination <= visible.len()
             {
-                let id = next.favorite_track_ids.remove(source);
+                let id = &visible[source];
+                let count = next
+                    .favorite_track_ids
+                    .iter()
+                    .filter(|candidate| *candidate == id)
+                    .count();
+                next.favorite_track_ids.retain(|candidate| candidate != id);
+                let mut reordered = visible.clone();
+                reordered.remove(source);
                 let index = if destination > source {
                     destination - 1
                 } else {
                     destination
                 };
+                let target = reordered
+                    .get(index)
+                    .and_then(|target| {
+                        next.favorite_track_ids
+                            .iter()
+                            .position(|candidate| candidate == target)
+                    })
+                    .unwrap_or(next.favorite_track_ids.len());
                 next.favorite_track_ids
-                    .insert(index.min(next.favorite_track_ids.len()), id);
+                    .splice(target..target, std::iter::repeat_n(id.clone(), count));
                 reduction.applied = true;
                 intents.persist_favorites = true;
             }
         }
         ViewAction::RestoreFavorites { ids } => {
-            let known: BTreeSet<_> = next
-                .tree
-                .groups
-                .iter()
-                .flat_map(|g| &g.tracks)
-                .map(SidebarTrack::id)
-                .collect();
             next.favorite_track_ids.clear();
             for (i, id) in ids.iter().enumerate() {
                 checkpoint(i, check)?;
-                if known.contains(id) {
-                    next.favorite_track_ids.push(id.clone());
-                }
+                next.favorite_track_ids.push(id.clone());
             }
-            // Restore does not deduplicate, enforce 12, or expand hidden tracks.
+            // Stored IDs keep unknown records and duplicates; display alone
+            // chooses up to twelve distinct known tracks.
             reduction.applied = true;
         }
         ViewAction::SetProcessFilter { text } => {

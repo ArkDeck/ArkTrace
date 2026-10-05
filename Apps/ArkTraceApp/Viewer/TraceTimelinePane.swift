@@ -109,7 +109,7 @@ struct TraceTimelinePane: View {
                                     cycleColor: {
                                         guard selection.sessionID == controller.annotationSessionID else { return }
                                         controller.updateFlag(
-                                            id: flag.id, colorIndex: flag.colorIndex + 1
+                                            id: flag.id, colorIndex: TimelineAnnotationColor.nextIndex(after: flag.colorIndex)
                                         )
                                     },
                                     remove: {

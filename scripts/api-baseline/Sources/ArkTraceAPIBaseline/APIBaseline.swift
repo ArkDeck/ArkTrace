@@ -255,6 +255,7 @@ private func pinRenderingSurface(
     _ = annotations.isEmpty
     _ = TimelineAnnotationColor.count
     _ = TimelineAnnotationColor.cgColor(at: 0)
+    _ = TimelineAnnotationColor.nextIndex(after: .max)
     for track in snapshot.tracks {
         _ = track.descriptor.title
         _ = track.descriptor.id

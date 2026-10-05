@@ -95,12 +95,10 @@ public final class TraceRustProductRuntime: Sendable {
                 sourceFormatHint: source.pathExtension.isEmpty ? nil : source.pathExtension,
                 operationTimeoutMilliseconds: queryTimeoutMilliseconds)
             let trace = await opening.metadata.cacheKey.traceSHA256.copyString()
-            let parser = await opening.metadata.cacheKey.parserKey.copyString()
-            guard let store = TraceViewStateStore(cacheDirectory: configuration.cacheDirectory,
-                traceSHA256: trace, parserKey: parser) else { throw RustAdmission.invalidBuffer }
+            let access = TraceViewStateAccess(session: session, traceSHA256: trace, timeoutMilliseconds: queryTimeoutMilliseconds)
             try Task.checkCancellation()
             return TraceOpenedDocument(repository: repository, cacheHit: opening.cacheHit, cacheMetadata: nil,
-                viewStateStore: store, close: { try await repository.close() })
+                viewStateAccess: access, close: { try await repository.close() })
         } catch {
             // Native close preserves cleanup-failure priority over cancellation.
             try await session.close()

@@ -1,4 +1,5 @@
 import ArkTraceAppSupport
+import ArkTraceRendering
 import SwiftUI
 
 /// Editable list of the user's flags and marks. Lives in the Inspector rather
@@ -30,7 +31,7 @@ struct AnnotationInspectorView: View {
                         onRename: { controller.updateFlag(id: flag.id, label: $0) },
                         onCycleColor: {
                             controller.updateFlag(
-                                id: flag.id, colorIndex: flag.colorIndex + 1
+                                id: flag.id, colorIndex: TimelineAnnotationColor.nextIndex(after: flag.colorIndex)
                             )
                         },
                         onDelete: { controller.removeFlag(id: flag.id) }
@@ -50,7 +51,7 @@ struct AnnotationInspectorView: View {
                         onRename: { controller.updateMark(id: mark.id, label: $0) },
                         onCycleColor: {
                             controller.updateMark(
-                                id: mark.id, colorIndex: mark.colorIndex + 1
+                                id: mark.id, colorIndex: TimelineAnnotationColor.nextIndex(after: mark.colorIndex)
                             )
                         },
                         onDelete: { controller.removeMark(id: mark.id) }

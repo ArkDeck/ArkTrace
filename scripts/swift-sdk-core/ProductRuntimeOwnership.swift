@@ -7,6 +7,7 @@ import Foundation
 private struct ProductInput: Decodable, Sendable {
     let source, namespace, cacheDirectory, helper, parser, helperSHA256, manifest: String
     let parserIdentity: TraceParserIdentity
+    let productViewStateLockProbe: Bool?
 }
 @concurrent private func productInput() async throws -> ProductInput {
     try JSONDecoder().decode(ProductInput.self, from: Data(contentsOf: URL(filePath: CommandLine.arguments[1])))
@@ -86,7 +87,7 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     let directory = URL(filePath: input.cacheDirectory).deletingLastPathComponent()
     try Data(contentsOf: sidecar).write(to: directory.appending(path: "product-saved-view-state.json"))
     let attributes = try manager.attributesOfItem(atPath: sidecar.path)
-    precondition((attributes[.posixPermissions] as! NSNumber).intValue == 0o600)
+    precondition((attributes[.posixPermissions] as! NSNumber).intValue == 0o400)
     try await productRaw(["permissions": (attributes[.posixPermissions] as! NSNumber).intValue])
         .write(to: directory.appending(path: "product-saved-view-state-permissions.json"))
 }
@@ -105,6 +106,110 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     try FileHandle.standardOutput.write(contentsOf: encoder.encode(value) + Data([10]))
 }
 
+@concurrent private func productSidecarURL(_ root: URL) async throws -> URL {
+    let files = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)!
+        .compactMap { $0 as? URL }.filter { $0.lastPathComponent == "view-state.json" }
+    guard files.count == 1 else { throw RustAdmission.invalidBuffer }
+    return files[0]
+}
+private struct ProductSidecar: Codable, Sendable {
+    let formatVersion: Int
+    let traceSHA256: String
+    let flags: [TimelineFlag]
+    let marks: [TimelineMark]
+    let favoriteTrackIDs: [String]?
+}
+@concurrent private func productReplaceSidecar(_ file: URL, _ sidecar: ProductSidecar) async throws -> Data {
+    let data = try JSONEncoder().encode(sidecar)
+    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)
+    try data.write(to: file)
+    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)
+    return data
+}
+@concurrent private func productSidecarBytes(_ file: URL) async throws -> Data { try Data(contentsOf: file) }
+@concurrent private func productPreserveSidecar(_ data: Data, name: String, input: ProductInput) async throws {
+    try data.write(to: URL(filePath: input.cacheDirectory).deletingLastPathComponent().appending(path: name))
+}
+@concurrent private func productWaitForProbe() async throws {
+    _ = try FileHandle.standardInput.read(upToCount: 1)
+}
+@concurrent private func productProbeEvent(_ value: [String: String]) async throws {
+    try await FileHandle.standardOutput.write(contentsOf: productRaw(value) + Data([10]))
+}
+
+@MainActor private func productViewStateChecks(_ controller: TraceDocumentController,
+    product: TraceRustProductRuntime, profile: TraceProductConfiguration, source: URL, input: ProductInput) async throws {
+    let file = try await productSidecarURL(profile.cacheDirectory)
+    let trace = file.deletingLastPathComponent().deletingLastPathComponent().lastPathComponent
+    let track = controller.trackGroups.flatMap(\.tracks)[0].id
+    let unknown = TimelineTrackID(rawValue: "missing\0🦀")
+    let flags = [TimelineFlag(id: .max, timestampNs: .max, label: "last\0🦀", colorIndex: .max),
+                 TimelineFlag(id: 1, timestampNs: .min, label: "first", colorIndex: .min)]
+    let marks = [TimelineMark(id: .min, range: try .query(startNs: .max - 1, endNs: .max),
+        label: "kept extreme", colorIndex: .max, isPersistent: true)]
+    let favorites = [unknown, track, unknown, track]
+    await controller.close()
+    let original = ProductSidecar(formatVersion: 1, traceSHA256: trace, flags: flags, marks: marks,
+        favoriteTrackIDs: favorites.map(\.rawValue))
+    _ = try await productReplaceSidecar(file, original)
+    controller.open(source); try await waitForProduct(controller)
+    precondition(controller.annotations.flags == flags && controller.annotations.marks == marks)
+    precondition(controller.favoriteTrackIDs == favorites && controller.favoriteTracks().map(\.id) == [track])
+    let added = controller.addFlag(atNs: 0, label: "unused identity")!
+    precondition(added.id == 2)
+    controller.updateFlag(id: .max, colorIndex: TimelineAnnotationColor.nextIndex(after: .max))
+    await controller.close()
+    let stored = try await productSidecarBytes(file)
+    let decoded = try JSONDecoder().decode(ProductSidecar.self, from: stored)
+    precondition(decoded.flags[0].id == .max && decoded.flags[0].timestampNs == .max && decoded.flags[0].colorIndex == 2)
+    precondition(decoded.flags[1] == flags[1] && decoded.marks == marks && decoded.favoriteTrackIDs == favorites.map(\.rawValue))
+    try await productPreserveSidecar(stored, name: "product-extreme-view-state.json", input: input)
+
+    let future = ProductSidecar(formatVersion: 999, traceSHA256: trace, flags: flags, marks: marks,
+        favoriteTrackIDs: favorites.map(\.rawValue))
+    let futureBytes = try await productReplaceSidecar(file, future)
+    controller.open(source); try await waitForProduct(controller)
+    precondition(controller.phase == .ready && controller.annotations.isEmpty && controller.errorPresentation != nil)
+    _ = controller.addFlag(atNs: 0, label: "cannot replace future")
+    await controller.close()
+    precondition(controller.phase == .failed && controller.errorPresentation?.diagnostic.contains("viewStatePreserved") == true)
+    let afterFuture = try await productSidecarBytes(file)
+    precondition(afterFuture == futureBytes)
+    try await productPreserveSidecar(afterFuture, name: "product-future-view-state.json", input: input)
+    let inventory = try await product.cacheMaintenance.inventory()
+    precondition(inventory.activeEntryCount == 0)
+    await controller.close()
+    precondition(controller.phase == .idle)
+    _ = try await productReplaceSidecar(file, original)
+    controller.open(source); try await waitForProduct(controller)
+    precondition(controller.annotations.flags == flags && controller.errorPresentation == nil)
+
+    if input.productViewStateLockProbe == true {
+        try await productProbeEvent(["phase": "controller-lock-ready", "parserKey": file.deletingLastPathComponent().lastPathComponent])
+        try await productWaitForProbe()
+        let start = ContinuousClock.now
+        var uiTicks = 0
+        let ticker = Task { @MainActor in
+            while !Task.isCancelled { uiTicks += 1; try? await Task.sleep(for: .milliseconds(1)) }
+        }
+        _ = controller.addFlag(atNs: 0, label: "blocked native save")
+        await controller.close()
+        ticker.cancel()
+        precondition(start.duration(to: .now) < .seconds(5))
+        precondition(uiTicks > 5)
+        precondition(controller.phase == .failed && controller.errorPresentation?.diagnostic.contains("QUERY_TIMEOUT") == true)
+        precondition(controller.annotations.flags.count == 3)
+        try await productProbeEvent(["phase": "controller-lock-complete", "closeBounded": "true", "saveTimeoutVisible": "true", "uiTicks": String(uiTicks)])
+        try await productWaitForProbe()
+        let released = try await product.cacheMaintenance.inventory()
+        precondition(released.activeEntryCount == 0)
+        await controller.close()
+        precondition(controller.phase == .idle)
+        controller.open(source); try await waitForProduct(controller)
+        precondition(controller.annotations.flags == flags && controller.errorPresentation == nil)
+    }
+}
+
 @MainActor func runProductRuntimeOwnership() async throws {
     let input = try await productInput()
     let roots = try await prepareProductRoots(input)
@@ -115,7 +220,8 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     let config = RustConfiguration.developmentFixture(namespace: profile.stagingDirectory,
         helper: URL(filePath: input.helper), parser: URL(filePath: input.parser), helperSHA256: input.helperSHA256,
         parserIdentity: input.parserIdentity, storagePolicy: .contentAddressed(cacheDirectory: profile.cacheDirectory))
-    let product = try await TraceRustProductRuntime.createDevelopmentFixture(configuration: profile, runtimeConfiguration: config)
+    let product = try await TraceRustProductRuntime.createDevelopmentFixture(configuration: profile, runtimeConfiguration: config,
+        queryTimeoutMilliseconds: input.productViewStateLockProbe == true ? 1_000 : 30_000)
     let before = try await product.cacheMaintenance.inventory()
     precondition(before.entryCount == 0 && before.totalByteCount == 0 && before.activeEntryCount == 0)
     let first = product.makeDocumentController(), second = product.makeDocumentController()
@@ -172,6 +278,7 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
     second.open(source); try await waitForProduct(second)
     precondition(second.cacheHit && second.annotations.flags == expectedFlags)
     precondition(second.annotations.marks == expectedMarks && second.favoriteTrackIDs == expectedFavorites)
+    try await productViewStateChecks(second, product: product, profile: profile, source: source, input: input)
     await second.close()
     await second.purgeUnusedCache()
     precondition(second.cacheInventory?.entryCount == 0)
@@ -186,5 +293,7 @@ private func productSnapshot(_ value: TimelineSnapshot?) throws -> TimelineSnaps
         "cacheMaintenanceBeforeOpen": true, "cacheMaintenanceActiveProtected": true,
         "cacheMaintenanceOneReaderProtected": true, "controllerSettingsPurgeAndReparse": true,
         "annotationsAndFavoritesRoundTrip": true, "persistenceDrainedBeforeClose": true,
+        "controllerViewStateExtremaAndUnknownFavorites": true, "controllerFutureSidecarPreserved": true,
+        "failedSaveStillReleasesSession": true,
         "allStorageCreditsReleased": true, "appCutover": false, "fullCacheAcceptance": false])
 }
