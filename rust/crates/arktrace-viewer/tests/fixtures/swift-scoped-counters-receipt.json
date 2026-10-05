@@ -4,7 +4,7 @@
   "vectors": 7,
   "xcode": "Xcode 27.0\nBuild version 27A266a",
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
-  "executableSHA256": "8bc82e1e29e244d84a382eec5d22e916614973566f14458c1f561e881ac6503b",
+  "executableSHA256": "2d1f6ba295fd96e9598dca25cb70581546bb356698f56a0e527374f9dc84d0af",
   "database": {
     "byteCount": 57344,
     "sha256": "df37d645cd9c9062390ec1714945597e0ee86af46421adf6a0f7d861c3fb74d0",
@@ -153,8 +153,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
-      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a",
-      "byteCount": 16950
+      "sha256": "33d994c61425fbc74b1eb98e18da5c9d47493011763d5163573d99d15dcadc98",
+      "byteCount": 18836
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
@@ -173,13 +173,13 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3",
-      "byteCount": 26221
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997",
+      "byteCount": 27152
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59",
-      "byteCount": 101479
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6",
+      "byteCount": 102182
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
@@ -193,8 +193,8 @@
     }
   ],
   "retainedExactRunArtifact": {
-    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-counters-8bc82e1e29e244d84a382eec5d22e916614973566f14458c1f561e881ac6503b.executable",
-    "sha256": "8bc82e1e29e244d84a382eec5d22e916614973566f14458c1f561e881ac6503b",
-    "byteCount": 4867968
+    "path": "/private/tmp/arktrace-viewer-scope-swiftpm/swift-scoped-counters-2d1f6ba295fd96e9598dca25cb70581546bb356698f56a0e527374f9dc84d0af.executable",
+    "sha256": "2d1f6ba295fd96e9598dca25cb70581546bb356698f56a0e527374f9dc84d0af",
+    "byteCount": 4874160
   }
 }

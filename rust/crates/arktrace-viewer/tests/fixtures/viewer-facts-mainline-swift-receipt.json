@@ -299,8 +299,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 103317,
-      "sha256": "7b687f524d8d1b9c05c8912da1ef8bf18f7a4e0a9a530f7bcdd8bda0550bc661"
+      "byteCount": 103253,
+      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -454,8 +454,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
-      "byteCount": 16950,
-      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a"
+      "byteCount": 18836,
+      "sha256": "33d994c61425fbc74b1eb98e18da5c9d47493011763d5163573d99d15dcadc98"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
@@ -474,13 +474,13 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "byteCount": 26221,
-      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3"
+      "byteCount": 27152,
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101479,
-      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59"
+      "byteCount": 102182,
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
@@ -673,6 +673,11 @@
       "sha256": "337821776504b46ca14634c7df7e08d17b833a0e887216f0fdbea47595015241"
     },
     {
+      "path": "Tests/ArkTraceRenderingTests/NativeSnapshotHitTests.swift",
+      "byteCount": 10150,
+      "sha256": "eada687219111dc4e3273a5f03eeedd7f4ad85a0702a16798cee2325164095a7"
+    },
+    {
       "path": "Tests/ArkTraceRenderingTests/NativeSnapshotLoadCancellationDeadlineTests.swift",
       "byteCount": 16714,
       "sha256": "16aaa423f188d709d083601be27663bb5a0fc1b94a11b5db200455d68d7ba922"
@@ -726,6 +731,11 @@
       "path": "Tests/ArkTraceRenderingTests/TimelineHoverTests.swift",
       "byteCount": 7516,
       "sha256": "0027fd7f0ffa8597119b1d2567c12ae61cc76945df212b390fb09e91887c9db2"
+    },
+    {
+      "path": "Tests/ArkTraceRenderingTests/TimelineNativeHitRoutingTests.swift",
+      "byteCount": 4299,
+      "sha256": "b9c62acad21f7db158473f7c1e97811dddca8a5dd6bdf1d37aa409bfdde922bc"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelineNavigationKeyTests.swift",
@@ -938,19 +948,19 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 10.244785082992166,
+      "elapsedSeconds": 32.044118916994194,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-swift-canonical.log",
-        "byteCount": 6355,
-        "sha256": "554f4e16c3d625c7a909d4ad8cd3de4f5c8e85683037706faed627b7475dfca4"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-swift-canonical.log",
+        "byteCount": 6879,
+        "sha256": "56c5a26ba0ec73b20d804989df8275fc7f4f295261927ac588783c35fe35c257"
       }
     },
     {
@@ -970,32 +980,32 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 3.980180125014158,
+      "elapsedSeconds": 5.470906457980163,
       "log": {
-        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/oracle-refresh/fresh-swift-regressions.log",
-        "byteCount": 16444,
-        "sha256": "b100829a14b099a1e62ef5ded7da90e61d74e29cc5e03b66d72ad8a02c450332"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-swift-regressions.log",
+        "byteCount": 15701,
+        "sha256": "34148361ab92eae5e3c0f79828ac1befb321a4322cba5776eb7f5dbc44ac17a0"
       }
     }
   ],
   "augmentedSources": [
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 104104,
-      "sha256": "20078c708c337558d0adbb6cc702cba4a38f2a8e83d9f409f10488e486debaf1"
+      "byteCount": 104040,
+      "sha256": "58f2aea27300220983b4e6e6c452eb634e4ae6bb512b0b5787da4e2e66505791"
     },
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101818,
-      "sha256": "0a0beb1ab830c25db03a00536cfcc57a42733324d6dc1177ba8c3ef16d338298"
+      "byteCount": 102521,
+      "sha256": "f3fa90fa7411126a4032c302fa3bc5898d272c6d3447ad916797ea9cbb22edf7"
     },
     {
       "path": "/private/tmp/arktrace-viewer-facts-swift/oracle-source/Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
@@ -1014,6 +1024,6 @@
     "Native-key recordings do not prove user IME/focus/menu acceptance",
     "Independent module capacity accounting excludes owner aggregate, allocator and scratch"
   ],
-  "previousReceiptSHA256": "cfd24704ce2ec153350322102707165adf096e1d89d6eb451662810c5dffc69c",
-  "revalidatedBaseCommit": "5c20a4a564626718ffd728696003731eb5b9a644"
+  "previousReceiptSHA256": "489d1efc5de02dd1f86e86dfcd91e526fb5fed966b63fb061fff55aecb85b94c",
+  "revalidatedBaseCommit": "141ab1e8280eb7b7cda07fe5415730059e48818f"
 }

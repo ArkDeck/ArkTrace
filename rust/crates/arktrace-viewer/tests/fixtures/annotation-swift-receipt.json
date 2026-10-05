@@ -63,8 +63,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 103317,
-      "sha256": "7b687f524d8d1b9c05c8912da1ef8bf18f7a4e0a9a530f7bcdd8bda0550bc661"
+      "byteCount": 103253,
+      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -218,8 +218,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
-      "byteCount": 16950,
-      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a"
+      "byteCount": 18836,
+      "sha256": "33d994c61425fbc74b1eb98e18da5c9d47493011763d5163573d99d15dcadc98"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
@@ -238,13 +238,13 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "byteCount": 26221,
-      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3"
+      "byteCount": 27152,
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101479,
-      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59"
+      "byteCount": 102182,
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
@@ -350,8 +350,8 @@
   "cacheOnlyAugmentedSources": [
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 105672,
-      "sha256": "89d96469370bfb76be8f08310f6c53c6d920746a6e97f78813d2c517603c8853"
+      "byteCount": 105608,
+      "sha256": "f08f7a6a30fe5948db483067f4783bf2a392f4520823c0aecf2b16fb23b718a1"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",

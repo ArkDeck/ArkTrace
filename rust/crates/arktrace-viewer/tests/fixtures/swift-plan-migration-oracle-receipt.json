@@ -7,8 +7,8 @@
   "sourceDigests": [
     {
       "path": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
-      "sha256": "9d66bce30957638e76911e4e702373a4340f5c711019fe9bdf4cc54b55f5fa7a",
-      "byteCount": 16950
+      "sha256": "33d994c61425fbc74b1eb98e18da5c9d47493011763d5163573d99d15dcadc98",
+      "byteCount": 18836
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineAnnotations.swift",
@@ -27,13 +27,13 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineModels.swift",
-      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3",
-      "byteCount": 26221
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997",
+      "byteCount": 27152
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59",
-      "byteCount": 101479
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6",
+      "byteCount": 102182
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",

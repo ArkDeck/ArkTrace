@@ -1482,12 +1482,9 @@ public final class TraceDocumentController {
                 verticalOffsetPoints: verticalOffsetPoints,
                 generation: nextViewportGeneration()
             )
-            snapshot = TimelineSnapshot(
-                viewport: viewport,
-                tracks: snapshot?.tracks ?? [],
-                generation: viewport.generation,
-                dataQuality: snapshot?.dataQuality ?? TraceDataQuality(),
-                isLoading: true
+            snapshot = snapshot?.displaying(viewport: viewport, isLoading: true) ?? TimelineSnapshot(
+                viewport: viewport, tracks: [], generation: viewport.generation,
+                dataQuality: TraceDataQuality(), isLoading: true
             )
             scheduleSnapshot(preference: .automatic)
         } catch {
@@ -1713,12 +1710,9 @@ public final class TraceDocumentController {
                 verticalOffsetPoints: old.verticalOffsetPoints,
                 generation: nextViewportGeneration()
             )
-            snapshot = TimelineSnapshot(
-                viewport: viewport,
-                tracks: snapshot?.tracks ?? [],
-                generation: viewport.generation,
-                dataQuality: snapshot?.dataQuality ?? TraceDataQuality(),
-                isLoading: true
+            snapshot = snapshot?.displaying(viewport: viewport, isLoading: true) ?? TimelineSnapshot(
+                viewport: viewport, tracks: [], generation: viewport.generation,
+                dataQuality: TraceDataQuality(), isLoading: true
             )
             scheduleSnapshot(preference: .automatic)
         } catch {

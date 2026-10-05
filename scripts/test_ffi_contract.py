@@ -28,7 +28,7 @@ def main():
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
     identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
     assert bytes(identity.contract_digest)==expected and identity.abi_version==CONTRACT['abiVersion']
-    assert identity.capabilities==(183 if sys.platform=='darwin' else 0)
+    assert identity.capabilities==(sum(K[k] for k in ('CAP_MACOS_ENGINE','CAP_COLD_JSON','CAP_VIEWPORT_RECORDS','CAP_CACHE_MAINTENANCE','CAP_VIEW_STATE','CAP_VIEW_STATE_BACKUP','CAP_SNAPSHOT_HIT')) if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
     abi.call('abi_identity',C.byref(identity),0,expected=K['STATUS_INVALID_BUFFER'])
     storage=(C.c_uint64*8)();bad=C.cast(C.byref(storage,1),C.POINTER(TYPES['AbiIdentity']))
@@ -57,6 +57,24 @@ def main():
         abi.call('view_state_request_submit',0,0,K['VIEW_STATE_WRITE'],pointer,length,1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
     oversize=(C.c_uint8*(K['MAXIMUM_VIEW_STATE_BYTES']+1))()
     abi.call('view_state_request_submit',0,0,K['VIEW_STATE_WRITE'],oversize,len(oversize),1,C.byref(request),C.sizeof(request),expected=K['STATUS_INVALID_BUFFER'])
+    # Synchronous retained hits validate caller storage before owner lookup.
+    viewport=TYPES['ViewportRecord'](start_ns=0,end_ns=100,ns_per_point=1,width_points=100,height_points=100,backing_scale=1)
+    hit=TYPES['SnapshotHit']()
+    def rejected_hit(mode=K['HIT_MODE_ANY'],v=viewport,x=10,y=30,expected=K['STATUS_INVALID_INPUT']):
+        C.memset(C.byref(hit),0xff,C.sizeof(hit))
+        abi.call('snapshot_hit',2**64-1,mode,C.byref(v),C.sizeof(v),x,y,C.byref(hit),C.sizeof(hit),expected=expected)
+        assert C.string_at(C.byref(hit),C.sizeof(hit))==bytes(C.sizeof(hit))
+    rejected_hit(expected=K['STATUS_INVALID_HANDLE'])
+    for mode in (0,4,2**32-1):rejected_hit(mode=mode)
+    for x,y in ((float('nan'),30),(10,float('inf'))):rejected_hit(x=x,y=y)
+    for name,value in [('ns_per_point',2),('backing_scale',0),('width_points',0),('height_points',float('inf')),('vertical_offset_points',-1),('end_ns',0)]:
+        invalid=TYPES['ViewportRecord'].from_buffer_copy(viewport);setattr(invalid,name,value);rejected_hit(v=invalid)
+    for pointer,count in ((None,C.sizeof(viewport)),(C.byref(viewport),0)):
+        abi.call('snapshot_hit',0,K['HIT_MODE_ANY'],pointer,count,0,0,C.byref(hit),C.sizeof(hit),expected=K['STATUS_INVALID_BUFFER'])
+    storage=(C.c_uint64*16)();bad_view=C.cast(C.byref(storage,1),C.POINTER(TYPES['ViewportRecord']));bad_hit=C.cast(C.byref(storage,1),C.POINTER(TYPES['SnapshotHit']))
+    abi.call('snapshot_hit',0,K['HIT_MODE_ANY'],bad_view,C.sizeof(viewport),0,0,C.byref(hit),C.sizeof(hit),expected=K['STATUS_INVALID_BUFFER'])
+    for pointer,count in ((None,C.sizeof(hit)),(C.byref(hit),0),(bad_hit,C.sizeof(hit))):
+        abi.call('snapshot_hit',0,K['HIT_MODE_ANY'],C.byref(viewport),C.sizeof(viewport),0,0,pointer,count,expected=K['STATUS_INVALID_BUFFER'])
     # Bounded arbitrary bytes are valid allocations, never dangling pointers.
     for payload in (b'{}',b'null',b'[]',b'\xff',b'{"sql":"SELECT *"}'):
         abi.input('engine_create',payload,'u64',expected=K['STATUS_INVALID_INPUT'])

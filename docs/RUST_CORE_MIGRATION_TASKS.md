@@ -38,6 +38,10 @@
 > 复用现有几何与 density intent；54 个当前 Swift/Rust 命中对照（含 loading 重投影）和
 > 12 个负例通过。见[retained hit 记录](migration-runs/AT-RUST-011-012-2026-10-06-retained-hit.md)；
 > C ABI/SDK/NSView 的生产接线与整体验收仍 open。
+> 后续已接通 additive ABI-2 retained hit export、typed Swift SDK 与生产 NSView，loading
+> 改 viewport 时保留 owner，detail/density 分模式命中。真实 Engine 的 96 点对照三轮通过，
+> 包括 Engine release 后读取；SDK 字段矩阵明确区分 nil/zero 与 Int64 精度。见
+> [retained hit 接线记录](migration-runs/AT-RUST-011-012-013-2026-10-06-retained-hit-wire.md)；总验收仍 open。
 
 ## 1. 执行规则与完成语义
 

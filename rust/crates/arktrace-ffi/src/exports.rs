@@ -26,6 +26,12 @@ fn guard(engine: u64, body: impl FnOnce() -> Result<(), u32>) -> u32 {
             Err(code) => return code,
         }
     };
+    guard_context(context, body)
+}
+fn guard_context(
+    context: Option<std::sync::Arc<registry::Host>>,
+    body: impl FnOnce() -> Result<(), u32>,
+) -> u32 {
     match catch_unwind(AssertUnwindSafe(body)) {
         Ok(Ok(())) => STATUS_OK,
         Ok(Err(code)) => code,
@@ -53,6 +59,17 @@ unsafe fn output<'a, T: Default>(pointer: *mut T, bytes: u64) -> Result<&'a mut 
 }
 unsafe fn input(pointer: *const u8, bytes: u64, maximum: u32) -> Result<Vec<u8>, u32> {
     Ok(unsafe { borrowed_input(pointer, bytes, maximum) }?.to_vec())
+}
+unsafe fn input_record<T: Copy>(pointer: *const T, bytes: u64) -> Result<T, u32> {
+    if pointer.is_null()
+        || bytes != size_of::<T>() as u64
+        || !pointer.addr().is_multiple_of(align_of::<T>())
+    {
+        return Err(STATUS_INVALID_BUFFER);
+    }
+    // SAFETY: caller provides an exact readable live aligned record. Copy it
+    // before computation; no caller storage is retained beyond this call.
+    Ok(unsafe { pointer.read() })
 }
 unsafe fn borrowed_input<'a>(
     pointer: *const u8,
@@ -89,7 +106,8 @@ pub unsafe extern "C" fn arktrace_abi_identity(out: *mut AbiIdentity, bytes: u64
                         | CAP_VIEWPORT_RECORDS
                         | CAP_CACHE_MAINTENANCE
                         | CAP_VIEW_STATE
-                        | CAP_VIEW_STATE_BACKUP,
+                        | CAP_VIEW_STATE_BACKUP
+                        | CAP_SNAPSHOT_HIT,
                 )
             } else {
                 0
@@ -628,6 +646,7 @@ pub unsafe extern "C" fn arktrace_session_error_acquire(
         {
             let result = registry::ResultOwner {
                 kind: RESULT_FAILURE,
+                producer: std::sync::Arc::downgrade(&host),
                 data: host
                     .engine
                     .acquire_session_error_result(RuntimeHandle::from_raw(session))
@@ -745,6 +764,156 @@ pub unsafe extern "C" fn arktrace_snapshot_view(
         #[cfg(not(target_os = "macos"))]
         {
             let _ = (out, result.kind);
+            Err(STATUS_UNSUPPORTED_HOST)
+        }
+    })
+}
+#[cfg(target_os = "macos")]
+fn hit_record(hit: Option<arktrace_viewer::HitIntent>) -> SnapshotHit {
+    use arktrace_contract::{EventTable, TraceDensitySource};
+    use arktrace_viewer::HitIntent;
+    let mut out = SnapshotHit {
+        struct_size: size_of::<SnapshotHit>() as u32,
+        ..SnapshotHit::default()
+    };
+    match hit {
+        None => {}
+        Some(HitIntent::Detail { event_key }) => {
+            out.kind = HIT_DETAIL;
+            out.event_table = match event_key.table {
+                EventTable::SchedSlice => TABLE_SCHED_SLICE,
+                EventTable::ThreadState => TABLE_THREAD_STATE,
+                EventTable::Callstack => TABLE_CALLSTACK,
+                EventTable::Measure => TABLE_MEASURE,
+                EventTable::ProcessMeasure => TABLE_PROCESS_MEASURE,
+                EventTable::FrameSlice => TABLE_FRAME_SLICE,
+            };
+            out.row_id = event_key.row_id;
+        }
+        Some(HitIntent::Density { intent }) => {
+            out.kind = HIT_DENSITY;
+            out.bucket_start_ns = intent.bucket.start_ns();
+            out.bucket_end_ns = intent.bucket.end_ns();
+            out.time_ns = intent.time_ns;
+            let owner = match intent.source {
+                TraceDensitySource::Cpu { cpu } => {
+                    out.source_kind = SOURCE_CPU;
+                    out.source_value = cpu;
+                    None
+                }
+                TraceDensitySource::ThreadState { thread } => {
+                    out.source_kind = SOURCE_THREAD_STATE;
+                    out.source_value = thread.itid;
+                    None
+                }
+                TraceDensitySource::NamedSlice { thread } => {
+                    out.source_kind = SOURCE_NAMED_SLICE;
+                    out.source_value = thread.map_or(0, |t| t.itid);
+                    thread.map(|_| 0)
+                }
+                TraceDensitySource::CpuCounter { filter_id, cpu } => {
+                    out.source_kind = SOURCE_CPU_COUNTER;
+                    out.filter_id = filter_id;
+                    cpu
+                }
+                TraceDensitySource::ProcessCounter {
+                    filter_id,
+                    process_key,
+                } => {
+                    out.source_kind = SOURCE_PROCESS_COUNTER;
+                    out.filter_id = filter_id;
+                    process_key.map(|p| p.ipid)
+                }
+                TraceDensitySource::Frame { process_key } => {
+                    out.source_kind = SOURCE_FRAME;
+                    process_key.map(|p| p.ipid)
+                }
+            };
+            if let Some(value) = owner {
+                out.flags = TRACK_OWNER;
+                out.owner_value = value;
+            }
+        }
+    }
+    out
+}
+/// # Safety
+/// Keep owner live. Input/output are non-overlapping exact live aligned records.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn arktrace_snapshot_hit(
+    owner: u64,
+    mode: u32,
+    viewport: *const arktrace_viewer::ViewportRecord,
+    viewport_bytes: u64,
+    point_x: f64,
+    point_y: f64,
+    out: *mut SnapshotHit,
+    out_bytes: u64,
+) -> u32 {
+    guard(0, || {
+        let out = unsafe { output(out, out_bytes) }?;
+        let v = unsafe { input_record(viewport, viewport_bytes) }?;
+        let mode = match mode {
+            HIT_MODE_DETAIL => arktrace_viewer::HotSnapshotHitMode::Detail,
+            HIT_MODE_DENSITY => arktrace_viewer::HotSnapshotHitMode::Density,
+            HIT_MODE_ANY => arktrace_viewer::HotSnapshotHitMode::Any,
+            _ => return Err(STATUS_INVALID_INPUT),
+        };
+        let range = arktrace_contract::TraceTimeRange::query(v.start_ns, v.end_ns)
+            .map_err(|_| STATUS_INVALID_INPUT)?;
+        let display = arktrace_viewer::Viewport::new(
+            range,
+            v.width_points,
+            v.height_points,
+            v.vertical_offset_points,
+            v.generation,
+        )
+        .map_err(|_| STATUS_INVALID_INPUT)?;
+        if v.ns_per_point.to_bits() != display.ns_per_point().to_bits()
+            || !v.backing_scale.is_finite()
+            || v.backing_scale <= 0.0
+            || !point_x.is_finite()
+            || !point_y.is_finite()
+        {
+            return Err(STATUS_INVALID_INPUT);
+        }
+        let result = registry::owner(owner)?;
+        #[cfg(target_os = "macos")]
+        {
+            // Retain the weak producer's panic context before running the pure
+            // computation, without depending on another registry lookup.
+            let status = guard_context(result.producer.upgrade(), || {
+                use arktrace_viewer::{HotSnapshotHitBudget, Point, ViewerError};
+                let scene = result.data.snapshot().ok_or(STATUS_UNSUPPORTED_OPERATION)?;
+                let hit = arktrace_viewer::hot_snapshot_hit_in(
+                    scene,
+                    &display,
+                    v.backing_scale,
+                    Point {
+                        x: point_x,
+                        y: point_y,
+                    },
+                    mode,
+                    HotSnapshotHitBudget::default(),
+                    &mut || Ok(()),
+                )
+                .map_err(|error| match error {
+                    ViewerError::InputBudgetExceeded => STATUS_OUTPUT_LIMIT,
+                    ViewerError::Cancelled => STATUS_CANCELLED,
+                    _ => STATUS_INTERNAL,
+                })?;
+                *out = hit_record(hit);
+                Ok(())
+            });
+            if status == STATUS_OK {
+                Ok(())
+            } else {
+                Err(status)
+            }
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (out, result.kind, mode, display);
             Err(STATUS_UNSUPPORTED_HOST)
         }
     })

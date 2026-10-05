@@ -1,0 +1,1985 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "baseCommit": "141ab1e8280eb7b7cda07fe5415730059e48818f",
+  "scope": "Retained C ABI hit, typed Swift SDK, production macOS canvas; software milestone only",
+  "goalStatus": "blocked",
+  "wholeMacOSAcceptance": false,
+  "selectedMacOSGates": [
+    "20-default-build",
+    "21-default-full-test",
+    "22c-native-full-test",
+    "23c-api",
+    "24b-app-debug",
+    "25b-app-document-types",
+    "14-migration-verifier",
+    "26-fmt",
+    "27-clippy",
+    "28b-rust-workspace",
+    "29-workspace-verifier",
+    "30-generator",
+    "31-migration-contract-tests",
+    "32-rust-build",
+    "33-migration-smoke",
+    "34-json-roundtrip",
+    "35-ffi-contract",
+    "36c-sdk-consumer",
+    "37-sdk-reference-1",
+    "38-sdk-reference-2",
+    "39-sdk-reference-3",
+    "40-sdk-reference-4",
+    "41-sdk-reference-5",
+    "03-sdk-fixtures",
+    "50-offline-01",
+    "50-offline-02",
+    "50-offline-03",
+    "50-offline-04",
+    "50-offline-05",
+    "50-offline-06",
+    "50-offline-07",
+    "50-offline-08",
+    "50-offline-09",
+    "50-offline-10",
+    "50-offline-11",
+    "50-offline-12",
+    "50-offline-15"
+  ],
+  "selectedGateCount": 37,
+  "rootReceiptCount": 64,
+  "rootNonzeroReceipts": {
+    "36b-sdk-consumer": 1,
+    "11-navigation": 1,
+    "23-api": 1,
+    "28-rust-workspace": 101,
+    "05-native-routing": 1,
+    "06d-native-negative-bucket-before": 1,
+    "11b-navigation": 1
+  },
+  "zeroTestResultNotAcceptance": {
+    "gate": "06b-native-hit-matrix",
+    "actualCases": 0,
+    "correctedActualCases": 2
+  },
+  "defaultSwift": {
+    "passed": 647,
+    "failed": 0,
+    "skipped": [
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+    ],
+    "actualCases": 653
+  },
+  "nativeSwift": {
+    "passed": 772,
+    "failed": 0,
+    "skipped": [
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+    ],
+    "actualCases": 778
+  },
+  "rust": {
+    "passed": 572,
+    "failed": 0,
+    "ignored": 0,
+    "doctests": 6
+  },
+  "ffi": {
+    "abiVersion": 2,
+    "consumer": {
+      "abiVersion": 2,
+      "capabilities": 247,
+      "consumer": "Swift C import",
+      "nativeEngineAcceptance": false,
+      "snapshotFormatVersion": 2
+    },
+    "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+    "exports": 27,
+    "fields": 135,
+    "nativeEngineAcceptance": false,
+    "records": 11,
+    "validAllocationFuzzCases": 1000
+  },
+  "nativeHit": {
+    "actualDirectSDKLoads": 1,
+    "actualEngineOpens": 1,
+    "actualNativeTimelineLoads": 2,
+    "comparisonRuns": 3,
+    "densityHitsPerRun": 10,
+    "detailHitsPerRun": 16,
+    "GUIAcceptance": false,
+    "independentSwiftDatabaseBackend": false,
+    "loadingDisplaysPerRun": 2,
+    "missesPerRun": 70,
+    "nativeHitAfterEngineRelease": true,
+    "noNewRetainedCreditDuringHits": true,
+    "pointsPerRun": 96
+  },
+  "sdk": {
+    "normal": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": false,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30854704,
+        "sha256": "17d37bc972a68b59cee2094f377f43553bee8a25051a06f959aca334eb24bba4"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30854704,
+          "sha256": "17d37bc972a68b59cee2094f377f43553bee8a25051a06f959aca334eb24bba4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    },
+    "fixtures": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30914120,
+        "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30914120,
+          "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    }
+  },
+  "consumer": {
+    "artifactIdentity": "affa7ffd38cb87c8ee57606c9725ec9867a60b55a28b4da85ec4c577bcbcf67b",
+    "artifactReceipt": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30914120,
+        "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30914120,
+          "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    },
+    "consumerExecutable": {
+      "byteCount": 14598048,
+      "sha256": "5cbcc25405762566db44118568f2963affd63f087b2ca9d13e7e78068b83faf1"
+    },
+    "lifecycleExecutable": {
+      "byteCount": 14247472,
+      "sha256": "009e1a7b540fb89e86046fa6a450f25ba0a019cb0a9fc762ce37c49bef426d60"
+    },
+    "directoryExecutable": {
+      "byteCount": 14310416,
+      "sha256": "e1d68f4b522b0ac16bd9a25b3e0149d91bf335ee74c5efbe1fc7e4e828dce2c9"
+    },
+    "summaryExecutable": {
+      "byteCount": 14097264,
+      "sha256": "5895f02b882891d64117e2d46f66177dc3eada33a94d96a5e0a061c3ccd0f864"
+    },
+    "coreExecutable": {
+      "byteCount": 25644944,
+      "sha256": "ccb631cdc6cb549299437361cbd346624144211beebe51c26d4f515bbe7b2e54"
+    },
+    "viewStateExecutable": {
+      "byteCount": 14105616,
+      "sha256": "4507c909a62108a93f91ba144629fa56013560c9d5299b202b2672673d2c2bc9"
+    },
+    "coreConsumerBuildLogSHA256": "d1462b473c0abe1ed85292b0cde45f1f469a712f81541e98cb6c3bdcbabdc326",
+    "sdkBuildLogSHA256": "dba9fc48fc2ca0cdc0f9a3327b084d1fc52107564f96c7b73e7bb4a0790e7bf1",
+    "consumerBuildLogSHA256": "7f5f1cf9aa4b54ae5c4b3f56e56d7793e3d15ef0a62e8e3d22edd89d99b2be73",
+    "sdkUnitTests": {
+      "passed": 96,
+      "failed": 0,
+      "skipped": 0,
+      "logSHA256": "430fed7a0022f32775160832f5629bbea8ccb7cbf6dca96b4928e79564f5fb14"
+    },
+    "borrowCompileRejections": [
+      {
+        "case": "BorrowCapture.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "99254ca1819f18950992b4c0534ce9deacd357aca2a6c5fc1dbd77896e328ad0"
+      },
+      {
+        "case": "BorrowEscape.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "e04b7f51be42f0ac93c88a21d4e51de1a17d23b31a934e0d93bc7436dc78031e"
+      },
+      {
+        "case": "TextBorrowCapture.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "31656b874017ef4d8cc69bb6a593942e28d8675b36fa34cfb8e7da09f5ea1140"
+      },
+      {
+        "case": "TextBorrowEscape.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "91525c2cafd609262b810f00da8f364635e7b65cb2e6e5de3a943cf66f48d8a2"
+      }
+    ]
+  },
+  "oracle": {
+    "actualProducerGroups": 9,
+    "changedSourceReceipts": 11,
+    "unchangedNonReceiptOutputs": [
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-display-swift.json",
+        "byteCount": 10837,
+        "sha256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+        "byteCount": 266960,
+        "sha256": "b5fe00e561ab5417d7f636472722458c44b492c4a7374cb818d197b340306816"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-keyboard-swift.json",
+        "byteCount": 123896,
+        "sha256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",
+        "byteCount": 273525,
+        "sha256": "77d8727d9ba5c420cae0ab3b202f13afd421440375ad5330077f98627217f220"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-oracle.json",
+        "byteCount": 6150862,
+        "sha256": "bb027933e3de12696b080dca4e2a83e3099f890770bd75ded02742cad268dbb4"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/boundary-inputs.json",
+        "byteCount": 832,
+        "sha256": "8e63aee5abd0b7b235e693f26a0b1624027ed0183ba451ea0f9f99f7f66c5eb8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-inputs.json",
+        "byteCount": 20556,
+        "sha256": "e0904c2a842bdfa7817b03320e29268243681d01f2c997a642f318d94062e2a3"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-oracle.json",
+        "byteCount": 11327,
+        "sha256": "5613dd5e6d8003bdcbb0c542562d424b8c2fa032a12c822a7f392524b88e42c2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-navigation-compat-inputs.json",
+        "byteCount": 13893,
+        "sha256": "cebf85e2b8eb0831803c041afefedc07725e2362fbe018f029b1a0519292d289"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/detail-inputs.json",
+        "byteCount": 13331,
+        "sha256": "3f4c1c84a7ace5011a9d9e320db8d21732341b7bcc4bf62c8d5fbb3430a032b1"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/geometry-inputs.json",
+        "byteCount": 304469,
+        "sha256": "35dc59b0616955e58f1b29af397daff4cfc771d5c0fffd36b4f284bfbc0f9889"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-input.json",
+        "byteCount": 967,
+        "sha256": "0e9df20590e88fe23c43e7daf4669e78b994d61eb64769743ba24f90d7d8a991"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-swift.json",
+        "byteCount": 1761,
+        "sha256": "3772fa286a400b57944864d1f015ac37c9b3f6291e65d57eab11e9a87d1144a8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-input.json",
+        "byteCount": 962,
+        "sha256": "546b8704fed6ce7562efea5803160f651a78a2ddf8dbc0f2178025c68eae63dc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-swift.json",
+        "byteCount": 1687,
+        "sha256": "80f3389d295e8733583d93f79cda6b31683888008aa2a392493b4a52bcfb4076"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-input.json",
+        "byteCount": 1364,
+        "sha256": "97222af84a3f0a6830c5b46e0a3360c51b1f6b33d8aa4f63162fb22d19e5fdc6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-swift.json",
+        "byteCount": 6688,
+        "sha256": "d0518862f8631bd4dd81a0932cd2639ad7e63304adb52f89dcfafefdec7c7542"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/counters-input.json",
+        "byteCount": 967,
+        "sha256": "0e9df20590e88fe23c43e7daf4669e78b994d61eb64769743ba24f90d7d8a991"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/counters-swift.json",
+        "byteCount": 4137,
+        "sha256": "20c56e7fdd4a6fe920bab01c3ccd217e8f2b0663c6251166e88d95bb3a84e8eb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/frames-input.json",
+        "byteCount": 962,
+        "sha256": "546b8704fed6ce7562efea5803160f651a78a2ddf8dbc0f2178025c68eae63dc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/frames-swift.json",
+        "byteCount": 3230,
+        "sha256": "9f2048830a15d2dfa4ce185fbe9c7494667632597c41d49b9ccbbff4cbe2070d"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/named-slices-input.json",
+        "byteCount": 1364,
+        "sha256": "97222af84a3f0a6830c5b46e0a3360c51b1f6b33d8aa4f63162fb22d19e5fdc6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/named-slices-swift.json",
+        "byteCount": 3615,
+        "sha256": "2ab05b2789791aa57af49ad0f4d912a9a97be1f552c5b49a5461a09abae2d428"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+        "byteCount": 281931,
+        "sha256": "f19b09342df67acdac5e0afc5fc2304ac20ab98e0fa0457f01cd27b3236e67cd"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift.json",
+        "byteCount": 340307,
+        "sha256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",
+        "byteCount": 27471,
+        "sha256": "764301d329540c92f22ec3df9eb268f2363c9437f153b54be836d1022ff037fe"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-inputs.json",
+        "byteCount": 126403,
+        "sha256": "4c7fe192ca59a5827c2a513a4c76b348a79ced780f4477cbbb4e4a36e040262a"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-swift-oracle.json",
+        "byteCount": 13300,
+        "sha256": "7c3db9a4bcb5c8400273d08b8fc0ad100073ede8f03fe8a1c858be3843967fe0"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-inputs.json",
+        "byteCount": 15936,
+        "sha256": "f6c19176fb8a993e45c06263cf021369d6b52db52449e1de26ae471f99cf30b8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-swift-oracle.json",
+        "byteCount": 57471,
+        "sha256": "0513a9064dbf8898332111e5b9b225029a6d22c56c494c855adec281da42e1de"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-oracle.json",
+        "byteCount": 1299044,
+        "sha256": "23374b2445cd0f3017fbb26c0db9f749889bd51e041d16da39ee16eb2f818deb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-whitespace-swift-oracle.json",
+        "byteCount": 196,
+        "sha256": "b7e91cf48f65e2d8ccf1cc394bf61dd282ce8bb61d918db8ebb554924d46dfc3"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/counters-input.json",
+        "byteCount": 967,
+        "sha256": "0e9df20590e88fe23c43e7daf4669e78b994d61eb64769743ba24f90d7d8a991"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/counters-packed.json",
+        "byteCount": 5120,
+        "sha256": "0895250cb683f28ffdb0abeb48a86329081c251ce990ef65d63afa884c5ec3db"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/counters-swift.json",
+        "byteCount": 4137,
+        "sha256": "20c56e7fdd4a6fe920bab01c3ccd217e8f2b0663c6251166e88d95bb3a84e8eb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/frames-input.json",
+        "byteCount": 962,
+        "sha256": "546b8704fed6ce7562efea5803160f651a78a2ddf8dbc0f2178025c68eae63dc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/frames-packed.json",
+        "byteCount": 4166,
+        "sha256": "bb3dd6ad62ecb4c2afe33e96ab70105a09cc994486a920d08945b6795e4c8cf4"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/frames-swift.json",
+        "byteCount": 3230,
+        "sha256": "9f2048830a15d2dfa4ce185fbe9c7494667632597c41d49b9ccbbff4cbe2070d"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/named-slices-input.json",
+        "byteCount": 1364,
+        "sha256": "97222af84a3f0a6830c5b46e0a3360c51b1f6b33d8aa4f63162fb22d19e5fdc6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/named-slices-packed.json",
+        "byteCount": 8106,
+        "sha256": "f5bfc4e94fd2f2b3d23f2777b615ae0030241e0a13c1e8c1efd9bf1e48bd3ec7"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/named-slices-swift.json",
+        "byteCount": 3615,
+        "sha256": "2ab05b2789791aa57af49ad0f4d912a9a97be1f552c5b49a5461a09abae2d428"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/plan-inputs.json",
+        "byteCount": 74498,
+        "sha256": "01e76fcc00118baaa8ba5dd3caf728cdfcf33e2867557fd6f5012b7d82467fbd"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+        "byteCount": 299512,
+        "sha256": "7901cc228208d6b52fc6f0371a701b5efb07125b60d0095c089d97dfecd2a908"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+        "byteCount": 828932,
+        "sha256": "fd8d0dc7034397b19fa548d92c1978e77e2574b5b157b326f90771c92503dff2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-counters-inputs.json",
+        "byteCount": 3779,
+        "sha256": "b390794df541449bd528316863ffa445d17dba01478ded591ae4b770719779e2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-slices-inputs.json",
+        "byteCount": 2760,
+        "sha256": "a3a90ff0f271ba7ab4d6f31832d4752aecce5a1199bf844e9cd51d2b28610f14"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-environment.json",
+        "byteCount": 899,
+        "sha256": "1af8bca4e080bb00a7ed0f311488bfd22a4239a7c27633a47bb483534e60dced"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "byteCount": 11601319,
+        "sha256": "0f1a85eb7f56dfca37517e507d227ce0ee4125c7783ea94be3d2083d9cae645c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+        "byteCount": 2674042,
+        "sha256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle.json",
+        "byteCount": 1330,
+        "sha256": "8a86a13bb51d8d062977c5b69c8c1e9e25f1be9b6c04a3a54dc8dd026b554ebc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-detail-oracle.json",
+        "byteCount": 8427,
+        "sha256": "15fe145fa7f84e4127cde06be1ce6e225f0e7bacd49732230065d9a362c23745"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle.json",
+        "byteCount": 149596,
+        "sha256": "63c5c245fe004a0192170e3dd7949cd0e1dfcbe8d490ebe94e0c25eb6740df31"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle.json",
+        "byteCount": 105784,
+        "sha256": "9b8d0a7f0de2f5ad1eb677c3b3e52bc50ba781744c3544e713bf1b62799f287c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle.json",
+        "byteCount": 113089,
+        "sha256": "cf9f881793ad76501f3294cf5857be38c510de73f27056b6ba7b4de0912aaa97"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-counters.json",
+        "byteCount": 9354,
+        "sha256": "5ad9aa6533eaf1efc5bed86bbe93e13af47c53a255805ea1799492333c02423d"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices-before.json",
+        "byteCount": 18830,
+        "sha256": "dbcf330cda94e271aadb26c54f2c4448745007cd6160d1e755b4ec5200961bd7"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices.json",
+        "byteCount": 17217,
+        "sha256": "1ac27b1de972f77b4b30bd5a9bb2b60806093e451e44822f45c025d7750d6e91"
+      }
+    ],
+    "navigationFinalMetadataByteEqual": true,
+    "navigationFinalLogicalIndexEqual": true,
+    "navigationR2Differences": [
+      {
+        "before": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.git/worktrees/ArkTrace/index",
+          "byteCount": 214774,
+          "sha256": "495432fc8fe633d7a27f65a85dd7f4742cd09fabc9c9a99623f3b7aa0b691e65"
+        },
+        "after": {
+          "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/.git/worktrees/ArkTrace/index",
+          "byteCount": 214774,
+          "sha256": "9769590a1a7e64cb6c6103ef0bad6db06839633c87ca7ee7acb786a200d715cc"
+        }
+      }
+    ],
+    "navigationR1CompleteBeforePinsAvailable": false
+  },
+  "warningAudit": {
+    "20-default-build": [],
+    "21-default-full-test": [],
+    "22c-native-full-test": [],
+    "23c-api": [],
+    "24b-app-debug": [
+      "2026-10-06 07:46:52.626 appintentsmetadataprocessor[47253:22897253] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+    ],
+    "25b-app-document-types": [],
+    "14-migration-verifier": [],
+    "26-fmt": [],
+    "27-clippy": [],
+    "28b-rust-workspace": [],
+    "29-workspace-verifier": [],
+    "30-generator": [],
+    "31-migration-contract-tests": [],
+    "32-rust-build": [],
+    "33-migration-smoke": [],
+    "34-json-roundtrip": [],
+    "35-ffi-contract": [],
+    "36c-sdk-consumer": [],
+    "37-sdk-reference-1": [],
+    "38-sdk-reference-2": [],
+    "39-sdk-reference-3": [],
+    "40-sdk-reference-4": [],
+    "41-sdk-reference-5": [],
+    "03-sdk-fixtures": [],
+    "50-offline-01": [],
+    "50-offline-02": [],
+    "50-offline-03": [],
+    "50-offline-04": [],
+    "50-offline-05": [],
+    "50-offline-06": [],
+    "50-offline-07": [],
+    "50-offline-08": [],
+    "50-offline-09": [],
+    "50-offline-10": [],
+    "50-offline-11": [],
+    "50-offline-12": [],
+    "50-offline-15": []
+  },
+  "desktop": {
+    "observedAtUnix": 1791243858.2963579,
+    "tool": "cua.getState",
+    "apps": [],
+    "nativeError": "The Mac is locked and automatic unlock could not unlock it. Ask the user to unlock the Mac manually before continuing.",
+    "GUIActionsExecuted": 0,
+    "latestHumanUnlockReplyPresent": true,
+    "currentDesktopAvailable": false,
+    "GUIAcceptance": false
+  },
+  "ciPlan": "lane_swiftpm=true\nlane_app=true\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+  "windowsNativeExecuted": false,
+  "releaseAcceptance": false,
+  "fullCompilerInputClosure": false,
+  "fullProcessForest": false,
+  "performanceAcceptance": false,
+  "RSSAcceptance": false,
+  "independentSwiftDatabaseBackend": false,
+  "currentSourceInventoryObservation": [
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAnalysis/TraceAgentQuery.swift",
+      "byteCount": 20622,
+      "sha256": "2f7dafdff6619a13cbad12a12dd44626b2e7fc7fcfafff3748ae21d24fa2089c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAnalysis/TraceContext.swift",
+      "byteCount": 68967,
+      "sha256": "58ff1e5185f312225e9b01feeb129f7518caad4f2884af6c06c573652fd4f024"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift",
+      "byteCount": 51087,
+      "sha256": "5e7836d979dbb73e145183ddc83ced0daff4f59a5de860a3328ccfd1b285c804"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAnalysis/TraceSummary.swift",
+      "byteCount": 14839,
+      "sha256": "6509cba0dee7a895ee73d51f5a846b2ae16d35ce19bf8ab8bbcf63e9b8674db6"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift",
+      "byteCount": 33088,
+      "sha256": "43a9a8b4e937eed31b1bf5cfc1309cef24e8725bbd72ee2fd73a29d88c261aac"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/AppDistribution.swift",
+      "byteCount": 2988,
+      "sha256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/SelectedEventArgumentLookup.swift",
+      "byteCount": 1526,
+      "sha256": "88c48a8966e8abeda9a7484f036490fd04c6def759e8236bbdfa5855e25204ed"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift",
+      "byteCount": 3872,
+      "sha256": "b2f8400920591121e79c2bd759a9fe292552d82c149a2e8081336fc8ab6f24d7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
+      "byteCount": 9329,
+      "sha256": "599b6ca04b9d046b64277b767ecdb50afec01eb0fc18e0e6bc4525cec9ee2185"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "byteCount": 103253,
+      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
+      "byteCount": 9497,
+      "sha256": "920022106a05279b837965702562662a27c9cd0fe748799f5c0175086ee28569"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceProductConfiguration.swift",
+      "byteCount": 8664,
+      "sha256": "1ec06f18f9c440f30da0ce1627debcbe93d6e71b50c0a31025fdb5ff6a52ed8c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceRecentDocuments.swift",
+      "byteCount": 5850,
+      "sha256": "c4580cceac63eca693951a56b336d4bcfcf2a8236a48f3c45d19324e44dca622"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceRustProductRuntime.swift",
+      "byteCount": 8081,
+      "sha256": "dc2e326e012c1896ac674f567ccb1497cb1c941f48888f929b01470e97abbbc8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceShortcutCatalog.swift",
+      "byteCount": 9117,
+      "sha256": "abd4309e5c29547dc167dd92e024efd3aee52f3c144d382b558e5b29d7fb2d9e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateAccess.swift",
+      "byteCount": 8310,
+      "sha256": "93d02e9931a3cc218b6db9d9b56028ea8c3a1b87ab1367614a2f3358b51b2791"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateBackupPresentation.swift",
+      "byteCount": 2518,
+      "sha256": "718fecb9e149c6cd5b6006e0c08c29b85937ed6dbbdd58609cd5da98d28ba58c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
+      "byteCount": 5677,
+      "sha256": "4507f5d6058f3c822d42f4e42b826675d0f98ab97f73d18be096cd2a6b022778"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIApplication.swift",
+      "byteCount": 24226,
+      "sha256": "868843d5f4d0dce6c0253e5948a9d87add7fb4d87c4050028a89b087dca48f31"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIExecutableIdentity.swift",
+      "byteCount": 7232,
+      "sha256": "8b2dd64c4806204d227fb117df421177f94b0745c61261f5005990dfbcebe839"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLILicenseResources.swift",
+      "byteCount": 12090,
+      "sha256": "09ae936aa81644fd545caa61154e2df20668485f800fe0d23915a9c519e5b897"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIModels.swift",
+      "byteCount": 5425,
+      "sha256": "8c7dd63b96f2c463dfe69c1a6eecd663a2a4e4f0b9a9bc1ff25b102edd6cea3b"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIOperationDeadline.swift",
+      "byteCount": 6142,
+      "sha256": "1cb3b952a043d5ea65a118a2ceb2b3d0bbd524ee856f3cb9a0af79e6a4da46aa"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIParser.swift",
+      "byteCount": 32490,
+      "sha256": "0612f8fd23f5bbb4f009f391b11612914df46997826170d78870f4f56e510d67"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIPresentation.swift",
+      "byteCount": 20538,
+      "sha256": "7e8fcc3bf5a6cdaaf383635434137828d1352b3885b0d8ac2b702acb7ab629c6"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIProductionCommandExecutor.swift",
+      "byteCount": 29694,
+      "sha256": "b62b76ded6fda42baa918e5a46cc1c8c8265544612b8f8a316198beafbeb16a2"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLIResourceLocator.swift",
+      "byteCount": 3063,
+      "sha256": "4a2a81d878576fa585a3c21e698aff0feb2f9bb9a284ccc2dc49761523c6be6f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/CLISignalMonitor.swift",
+      "byteCount": 5812,
+      "sha256": "64aa47a2d4fef167084b60f46aef4c122136dec183e7691e5bcecbf360f48a59"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLI/MachineContract.swift",
+      "byteCount": 93798,
+      "sha256": "029a6b3dd3bece0b78f34d2890f63ae785f4c6cedc89665f58de5638aa2c7df2"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCLIResourceFixtures/ArkTraceCLIResourceFixtures.swift",
+      "byteCount": 993,
+      "sha256": "4732007f7b1127d8b8aa4a1c48a9816357d8fb47cb7efca6c165351372fb29ed"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCapture/TraceCapture.swift",
+      "byteCount": 46455,
+      "sha256": "e28244a3fb1fcebe580858b7fb3065c0a0d3eeb2b771f127b2d9637758900967"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Error/ArkTraceError.swift",
+      "byteCount": 11275,
+      "sha256": "87a640f446c7beb6956bf20a97895c112747905903d42292d958244386c3332a"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/IO/BoundedRegularFile.swift",
+      "byteCount": 4367,
+      "sha256": "30db27823efda69a3d12c80c7c0582d65d7cd2ee7d8d2dd76128097a585e3cb3"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/IO/LowercaseHex.swift",
+      "byteCount": 1042,
+      "sha256": "69cec497498af6fa21032a5b44dce728767e0d10afd2b24aeb7dd4cc67d93981"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/ArkTraceProduct.swift",
+      "byteCount": 375,
+      "sha256": "3a03742adfe8e77e03717a0adae7b648211a5860472c4b677eca6553d988eeb2"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/IdentityGrammar.swift",
+      "byteCount": 862,
+      "sha256": "e9d1aeb53abeb97cfe52c77315b4ec90917e7ced43795763c54d912f575a9ddd"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceEventModels.swift",
+      "byteCount": 17503,
+      "sha256": "9d7c4bc7d3c3c5f6ab8b84174517009dd7bc2f7ad390cfc5a520602c4c0ad3a7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceIdentity.swift",
+      "byteCount": 1526,
+      "sha256": "dcd28332106930e329da70e6c68c72379f88262556392cedb10de9e57a33d765"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceModels.swift",
+      "byteCount": 13541,
+      "sha256": "ad2ec7a333007ddb6b525920adc7c113382bfb6a243b413a956333db24ff60e9"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceViewerModels.swift",
+      "byteCount": 5258,
+      "sha256": "c6f327208da8e22022fb108da54125deeb1942f59aaf528d818610091e60b72e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Parser/TraceParser.swift",
+      "byteCount": 8071,
+      "sha256": "46d89163d8c5b4ee99ce82454360fe2f466ea870845943a431e5829c4a7792e6"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Performance/TracePerformanceMetrics.swift",
+      "byteCount": 3147,
+      "sha256": "fe1a7e923e09e278c10c49bc856085793374405a3d33c04b16ec061d0dea7e6f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceAgentQuery.swift",
+      "byteCount": 16011,
+      "sha256": "52029a979f44fff677cfc72f3d0cfb5771832a7d5a674cc7541001a352f6980a"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceArgumentQuery.swift",
+      "byteCount": 1186,
+      "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceCPUCatalog.swift",
+      "byteCount": 1724,
+      "sha256": "024815aca84efdff366a89e1ae9c789f9f14bd5bbe368705857bdab543612e22"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceDensity.swift",
+      "byteCount": 3873,
+      "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceEventQueries.swift",
+      "byteCount": 9744,
+      "sha256": "aca5ec6f3e2e864a4329537ccf26de56dc2fb386d0f2a92a0367b2fdce11f989"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
+      "byteCount": 863,
+      "sha256": "e992da92933a843d4cec33d29f7b79ce280504f086f9ddc0775fb507938731dc"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Query/TraceQueries.swift",
+      "byteCount": 17200,
+      "sha256": "6bca47633ca3ee379f9931f7130d509390157c834e073062862fcdfacd44b604"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Time/TraceTime.swift",
+      "byteCount": 2757,
+      "sha256": "97551780e087ae8a7ecd03462993adff6cfe97bc1b29d3c25d74536a200a8c6f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceParser/TraceStreamerManifest.swift",
+      "byteCount": 11624,
+      "sha256": "5dd5b227954141de5e92a49c1ab632114f780a364d5476479debf0c1b6e70866"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
+      "byteCount": 79370,
+      "sha256": "6ea3b715384ec1083727c216c84e3c08eb9d2d77c796e866ad0b9eb87f960a84"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
+      "byteCount": 2941,
+      "sha256": "5d58e6a308ad39286c2e112c0b9ac95998c21d61cd5ba67848d5fdb1bba4e36f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
+      "byteCount": 18836,
+      "sha256": "33d994c61425fbc74b1eb98e18da5c9d47493011763d5163573d99d15dcadc98"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineAnnotations.swift",
+      "byteCount": 6608,
+      "sha256": "0344cd987512a24c45071f47e1cdd59c103661326c5abd62bdcb6601bbecfc56"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineColorPalette.swift",
+      "byteCount": 29092,
+      "sha256": "f192c466dea365b053f35e1fd24413c1ef656abc00cdb07653821bb31cf89197"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineGeometry.swift",
+      "byteCount": 8339,
+      "sha256": "ef5c1239ba6fc8e780f0fcd1932a8c49049a1bd1454811dd961bea82aa137ac8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineModels.swift",
+      "byteCount": 27152,
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "byteCount": 102182,
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
+      "byteCount": 1003,
+      "sha256": "ba28a4379320e72ed2ee861dc5055aff911bf779f73ecc7fecb810acdf126773"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineSnapshotLoader.swift",
+      "byteCount": 41220,
+      "sha256": "81e784d31a7b24b224213ea4fc12cc494191b90ab5a533f90c5862887210b1e9"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRuntime/BoundedSnapshotReader.swift",
+      "byteCount": 1309,
+      "sha256": "8e5da37961111f86f12b77baac397e05e19feb9ad31e8c9e1294349de8bed23f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRuntime/TraceCache.swift",
+      "byteCount": 145703,
+      "sha256": "5e91fe959715315e5a08e11819c94c499bc1f84b33be888459399b943094b721"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRuntime/TraceCacheMaintenanceOperations.swift",
+      "byteCount": 1488,
+      "sha256": "4ff8561a8ec7ca942267017afcd8b635122b4e56316c319a27f2eb9c58e956f2"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRuntime/TraceSession.swift",
+      "byteCount": 15360,
+      "sha256": "f224f67738fad58dc87e0b4baa05fa510677c891b5c657e9b2ebecfa1a16f4df"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustAnalysisQuery.swift",
+      "byteCount": 403,
+      "sha256": "cd86f8c87046320cb092305c5f1d5db80a3792b3ea7fcf97c736ed8bd09bef18"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustAnalysisRequest.swift",
+      "byteCount": 1907,
+      "sha256": "e9e10065be571a8f742e8a6842de72620df44ed0249a30978c0d4745472b8050"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustAnalysisScope.swift",
+      "byteCount": 511,
+      "sha256": "f396a51658d0721ef4256f144bd3376087e3885d9f40708b3d8b17faf1914848"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustArgumentQuery.swift",
+      "byteCount": 334,
+      "sha256": "59229ade82798f3437f8b69886a0af53e2288b7fcbd1560c8047e71220103493"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustBatchDeadlines.swift",
+      "byteCount": 2834,
+      "sha256": "074189e2971c39871ec6d17420cff3e035302884709b7a806ebb2122264647cc"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustBatchDecoder.swift",
+      "byteCount": 10190,
+      "sha256": "79d969fd86591bc2bf6f5113e8d1c005a3e58065f0323d114b035220e2a38577"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustBatchQuery.swift",
+      "byteCount": 1002,
+      "sha256": "af82c854ac8702289d084344f65ce8f023eea5321429552dcee23d0f57715298"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustBatchResult.swift",
+      "byteCount": 1594,
+      "sha256": "78145f51fac07bc937e33d67abcd3fe468917adb12847b3d0145a6692b9097f3"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCPUCatalog.swift",
+      "byteCount": 4865,
+      "sha256": "2825c9d03c3490b6099120d42f6a5dfddbc6dee89c26764cd9db9e02cf83cde7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCPUQuery.swift",
+      "byteCount": 636,
+      "sha256": "23ca7de33264fc12cf3c292d4ed04917ec703e62ee78f54084da5c0b7c6333d8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCacheKey.swift",
+      "byteCount": 324,
+      "sha256": "2ddfc52bcd7ce8da8a86a69f56c36005b3ad18a046003b7aae7bcae5706a6126"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCacheMaintenance.swift",
+      "byteCount": 4866,
+      "sha256": "6d14279e884d5508423fcf3bb898a5627c9471456e91b75de47b06f172f2b3fd"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCacheMetadata.swift",
+      "byteCount": 619,
+      "sha256": "6f93b9a2508ffd1fa13f6d81c79f944386effecd25d8d7e1704c5409bf3068c4"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCleanup.swift",
+      "byteCount": 1255,
+      "sha256": "437ba1e8f734c9e59a2399bc31d90fb1f79406aa488c9c63f2d35c5f62eb2307"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCleanupFailure.swift",
+      "byteCount": 560,
+      "sha256": "1670da95fa7a340aa512ec3e2bb8f352e92ef9ed34404ef5fe7af1219f1e8214"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustColdDecoder.swift",
+      "byteCount": 9691,
+      "sha256": "156e0d30e2ba47c363254e3595410b6eb53259a1a5555c19c24155ce19da0294"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustConfiguration.swift",
+      "byteCount": 3832,
+      "sha256": "d4d028ae25d829e3957d16cb45cffe2f7db3ef17fe71f0f6ccbb5a2c8175931d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCoreBatchMaterialization.swift",
+      "byteCount": 1379,
+      "sha256": "ddc81af2cb5de8c965e82b280dc1da1ec242a8ce3b859e09db2ac8449dce72d0"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCoreBatchQuery.swift",
+      "byteCount": 4115,
+      "sha256": "9716b4cd61cacee6ab338d3468d35459eb09bb7cc0e85dd63e60376d5e2aae26"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCoreDeadlineQuery.swift",
+      "byteCount": 3545,
+      "sha256": "0049ad14772f22c328711b91b4b39027d1b70bf69d11e3e5659282b72944edf1"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCoreDensityMaterialization.swift",
+      "byteCount": 1437,
+      "sha256": "498cb553fcf7f1c0f311f80e4f028b7e8f228997b531c00457bc0b2182e57ce5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCoreEventMaterialization.swift",
+      "byteCount": 8480,
+      "sha256": "859c20e65c56911485738c9685b4a12f7a1dd5ad97c16364a7bfb8e4af74f4f7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCoreMaterialization.swift",
+      "byteCount": 6451,
+      "sha256": "426347b2da60f1702aadeed568f5a540a2921216e5a1d458a472b79d97ff972d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCounterQuery.swift",
+      "byteCount": 951,
+      "sha256": "632fd1e422ebd92ed17a460e148397c62c1a1204a45f839ebf1db1b3ef3d6309"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCounterScope.swift",
+      "byteCount": 97,
+      "sha256": "3e93727632b09896330f20dc8e609e38edd2d5c63910a1ab393fd708efdea94e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCounterSeriesQuery.swift",
+      "byteCount": 349,
+      "sha256": "4f30e94b3b71e72f958a12bed7a4191a92e0c2dc57474e21bfe99773a8e2fa23"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustCounterTable.swift",
+      "byteCount": 136,
+      "sha256": "9a4c100dc81ba037945ec6ab37684d5011bbc6db2dad105a4bbba9c3334c62a1"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDataQuality.swift",
+      "byteCount": 612,
+      "sha256": "12a8ac24f1d007aa993ddf1b19bf6c96cf2d40134788e45c77ed1c93b4784ef8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDecodeCopies.swift",
+      "byteCount": 1159,
+      "sha256": "0818dcba3c867ffe4b3a5baad2fc90c4722cb828c0af1c2df85196cc457265d0"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDensityDecoder.swift",
+      "byteCount": 5125,
+      "sha256": "c38febd053b8cfcbed3cbe87b541853f7d1f1b4726dcc85d999122866230dabc"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDensityQuery.swift",
+      "byteCount": 376,
+      "sha256": "54fe4ec35f75d8bb3cd58b7b500c37f101bab9cb6e94c3d8906e85a7d1394efd"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDensityResult.swift",
+      "byteCount": 2429,
+      "sha256": "21eb24a61db6cb7557591dc9627823956d1b66a95ed5905f44f7cc47c2b2849e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDensitySource.swift",
+      "byteCount": 332,
+      "sha256": "9acc89e756624d7f933e9d4c98262f58d69e4f6d3d113d4cd890ac6b9e032ca8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDetailQuery.swift",
+      "byteCount": 351,
+      "sha256": "19ce59c626a8ed27e75d97a8ed12cec50dbcd4d7a5ab0cb05876068b5ecc7a72"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDirectoryDecoder.swift",
+      "byteCount": 6176,
+      "sha256": "25e5314657213785bb712af29e10a4f868207015f0a1b46b4c484c6be91c4d84"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustDirectoryPages.swift",
+      "byteCount": 5880,
+      "sha256": "056313e7cd376b94c08440344397452e99f382b8b4cbfaa44005ea8af652cba4"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustEngine.swift",
+      "byteCount": 23337,
+      "sha256": "d9f5933345f4fa77274720196d461f81b38751dd2237f556b1ec75ad712bd918"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustError.swift",
+      "byteCount": 1250,
+      "sha256": "ae1c03ca14b8fc9fac69a8056680235d652204aa8bc34c7844430e955e12b5d9"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustEventDecoder.swift",
+      "byteCount": 6872,
+      "sha256": "e3744e65101e1f4168f9fa8c29b39902e23c0816343b1a7f0f3c4993e58d8985"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustEventPages.swift",
+      "byteCount": 3377,
+      "sha256": "95f641bebe913a954f17c125ccc518c63b5ceacce0ae0e9f635ae202bfe0db57"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustEventRecordDecoding.swift",
+      "byteCount": 11257,
+      "sha256": "4445b86249b0867dc316aee33c11870e8e3ef3b3fda24ed23193e2279f7054fb"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustEventRecords.swift",
+      "byteCount": 9506,
+      "sha256": "f68109558fc5b35a9fe66f34ca85508b1342f3e509f656ebc72495a30d0d2080"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustFrameQuery.swift",
+      "byteCount": 438,
+      "sha256": "03877e239a7622adcf882daf7cda8fdcc15c7bd7f39074d2934e1a508840a76b"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustInspection.swift",
+      "byteCount": 492,
+      "sha256": "a48bceb60c7461e57c0c8c2baf3d1af8e48f746bbda5807c4215d6b0c1cd2b7c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustJSONShape.swift",
+      "byteCount": 7978,
+      "sha256": "eb3c32466599ed171d793ae745e68e0a411e0d10a5d2ed4249920406d75380c9"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustMetadataPreparation.swift",
+      "byteCount": 315,
+      "sha256": "0ea6c436a9c608d67469c42d326de323ba27b2e71e588388931a2c85c272d12f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustNameMatch.swift",
+      "byteCount": 105,
+      "sha256": "d97e73cff8e43906389f71647d7cd11474afa4995784b31f21fcdc42ba822264"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustOpenDecoder.swift",
+      "byteCount": 13130,
+      "sha256": "c2377ec91d51a499437e72b9069d6d666f719fc6d96d81dcb4e699ae56e8ea66"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustOpenResult.swift",
+      "byteCount": 1201,
+      "sha256": "c5a9d3b81d5fa8c6497d86c00fc94be08fcfb301cf8385f0b40e2f518bcf51a6"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustOpenView.swift",
+      "byteCount": 8139,
+      "sha256": "49d734cdb1848c174b5cca4c664ba9c086d0772b27082d69cf1c0fec59c2c3cc"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustOpeningProgress.swift",
+      "byteCount": 915,
+      "sha256": "c86c0c1d5327b3fb7f4d0386e2fb16d725751574039b90cf8b47caa2153fc33d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustOwnedText.swift",
+      "byteCount": 1732,
+      "sha256": "a7eb275ecccf824e24cfd084b8e6a4d91a3aed216251d3f89aaa6fa5549201f8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustProcessQuery.swift",
+      "byteCount": 607,
+      "sha256": "2374ed23384e231e5313be26b12a882ae79fc1b826c2b1689b3a8b4f3478cb75"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustQualityEncoding.swift",
+      "byteCount": 635,
+      "sha256": "3ed373ece14dcc03b69ecab290eda8ea25163b5258733f6412138bd4dcdd3123"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustRequest.swift",
+      "byteCount": 3005,
+      "sha256": "05ceddb6d8b65e56b191abe089ab8cc990b3741903141de13923f501744e7721"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustResolutionQuery.swift",
+      "byteCount": 367,
+      "sha256": "998638981b275bc5eea8258829fbd73c20b3a730abed2cd96ea916e80efa8a39"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustResult.swift",
+      "byteCount": 11471,
+      "sha256": "8ddd0a19348b7bb3efbbf96b203315b8ef0e6baea101b0e987f1f87193c034b5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustRetainedStorage.swift",
+      "byteCount": 2535,
+      "sha256": "4e0488052bf023c7c4e66fe9a85e564e404e9b419543c8dc36ba7e07cee9f56c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustRetry.swift",
+      "byteCount": 1237,
+      "sha256": "03946049a4afeb5a1192e86f02b4d2c861f48cf8965ab58962e0dd6dd31362d7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSearchQuery.swift",
+      "byteCount": 400,
+      "sha256": "5ae7d0cc44d58ce43270387c037f0ce9a21a2bc3d29fb98dc73f6cabf5aea8c7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSession.swift",
+      "byteCount": 10903,
+      "sha256": "b3d37d0d4bc7f768bfa914145ee7b412b6c1b3ea1819ec86e69071d6e5a03f8a"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSliceQuery.swift",
+      "byteCount": 1401,
+      "sha256": "fb1e6659c4909f4a7b8d61a0ac463b246b0f8c2bddcea7363460a033cf87d0ce"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+      "byteCount": 3461,
+      "sha256": "024576cbf404a3d532a1d1e01109b5af92d37a2267a3a6b6bbbcf6e45efb9d56"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSnapshotCopyOwner.swift",
+      "byteCount": 731,
+      "sha256": "08d77d0abaf426c89730f56c1b2a93f143ec56e7a68c861f5e59533d75602dea"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSnapshotHit.swift",
+      "byteCount": 5596,
+      "sha256": "9c470e20923a8f074f336607ef640b35fe45c7bcefd0710c9bd61dc3aff6221a"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSummaryDecoder.swift",
+      "byteCount": 6500,
+      "sha256": "4672fc812c0f530dd6708c1d6510240eb89324a42df2fd58220f5254726b1a02"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSummaryQuery.swift",
+      "byteCount": 677,
+      "sha256": "6ea0eea71ddff4252bfaae4e88141ef4a7f5c176c9cbca5f9d25a4b73c66a4fe"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSummaryView.swift",
+      "byteCount": 4275,
+      "sha256": "5d496b5b99815fd295cf99c34ddf55d87c82751b9abd704411beeee97e572233"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustThreadQuery.swift",
+      "byteCount": 768,
+      "sha256": "284c94689295d3f28aa35dd6580bb4e12c67e0582b3d1abd94352cd26d574805"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustThreadStateQuery.swift",
+      "byteCount": 934,
+      "sha256": "559056abfa011b7658f243fd12215f011956dea1915e38578ae0758e423a7ba3"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustTraceRepository.swift",
+      "byteCount": 7100,
+      "sha256": "c8b7333c1bec0ea82e0b6076f963ae2e4de347830bea505e230ea0cc9dc7d0f4"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustViewState.swift",
+      "byteCount": 5430,
+      "sha256": "f6fd9c428010c331b6c4a620bd16945845ef09dbd1240f7e09dd97cfb633ccf3"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustViewStateBackup.swift",
+      "byteCount": 2476,
+      "sha256": "ca109c64c69bbaf0a3f5484a91a9ea37a0a566f6925bbced6b67a7ede64a193a"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustViewStateBackupDecoder.swift",
+      "byteCount": 5103,
+      "sha256": "ce513bf33402ff071b6f93e2494a43504ca25f69780c2de3db4a0c4474fda393"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustViewStateDecoder.swift",
+      "byteCount": 9125,
+      "sha256": "2ee73cc3e24c87e1fb0deff170b5c033d69e018234a504c035ea2f441f28185f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustViewStateEncoder.swift",
+      "byteCount": 5287,
+      "sha256": "2619118c257a053ffcac74c5aa04d94119530619cdadabd6d47f6a6d67276a79"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustViewportQuery.swift",
+      "byteCount": 2807,
+      "sha256": "e02ebc011d19b42fe04529d4ee063257225cb62921f971389e08eff7f3e517b5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceSignalShim/ArkTraceSignalShim.c",
+      "byteCount": 3478,
+      "sha256": "ff0dffa0ce9db79ed08e0c22c4559a94cd2900a6fe5a25a463a76c22e523c8f4"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceSignalShim/include/ArkTraceSignalShim.h",
+      "byteCount": 725,
+      "sha256": "8427abaff715c6541083f9b2311787ef8ef0bd229e5bd15e7c5adab2e3077334"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceStore/SQLiteTraceRepository.swift",
+      "byteCount": 163579,
+      "sha256": "a5e5744b240ee347c357fc0371c5c3a284673cbc87c92ad23c4573101d13e761"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceStore/TraceDatabase.swift",
+      "byteCount": 29935,
+      "sha256": "155c6e6a735904afffd895c29b18c67974d8f1c32e6109267c56c2c33db13631"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceStore/TraceDatabaseStagingPreparer.swift",
+      "byteCount": 33831,
+      "sha256": "f2e517ac327c6be82bbb31099a57ee73f82bf5e2051760bf0c6727b6cdd57b11"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceStore/TraceEventIntersection.swift",
+      "byteCount": 3269,
+      "sha256": "f8578ac034ba9802b1d9648d948a911e5a51d3143de253d476bc79e16fbb1fe8"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceStore/TraceSchemaAdapter.swift",
+      "byteCount": 49595,
+      "sha256": "621bd622a1ffb8aea963d15f3e86ee047684cd7572edbde27062207bef722193"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/arktrace/ArkTraceMain.swift",
+      "byteCount": 1886,
+      "sha256": "dd46445a1de813b96990cfb985ec6cac0faa1d11f141194f4769b8813a04cbb0"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/ArkTraceApp.entitlements",
+      "byteCount": 179,
+      "sha256": "55a9c3dbd2e3925788619684eace456de8fcbdd4e0afb681237cdcff36d6bda9"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/ArkTraceApp.swift",
+      "byteCount": 4409,
+      "sha256": "4843ff3e5210d87998f79c25ea6f2f87b03d42d78deb1780b9397bc36c075214"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "byteCount": 1301,
+      "sha256": "fd62c72482a200be31beefeacd22582182828322e523947c8d778ac34d4f1c1b"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_128x128.png",
+      "byteCount": 17250,
+      "sha256": "8e06c7a2f586d0d856753eb3136ca483b7a4e51d34687eaf62b3ce9bd76baa7b"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_128x128@2x.png",
+      "byteCount": 55699,
+      "sha256": "d1a20fbe108f9295cabaf878d95be3f9f1e372ceea3e1f69d9cb4079650e617d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_16x16.png",
+      "byteCount": 801,
+      "sha256": "025c06cc7e897aaf229d91a2f2b38f82b0b7ca710375267ce0f3fb501adf5225"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_16x16@2x.png",
+      "byteCount": 2018,
+      "sha256": "3d3c466a6118b553430f9b7f6cbc9d82ca15339551651dfd1655b4312a9ed134"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_256x256.png",
+      "byteCount": 55699,
+      "sha256": "d1a20fbe108f9295cabaf878d95be3f9f1e372ceea3e1f69d9cb4079650e617d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png",
+      "byteCount": 179958,
+      "sha256": "8797cb5625d2ed9911a567657a4a1f855f2077efc253d9b85bd9b2bc689ec7bc"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_32x32.png",
+      "byteCount": 2018,
+      "sha256": "3d3c466a6118b553430f9b7f6cbc9d82ca15339551651dfd1655b4312a9ed134"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_32x32@2x.png",
+      "byteCount": 5783,
+      "sha256": "8e231913ac99f7f56448714e5689cee39feb9d07c71c713b3bce22aa2bb6a79e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
+      "byteCount": 179958,
+      "sha256": "8797cb5625d2ed9911a567657a4a1f855f2077efc253d9b85bd9b2bc689ec7bc"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png",
+      "byteCount": 588784,
+      "sha256": "bcb92237395584d1e34e6379c18a05bb23be2e16c5bf85c2f24482692b1303bf"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Capture/TraceCaptureStatusView.swift",
+      "byteCount": 2524,
+      "sha256": "3eaec55b5e5ffcfc30793e60eafe6c04e633e267aaeada4db44d1789228f297c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Capture/TraceCaptureWindow.swift",
+      "byteCount": 18974,
+      "sha256": "fed6cd1822ca013041c2519e305fdc60867c37efb9053bac7312b71174771391"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Help/ShortcutHelpView.swift",
+      "byteCount": 1621,
+      "sha256": "658ae3836a8af11a56010d40730bc48a977cd9a629c01dabe240749878a476a1"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Info.plist",
+      "byteCount": 1600,
+      "sha256": "3801cd3f019b4aeb344349f8db70f44304cf13ef672f0b1cd90badd974dc8d5d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift",
+      "byteCount": 2848,
+      "sha256": "a2d2765aecbe794ec7b385a5ec6a5f6042b461a6caf7544a91f33555e2dadf02"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/AnnotationRow.swift",
+      "byteCount": 1948,
+      "sha256": "98ca43295143b039a6b67797ff50c9907824024789fdbbe847c7bff2ba696610"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/EventInspectorView.swift",
+      "byteCount": 2732,
+      "sha256": "a62d385e860a2b4a32e58a285055eb6c5386b7b62a05cb2b3609a1bea6a842c3"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/FlagTagEditor.swift",
+      "byteCount": 3255,
+      "sha256": "5170f6cad8d54e6d9633e0ca655741e126ec56ca313822a744124ccc2f596555"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/InspectorDockMenu.swift",
+      "byteCount": 1535,
+      "sha256": "43881394e18655c8c781e14c2c45ea27708c179cce485f78018ecd4851098251"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "byteCount": 2793,
+      "sha256": "b6f3d297311928674b189e098168883ba1151ae557d1bd21ec86666f830386d5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/InspectorToolbarToggle.swift",
+      "byteCount": 1710,
+      "sha256": "77d55dc272f1b3252caeb54d6050428ad46c03e2c6c234961f3aeb18f869c155"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/RangeInspectorView.swift",
+      "byteCount": 13378,
+      "sha256": "ffac32f8ddcd7957770b1f2a3992d250d4da72fbe221c718ef3cd462605fb429"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/SliceAggregateSort.swift",
+      "byteCount": 300,
+      "sha256": "5c116b7e44cbbab2ed659631317cd797a6e7041b29c8a56dea869fabe36b9700"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/TraceInspectorDock+Symbol.swift",
+      "byteCount": 560,
+      "sha256": "09b8e92085663095498ba5d2c4cbd408035a02848e78ee2b339f62ca3c9af079"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/TraceInspectorPane.swift",
+      "byteCount": 3988,
+      "sha256": "c4f672b9bac65bd2d3dfcaad581e3d8b948505e3e639390025d4b38bf66e51a1"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Localizable.xcstrings",
+      "byteCount": 21813,
+      "sha256": "7d247cdee3ea93ea5c524e4c8d224c5427008cef0d822173c71ab540463191d5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/NativeAppBootstrap.swift",
+      "byteCount": 5499,
+      "sha256": "6821aa62c8f112c3ff9ff078aceefacfeeb8fdf792be8f759daf9f6cb960be5e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Settings/SettingsRootView.swift",
+      "byteCount": 765,
+      "sha256": "6c82cd13789a1a02708486d696ce32d900b16f1d87d091534f5e4ef8aedd92c0"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Settings/TraceCacheSettingsView.swift",
+      "byteCount": 1705,
+      "sha256": "35dd20e39da7a8be87120f50b5f1cbb1fe4f5a06cfc48516a0327d94b4512fdb"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Settings/TraceLicensesView.swift",
+      "byteCount": 2962,
+      "sha256": "4540c23ec4064dd56e287fa88dfa5145e9714075c59bbfd113b36dd57e8eda19"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/ArkTraceWindow.swift",
+      "byteCount": 177,
+      "sha256": "e709903e14a06ba5465e72e4cdd57c3bc59eda4bca3c78df58ac9a64d8de390a"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/FocusableTextField.swift",
+      "byteCount": 3858,
+      "sha256": "130f019cf848c7ce86a968b626e383f9bb3b1fb79c3716a8346b693c288b4d38"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/TraceAccessibilityMessage+Localization.swift",
+      "byteCount": 1442,
+      "sha256": "ce07a5d9f90cd01286c66de87a58aa4513c50910ce227b1f3b55c6a6b3d9a64f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/TraceAppErrorTitle+Localization.swift",
+      "byteCount": 494,
+      "sha256": "2fc6216071d592478d2b3ec0a8cabb4db2092a7c05496248b4e09638bdfb0942"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/TraceFormatting.swift",
+      "byteCount": 713,
+      "sha256": "20cb0e6fb57fbafc8e58f46babfa9b25fbbeb277e67d55bf1235aced9b34ec0d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/TraceLoadingStageLabel.swift",
+      "byteCount": 488,
+      "sha256": "bc714ebb46e4ff088d382f11d7bd530bf8684c746a9d30c10dcd097ed826d302"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Shared/View+PrimaryToolbarTarget.swift",
+      "byteCount": 329,
+      "sha256": "bf24aa57b06a88c72eae1525cbebdea4dc6fb5c6a56e195498b862bebcb3e173"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/DepthDisclosureButton.swift",
+      "byteCount": 1255,
+      "sha256": "c125af537b6a3b3b650ffe35374078b6c7aa935ce37b90f19cf5ee9f2a5d82b1"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/ProcessFilterBar.swift",
+      "byteCount": 2714,
+      "sha256": "a7173e16a3918733f0116715ad9b62fdf246a51acd76dc2654a52559871491b9"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/RecentDocumentRow.swift",
+      "byteCount": 2686,
+      "sha256": "bf112be9b2ef0a466f15babf2f08854b0fc30095c8dc62e9067de5a27c928f4d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/RecentDocumentsSection.swift",
+      "byteCount": 927,
+      "sha256": "55cd02bc4270dee8cd9ddfabed0ac2f46b7e3e824f0151af9d9912f6730645b3"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/SearchResultsSection.swift",
+      "byteCount": 3574,
+      "sha256": "89e75120646e60a863b00f66e80e0e99876524c9b56306e4b5ad47d3527c7128"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/TraceViewerSidebar.swift",
+      "byteCount": 5381,
+      "sha256": "9f486050dfbff9af776492d1f375b499d941567a247f915c73426d8af8f29c9e"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Sidebar/TrackRow.swift",
+      "byteCount": 2413,
+      "sha256": "a13442fef6d5253be2b0c37c30e89252bf85cac33b86b4c54be5e6e7b017aae5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceAnnouncementBridge.swift",
+      "byteCount": 1951,
+      "sha256": "7f0ff0155dd66c5ab358a04c76acefa39766044c13b384db49210eabc1f97471"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceErrorBannerOverlay.swift",
+      "byteCount": 2183,
+      "sha256": "796be29f2a14eb7f5698521ef711e2c62fdc92ecbc884b944ec313fecd285357"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceLoadingPane.swift",
+      "byteCount": 5803,
+      "sha256": "98fd2b8715a8a5df60545480deb591556a9969d8d0529256a613d85cd60ba373"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceReloadButton.swift",
+      "byteCount": 441,
+      "sha256": "40b0e6cc86452a354fad6a9f8a1ec38b3b726437bffcd83f740140364e2fd625"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceResetZoomButton.swift",
+      "byteCount": 461,
+      "sha256": "56a6617049de260aedc89a07f561aa2ca5f3ba9730c7793dc2e6c111be47861c"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceSearchField.swift",
+      "byteCount": 1054,
+      "sha256": "d956c261c0f8b955fb67b7428f9610bcffcb54c773c629512d177a84d3640e3f"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift",
+      "byteCount": 11722,
+      "sha256": "9b0cddea6df19d028358284aae93ee52285de35aaaf206e7300cb860f2ae6275"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+      "byteCount": 4479,
+      "sha256": "c13d631365dfc6d7b6d16c72edaf3cefcb4843910fb4c906d060d8e67b12f0a5"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceViewerRootView.swift",
+      "byteCount": 14083,
+      "sha256": "c7d0ecaf4abde1104d1401c471e2993c1f116430e261605efaaaebe2c4f9d9f7"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceZoomInButton.swift",
+      "byteCount": 424,
+      "sha256": "276585b10ea04da3847557f58ee3433e6557ce6b7d986a41f73c2ca2fe577833"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceZoomOutButton.swift",
+      "byteCount": 428,
+      "sha256": "cf37b115761d8dbbadcfdc1995c8a6527eb363f54db47fdae0749bcf7adaf44d"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceZoomSelectionButton.swift",
+      "byteCount": 451,
+      "sha256": "1e56e34e623a24210030b7556f6f64a0e8342f00b545aa3c616be71bf377afc8"
+    }
+  ],
+  "changedSourcePins": [
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "byteCount": 103253,
+      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445",
+      "repositoryPath": "Sources/ArkTraceAppSupport/TraceDocumentController.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/NativeTimelineSnapshot.swift",
+      "byteCount": 18836,
+      "sha256": "33d994c61425fbc74b1eb98e18da5c9d47493011763d5163573d99d15dcadc98",
+      "repositoryPath": "Sources/ArkTraceRendering/NativeTimelineSnapshot.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineModels.swift",
+      "byteCount": 27152,
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997",
+      "repositoryPath": "Sources/ArkTraceRendering/TimelineModels.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
+      "byteCount": 102182,
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6",
+      "repositoryPath": "Sources/ArkTraceRendering/TimelineNSView.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustEngine.swift",
+      "byteCount": 23337,
+      "sha256": "d9f5933345f4fa77274720196d461f81b38751dd2237f556b1ec75ad712bd918",
+      "repositoryPath": "Sources/ArkTraceRustRuntime/RustEngine.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSnapshot.swift",
+      "byteCount": 3461,
+      "sha256": "024576cbf404a3d532a1d1e01109b5af92d37a2267a3a6b6bbbcf6e45efb9d56",
+      "repositoryPath": "Sources/ArkTraceRustRuntime/RustSnapshot.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSnapshotCopyOwner.swift",
+      "byteCount": 731,
+      "sha256": "08d77d0abaf426c89730f56c1b2a93f143ec56e7a68c861f5e59533d75602dea",
+      "repositoryPath": "Sources/ArkTraceRustRuntime/RustSnapshotCopyOwner.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRustRuntime/RustSnapshotHit.swift",
+      "byteCount": 5596,
+      "sha256": "9c470e20923a8f074f336607ef640b35fe45c7bcefd0710c9bd61dc3aff6221a",
+      "repositoryPath": "Sources/ArkTraceRustRuntime/RustSnapshotHit.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceRenderingTests/NativeSnapshotHitTests.swift",
+      "byteCount": 10150,
+      "sha256": "eada687219111dc4e3273a5f03eeedd7f4ad85a0702a16798cee2325164095a7",
+      "repositoryPath": "Tests/ArkTraceRenderingTests/NativeSnapshotHitTests.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceRenderingTests/TimelineNativeHitRoutingTests.swift",
+      "byteCount": 4299,
+      "sha256": "b9c62acad21f7db158473f7c1e97811dddca8a5dd6bdf1d37aa409bfdde922bc",
+      "repositoryPath": "Tests/ArkTraceRenderingTests/TimelineNativeHitRoutingTests.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceRustRuntimeTests/RustSnapshotHitTests.swift",
+      "byteCount": 5211,
+      "sha256": "1b949a59b5986315d338196076fbbd4276c9410d7aaec0311938b690e92eba92",
+      "repositoryPath": "Tests/ArkTraceRustRuntimeTests/RustSnapshotHitTests.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+      "byteCount": 29872,
+      "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+      "repositoryPath": "bindings/c/arktrace_ffi.h"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/csharp/NativeMethods.cs",
+      "byteCount": 19343,
+      "sha256": "b91f006ab0bf60d3e0eec155abb32778f3cc4ec8711bbfb8604d9669c38a26bc",
+      "repositoryPath": "bindings/csharp/NativeMethods.cs"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/ffi-layouts.json",
+      "byteCount": 4288,
+      "sha256": "a8d755b4e17c9591bc1c3c4ee499a0a5171e3024cb20a99caebd34640a40cfc1",
+      "repositoryPath": "bindings/ffi-layouts.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/swift/GeneratedLayouts.swift",
+      "byteCount": 16479,
+      "sha256": "5c5be9322cf36dee07bb0318da8c89b1d767e6026ac57e78a8bc5eff52619111",
+      "repositoryPath": "bindings/swift/GeneratedLayouts.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/contracts/ffi-v1.json",
+      "byteCount": 34578,
+      "sha256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "repositoryPath": "contracts/ffi-v1.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/contracts/ffi-v1.sha256",
+      "byteCount": 65,
+      "sha256": "5ba93e95d7c862291135052703a1543d3311af6b147fedcb479223b98629d850",
+      "repositoryPath": "contracts/ffi-v1.sha256"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/docs/RUST_CORE_MIGRATION_TASKS.md",
+      "byteCount": 98425,
+      "sha256": "7236cb4a85de0671dd1c42093ab27e92d48050e622f6826fb9ccb1c6568d6cb2",
+      "repositoryPath": "docs/RUST_CORE_MIGRATION_TASKS.md"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/docs/migration-runs/AT-RUST-011-012-013-2026-10-06-retained-hit-wire.md",
+      "byteCount": 6007,
+      "sha256": "06df64879b3850a8371e9cf52986e1003c108f141a4d087b00ba10a69b112036",
+      "repositoryPath": "docs/migration-runs/AT-RUST-011-012-013-2026-10-06-retained-hit-wire.md"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-ffi/src/abi_records.rs",
+      "byteCount": 14747,
+      "sha256": "74c267bb6dd5343ffa5e161cfdf2a8516ba1c397b7f508c505b076a9951ca58e",
+      "repositoryPath": "rust/crates/arktrace-ffi/src/abi_records.rs"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-ffi/src/exports.rs",
+      "byteCount": 31236,
+      "sha256": "4bead5896f4becce3c62eac9fde1db75cec70b423c954e5cbbe7545a2b51d5ef",
+      "repositoryPath": "rust/crates/arktrace-ffi/src/exports.rs"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-ffi/src/registry.rs",
+      "byteCount": 8269,
+      "sha256": "ea2009bc13fbdce7dc4df7631eed83021a7d555ed4bc9d83453ef8f3128a0dce",
+      "repositoryPath": "rust/crates/arktrace-ffi/src/registry.rs"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/annotation-mainline-swift-receipt.json",
+      "byteCount": 15634,
+      "sha256": "d6e063e820efdb32c34382c35afa8a8ae70387a538dfed1a9793377929561c5d",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/annotation-mainline-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+      "byteCount": 14650,
+      "sha256": "c5a1426ba9600ff19d8e405c9ef89a2edd4fdf67235d6f982920fc5ff981f621",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+      "byteCount": 16187,
+      "sha256": "0fc3f3f538f5604830fa0c5079635575511ff6a9967610287c20e5f4965d6b5c",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json",
+      "byteCount": 17280,
+      "sha256": "0b4bb2cfdab80564d3bf7a523716d1a08bf401c26e0412cce06c8305ecc3ca58",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json",
+      "byteCount": 5560,
+      "sha256": "fe84d009bd6559bb3bedb9a54a67e95ffbedef009ccf490a43197ca445020ab4",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json",
+      "byteCount": 8109,
+      "sha256": "e0bc479cbbc93505966264638e7ce6aa90f39b0012b46522836cb0c5d4808e62",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/swift-detail-oracle-receipt.json",
+      "byteCount": 7468,
+      "sha256": "9e9b860dbf8173e5bcc346ed2bb3b8b367cc2e95c45e30022c11358c46df4288",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/swift-detail-oracle-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle-receipt.json",
+      "byteCount": 6259,
+      "sha256": "1b7f370cc761bbdc30a4c4fee1dc1401d5da53e3c7d09d4a93cdfb4c361f4a56",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-counters-receipt.json",
+      "byteCount": 7744,
+      "sha256": "7aaa2d27f438218da088b77a91c8ccaf3ef3eaa2f95bd46544686db923e2660c",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-counters-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices-receipt.json",
+      "byteCount": 7739,
+      "sha256": "f46dbf65560cf02214e2c14e3e052d87a9d9037ae642995ad723720f1c180644",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "byteCount": 42983,
+      "sha256": "f0fc8a22e1d48e467e3514cdfc07a92dbe81854cd8024625a08c672c94067d44",
+      "repositoryPath": "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/swift-sdk-conformance/Consumer.swift",
+      "byteCount": 13792,
+      "sha256": "a3cd6051529070c7e35d318f553c082bbcd4aad4d82e147d32a18c2fe7f46aa6",
+      "repositoryPath": "scripts/swift-sdk-conformance/Consumer.swift"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/test_ffi_contract.py",
+      "byteCount": 10038,
+      "sha256": "2003d667791927061444aab7f84b7052bd6d39b7c9f94496bd9f414da1a009b2",
+      "repositoryPath": "scripts/test_ffi_contract.py"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/test_macos_ffi_owner.py",
+      "byteCount": 17291,
+      "sha256": "36df95b9465ab77b1683d9a8252f702805e6b639c67c9488c7bc12e8827e0101",
+      "repositoryPath": "scripts/test_macos_ffi_owner.py"
+    },
+    {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/test_macos_rust_sdk.py",
+      "byteCount": 17544,
+      "sha256": "848526666f35ebe829f50ce075ceab1f6b7dc87e2e8190fd86958e08d06c6347",
+      "repositoryPath": "scripts/test_macos_rust_sdk.py"
+    }
+  ],
+  "nativeExecutingArtifact": {
+    "sourcePath": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Products/Debug/ArkTraceRenderingTests.xctest/Contents/MacOS/ArkTraceRenderingTests",
+    "frozenPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/native-final-executing-artifact/ArkTraceRenderingTests",
+    "byteCount": 19798832,
+    "sha256": "0592184a27b2e84373ceab5da8c60fc12a35eca489a63f821a1b894a30004429",
+    "mtime": 1791243964.1893535,
+    "observedAfter": "22c-native-full-test",
+    "priorArtifactPreserved": true,
+    "noFullProcessForestClaim": true
+  },
+  "remaining": [
+    "in-flight cancellation",
+    "actual GUI and backup interaction",
+    "large >500 MiB and performance/RSS",
+    "full process forest",
+    "actual Capture",
+    "ArkDeck schema/index 4 consumption",
+    "applicable signing/distribution"
+  ],
+  "observedAtUnix": 1791244390.5834491
+}

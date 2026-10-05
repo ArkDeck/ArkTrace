@@ -2,10 +2,10 @@
 use arktrace_viewer::{PrimitiveRecord, QualityRecord, TrackRecord, ViewportRecord};
 pub const ABI_VERSION: u32 = 2;
 pub const CONTRACT_DIGEST_HEX: &str =
-    "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617";
+    "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a";
 pub const CONTRACT_DIGEST: [u8; 32] = [
-    191, 33, 203, 251, 34, 228, 175, 195, 75, 129, 105, 249, 150, 28, 39, 17, 159, 250, 120, 145,
-    84, 228, 65, 168, 56, 222, 66, 64, 173, 59, 134, 23,
+    206, 0, 205, 42, 14, 20, 5, 108, 176, 134, 4, 236, 121, 190, 64, 52, 108, 59, 158, 190, 107,
+    177, 228, 4, 249, 110, 95, 93, 107, 50, 27, 26,
 ];
 pub const SNAPSHOT_FORMAT_VERSION: u32 = 2;
 pub const STATUS_OK: u32 = 0;
@@ -156,6 +156,13 @@ pub const FLAG_CPU: u32 = 524288;
 pub const FLAG_VALUE: u32 = 1048576;
 pub const FLAG_PRIORITY: u32 = 2097152;
 pub const FLAG_COLOR: u32 = 4194304;
+pub const CAP_SNAPSHOT_HIT: u32 = 64;
+pub const HIT_NONE: u32 = 0;
+pub const HIT_DETAIL: u32 = 1;
+pub const HIT_DENSITY: u32 = 2;
+pub const HIT_MODE_DETAIL: u32 = 1;
+pub const HIT_MODE_DENSITY: u32 = 2;
+pub const HIT_MODE_ANY: u32 = 3;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct AbiIdentity {
@@ -334,4 +341,39 @@ const _: () = {
     assert!(std::mem::offset_of!(SnapshotView, retained_bytes) == 152);
     assert!(std::mem::offset_of!(SnapshotView, quality_status) == 160);
     assert!(std::mem::offset_of!(SnapshotView, reserved) == 164);
+};
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub struct SnapshotHit {
+    pub struct_size: u32,
+    pub kind: u32,
+    pub event_table: u32,
+    pub source_kind: u32,
+    pub flags: u32,
+    pub reserved: u32,
+    pub row_id: i64,
+    pub source_value: i64,
+    pub filter_id: i64,
+    pub owner_value: i64,
+    pub bucket_start_ns: i64,
+    pub bucket_end_ns: i64,
+    pub time_ns: i64,
+}
+#[cfg(target_pointer_width = "64")]
+const _: () = {
+    assert!(std::mem::size_of::<SnapshotHit>() == 80);
+    assert!(std::mem::align_of::<SnapshotHit>() == 8);
+    assert!(std::mem::offset_of!(SnapshotHit, struct_size) == 0);
+    assert!(std::mem::offset_of!(SnapshotHit, kind) == 4);
+    assert!(std::mem::offset_of!(SnapshotHit, event_table) == 8);
+    assert!(std::mem::offset_of!(SnapshotHit, source_kind) == 12);
+    assert!(std::mem::offset_of!(SnapshotHit, flags) == 16);
+    assert!(std::mem::offset_of!(SnapshotHit, reserved) == 20);
+    assert!(std::mem::offset_of!(SnapshotHit, row_id) == 24);
+    assert!(std::mem::offset_of!(SnapshotHit, source_value) == 32);
+    assert!(std::mem::offset_of!(SnapshotHit, filter_id) == 40);
+    assert!(std::mem::offset_of!(SnapshotHit, owner_value) == 48);
+    assert!(std::mem::offset_of!(SnapshotHit, bucket_start_ns) == 56);
+    assert!(std::mem::offset_of!(SnapshotHit, bucket_end_ns) == 64);
+    assert!(std::mem::offset_of!(SnapshotHit, time_ns) == 72);
 };

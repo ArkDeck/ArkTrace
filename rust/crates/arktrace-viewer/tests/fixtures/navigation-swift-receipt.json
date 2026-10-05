@@ -17,13 +17,13 @@
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "7b687f524d8d1b9c05c8912da1ef8bf18f7a4e0a9a530f7bcdd8bda0550bc661",
-      "byteCount": 103317
+      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445",
+      "byteCount": 103253
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59",
-      "byteCount": 101479
+      "sha256": "2f075ef959c47e64fa8b1364dcb94e18eeb9151f6ecc01e4be49c658ee853be6",
+      "byteCount": 102182
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -32,8 +32,8 @@
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineModels.swift",
-      "sha256": "553daed35df5bca749a06c226e4e12a95be3bd5ac151259125a3ebab3c3624b3",
-      "byteCount": 26221
+      "sha256": "6277f0095d896e56a6bbc8ff342ccc4d82f3863113a95e51a9cd2d3ad428b997",
+      "byteCount": 27152
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceCore/Model/TraceModels.swift",
@@ -49,13 +49,13 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "ecc5017e95533cec8c80417d8492bf7e6e48a6bbec14e05d7a0a89019eebca13",
-      "byteCount": 104788
+      "sha256": "a05793ed8e8ad4b98d59f65a31b8d8881bccdddfcd604e516fc4c3d5eb4ad7c9",
+      "byteCount": 104724
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "884ddb82043889b16cb25111e9a55d9a5b79175de813b1dff01357e2decee05d",
-      "byteCount": 102042
+      "sha256": "43e57d41a8c7a312fbf1c1c808c69d4fa84c674fa95b2f7f85de923f1844f339",
+      "byteCount": 102745
     }
   ],
   "seams": [
@@ -94,8 +94,8 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "b4be24d5fe5e172d356eab6ab6cb0fc99cda4c9be6443487e1ed275f16df3de3",
-    "byteCount": 8011
+    "sha256": "013d4560f226bd7d45278c69ee9a25ce839de83315e894d749a305c69e7c5720",
+    "byteCount": 5328
   },
   "note": "Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.",
   "outputs": [

@@ -7,4 +7,8 @@ package final class RustSnapshotCopyOwner: Sendable {
         self.native = native
         credit = try RustRetainedStorage.shared.reserve(maximumCopyBytes)
     }
+    package func hit(atX x: Double, y: Double, viewport: RustViewport,
+        backingScale: Double, mode: RustSnapshotHitMode) throws -> RustSnapshotHit? {
+        try native.hit(atX: x, y: y, viewport: viewport, backingScale: backingScale, mode: mode)
+    }
 }

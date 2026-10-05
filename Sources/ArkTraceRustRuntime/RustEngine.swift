@@ -77,7 +77,8 @@ public actor RustEngine {
                 identity.capabilities & UInt64(ARKTRACE_CAP_MACOS_ENGINE) != 0,
                 identity.capabilities & UInt64(ARKTRACE_CAP_CACHE_MAINTENANCE) != 0,
                 identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE) != 0,
-                identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE_BACKUP) != 0 else { throw RustAdmission.abiMismatch }
+                identity.capabilities & UInt64(ARKTRACE_CAP_VIEW_STATE_BACKUP) != 0,
+                identity.capabilities & UInt64(ARKTRACE_CAP_SNAPSHOT_HIT) != 0 else { throw RustAdmission.abiMismatch }
             var handle: UInt64 = 0
             try unsafe data.withUnsafeBytes { buffer in
                 let p = unsafe buffer.bindMemory(to: UInt8.self).baseAddress

@@ -5,7 +5,7 @@ namespace ArkTrace.Native;
 public static unsafe partial class NativeMethods
 {
     public const uint ABI_VERSION = 2;
-    public const string CONTRACT_DIGEST = "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617";
+    public const string CONTRACT_DIGEST = "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a";
     public const uint SNAPSHOT_FORMAT_VERSION = 2;
     public const uint STATUS_OK = 0;
     public const uint STATUS_BUSY = 1;
@@ -155,6 +155,13 @@ public static unsafe partial class NativeMethods
     public const uint FLAG_VALUE = 1048576;
     public const uint FLAG_PRIORITY = 2097152;
     public const uint FLAG_COLOR = 4194304;
+    public const uint CAP_SNAPSHOT_HIT = 64;
+    public const uint HIT_NONE = 0;
+    public const uint HIT_DETAIL = 1;
+    public const uint HIT_DENSITY = 2;
+    public const uint HIT_MODE_DETAIL = 1;
+    public const uint HIT_MODE_DENSITY = 2;
+    public const uint HIT_MODE_ANY = 3;
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_abi_identity")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_abi_identity(AbiIdentity* output, ulong output_bytes);
@@ -233,6 +240,9 @@ public static unsafe partial class NativeMethods
     [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_session_error_acquire")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     public static partial uint arktrace_session_error_acquire(ulong engine, ulong session, ResultView* output, ulong output_bytes);
+    [LibraryImport("arktrace_ffi", EntryPoint = "arktrace_snapshot_hit")]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static partial uint arktrace_snapshot_hit(ulong owner, uint mode, ViewportRecord* viewport, ulong viewport_bytes, double point_x, double point_y, SnapshotHit* output, ulong output_bytes);
 }
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct AbiIdentity
@@ -395,4 +405,21 @@ public unsafe struct SnapshotView
     public ulong retained_bytes;
     public uint quality_status;
     public uint reserved;
+}
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct SnapshotHit
+{
+    public uint struct_size;
+    public uint kind;
+    public uint event_table;
+    public uint source_kind;
+    public uint flags;
+    public uint reserved;
+    public long row_id;
+    public long source_value;
+    public long filter_id;
+    public long owner_value;
+    public long bucket_start_ns;
+    public long bucket_end_ns;
+    public long time_ns;
 }

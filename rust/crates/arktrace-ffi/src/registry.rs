@@ -3,6 +3,8 @@ use crate::{abi_records::*, model::*};
 use arktrace_engine::{
     AsyncEngine, DrainStatus, OwnedResult, RequestState, RuntimeFailure, RuntimeHandle,
 };
+#[cfg(target_os = "macos")]
+use std::sync::Weak;
 use std::sync::{
     Arc, LazyLock, Mutex, MutexGuard, TryLockError,
     atomic::{AtomicBool, Ordering},
@@ -18,6 +20,8 @@ pub(crate) struct ResultOwner {
     pub kind: u32,
     #[cfg(target_os = "macos")]
     pub data: OwnedResult,
+    #[cfg(target_os = "macos")]
+    pub producer: Weak<Host>,
 }
 enum Record {
     Engine(Arc<Host>),
@@ -159,18 +163,20 @@ impl Host {
         }
     }
     #[cfg(target_os = "macos")]
-    pub fn acquire(&self, request: u64) -> Result<ResultOwner, u32> {
+    pub fn acquire(self: &Arc<Self>, request: u64) -> Result<ResultOwner, u32> {
         let handle = RuntimeHandle::from_raw(request);
         let status = self.engine.poll(handle).map_err(failure)?;
         if status.state == RequestState::Failed {
             Ok(ResultOwner {
                 kind: RESULT_FAILURE,
                 data: self.engine.acquire_error_result(handle).map_err(failure)?,
+                producer: Arc::downgrade(self),
             })
         } else {
             Ok(ResultOwner {
                 kind: RESULT_SUCCESS,
                 data: self.engine.acquire_result(handle).map_err(failure)?,
+                producer: Arc::downgrade(self),
             })
         }
     }

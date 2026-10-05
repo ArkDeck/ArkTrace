@@ -539,6 +539,63 @@
           "type": "u32"
         }
       ]
+    },
+    {
+      "name": "SnapshotHit",
+      "fields": [
+        {
+          "name": "struct_size",
+          "type": "u32"
+        },
+        {
+          "name": "kind",
+          "type": "u32"
+        },
+        {
+          "name": "event_table",
+          "type": "u32"
+        },
+        {
+          "name": "source_kind",
+          "type": "u32"
+        },
+        {
+          "name": "flags",
+          "type": "u32"
+        },
+        {
+          "name": "reserved",
+          "type": "u32"
+        },
+        {
+          "name": "row_id",
+          "type": "i64"
+        },
+        {
+          "name": "source_value",
+          "type": "i64"
+        },
+        {
+          "name": "filter_id",
+          "type": "i64"
+        },
+        {
+          "name": "owner_value",
+          "type": "i64"
+        },
+        {
+          "name": "bucket_start_ns",
+          "type": "i64"
+        },
+        {
+          "name": "bucket_end_ns",
+          "type": "i64"
+        },
+        {
+          "name": "time_ns",
+          "type": "i64"
+        }
+      ]
     }
   ],
   "constants": {
@@ -689,7 +746,14 @@
     "FLAG_CPU": 524288,
     "FLAG_VALUE": 1048576,
     "FLAG_PRIORITY": 2097152,
-    "FLAG_COLOR": 4194304
+    "FLAG_COLOR": 4194304,
+    "CAP_SNAPSHOT_HIT": 64,
+    "HIT_NONE": 0,
+    "HIT_DETAIL": 1,
+    "HIT_DENSITY": 2,
+    "HIT_MODE_DETAIL": 1,
+    "HIT_MODE_DENSITY": 2,
+    "HIT_MODE_ANY": 3
   },
   "functions": [
     {
@@ -1195,6 +1259,44 @@
         }
       ],
       "returns": "u32"
+    },
+    {
+      "name": "arktrace_snapshot_hit",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "u64"
+        },
+        {
+          "name": "mode",
+          "type": "u32"
+        },
+        {
+          "name": "viewport",
+          "type": "const ViewportRecord*"
+        },
+        {
+          "name": "viewport_bytes",
+          "type": "u64"
+        },
+        {
+          "name": "point_x",
+          "type": "f64"
+        },
+        {
+          "name": "point_y",
+          "type": "f64"
+        },
+        {
+          "name": "output",
+          "type": "SnapshotHit*"
+        },
+        {
+          "name": "output_bytes",
+          "type": "u64"
+        }
+      ],
+      "returns": "u32"
     }
   ],
   "requestOperations": [
@@ -1228,5 +1330,6 @@
   "viewState": "Session-scoped background transport using only the opening held Ready directory and active lease. VIEW_STATE_READ and VIEW_STATE_REMOVE require null input with zero bytes; VIEW_STATE_WRITE copies original format-1 JSON, 1..4194304 bytes, without envelope overhead. All queued/running copied input capacities and rollback pipeline reservations share a fixed 16777216-byte engine admission budget; CAPACITY precedes copying when exhausted and credits refund when commands drop, including rejection/cancel/close/drain/panic. Original closed JSON, traceSHA256, combined flags+marks <=4096, favorites <=4096 and each UTF-8 label/favorite <=4096 bytes are validated by the owner worker before mutation; invalid data is a terminal INVALID_ARGUMENT request error. Read body is {status: sessionScoped|missing|restored|preserved, document only for restored}; write/remove body is sessionScoped|saved|removed|preserved. Unknown/corrupt existing sidecar is preserved; uncached sessions do not persist. Uses ordinary request handles, result ownership/budgets, provenance and cancellation. A cancellation or output failure after durable publication can accompany a committed save/remove; refresh via READ. Ordinary request input remains capped at 1048576 bytes. No caller paths, raw SQL or Swift fallback.",
   "viewStateBackup": "CAP_VIEW_STATE_BACKUP and VIEW_STATE_BACKUP use the ordinary Session request, result, provenance, cancellation, close and drain contracts. Input must be null with zero bytes; destination is fixed viewStateBackup.backupDirectory/rollback. Admission reserves the entire existing 16777216-byte view-state input budget for one bounded native read/encode/publish pipeline, without allocating a dummy buffer; queued/running write inputs and another backup cannot be admitted until this command drops. This is a logical pipeline reservation, not allocator/RSS telemetry. Reads validated format-1 state through the held Session/key lock and publishes an immutable complete private bundle containing view-state.json and receipt.json. Snapshot identity uses domain-separated SHA256 of traceSHA256, parserKey and documentSHA256. Output is {status, receipt}; status is notConfigured|sessionScoped|missing|preserved|backedUp|alreadyBackedUp, receipt is null unless backedUp/alreadyBackedUp. Receipt is closed formatVersion=1, backupIdentifier, traceSHA256, parserKey, documentSHA256 (all lowercase 64-byte digests), documentByteCount=1..4194304, flagCount, persistentMarkCount (combined<=4096), favoriteTrackCount (nullable or 0..4096). Preserve array order, duplicate IDs/favorites and original UTF-8; omit transient marks and retain nullable favorites distinct from empty. No absolute paths, caller destination, raw SQL or automatic restoration. Read snapshot precedes publication; other Sessions can save afterwards. Complete no-replace directory publication and readonly payload verification reject foreign, corrupt, incomplete, linked or writable existing backups. Backup survives LRU/purge. Cancellation/result failure can follow durable publication: retry verifies the exact complete bundle; never infer no change. Request-owned native staging removes only proven prepublication residue, preserves ambiguous postpublication residue and never sweeps unknown owners by age. Swift validates private expected engine/session/request identity and a bounded typed receipt; no public raw decoder.",
   "cpuCatalog": "queryWithDeadline-only closed CpuCatalog query {range,limit:1..4096,activityLimit:1..20000}, under hostContinuousEpochV1 with required absolute deadline. Result is closed {cpus,activity}, both capability-aware EventPages with machine quality. CPU identities are strictly ascending signed Int64, bounded by identities with limit+1 truncation, independent of the first-N scheduling owner sample used for process ordering. Activity truncation never implies CPU directory truncation. The Store retains one 2000000-step VM credit across all identity seeks and activity decoding; cancellation, expired deadline, malformed required identity and budget failure remain failures, never unavailable. No raw SQL or relative deadline reset.",
-  "hotSnapshotFacts": "Snapshot format 2 only. Detail source DTOs retain shared canonical presentation and Inspector facts through the viewport owner. Presence flags distinguish absent scalars/text from zero/empty UTF-8; EventKey table/rowID, ipid/itid, semantic duration/open-ended, counter values, priority and frame jankTag remain Int64. Presentation label/category and Inspector name/category are distinct. Density has no Inspector/EventKey. color_rgb is packed 0xRRGGBB from the shared Rust palette. Facts pool is capped at 16 MiB across unique chunks, each Inspector chunk <=4096 without scene truncation. Complete scene/string/JSON retained ownership remains bounded by the existing result budget. Generated ABI 2 and exact digest are required; no format-1 fallback."
+  "hotSnapshotFacts": "Snapshot format 2 only. Detail source DTOs retain shared canonical presentation and Inspector facts through the viewport owner. Presence flags distinguish absent scalars/text from zero/empty UTF-8; EventKey table/rowID, ipid/itid, semantic duration/open-ended, counter values, priority and frame jankTag remain Int64. Presentation label/category and Inspector name/category are distinct. Density has no Inspector/EventKey. color_rgb is packed 0xRRGGBB from the shared Rust palette. Facts pool is capped at 16 MiB across unique chunks, each Inspector chunk <=4096 without scene truncation. Complete scene/string/JSON retained ownership remains bounded by the existing result budget. Generated ABI 2 and exact digest are required; no format-1 fallback.",
+  "snapshotHit": "CAP_SNAPSHOT_HIT is an additive ABI-2 export; snapshot format remains 2 and exact current digest is required. Synchronous bounded pure hit over the immutable retained owner, independent of Engine/session/request lifetime, including after close/drain/release. No IO, database, polling, JSON or new result owner. Caller keeps owner live and supplies a valid non-overlapping aligned ViewportRecord and SnapshotHit of exact byte sizes. Display range, dimensions, offset, generation and backing scale may differ from retained projection; ns_per_point must match range/width, source_generation is metadata only. Detail/density/any modes are distinct. On success struct_size is exact; kind NONE has all payload fields zero, DETAIL has only event_table/row_id, DENSITY has typed source kind and TRACK_OWNER presence (zero distinct from absent), source_value/filter_id/owner_value, inclusive bucket start/end and time. Source tags match TrackRecord; no pointers or strings escape. Non-applicable fields and reserved are zero. All error paths with valid output storage clear that storage. Invalid display or mode is INVALID_INPUT; invalid pointer/size/alignment is INVALID_BUFFER; a stale/non-result owner is INVALID_HANDLE; a cold result is UNSUPPORTED_OPERATION. Registry contention is BUSY; callers may defer/retry, not block MainActor. Existing scene budgets bound input/string work/output. Owner retains a weak producer panic context: unexpected hit panic poisons/drains a still-live producer without keeping a released Engine alive. Windows returns truthful unsupported outcomes and needs native acceptance."
 }

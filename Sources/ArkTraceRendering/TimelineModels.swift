@@ -611,10 +611,25 @@ public struct TimelineTrackSnapshot: Hashable, Codable, Sendable {
     }
 }
 
+package enum TimelineNativeHitError: Error { case busy }
+package protocol TimelineNativeHitOwner: Sendable {
+    func event(at point: CGPoint, viewport: TimelineViewport, backingScale: Double) throws -> EventKey?
+    func densityBand(at point: CGPoint, viewport: TimelineViewport, backingScale: Double) throws -> TimelineDensityHit?
+}
+
 public struct TimelineSnapshot: Hashable, Codable, Sendable {
     private var retainedNativeOwner: (any Sendable)? = nil
     private enum CodingKeys: String, CodingKey { case viewport, tracks, generation, dataQuality, isLoading }
     package mutating func retainNativeProjection(_ owner: any Sendable) { retainedNativeOwner = owner }
+    package var nativeHitOwner: (any TimelineNativeHitOwner)? { retainedNativeOwner as? any TimelineNativeHitOwner }
+    /// Display the same immutable records while a replacement is loading.
+    /// Preserves native ownership and copy credits without copying the arrays.
+    package func displaying(viewport: TimelineViewport, isLoading: Bool) -> Self {
+        var result = Self(viewport: viewport, tracks: tracks, generation: viewport.generation,
+            dataQuality: dataQuality, isLoading: isLoading)
+        result.retainedNativeOwner = retainedNativeOwner
+        return result
+    }
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.viewport == rhs.viewport && lhs.tracks == rhs.tracks && lhs.generation == rhs.generation
             && lhs.dataQuality == rhs.dataQuality && lhs.isLoading == rhs.isLoading

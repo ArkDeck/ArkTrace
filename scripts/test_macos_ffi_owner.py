@@ -83,7 +83,7 @@ def main():
         assert digest(destination)==pin
         artifacts.append({'path':str(destination),'sha256':pin,'byteCount':destination.stat().st_size})
     abi=ABI(retained/'libarktrace_ffi.dylib')
-    identity=abi.out('abi_identity','AbiIdentity');assert identity.capabilities==191
+    identity=abi.out('abi_identity','AbiIdentity');assert identity.capabilities==sum(K[k] for k in ('CAP_MACOS_ENGINE','CAP_COLD_JSON','CAP_VIEWPORT_RECORDS','CAP_CACHE_MAINTENANCE','CAP_VIEW_STATE','CAP_VIEW_STATE_BACKUP','CAP_SNAPSHOT_HIT','CAP_DEVELOPMENT_FIXTURES'))
     manifest=json.loads((ROOT/'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
     parser=ROOT/'ThirdParty/TraceStreamer/macx/trace_streamer';assert digest(parser)==manifest['binarySHA256']
     parser_identity={k:manifest[k] for k in ('name','reportedVersion','binarySHA256','upstreamRepository','upstreamRevision','architecture','adapterVersion','buildRecipeVersion')}

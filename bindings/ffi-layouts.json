@@ -190,5 +190,25 @@
       "quality_status": 160,
       "reserved": 164
     }
+  },
+  {
+    "name": "SnapshotHit",
+    "size": 80,
+    "alignment": 8,
+    "offsets": {
+      "struct_size": 0,
+      "kind": 4,
+      "event_table": 8,
+      "source_kind": 12,
+      "flags": 16,
+      "reserved": 20,
+      "row_id": 24,
+      "source_value": 32,
+      "filter_id": 40,
+      "owner_value": 48,
+      "bucket_start_ns": 56,
+      "bucket_end_ns": 64,
+      "time_ns": 72
+    }
   }
 ]

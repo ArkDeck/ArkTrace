@@ -52,6 +52,12 @@ struct Report: Codable, Sendable {
     precondition(!Thread.isMainThread)
     return value.withBytes { span in String(decoding: (0..<span.count).map { span[$0] }, as: UTF8.self) }
 }
+// Package-external compile contract for the synchronous typed retained hit.
+func retainedHit(_ snapshot: RustSnapshot, viewport: RustViewport,
+    mode: RustSnapshotHitMode) throws -> RustSnapshotHit? {
+    try snapshot.hit(atX: 0, y: 0, viewport: viewport, backingScale: 2, mode: mode)
+}
+
 @concurrent func scene(_ value: RustSnapshot) async -> Scene {
     precondition(!Thread.isMainThread)
     return value.withRecords { tracks, primitives, quality, strings in

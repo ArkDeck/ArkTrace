@@ -11,7 +11,7 @@ extern "C" {
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
 #define ARKTRACE_ABI_VERSION 2u
-#define ARKTRACE_CONTRACT_DIGEST "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617"
+#define ARKTRACE_CONTRACT_DIGEST "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_SNAPSHOT_FORMAT_VERSION 2u
@@ -163,6 +163,13 @@ ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host
 #define ARKTRACE_FLAG_VALUE 1048576u
 #define ARKTRACE_FLAG_PRIORITY 2097152u
 #define ARKTRACE_FLAG_COLOR 4194304u
+#define ARKTRACE_CAP_SNAPSHOT_HIT 64u
+#define ARKTRACE_HIT_NONE 0u
+#define ARKTRACE_HIT_DETAIL 1u
+#define ARKTRACE_HIT_DENSITY 2u
+#define ARKTRACE_HIT_MODE_DETAIL 1u
+#define ARKTRACE_HIT_MODE_DENSITY 2u
+#define ARKTRACE_HIT_MODE_ANY 3u
 typedef struct ArkTraceAbiIdentity {
     uint32_t struct_size;
     uint32_t abi_version;
@@ -437,6 +444,35 @@ ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotView, string_bytes) == 144, "Sna
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotView, retained_bytes) == 152, "SnapshotView.retained_bytes offset");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotView, quality_status) == 160, "SnapshotView.quality_status offset");
 ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotView, reserved) == 164, "SnapshotView.reserved offset");
+typedef struct ArkTraceSnapshotHit {
+    uint32_t struct_size;
+    uint32_t kind;
+    uint32_t event_table;
+    uint32_t source_kind;
+    uint32_t flags;
+    uint32_t reserved;
+    int64_t row_id;
+    int64_t source_value;
+    int64_t filter_id;
+    int64_t owner_value;
+    int64_t bucket_start_ns;
+    int64_t bucket_end_ns;
+    int64_t time_ns;
+} ArkTraceSnapshotHit;
+ARKTRACE_LAYOUT_ASSERT(sizeof(ArkTraceSnapshotHit) == 80, "SnapshotHit size");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, struct_size) == 0, "SnapshotHit.struct_size offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, kind) == 4, "SnapshotHit.kind offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, event_table) == 8, "SnapshotHit.event_table offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, source_kind) == 12, "SnapshotHit.source_kind offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, flags) == 16, "SnapshotHit.flags offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, reserved) == 20, "SnapshotHit.reserved offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, row_id) == 24, "SnapshotHit.row_id offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, source_value) == 32, "SnapshotHit.source_value offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, filter_id) == 40, "SnapshotHit.filter_id offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, owner_value) == 48, "SnapshotHit.owner_value offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, bucket_start_ns) == 56, "SnapshotHit.bucket_start_ns offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, bucket_end_ns) == 64, "SnapshotHit.bucket_end_ns offset");
+ARKTRACE_LAYOUT_ASSERT(offsetof(ArkTraceSnapshotHit, time_ns) == 72, "SnapshotHit.time_ns offset");
 uint32_t arktrace_abi_identity(ArkTraceAbiIdentity * output, uint64_t output_bytes);
 uint32_t arktrace_engine_create(const uint8_t * input, uint64_t input_bytes, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_engine_create_fixture(const uint8_t * input, uint64_t input_bytes, uint64_t * output, uint64_t output_bytes);
@@ -463,6 +499,7 @@ uint32_t arktrace_fixture_panic(uint64_t engine);
 uint32_t arktrace_engine_retained_result_bytes(uint64_t engine, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_engine_retained_view_state_input_bytes(uint64_t engine, uint64_t * output, uint64_t output_bytes);
 uint32_t arktrace_session_error_acquire(uint64_t engine, uint64_t session, ArkTraceResultView * output, uint64_t output_bytes);
+uint32_t arktrace_snapshot_hit(uint64_t owner, uint32_t mode, const ArkTraceViewportRecord * viewport, uint64_t viewport_bytes, double point_x, double point_y, ArkTraceSnapshotHit * output, uint64_t output_bytes);
 #undef ARKTRACE_LAYOUT_ASSERT
 #ifdef __cplusplus
 }

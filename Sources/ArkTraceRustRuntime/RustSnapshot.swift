@@ -28,6 +28,7 @@ public struct RustSnapshot: Sendable {
         lease = unsafe SnapshotLease(view)
     }
     public var viewport: ArkTraceViewportRecord { unsafe lease.view.viewport }
+    var retainedOwner: UInt64 { unsafe lease.view.owner }
     public var qualityStatus: UInt32 { unsafe lease.view.quality_status }
     public var retainedBytes: UInt64 { unsafe lease.view.retained_bytes }
     public var trackCount: Int { unsafe Int(lease.view.track_count) }

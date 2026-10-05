@@ -227,4 +227,36 @@ package enum NativeTimelineSnapshot {
         }
     }
 }
+
+extension RustSnapshotCopyOwner: TimelineNativeHitOwner {
+    package func event(at point: CGPoint, viewport: TimelineViewport, backingScale: Double) throws -> EventKey? {
+        let result = try displayHit(point, viewport, backingScale, .detail)
+        guard let result else { return nil }
+        guard case .detail(let key) = result else { throw RustAdmission.invalidBuffer }
+        return key
+    }
+    package func densityBand(at point: CGPoint, viewport: TimelineViewport, backingScale: Double) throws -> TimelineDensityHit? {
+        let result = try displayHit(point, viewport, backingScale, .density)
+        guard let result else { return nil }
+        guard case .density(let source, let bucket, let time) = result else { throw RustAdmission.invalidBuffer }
+        let track: TimelineTrackSource = switch source {
+        case .cpu(let cpu): .cpu(cpu)
+        case .threadState(let key): .threadState(key)
+        case .namedSlice(let key): .namedSlice(key)
+        case .cpuCounter(let id, let cpu): .cpuCounter(filterID: id, cpu: cpu)
+        case .processCounter(let id, let key): .processCounter(filterID: id, processKey: key)
+        case .frame(let key): .frame(key)
+        }
+        return TimelineDensityHit(trackID: track.stableID, bucket: bucket, timeNs: time)
+    }
+    private func displayHit(_ point: CGPoint, _ viewport: TimelineViewport, _ scale: Double,
+        _ mode: RustSnapshotHitMode) throws -> RustSnapshotHit? {
+        do {
+            return try hit(atX: point.x, y: point.y, viewport: RustViewport(range: viewport.range,
+                widthPoints: viewport.widthPoints, heightPoints: viewport.heightPoints,
+                verticalOffsetPoints: viewport.verticalOffsetPoints, generation: viewport.generation),
+                backingScale: scale, mode: mode)
+        } catch RustAdmission.busy { throw TimelineNativeHitError.busy }
+    }
+}
 #endif

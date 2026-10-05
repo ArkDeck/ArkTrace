@@ -400,6 +400,11 @@ public final class TimelineNSView: NSView {
     public func event(at point: CGPoint) -> EventKey? {
         guard let source = displayedSnapshot else { return nil }
         let scale = unsafe window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
+        if let owner = source.nativeHitOwner {
+            do { return try owner.event(at: point, viewport: source.viewport, backingScale: scale) }
+            catch TimelineNativeHitError.busy { /* Use the immutable Swift copy for this pointer sample. */ }
+            catch { return nil }
+        }
         var candidate: (style: Int, order: Int, key: EventKey)?
         var order = 0
         for track in source.tracks {
@@ -440,6 +445,12 @@ public final class TimelineNSView: NSView {
     /// is over is the band that answers.
     public func densityBand(at point: CGPoint) -> TimelineDensityHit? {
         guard let source = displayedSnapshot else { return nil }
+        if let owner = source.nativeHitOwner {
+            let scale = unsafe window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
+            do { return try owner.densityBand(at: point, viewport: source.viewport, backingScale: scale) }
+            catch TimelineNativeHitError.busy { /* Do not block MainActor waiting for the registry. */ }
+            catch { return nil }
+        }
         for track in source.tracks {
             guard TimelineGeometry.trackFrame(track).contains(point) else { continue }
             let time = TimelineGeometry.time(forX: point.x, viewport: source.viewport)
