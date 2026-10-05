@@ -1057,6 +1057,15 @@ impl HeldFile {
     pub fn snapshot(&self) -> FileSnapshot {
         self.initial
     }
+    /// Immutable backup/publication inputs must have no write permission.
+    /// Validate the exact held file without repairing existing permissions.
+    pub fn require_readonly(&self) -> Result<(), HostError> {
+        self.verify()?;
+        if self.initial.mode & 0o222 != 0 {
+            return Err(HostError::NotPrivate);
+        }
+        Ok(())
+    }
 
     pub fn path(&self) -> PathBuf {
         self.parent
@@ -1240,7 +1249,7 @@ impl EphemeralLease {
         budget: &IoBudget,
     ) -> Result<Self, HostError> {
         budget.check()?;
-        Lease::try_acquire_impl(parent, name, LeaseMode::Exclusive, true, true)?
+        Lease::try_acquire_impl(parent, name, LeaseMode::Exclusive, true, true, false)?
             .map(Self)
             .ok_or(HostError::Busy)
     }
@@ -1268,7 +1277,36 @@ impl Lease {
         mode: LeaseMode,
         create: bool,
     ) -> Result<Option<Self>, HostError> {
-        Self::try_acquire_impl(parent, name, mode, create, false)
+        Self::try_acquire_impl(parent, name, mode, create, false, false)
+    }
+
+    /// Read-only migration authority. Missing locks are never created; an
+    /// existing file is opened O_RDONLY and retains its permissions and bytes.
+    /// flock still interoperates with the legacy Swift/ArkDeck lock protocol.
+    pub fn try_acquire_existing_readonly(
+        parent: &HeldDirectory,
+        name: &str,
+        mode: LeaseMode,
+    ) -> Result<Option<Self>, HostError> {
+        Self::try_acquire_impl(parent, name, mode, false, false, true)
+    }
+
+    pub fn acquire_existing_readonly(
+        parent: &HeldDirectory,
+        name: &str,
+        mode: LeaseMode,
+        budget: &IoBudget,
+    ) -> Result<Self, HostError> {
+        loop {
+            budget.check()?;
+            if let Some(lease) = Self::try_acquire_existing_readonly(parent, name, mode)? {
+                return Ok(lease);
+            }
+            thread::sleep(
+                Duration::from_millis(5)
+                    .min(budget.deadline.saturating_duration_since(Instant::now())),
+            );
+        }
     }
     fn try_acquire_impl(
         parent: &HeldDirectory,
@@ -1276,13 +1314,19 @@ impl Lease {
         mode: LeaseMode,
         create: bool,
         require_fresh: bool,
+        readonly_existing: bool,
     ) -> Result<Option<Self>, HostError> {
         if !parent.0.private {
             return Err(HostError::NotPrivate);
         }
         parent.revalidate()?;
         let name = component(OsStr::new(name))?;
-        let flags = libc::O_RDWR | libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK;
+        let access = if readonly_existing {
+            libc::O_RDONLY
+        } else {
+            libc::O_RDWR
+        };
+        let flags = access | libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK;
         // SAFETY: held parent and component; exclusive create never chmods an existing file.
         let mut fd = if create {
             unsafe {
@@ -1314,6 +1358,9 @@ impl Lease {
         require_private_security(&file, &metadata)?;
         if metadata.nlink() != 1 {
             return Err(HostError::LinkedObject);
+        }
+        if readonly_existing && metadata.len() != 0 {
+            return Err(HostError::InvalidEvidence);
         }
         let operation = if mode == LeaseMode::Shared {
             libc::LOCK_SH

@@ -43,6 +43,7 @@ dependencies = [
  "arktrace-viewer",
  "serde",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]

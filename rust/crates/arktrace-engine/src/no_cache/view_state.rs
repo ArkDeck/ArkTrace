@@ -8,7 +8,7 @@ use crate::{
 
 const FILE_NAME: &str = "view-state.json";
 
-fn read_directory(
+pub(super) fn read_directory(
     directory: &HeldDirectory,
     trace_sha256: &str,
     io: &IoBudget,

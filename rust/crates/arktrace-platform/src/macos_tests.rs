@@ -40,6 +40,79 @@ fn budget() -> IoBudget {
 }
 
 #[test]
+fn existing_readonly_leases_do_not_create_or_mutate_legacy_locks() {
+    let fixture = Fixture::new();
+    let root = fixture.held();
+    assert!(matches!(
+        Lease::try_acquire_existing_readonly(&root, "missing", LeaseMode::Shared),
+        Err(HostError::NotFound)
+    ));
+    assert!(!root.path().join("missing").exists());
+    drop(Lease::acquire(&root, "lock", LeaseMode::Shared, &budget()).unwrap());
+    let file = root.open_file("lock").unwrap();
+    let before = file.snapshot();
+    let shared =
+        Lease::acquire_existing_readonly(&root, "lock", LeaseMode::Shared, &budget()).unwrap();
+    // SAFETY: inspect the owned descriptor's access mode without changing it.
+    assert_eq!(
+        unsafe { libc::fcntl(shared.file.as_raw_fd(), libc::F_GETFL) } & libc::O_ACCMODE,
+        libc::O_RDONLY
+    );
+    assert!(
+        Lease::try_acquire_existing_readonly(&root, "lock", LeaseMode::Exclusive)
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        Lease::try_acquire(&root, "lock", LeaseMode::Exclusive, false)
+            .unwrap()
+            .is_none()
+    );
+    drop(shared);
+    let exclusive =
+        Lease::acquire_existing_readonly(&root, "lock", LeaseMode::Exclusive, &budget()).unwrap();
+    assert!(
+        Lease::try_acquire_existing_readonly(&root, "lock", LeaseMode::Shared)
+            .unwrap()
+            .is_none()
+    );
+    exclusive.revalidate().unwrap();
+    drop(exclusive);
+    assert_eq!(root.open_file("lock").unwrap().snapshot(), before);
+    let readonly = root.write_new_readonly("readonly", b"", &budget()).unwrap();
+    let readonly_lease =
+        Lease::acquire_existing_readonly(&root, "readonly", LeaseMode::Exclusive, &budget())
+            .unwrap();
+    readonly_lease.revalidate().unwrap();
+    drop(readonly_lease);
+    readonly.verify().unwrap();
+    root.write_new_readonly("foreign", b"not an empty legacy lock", &budget())
+        .unwrap();
+    assert!(matches!(
+        Lease::try_acquire_existing_readonly(&root, "foreign", LeaseMode::Shared),
+        Err(HostError::InvalidEvidence)
+    ));
+}
+
+#[test]
+fn existing_readonly_leases_reject_links_and_replaced_parent() {
+    use std::os::unix::fs::symlink;
+    let fixture = Fixture::new();
+    let root = fixture.held();
+    root.write_new_readonly("lock", b"", &budget()).unwrap();
+    symlink(root.path().join("lock"), root.path().join("linked")).unwrap();
+    assert!(Lease::try_acquire_existing_readonly(&root, "linked", LeaseMode::Shared).is_err());
+    let child = root.create_private_child("child").unwrap();
+    child.write_new_readonly("lock", b"", &budget()).unwrap();
+    let lease =
+        Lease::acquire_existing_readonly(&child, "lock", LeaseMode::Shared, &budget()).unwrap();
+    fs::rename(child.path(), root.path().join("detached")).unwrap();
+    root.create_private_child("child").unwrap();
+    assert!(lease.revalidate().is_err());
+    assert!(Lease::try_acquire_existing_readonly(&child, "lock", LeaseMode::Shared).is_err());
+}
+
+#[test]
 fn cancellation_after_first_copy_chunk_removes_partial_output() {
     let fixture = Fixture::new();
     let source = fixture.source();

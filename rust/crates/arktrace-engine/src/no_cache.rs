@@ -25,7 +25,9 @@ use std::{
     sync::Arc,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
+mod legacy_view_state;
 mod persistent;
+pub use legacy_view_state::LegacyViewStateMigration;
 mod view_state;
 mod viewer;
 pub use persistent::open_cached;

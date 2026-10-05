@@ -176,6 +176,13 @@ lane_contracts=false
 lane_rust_macos=true
 lane_rust_windows=true' 'scripts/test_viewer_json_roundtrip.py'
 
+expect "legacy annotation harness selects macOS and contracts" \
+    'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=true
+lane_rust_windows=false' 'scripts/test_macos_legacy_view_state.py'
+
 expect "Rust documentation does not build" "$docs_only" 'rust/README.md'
 
 expect "cargo runner change fails closed" "$all_lanes" 'scripts/run-cargo.py'

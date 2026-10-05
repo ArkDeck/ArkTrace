@@ -1,0 +1,339 @@
+{
+  "formatVersion": 1,
+  "goalStatus": "active",
+  "baseCommit": "8debd4c1dfb6e4939ef5f2cc3853d9fec3095d74",
+  "nativeHost": "macOS arm64",
+  "rust": "1.99.0",
+  "xcode": "27.0",
+  "engineImportImplemented": true,
+  "asyncTransportConnected": false,
+  "cABIConnected": false,
+  "swiftSDKConnected": false,
+  "appAdapterConnected": false,
+  "bounds": {
+    "maximumLegacyEntries": 64,
+    "maximumRawBackupFileBytes": 16777216,
+    "maximumAggregateRawBackupBytes": 67108864,
+    "maximumDecodedSidecarBytes": 4194304
+  },
+  "policy": {
+    "originalReadOnly": true,
+    "backupOutsideBothCaches": true,
+    "conflictsNeedChoice": true,
+    "favoriteReuseRequiresExactParserAndCacheIdentity": true,
+    "unmatchedRetainsOriginalOrderAndDuplicates": true,
+    "existingDestinationKept": true,
+    "completionOutlivesEntry": true,
+    "unprovenPendingNotSwept": true
+  },
+  "tests": {
+    "defaultFeatures": {
+      "passed": 511,
+      "failed": 0,
+      "ignored": 0,
+      "groups": 56
+    },
+    "allFeatures": {
+      "passed": 552,
+      "failed": 0,
+      "ignored": 0,
+      "groups": 59
+    }
+  },
+  "finalGateCount": 12,
+  "gates": [
+    {
+      "name": "24-probe-build-final",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/24-probe-build-final.receipt.json",
+        "byteCount": 767,
+        "sha256": "7004b1cf429a73643045f86ea36ec60e6ad7eaa712a36ecb80e48e88e52b705b"
+      }
+    },
+    {
+      "name": "25-actual-migration-final",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/25-actual-migration-final.receipt.json",
+        "byteCount": 2197,
+        "sha256": "15c9af1bb78da53ce48151844b6f42b18af3d69628ce9123d8916810c5f3f893"
+      }
+    },
+    {
+      "name": "27-clippy-features-final",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/27-clippy-features-final.receipt.json",
+        "byteCount": 738,
+        "sha256": "47320dea246d409a1d2a6a5565e804d1f97a9230f6d2b68ee0d3e740dbfbec5a"
+      }
+    },
+    {
+      "name": "28-ci-planner",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/28-ci-planner.receipt.json",
+        "byteCount": 623,
+        "sha256": "292678ee2e67d0b6d1757e1e90b338dc719bbe89b9f9a3a4f48a86a06a912a45"
+      }
+    },
+    {
+      "name": "29-migration-contracts",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/29-migration-contracts.receipt.json",
+        "byteCount": 643,
+        "sha256": "4f5af51099ebceed6d4e2db4d76ab4f383a65682e1971f3347f45d301a2d6cf4"
+      }
+    },
+    {
+      "name": "30-licenses",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/30-licenses.receipt.json",
+        "byteCount": 626,
+        "sha256": "12efce34654e87582cc87c6dfb4ed1206a6c331529c85eece6ad880dbade659e"
+      }
+    },
+    {
+      "name": "31-rust-build",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/31-rust-build.receipt.json",
+        "byteCount": 658,
+        "sha256": "1820cf6524257e9244a8eae3fcae75d575f3775ea76ad8868f85abbf93dbb537"
+      }
+    },
+    {
+      "name": "32-rust-test-all-features",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/32-rust-test-all-features.receipt.json",
+        "byteCount": 678,
+        "sha256": "95394dce5b9d6957b453b49d07133de22f53ca441d6f1f46f7e3e8f4da17ca80"
+      }
+    },
+    {
+      "name": "33-rust-fmt-check",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/33-rust-fmt-check.receipt.json",
+        "byteCount": 672,
+        "sha256": "2a45142a63761b643d5acd01822dd91c4d076153aeb4b13b0f127d600d9d863f"
+      }
+    },
+    {
+      "name": "34-bindings",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/34-bindings.receipt.json",
+        "byteCount": 653,
+        "sha256": "e2f3d4651e582e4af816cebb748ce8f163a1308c34e55f5bd6c5fb63144b29f6"
+      }
+    },
+    {
+      "name": "36-ffi-contract-retained",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/36-ffi-contract-retained.receipt.json",
+        "byteCount": 829,
+        "sha256": "0e72788f3ebfabaf7eff604eafcdb14bbbe354edd47bf6520fc91d536188ae36"
+      }
+    },
+    {
+      "name": "17-rust-verifier-final",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/17-rust-verifier-final.receipt.json",
+        "byteCount": 638,
+        "sha256": "0f170c4816ad38e6146922e5707231345ad7a2690225eafc7a48e0136f6a72d3"
+      }
+    }
+  ],
+  "retainedFailures": [
+    {
+      "name": "04-test-readonly-lock",
+      "reason": "0400 fixture cannot use the existing O_RDWR legacy API; corrected to actual 0600 protocol, with a separate 0400 readonly check",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/04-test-readonly-lock.receipt.json",
+        "byteCount": 700,
+        "sha256": "17263c77a6fe7bdb28307c6e08922c41b55893180bc30ce6ca8f2dbde8f685dc"
+      }
+    },
+    {
+      "name": "12-probe-build",
+      "reason": "incorrect close signature and SourceFacts serialization in new development probe; corrected",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/12-probe-build.receipt.json",
+        "byteCount": 770,
+        "sha256": "c36d0cd1b813d1a5b4f559ec2cbced4a2fd0e45427544cc8a5fef697b38563d0"
+      }
+    },
+    {
+      "name": "21-probe-build-final",
+      "reason": "private FileSnapshot.mode access; replaced by HeldFile.require_readonly",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/21-probe-build-final.receipt.json",
+        "byteCount": 771,
+        "sha256": "274c28a76d68eee4392022c3fa41664a6e99caa760ee507f7d140efe701b3db5"
+      }
+    },
+    {
+      "name": "22-actual-migration-final",
+      "reason": "consumer rejected nonzero producer receipt before starting any native scenario",
+      "receipt": {
+        "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/gates/22-actual-migration-final.receipt.json",
+        "byteCount": 2199,
+        "sha256": "f87fddf49d4749cf239ac31780e14f59d79e0e60b7a3beccc34690bbbbd8ff52"
+      }
+    }
+  ],
+  "actualNative": {
+    "formatVersion": 1,
+    "nativeHost": "macOS arm64",
+    "sourceSHA256": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe",
+    "parserSHA256": "0665e04e4abf2c2b60e173f6c666cb91844557c85d45386a03962e56804fa55a",
+    "helperSHA256": "f660f160a3e23dc9f41b76d50d9119f5148b4b43b0c247050194033bb3f2a901",
+    "probeSHA256": "b5a694042ea9143a8abcb0557e50ecffc99dcd8c9fe18e74a24e149d825c3369",
+    "legacyMetadataSHA256": "e21d4f0f87f8e477e660aaf603fa3e283bbf710b16fa97af48e7edf1845822bd",
+    "legacyDatabaseSHA256": "b8831f7c9e3e7868a7476145104d1df75c0dc9698b245a0018eaff780515f507",
+    "legacySidecarSHA256": "15fa541ba624f79b2fd84e425381ed5ed44ee6e814f85f33e6b6b72ae0b15488",
+    "cases": [
+      {
+        "case": "normal",
+        "label": "cold",
+        "status": "imported",
+        "cacheHit": false,
+        "stdoutSHA256": "e9948c5eabdc8fdd34439d10cc25f2f34bce53721259542e3b7f93574bb81f23",
+        "stderrSHA256": "61444b3b5d22f6f759f9d71492ff08267d8f3e09fe9d523cd151c3b8e0115a1f",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "normal",
+        "label": "warm",
+        "status": "alreadyCompleted",
+        "cacheHit": true,
+        "stdoutSHA256": "71813a7b83a4960c53201bd6b601f7163822569551628af01f4ce4576645bcd6",
+        "stderrSHA256": "bb5c795d631fdc2b4aef094c9d365f16c8cfe0783223a0286695a2c0236c4977",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "normal",
+        "label": "cleared",
+        "status": "alreadyCompleted",
+        "cacheHit": true,
+        "stdoutSHA256": "fcdcae9c35a2d39b01d4c9831a410fe89710fb85cbb84eecd20e3bdac0057f4a",
+        "stderrSHA256": "bb5c795d631fdc2b4aef094c9d365f16c8cfe0783223a0286695a2c0236c4977",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "sigkill-1",
+        "label": "resumed",
+        "status": "imported",
+        "cacheHit": true,
+        "stdoutSHA256": "cd05de791ad90ad922408b8d3e52bc7895d01b96e7ea6610f87c07c8a4163362",
+        "stderrSHA256": "bb5c795d631fdc2b4aef094c9d365f16c8cfe0783223a0286695a2c0236c4977",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "sigkill-1",
+        "label": "resumed-again",
+        "status": "alreadyCompleted",
+        "cacheHit": true,
+        "stdoutSHA256": "4f736dcee903062595f0dacccc8845d4d5d758d9c9339c9769b093af56d1389d",
+        "stderrSHA256": "bb5c795d631fdc2b4aef094c9d365f16c8cfe0783223a0286695a2c0236c4977",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "sigkill-2",
+        "label": "resumed",
+        "status": "imported",
+        "cacheHit": true,
+        "stdoutSHA256": "8c9c972428d2001a8491b878925958689416614ff9a9b3f1a29f07abf42f03dd",
+        "stderrSHA256": "bb5c795d631fdc2b4aef094c9d365f16c8cfe0783223a0286695a2c0236c4977",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "sigkill-2",
+        "label": "resumed-again",
+        "status": "alreadyCompleted",
+        "cacheHit": true,
+        "stdoutSHA256": "da2e0e9aa4719edf869f81c0213ce8bd55ced2d5731db08d2d1f1a9d0957c4c0",
+        "stderrSHA256": "bb5c795d631fdc2b4aef094c9d365f16c8cfe0783223a0286695a2c0236c4977",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      },
+      {
+        "case": "future",
+        "label": "future",
+        "status": "preservedSource",
+        "cacheHit": false,
+        "stdoutSHA256": "fedb5ae09ac5dc939bb7b7ec8de859cdea3fc58c71da3a354a7a93664c054782",
+        "stderrSHA256": "61444b3b5d22f6f759f9d71492ff08267d8f3e09fe9d523cd151c3b8e0115a1f",
+        "legacyUnchanged": true,
+        "rawTraceUnchanged": true,
+        "resourcesClosed": true
+      }
+    ],
+    "actualSIGKILLWindows": [
+      1,
+      2
+    ],
+    "legacyInputs": "ended Swift cache metadata/database and committed actual Swift format-1 sidecar fixture",
+    "appAdapterConnected": false,
+    "windowsNativeAcceptance": false,
+    "fullMacOSAcceptance": false
+  },
+  "actualNativeReport": {
+    "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/actual-v2/report.json",
+    "byteCount": 4122,
+    "sha256": "51599d521c089ba313e1b09e575b6037d0dcc40cec0e105cabc956b02062d021"
+  },
+  "producerSourceManifest": {
+    "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/producer-24/source-manifest.json",
+    "byteCount": 336138,
+    "sha256": "28003041a909d3f59a5b328b327ebe2a59b95d1b9eb9f8dededfaece5334c2db"
+  },
+  "nativeABI": {
+    "contractSHA256": "1e38181b0c9284699c56cd0a55c756812e43ea426c2bdd6a4e44d93d8cc11cd2",
+    "exports": 26,
+    "records": 10,
+    "fields": 95,
+    "capabilities": 55,
+    "actualSwiftCImport": true,
+    "consumerManifest": {
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/ffi-consumer-36/manifest.json",
+      "byteCount": 3081,
+      "sha256": "5da076970a217beca87024f467975982c56327fc88fed44fd8469a4c8a59c50d"
+    },
+    "nativeEngineAcceptance": false
+  },
+  "mainCargoCacheReboundToActualFinalSource": true,
+  "actualCachesRetired": 0,
+  "actualReclaimedBytes": 0,
+  "phaseReceiptPath": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/phase-receipt.json",
+  "windowsNativeChecksExecuted": false,
+  "fullMacOSAcceptance": false,
+  "remaining": [
+    "fixed product migration configuration and async request",
+    "typed C ABI/SDK transport and App failure/conflict/unmatched UI",
+    "rollback export of new annotations",
+    "default native snapshot/range/inspector product wiring",
+    "actual GUI/signing/performance/Capture/ArkDeck acceptance",
+    "Windows native port and gates"
+  ],
+  "completeDiffPathCount": 131,
+  "ciPlan": {
+    "lane_swiftpm": true,
+    "lane_app": true,
+    "lane_contracts": true,
+    "lane_rust_macos": true,
+    "lane_rust_windows": true
+  },
+  "retainedEvidenceCollectorFailure": {
+    "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/legacy-view-state-20261005/collector-v1-failure.json",
+    "reason": "incorrect registry key in readback collector; no manifest was published, not a native product failure"
+  }
+}

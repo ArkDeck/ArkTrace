@@ -4,6 +4,7 @@ mod async_runtime;
 mod metadata;
 mod query_deadlines;
 mod view_state;
+mod view_state_migration;
 #[cfg(target_os = "macos")]
 pub use async_runtime::{
     AsyncEngine, CacheRequest, DrainStatus, MAXIMUM_RETAINED_VIEW_STATE_INPUT_BYTES, OpenTicket,
@@ -16,6 +17,11 @@ pub use query_deadlines::{
 pub use view_state::{
     MAXIMUM_VIEW_STATE_BYTES, MAXIMUM_VIEW_STATE_RECORDS, ViewStateDocument, ViewStateEncodeError,
     ViewStateRead, ViewStateWrite,
+};
+pub use view_state_migration::{
+    LegacyViewStateIssue, LegacyViewStateMigrationReport, LegacyViewStateMigrationStatus,
+    LegacyViewStateSource, MAXIMUM_LEGACY_BACKUP_FILE_BYTES, MAXIMUM_LEGACY_BACKUP_SCAN_BYTES,
+    MAXIMUM_LEGACY_VIEW_STATE_ENTRIES,
 };
 mod handles;
 #[cfg(any(target_os = "macos", test))]
@@ -49,8 +55,9 @@ pub use cache_maintenance::{
 #[cfg(target_os = "macos")]
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
-    EngineSession, EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession,
-    ParserTools, SourceFormat, ViewerFailure, open_cached, open_no_cache, recover_no_cache,
+    EngineSession, EngineStage, LegacyViewStateMigration, NoCacheRecoveryOutcome,
+    NoCacheRecoveryRow, NoCacheSession, ParserTools, SourceFormat, ViewerFailure, open_cached,
+    open_no_cache, recover_no_cache,
 };
 
 pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {
