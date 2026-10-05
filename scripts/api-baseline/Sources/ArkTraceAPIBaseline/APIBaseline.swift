@@ -67,6 +67,24 @@ private func pinAppSupportSurface(
     controller.refreshRecentDocuments()
     controller.recentDocuments.first.map(controller.removeRecentDocument)
     _ = controller.errorPresentation
+    _ = controller.isImportingLegacyViewState
+    controller.viewStateMigration.map { report in
+        _ = report.status.rawValue
+        _ = report.shouldPresent
+        _ = report.needsSelection
+        _ = report.preservedSourceCount
+        _ = report.unmatchedFavoriteTrackIDs
+        report.candidates.first.map { candidate in
+            _ = candidate.parserReportedVersion
+            _ = candidate.flagCount
+            _ = candidate.persistentMarkCount
+            _ = candidate.favoriteTrackCount
+            _ = candidate.exactParserIdentity
+            _ = candidate.labelPreviews
+            controller.importLegacyViewState(snapshotIdentifier: candidate.id, sessionID: controller.annotationSessionID)
+        }
+    }
+    controller.dismissViewStateMigration(sessionID: controller.annotationSessionID)
     _ = controller.cacheHit
     _ = controller.accessibilityAnnouncement
     _ = controller.timelineFocusRequestID
@@ -102,12 +120,17 @@ private func pinAppSupportSurface(
         recentDocumentsKey: "Consumer.Trace.Recent.v1",
         signpostSubsystem: "com.example.consumer.trace",
         bundledParser: parserLocation,
-        bundledParserExecutionPolicy: .signedBundleInPlace
+        bundledParserExecutionPolicy: .signedBundleInPlace,
+        viewStateMigration: try! TraceProductViewStateMigrationConfiguration(
+            legacyCacheDirectory: URL(filePath: "/tmp/consumer-legacy/traces"),
+            backupDirectory: URL(filePath: "/tmp/consumer/migration-backup"))
     )
     _ = parserLocation.executableURL(in: productConfiguration.bundleURL)
     _ = parserLocation.manifestURL(in: productConfiguration.bundleURL)
     _ = productConfiguration.cacheDirectory
     _ = productConfiguration.stagingDirectory
+    _ = productConfiguration.viewStateMigration?.legacyCacheDirectory
+    _ = productConfiguration.viewStateMigration?.backupDirectory
     _ = productConfiguration.bundledParserExecutionPolicy.rawValue
     _ = TraceDocumentController(configuration: productConfiguration)
 

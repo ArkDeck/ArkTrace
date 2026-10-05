@@ -1,0 +1,356 @@
+{
+  "formatVersion": 1,
+  "date": "2026-10-05",
+  "goalStatus": "active",
+  "scope": "native controller restoration, conflict selection, unmatched favorites and actual SwiftUI keyboard interaction",
+  "baselineCommit": "616687c6ce0523fbfe56311283c097d1eb7d3511",
+  "rust": "1.99.0",
+  "xcode": "27.0",
+  "swift": "6.4",
+  "nativeSourceSHA256": "32acd65c37e6325d9e3333230b378caca7db37f3f9316e5648c4a6b3c6a66597",
+  "nativeSourceInputsReadBack": 476,
+  "rustRecompiled": false,
+  "rustAllFeaturesTestsThisPhase": false,
+  "contractSHA256": "5244bd797884271ec242ece5c2912eb3ccfd1b07c9de67127e4a296e93aa91d9",
+  "librarySHA256": "3717a1c7bf18c37e5aed896a92b89a0f5a9ecf8208aefa7fec0ae03c2c325796",
+  "artifactIdentity": "b1c15df77ab8a4260b4affea6daf40179c6371f322e0b3faebe507c931dc785c",
+  "tests": {
+    "nativeSwiftExecuted": 725,
+    "nativeSwiftPassed": 719,
+    "nativeSwiftExistingSkips": 6,
+    "nativeSwiftFailed": 0,
+    "sdkPassed": 94,
+    "sdkSkipped": 0,
+    "newControllerTests": 4
+  },
+  "freshNativeControllerCases": 2,
+  "realColdWarmSaveReopen": true,
+  "originalTreeUnchanged": true,
+  "rawBackupsMatched": true,
+  "SDKCreditsReleased": true,
+  "measuredFoundationInternalsOrRSS": false,
+  "controllerMigrationConnected": true,
+  "UIFixtureBackend": "synthetic controller with actual production view",
+  "actualKeyboardAndAXVerified": true,
+  "voiceOverAudioVerified": false,
+  "germanLayoutVerified": false,
+  "screenshotBytesFrozen": false,
+  "defaultAppCutover": false,
+  "rollbackProductExport": false,
+  "wholeMacOSAcceptance": false,
+  "windowsNativeAcceptance": false,
+  "newSIGKILLMatrix": false,
+  "published": false,
+  "merged": false,
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-migration-controller-20261005",
+  "receipts": [
+    {
+      "name": "01-controller-tests.receipt.json",
+      "exitCode": 1
+    },
+    {
+      "name": "02-controller-tests.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "03-native-controller-tests.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "04-fresh-writer-check.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "05-fresh-writer-copy.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "06-native-app-sdk-tests.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "07-fresh-native-controller.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "08-api-native.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "09-app-default.receipt.json",
+      "exitCode": 65
+    },
+    {
+      "name": "10-app-stage.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "11-app-native.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "12-app-default-explicit-selection.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "13-native-final-swift-tests.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "14-ui-probe-compile.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "15-fresh-writer-copy-final.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "16-fresh-native-controller-final.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "17-ui-probe-launch.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "18-ui-probe-focus-compile.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "19-app-native-focus.receipt.json",
+      "exitCode": 74
+    },
+    {
+      "name": "20-api-native-final.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "21-app-default-final.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "22-app-stage-final.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "23-app-native-final.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "24-ui-probe-focus-launch.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "25-ui-probe-focusable-compile.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "26-ui-probe-focusable-launch.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "27-ui-keyboard-compile.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "28-ui-keyboard-launch.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "29-app-document-types.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "30-palette.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "31-planner-tests.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "32-rust-workspace-verify.receipt.json",
+      "exitCode": 0
+    },
+    {
+      "name": "33-complete-diff-plan.receipt.json",
+      "exitCode": 0
+    }
+  ],
+  "frozenEvidence": {
+    "formatVersion": 1,
+    "phase": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-migration-controller-20261005",
+    "memberCount": 1314,
+    "totalBytes": 372610125,
+    "manifestSHA256": "7a75b5f7027d4967ec99947bc3ecd9b3d2e0fdf2bc846cb2fb303bdde119c16f",
+    "checksumsSHA256": "47ba8a862571822a8c54a59f2c785ade0d7435e8e59bdf55d254b702c2d8a87e",
+    "allBytesAndModesReadBack": true,
+    "receipts": [
+      {
+        "name": "01-controller-tests.receipt.json",
+        "exitCode": 1
+      },
+      {
+        "name": "02-controller-tests.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "03-native-controller-tests.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "04-fresh-writer-check.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "05-fresh-writer-copy.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "06-native-app-sdk-tests.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "07-fresh-native-controller.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "08-api-native.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "09-app-default.receipt.json",
+        "exitCode": 65
+      },
+      {
+        "name": "10-app-stage.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "11-app-native.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "12-app-default-explicit-selection.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "13-native-final-swift-tests.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "14-ui-probe-compile.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "15-fresh-writer-copy-final.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "16-fresh-native-controller-final.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "17-ui-probe-launch.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "18-ui-probe-focus-compile.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "19-app-native-focus.receipt.json",
+        "exitCode": 74
+      },
+      {
+        "name": "20-api-native-final.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "21-app-default-final.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "22-app-stage-final.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "23-app-native-final.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "24-ui-probe-focus-launch.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "25-ui-probe-focusable-compile.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "26-ui-probe-focusable-launch.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "27-ui-keyboard-compile.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "28-ui-keyboard-launch.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "29-app-document-types.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "30-palette.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "31-planner-tests.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "32-rust-workspace-verify.receipt.json",
+        "exitCode": 0
+      },
+      {
+        "name": "33-complete-diff-plan.receipt.json",
+        "exitCode": 0
+      }
+    ],
+    "defaultCutover": false,
+    "wholeMacOSAcceptance": false,
+    "retiredCaches": 0,
+    "receiptSHA256": "f148a2bd9aad979b0e78b1eb2c19848c5d3ff40e3e7c66c6a0ff08fc1a8a67e4"
+  },
+  "CIPlan": {
+    "changedPathCount": 151,
+    "pathListSHA256": "488e189ce2f2523c365176decd783978d946d3a24dfa81214f42d2b507762538",
+    "plan": "lane_swiftpm=true\nlane_app=true\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "exitCode": 0,
+    "allSelectedLanesExecuted": false,
+    "windowsNativeExecuted": false,
+    "diffCheckPassed": true
+  },
+  "warningSkipAudit": {
+    "compilerWarnings": [],
+    "nonCompilerMetadataNotes": {
+      "21-app-default-final.stdout": [
+        "2026-10-05 14:42:08.156 appintentsmetadataprocessor[83714:15929003] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+      ],
+      "23-app-native-final.stdout": [
+        "2026-10-05 14:44:41.325 appintentsmetadataprocessor[84667:15934260] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+      ]
+    },
+    "existingSkips": [
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]' skipped (0.001 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]' skipped (0.001 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]' skipped (0.000 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]' skipped (0.000 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]' skipped (0.000 seconds).",
+      "Test Case '-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]' skipped (0.000 seconds)."
+    ],
+    "unexpectedSkips": []
+  }
+}

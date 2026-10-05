@@ -91,7 +91,9 @@ let package = Package(
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering",
             ] + nativeAppSupportDependencies,
-            swiftSettings: firstPartySwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
+            swiftSettings: firstPartySwiftSettings
+                + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
+                + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
         ),
         // Deliberately isolated from Core/Runtime/CLI. Device discovery and
         // capture are an explicit GUI capability; analysis products never

@@ -78,12 +78,34 @@ public struct TraceBundledParserLocation: Hashable, Sendable {
     }
 }
 
+/// Fixed product-owned source and backup roots for one-way state import.
+public struct TraceProductViewStateMigrationConfiguration: Hashable, Sendable {
+    public let legacyCacheDirectory: URL
+    public let backupDirectory: URL
+
+    public init(legacyCacheDirectory: URL, backupDirectory: URL) throws {
+        let roots = [legacyCacheDirectory, backupDirectory]
+        guard roots.allSatisfy({ $0.isFileURL && ($0.host == nil || $0.host == "" || $0.host == "localhost")
+            && $0.path.hasPrefix("/") && $0.path.utf8.count <= 4096 && !$0.path.utf8.contains(0)
+            && !$0.pathComponents.contains("..") && !$0.pathComponents.contains(".")
+            && $0.standardizedFileURL.path != "/"
+            && $0.standardizedFileURL != FileManager.default.homeDirectoryForCurrentUser.standardizedFileURL }),
+              Self.disjoint(legacyCacheDirectory, backupDirectory) else {
+            throw ArkTraceError(code: .invalidArgument, stage: .preparing,
+                message: "Trace view-state migration storage configuration is invalid")
+        }
+        self.legacyCacheDirectory = legacyCacheDirectory.standardizedFileURL
+        self.backupDirectory = backupDirectory.standardizedFileURL
+    }
+
+    fileprivate static func disjoint(_ lhs: URL, _ rhs: URL) -> Bool {
+        let left = lhs.standardizedFileURL.pathComponents, right = rhs.standardizedFileURL.pathComponents
+        return !left.starts(with: right) && !right.starts(with: left)
+    }
+}
+
 /// Product-owned composition values for the shared trace document engine.
-///
-/// ArkTrace and ArkDeck share the document/session/query implementation, but
-/// they own different bundles, cache roots, preferences and instrumentation
-/// namespaces. Keeping those values here prevents product identity from
-/// leaking into Runtime, Store or the document state machine.
+/// Consumers own their bundles, storage, migration and preference namespaces.
 public struct TraceProductConfiguration: Hashable, Sendable {
     public let bundleURL: URL
     public let cacheDirectory: URL
@@ -92,6 +114,7 @@ public struct TraceProductConfiguration: Hashable, Sendable {
     public let signpostSubsystem: String
     public let bundledParser: TraceBundledParserLocation
     public let bundledParserExecutionPolicy: TraceBundledParserExecutionPolicy
+    public let viewStateMigration: TraceProductViewStateMigrationConfiguration?
 
     public init(
         bundleURL: URL,
@@ -100,7 +123,8 @@ public struct TraceProductConfiguration: Hashable, Sendable {
         recentDocumentsKey: String,
         signpostSubsystem: String,
         bundledParser: TraceBundledParserLocation,
-        bundledParserExecutionPolicy: TraceBundledParserExecutionPolicy = .immutableSnapshot
+        bundledParserExecutionPolicy: TraceBundledParserExecutionPolicy = .immutableSnapshot,
+        viewStateMigration: TraceProductViewStateMigrationConfiguration? = nil
     ) throws {
         let bundleURL = bundleURL.standardizedFileURL
         let cacheDirectory = cacheDirectory.standardizedFileURL
@@ -134,6 +158,15 @@ public struct TraceProductConfiguration: Hashable, Sendable {
                 message: "Trace product identity configuration is invalid"
             )
         }
+        if let migration = viewStateMigration {
+            guard [cacheDirectory, stagingDirectory].allSatisfy({ root in
+                TraceProductViewStateMigrationConfiguration.disjoint(root, migration.legacyCacheDirectory)
+                    && TraceProductViewStateMigrationConfiguration.disjoint(root, migration.backupDirectory)
+            }) else {
+                throw ArkTraceError(code: .invalidArgument, stage: .preparing,
+                    message: "Trace view-state migration roots overlap product storage")
+            }
+        }
         self.bundleURL = bundleURL
         self.cacheDirectory = cacheDirectory
         self.stagingDirectory = stagingDirectory
@@ -141,6 +174,7 @@ public struct TraceProductConfiguration: Hashable, Sendable {
         self.signpostSubsystem = signpostSubsystem
         self.bundledParser = bundledParser
         self.bundledParserExecutionPolicy = bundledParserExecutionPolicy
+        self.viewStateMigration = viewStateMigration
     }
 
     package init(
@@ -159,6 +193,7 @@ public struct TraceProductConfiguration: Hashable, Sendable {
         signpostSubsystem = reviewedSignpostSubsystem
         bundledParser = reviewedBundledParser
         bundledParserExecutionPolicy = reviewedBundledParserExecutionPolicy
+        viewStateMigration = nil
     }
 
     private static func isBoundedIdentifier(

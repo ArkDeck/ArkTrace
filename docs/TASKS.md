@@ -256,3 +256,5 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 - ~~large-trace gate 记录 source/staging filesystem~~ 与 ~~测试不改 process-global `PATH`~~——2026-08-16 完成。
 
 因此“所有构建输入已完全锁定”现在是一个有证据支撑的表述，而不再是被这条 hardening 挡住的措辞。
+
+2026-10-05：native controller 已接通旧状态导入、非致命恢复、代次绑定冲突选择与未匹配收藏界面。Fresh Swift producer → actual native controller 冷导入/重开/新编辑保存与资源释放通过；719 Swift passed、6 既有 skip，默认/原生 App 与包外 API 通过。默认 cutover、回滚产品导出与完整 macOS 验收仍未完成，goal active；见 [本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-migration-controller.md)。

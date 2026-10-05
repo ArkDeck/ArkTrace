@@ -2008,4 +2008,146 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertEqual(controller.phase, .loading(.cancelled))
         await controller.close()
     }
+    private static let migrationCandidate = TraceViewStateMigrationPresentation.Candidate(
+        id: String(repeating: "a", count: 64), parserReportedVersion: "old-parser", flagCount: 1,
+        persistentMarkCount: 0, favoriteTrackCount: 2, exactParserIdentity: false, labelPreviews: ["旧标注"])
+    private static var conflictReport: TraceViewStateMigrationPresentation {
+        TraceViewStateMigrationPresentation(status: .conflict, candidates: [migrationCandidate],
+            unmatchedFavoriteTrackIDs: [], preservedSourceCount: 0)
+    }
+    private actor MigrationSink {
+        var selected: [String] = []
+        var state = TraceViewStateStore.Restored()
+        func read() -> TraceViewStateStore.Restored { state }
+        func save(_ value: TraceViewStateStore.Restored) { state = value }
+        func choose(_ value: String) { selected.append(value) }
+        func selections() -> [String] { selected }
+    }
+    func testMigrationFailureStillRestoresExistingDestinationAndKeepsTraceReady() async throws {
+        let original = TraceViewStateStore.Restored(annotations: TimelineAnnotations(
+            flags: [TimelineFlag(id: 9, timestampNs: 100, label: "current", colorIndex: 0)]))
+        let access = TraceViewStateAccess(load: { original }, save: { _ in }, migrate: { _ in
+            throw ArkTraceError(code: .queryFailed, stage: .querying, message: "migration refused")
+        })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: {})
+        })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        XCTAssertEqual(controller.annotations, original.annotations)
+        XCTAssertEqual(controller.errorPresentation?.reason, "migration refused")
+        XCTAssertEqual(controller.phase, .ready)
+        await controller.close()
+    }
+    func testConflictSelectionRejectsStaleOrUnknownChoiceAndKeepsUnmatchedIdentities() async throws {
+        let sink = MigrationSink(), gate = FirstCloseBarrier(), conflict = Self.conflictReport
+        let unmatched = ["thread:102", "thread:102", "cpu:1"]
+        let imported = TraceViewStateStore.Restored(annotations: TimelineAnnotations(
+            flags: [TimelineFlag(id: 42, timestampNs: 300, label: "旧标注", colorIndex: 1)]))
+        let access = TraceViewStateAccess(load: { await sink.read() }, save: { await sink.save($0) }, migrate: { choice in
+            guard let choice else { return conflict }
+            await sink.choose(choice); await gate.close(); await sink.save(imported)
+            return TraceViewStateMigrationPresentation(status: .imported, candidates: conflict.candidates,
+                unmatchedFavoriteTrackIDs: unmatched, preservedSourceCount: 0)
+        })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: {})
+        })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        let session = controller.annotationSessionID
+        XCTAssertEqual(controller.viewStateMigration?.status, .conflict)
+        XCTAssertTrue(controller.annotations.isEmpty)
+        controller.importLegacyViewState(snapshotIdentifier: Self.migrationCandidate.id, sessionID: session &- 1)
+        controller.importLegacyViewState(snapshotIdentifier: String(repeating: "b", count: 64), sessionID: session)
+        XCTAssertFalse(controller.isImportingLegacyViewState)
+        controller.importLegacyViewState(snapshotIdentifier: Self.migrationCandidate.id, sessionID: session)
+        await gate.waitUntilReached()
+        XCTAssertTrue(controller.isImportingLegacyViewState)
+        XCTAssertEqual(controller.phase, .ready)
+        XCTAssertNil(controller.addFlag(atNs: 20))
+        controller.toggleFavorite(TimelineTrackID(rawValue: "cpu:1"))
+        XCTAssertTrue(controller.favoriteTrackIDs.isEmpty)
+        controller.dismissViewStateMigration(sessionID: session)
+        XCTAssertNotNil(controller.viewStateMigration)
+        await gate.release()
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        while controller.isImportingLegacyViewState {
+            guard ContinuousClock.now < deadline else { return XCTFail("migration did not finish") }
+            await Task.yield()
+        }
+        let selected = await sink.selections()
+        XCTAssertEqual(selected, [Self.migrationCandidate.id])
+        XCTAssertEqual(controller.annotations, imported.annotations)
+        XCTAssertEqual(controller.viewStateMigration?.unmatchedFavoriteTrackIDs, unmatched)
+        XCTAssertTrue(controller.favoriteTracks().isEmpty)
+        controller.dismissViewStateMigration(sessionID: session)
+        XCTAssertNil(controller.viewStateMigration)
+        await controller.close()
+    }
+    func testReplacementDiscardsLateMigrationResultEvenWhenProviderIgnoresCancellation() async throws {
+        let gate = FirstCloseBarrier(), conflict = Self.conflictReport
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { _ in }, migrate: { choice in
+            guard choice != nil else { return conflict }
+            await gate.close()
+            return TraceViewStateMigrationPresentation(status: .imported, candidates: conflict.candidates,
+                unmatchedFavoriteTrackIDs: ["old-document"], preservedSourceCount: 0)
+        })
+        let sink = ViewStateSink()
+        let first = try viewStateSource(), second = try viewStateSource()
+        defer { try? FileManager.default.removeItem(at: first); try? FileManager.default.removeItem(at: second) }
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { source, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: source == first ? access : nil, close: { await sink.close() })
+        })
+        controller.open(first); try await waitForViewStateDocument(controller)
+        let session = controller.annotationSessionID
+        controller.importLegacyViewState(snapshotIdentifier: Self.migrationCandidate.id, sessionID: session)
+        await gate.waitUntilReached()
+        controller.open(second); try await waitForViewStateDocument(controller)
+        XCTAssertFalse(controller.isImportingLegacyViewState)
+        await gate.release()
+        for _ in 0..<100 { await Task.yield() }
+        XCTAssertNil(controller.viewStateMigration)
+        XCTAssertNil(controller.errorPresentation)
+        XCTAssertTrue(controller.annotations.isEmpty)
+        XCTAssertEqual(controller.sourceURL, second)
+        await controller.close()
+        let (_, closeCount) = await sink.snapshot()
+        XCTAssertEqual(closeCount, 2)
+    }
+    func testConflictSelectionWaitsForCurrentSaveAndPreservesCurrentDestination() async throws {
+        let sink = MigrationSink(), saveGate = FirstCloseBarrier(), conflict = Self.conflictReport
+        let access = TraceViewStateAccess(load: { await sink.read() }, save: { state in
+            await saveGate.close(); await sink.save(state)
+        }, migrate: { choice in
+            guard let choice else { return conflict }
+            await sink.choose(choice)
+            return TraceViewStateMigrationPresentation(status: .destinationKept, candidates: conflict.candidates,
+                unmatchedFavoriteTrackIDs: [], preservedSourceCount: 0)
+        })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { _, _ in
+            TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                viewStateAccess: access, close: {})
+        })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        controller.addFlag(atNs: 10, label: "new edit")
+        await saveGate.waitUntilReached()
+        controller.importLegacyViewState(snapshotIdentifier: Self.migrationCandidate.id, sessionID: controller.annotationSessionID)
+        for _ in 0..<100 { await Task.yield() }
+        let before = await sink.selections(); XCTAssertTrue(before.isEmpty)
+        await saveGate.release()
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        while controller.isImportingLegacyViewState {
+            guard ContinuousClock.now < deadline else { return XCTFail("migration did not finish") }
+            await Task.yield()
+        }
+        XCTAssertEqual(controller.annotations.flags.map(\.label), ["new edit"])
+        XCTAssertEqual(controller.viewStateMigration?.status, .destinationKept)
+        await controller.close()
+    }
+
 }

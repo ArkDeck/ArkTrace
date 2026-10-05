@@ -47,6 +47,7 @@
 		11000000000000000000001E /* TrackRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001E /* TrackRow.swift */; };
 		11000000000000000000001F /* TraceAnnouncementBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000001F /* TraceAnnouncementBridge.swift */; };
 		110000000000000000000020 /* TraceErrorBannerOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000020 /* TraceErrorBannerOverlay.swift */; };
+		11A000000000000000000001 /* TraceViewStateMigrationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A000000000000000000001 /* TraceViewStateMigrationOverlay.swift */; };
 		110000000000000000000021 /* TraceLoadingPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000021 /* TraceLoadingPane.swift */; };
 		110000000000000000000022 /* TraceReloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000022 /* TraceReloadButton.swift */; };
 		110000000000000000000023 /* TraceResetZoomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 120000000000000000000023 /* TraceResetZoomButton.swift */; };
@@ -101,6 +102,7 @@
 		12000000000000000000001E /* TrackRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrackRow.swift"; sourceTree = "<group>"; };
 		12000000000000000000001F /* TraceAnnouncementBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceAnnouncementBridge.swift"; sourceTree = "<group>"; };
 		120000000000000000000020 /* TraceErrorBannerOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceErrorBannerOverlay.swift"; sourceTree = "<group>"; };
+		12A000000000000000000001 /* TraceViewStateMigrationOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceViewStateMigrationOverlay.swift"; sourceTree = "<group>"; };
 		120000000000000000000021 /* TraceLoadingPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceLoadingPane.swift"; sourceTree = "<group>"; };
 		120000000000000000000022 /* TraceReloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceReloadButton.swift"; sourceTree = "<group>"; };
 		120000000000000000000023 /* TraceResetZoomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TraceResetZoomButton.swift"; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 			children = (
 				12000000000000000000001F /* TraceAnnouncementBridge.swift */,
 				120000000000000000000020 /* TraceErrorBannerOverlay.swift */,
+				12A000000000000000000001 /* TraceViewStateMigrationOverlay.swift */,
 				120000000000000000000021 /* TraceLoadingPane.swift */,
 				120000000000000000000022 /* TraceReloadButton.swift */,
 				120000000000000000000023 /* TraceResetZoomButton.swift */,
@@ -401,6 +404,7 @@
 				11000000000000000000001E /* TrackRow.swift in Sources */,
 				11000000000000000000001F /* TraceAnnouncementBridge.swift in Sources */,
 				110000000000000000000020 /* TraceErrorBannerOverlay.swift in Sources */,
+				11A000000000000000000001 /* TraceViewStateMigrationOverlay.swift in Sources */,
 				110000000000000000000021 /* TraceLoadingPane.swift in Sources */,
 				110000000000000000000022 /* TraceReloadButton.swift in Sources */,
 				110000000000000000000023 /* TraceResetZoomButton.swift in Sources */,

@@ -34,7 +34,7 @@ final class ObservationBoundaryTests: XCTestCase {
     func testSplitChildViewsExist() throws {
         for name in [
             "TraceViewerRootView", "TraceViewerSidebar", "TraceTimelinePane",
-            "TraceInspectorPane", "TraceErrorBannerOverlay", "TraceAnnouncementBridge",
+            "TraceInspectorPane", "TraceErrorBannerOverlay", "TraceViewStateMigrationOverlay", "TraceAnnouncementBridge",
             "TraceSearchField", "SettingsRootView", "TraceCacheSettingsView",
         ] {
             _ = try block(name)
@@ -50,6 +50,7 @@ final class ObservationBoundaryTests: XCTestCase {
                 "searchResults", "searchFieldText", "isSearching", "rangeAnalysis",
                 "errorPresentation", "accessibilityAnnouncement", "cacheInventory",
                 "metadata", "recentDocuments", "trackGroups", "timelineFocusRequestID",
+                "viewStateMigration", "isImportingLegacyViewState",
             ],
             in: "TraceViewerRootView"
         )
