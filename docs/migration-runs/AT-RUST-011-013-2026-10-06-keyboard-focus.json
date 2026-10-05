@@ -1,0 +1,386 @@
+{
+  "baseCommit": "e33d0db0d6d76d8e31ac93b27408f127f476a059",
+  "toolchain": {
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)"
+  },
+  "finalSelectedMacOSGates": [
+    "11-migration-verifier",
+    "12b-default-build",
+    "13b-default-full-test",
+    "14-native-full-test",
+    "15-native-keyboard-replay",
+    "16-normal-native-build",
+    "17-api",
+    "18-app-debug",
+    "19-app-document-types",
+    "20-fmt",
+    "23-workspace-verifier",
+    "24-generator",
+    "25-migration-contract-tests",
+    "26-rust-build",
+    "21-clippy",
+    "22-rust-workspace",
+    "27-migration-smoke",
+    "28-json-roundtrip",
+    "29-ffi-contract",
+    "32-sdk-artifact",
+    "30-sdk-consumer",
+    "31-sdk-reference-1",
+    "31-sdk-reference-2",
+    "31-sdk-reference-3",
+    "31-sdk-reference-4",
+    "31-sdk-reference-5"
+  ],
+  "allFinalGatesPassed": true,
+  "appOptionalMetadataWarningCount": 1,
+  "utilityAuditDiagnostics": {
+    "initialUtilityAuditExitCode": 1,
+    "reason": "Initial zero-warning assumption rejected one optional AppIntents metadata extraction warning; CI app lane does not require absent AppIntents metadata",
+    "actualToolOutputChunk": "98f314",
+    "retainedWarning": "2026-10-06 06:07:00.483 appintentsmetadataprocessor[43560:22051231] warning: Metadata extraction skipped, no AppIntents.framework dependency found",
+    "noSwiftOrRustCompilerWarnings": true,
+    "rootGateReceiptCountUnchanged": true,
+    "secondUtilityAuditExitCode": 1,
+    "secondReason": "Receipt archival assumed all five reference commands return the same JSON envelope; actual reference outputs have their own schema and were already preserved in stdout",
+    "secondToolOutputChunk": "66896a",
+    "thirdUtilityAuditExitCode": 1,
+    "thirdReason": "An extra archive check attempted deep signature verification on the intentionally unsigned CI App; runner sets CODE_SIGNING_ALLOWED=NO and CODE_SIGN_IDENTITY empty",
+    "thirdToolOutputChunk": "3e883f",
+    "unsignedAppVerificationError": "code has no resources but signature indicates they must be present"
+  },
+  "rootReceipts": [
+    {
+      "label": "01-stale-focus-before",
+      "exitCode": 1,
+      "receiptSHA256": "b24b4b9df75cfb6d3c7eb4b52468b67bac7dbd465607924908ce3c4338a43c16"
+    },
+    {
+      "label": "02-stale-focus-after",
+      "exitCode": 1,
+      "receiptSHA256": "58ca45c1521592f099655e4e2d7a6a9ec4b2e2c1fbf63afa769c5f75457b4657"
+    },
+    {
+      "label": "03-stale-focus-loading-corrected",
+      "exitCode": 0,
+      "receiptSHA256": "f033c01304455db7ff9468e0a7d52498e47d041af6338c1c6ec52e6451b316d5"
+    },
+    {
+      "label": "04-plan",
+      "exitCode": 0,
+      "receiptSHA256": "08b0e848bd940b2119074bafce11838af41f4b9df73afc14bb024418fa263667"
+    },
+    {
+      "label": "05-detail",
+      "exitCode": 0,
+      "receiptSHA256": "5e309608bdc60479b1d15c5864ffe06637201128bfbbfc10ce9fc9c3557105eb"
+    },
+    {
+      "label": "06-presentation",
+      "exitCode": 0,
+      "receiptSHA256": "aa54f5d28b053dec8d63ba252b279f98d3fd6fe38bfd713feb8d34818c96e052"
+    },
+    {
+      "label": "07-scope",
+      "exitCode": 0,
+      "receiptSHA256": "de706b5495d3faeab2c21a62368a6b198b3b02dbdf4b140ef1687d906271d8d8"
+    },
+    {
+      "label": "08-navigation",
+      "exitCode": 0,
+      "receiptSHA256": "7b8eaecf731cf22c0f07325c6a9ffb1d3ee6d182f88aae84046d039705bbae9e"
+    },
+    {
+      "label": "09-annotation",
+      "exitCode": 0,
+      "receiptSHA256": "3dbbf787532843e247a826fc2e960d888c73df4140039880148fb55da71a3dee"
+    },
+    {
+      "label": "10-facts-counter",
+      "exitCode": 0,
+      "receiptSHA256": "ec3d66b518eae7ac188af4914f492fc1e37ab1fe4f36d53130d4d66f21a0fac2"
+    },
+    {
+      "label": "11-migration-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "f32d60d38a8b4fe11a3e0851f5f0c9e251282e2337f6281199d9f4d97c452ba6"
+    },
+    {
+      "label": "12-default-build",
+      "exitCode": 1,
+      "receiptSHA256": "e394f7a7adbe2e1390119cf70a13ded50e592d6b5e9493d8c6ca1309f47ef72c"
+    },
+    {
+      "label": "12b-default-build",
+      "exitCode": 0,
+      "receiptSHA256": "a779c73760e2650f19c453855ef7af0f8cdb681371767f01594820ce8973223f"
+    },
+    {
+      "label": "13-default-full-test",
+      "exitCode": 1,
+      "receiptSHA256": "86ac9ed0e7e8ef5bae0a315093ea4b7ac145e291707e10a5b5d69dacc79d1e35"
+    },
+    {
+      "label": "13a-host-paint-diagnostic",
+      "exitCode": 0,
+      "receiptSHA256": "962a44944e6e76f00750b3ea1b445fe3303afd8cc8c8468d42d157b7da0042ea"
+    },
+    {
+      "label": "13b-default-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "d467181cfbf9be82bf0140938379ca2a6c8ede04945aea32b5d5e1000e148b1d"
+    },
+    {
+      "label": "14-native-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "76cec8131774858eacf8d78c80b6a55e1bf9f261e3ab10198173d538674bac73"
+    },
+    {
+      "label": "15-native-keyboard-replay",
+      "exitCode": 0,
+      "receiptSHA256": "c1fef60d6f8ed863f8dce7cc05164147fc092863c84463dd87044a9410f6d302"
+    },
+    {
+      "label": "16-normal-native-build",
+      "exitCode": 0,
+      "receiptSHA256": "b6f44155ab08cead2041f7ca9c7e79ad2eca09ad43fc29cae091f2ea852b9a29"
+    },
+    {
+      "label": "17-api",
+      "exitCode": 0,
+      "receiptSHA256": "fd58f09f2614c6d6775dbbbaee8113a1ee3b887cca447bfda1e4665dd1c69e85"
+    },
+    {
+      "label": "18-app-debug",
+      "exitCode": 0,
+      "receiptSHA256": "e2c23d6d6b9b45a9c7f3e8718d6d29465a0214ac7fcdd12228e08bb73e43b9a2"
+    },
+    {
+      "label": "19-app-document-types",
+      "exitCode": 0,
+      "receiptSHA256": "0158de056e4a2b6ee3b010fe6f5f036689eba0e70efca969230575d0d352c3ac"
+    },
+    {
+      "label": "20-fmt",
+      "exitCode": 0,
+      "receiptSHA256": "3810ae328699a4ee1f7ee86368782c4988760e67cfa4bb1e6f7d0d6e412cbd17"
+    },
+    {
+      "label": "21-clippy",
+      "exitCode": 0,
+      "receiptSHA256": "062ccbc4ca72ef6e5eb8ab22741a3b8b01f346e3f80e2f2ce955aa2a817bd075"
+    },
+    {
+      "label": "22-rust-workspace",
+      "exitCode": 0,
+      "receiptSHA256": "ea09f09d47a1a2c94f1211a69b91741a907cee9c5f3ba872682b7cbcb18aa77f"
+    },
+    {
+      "label": "23-workspace-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "55c4b14a3b4e5e73d2af93c814f81a98821b2f45fbb4261a0141512c9d137a13"
+    },
+    {
+      "label": "24-generator",
+      "exitCode": 0,
+      "receiptSHA256": "665731dc7fc7a9d7a1b4b6191e367bf3a74404280a49a7d298f5e9125d52f07c"
+    },
+    {
+      "label": "25-migration-contract-tests",
+      "exitCode": 0,
+      "receiptSHA256": "5d6b5ba0f55897321f0e96a742c46f3ced02b181063c9be62b31f0a1baa00eee"
+    },
+    {
+      "label": "26-rust-build",
+      "exitCode": 0,
+      "receiptSHA256": "15cea0e12dd6c4bd2557145af771c4417d290b83f012ae4ff2d5ca1c9a3eebad"
+    },
+    {
+      "label": "27-migration-smoke",
+      "exitCode": 0,
+      "receiptSHA256": "1771f37c6b901983eddaa4e12aa2e2f64000991439d1828ef9fa4082cd30f670"
+    },
+    {
+      "label": "28-json-roundtrip",
+      "exitCode": 0,
+      "receiptSHA256": "9e15e6de4b081903dcd99252a67978901a9ecc01f15db34439972669172fd258"
+    },
+    {
+      "label": "29-ffi-contract",
+      "exitCode": 0,
+      "receiptSHA256": "c959fb21cf352e9a476b952f3c821fb3c321c20853cb0b7ceaaf35d61d5df5c8"
+    },
+    {
+      "label": "30-sdk-consumer",
+      "exitCode": 0,
+      "receiptSHA256": "011f7ff079da41210d973e2d1f38563aa46ac35b21baf0cfc1270c04b2a38dc9"
+    },
+    {
+      "label": "31-sdk-reference-1",
+      "exitCode": 0,
+      "receiptSHA256": "b6eb5258d0d1e5e236d1d9da7ea92443d3af76bc749f3f9093f6f134043372c5"
+    },
+    {
+      "label": "31-sdk-reference-2",
+      "exitCode": 0,
+      "receiptSHA256": "ea7f93d85cf0872bbbe8014b6bd22f62119958c0eb27874d503bc82da0179f29"
+    },
+    {
+      "label": "31-sdk-reference-3",
+      "exitCode": 0,
+      "receiptSHA256": "949132b1c00f05c00eea0f9c5af99f2bc55793485bff862a45f0f95bf41c4fb9"
+    },
+    {
+      "label": "31-sdk-reference-4",
+      "exitCode": 0,
+      "receiptSHA256": "f8a25da06c49c18865db878d1b4c58165e177deddbe7788431e84a1acb636f69"
+    },
+    {
+      "label": "31-sdk-reference-5",
+      "exitCode": 0,
+      "receiptSHA256": "1588ebad8e242da3b861d1ccad510ca39deaf9c866af3aeb86ec3feabc8487de"
+    },
+    {
+      "label": "32-sdk-artifact",
+      "exitCode": 0,
+      "receiptSHA256": "4f472a8d2b7a4660be97f55a048a678859a805cecdd19f6c989f729417796058"
+    },
+    {
+      "label": "33-local-app-candidate",
+      "exitCode": 1,
+      "receiptSHA256": "b15f6f92f987677579091c0bf7f58636b171a411635c47af269af61fb99b9a0b"
+    },
+    {
+      "label": "33b-host-signature-verification",
+      "exitCode": 0,
+      "receiptSHA256": "d7c33635e6f9bcad391b71c0a2e41e1f90ccf94214d750ae1b4bd9b6b6c95b37"
+    }
+  ],
+  "rootReceiptCount": 41,
+  "nonzeroDiagnosticOrHarnessExits": 5,
+  "localGUICandidateSignatureVerified": true,
+  "localGUICandidateSignatureGate": "33b-host-signature-verification",
+  "swift": {
+    "13b-default-full-test": {
+      "passed": 641,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTestIdentities": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "logInterleavingHandled": true
+    },
+    "14-native-full-test": {
+      "passed": 758,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTestIdentities": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "logInterleavingHandled": true
+    }
+  },
+  "rust": {
+    "passed": 570,
+    "failed": 0,
+    "ignored": 0,
+    "resultBlocks": 64,
+    "includesDocTests": 6
+  },
+  "keyboard": {
+    "groups": [
+      {
+        "group": "counters",
+        "actualConvertCalls": 1,
+        "actualCurrentLoaderCalls": 1,
+        "actualKeyEvents": 18,
+        "sha256": "4b105bcee18b6fa59acd612e13c4a35436b9446e461b16b7899438c20198ec98",
+        "byteCount": 14624
+      },
+      {
+        "group": "frames",
+        "actualConvertCalls": 1,
+        "actualCurrentLoaderCalls": 1,
+        "actualKeyEvents": 18,
+        "sha256": "ada771de10a66373a45f83cfb09a66bd96a49fc697357a1f4f7f2a2cae84c409",
+        "byteCount": 15242
+      },
+      {
+        "group": "named-slices",
+        "actualConvertCalls": 3,
+        "actualCurrentLoaderCalls": 3,
+        "actualKeyEvents": 54,
+        "sha256": "ae4e645977c32e6f49c0917485336f47290757a51916a27bd89310ff50b6e67c",
+        "byteCount": 43630
+      }
+    ],
+    "typedLeafComparisons": 1652,
+    "actualTests": 3,
+    "actualConvertCalls": 5,
+    "actualCurrentLoaderCalls": 5,
+    "actualKeyEvents": 90,
+    "unavailableKeyActivations": 0,
+    "actualRustPackCalls": 0,
+    "actualEngineLoadCalls": 0,
+    "actualAppWindowGUICases": 0
+  },
+  "currentContractDigest": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+  "abiVersion": 2,
+  "snapshotFormatVersion": 2,
+  "productionInputsUnchanged": 347,
+  "productionInputsChanged": [
+    {
+      "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
+      "bytes": 101342,
+      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39",
+      "mode": "0o644",
+      "currentSHA256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59"
+    }
+  ],
+  "retainedOldCheckpointUnchanged": true,
+  "sourceChanges": [
+    "Sources/ArkTraceRendering/TimelineNSView.swift",
+    "Tests/ArkTraceRenderingTests/TimelineStaleKeyboardFocusTests.swift",
+    "docs/RUST_CORE_MIGRATION_TASKS.md",
+    "docs/migration-runs/AT-RUST-011-013-2026-10-06-keyboard-focus.json",
+    "docs/migration-runs/AT-RUST-011-013-2026-10-06-keyboard-focus.md",
+    "rust/crates/arktrace-viewer/tests/fixtures/annotation-mainline-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-detail-oracle-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-counters-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices-receipt.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+  ],
+  "goalComplete": false,
+  "goalManagerStatus": "blocked",
+  "GUIAcceptance": false,
+  "WindowsNativeAcceptance": false,
+  "completeProcessForest": false,
+  "RSSPressureAcceptance": false,
+  "remaining": [
+    "actual GUI",
+    "Rust hit to C ABI/SDK",
+    "native load cancellation/deadline",
+    "large/performance",
+    "complete process forest",
+    "real Capture",
+    "ArkDeck schema-4 consumption",
+    "applicable release/install/upgrade/rollback"
+  ]
+}

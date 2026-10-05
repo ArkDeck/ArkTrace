@@ -819,8 +819,11 @@ public final class TimelineNSView: NSView {
             let previousSelectedEvent = selectedEventKey
             let previousSelection = selection
             suppressAccessibilityNotifications = true
-            if focusedEventKey == nil { _ = moveEvent(by: 1) }
-            guard let focusedEventKey else {
+            if focusedEventKey == nil || currentFocusLocation() == nil {
+                _ = moveEvent(by: 1)
+            }
+            guard let focusedEventKey,
+                currentFocusLocation()?.detail.eventKey == focusedEventKey else {
                 suppressAccessibilityNotifications = false
                 return false
             }

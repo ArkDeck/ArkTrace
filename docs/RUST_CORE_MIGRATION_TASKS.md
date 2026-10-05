@@ -24,6 +24,10 @@
 > byte/owner 拒绝后恢复验证；同时修复 SwiftPM 源码同步删除缓存 SDK 的问题。
 > 见[snapshot load 记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-load-ownership.md)；
 > 小 trace 有界验证已通过，取消/deadline、GUI、性能及其余完整任务验收仍 open。
+> 已修复 Return 激活当前 snapshot 已移除事件的焦点问题；默认三组回归及 packed snapshot
+> 的 5 次 convert / 5 次当前 Swift loader / 90 次实际 keyDown 对照通过。
+> 见[键盘焦点记录](migration-runs/AT-RUST-011-013-2026-10-06-keyboard-focus.md)；
+> loading 显示上一帧时仍能激活该帧 detail，macOS 总验收继续 open。
 
 ## 1. 执行规则与完成语义
 

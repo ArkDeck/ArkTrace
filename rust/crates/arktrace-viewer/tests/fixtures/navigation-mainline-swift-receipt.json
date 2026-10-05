@@ -210,8 +210,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101342,
-      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39"
+      "byteCount": 101479,
+      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
@@ -322,14 +322,14 @@
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "98ca32f26668070e38a8611c437670327e5883c519379f34c301e3245cbcfe17",
-      "byteCount": 101905
+      "sha256": "884ddb82043889b16cb25111e9a55d9a5b79175de813b1dff01357e2decee05d",
+      "byteCount": 102042
     }
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "68834c5ba3bb504506a77bbcb7db03465727fc27be13b5a7d19ec13f18600977",
-    "byteCount": 5632
+    "sha256": "b4be24d5fe5e172d356eab6ab6cb0fc99cda4c9be6443487e1ed275f16df3de3",
+    "byteCount": 8011
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
@@ -340,8 +340,8 @@
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39",
-      "byteCount": 101342
+      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59",
+      "byteCount": 101479
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceViewStateStore.swift",
@@ -420,7 +420,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "dbb7c97a6ab1a420c1b25afcae167dc0eabef77a",
-  "previousReceiptSHA256": "6c736b47b4ff8754870e693809210887389d7052bb04129ad6b849352773f89c",
+  "revalidatedBaseCommit": "e33d0db0d6d76d8e31ac93b27408f127f476a059",
+  "previousReceiptSHA256": "a06a196ddb926290bfdd5761dfa57fe85446f65e9cf6134b7e5767cf108601d1",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

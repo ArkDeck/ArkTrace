@@ -243,8 +243,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "byteCount": 101342,
-      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39"
+      "byteCount": 101479,
+      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59"
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
@@ -394,6 +394,6 @@
     "sha256": "7c889e65791fd29cc7a90bfd5e7a25a732bb9b8559a1d9556b03bee3689eae83"
   },
   "rawReceiptSHA256": "e96998afbb88e3ae7dfc4ed3facd12898b2760907fb1d025689bfe24d969918a",
-  "revalidatedBaseCommit": "91368f9",
-  "previousReceiptSHA256": "9974161ce2a86b2ff30a963985403a9de849cec93105a936b1be26e59b7e5e69"
+  "revalidatedBaseCommit": "e33d0db0d6d76d8e31ac93b27408f127f476a059",
+  "previousReceiptSHA256": "798c21b393d3ce57c6e58467c674928673d04f3617107c7ef3fe70dd4a8766d0"
 }

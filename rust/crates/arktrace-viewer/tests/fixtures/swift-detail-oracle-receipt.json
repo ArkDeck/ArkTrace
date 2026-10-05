@@ -32,8 +32,8 @@
     },
     {
       "path": "Sources/ArkTraceRendering/TimelineNSView.swift",
-      "sha256": "e629a6c42b09471856657c09cdcbee95beb83c501eb583f7739eaeeb9c12bc39",
-      "byteCount": 101342
+      "sha256": "2b11a38163fe3a6dcb24b37208002687135a2012e74e3f6ed22cce5e3bd8ca59",
+      "byteCount": 101479
     },
     {
       "path": "Sources/ArkTraceRendering/TimelinePrimitiveProjection.swift",
@@ -183,8 +183,8 @@
       },
       {
         "path": "/private/tmp/arktrace-viewer-swiftpm/oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
-        "sha256": "e080d41072adc2af866bf80d586d2c994000e3f514ba2eacf70630f5d08e1b54",
-        "byteCount": 101583
+        "sha256": "2f9024ae0223e90437131be18d8a1f5ac3053167826667f92624514f3e7d0a4e",
+        "byteCount": 101720
       }
     ]
   }
