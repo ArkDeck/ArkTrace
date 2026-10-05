@@ -30,6 +30,10 @@
 > loading 显示上一帧时仍能激活该帧 detail，macOS 总验收继续 open。
 > 同一 native 键盘候选已逐字节纳入长期回归；当前主线 native 全套 761 项通过，
 > 见[主线键盘回归记录](migration-runs/AT-RUST-011-013-2026-10-06-native-keyboard-regression.md)。
+> 实际 native load 的调用前取消、原始绝对 deadline 过期及两次健康恢复已纳入主线；
+> native 全套 763 项通过，错误后与最后 owner 释放后额度回到 opening 基线，close 后归零。
+> 见[取消与 deadline 回归记录](migration-runs/AT-RUST-012-013-2026-10-06-native-load-cancellation.md)；
+> in-flight 取消、Rust retained hit 接线及完整 macOS 验收仍 open。
 
 ## 1. 执行规则与完成语义
 

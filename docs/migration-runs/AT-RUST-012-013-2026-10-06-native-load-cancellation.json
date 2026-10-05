@@ -1,0 +1,738 @@
+{
+  "baseCommit": "6e4137158ea5220f788b48d58887e0004b4739ec",
+  "mainlineTest": "Tests/ArkTraceRenderingTests/NativeSnapshotLoadCancellationDeadlineTests.swift",
+  "mainlineSHA256": "16aaa423f188d709d083601be27663bb5a0fc1b94a11b5db200455d68d7ba922",
+  "importReadback": {
+    "baseCommit": "6e4137158ea5220f788b48d58887e0004b4739ec",
+    "candidatePath": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/native-load-cancel-deadline-identity-r1-20261005/Tests/ArkTraceRenderingTests/NativeSnapshotLoadCancellationDeadlineTests.swift",
+    "candidateBytes": 16641,
+    "candidateSHA256": "bfad7a106e7fd976490f7efe5057c37aadf5f0752ffcf472dbf7434ef87d3167",
+    "mainlinePath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceRenderingTests/NativeSnapshotLoadCancellationDeadlineTests.swift",
+    "mainlineBytes": 16714,
+    "mainlineSHA256": "16aaa423f188d709d083601be27663bb5a0fc1b94a11b5db200455d68d7ba922",
+    "adaptations": [
+      "compare actual digest to current generated contract constant",
+      "reuse standard native ownership input when no separate input is supplied",
+      "make bounded transcript output optional for normal suite execution"
+    ]
+  },
+  "allFinalGatesPassed": true,
+  "finalSelectedMacOSGates": [
+    "12b-default-build",
+    "13b-default-full-test",
+    "14-native-full-test",
+    "11-migration-verifier",
+    "20-fmt",
+    "21-clippy",
+    "22-rust-workspace",
+    "23-workspace-verifier",
+    "24-generator",
+    "25-migration-contract-tests",
+    "26-rust-build",
+    "27-migration-smoke",
+    "28-json-roundtrip",
+    "29-ffi-contract",
+    "30-sdk-consumer",
+    "31-sdk-reference-1",
+    "31-sdk-reference-2",
+    "31-sdk-reference-3",
+    "31-sdk-reference-4",
+    "31-sdk-reference-5",
+    "32-sdk-artifact"
+  ],
+  "rootReceipts": [
+    {
+      "label": "01-facts-refresh",
+      "exitCode": 0,
+      "receiptSHA256": "c93b61c9886e02e010afc019b7879040eb9f2b4787ac18092ee6d1778b4ee062"
+    },
+    {
+      "label": "02-native-focused",
+      "exitCode": 0,
+      "receiptSHA256": "a1cf2ea62800f463d1df9b7dbfdac03756994a8884ff477c444453257459c744"
+    },
+    {
+      "label": "11-migration-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "f3c21b4fdd37d362ba8950583a5f293c484ac3ba56c64c0d4e48abe8172fa6f5"
+    },
+    {
+      "label": "12b-default-build",
+      "exitCode": 0,
+      "receiptSHA256": "f55fd7a8df4d6deedb3d4492c82d4ea549c8745f5c68d37161192344ed640ce5"
+    },
+    {
+      "label": "13b-default-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "5db0c5db272e9bec1fa98c24ef301c5efda2ceac1f8b25a392020d49de1e17c5"
+    },
+    {
+      "label": "14-native-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "4e619b30355c83550e85703e703eda8ed69fad3c0e8def8d0ed1400b1ceb0251"
+    },
+    {
+      "label": "20-fmt",
+      "exitCode": 0,
+      "receiptSHA256": "ba418ea50e3499ad23f9d787d73b88a302215377cbccf1754ee69eed6e842d18"
+    },
+    {
+      "label": "21-clippy",
+      "exitCode": 0,
+      "receiptSHA256": "241598247256c37520e9c88e985555b32a37ae01575df5012213d074a1f95120"
+    },
+    {
+      "label": "22-rust-workspace",
+      "exitCode": 0,
+      "receiptSHA256": "46115c1a30a1529eda2d100fe9aa317e54a84b339e431f1a4339faa97858e016"
+    },
+    {
+      "label": "23-workspace-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "1d464311f28779ef1a6574be9d1e6b663e5b4a394d5e81833c0ff1ac04994226"
+    },
+    {
+      "label": "24-generator",
+      "exitCode": 0,
+      "receiptSHA256": "0dd247d6d122bcc96cfb4fd386126bdd09f3ee37e2ad08913dc08e62f012b2ea"
+    },
+    {
+      "label": "25-migration-contract-tests",
+      "exitCode": 0,
+      "receiptSHA256": "6b43c093ac5bd087c8155cb627114717294ed24b268689eb55b8741f2aff8ea2"
+    },
+    {
+      "label": "26-rust-build",
+      "exitCode": 0,
+      "receiptSHA256": "f46cd47858379a135562ab8238fe60dbf7340b344af8f93377d81b04b72668b3"
+    },
+    {
+      "label": "27-migration-smoke",
+      "exitCode": 0,
+      "receiptSHA256": "6db2b0223e6ae00713508e6d49549804ed811f7d4cd2f829bfec67ab847224bf"
+    },
+    {
+      "label": "28-json-roundtrip",
+      "exitCode": 0,
+      "receiptSHA256": "ebc7583541defbf259b5f299029aac01b6b2306abf3924b33ebc4db52ea6a3ee"
+    },
+    {
+      "label": "29-ffi-contract",
+      "exitCode": 0,
+      "receiptSHA256": "653240c91352a1c50e569607787982f91a6b2e5deeac25b9296b60036d7ef02b"
+    },
+    {
+      "label": "30-sdk-consumer",
+      "exitCode": 0,
+      "receiptSHA256": "14ac50ec3465852231dc793a40e1de8f9bbb5254ccf71d94d5cb22b1ebe2ce37"
+    },
+    {
+      "label": "31-sdk-reference-1",
+      "exitCode": 0,
+      "receiptSHA256": "ce8ca635949afa2b3afdea757fe80d39e51c6d25255b3107131289237bb06d8a"
+    },
+    {
+      "label": "31-sdk-reference-2",
+      "exitCode": 0,
+      "receiptSHA256": "02e2bc90585add1f436d00b9f374b254735d050743f3e5b627e9a2733be85a69"
+    },
+    {
+      "label": "31-sdk-reference-3",
+      "exitCode": 0,
+      "receiptSHA256": "9ae5656b2c383813f8a8c1b66b37eedd286ae4cdf12ad3601998547d24ab6dba"
+    },
+    {
+      "label": "31-sdk-reference-4",
+      "exitCode": 0,
+      "receiptSHA256": "36c61b8dce91b7700451f1790ac6a155e0be4af7ba01e8e52f48ccb3d1828b2b"
+    },
+    {
+      "label": "31-sdk-reference-5",
+      "exitCode": 0,
+      "receiptSHA256": "64c0155e292861c5a370fed82301a0221009da52cb8a6d60c4176133f566f5b4"
+    },
+    {
+      "label": "32-sdk-artifact",
+      "exitCode": 0,
+      "receiptSHA256": "1df824e097f998fa180340ef243761cdf7b2e6e3810475ef95511bdb991be73a"
+    }
+  ],
+  "rootReceiptCount": 23,
+  "nonzeroRootGateExits": 0,
+  "swift": {
+    "02-native-focused": {
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0,
+      "skippedTests": []
+    },
+    "13b-default-full-test": {
+      "passed": 641,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTests": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    },
+    "14-native-full-test": {
+      "passed": 763,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTests": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    }
+  },
+  "rust": {
+    "passed": 570,
+    "includesDocTests": 6,
+    "failed": 0,
+    "ignored": 0
+  },
+  "actualRuns": [
+    {
+      "run": "focused-transcripts",
+      "engineOpens": 2,
+      "actualNativeLoads": 4,
+      "expectedFailures": 2,
+      "healthyRecoveries": 2,
+      "groups": [
+        {
+          "group": "expired-deadline",
+          "sha256": "d16f3bedc78eb7be3fcd02a8286afa23060f6ef5ae3ee56880887489e9ba928e",
+          "facts": {
+            "actualABIIdentityCalls": 1,
+            "actualEngineOpenCalls": 1,
+            "actualNativeLoadAttempts": 2,
+            "actualNativeLoadFailures": 1,
+            "actualNativeLoadSuccesses": 1,
+            "afterShutdownSwiftOwnersStagingSessionsRequestsZero": true,
+            "copyCreditInjection": false,
+            "error": {
+              "cancelledAtActualLoadEntry": false,
+              "code": "QUERY_TIMEOUT",
+              "message": "The trace operation reached its deadline.",
+              "originalDeadlineAttoseconds": 436331125000000000,
+              "originalDeadlineExpiredAtActualLoadEntry": true,
+              "originalDeadlineSeconds": 164331,
+              "retryable": true,
+              "stage": "querying"
+            },
+            "explicitCloseExecuted": true,
+            "group": "expired-deadline",
+            "namespaceMembersAfterShutdown": [
+              ".actors",
+              ".actors/.owners"
+            ],
+            "nativeZeroObservedAfterExplicitCloseBeforeEngineRelease": true,
+            "oldOwnershipSuiteRepeated": false,
+            "recoveryFacts": {
+              "firstInspector": {
+                "isOpenEnded": false,
+                "key": {
+                  "rowID": 0,
+                  "table": "callstack"
+                },
+                "name": "H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()",
+                "pid": 6709,
+                "processKey": {
+                  "ipid": 1
+                },
+                "range": {
+                  "endNs": 798000,
+                  "startNs": 0
+                },
+                "semanticDurationNs": 798000,
+                "threadKey": {
+                  "itid": 1
+                },
+                "tid": 6709,
+                "type": "namedSlice"
+              },
+              "inspectors": 2,
+              "primitives": 2
+            },
+            "samples": {
+              "afterErrorFlush": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterExplicitClose": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterRecoveryLastDrop": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "beforeOpening": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "opening": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "recoveryRetained": {
+                "bytes": 9176,
+                "nativeBytes": 7184,
+                "owners": 1,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              }
+            },
+            "shutdownExecuted": true
+          }
+        },
+        {
+          "group": "pre-cancelled",
+          "sha256": "17a8e29b374dab482d22d42796e59cab1b7b836c318ab3aa01024ab935164046",
+          "facts": {
+            "actualABIIdentityCalls": 1,
+            "actualEngineOpenCalls": 1,
+            "actualNativeLoadAttempts": 2,
+            "actualNativeLoadFailures": 1,
+            "actualNativeLoadSuccesses": 1,
+            "afterShutdownSwiftOwnersStagingSessionsRequestsZero": true,
+            "copyCreditInjection": false,
+            "error": {
+              "cancelledAtActualLoadEntry": true,
+              "code": "CANCELLED",
+              "message": "Trace query cancelled",
+              "originalDeadlineAttoseconds": 299121541000000000,
+              "originalDeadlineExpiredAtActualLoadEntry": false,
+              "originalDeadlineSeconds": 164341,
+              "retryable": true,
+              "stage": "querying"
+            },
+            "explicitCloseExecuted": true,
+            "group": "pre-cancelled",
+            "namespaceMembersAfterShutdown": [
+              ".actors",
+              ".actors/.owners"
+            ],
+            "nativeZeroObservedAfterExplicitCloseBeforeEngineRelease": true,
+            "oldOwnershipSuiteRepeated": false,
+            "recoveryFacts": {
+              "firstInspector": {
+                "isOpenEnded": false,
+                "key": {
+                  "rowID": 0,
+                  "table": "callstack"
+                },
+                "name": "H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()",
+                "pid": 6709,
+                "processKey": {
+                  "ipid": 1
+                },
+                "range": {
+                  "endNs": 798000,
+                  "startNs": 0
+                },
+                "semanticDurationNs": 798000,
+                "threadKey": {
+                  "itid": 1
+                },
+                "tid": 6709,
+                "type": "namedSlice"
+              },
+              "inspectors": 2,
+              "primitives": 2
+            },
+            "samples": {
+              "afterErrorFlush": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterExplicitClose": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterRecoveryLastDrop": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "beforeOpening": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "opening": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "recoveryRetained": {
+                "bytes": 9176,
+                "nativeBytes": 7184,
+                "owners": 1,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              }
+            },
+            "shutdownExecuted": true
+          }
+        }
+      ]
+    },
+    {
+      "run": "full-cancel-deadline-transcripts",
+      "engineOpens": 2,
+      "actualNativeLoads": 4,
+      "expectedFailures": 2,
+      "healthyRecoveries": 2,
+      "groups": [
+        {
+          "group": "expired-deadline",
+          "sha256": "f3e68c3e3ae9cee5949e9f6e9a006ee4d588140cf90aad5c3c4e11972ead9b91",
+          "facts": {
+            "actualABIIdentityCalls": 1,
+            "actualEngineOpenCalls": 1,
+            "actualNativeLoadAttempts": 2,
+            "actualNativeLoadFailures": 1,
+            "actualNativeLoadSuccesses": 1,
+            "afterShutdownSwiftOwnersStagingSessionsRequestsZero": true,
+            "copyCreditInjection": false,
+            "error": {
+              "cancelledAtActualLoadEntry": false,
+              "code": "QUERY_TIMEOUT",
+              "message": "The trace operation reached its deadline.",
+              "originalDeadlineAttoseconds": 604600916000000000,
+              "originalDeadlineExpiredAtActualLoadEntry": true,
+              "originalDeadlineSeconds": 164375,
+              "retryable": true,
+              "stage": "querying"
+            },
+            "explicitCloseExecuted": true,
+            "group": "expired-deadline",
+            "namespaceMembersAfterShutdown": [
+              ".actors",
+              ".actors/.owners"
+            ],
+            "nativeZeroObservedAfterExplicitCloseBeforeEngineRelease": true,
+            "oldOwnershipSuiteRepeated": false,
+            "recoveryFacts": {
+              "firstInspector": {
+                "isOpenEnded": false,
+                "key": {
+                  "rowID": 0,
+                  "table": "callstack"
+                },
+                "name": "H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()",
+                "pid": 6709,
+                "processKey": {
+                  "ipid": 1
+                },
+                "range": {
+                  "endNs": 798000,
+                  "startNs": 0
+                },
+                "semanticDurationNs": 798000,
+                "threadKey": {
+                  "itid": 1
+                },
+                "tid": 6709,
+                "type": "namedSlice"
+              },
+              "inspectors": 2,
+              "primitives": 2
+            },
+            "samples": {
+              "afterErrorFlush": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterExplicitClose": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterRecoveryLastDrop": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "beforeOpening": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "opening": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "recoveryRetained": {
+                "bytes": 9176,
+                "nativeBytes": 7184,
+                "owners": 1,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              }
+            },
+            "shutdownExecuted": true
+          }
+        },
+        {
+          "group": "pre-cancelled",
+          "sha256": "8743dcceeb47efea5c4046326db59519f708d4644b7ea03a061080d0b7517be8",
+          "facts": {
+            "actualABIIdentityCalls": 1,
+            "actualEngineOpenCalls": 1,
+            "actualNativeLoadAttempts": 2,
+            "actualNativeLoadFailures": 1,
+            "actualNativeLoadSuccesses": 1,
+            "afterShutdownSwiftOwnersStagingSessionsRequestsZero": true,
+            "copyCreditInjection": false,
+            "error": {
+              "cancelledAtActualLoadEntry": true,
+              "code": "CANCELLED",
+              "message": "Trace query cancelled",
+              "originalDeadlineAttoseconds": 361777750000000000,
+              "originalDeadlineExpiredAtActualLoadEntry": false,
+              "originalDeadlineSeconds": 164385,
+              "retryable": true,
+              "stage": "querying"
+            },
+            "explicitCloseExecuted": true,
+            "group": "pre-cancelled",
+            "namespaceMembersAfterShutdown": [
+              ".actors",
+              ".actors/.owners"
+            ],
+            "nativeZeroObservedAfterExplicitCloseBeforeEngineRelease": true,
+            "oldOwnershipSuiteRepeated": false,
+            "recoveryFacts": {
+              "firstInspector": {
+                "isOpenEnded": false,
+                "key": {
+                  "rowID": 0,
+                  "table": "callstack"
+                },
+                "name": "H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()",
+                "pid": 6709,
+                "processKey": {
+                  "ipid": 1
+                },
+                "range": {
+                  "endNs": 798000,
+                  "startNs": 0
+                },
+                "semanticDurationNs": 798000,
+                "threadKey": {
+                  "itid": 1
+                },
+                "tid": 6709,
+                "type": "namedSlice"
+              },
+              "inspectors": 2,
+              "primitives": 2
+            },
+            "samples": {
+              "afterErrorFlush": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterExplicitClose": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "afterRecoveryLastDrop": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "beforeOpening": {
+                "bytes": 0,
+                "nativeBytes": 0,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 0,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "opening": {
+                "bytes": 0,
+                "nativeBytes": 3904,
+                "owners": 0,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              },
+              "recoveryRetained": {
+                "bytes": 9176,
+                "nativeBytes": 7184,
+                "owners": 1,
+                "requests": 0,
+                "sessions": 1,
+                "stagingBytes": 0,
+                "stagingOwners": 0
+              }
+            },
+            "shutdownExecuted": true
+          }
+        }
+      ]
+    }
+  ],
+  "productionInputsUnchanged": 348,
+  "sourceChanges": [
+    "Tests/ArkTraceRenderingTests/NativeSnapshotLoadCancellationDeadlineTests.swift",
+    "docs/RUST_CORE_MIGRATION_TASKS.md",
+    "docs/migration-runs/AT-RUST-012-013-2026-10-06-native-load-cancellation.json",
+    "docs/migration-runs/AT-RUST-012-013-2026-10-06-native-load-cancellation.md",
+    "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+  ],
+  "oracleOutputsByteIdentical": 51,
+  "currentContractDigest": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+  "ABI": 2,
+  "snapshotFormat": 2,
+  "toolchain": {
+    "rust": "1.99.0",
+    "xcode": "27.0",
+    "xcodeBuild": "27A266a",
+    "swift": "6.4"
+  },
+  "preservedNativeExecutingArtifact": {
+    "sourcePath": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Products/Debug/ArkTraceRenderingTests.xctest/Contents/MacOS/ArkTraceRenderingTests",
+    "bytes": 19246528,
+    "sha256": "0234066bdfcf51a0c033f1fe74a25dbdcfc81b4e90351f5d3bbef80d9d9b7020",
+    "mtime": 1791240268.752686,
+    "pinBeforeFullSuiteCompletion": true,
+    "fullSuiteStarted": 1791240316.728616,
+    "frozenPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-load-cancel-deadline-mainline-20261006/selected-test-artifact/ArkTraceRenderingTests",
+    "sameArtifactAsFocused": true
+  },
+  "appAPIReuse": {
+    "packet": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-keyboard-focus-recovery-20261006",
+    "manifestSHA256": "71fd7fb51653ed3b6d57ab2f7767ce7be1db35c409b87f231e9fb7636ddced96",
+    "productionSourcesPackageBindingsUnchanged": true,
+    "actualNewAppBuild": false,
+    "actualNewAPIBaseline": false,
+    "scope": "test-only source integration; preceding App/API evidence applies only to unchanged production inputs"
+  },
+  "archiveControlFailures": [
+    {
+      "action": "read exitCode before full native suite had ended",
+      "error": "KeyError: exitCode",
+      "correction": "pin actual executing binary before mutable cache reuse; verify ended receipt at final audit"
+    }
+  ],
+  "WindowsNativeAcceptance": false,
+  "GUIAcceptance": false,
+  "inFlightCancellationAcceptance": false,
+  "SQLInterruptionAcceptance": false,
+  "fullProcessForestProven": false,
+  "fullCompilerInputClosureProven": false,
+  "goalComplete": false,
+  "goalManagerStatus": "blocked",
+  "remaining": [
+    "Rust retained hit to C ABI/SDK/NSView",
+    "in-flight cancellation",
+    "actual GUI and manual backup UI",
+    "large/performance",
+    "real Capture",
+    "ArkDeck schema-4 integration",
+    "applicable release acceptance"
+  ]
+}
