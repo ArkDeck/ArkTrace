@@ -240,7 +240,7 @@ pub(super) fn lookup(
     source: &HeldFile,
     original: &SourceFacts,
     tools: &ParserTools<'_>,
-    _root: &HeldDirectory,
+    root: &HeldDirectory,
     owners: &OwnerStore,
     locks: &HeldDirectory,
     leases: &HeldDirectory,
@@ -271,7 +271,22 @@ pub(super) fn lookup(
         Err(e) => return Err(host(EngineStage::CacheLookup, e)),
     };
     let record = matching_owner(owners, key, key_lock, &lease, &directory, &io)?;
+    let sidecars = SidecarStore::open(root, crate::MAXIMUM_VIEW_STATE_BYTES as u64, &io)
+        .map_err(|e| host(EngineStage::Recovering, e))?;
+    sidecars
+        .recover_orphans(&io)
+        .map_err(|e| host(EngineStage::Recovering, e))?;
+    let recovered = sidecars
+        .recover(&directory, key_lock, &lease, &io)
+        .map_err(|e| host(EngineStage::Recovering, e))?;
+    let journal_ready = matches!(
+        recovered,
+        SidecarRecovery::Absent | SidecarRecovery::Aborted | SidecarRecovery::Committed
+    );
     if record.is_quarantined() {
+        if !journal_ready {
+            return Err(cache_error(EngineFailure::CacheUnsupported));
+        }
         drop(lease);
         let exclusive = exclusive_lease(leases, key, budget)?;
         owners
@@ -288,6 +303,9 @@ pub(super) fn lookup(
     let (database, reader, metadata_file, mut metadata) = match validated {
         Ok(v) => v,
         Err(error) if indicts_entry(&error) => {
+            if !journal_ready {
+                return Err(error);
+            }
             drop(lease);
             let exclusive = exclusive_lease(leases, key, budget)?;
             owners
@@ -353,6 +371,7 @@ pub(super) fn lookup(
             directory,
             lease,
             locks: locks.clone(),
+            sidecars,
         },
         cache_hit: true,
         database: Some(database),

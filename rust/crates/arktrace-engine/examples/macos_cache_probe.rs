@@ -3,7 +3,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     use arktrace_contract::{ProcessQuery, TraceParserIdentity};
     use arktrace_engine::{
         EngineBudget, EngineFailure, EngineProgress, ParserTools, SourceFormat, ViewStateRead,
-        open_cached,
+        ViewStateWrite, open_cached,
     };
     use arktrace_platform::{
         CancellationToken, CodeTrustPolicy, HeldDirectory, HeldFile, IoBudget, Lease, LeaseMode,
@@ -82,6 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let before = source.facts(&io())?;
     let mut cold_progress = vec![];
     let first = open_cached(&source, format, &tools, &cache, &budget(), |p| {
+        eprintln!("CACHE_COLD_PROGRESS={p:?}");
         cold_progress.push(p)
     })?;
     assert!(!first.cache_hit() && cold_progress.contains(&EngineProgress::Parsing));
@@ -102,6 +103,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     std::thread::sleep(Duration::from_secs(1));
     let mut warm_progress = vec![];
     let second = open_cached(&source, format, &tools, &cache, &budget(), |p| {
+        eprintln!("CACHE_WARM_PROGRESS={p:?}");
         warm_progress.push(p)
     })?;
     assert!(
@@ -144,12 +146,76 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(document.favorite_track_ids, Some(vec!["cpu:0".into()]));
     assert_eq!(
         second.read_view_state(&budget())?,
-        ViewStateRead::Restored(document)
+        ViewStateRead::Restored(document.clone())
     );
     let cancelled = budget();
     cancelled.cancellation.cancel();
     assert!(first.read_view_state(&cancelled).is_err());
     assert_eq!(sidecar.read_bounded(&io())?, sidecar_bytes);
+    let mut saved_document = document.clone();
+    saved_document.flags.push(arktrace_viewer::AnnotationFlag {
+        id: -7,
+        timestamp_ns: i64::MAX,
+        label: "保存\0🦀e\u{301}".into(),
+        color_index: i64::MIN,
+    });
+    saved_document.marks = vec![
+        arktrace_viewer::AnnotationMark {
+            id: 8,
+            range: arktrace_contract::TraceTimeRange::event(0, 0)
+                .map_err(|_| "invalid instant fixture")?,
+            label: "persistent".into(),
+            color_index: 2,
+            is_persistent: true,
+        },
+        arktrace_viewer::AnnotationMark {
+            id: 8,
+            range: arktrace_contract::TraceTimeRange::event(0, 1)
+                .map_err(|_| "invalid range fixture")?,
+            label: "transient".into(),
+            color_index: 2,
+            is_persistent: false,
+        },
+    ];
+    saved_document.favorite_track_ids =
+        Some(vec!["cpu:0".into(), "cpu:0".into(), "线程 🦀".into()]);
+    let mut expected = saved_document.clone();
+    expected.marks.retain(|v| v.is_persistent);
+    assert_eq!(
+        first.write_view_state(Some(&saved_document), &budget())?,
+        ViewStateWrite::Saved
+    );
+    assert_eq!(
+        second.read_view_state(&budget())?,
+        ViewStateRead::Restored(expected.clone())
+    );
+    let sidecar = directory.open_file("view-state.json")?;
+    let written_sidecar_bytes = sidecar.read_bounded(&io())?;
+    assert!(
+        first
+            .write_view_state(Some(&saved_document), &cancelled)
+            .is_err()
+    );
+    assert_eq!(sidecar.read_bounded(&io())?, written_sidecar_bytes);
+    let mut invalid = saved_document.clone();
+    invalid.trace_sha256 = "b".repeat(64);
+    assert!(first.write_view_state(Some(&invalid), &budget()).is_err());
+    assert_eq!(sidecar.read_bounded(&io())?, written_sidecar_bytes);
+    let reopened = open_cached(&source, format, &tools, &cache, &budget(), |_| {})?;
+    assert!(reopened.cache_hit());
+    assert_eq!(
+        reopened.read_view_state(&budget())?,
+        ViewStateRead::Restored(expected.clone())
+    );
+    reopened.close()?;
+    assert_eq!(
+        directory.open_file("trace.sqlite")?.facts(&io())?,
+        database_before
+    );
+    assert_eq!(
+        serde_json::to_value(first.processes(&query, &budget())?)?,
+        original_page
+    );
     let lock_parent = cache.open_private_child(".locks")?;
     let key_lock = Lease::acquire(
         &lock_parent,
@@ -162,6 +228,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ..budget()
     };
     assert!(first.read_view_state(&short).is_err());
+    let short = EngineBudget {
+        deadline: Instant::now() + Duration::from_millis(25),
+        ..budget()
+    };
+    assert!(
+        first
+            .write_view_state(Some(&saved_document), &short)
+            .is_err()
+    );
+    assert_eq!(sidecar.read_bounded(&io())?, written_sidecar_bytes);
     drop(key_lock);
     let future_sidecar = serde_json::to_vec(
         &serde_json::json!({"formatVersion":999,"traceSHA256":metadata.trace_sha256,"flags":[],"marks":[]}),
@@ -169,7 +245,50 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sidecar = directory.replace_readonly(&sidecar, &future_sidecar, &io())?;
     assert_eq!(first.read_view_state(&budget())?, ViewStateRead::Preserved);
     assert_eq!(sidecar.read_bounded(&io())?, future_sidecar);
+    assert_eq!(
+        first.write_view_state(None, &budget())?,
+        ViewStateWrite::Preserved
+    );
+    assert_eq!(
+        first.write_view_state(Some(&saved_document), &budget())?,
+        ViewStateWrite::Preserved
+    );
+    assert_eq!(sidecar.read_bounded(&io())?, future_sidecar);
     directory.remove_owned_file("view-state.json", sidecar.snapshot().identity)?;
+    assert_eq!(
+        first.write_view_state(Some(&saved_document), &budget())?,
+        ViewStateWrite::Saved
+    );
+    assert_eq!(
+        second.read_view_state(&budget())?,
+        ViewStateRead::Restored(expected)
+    );
+    assert_eq!(
+        first.write_view_state(None, &budget())?,
+        ViewStateWrite::Removed
+    );
+    assert_eq!(second.read_view_state(&budget())?, ViewStateRead::Missing);
+    let mut empty = saved_document.clone();
+    empty.flags.clear();
+    empty.marks.retain(|v| !v.is_persistent);
+    empty.favorite_track_ids = Some(vec![]);
+    assert_eq!(
+        first.write_view_state(Some(&empty), &budget())?,
+        ViewStateWrite::Removed
+    );
+    let journal = cache.open_private_child(".view-state")?;
+    assert_eq!(
+        journal.child_names(&io(), 4)?,
+        vec![
+            std::ffi::OsString::from(".staging"),
+            std::ffi::OsString::from("journal.lock")
+        ]
+    );
+    assert!(
+        OwnerStore::open(&journal.open_private_child(".staging")?, &journal)?
+            .identifiers(&io())?
+            .is_empty()
+    );
     directory.write_new_readonly("view-state.json", b"{\"fixtureUserState\":true}", &io())?;
     assert_eq!(first.read_view_state(&budget())?, ViewStateRead::Preserved);
     let current = directory.open_file("metadata.json")?;
@@ -439,7 +558,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "corruptionQuarantinedWithUserSidecar":true,"futureFormatPreserved":true,"cancelledPhases":cancelled,
         "stableLeaseCount":1,"ownerProofCount":owners.identifiers(&io())?.len(),"stagingPayloadCount":0,"rawSourceUnchanged":true,
         "sourceSHA256":before.sha256,"sourceBytes":before.byte_count,"databaseSHA256":database_before.sha256,"databaseBytes":database_before.byte_count,
-        "nativeSessionSidecarRead":true,"nativeSessionSidecarCancelAndLockBudget":true,"unknownSidecarBytesPreserved":true,
+        "nativeSessionSidecarRead":true,"nativeSessionSidecarWriteReplaceDelete":true,"nativeSessionSidecarWriteCancelAndLockBudget":true,"nativeSessionSidecarWritePreservesFuture":true,"nativeSessionSidecarPersistentMarksAndReopen":true,"sidecarBytesUTF8":std::str::from_utf8(&written_sidecar_bytes)?,"nativeSessionSidecarCancelAndLockBudget":true,"unknownSidecarBytesPreserved":true,
         "processPage":original_page,"maintenance":maintenance_proof,"fullCacheAcceptance":false,"appCutover":false})
     );
     Ok(())

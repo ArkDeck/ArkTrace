@@ -22,6 +22,66 @@ fn main() {
         }
     }
     match args.first().map(String::as_str) {
+        Some("sidecar-worker") => {
+            use arktrace_platform::{
+                CancellationToken, HeldDirectory, IoBudget, Lease, LeaseMode, SidecarStore,
+            };
+            use sha2::{Digest, Sha256};
+            let budget = IoBudget {
+                maximum_bytes: 4096,
+                deadline: std::time::Instant::now() + Duration::from_secs(30),
+                cancellation: CancellationToken::default(),
+            };
+            let root = HeldDirectory::open_private(std::path::Path::new(&args[1])).unwrap();
+            let trace = "a".repeat(64);
+            let parser = "b".repeat(64);
+            let identifier = format!("{:x}", Sha256::digest(format!("{trace}:{parser}")));
+            let entry = root
+                .open_private_child(&trace)
+                .unwrap()
+                .open_private_child(&parser)
+                .unwrap();
+            let key = Lease::acquire(
+                &root.open_private_child(".locks").unwrap(),
+                &format!("{identifier}.lock"),
+                LeaseMode::Exclusive,
+                &budget,
+            )
+            .unwrap();
+            let active = Lease::acquire(
+                &root.open_private_child(".leases").unwrap(),
+                &format!("{identifier}.lease"),
+                LeaseMode::Shared,
+                &budget,
+            )
+            .unwrap();
+            let store = SidecarStore::open(&root, 4096, &budget).unwrap();
+            if let Some(point) = args[3].strip_prefix("write-") {
+                arktrace_platform::process_fixture::pause_sidecar_transaction(
+                    point.parse().unwrap(),
+                )
+                .unwrap();
+            } else if let Some(point) = args[3].strip_prefix("cleanup-") {
+                arktrace_platform::process_fixture::pause_owner_cleanup(point.parse().unwrap())
+                    .unwrap();
+            } else {
+                panic!("bad sidecar boundary");
+            }
+            store
+                .write(
+                    &entry,
+                    &key,
+                    &active,
+                    if args[2] == "delete" {
+                        None
+                    } else {
+                        Some(b"new")
+                    },
+                    &budget,
+                )
+                .unwrap();
+            std::process::exit(3);
+        }
         Some("owner-worker") => {
             use arktrace_platform::{
                 CancellationToken, HeldDirectory, IoBudget, OwnerKind, OwnerStore,

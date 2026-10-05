@@ -20,6 +20,14 @@ const RECORD_LIMIT: u64 = 4096;
 const ENTRY_LIMIT: usize = 4096;
 const DEPTH_LIMIT: usize = 8;
 
+#[path = "macos_sidecar.rs"]
+mod sidecar;
+pub use sidecar::{SidecarRecovery, SidecarStore};
+#[cfg(feature = "process-fixtures")]
+pub(super) fn fixture_pause_sidecar(point: u8) {
+    sidecar::fixture_pause(point);
+}
+
 #[cfg(feature = "process-fixtures")]
 thread_local! {
     static PAUSE_CREATE: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };

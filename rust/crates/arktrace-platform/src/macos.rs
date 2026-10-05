@@ -23,10 +23,13 @@ use std::{
 
 #[path = "macos_directory.rs"]
 mod directory;
+#[path = "macos_file_transaction.rs"]
+mod file_transaction;
 #[path = "macos_owner.rs"]
 mod owner;
 pub use owner::{
     OwnedDirectory, OwnerKind, OwnerRecoveryOutcome, OwnerStore, PublishedOwnerEvidence,
+    SidecarRecovery, SidecarStore,
 };
 #[path = "macos_writable.rs"]
 mod writable;
@@ -72,6 +75,13 @@ pub(crate) fn continuous_time() -> Result<(i64, u32), HostError> {
 #[cfg(feature = "process-fixtures")]
 pub mod process_fixture {
     use crate::ProcessError;
+    pub fn pause_sidecar_transaction(point: u8) -> Result<(), ProcessError> {
+        if point > 4 {
+            return Err(ProcessError::InvalidArguments);
+        }
+        super::owner::fixture_pause_sidecar(point);
+        Ok(())
+    }
     pub fn cancel_next_cache_purge_after_intent() {
         super::owner::fixture_cancel_purge_after_intent();
     }

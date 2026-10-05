@@ -4,7 +4,7 @@ use crate::{CacheMetadata, EngineError, EngineFailure, EngineStage};
 use arktrace_contract::TraceCacheKey;
 use arktrace_platform::{
     HeldDirectory, HostError, IoBudget, Lease, LeaseMode, OwnerRecoveryOutcome, OwnerStore,
-    PublishedOwnerEvidence,
+    PublishedOwnerEvidence, SidecarRecovery, SidecarStore,
 };
 use serde::Serialize;
 use std::collections::HashMap;
@@ -286,7 +286,10 @@ impl CacheMaintenance {
         owners: &OwnerStore,
         budget: &IoBudget,
     ) -> Result<(usize, usize), EngineError> {
-        let mut count = 0;
+        let sidecars =
+            SidecarStore::open(&self.root, crate::MAXIMUM_VIEW_STATE_BYTES as u64, budget)
+                .map_err(host)?;
+        let mut count = sidecars.recover_orphans(budget).map_err(host)?;
         for id in self.identifiers(owners, budget)? {
             budget.check().map_err(host)?;
             match owners.published_evidence(&id, budget).map_err(host)? {
@@ -428,6 +431,18 @@ impl CacheMaintenance {
                 .metadata(&entry.directory, &entry.trace, &entry.parser, budget)?
                 .is_some_and(|m| m.cache_key == *key)
             {
+                report.skipped_active_entry_count += 1;
+                continue;
+            }
+            let sidecars =
+                SidecarStore::open(&self.root, crate::MAXIMUM_VIEW_STATE_BYTES as u64, budget)
+                    .map_err(host)?;
+            if matches!(
+                sidecars
+                    .recover(&entry.directory, &lock, &lease, budget)
+                    .map_err(host)?,
+                SidecarRecovery::Preserved | SidecarRecovery::Active
+            ) {
                 report.skipped_active_entry_count += 1;
                 continue;
             }

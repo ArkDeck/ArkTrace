@@ -11,7 +11,8 @@ use arktrace_contract::{
 use arktrace_platform::{
     CancellationToken, EphemeralLease, HeldDirectory, HeldFile, HostError, IoBudget, Lease,
     LeaseMode, OwnedDirectory, OwnerKind, OwnerRecoveryOutcome, OwnerStore, ProcessBudget,
-    ProcessError, ProcessOutputFileBudget, VerifiedExecutable, run_supervised,
+    ProcessError, ProcessOutputFileBudget, SidecarRecovery, SidecarStore, VerifiedExecutable,
+    run_supervised,
 };
 use arktrace_store::{
     DatabaseInspection, IndexProgress, StoreError, StoreReader, ValidationBudget,
@@ -234,6 +235,7 @@ enum SessionStorage {
         directory: HeldDirectory,
         lease: Lease,
         locks: HeldDirectory,
+        sidecars: SidecarStore,
     },
 }
 impl SessionStorage {
@@ -244,9 +246,11 @@ impl SessionStorage {
                 directory,
                 lease,
                 locks,
+                sidecars,
             } => {
                 directory.revalidate()?;
                 locks.revalidate()?;
+                sidecars.revalidate()?;
                 lease.revalidate()
             }
         }
@@ -1630,6 +1634,16 @@ fn open_store(
     };
     let locks = setup(".locks")?;
     let leases = setup(".leases")?;
+    let sidecars = cached
+        .then(|| {
+            SidecarStore::open(
+                temporary_namespace,
+                crate::MAXIMUM_VIEW_STATE_BYTES as u64,
+                &source_io,
+            )
+        })
+        .transpose()
+        .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
     let owners = OwnerStore::open(&stage, temporary_namespace)
         .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
     let key_lock = Lease::acquire(
@@ -2023,6 +2037,9 @@ fn open_store(
                     directory: published,
                     lease,
                     locks: locks.clone(),
+                    sidecars: sidecars.clone().ok_or_else(|| {
+                        failure(EngineStage::Publishing, EngineFailure::InvalidMetadata)
+                    })?,
                 }
             }
         };

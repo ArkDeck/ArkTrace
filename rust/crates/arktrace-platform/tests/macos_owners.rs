@@ -725,3 +725,157 @@ fn owner_moved_outside_recovery_root_retains_proof_and_never_deletes_escaped_byt
     assert_eq!(fixture.store.identifiers(&budget()).unwrap(), [identifier]);
     fs::remove_dir_all(escaped).unwrap();
 }
+
+#[test]
+fn native_sidecar_sigkill_recovers_create_replace_delete_and_every_owner_cleanup_boundary() {
+    use arktrace_platform::{Lease, LeaseMode, SidecarRecovery, SidecarStore};
+    use sha2::Digest;
+    let mut records = Vec::new();
+    for operation in ["create", "replace", "delete"] {
+        for phase in ["write", "cleanup"] {
+            for point in 0..=4 {
+                let f = Fixture::new();
+                let (trace, parser, key, active) = cache_authority(&f);
+                let entry = f
+                    .root
+                    .ensure_private_child(&trace)
+                    .unwrap()
+                    .ensure_private_child(&parser)
+                    .unwrap();
+                let store = SidecarStore::open(&f.root, 4096, &budget()).unwrap();
+                let old = if operation == "create" {
+                    None
+                } else {
+                    Some(b"old".as_slice())
+                };
+                if let Some(old) = old {
+                    entry
+                        .write_new_readonly("view-state.json", old, &budget())
+                        .unwrap();
+                }
+                drop(key);
+                drop(active);
+                let boundary = format!("{phase}-{point}");
+                let mut child = Worker(
+                    Command::new(env!("CARGO_BIN_EXE_arktrace-process-fixture"))
+                        .args([
+                            "sidecar-worker",
+                            f.path.to_str().unwrap(),
+                            operation,
+                            &boundary,
+                        ])
+                        .spawn()
+                        .unwrap(),
+                );
+                let marker = if phase == "write" {
+                    f.path.join("sidecar-window.json")
+                } else {
+                    f.path.join(".view-state/owner-window.json")
+                };
+                let deadline = Instant::now() + Duration::from_secs(5);
+                while !marker.exists() {
+                    assert!(
+                        child.0.try_wait().unwrap().is_none(),
+                        "worker stopped before {boundary}"
+                    );
+                    assert!(
+                        Instant::now() < deadline,
+                        "worker failed to reach {boundary}"
+                    );
+                    std::thread::sleep(Duration::from_millis(5));
+                }
+                let marker_bytes = fs::read(&marker).unwrap();
+                let window: serde_json::Value = serde_json::from_slice(&marker_bytes).unwrap();
+                assert_eq!(window["point"], point);
+                assert_eq!(window["pid"], child.0.id());
+                let identifier = format!("{:x}", sha2::Sha256::digest(format!("{trace}:{parser}")));
+                let blocked = IoBudget {
+                    deadline: Instant::now() + Duration::from_millis(20),
+                    ..budget()
+                };
+                assert!(matches!(
+                    Lease::acquire(
+                        &f.root.open_private_child(".locks").unwrap(),
+                        &format!("{identifier}.lock"),
+                        LeaseMode::Exclusive,
+                        &blocked
+                    ),
+                    Err(HostError::DeadlineExceeded)
+                ));
+                child.0.kill().unwrap();
+                let status = child.0.wait().unwrap();
+                assert!(!status.success());
+                let actual_before = match entry.open_file("view-state.json") {
+                    Ok(v) => Some(v.read_bounded(&budget()).unwrap()),
+                    Err(HostError::NotFound) => None,
+                    Err(e) => panic!("{e:?}"),
+                };
+                assert_eq!(fs::read(&marker).unwrap(), marker_bytes);
+                fs::remove_file(&marker).unwrap();
+                let key = Lease::acquire(
+                    &f.root.open_private_child(".locks").unwrap(),
+                    &format!("{identifier}.lock"),
+                    LeaseMode::Exclusive,
+                    &budget(),
+                )
+                .unwrap();
+                let active = Lease::acquire(
+                    &f.root.open_private_child(".leases").unwrap(),
+                    &format!("{identifier}.lease"),
+                    LeaseMode::Shared,
+                    &budget(),
+                )
+                .unwrap();
+                let recovered = store.recover(&entry, &key, &active, &budget()).unwrap();
+                let expected = if phase == "write" && point == 0 {
+                    assert_eq!(store.recover_orphans(&budget()).unwrap(), 1);
+                    SidecarRecovery::Absent
+                } else if phase == "write" && point == 1 {
+                    SidecarRecovery::Aborted
+                } else {
+                    SidecarRecovery::Committed
+                };
+                assert_eq!(recovered, expected);
+                let bytes = match entry.open_file("view-state.json") {
+                    Ok(v) => {
+                        assert_eq!(v.snapshot().byte_count, 3);
+                        Some(v.read_bounded(&budget()).unwrap())
+                    }
+                    Err(HostError::NotFound) => None,
+                    Err(e) => panic!("{e:?}"),
+                };
+                let final_expected = if phase == "write" && point < 2 {
+                    old
+                } else if operation == "delete" {
+                    None
+                } else {
+                    Some(b"new".as_slice())
+                };
+                assert_eq!(bytes.as_deref(), final_expected);
+                assert_eq!(bytes, actual_before);
+                let journal = f.root.open_private_child(".view-state").unwrap();
+                let owners =
+                    OwnerStore::open(&journal.open_private_child(".staging").unwrap(), &journal)
+                        .unwrap();
+                assert!(owners.identifiers(&budget()).unwrap().is_empty());
+                assert_eq!(
+                    journal.child_names(&budget(), 4).unwrap(),
+                    vec![
+                        std::ffi::OsString::from(".staging"),
+                        std::ffi::OsString::from("journal.lock")
+                    ]
+                );
+                assert_eq!(
+                    entry.child_names(&budget(), 2).unwrap().len(),
+                    usize::from(bytes.is_some())
+                );
+                records.push(serde_json::json!({"operation":operation,"boundary":boundary,"window":window,"killedAndReaped":true,"recovery":recovered,"beforeRecoveryBytes":actual_before,"afterRecoveryBytes":bytes,"readyTemporaryMembers":0,"remainingOwnerProofs":0}));
+            }
+        }
+    }
+    println!(
+        "SIDECAR_SIGKILL_EVIDENCE={}",
+        serde_json::to_string(&records).unwrap()
+    );
+    assert_eq!(records.len(), 30);
+}

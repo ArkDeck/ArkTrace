@@ -36,6 +36,35 @@ pub enum ViewStateRead {
     Preserved,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ViewStateWrite {
+    SessionScoped,
+    Saved,
+    Removed,
+    Preserved,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ViewStateEncodeError {
+    InvalidDocument,
+    InputBudgetExceeded,
+}
+struct BoundedBytes(Vec<u8>);
+impl std::io::Write for BoundedBytes {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        if bytes.len() > MAXIMUM_VIEW_STATE_BYTES.saturating_sub(self.0.len()) {
+            return Err(std::io::Error::other("view-state byte budget exceeded"));
+        }
+        self.0
+            .try_reserve(bytes.len())
+            .map_err(std::io::Error::other)?;
+        self.0.extend_from_slice(bytes);
+        Ok(bytes.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
 fn records<'de, D: Deserializer<'de>, T: Deserialize<'de>>(
     deserializer: D,
 ) -> Result<Vec<T>, D::Error> {
@@ -84,6 +113,57 @@ fn optional_records<'de, D: Deserializer<'de>, T: Deserialize<'de>>(
 }
 
 impl ViewStateDocument {
+    fn valid(&self, trace_sha256: &str) -> bool {
+        self.format_version == 1
+            && self.trace_sha256 == trace_sha256
+            && trace_sha256.len() == 64
+            && trace_sha256
+                .bytes()
+                .all(|v| v.is_ascii_digit() || (b'a'..=b'f').contains(&v))
+            && self.flags.len() <= MAXIMUM_VIEW_STATE_RECORDS
+            && self.marks.len() <= MAXIMUM_VIEW_STATE_RECORDS - self.flags.len()
+            && self
+                .favorite_track_ids
+                .as_ref()
+                .is_none_or(|v| v.len() <= MAXIMUM_VIEW_STATE_RECORDS)
+            && self
+                .flags
+                .iter()
+                .map(|v| v.label.len())
+                .chain(self.marks.iter().map(|v| v.label.len()))
+                .chain(self.favorite_track_ids.iter().flatten().map(String::len))
+                .all(|n| n <= arktrace_viewer::MAXIMUM_ANNOTATION_LABEL_BYTES as usize)
+    }
+    /// Serialization checks shape before allocation and stops at the exact
+    /// encoded UTF-8 byte cap, including JSON escaping overhead.
+    pub fn encode(&self, trace_sha256: &str) -> Result<Vec<u8>, ViewStateEncodeError> {
+        if !self.valid(trace_sha256) {
+            return Err(ViewStateEncodeError::InvalidDocument);
+        }
+        let mut output = BoundedBytes(Vec::new());
+        serde_json::to_writer(&mut output, self)
+            .map_err(|_| ViewStateEncodeError::InputBudgetExceeded)?;
+        Ok(output.0)
+    }
+    pub(crate) fn persisted(&self) -> Self {
+        Self {
+            marks: self
+                .marks
+                .iter()
+                .filter(|v| v.is_persistent)
+                .cloned()
+                .collect(),
+            format_version: self.format_version,
+            trace_sha256: self.trace_sha256.clone(),
+            flags: self.flags.clone(),
+            favorite_track_ids: self.favorite_track_ids.clone(),
+        }
+    }
+    pub(crate) fn is_empty(&self) -> bool {
+        self.flags.is_empty()
+            && self.marks.is_empty()
+            && self.favorite_track_ids.as_ref().is_none_or(Vec::is_empty)
+    }
     /// Decode the original stream, including duplicate-field rejection. A
     /// caller must retain the original bytes when this returns Preserved.
     pub fn decode(bytes: &[u8], trace_sha256: &str) -> ViewStateRead {
@@ -98,17 +178,7 @@ impl ViewStateDocument {
         let Ok(value) = serde_json::from_slice::<Self>(bytes) else {
             return ViewStateRead::Preserved;
         };
-        if value.format_version != 1
-            || value.trace_sha256 != trace_sha256
-            || value.flags.len() + value.marks.len() > MAXIMUM_VIEW_STATE_RECORDS
-            || value
-                .flags
-                .iter()
-                .map(|v| v.label.len())
-                .chain(value.marks.iter().map(|v| v.label.len()))
-                .chain(value.favorite_track_ids.iter().flatten().map(String::len))
-                .any(|n| n > arktrace_viewer::MAXIMUM_ANNOTATION_LABEL_BYTES as usize)
-        {
+        if !value.valid(trace_sha256) {
             return ViewStateRead::Preserved;
         }
         ViewStateRead::Restored(value)
@@ -234,5 +304,60 @@ mod tests {
             ViewStateDocument::decode(&vec![b' '; MAXIMUM_VIEW_STATE_BYTES + 1], &hash()),
             ViewStateRead::Preserved
         );
+    }
+    #[test]
+    fn bounded_encoding_checks_typed_counts_and_actual_json_escape_expansion() {
+        let ViewStateRead::Restored(mut document) = decode(&input()) else {
+            panic!("fixture");
+        };
+        let encoded = document.encode(&hash()).unwrap();
+        assert_eq!(
+            ViewStateDocument::decode(&encoded, &hash()),
+            ViewStateRead::Restored(document.clone())
+        );
+        assert_eq!(
+            document.encode(&"b".repeat(64)).unwrap_err(),
+            ViewStateEncodeError::InvalidDocument
+        );
+        document.favorite_track_ids = Some(vec!["x".into(); MAXIMUM_VIEW_STATE_RECORDS + 1]);
+        assert_eq!(
+            document.encode(&hash()).unwrap_err(),
+            ViewStateEncodeError::InvalidDocument
+        );
+        document.favorite_track_ids = None;
+        document.marks.clear();
+        let flag = document.flags[0].clone();
+        document.flags = vec![flag; MAXIMUM_VIEW_STATE_RECORDS];
+        for f in &mut document.flags {
+            f.label = "\0".repeat(4096);
+        }
+        assert_eq!(
+            document.encode(&hash()).unwrap_err(),
+            ViewStateEncodeError::InputBudgetExceeded
+        );
+        let mut output = BoundedBytes(vec![0; MAXIMUM_VIEW_STATE_BYTES - 1]);
+        use std::io::Write;
+        assert_eq!(output.write(&[1]).unwrap(), 1);
+        assert!(output.write(&[2]).is_err());
+        assert_eq!(output.0.len(), MAXIMUM_VIEW_STATE_BYTES);
+    }
+    #[test]
+    fn persistence_uses_existing_transient_mark_and_empty_state_policy() {
+        let ViewStateRead::Restored(document) = decode(&input()) else {
+            panic!("fixture");
+        };
+        let mut kept = document.marks[0].clone();
+        kept.is_persistent = true;
+        let mut mixed = document.clone();
+        mixed.marks.push(kept.clone());
+        let saved = mixed.persisted();
+        assert_eq!(saved.marks, [kept]);
+        assert_eq!(saved.flags, document.flags);
+        assert_eq!(saved.favorite_track_ids, document.favorite_track_ids);
+        mixed.flags.clear();
+        mixed.marks.retain(|v| !v.is_persistent);
+        mixed.favorite_track_ids = Some(vec![]);
+        assert!(mixed.persisted().is_empty());
+        assert!(!document.persisted().is_empty());
     }
 }

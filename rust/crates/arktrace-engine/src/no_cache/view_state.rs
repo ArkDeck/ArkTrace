@@ -1,7 +1,10 @@
 //! Session-held read authority for the one user sidecar. No caller path, root
-//! discovery, write, deletion or fallback. Active leases protect the Ready.
+//! discovery or fallback. Journaled writes keep active leases protecting Ready.
 use super::*;
-use crate::{MAXIMUM_VIEW_STATE_BYTES, ViewStateDocument, ViewStateRead};
+use crate::{
+    MAXIMUM_VIEW_STATE_BYTES, ViewStateDocument, ViewStateEncodeError, ViewStateRead,
+    ViewStateWrite,
+};
 
 const FILE_NAME: &str = "view-state.json";
 
@@ -38,7 +41,11 @@ impl EngineSession {
     pub fn read_view_state(&self, budget: &EngineBudget) -> Result<ViewStateRead, EngineError> {
         self.query_reader(budget)?;
         let SessionStorage::Cached {
-            directory, locks, ..
+            directory,
+            locks,
+            lease,
+            sidecars,
+            ..
         } = &self.storage
         else {
             return Ok(ViewStateRead::SessionScoped);
@@ -52,6 +59,19 @@ impl EngineSession {
         )
         .map_err(|e| host(EngineStage::Querying, e))?;
         self.query_reader(budget)?;
+        let recovered = sidecars
+            .recover(directory, &key, lease, &io)
+            .map_err(|e| host(EngineStage::Querying, e))?;
+        if matches!(
+            recovered,
+            SidecarRecovery::Preserved | SidecarRecovery::Active
+        ) {
+            self.query_reader(budget)?;
+            key.revalidate()
+                .map_err(|e| host(EngineStage::Querying, e))?;
+            io.check().map_err(|e| host(EngineStage::Querying, e))?;
+            return Ok(ViewStateRead::Preserved);
+        }
         let result = read_directory(directory, &self.metadata.trace_sha256, &io)
             .map_err(|e| host(EngineStage::Querying, e));
         self.query_reader(budget)?;
@@ -60,6 +80,91 @@ impl EngineSession {
         io.check().map_err(|e| host(EngineStage::Querying, e))?;
         result
     }
+    /// Validate/encode before staging. Uncached state remains session scoped;
+    /// unsupported original sidecars are preserved even for an empty save.
+    pub fn write_view_state(
+        &self,
+        document: Option<&ViewStateDocument>,
+        budget: &EngineBudget,
+    ) -> Result<ViewStateWrite, EngineError> {
+        self.query_reader(budget)?;
+        let encoded = match document {
+            Some(v) => {
+                // Reject an invalid typed caller before cloning or filtering.
+                v.encode(&self.metadata.trace_sha256)
+                    .map_err(view_state_encode_error)?;
+                let persisted = v.persisted();
+                if persisted.is_empty() {
+                    None
+                } else {
+                    Some(
+                        persisted
+                            .encode(&self.metadata.trace_sha256)
+                            .map_err(view_state_encode_error)?,
+                    )
+                }
+            }
+            None => None,
+        };
+        self.query_reader(budget)?;
+        let SessionStorage::Cached {
+            directory,
+            locks,
+            lease,
+            sidecars,
+        } = &self.storage
+        else {
+            return Ok(ViewStateWrite::SessionScoped);
+        };
+        let io = budget.io(MAXIMUM_VIEW_STATE_BYTES as u64);
+        let key = Lease::acquire(
+            locks,
+            &format!("{}.lock", self.metadata.cache_key.entry_identifier()),
+            LeaseMode::Exclusive,
+            &io,
+        )
+        .map_err(|e| host(EngineStage::Querying, e))?;
+        self.query_reader(budget)?;
+        let recovered = sidecars
+            .recover(directory, &key, lease, &io)
+            .map_err(|e| host(EngineStage::Querying, e))?;
+        if matches!(
+            recovered,
+            SidecarRecovery::Preserved | SidecarRecovery::Active
+        ) || read_directory(directory, &self.metadata.trace_sha256, &io)
+            .map_err(|e| host(EngineStage::Querying, e))?
+            == ViewStateRead::Preserved
+        {
+            self.query_reader(budget)?;
+            key.revalidate()
+                .map_err(|e| host(EngineStage::Querying, e))?;
+            io.check().map_err(|e| host(EngineStage::Querying, e))?;
+            return Ok(ViewStateWrite::Preserved);
+        }
+        let result = sidecars
+            .write(directory, &key, lease, encoded.as_deref(), &io)
+            .map_err(|e| host(EngineStage::Querying, e));
+        self.query_reader(budget)?;
+        key.revalidate()
+            .map_err(|e| host(EngineStage::Querying, e))?;
+        io.check().map_err(|e| host(EngineStage::Querying, e))?;
+        result?;
+        Ok(if encoded.is_some() {
+            ViewStateWrite::Saved
+        } else {
+            ViewStateWrite::Removed
+        })
+    }
+}
+
+fn view_state_encode_error(error: ViewStateEncodeError) -> EngineError {
+    host(
+        EngineStage::Querying,
+        match error {
+            ViewStateEncodeError::InvalidDocument => HostError::InvalidEvidence,
+            ViewStateEncodeError::InputBudgetExceeded => HostError::LimitExceeded,
+        },
+    )
 }
 
 #[cfg(test)]

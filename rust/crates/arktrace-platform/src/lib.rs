@@ -23,7 +23,7 @@ pub use macos::{
 #[cfg(target_os = "macos")]
 pub use macos::{
     OwnedDirectory, OwnerKind, OwnerRecoveryOutcome, OwnerStore, PublishedOwnerEvidence,
-    WritableFile,
+    SidecarRecovery, SidecarStore, WritableFile,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

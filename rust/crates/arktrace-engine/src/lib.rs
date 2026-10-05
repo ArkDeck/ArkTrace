@@ -14,7 +14,8 @@ pub use query_deadlines::{
     BatchQueryDeadlines, DeadlineBatch, DeadlineQuery, DeadlineRepositoryQuery, QueryClock,
 };
 pub use view_state::{
-    MAXIMUM_VIEW_STATE_BYTES, MAXIMUM_VIEW_STATE_RECORDS, ViewStateDocument, ViewStateRead,
+    MAXIMUM_VIEW_STATE_BYTES, MAXIMUM_VIEW_STATE_RECORDS, ViewStateDocument, ViewStateEncodeError,
+    ViewStateRead, ViewStateWrite,
 };
 mod handles;
 #[cfg(any(target_os = "macos", test))]
