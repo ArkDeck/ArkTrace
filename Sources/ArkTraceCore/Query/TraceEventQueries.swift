@@ -1,4 +1,4 @@
-private enum TraceEventQueryValidation {
+enum TraceEventQueryValidation {
     static func limit(_ value: Int) throws {
         guard (1...100_000).contains(value) else {
             throw ArkTraceError(

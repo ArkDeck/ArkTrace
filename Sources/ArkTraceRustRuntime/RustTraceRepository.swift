@@ -88,6 +88,9 @@ package actor RustTraceRepository: TraceRepositoryProtocol {
     package func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
         try await eventBatch(TraceRepositoryEventBatch(cpuSlices: [query])).cpuSlices[0]
     }
+    package func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog {
+        try await invoke { try await $0.coreCPUCatalog(query, timeoutMilliseconds: self.operationTimeoutMilliseconds) }
+    }
     package func threadStates(_ query: ThreadStateQuery) async throws -> TraceEventPage<ThreadStateInterval> {
         try await eventBatch(TraceRepositoryEventBatch(threadStates: [query])).threadStates[0]
     }

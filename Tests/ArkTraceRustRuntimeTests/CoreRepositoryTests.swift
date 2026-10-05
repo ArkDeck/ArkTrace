@@ -4,6 +4,65 @@ import XCTest
 @testable import ArkTraceRustRuntime
 
 @MainActor final class CoreRepositoryTests: XCTestCase {
+    private func cpuCatalogEnvelope(cpus: [Int64] = [.min, 0, .max]) throws -> Data {
+        let quality: [String: Any] = ["status": "ok", "warnings": []]
+        return try JSONSerialization.data(withJSONObject: ["formatVersion": 1, "session": 2, "request": 3,
+            "body": ["cpus": ["items": cpus.map { ["cpu": $0] }, "truncated": false,
+                "capabilityAvailable": true, "dataQuality": quality],
+                "activity": ["items": [["processKey": ["ipid": Int64.min]], ["processKey": NSNull()]],
+                    "truncated": true, "capabilityAvailable": true, "dataQuality": quality]]])
+    }
+
+    func testCPUCatalogPreservesSignedIDsNullableOwnersAndIndependentCoverage() async throws {
+        let query = try TraceCPUCatalogQuery(range: .query(startNs: 0, endNs: 1), limit: 3, activityLimit: 2,
+            deadline: .now.advanced(by: .seconds(10)))
+        let result = try await RustCPUCatalogDecoder.decode(cpuCatalogEnvelope(),
+            identity: RustSessionIdentity(engine: 1, session: 2), request: 3, query: query)
+        XCTAssertEqual(result.cpus.items.map(\.cpu), [.min, 0, .max])
+        XCTAssertFalse(result.cpus.truncated)
+        XCTAssertTrue(result.activity.truncated)
+        XCTAssertEqual(result.activity.items.map(\.processKey), [ProcessKey(ipid: .min), nil])
+    }
+
+    func testCPUCatalogRejectsIdentityOrderBoundsAndWrongProvenance() async throws {
+        let query = try TraceCPUCatalogQuery(range: .query(startNs: 0, endNs: 1), limit: 3, activityLimit: 2,
+            deadline: .now.advanced(by: .seconds(10)))
+        for ids: [Int64] in [[0, 0], [1, 0], [-1, 0, 1, 2]] {
+            do {
+                _ = try await RustCPUCatalogDecoder.decode(cpuCatalogEnvelope(cpus: ids),
+                    identity: RustSessionIdentity(engine: 1, session: 2), request: 3, query: query)
+                XCTFail("invalid identity directory was admitted")
+            } catch is RustAdmission {}
+        }
+        do {
+            _ = try await RustCPUCatalogDecoder.decode(cpuCatalogEnvelope(),
+                identity: RustSessionIdentity(engine: 1, session: 4), request: 3, query: query)
+            XCTFail("foreign Session result was admitted")
+        } catch is RustAdmission {}
+    }
+
+    func testCPUCatalogRejectsFloatingIdentityUnknownFieldsAndZeroOwners() async throws {
+        let query = try TraceCPUCatalogQuery(range: .query(startNs: 0, endNs: 1), limit: 3, activityLimit: 2,
+            deadline: .now.advanced(by: .seconds(10)))
+        let base = try JSONSerialization.jsonObject(with: cpuCatalogEnvelope()) as! [String: Any]
+        for mutation in 0..<3 {
+            var root = base, body = base["body"] as! [String: Any]
+            if mutation == 0 {
+                var page = body["cpus"] as! [String: Any]; page["items"] = [["cpu": 1.5]]; body["cpus"] = page
+            } else if mutation == 1 {
+                body["rawSQL"] = "SELECT 1"
+            } else {
+                var page = body["activity"] as! [String: Any]; page["items"] = [["processKey": ["ipid": 0]]]; body["activity"] = page
+            }
+            root["body"] = body
+            do {
+                _ = try await RustCPUCatalogDecoder.decode(JSONSerialization.data(withJSONObject: root),
+                    identity: RustSessionIdentity(engine: 1, session: 2), request: 3, query: query)
+                XCTFail("malformed CPU catalog was admitted")
+            } catch is RustAdmission {}
+        }
+    }
+
     func testScalarDirectoryNilIsExplicitAndPreservesEveryFilter() throws {
         let query = RustProcessQuery(processKey: .min, pid: .max, name: "e\u{301}😀", nameMatch: .contains, limit: 100_000)
         let data = try JSONEncoder().encode(RustRequest.queryWithDeadline(RustWireDeadlineQuery(.processes(query), deadline: nil)))

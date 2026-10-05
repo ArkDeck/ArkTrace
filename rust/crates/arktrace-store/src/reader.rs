@@ -31,6 +31,15 @@ pub struct StoreReader {
     query_deadline: Cell<Option<ContinuousDeadline>>,
 }
 impl StoreReader {
+    pub fn cpu_catalog(
+        &self,
+        query: &arktrace_contract::CpuCatalogQuery,
+        budget: &ValidationBudget,
+    ) -> Result<arktrace_contract::CpuCatalog, StoreError> {
+        self.with_database(budget, |db| {
+            crate::cpu_catalog::query(db, self.inspection(), query)
+        })
+    }
     #[cfg(test)]
     pub(crate) fn snapshot_for_test(&self) -> Arc<HeldFile> {
         self.snapshot.clone()

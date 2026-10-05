@@ -11,7 +11,7 @@ extern "C" {
 #endif
 ARKTRACE_LAYOUT_ASSERT(sizeof(void *) == 8, "ArkTrace ABI requires a 64-bit host");
 #define ARKTRACE_ABI_VERSION 1u
-#define ARKTRACE_CONTRACT_DIGEST "39b9981a74b3bf293319231fbbccad890e930e4f14f2aa1b6e5703370799cd6b"
+#define ARKTRACE_CONTRACT_DIGEST "ae714f859fdd5f71f747a726d41d701f3691679a589aa06a62de45c2a610d2f8"
 /* Input/output storage must be valid, correctly aligned, live and non-overlapping. Inputs are copied before return; output records use exact byte sizes. Rust owners retain immutable data through release/close/drain; view memory remains live until its owner is released. No arbitrary dangling-pointer safety is claimed. */
 /* Exports catch Rust unwind; an unexpected export panic poisons and drains its Engine. Worker failures preserve actual session/cleanup errors. OOM/native faults may terminate the process. */
 #define ARKTRACE_STATUS_OK 0u

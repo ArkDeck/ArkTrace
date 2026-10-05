@@ -19,6 +19,8 @@ final class TimelineRenderingTests: XCTestCase {
     }
 
     private actor DensityRepository: TraceRepositoryProtocol {
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         let eventCount: Int64
         let delay: Duration?
         let counterPage: TraceEventPage<CounterSeries>?

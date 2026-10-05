@@ -4,6 +4,8 @@ import XCTest
 
 final class TraceViewerAnalysisTests: XCTestCase {
     private actor Repository: TraceRepositoryProtocol {
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         let traceMetadata: TraceMetadata
         let processRows: [TraceProcess]
         let threadRows: [TraceThread]

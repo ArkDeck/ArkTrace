@@ -6,6 +6,45 @@ import XCTest
 @testable import ArkTraceStore
 
 final class RepositoryTests: XCTestCase {
+    func testCPUCatalogFindsLateSignedIdentitiesBeyondActivitySample() async throws {
+        let (repository, url) = try makeSummaryRepository(extraSQL: """
+            WITH RECURSIVE n(i) AS (VALUES(10) UNION ALL SELECT i+1 FROM n WHERE i<21010)
+            INSERT INTO sched_slice SELECT i,1101,1,0,1,1 FROM n;
+            INSERT INTO sched_slice VALUES(22000,1800,0,-9223372036854775808,2,2);
+            INSERT INTO sched_slice VALUES(22001,1900,NULL,9223372036854775807,2,2);
+            INSERT INTO sched_slice VALUES(22002,1999,-1,99,2,2);
+            """)
+        defer { try? FileManager.default.removeItem(at: url) }
+        let range = try TraceTimeRange.query(startNs: 0, endNs: 1_000)
+        let result = try await repository.cpuCatalog(TraceCPUCatalogQuery(range: range,
+            deadline: .now.advanced(by: .seconds(10))))
+        XCTAssertEqual(result.cpus.items.map(\.cpu), [Int64.min, 0, 1, 2, 3, 99, Int64.max])
+        XCTAssertFalse(result.cpus.truncated)
+        XCTAssertTrue(result.activity.truncated)
+        XCTAssertEqual(result.activity.items.count, 20_000)
+        let bounded = try await repository.cpuCatalog(TraceCPUCatalogQuery(range: range,
+            limit: 2, activityLimit: 2, deadline: .now.advanced(by: .seconds(10))))
+        XCTAssertEqual(bounded.cpus.items.map(\.cpu), [Int64.min, 0])
+        XCTAssertTrue(bounded.cpus.truncated)
+        let detail = try await repository.cpuSlices(CpuSliceQuery(range: range,
+            limit: 2, deadline: .now.advanced(by: .seconds(10))))
+        XCTAssertEqual(bounded.activity.items.map(\.processKey), detail.items.map(\.processKey))
+    }
+
+    func testCPUCatalogPreservesRangeAndDeadlineSemantics() async throws {
+        let (repository, url) = try makeSummaryRepository()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let range = try TraceTimeRange.query(startNs: 200, endNs: 400)
+        let result = try await repository.cpuCatalog(TraceCPUCatalogQuery(range: range,
+            deadline: .now.advanced(by: .seconds(10))))
+        XCTAssertEqual(result.cpus.items.map(\.cpu), [1, 2])
+        do {
+            _ = try await repository.cpuCatalog(TraceCPUCatalogQuery(range: range,
+                deadline: .now.advanced(by: .seconds(-1))))
+            XCTFail("expired catalog must fail rather than publish an empty directory")
+        } catch let error as ArkTraceError { XCTAssertEqual(error.code, .queryTimeout) }
+    }
+
     private final class PerformanceMetricRecorder: @unchecked Sendable {
         private let lock = NSLock()
         private var values: [TracePerformanceMetric] = []

@@ -2114,23 +2114,21 @@ public final class TraceDocumentController {
             )
         }
         let range = try TraceTimeRange.query(startNs: 0, endNs: metadata.durationNs)
-        // After metadata, the thread directory, CPU slices and counter series
-        // are mutually independent read-only queries. One repository event
-        // batch runs them concurrently through the Store's own
-        // clone-and-verify connection path — identity checks and per-query
-        // limits are exactly those of the sequential form — under one shared
-        // deadline. Assembly below keeps the deterministic group order.
-        let wantsCpuSlices = metadata.capabilities.cpuScheduling
+        // Identity discovery and the lightweight activity sample are separate
+        // from event detail. All catalog reads share the same deadline.
+        let wantsCpuCatalog = metadata.capabilities.cpuScheduling
         let wantsCounters = metadata.capabilities.cpuCounters
             || metadata.capabilities.processCounters
         let batch = try TraceRepositoryEventBatch(
-            cpuSlices: wantsCpuSlices
-                ? [CpuSliceQuery(range: range, limit: 20_000, deadline: deadline)] : [],
             counterSeries: wantsCounters
                 ? [CounterSeriesQuery(range: range, limit: 2_000, deadline: deadline)] : [],
             threads: [ThreadQuery(limit: 1_000, deadline: deadline)]
         )
+        async let cpuCatalogRead: TraceCPUCatalog = wantsCpuCatalog
+            ? repository.cpuCatalog(TraceCPUCatalogQuery(range: range, deadline: deadline))
+            : .unavailable
         let batchResult = try await repository.eventBatch(batch)
+        let cpuCatalog = try await cpuCatalogRead
         guard let threads = batchResult.threads.first else {
             throw ArkTraceError(
                 code: .internalError,
@@ -2138,16 +2136,14 @@ public final class TraceDocumentController {
                 message: "Catalog batch omitted the thread directory"
             )
         }
-        let cpuPage = wantsCpuSlices
-            ? (batchResult.cpuSlices.first ?? .unavailable)
-            : .unavailable
+        let cpuPage = cpuCatalog.cpus
         // Lanes come from the series directory, not from a page of samples: a
         // sample page is bounded by samples, so one busy series hides the rest
         // (a real capture puts 13 of its 66 series in the first 2,000 samples).
         let counterPage: TraceEventPage<CounterSeriesDescriptor> = wantsCounters
             ? (batchResult.counterSeries.first ?? .unavailable)
             : .unavailable
-        let cpus = Array(Set(cpuPage.items.map(\.cpu))).sorted()
+        let cpus = cpuPage.items.map(\.cpu)
         let cpuTracks = cpus.enumerated().map {
             TrackDescriptor(
                 title: "CPU \($0.element)",
@@ -2182,7 +2178,7 @@ public final class TraceDocumentController {
                 metadata: metadata,
                 threads: threads.items,
                 threadsTruncated: threads.truncated,
-                cpuSlices: cpuPage.items,
+                activity: cpuCatalog.activity.items,
                 counters: counterPage.items.filter { $0.scope == .process },
                 counterTruncated: counterPage.truncated,
                 frameProcessKeys: frameProcessKeys
@@ -2233,15 +2229,15 @@ public final class TraceDocumentController {
         metadata: TraceMetadata,
         threads: [TraceThread],
         threadsTruncated: Bool,
-        cpuSlices: [CpuSlice],
+        activity: [TraceCPUActivity],
         counters: [CounterSeriesDescriptor],
         counterTruncated: Bool,
         frameProcessKeys: Set<ProcessKey> = []
     ) -> [TraceTrackGroup] {
-        // Activity is measured from the CPU slices already fetched for the CPU
-        // lanes -- no extra query buys this ordering.
+        // This is the same bounded scheduling sample as event detail used
+        // previously; CPU identity completeness is independent of its limit.
         var scheduledByProcess: [ProcessKey: Int] = [:]
-        for slice in cpuSlices {
+        for slice in activity {
             guard let key = slice.processKey else { continue }
             scheduledByProcess[key, default: 0] += 1
         }

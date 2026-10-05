@@ -30,6 +30,8 @@ struct Items<T: Encodable>: Encodable { let items: [T]; let truncated: Bool; let
 /// Records the actual typed reads issued by the existing search composition.
 /// Delegation does not implement filtering, mapping or sorting in the harness.
 actor RecordingRepository: TraceRepositoryProtocol {
+    func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { try await base.cpuCatalog(query) }
+
     private let base: SQLiteTraceRepository
     private var steps: [Step] = []
     init(_ base: SQLiteTraceRepository) { self.base = base }

@@ -913,6 +913,58 @@ package actor SQLiteTraceRepository: TraceRepositoryProtocol {
         )
     }
 
+    public func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog {
+        guard validation.capabilities.cpuScheduling else { return .unavailable }
+        let range = try validatedAbsoluteRange(query.range)
+        let predicate = TraceEventIntersection.sqlPredicate(alias: "s")
+        let baseBindings = TraceEventIntersection.bindings(queryStart: range.start,
+            queryEnd: range.end, traceEnd: validation.traceEndTs)
+        var cpus: [TraceCPUIdentity] = []
+        var previous: Int64?
+        while cpus.count <= query.limit {
+            try checkQueryBoundary(query.deadline)
+            let comparison = previous == nil ? ">=" : ">"
+            let next = try db.query(
+                "SELECT s.cpu FROM sched_slice s WHERE \(predicate) AND s.cpu\(comparison)? "
+                    + "AND typeof(s.cpu)='integer' ORDER BY s.cpu ASC LIMIT 1",
+                bindings: baseBindings + [.int64(previous ?? Int64.min)],
+                observesTaskCancellation: true, deadline: query.deadline
+            ) { $0.int64(0) }
+            guard let cpu = next.first.flatMap({ $0 }) else { break }
+            cpus.append(TraceCPUIdentity(cpu: cpu)); previous = cpu
+            if cpu == Int64.max { break }
+        }
+        let cpuRows = cpus.count
+        let rows = try db.query(
+            "SELECT s.id,s.ts,s.dur,s.cpu,s.ipid FROM sched_slice s WHERE \(predicate) "
+                + "ORDER BY s.ts ASC,s.id ASC LIMIT ?",
+            bindings: baseBindings + [.int64(Int64(query.activityLimit) + 1)],
+            observesTaskCancellation: true, deadline: query.deadline
+        ) { row in
+            (id: row.int64(0), ts: row.int64(1), dur: row.int64(2),
+             durNull: row.isNull(2), cpu: row.int64(3), owner: row.int64(4))
+        }
+        var quality = EventQuality()
+        var activity: [TraceCPUActivity] = []
+        for row in rows.prefix(query.activityLimit) {
+            try checkQueryBoundary(query.deadline)
+            guard row.id != nil else { throw Self.invalidIdentity(table: "sched_slice") }
+            guard row.cpu != nil else { quality.invalidNumeric += 1; continue }
+            guard try eventInterval(timestamp: row.ts, duration: row.dur,
+                durationIsNull: row.durNull, table: "sched_slice", quality: &quality) != nil else { continue }
+            activity.append(TraceCPUActivity(processKey: row.owner.flatMap {
+                $0 == 0 ? nil : ProcessKey(ipid: $0)
+            }))
+        }
+        try checkQueryBoundary(query.deadline)
+        return TraceCPUCatalog(
+            cpus: eventPage(items: Array(cpus.prefix(query.limit)), sourceRows: cpuRows,
+                limit: query.limit, table: "sched_slice", quality: EventQuality()),
+            activity: eventPage(items: activity, sourceRows: rows.count,
+                limit: query.activityLimit, table: "sched_slice", quality: quality)
+        )
+    }
+
     public func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
         guard validation.capabilities.cpuScheduling else { return .unavailable }
         let range = try validatedAbsoluteRange(query.range)

@@ -5,7 +5,7 @@
   "swift": "Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)\nTarget: arm64-apple-macosx27.0.0",
   "vectors": 84,
   "inspectorLookups": 4,
-  "executableSHA256": "9e25ac1382f50cf09e314db063d71a99c21eae4f4537b3918bcb323f0889849f",
+  "executableSHA256": "df1b719b3eac8ebbf3eb6bce3d578c5b8b2b89bb80e81fc2e279703a37ce74ff",
   "databases": [
     {
       "fixture": "argument-full",
@@ -165,14 +165,19 @@
       "byteCount": 1186
     },
     {
+      "path": "Sources/ArkTraceCore/Query/TraceCPUCatalog.swift",
+      "sha256": "024815aca84efdff366a89e1ae9c789f9f14bd5bbe368705857bdab543612e22",
+      "byteCount": 1724
+    },
+    {
       "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
       "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d",
       "byteCount": 3873
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4",
-      "byteCount": 9752
+      "sha256": "aca5ec6f3e2e864a4329537ccf26de56dc2fb386d0f2a92a0367b2fdce11f989",
+      "byteCount": 9744
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
@@ -181,8 +186,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69",
-      "byteCount": 17117
+      "sha256": "6bca47633ca3ee379f9931f7130d509390157c834e073062862fcdfacd44b604",
+      "byteCount": 17200
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
@@ -191,8 +196,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
-      "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4",
-      "byteCount": 160666
+      "sha256": "a5e5744b240ee347c357fc0371c5c3a284673cbc87c92ad23c4573101d13e761",
+      "byteCount": 163579
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabase.swift",

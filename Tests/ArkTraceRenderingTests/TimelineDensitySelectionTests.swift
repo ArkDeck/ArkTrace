@@ -376,6 +376,8 @@ final class TimelineDensitySelectionTests: XCTestCase {
     /// Returns the slices intersecting the queried range, the way the Store
     /// does, and records what it was asked for.
     private actor SliceRepository: TraceRepositoryProtocol {
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         private let slices: [TraceSlice]
         private var ranges: [TraceTimeRange] = []
 

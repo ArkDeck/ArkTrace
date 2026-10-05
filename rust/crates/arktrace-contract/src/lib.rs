@@ -3,6 +3,7 @@ mod arguments;
 mod batch;
 mod cache;
 mod counters;
+mod cpu_catalog;
 mod density;
 mod directory;
 mod error;
@@ -24,6 +25,7 @@ pub use counters::{
     CounterQuery, CounterSample, CounterScope, CounterSeries, CounterSeriesDescriptor,
     CounterSeriesQuery, TraceAgentCounterEvent,
 };
+pub use cpu_catalog::{CpuActivity, CpuCatalog, CpuCatalogQuery, CpuIdentity};
 pub use density::{
     TraceDensityBucket, TraceDensityIdentity, TraceDensityQuery, TraceDensityResult,
     TraceDensitySource,

@@ -4,6 +4,8 @@ import Foundation
 import XCTest
 
 private actor InspectorProjectionOracleRepository: TraceRepositoryProtocol {
+    func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
     let cpu: [CpuSlice]; let states: [ThreadStateInterval]; let named: [TraceSlice]
     let framesInput: [TraceFrame]; let counterInput: [CounterSeries]
     init(cpu: [CpuSlice] = [], states: [ThreadStateInterval] = [], named: [TraceSlice] = [], frames: [TraceFrame] = [], counters: [CounterSeries] = []) {

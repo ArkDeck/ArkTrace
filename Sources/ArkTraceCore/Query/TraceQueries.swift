@@ -283,6 +283,7 @@ package protocol TraceRepositoryProtocol: Sendable {
     func threads(_ query: ThreadQuery) async throws -> BoundedPage<TraceThread>
     func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts
     func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice>
+    func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog
     func threadStates(
         _ query: ThreadStateQuery
     ) async throws -> TraceEventPage<ThreadStateInterval>

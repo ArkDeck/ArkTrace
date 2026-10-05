@@ -6,6 +6,8 @@ mod arguments;
 #[cfg(any(target_os = "macos", test))]
 mod counters;
 #[cfg(any(target_os = "macos", test))]
+mod cpu_catalog;
+#[cfg(any(target_os = "macos", test))]
 mod database;
 #[cfg(any(target_os = "macos", test))]
 mod density;

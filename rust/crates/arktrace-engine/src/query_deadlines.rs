@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
     deny_unknown_fields
 )]
 pub enum DeadlineRepositoryQuery {
+    CpuCatalog(arktrace_contract::CpuCatalogQuery),
     Processes(arktrace_contract::ProcessQuery),
     SummaryFacts(arktrace_contract::TraceSummaryQuery),
     Frames(arktrace_contract::TraceFrameQuery),
@@ -18,6 +19,7 @@ pub enum DeadlineRepositoryQuery {
 impl DeadlineRepositoryQuery {
     pub fn validate(&self) -> Result<(), ContractError> {
         match self {
+            Self::CpuCatalog(q) => q.validate(),
             Self::Processes(q) => q.validate(),
             Self::SummaryFacts(q) => q.validate(),
             Self::Frames(q) => q.validate(),
@@ -143,6 +145,10 @@ mod tests {
     #[test]
     fn scalar_resource_policy_is_explicit_and_only_processes_may_have_nil() {
         for (operation, query) in [
+            (
+                "cpuCatalog",
+                json!({"range":{"startNs":0,"endNs":1},"limit":4096,"activityLimit":20000}),
+            ),
             ("processes", json!({"nameMatch":"exact","limit":1})),
             (
                 "summaryFacts",

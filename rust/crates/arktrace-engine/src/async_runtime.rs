@@ -1137,6 +1137,13 @@ fn query(
     let b = &command.budget;
     match query {
         RepositoryRequest::QueryWithDeadline(q) => match &q.query {
+            crate::DeadlineRepositoryQuery::CpuCatalog(query) => {
+                read!(session.cpu_catalog_with_deadline(
+                    query,
+                    q.deadline.ok_or(RuntimeFailure::InvalidRequest)?,
+                    b
+                ))
+            }
             crate::DeadlineRepositoryQuery::Processes(query) => {
                 read!(session.processes_with_deadline(query, q.deadline, b))
             }

@@ -434,6 +434,16 @@ impl EngineSession {
             reader.processes(query, budget)
         })
     }
+    pub fn cpu_catalog_with_deadline(
+        &self,
+        query: &arktrace_contract::CpuCatalogQuery,
+        deadline: arktrace_platform::ContinuousDeadline,
+        budget: &EngineBudget,
+    ) -> Result<arktrace_contract::CpuCatalog, EngineError> {
+        self.read_with_deadline(Some(deadline), budget, |reader, budget| {
+            reader.cpu_catalog(query, budget)
+        })
+    }
     pub fn summary_facts_with_deadline(
         &self,
         query: &arktrace_contract::TraceSummaryQuery,

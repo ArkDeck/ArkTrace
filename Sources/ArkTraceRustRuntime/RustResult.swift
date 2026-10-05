@@ -1,4 +1,5 @@
 import CArkTrace
+import ArkTraceCore
 import Foundation
 
 /// Immutable Rust bytes with one independent native lease. Only this owner
@@ -17,6 +18,16 @@ private final class ResultLease: @unchecked Sendable {
 }
 
 public struct RustResult: Sendable {
+    @concurrent
+    func cpuCatalog(identity: RustSessionIdentity, query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog {
+        precondition(!Thread.isMainThread)
+        guard kind == ARKTRACE_RESULT_SUCCESS, identity.engine == engineIdentity,
+              count <= 4 * 1024 * 1024 else { throw RustAdmission.invalidBuffer }
+        let credit = try RustDecodeCopies.reserve(count)
+        defer { credit.release() }
+        let data = unsafe Data(bytes: lease.pointer, count: count)
+        return try await RustCPUCatalogDecoder.decode(data, identity: identity, request: requestIdentity, query: query)
+    }
     private let lease: ResultLease
     public let count: Int
     public let retainedBytes: UInt64

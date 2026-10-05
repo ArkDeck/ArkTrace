@@ -35,6 +35,8 @@ final class TraceAgentBatchTests: XCTestCase {
     }
 
     private actor Repository: TraceRepositoryProtocol {
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         nonisolated let immutableContentIdentity: TraceRepositoryContentIdentity?
         let traceMetadata: TraceMetadata
         let processRows: [TraceProcess]

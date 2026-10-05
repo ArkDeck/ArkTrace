@@ -258,3 +258,5 @@ DESIGN §24 是发布门状态的事实源。任务文档不得凭 commit messag
 因此“所有构建输入已完全锁定”现在是一个有证据支撑的表述，而不再是被这条 hardening 挡住的措辞。
 
 2026-10-05：native controller 已接通旧状态导入、非致命恢复、代次绑定冲突选择与未匹配收藏界面。Fresh Swift producer → actual native controller 冷导入/重开/新编辑保存与资源释放通过；719 Swift passed、6 既有 skip，默认/原生 App 与包外 API 通过。默认 cutover、回滚产品导出与完整 macOS 验收仍未完成，goal active；见 [本轮记录](migration-runs/AT-RUST-008-012-2026-10-05-native-migration-controller.md)。
+
+2026-10-06：当前未发布产品继续只保留最新状态规则。默认 native catalog 已使用有界 CPU 身份目录，真实 signed bundle 的空根冷解析、缓存重开和默认 bundled 工厂均到 Ready，close/shutdown 通过；Rust 549、默认 Swift 631、native Swift 732 passed。GUI、性能、完整 process forest 及适用发行验收未完成，goal 管理器仍 blocked；见 [CPU 目录增量记录](migration-runs/AT-RUST-007-013-2026-10-06-cpu-catalog.md)。

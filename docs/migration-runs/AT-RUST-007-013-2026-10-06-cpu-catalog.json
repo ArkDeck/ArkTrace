@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "baseCommit": "e2af494",
+  "goalStatus": "blocked",
+  "macOSAcceptanceComplete": false,
+  "WindowsNativeExecuted": false,
+  "latestUnreleasedContractsOnly": true,
+  "behavior": {
+    "cpuIdentityLimit": 4096,
+    "activityLimit": 20000,
+    "identityCoverageIndependentOfSample": true,
+    "signedInt64CPU": true,
+    "activityOrder": [
+      "ts",
+      "id"
+    ],
+    "processGroupRankingPreserved": true,
+    "sharedSQLVMCredits": 2000000,
+    "queryMemoryLimitBytes": 134217728,
+    "sameAbsoluteDeadline": true,
+    "wireAdmission": "queryWithDeadline.cpuCatalog only"
+  },
+  "toolchains": {
+    "rust": "1.99.0",
+    "edition": 2024,
+    "xcode": "27.0 (27A266a)",
+    "swift": "6.4 / language 6",
+    "platform": "macOS 26+ arm64"
+  },
+  "validation": {
+    "rustPassed": 549,
+    "rustIgnored": 0,
+    "defaultSwiftPassed": 631,
+    "nativeSwiftPassed": 732,
+    "defaultSwiftOptInSkips": 6,
+    "nativeSwiftOptInSkips": 6,
+    "sdkTestsPassed": 94,
+    "borrowCompileNegativeControls": 4,
+    "referenceCompiles": 5,
+    "compilerWarnings": 0,
+    "API": [
+      "default",
+      "finalNormalSDK"
+    ],
+    "app": [
+      "finalNormalDebug",
+      "finalNormalRelease",
+      "DeveloperIDReviewCandidate",
+      "frozenDeepStrictSignature"
+    ],
+    "canonicalOracleOutputsUnchanged": true
+  },
+  "actualPublicRuntime": {
+    "freshParseReceipt": "54-final-empty-root-parse-reopen.receipt.json",
+    "defaultBundledFactoryReceipt": "51-final-bundled-factory-ready.receipt.json",
+    "consumerCompileReceipt": "49-final-public-consumer.receipt.json",
+    "preCompileBinding": "final-public-precompile-binding.json",
+    "binaryBinding": "final-public-probe-binary.json",
+    "firstOpenCacheHit": false,
+    "cachedReopenCacheHit": true,
+    "controllerReady": true,
+    "groups": 53,
+    "cpuIdentities": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "cpuDirectoryTruncated": false,
+    "snapshotPresent": true,
+    "activeBeforeClose": 1,
+    "activeAfterClose": 0,
+    "shutdown": true,
+    "sourceSHA256": "350c9fa59e887a41dab0fc3078d81688aabbb72e3a7e3ea671b620e57a76caef",
+    "GUIAcceptance": false,
+    "fullProcessForestAcceptance": false
+  },
+  "contractSHA256": "ae714f859fdd5f71f747a726d41d701f3691679a589aa06a62de45c2a610d2f8",
+  "abi": {
+    "records": 10,
+    "fields": 95,
+    "exports": 26
+  },
+  "rustSourceSHA256": "48c4ae1e5c753f3f9c17040bad864080cb573b6af62d1761db526fc2a66dc7a1",
+  "SDKs": {
+    "initialNormal": {
+      "developmentFixtures": false,
+      "byteCount": 30782664,
+      "sha256": "037c584e4aa12e1c462536779ecbb7c5c4ee16e3a8e655e435c8023eb17e4bf5"
+    },
+    "fixture": {
+      "developmentFixtures": true,
+      "byteCount": 30846160,
+      "sha256": "32e84738e73f5da7f552aeb783db4ab139cb296924ccc04bfa14ff280d0d9ab9"
+    },
+    "finalNormal": {
+      "developmentFixtures": false,
+      "byteCount": 30782776,
+      "sha256": "c2a0f5ecc75a35a343484ce7ad5a029abd3c7b30677a9af69b66aeaf80244237"
+    }
+  },
+  "signedCandidate": {
+    "sourceApp": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/native-release-candidates/ArkTrace-review-candidate-20261005T164849Z.app",
+    "buildReceipt": "45-final-signed-candidate.receipt.json",
+    "reportedTreeSHA256": "abb5235e16b7ca32eab444b435047f43f160a7ed9b82fc81db81fe0797ab7cdd",
+    "reportedCDHash": "7fa170b3809f632f736b1946b9395b6a078d6d15"
+  },
+  "frozenSignedCandidate": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-cpu-catalog-20261006/frozen-artifacts/final-signed-app/ArkTrace-review-candidate-20261005T164849Z.app",
+  "remaining": [
+    "desktop startup/open/backup/reopen/Quit",
+    "VoiceOver",
+    "performance",
+    "complete native launch/reap/escalation ledger",
+    "applicable Capture and ArkDeck validation",
+    "notarization/Gatekeeper/clean host/release"
+  ],
+  "evidencePath": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-cpu-catalog-20261006",
+  "packetManifest": "packet-manifest.json",
+  "cacheOwner": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+  "cacheOwnerContinuesActive": true,
+  "processForestDeadlineClaim": false,
+  "controllerPinCaptureTiming": "08 post-build exact source/mirror match; separate final public49 precompile binding",
+  "originalFailuresPreserved": true,
+  "normalSDKByteIdentityClaim": false,
+  "packetFreeze": {
+    "manifestSHA256": "d9c3bf4a6fe9aec6fca6ded8b69631375cc4e25552bf643376ce9601e4492b56",
+    "members": 3629,
+    "files": 2576,
+    "directories": 1053,
+    "links": 0,
+    "bytes": 479486444,
+    "readonlyOutsideSignatureTrees": true,
+    "rootMode": 320,
+    "signatureTreeModesPreserved": [
+      "frozen-artifacts/initial-signed-app/",
+      "frozen-artifacts/final-signed-app/",
+      "frozen-normal-controller-test-bundle/"
+    ],
+    "processForestAcceptance": false,
+    "macOSAcceptanceComplete": false
+  },
+  "postSealActualDeepStrictVerified": 2,
+  "CIPlan": {
+    "lane_swiftpm": "true",
+    "lane_app": "true",
+    "lane_contracts": "true",
+    "lane_rust_macos": "true",
+    "lane_rust_windows": "true"
+  },
+  "topLevelGateReceipts": {
+    "count": 71,
+    "exitZero": 64,
+    "exitNonzero": 7,
+    "allLogHashesMatch": true
+  }
+}

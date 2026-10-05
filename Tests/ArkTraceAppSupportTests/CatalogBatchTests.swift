@@ -6,15 +6,16 @@ import XCTest
 @testable import ArkTraceAppSupport
 
 /// Contract tests for the parallelized catalog load: after `metadata()`, the
-/// thread directory, CPU slices and counter series are fetched as ONE
-/// repository event batch (the Store executes it through its clone-and-verify
-/// connection path), under one shared deadline, with deterministic assembly
+/// thread directory and counter series use one event batch, while the CPU
+/// identity directory and activity sample use a dedicated typed read. Both
+/// share one deadline, with deterministic assembly
 /// and no partial catalog on cancellation.
 @MainActor
 final class CatalogBatchTests: XCTestCase {
     private actor BatchRecordingRepository: TraceRepositoryProtocol {
         let capabilities: TraceCapabilities
         var counterSeriesPage: [CounterSeriesDescriptor] = []
+        private(set) var recordedCPUCatalogs: [TraceCPUCatalogQuery] = []
         private(set) var recordedBatches: [TraceRepositoryEventBatch] = []
         private(set) var directCallNames: [String] = []
         var batchGate: CheckedContinuation<Void, Never>?
@@ -60,6 +61,14 @@ final class CatalogBatchTests: XCTestCase {
                 capabilities: capabilities,
                 dataQuality: TraceDataQuality()
             )
+        }
+
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog {
+            recordedCPUCatalogs.append(query)
+            await waitForGate()
+            try Task.checkCancellation()
+            return TraceCPUCatalog(cpus: TraceEventPage(items: [TraceCPUIdentity(cpu: 0), TraceCPUIdentity(cpu: 99)],
+                truncated: false), activity: TraceEventPage(items: [], truncated: true))
         }
 
         func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess> {
@@ -215,7 +224,12 @@ final class CatalogBatchTests: XCTestCase {
         XCTAssertEqual(catalogBatches.count, 1, "the catalog must be one event batch")
         let batch = try XCTUnwrap(catalogBatches.first)
         XCTAssertEqual(batch.threads.map(\.limit), [1_000])
-        XCTAssertEqual(batch.cpuSlices.map(\.limit), [20_000])
+        XCTAssertTrue(batch.cpuSlices.isEmpty)
+        let cpuQueries = await repository.recordedCPUCatalogs
+        let cpuQuery = try XCTUnwrap(cpuQueries.first)
+        XCTAssertEqual(cpuQueries.count, 1)
+        XCTAssertEqual(cpuQuery.limit, 4_096)
+        XCTAssertEqual(cpuQuery.activityLimit, 20_000)
         // Lanes are bounded by series, not by samples: a sample page lets one
         // busy series crowd every other out of the sidebar.
         XCTAssertTrue(batch.counters.isEmpty)
@@ -226,7 +240,7 @@ final class CatalogBatchTests: XCTestCase {
 
         // One deadline is shared by every query in the batch.
         let deadlines: [ContinuousClock.Instant?] = batch.threads.map(\.deadline)
-            + batch.cpuSlices.map { Optional($0.deadline) }
+            + [Optional(cpuQuery.deadline)]
             + batch.counters.map { Optional($0.deadline) }
             + batch.counterSeries.map { Optional($0.deadline) }
         XCTAssertEqual(Set(deadlines).count, 1, "catalog queries must share one deadline")
@@ -245,7 +259,8 @@ final class CatalogBatchTests: XCTestCase {
             controller.trackGroups.map(\.id),
             ["cpu", "cpu-counter", "process:3", "unattributed"]
         )
-        XCTAssertTrue(controller.trackGroups[0].truncated, "cpu page truncation must propagate")
+        XCTAssertFalse(controller.trackGroups[0].truncated, "activity truncation must not truncate the CPU identity directory")
+        XCTAssertEqual(controller.trackGroups[0].tracks.map(\.source), [.cpu(0), .cpu(99)])
         XCTAssertEqual(controller.trackGroups[2].title, "app [30]")
         XCTAssertEqual(controller.trackGroups[2].processKey, ProcessKey(ipid: 3))
         // One thread contributes its state lane and its slice lane, adjacent.
@@ -279,6 +294,8 @@ final class CatalogBatchTests: XCTestCase {
         let batch = try XCTUnwrap(recorded.first)
         XCTAssertTrue(batch.cpuSlices.isEmpty, "capability-unavailable queries must not be issued")
         XCTAssertTrue(batch.counters.isEmpty)
+        let cpuQueries = await repository.recordedCPUCatalogs
+        XCTAssertTrue(cpuQueries.isEmpty)
         XCTAssertEqual(batch.threads.count, 1)
         // With every capability off there are no per-thread or counter lanes,
         // so only the two cross-process groups remain and both report

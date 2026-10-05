@@ -663,6 +663,13 @@ ArkDeck 共同确定，fixture 拒绝路径不能充当成功路径。
 
 ### 11.1 Viewer 共享语义
 
+2026-10-06 默认 native App 的 CPU catalog 已接通共享 Core/SQLite/Rust/SDK 契约。
+CPU 身份目录独立于前 20,000 条活动样本，最多 4,096 个 signed CPU，两个 page
+分别报告 truncation；活动样本保留原先进程计数排序。身份查找与样本共用原有 VM、
+memory 和 absolute deadline。真实 signed bundle 的 public consumer 冷解析及缓存重开
+已到 Ready，GUI、性能和发行验收仍待完成；见
+[CPU 目录增量记录](migration-runs/AT-RUST-007-013-2026-10-06-cpu-catalog.md)。
+
 2026-10-05 已有显式 SDK 图下的 `TraceRustProductRuntime`，固定 Engine 同时供 document
 controllers 与 cache maintenance 使用；原 catalog/Rendering 通过 Core adapter 复用。
 标注兼容 IO 在 MainActor 外，close 前排空，sidecar 保持 owner-private。默认 App、native

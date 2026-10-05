@@ -4,6 +4,8 @@ import XCTest
 
 final class TraceSummaryTests: XCTestCase {
     private actor RepositoryStub: TraceRepositoryProtocol {
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         let traceMetadata: TraceMetadata
         let facts: TraceSummaryFacts
         let metadataDelay: Duration?

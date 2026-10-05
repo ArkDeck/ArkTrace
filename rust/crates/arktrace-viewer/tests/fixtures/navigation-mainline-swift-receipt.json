@@ -40,8 +40,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 104435,
-      "sha256": "69b8f117bb5bbd04d2ad9a30d23a1b3576c8238074fca30fd18e35430789accc"
+      "byteCount": 104176,
+      "sha256": "e5bb626dcb25a51d94c68054c18d153f051910089f9312d9debc15b7ef1e73b1"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -149,14 +149,19 @@
       "sha256": "40659ee9effb339dcf769e3326b05fab21b7856917a2138132bf0b8148d49331"
     },
     {
+      "path": "Sources/ArkTraceCore/Query/TraceCPUCatalog.swift",
+      "byteCount": 1724,
+      "sha256": "024815aca84efdff366a89e1ae9c789f9f14bd5bbe368705857bdab543612e22"
+    },
+    {
       "path": "Sources/ArkTraceCore/Query/TraceDensity.swift",
       "byteCount": 3873,
       "sha256": "2928b0c00f05efd0a7a9dd93c671037f3cba0651efbdf8e89aaef40cb2a0725d"
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceEventQueries.swift",
-      "byteCount": 9752,
-      "sha256": "5e1d3a1a70002d27ad808deaace4a5fc5ff212529092b8599ad6b11880d629a4"
+      "byteCount": 9744,
+      "sha256": "aca5ec6f3e2e864a4329537ccf26de56dc2fb386d0f2a92a0367b2fdce11f989"
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceFrameQuery.swift",
@@ -165,8 +170,8 @@
     },
     {
       "path": "Sources/ArkTraceCore/Query/TraceQueries.swift",
-      "byteCount": 17117,
-      "sha256": "f800ae84579cb3438c0d8a68632466c6838952828b684ced4233761e60479e69"
+      "byteCount": 17200,
+      "sha256": "6bca47633ca3ee379f9931f7130d509390157c834e073062862fcdfacd44b604"
     },
     {
       "path": "Sources/ArkTraceCore/Time/TraceTime.swift",
@@ -205,8 +210,8 @@
     },
     {
       "path": "Sources/ArkTraceStore/SQLiteTraceRepository.swift",
-      "byteCount": 160666,
-      "sha256": "c417cd91e669689cb261d6c8cfd3b04db118870fd44f6bb066aa32767525eef4"
+      "byteCount": 163579,
+      "sha256": "a5e5744b240ee347c357fc0371c5c3a284673cbc87c92ad23c4573101d13e761"
     },
     {
       "path": "Sources/ArkTraceStore/TraceDatabase.swift",
@@ -235,8 +240,8 @@
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/navigation_harness.swift",
-      "byteCount": 16616,
-      "sha256": "f9dc850436a7b5bcec01169b9da1b8607f70c76ef85d0cee4583d30789f77c7c"
+      "byteCount": 17195,
+      "sha256": "f017ae5b638b492e0614daaf20ed8c4856ce219cd1a2b6d807427d7fcb602cf5"
     },
     {
       "path": "rust/crates/arktrace-viewer/oracle/navigation_rendering_seam.swift",
@@ -297,8 +302,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "b505113928cfa9cc79bdb376becb0aa3fb85e410b6568bd6ef119d068a81b687",
-      "byteCount": 105906
+      "sha256": "305982aa5fdfaeeeedf6af1ab7cb6ccc83c58bd69be85329da9bae334bff7e98",
+      "byteCount": 105647
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -308,15 +313,15 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "f6f40675bd7302556650521f34720ba2ede1b2e53cc69665e400bb6471e31e27",
-    "byteCount": 6162
+    "sha256": "3229fe58d27ded96c724c3d958ba2ad27d6f6f9962a86a2612ccefd92910507b",
+    "byteCount": 7441
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "69b8f117bb5bbd04d2ad9a30d23a1b3576c8238074fca30fd18e35430789accc",
-      "byteCount": 104435
+      "sha256": "e5bb626dcb25a51d94c68054c18d153f051910089f9312d9debc15b7ef1e73b1",
+      "byteCount": 104176
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -358,8 +363,8 @@
   ],
   "harness": {
     "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/oracle/navigation_harness.swift",
-    "sha256": "f9dc850436a7b5bcec01169b9da1b8607f70c76ef85d0cee4583d30789f77c7c",
-    "byteCount": 16616
+    "sha256": "f017ae5b638b492e0614daaf20ed8c4856ce219cd1a2b6d807427d7fcb602cf5",
+    "byteCount": 17195
   },
   "inputs": [
     {
@@ -400,7 +405,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "71d3707541f6e395bb64b15cc78f6dfac75c483a",
-  "previousReceiptSHA256": "7a96cf81b3775dc89f82f41a73f7ea287f6239d8ef33798e65e02ef0b9df4bbd",
+  "revalidatedBaseCommit": "e2af494",
+  "previousReceiptSHA256": "4747ef1f0f2c5d3a6292d4367adb6598f835deb2b67e3f7e419292372774fef2",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }

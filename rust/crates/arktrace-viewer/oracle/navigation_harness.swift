@@ -43,6 +43,13 @@ private actor NavigationOracleRepository: TraceRepositoryProtocol {
     func threads(_ query: ThreadQuery) async throws -> BoundedPage<TraceThread> { BoundedPage(items:facts.threads,truncated:facts.threadsTruncated) }
     func processes(_ query: ProcessQuery) async throws -> BoundedPage<TraceProcess> { BoundedPage(items:[],truncated:false) }
     func summaryFacts(_ query: TraceSummaryQuery) async throws -> TraceSummaryFacts { throw CancellationError() }
+    func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog {
+        let cpus = Array(Set(facts.samples.map(\.cpu))).sorted()
+        return TraceCPUCatalog(cpus: TraceEventPage(items: cpus.prefix(query.limit).map { TraceCPUIdentity(cpu: $0) },
+            truncated: facts.cpuTruncated || cpus.count > query.limit),
+            activity: TraceEventPage(items: facts.samples.prefix(query.activityLimit).map { TraceCPUActivity(processKey: $0.processKey) },
+                truncated: facts.cpuTruncated || facts.samples.count > query.activityLimit))
+    }
     func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> { TraceEventPage(items:facts.samples,truncated:facts.cpuTruncated) }
     func counterSeries(_ query: CounterSeriesQuery) async throws -> TraceEventPage<CounterSeriesDescriptor> { TraceEventPage(items:facts.counters,truncated:facts.countersTruncated) }
     func frames(_ query: TraceFrameQuery) async throws -> TraceEventPage<TraceFrame> { TraceEventPage(items:facts.frames,truncated:false) }

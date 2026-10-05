@@ -46,6 +46,7 @@ final class RustColdContext: Sendable {
     private let pool: RustColdPool
     private let samples = Mutex(0)
     private let children: [String: [RustColdContext]]
+    private let singlePageFamilies: Set<String>
     let batchThreads: Bool
     let limit: Int
     let session: UInt64
@@ -56,7 +57,7 @@ final class RustColdContext: Sendable {
 
     init(limit: Int, session: UInt64, request: UInt64, inputBytes: Int, staging: RustRetainedStorage,
          maximumItems: Int = 100_000, maximumInputBytes: Int = 16 * 1024 * 1024,
-         pageLimits: [String: [Int]] = [:]) throws {
+         pageLimits: [String: [Int]] = [:], singlePageLimits: [String: Int] = [:]) throws {
         guard (1...1_000_000).contains(maximumItems), (1...(64 * 1024 * 1024)).contains(maximumInputBytes),
               (1...maximumItems).contains(limit), (1...maximumInputBytes).contains(inputBytes) else {
             throw RustAdmission.invalidBuffer
@@ -66,17 +67,24 @@ final class RustColdContext: Sendable {
         self.request = request
         self.maximumTextBytes = inputBytes
         self.staging = staging
-        let count = pageLimits.values.reduce(0) { $0 + $1.count }
-        guard count <= 32, pageLimits.values.allSatisfy({ $0.allSatisfy({ (1...100_000).contains($0) }) }) else {
+        let count = pageLimits.values.reduce(0) { $0 + $1.count } + singlePageLimits.count
+        guard count <= 32, Set(pageLimits.keys).isDisjoint(with: singlePageLimits.keys),
+              singlePageLimits.values.allSatisfy({ (1...100_000).contains($0) }),
+              pageLimits.values.allSatisfy({ $0.allSatisfy({ (1...100_000).contains($0) }) }) else {
             throw RustAdmission.invalidBuffer
         }
         let sharedPool = try RustColdPool(inputBytes: inputBytes, staging: staging, contextCount: count)
         pool = sharedPool
         batchThreads = false
+        singlePageFamilies = Set(singlePageLimits.keys)
         var contexts: [String: [RustColdContext]] = [:]
         for (family, limits) in pageLimits {
             contexts[family] = limits.map { RustColdContext(limit: $0, session: session, request: request,
                 pool: sharedPool, batchThreads: family == "threads") }
+        }
+        for (family, limit) in singlePageLimits {
+            contexts[family] = [RustColdContext(limit: limit, session: session, request: request,
+                pool: sharedPool, batchThreads: false)]
         }
         children = contexts
     }
@@ -85,11 +93,14 @@ final class RustColdContext: Sendable {
         self.limit = limit; self.session = session; self.request = request; self.pool = pool
         maximumTextBytes = pool.maximumTextBytes; staging = pool.staging
         self.batchThreads = batchThreads; children = [:]
+        singlePageFamilies = []
     }
 
     func context(for path: [any CodingKey]) throws -> RustColdContext {
         guard !children.isEmpty, path.count >= 3, path[0].stringValue == "body" else { return self }
-        guard let family = children[path[1].stringValue], let index = path[2].intValue,
+        let familyName = path[1].stringValue
+        if singlePageFamilies.contains(familyName), let context = children[familyName]?.first { return context }
+        guard let family = children[familyName], let index = path[2].intValue,
               family.indices.contains(index) else { throw RustAdmission.invalidBuffer }
         return family[index]
     }

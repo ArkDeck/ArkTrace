@@ -14,6 +14,8 @@ extension TimelineRenderingTests {
         let capabilityAvailable: Bool
     }
     private actor DetailOracleRepository: TraceRepositoryProtocol {
+    func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         let vector: DetailOracleVector
         init(_ vector: DetailOracleVector) { self.vector = vector }
         func page<T: Sendable>(_ items: [T]) -> TraceEventPage<T> {

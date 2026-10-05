@@ -74,6 +74,17 @@ final class TraceDocumentControllerTests: XCTestCase {
             )
         }
 
+        func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog {
+            guard capabilities.cpuScheduling else { return .unavailable }
+            let cpus = Array(Set(cpuRows.map(\.cpu))).sorted()
+            return TraceCPUCatalog(
+                cpus: TraceEventPage(items: cpus.prefix(query.limit).map { TraceCPUIdentity(cpu: $0) },
+                    truncated: cpus.count > query.limit),
+                activity: TraceEventPage(items: cpuRows.prefix(query.activityLimit).map { TraceCPUActivity(processKey: $0.processKey) },
+                    truncated: cpuRows.count > query.activityLimit)
+            )
+        }
+
         func cpuSlices(_ query: CpuSliceQuery) async throws -> TraceEventPage<CpuSlice> {
             TraceEventPage(
                 items: Array(cpuRows.prefix(query.limit)),

@@ -183,6 +183,8 @@ extension TimelineRenderingTests {
         let limit: Int
     }
     private actor ParallelPlanRepository: TraceRepositoryProtocol {
+    func cpuCatalog(_ query: TraceCPUCatalogQuery) async throws -> TraceCPUCatalog { .unavailable }
+
         let vector: ParallelPlan
         var densityCalls: [ParallelDensityCall] = []
         var detailCalls: [ParallelDetailCall] = []
