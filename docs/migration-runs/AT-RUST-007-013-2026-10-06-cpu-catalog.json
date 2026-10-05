@@ -49,7 +49,9 @@
       "DeveloperIDReviewCandidate",
       "frozenDeepStrictSignature"
     ],
-    "canonicalOracleOutputsUnchanged": true
+    "canonicalOracleOutputsUnchanged": true,
+    "nativeSwiftSDKMode": "fixtures",
+    "finalNormalSelectedSwiftPassed": 54
   },
   "actualPublicRuntime": {
     "freshParseReceipt": "54-final-empty-root-parse-reopen.receipt.json",

@@ -1031,50 +1031,25 @@ public final class TraceDocumentController {
         else { return }
         let generation = documentGeneration
         argumentsTask = ownedTask { [weak self] in
-            guard !Task.isCancelled, let argSetID = await Self.argumentSetID(
-                for: event, in: repository
-            ), !Task.isCancelled else { return }
-            guard let query = try? TraceArgumentQuery(
-                argSetID: argSetID,
-                deadline: ContinuousClock.now.advanced(by: .seconds(5))
-            ), let page = try? await repository.arguments(query) else { return }
-            guard let self, !Task.isCancelled, generation == self.documentGeneration,
+            let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+            // Resolve only this event's argsetid, keeping it out of the covering
+            // viewport query (DESIGN §14.2.4).
+            guard !Task.isCancelled,
+                let lookup = try? SelectedEventArgumentLookup(event: event, deadline: deadline),
+                let slices = try? await repository.slices(lookup.sliceQuery),
+                lookup.allowsPublication(now: .now, isCancelled: Task.isCancelled),
+                let argSetID = slices.items.first?.argSetID,
+                let query = try? lookup.argumentsQuery(argSetID: argSetID),
+                let page = try? await repository.arguments(query)
+            else { return }
+            guard let self,
+                lookup.allowsPublication(now: .now, isCancelled: Task.isCancelled),
+                generation == self.documentGeneration,
                 self.selectedEvent?.key == key
             else { return }
             self.selectedEventArguments = page.items
             self.selectedEventArgumentsTruncated = page.truncated
         }
-    }
-
-    /// Resolves one selected slice's arg set with a bounded query keyed by the
-    /// event itself.
-    ///
-    /// It deliberately does *not* ride along on the snapshot. `argsetid` is in
-    /// no ArkTrace index, so carrying it through the viewport query costs a
-    /// table lookup per visible slice and drops that query off its covering
-    /// index — measured at +20% p95 on the pinned medium fixture. Here it is
-    /// one row for the one slice the user selected (DESIGN §14.2.4).
-    private static func argumentSetID(
-        for event: TraceEventInspector,
-        in repository: any TraceRepositoryProtocol
-    ) async -> Int64? {
-        // An instant has a degenerate range; widen it by a nanosecond so the
-        // query range stays valid (AT-TIME-006).
-        guard let range = try? TraceTimeRange.query(
-            startNs: event.range.startNs,
-            endNs: max(event.range.startNs + 1, event.range.endNs)
-        ),
-            let query = try? TraceSliceQuery(
-                range: range,
-                eventKey: event.key,
-                threadKey: event.threadKey,
-                includesArgumentSet: true,
-                limit: 1,
-                deadline: ContinuousClock.now.advanced(by: .seconds(5))
-            ),
-            let page = try? await repository.slices(query)
-        else { return nil }
-        return page.items.first?.argSetID
     }
 
     public func hoverEvent(_ key: EventKey?) {
@@ -1753,7 +1728,9 @@ public final class TraceDocumentController {
 
     private func revealRange(_ eventRange: TraceTimeRange) {
         guard let bounds = try? traceBounds() else { return }
-        let padding = max(1, min(bounds.durationNs / 20, max(1, eventRange.durationNs * 4)))
+        let cap = max(1, bounds.durationNs / 20)
+        let (scaledDuration, durationOverflow) = eventRange.durationNs.multipliedReportingOverflow(by: 4)
+        let padding = min(cap, durationOverflow ? cap : max(1, scaledDuration))
         let start = max(bounds.startNs, eventRange.startNs - min(eventRange.startNs, padding))
         let (rawEnd, overflow) = eventRange.endNs.addingReportingOverflow(padding)
         let end = min(bounds.endNs, overflow ? bounds.endNs : rawEnd)

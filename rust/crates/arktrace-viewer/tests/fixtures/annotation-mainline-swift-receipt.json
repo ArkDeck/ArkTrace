@@ -47,6 +47,11 @@
       "sha256": "16b75f985a9aa03c90871a3549770a081f65702a2161cee453b1ac311fc0d830"
     },
     {
+      "path": "Sources/ArkTraceAppSupport/SelectedEventArgumentLookup.swift",
+      "byteCount": 1526,
+      "sha256": "88c48a8966e8abeda9a7484f036490fd04c6def759e8236bbdfa5855e25204ed"
+    },
+    {
       "path": "Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift",
       "byteCount": 3872,
       "sha256": "b2f8400920591121e79c2bd759a9fe292552d82c149a2e8081336fc8ab6f24d7"
@@ -58,8 +63,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 104176,
-      "sha256": "e5bb626dcb25a51d94c68054c18d153f051910089f9312d9debc15b7ef1e73b1"
+      "byteCount": 103317,
+      "sha256": "7b687f524d8d1b9c05c8912da1ef8bf18f7a4e0a9a530f7bcdd8bda0550bc661"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -288,8 +293,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 112525,
-      "sha256": "0a80b62d95744720c3553435d1df0b8e6c7931b9e44dd2c25ba7c3c243938873"
+      "byteCount": 118961,
+      "sha256": "bb87295ab9a0c6724eb7b42b8a1165bac81c4c4ea1fd230d0f9e46babf764731"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
@@ -335,13 +340,13 @@
   "cacheOnlyAugmentedSources": [
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 106531,
-      "sha256": "6a7c74bd4efe1763c3f89f7c667574e40750a6eb15edfd1a6e998d846556ea78"
+      "byteCount": 105672,
+      "sha256": "89d96469370bfb76be8f08310f6c53c6d920746a6e97f78813d2c517603c8853"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 122410,
-      "sha256": "035a92379f9ac4eab35f14a253a5810eb23bb99e1e97c48d8bd769ae6dc2c4d9"
+      "byteCount": 128846,
+      "sha256": "713b586466ff1af21022f13be332aabb02f627341faf4d8050cbdb10c0902166"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Package.swift",
@@ -379,6 +384,6 @@
     "sha256": "7c889e65791fd29cc7a90bfd5e7a25a732bb9b8559a1d9556b03bee3689eae83"
   },
   "rawReceiptSHA256": "e96998afbb88e3ae7dfc4ed3facd12898b2760907fb1d025689bfe24d969918a",
-  "revalidatedBaseCommit": "e2af494",
-  "previousReceiptSHA256": "517628edced309a0167a133aec1731429c8c54210dd9c080a38a45eeab938943"
+  "revalidatedBaseCommit": "298c8db",
+  "previousReceiptSHA256": "8f9b4bde2443ee77e807be31fad27eea565c8dddc5d00c4c3c66397702d2d299"
 }

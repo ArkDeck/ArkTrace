@@ -13,7 +13,7 @@ Core、SQLite、Rust Store/Engine、Swift SDK 与 Controller 共用这一契约�
 | 检查 | 结果 |
 |---|---|
 | Rust | workspace/all-features 549 passed，0 ignored；all-targets/all-features check、clippy `-D warnings`、fmt 与 verifier 通过 |
-| Swift | 默认 631 passed，native 732 passed；各 6 个既有显式 opt-in skips，无 compiler warning |
+| Swift | 默认 631 passed，native fixture SDK 732 passed；各 6 个既有显式 opt-in skips，无 compiler warning；最终正常 SDK 另跑 54 项相关回归 |
 | SDK/API | 94 SDK tests、4 borrow compile-negative controls、五个独立 reference 编译、默认与最终正常 SDK API baseline 通过 |
 | App | 最终正常 SDK Debug/Release/resource compile gate、优化 Developer ID review candidate、复制后的 deep/strict 签名核验通过 |
 | 既有 oracle | 当前 Swift 实际重放，既有 canonical 输出保持一致；更新当前 receipts，没有修改 goldens |

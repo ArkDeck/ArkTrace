@@ -18,6 +18,10 @@ final class TraceDocumentControllerTests: XCTestCase {
         let cpuRows: [CpuSlice]
         let counterRows: [CounterSeries]
         let argumentRows: [Int64: [TraceEventArgument]]
+        let argumentDelay: Duration
+        private var sliceArgumentDeadlines: [ContinuousClock.Instant] = []
+        private var argumentDeadlines: [ContinuousClock.Instant] = []
+        private var returnedArgumentPages = 0
         private var densityQueryCount = 0
 
         init(
@@ -31,7 +35,8 @@ final class TraceDocumentControllerTests: XCTestCase {
             threads: [TraceThread] = [],
             cpuSlices: [CpuSlice] = [],
             counters: [CounterSeries] = [],
-            arguments: [Int64: [TraceEventArgument]] = [:]
+            arguments: [Int64: [TraceEventArgument]] = [:],
+            argumentDelay: Duration = .zero
         ) {
             self.identity = identity
             self.durationNs = durationNs
@@ -41,6 +46,7 @@ final class TraceDocumentControllerTests: XCTestCase {
             cpuRows = cpuSlices
             counterRows = counters
             argumentRows = arguments
+            self.argumentDelay = argumentDelay
         }
 
         func metadata() async throws -> TraceMetadata {
@@ -105,6 +111,7 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
 
         func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice> {
+            if query.includesArgumentSet { sliceArgumentDeadlines.append(query.deadline) }
             let matches = sliceRows.filter { slice in
                 let nameMatches: Bool
                 switch query.name {
@@ -141,12 +148,21 @@ final class TraceDocumentControllerTests: XCTestCase {
         func observedDensityQueryCount() -> Int { densityQueryCount }
 
         func arguments(_ query: TraceArgumentQuery) async throws -> TraceEventPage<TraceEventArgument> {
+            argumentDeadlines.append(query.deadline)
+            if argumentDelay > .zero { try await Task.sleep(for: argumentDelay) }
             let rows = argumentRows[query.argSetID] ?? []
+            returnedArgumentPages += 1
             return TraceEventPage(
                 items: Array(rows.prefix(query.limit)),
                 truncated: rows.count > query.limit
             )
         }
+
+        func argumentLookupDeadlines() -> ([ContinuousClock.Instant], [ContinuousClock.Instant]) {
+            (sliceArgumentDeadlines, argumentDeadlines)
+        }
+
+        func argumentPagesReturned() -> Int { returnedArgumentPages }
     }
 
     private actor CloseRecorder {
@@ -1315,11 +1331,102 @@ final class TraceDocumentControllerTests: XCTestCase {
         XCTAssertNil(controller.selectedRange)
         XCTAssertEqual(controller.timelineFocusRequestID, focusBefore)
 
+        let (sliceDeadlines, argumentDeadlines) = await repository.argumentLookupDeadlines()
+        XCTAssertEqual(sliceDeadlines.count, 2)
+        XCTAssertEqual(sliceDeadlines, argumentDeadlines,
+            "Selected event identity and arguments must share one absolute deadline")
+
         controller.open(source)
         XCTAssertTrue(controller.selectedEventArguments.isEmpty)
         XCTAssertFalse(controller.selectedEventArgumentsTruncated)
         while controller.phase != .ready { await Task.yield() }
         await controller.close()
+    }
+
+    func testExpiredArgumentPageCannotPublishIntoInspector() async throws {
+        let suite = "ArkTraceLateArgumentTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let key = EventKey(table: .callstack, rowID: 1)
+        let slice = TraceSlice(key: key,
+            range: try TraceTimeRange(startNs: 200, endNs: 260),
+            threadKey: ThreadKey(itid: 1), processKey: ProcessKey(ipid: 1),
+            name: "late", category: nil, depth: 0, parentEventKey: nil,
+            isAsync: false, isOpenEnded: false, argSetID: 1)
+        let repository = Repository(identity: "a",
+            capabilities: TraceCapabilities(cpuScheduling: false, threadStates: false,
+                namedSlices: true, cpuCounters: false, processCounters: false),
+            slices: [slice], threads: [Self.makeThread(itid: 1, ipid: 1, name: "worker")],
+            arguments: [1: [TraceEventArgument(key: "late", value: "stale", typeName: nil)]],
+            argumentDelay: .milliseconds(5_100))
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults), maintenance: nil,
+            opener: { _, _ in TraceOpenedDocument(repository: repository,
+                cacheHit: false, cacheMetadata: nil, close: {}) })
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-late-arguments-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        let readyBound = ContinuousClock.now.advanced(by: .seconds(10))
+        while controller.phase != .ready, controller.phase != .failed,
+              ContinuousClock.now < readyBound { await Task.yield() }
+        XCTAssertEqual(controller.phase, .ready)
+        guard controller.phase == .ready else {
+            try await controller.closeForProductShutdown(); return
+        }
+        controller.selectEvent(key)
+        XCTAssertEqual(controller.selectedEvent?.key, key)
+        let bound = ContinuousClock.now.advanced(by: .seconds(10))
+        while await repository.argumentPagesReturned() == 0, ContinuousClock.now < bound {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        let returned = await repository.argumentPagesReturned()
+        XCTAssertEqual(returned, 1, "The adversarial repository must actually return the expired page")
+        for _ in 0..<100 { await Task.yield() }
+        XCTAssertTrue(controller.selectedEventArguments.isEmpty)
+        XCTAssertFalse(controller.selectedEventArgumentsTruncated)
+        try await controller.closeForProductShutdown()
+    }
+
+    func testSearchRevealSpanningMaximumDurationDoesNotOverflow() async throws {
+        let suite = "ArkTraceMaximumRevealTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let range = try TraceTimeRange.query(startNs: 0, endNs: .max)
+        let slice = TraceSlice(key: EventKey(table: .callstack, rowID: 1), range: range,
+            threadKey: ThreadKey(itid: 1), processKey: ProcessKey(ipid: 1),
+            name: "huge", category: nil, depth: 0, parentEventKey: nil,
+            isAsync: false, isOpenEnded: false, argSetID: nil)
+        let repository = Repository(identity: "a", durationNs: .max,
+            capabilities: TraceCapabilities(cpuScheduling: false, threadStates: false,
+                namedSlices: true, cpuCounters: false, processCounters: false),
+            slices: [slice], threads: [Self.makeThread(itid: 1, ipid: 1, name: "worker")])
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults), maintenance: nil,
+            opener: { _, _ in TraceOpenedDocument(repository: repository,
+                cacheHit: false, cacheMetadata: nil, close: {}) })
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-maximum-reveal-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        let bound = ContinuousClock.now.advanced(by: .seconds(10))
+        while controller.phase != .ready, controller.phase != .failed,
+              ContinuousClock.now < bound { await Task.yield() }
+        XCTAssertEqual(controller.phase, .ready)
+        guard controller.phase == .ready else {
+            try await controller.closeForProductShutdown(); return
+        }
+        controller.search("huge")
+        while controller.isSearching, ContinuousClock.now < bound { await Task.yield() }
+        let targetIndex = try XCTUnwrap(controller.searchResults.items.firstIndex {
+            $0.eventKey == slice.key && $0.range == range
+        })
+        for _ in 0...targetIndex { XCTAssertTrue(controller.stepSearchResult(by: 1)) }
+        XCTAssertTrue(controller.activateSearchResult())
+        XCTAssertEqual(controller.snapshot?.viewport.range, range)
+        try await controller.closeForProductShutdown()
     }
 
     /// Annotations are session state. Upstream's `m` keeps only the newest
