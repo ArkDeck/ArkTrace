@@ -1,0 +1,236 @@
+{
+  "baseCommit": "1a38d7febcbb87cd3cc89890689db20a68fa4855",
+  "importedTest": "Tests/ArkTraceRenderingTests/NativePackedCanvasKeyboardTests.swift",
+  "importedSHA256": "c0bec9bb160a1114ba2018416466c4c17ea152b0b145b16553d17959e9242955",
+  "productionInputsUnchanged": 348,
+  "sourceChanges": [
+    "Tests/ArkTraceRenderingTests/NativePackedCanvasKeyboardTests.swift",
+    "docs/RUST_CORE_MIGRATION_TASKS.md",
+    "docs/migration-runs/AT-RUST-011-013-2026-10-06-native-keyboard-regression.json",
+    "docs/migration-runs/AT-RUST-011-013-2026-10-06-native-keyboard-regression.md",
+    "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+  ],
+  "allFinalGatesPassed": true,
+  "finalSelectedMacOSGates": [
+    "11-migration-verifier",
+    "12b-default-build",
+    "13b-default-full-test",
+    "14-native-full-test",
+    "20-fmt",
+    "23-workspace-verifier",
+    "24-generator",
+    "25-migration-contract-tests",
+    "26-rust-build",
+    "21-clippy",
+    "22-rust-workspace",
+    "27-migration-smoke",
+    "28-json-roundtrip",
+    "29-ffi-contract",
+    "32-sdk-artifact",
+    "30-sdk-consumer",
+    "31-sdk-reference-1",
+    "31-sdk-reference-2",
+    "31-sdk-reference-3",
+    "31-sdk-reference-4",
+    "31-sdk-reference-5"
+  ],
+  "rootReceipts": [
+    {
+      "label": "01-facts-refresh",
+      "exitCode": 0,
+      "receiptSHA256": "ce16538a7b6358aab4f359ca2a13690b642a7a476c27186ce824905ff58a5c78"
+    },
+    {
+      "label": "11-migration-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "d1889d8e7c26dcee27783aa84ae988e87b98abeb60d858d13e49273417c48db6"
+    },
+    {
+      "label": "12b-default-build",
+      "exitCode": 0,
+      "receiptSHA256": "e3ec6bf3e50fd72daa76f4921472d395a9104cba40141db36b79b2459354cb78"
+    },
+    {
+      "label": "13b-default-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "79b4f00f3b1bd7f3105824f011158e0529c6486a976ca872184e66c82516b988"
+    },
+    {
+      "label": "14-native-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "14d0b9e26b1f07e24e8764d64506ab56ec38c956d297cae5c0d80e102e6234c9"
+    },
+    {
+      "label": "20-fmt",
+      "exitCode": 0,
+      "receiptSHA256": "775498a06607f996335e10d5be106aa5955bf33216c56fae033c7a78b8488bbb"
+    },
+    {
+      "label": "21-clippy",
+      "exitCode": 0,
+      "receiptSHA256": "9c8d3b9b0bc35bb1e1cefd336078004e8d34fdad2396bee72cbe82b08f38ffe4"
+    },
+    {
+      "label": "22-rust-workspace",
+      "exitCode": 0,
+      "receiptSHA256": "04f37aa71bc2594dd669e1c1ea53361d1ed0074d62a2813ba48c9d26974905ee"
+    },
+    {
+      "label": "23-workspace-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "8e2337021b19c939eebd8cecc7612ebcabb36f8b3352c868e32036a230407625"
+    },
+    {
+      "label": "24-generator",
+      "exitCode": 0,
+      "receiptSHA256": "8d99c764587af536b0cc10522d868f25473c2fd45429bae73aaac81c2b86cb64"
+    },
+    {
+      "label": "25-migration-contract-tests",
+      "exitCode": 0,
+      "receiptSHA256": "0f71b5f10b479ee8549f99e34994f3680410e6e95d2c5f6d38763015d2438747"
+    },
+    {
+      "label": "26-rust-build",
+      "exitCode": 0,
+      "receiptSHA256": "11678faff8241c789529f587811b06b11ab056f77abbda289be15e6b670f69d5"
+    },
+    {
+      "label": "27-migration-smoke",
+      "exitCode": 0,
+      "receiptSHA256": "0d32d6add21cd8e7127d1498dee99c6409c2f7161fba21cef3b6c8daf55414bb"
+    },
+    {
+      "label": "28-json-roundtrip",
+      "exitCode": 0,
+      "receiptSHA256": "f74aa704c1ccef81c00bd65c8c1df11434bf0e2ccff058b66660d078d18aaccb"
+    },
+    {
+      "label": "29-ffi-contract",
+      "exitCode": 0,
+      "receiptSHA256": "a11d1eaf7bc3301c06afdfacf08c7a8b5870849a05d8ad7c5183aec5dbbe9afb"
+    },
+    {
+      "label": "30-sdk-consumer",
+      "exitCode": 0,
+      "receiptSHA256": "67db92709b3c7540812e05ddfaa1836d9fc501b0ec91bafff2ef02d2adfd72b2"
+    },
+    {
+      "label": "31-sdk-reference-1",
+      "exitCode": 0,
+      "receiptSHA256": "01fab6e079e1e12d475ef181308a2f64218e4a65318d2ef94fd409415b2bad24"
+    },
+    {
+      "label": "31-sdk-reference-2",
+      "exitCode": 0,
+      "receiptSHA256": "fe031d502fedc40fba91b263bf9dfe0d2d6618517fba234ba85656d98c6931ef"
+    },
+    {
+      "label": "31-sdk-reference-3",
+      "exitCode": 0,
+      "receiptSHA256": "91c085c0478fb20523afaf52b88f2bf84ac9807fcca148cb7ab04710a4fcdeb3"
+    },
+    {
+      "label": "31-sdk-reference-4",
+      "exitCode": 0,
+      "receiptSHA256": "949118310c48047a4cc2f3b4b5e35abfae831bc1b89ddfe652fde9dbc84ab3a1"
+    },
+    {
+      "label": "31-sdk-reference-5",
+      "exitCode": 0,
+      "receiptSHA256": "e96dfc5167873bb532d2fe5ef2358509ca7e7cb80271ed9b36ce956ad49ada15"
+    },
+    {
+      "label": "32-sdk-artifact",
+      "exitCode": 0,
+      "receiptSHA256": "340f5a7394e267c11eaecef95833255abee4e209d0caa9955dfcefd108bb1f82"
+    }
+  ],
+  "rootReceiptCount": 22,
+  "nonzeroExits": 0,
+  "swift": {
+    "13b-default-full-test": {
+      "passed": 641,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTests": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    },
+    "14-native-full-test": {
+      "passed": 761,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTests": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    }
+  },
+  "rust": {
+    "passed": 570,
+    "includesDocTests": 6,
+    "failed": 0,
+    "ignored": 0
+  },
+  "actualNativeKeyboardTests": 3,
+  "actualConvertCalls": 5,
+  "actualCurrentLoaderCalls": 5,
+  "actualKeyDown": 90,
+  "typedLeafComparisons": 1652,
+  "unavailableEventActivations": 0,
+  "keyboardGroups": [
+    {
+      "group": "counters",
+      "actualConvertCalls": 1,
+      "actualCurrentLoaderCalls": 1,
+      "actualKeyEvents": 18,
+      "sha256": "4b105bcee18b6fa59acd612e13c4a35436b9446e461b16b7899438c20198ec98"
+    },
+    {
+      "group": "frames",
+      "actualConvertCalls": 1,
+      "actualCurrentLoaderCalls": 1,
+      "actualKeyEvents": 18,
+      "sha256": "ada771de10a66373a45f83cfb09a66bd96a49fc697357a1f4f7f2a2cae84c409"
+    },
+    {
+      "group": "named-slices",
+      "actualConvertCalls": 3,
+      "actualCurrentLoaderCalls": 3,
+      "actualKeyEvents": 54,
+      "sha256": "ae4e645977c32e6f49c0917485336f47290757a51916a27bd89310ff50b6e67c"
+    }
+  ],
+  "currentContractDigest": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+  "ABI": 2,
+  "snapshotFormat": 2,
+  "toolchain": {
+    "rust": "1.99.0",
+    "xcode": "27.0",
+    "swift": "6.4"
+  },
+  "appBuild": "Reused preceding 1a38d7f artifact; complete production input bytes unchanged; App lane not selected",
+  "WindowsNativeAcceptance": false,
+  "GUIAcceptance": false,
+  "actualRustPackCallsInCanvasTest": 0,
+  "actualEngineLoadCallsInCanvasTest": 0,
+  "goalComplete": false,
+  "goalManagerStatus": "blocked",
+  "artifactObservation": {
+    "path": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Products/Debug/ArkTraceRenderingTests.xctest",
+    "executableSHA256": "a92cde0ac69a7efababf3e24da8f55a0f832223a80d6128243d79b4982e6c84b",
+    "executableMtimeUnix": 1791239046.951873,
+    "fullTestFinishedAtUnix": 1791238991.54103,
+    "mtimeNotNewerThanFullTest": false
+  }
+}
