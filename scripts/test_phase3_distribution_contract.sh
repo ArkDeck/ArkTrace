@@ -21,12 +21,14 @@ mkdir -p "$repository/scripts" "$repository/ArkTrace.xcodeproj" \
     "$repository/Config" \
     "$repository/ThirdParty/TraceStreamer/macx" \
     "$repository/ThirdParty/TraceStreamer/LICENSES" \
-    "$repository/Fixtures/release-evidence" "$fake_bin"
+    "$repository/Fixtures/release-evidence" "$repository/contracts" "$fake_bin"
+cp "$source_scripts/../contracts/ffi-v1.sha256" "$repository/contracts/"
 cp "$source_scripts/build_phase3_distribution_candidate.sh" \
     "$source_scripts/package_phase3.sh" \
     "$source_scripts/verify_phase3_notarized_artifact.sh" \
     "$source_scripts/verify_phase3_evidence_times.py" \
-    "$source_scripts/phase3_shell_safety.sh" "$repository/scripts/"
+    "$source_scripts/phase3_shell_safety.sh" \
+    "$source_scripts/native_app_distribution_safety.sh" "$repository/scripts/"
 chmod +x "$repository/scripts/"*.sh
 PYTHONDONTWRITEBYTECODE=1 python3 -B \
     "$repository/scripts/verify_phase3_evidence_times.py" \
@@ -91,19 +93,37 @@ SH
 cat >"$fake_bin/xcodebuild" <<'SH'
 #!/bin/sh
 archive=
+project=
 printf 'xcodebuild' >>"$ARKTRACE_FAKE_OPERATION_LOG"
 for argument in "$@"; do printf ' %s' "$argument" >>"$ARKTRACE_FAKE_OPERATION_LOG"; done
 printf '\n' >>"$ARKTRACE_FAKE_OPERATION_LOG"
 while [ "$#" -gt 0 ]; do
-    if [ "$1" = -archivePath ]; then archive=$2; shift 2; else shift; fi
+    case "$1" in
+        -archivePath) archive=$2; shift 2 ;;
+        -project) project=$2; shift 2 ;;
+        *) shift ;;
+    esac
 done
 [ -n "$archive" ] || exit 2
 mkdir -p "$archive/Products/Applications"
 /usr/bin/ditto --noqtn "$ARKTRACE_FAKE_SOURCE_APP" \
     "$archive/Products/Applications/ArkTrace.app"
+native_inputs="$(dirname "$project")/.arktrace-native/AppInputs"
+for resource in \
+    'Helpers/arktrace-host-process:Contents/Helpers/arktrace-host-process' \
+    'Helpers/trace_streamer:Contents/Helpers/trace_streamer' \
+    'TraceStreamer/manifest.json:Contents/Resources/TraceStreamer/manifest.json' \
+    'ArkTraceRuntime/manifest.json:Contents/Resources/ArkTraceRuntime/manifest.json'
+do
+    target="$archive/Products/Applications/ArkTrace.app/${resource#*:}"
+    mkdir -p "$(dirname "$target")"
+    cp "${native_inputs}/${resource%%:*}" "$target"
+    case "$resource" in Helpers/*) chmod 555 "$target" ;; esac
+done
 case "${ARKTRACE_FAKE_ARCHIVE_LICENSE_DRIFT:-}" in
     inventory) printf 'drift\n' >>"$archive/Products/Applications/ArkTrace.app/Contents/Resources/license-inventory.json" ;;
     file) printf 'drift\n' >>"$archive/Products/Applications/ArkTrace.app/Contents/Resources/Licenses/component.txt" ;;
+    native) printf 'drift\n' >>"$archive/Products/Applications/ArkTrace.app/Contents/Helpers/arktrace-host-process" ;;
 esac
 SH
 cat >"$fake_bin/codesign" <<'SH'
@@ -135,13 +155,19 @@ case " $* " in
         printf '<?xml version="1.0"?><plist version="1.0"><dict/></plist>\n'
         exit 0 ;;
 esac
+for last; do :; done
 case " $* " in
-    *' --sign '*' trace_streamer '*)
-        for last; do :; done
-        printf 'developer-id-signature\n' >>"$last" ;;
+    *' --sign '*)
+        case "$(basename "$last")" in
+            trace_streamer|arktrace-host-process) printf 'developer-id-signature\n' >>"$last" ;;
+        esac ;;
 esac
 case " $* " in
     *' -dv '*|*' -d '*)
+        case "$(basename "$last")" in
+            arktrace-host-process) printf 'Identifier=com.arktrace.ArkTrace.host-process\n' >&2 ;;
+            trace_streamer) printf 'Identifier=com.arktrace.ArkTrace.trace-streamer\n' >&2 ;;
+        esac
         printf 'Authority=Developer ID Application: ArkTrace Test (TEAMTEST01)\n' >&2
         printf 'TeamIdentifier=TEAMTEST01\nCodeDirectory v=20500 size=123 flags=0x10000(runtime) hashes=1+1 location=embedded\nTimestamp=Aug 13, 2026\nCDHash=0123456789abcdef0123456789abcdef01234567\n' >&2 ;;
 esac
@@ -194,6 +220,32 @@ for last; do :; done
 SH
 chmod +x "$fake_bin/"*
 
+# Pure release orchestration fixture: no synthetic bytes execute as a parser
+# or native runtime, and this test does not establish Developer ID acceptance.
+cat >"$repository/scripts/prepare_macos_native_app.py" <<'PY'
+import argparse,hashlib,json,subprocess
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--workspace',type=Path,required=True)
+p.add_argument('--signing-identity',required=True);p.add_argument('--sdk');a=p.parse_args()
+root=a.workspace;inputs=root/'.arktrace-native/AppInputs'
+digest=lambda data:hashlib.sha256(data).hexdigest()
+helper=b'synthetic native helper\n';parser=(root/'ThirdParty/TraceStreamer/macx/trace_streamer').read_bytes()
+publisher={'teamIdentifier':'TEAMTEST01','helperCodeIdentifier':'com.arktrace.ArkTrace.host-process','parserCodeIdentifier':'com.arktrace.ArkTrace.trace-streamer'}
+for name,data in [('arktrace-host-process',helper),('trace_streamer',parser)]:
+ target=inputs/'Helpers'/name;target.parent.mkdir(parents=True,exist_ok=True)
+ if target.exists(): target.chmod(0o700)
+ target.write_bytes(data)
+ subprocess.run(['codesign','--force','--sign',a.signing_identity,'--options','runtime','--timestamp',str(target)],check=True)
+ target.chmod(0o555)
+manifest=json.loads((root/'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
+manifest['binarySHA256']=digest((inputs/'Helpers/trace_streamer').read_bytes())
+runtime={'formatVersion':1,'contractSHA256':(root/'contracts/ffi-v1.sha256').read_text().strip(),'helperSHA256':digest((inputs/'Helpers/arktrace-host-process').read_bytes()),'publisher':publisher}
+for name,value in [('TraceStreamer/manifest.json',manifest),('ArkTraceRuntime/manifest.json',runtime),('receipt.json',{'inputs':{'unsignedHelperSHA256':digest(helper)}})]:
+ target=inputs/name;target.parent.mkdir(parents=True,exist_ok=True)
+ target.write_text(json.dumps(value))
+print(json.dumps({'relativeSDK':'.arktrace-native/fixture/CArkTrace.xcframework','runtimeUsable':True,'releaseAcceptance':False}))
+PY
+
 git -C "$repository" init -q
 PATH="$fake_bin:$PATH" \
 ARKTRACE_FAKE_SOURCE_APP="$source_app" \
@@ -223,7 +275,7 @@ helper_line=$(grep -n 'codesign.*trace_streamer' "$operation_log" | head -1 | cu
 app_line=$(grep -n 'codesign.*ArkTrace.app' "$operation_log" | tail -1 | cut -d: -f1)
 [ "$helper_line" -lt "$app_line" ] || fail "outer App was signed before its nested helper"
 
-for drift in inventory file; do
+for drift in inventory file native; do
     if PATH="$fake_bin:$PATH" \
         ARKTRACE_FAKE_SOURCE_APP="$source_app" \
         ARKTRACE_FAKE_ARCHIVE_LICENSE_DRIFT="$drift" \

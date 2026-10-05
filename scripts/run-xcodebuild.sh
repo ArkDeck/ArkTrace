@@ -24,6 +24,9 @@ Environment overrides:
   ARKTRACE_XCODE_CACHE_ROOT       Absolute cache root owned by this runner.
   ARKTRACE_XCODE_OUTPUT_ROOT      Absolute product output root.
   ARKTRACE_XCODEBUILD_EXECUTABLE  Absolute xcodebuild executable path.
+  ARKTRACE_RUST_XCFRAMEWORK       Optional verified production SDK artifact.
+  ARKTRACE_CARGO_CACHE_ROOT       Session-owned stable native Cargo cache.
+  ARKTRACE_NATIVE_APP_SIGNING_IDENTITY  Developer ID for runnable bundled tools.
 
 The runner owns the project, target, configuration, object/package/module
 caches and build action. It requires the locally pinned TraceStreamer binary
@@ -202,6 +205,22 @@ mkdir -p "$(dirname -- "$mirror_parser")"
 
 printf 'ArkTrace Xcode cache: %s\n' "$cache_root" >&2
 printf 'ArkTrace Xcode worktree: %s\n' "$repository_root" >&2
+
+# Stage after the source mirror sync, which deliberately removes ignored
+# artifacts. The App always links the actual SDK; a missing dependency cannot
+# silently select the Swift document engine. Without signing credentials this
+# is a compile-only bundle, and startup reports unavailable publisher trust.
+set -- python3 "$repository_root/scripts/prepare_macos_native_app.py" --workspace "$workspace_path"
+if [ -n "${ARKTRACE_RUST_XCFRAMEWORK:-}" ]; then
+    set -- "$@" --sdk "$ARKTRACE_RUST_XCFRAMEWORK"
+fi
+if [ -n "${ARKTRACE_NATIVE_APP_SIGNING_IDENTITY:-}" ]; then
+    set -- "$@" --signing-identity "$ARKTRACE_NATIVE_APP_SIGNING_IDENTITY"
+fi
+"$@" >"$cache_root/native-app-preparation.json"
+ARKTRACE_RUST_XCFRAMEWORK=$(jq -er '.relativeSDK' "$cache_root/native-app-preparation.json")
+export ARKTRACE_RUST_XCFRAMEWORK
+unset ARKTRACE_RUST_SDK_FIXTURES
 
 exec env \
     CLANG_MODULE_CACHE_PATH="$module_cache" \

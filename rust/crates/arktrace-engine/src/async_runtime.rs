@@ -1033,9 +1033,12 @@ fn load_tools(
     let owners = OwnerStore::open(&actors, &namespace)
         .map_err(|e| engine_failure(EngineStage::SourceSnapshot, EngineFailure::Host(e)))?;
     let tool = |path: &std::path::Path, pin: &str, trust: &CodeTrustPolicy| {
-        let parent =
-            HeldDirectory::open_private(path.parent().ok_or(RuntimeFailure::InvalidRequest)?)
-                .map_err(|e| engine_failure(EngineStage::ParserIdentity, EngineFailure::Host(e)))?;
+        let path_parent = path.parent().ok_or(RuntimeFailure::InvalidRequest)?;
+        let parent = match trust {
+            CodeTrustPolicy::DeveloperId { .. } => HeldDirectory::open_code_directory(path_parent),
+            CodeTrustPolicy::DevelopmentPinned => HeldDirectory::open_private(path_parent),
+        }
+        .map_err(|e| engine_failure(EngineStage::ParserIdentity, EngineFailure::Host(e)))?;
         let file = parent
             .open_file(
                 path.file_name()

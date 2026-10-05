@@ -38,10 +38,16 @@ public struct RustSnapshot: Sendable {
     /// No experimental lifetime feature or unsafe caller annotation is needed.
     public func withRecords<R>(_ body: (Span<ArkTraceTrackRecord>, Span<ArkTracePrimitiveRecord>, Span<ArkTraceQualityRecord>, Span<UInt8>) throws -> R) rethrows -> R {
         try withExtendedLifetime(self) {
-            let tracks = unsafe Span(_unsafeStart: lease.view.tracks, count: trackCount)
-            let primitives = unsafe Span(_unsafeStart: lease.view.primitives, count: primitiveCount)
-            let quality = unsafe Span(_unsafeStart: lease.view.quality, count: qualityCount)
-            let strings = unsafe Span(_unsafeStart: lease.view.strings, count: stringByteCount)
+            // Local buffers give each Span a lexical borrow and preserve the
+            // native nil/zero representation of empty record or string pools.
+            let trackBuffer = unsafe UnsafeBufferPointer(start: lease.view.tracks, count: trackCount)
+            let primitiveBuffer = unsafe UnsafeBufferPointer(start: lease.view.primitives, count: primitiveCount)
+            let qualityBuffer = unsafe UnsafeBufferPointer(start: lease.view.quality, count: qualityCount)
+            let stringBuffer = unsafe UnsafeBufferPointer(start: lease.view.strings, count: stringByteCount)
+            let tracks = unsafe Span(_unsafeElements: trackBuffer)
+            let primitives = unsafe Span(_unsafeElements: primitiveBuffer)
+            let quality = unsafe Span(_unsafeElements: qualityBuffer)
+            let strings = unsafe Span(_unsafeElements: stringBuffer)
             return try body(tracks, primitives, quality, strings)
         }
     }

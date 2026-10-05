@@ -20,7 +20,7 @@ final class AppCommandTests: XCTestCase {
     func testFindCommandsAreBoundAndReachTheController() throws {
         let source = try source()
         XCTAssertTrue(
-            source.contains(#"Button("Filter Processes") { controller.focusProcessFilter() }"#),
+            source.contains(#"Button("Filter Processes") { bootstrap.controller?.focusProcessFilter() }"#),
             "the sidebar's filter needs a Find item"
         )
         XCTAssertTrue(
@@ -28,7 +28,7 @@ final class AppCommandTests: XCTestCase {
             "⌘F, unmodified, must open the sidebar's process filter"
         )
         XCTAssertTrue(
-            source.contains(#"Button("Search Trace") { controller.focusTraceSearch() }"#),
+            source.contains(#"Button("Search Trace") { bootstrap.controller?.focusTraceSearch() }"#),
             "the toolbar search needs a binding of its own, or ⌘F is ambiguous"
         )
         XCTAssertTrue(

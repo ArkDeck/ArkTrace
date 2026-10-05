@@ -6,6 +6,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11C000000000000000000001 /* NativeAppBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12C000000000000000000001 /* NativeAppBootstrap.swift */; };
 		11000000000000000000002A /* TraceCaptureStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12000000000000000000002A /* TraceCaptureStatusView.swift */; };
 		010000000000000000000001 /* ArkTraceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* ArkTraceApp.swift */; };
 		010000000000000000000004 /* ArkTraceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 090000000000000000000001 /* ArkTraceCore */; };
@@ -60,6 +61,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		12C000000000000000000001 /* NativeAppBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppBootstrap.swift; sourceTree = "<group>"; };
 		12000000000000000000002A /* TraceCaptureStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TraceCaptureStatusView.swift; sourceTree = "<group>"; };
 		020000000000000000000001 /* ArkTraceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArkTraceApp.swift; sourceTree = "<group>"; };
 		020000000000000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				020000000000000000000001 /* ArkTraceApp.swift */,
+				12C000000000000000000001 /* NativeAppBootstrap.swift */,
 				150000000000000000000001 /* Capture */,
 				150000000000000000000002 /* Help */,
 				150000000000000000000003 /* Inspector */,
@@ -331,8 +334,12 @@
 			buildActionMask = 2147483647;
 			files = ();
 			inputPaths = (
-				"$(SRCROOT)/ThirdParty/TraceStreamer/macx/trace_streamer",
-				"$(SRCROOT)/ThirdParty/TraceStreamer/macx/manifest.json",
+				"$(SRCROOT)/.arktrace-native/AppInputs/Helpers/trace_streamer",
+				"$(SRCROOT)/.arktrace-native/AppInputs/Helpers/arktrace-host-process",
+				"$(SRCROOT)/.arktrace-native/AppInputs/ArkTraceRuntime/manifest.json",
+				"$(SRCROOT)/.arktrace-native/AppInputs/receipt.json",
+				"$(SRCROOT)/scripts/copy_native_app_resources.py",
+				"$(SRCROOT)/.arktrace-native/AppInputs/TraceStreamer/manifest.json",
 				"$(SRCROOT)/LICENSE",
 				"$(SRCROOT)/THIRD_PARTY_NOTICES.md",
 				"$(SRCROOT)/ThirdParty/TraceStreamer/license-inventory.json",
@@ -341,6 +348,8 @@
 			name = "Copy Pinned TraceStreamer Bytes";
 			outputPaths = (
 				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Helpers/trace_streamer",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Helpers/arktrace-host-process",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/ArkTraceRuntime/manifest.json",
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/TraceStreamer/manifest.json",
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/LICENSE",
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/THIRD_PARTY_NOTICES.md",
@@ -349,7 +358,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\nresources=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nhelpers=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\nmanifest_dir=\"${resources}/TraceStreamer\"\n/bin/mkdir -p \"${helpers}\" \"${manifest_dir}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/trace_streamer\" \"${helpers}/trace_streamer\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/macx/manifest.json\" \"${manifest_dir}/manifest.json\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/LICENSE\" \"${resources}/LICENSE\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/THIRD_PARTY_NOTICES.md\" \"${resources}/THIRD_PARTY_NOTICES.md\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/license-inventory.json\" \"${resources}/license-inventory.json\"\n/bin/rm -rf \"${resources}/Licenses\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/LICENSES\" \"${resources}/Licenses\"\n/bin/chmod 755 \"${helpers}/trace_streamer\"\n/bin/chmod 644 \"${manifest_dir}/manifest.json\" \"${resources}/LICENSE\" \"${resources}/THIRD_PARTY_NOTICES.md\" \"${resources}/license-inventory.json\"\n";
+			shellScript = "set -eu\npython3 \"${SRCROOT}/scripts/copy_native_app_resources.py\" --inputs \"${SRCROOT}/.arktrace-native/AppInputs\" --bundle \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\nresources=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nhelpers=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\nmanifest_dir=\"${resources}/TraceStreamer\"\n/bin/mkdir -p \"${helpers}\" \"${manifest_dir}\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/LICENSE\" \"${resources}/LICENSE\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/THIRD_PARTY_NOTICES.md\" \"${resources}/THIRD_PARTY_NOTICES.md\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/license-inventory.json\" \"${resources}/license-inventory.json\"\n/bin/rm -rf \"${resources}/Licenses\"\n/usr/bin/ditto --noqtn \"${SRCROOT}/ThirdParty/TraceStreamer/LICENSES\" \"${resources}/Licenses\"\n/bin/chmod 644 \"${manifest_dir}/manifest.json\" \"${resources}/LICENSE\" \"${resources}/THIRD_PARTY_NOTICES.md\" \"${resources}/license-inventory.json\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -371,6 +380,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				010000000000000000000001 /* ArkTraceApp.swift in Sources */,
+				11C000000000000000000001 /* NativeAppBootstrap.swift in Sources */,
 				110000000000000000000001 /* TraceCaptureWindow.swift in Sources */,
 				11000000000000000000002A /* TraceCaptureStatusView.swift in Sources */,
 				110000000000000000000002 /* ShortcutHelpView.swift in Sources */,

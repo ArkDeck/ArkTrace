@@ -64,7 +64,7 @@ package struct TraceBundledParserResolver: Sendable {
         )
     }
 
-    private static func isRegularReadableFile(
+    static func isRegularReadableFile(
         _ url: URL,
         inside bundleURL: URL,
         executable: Bool

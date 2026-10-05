@@ -31,6 +31,7 @@ public struct RustViewStateBackupConfiguration: Encodable, Sendable {
 public struct RustConfiguration: Encodable, Sendable {
     let abiVersion: UInt32 = ARKTRACE_ABI_VERSION
     let contractDigest: String = ARKTRACE_CONTRACT_DIGEST
+    package var configuredContractDigest: String { contractDigest }
     let cachePolicy: String
     let cacheDirectory: String?
     let viewStateBackup: RustViewStateBackupConfiguration?

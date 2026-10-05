@@ -370,6 +370,15 @@ fn require_owner_enforcement(file: &File) -> Result<(), HostError> {
 
 fn require_private_security(file: &File, metadata: &Metadata) -> Result<(), HostError> {
     require_private(metadata)?;
+    require_restricted_acl(file, metadata)?;
+    require_private(
+        &file
+            .metadata()
+            .map_err(|e| from_io(e, HostOperation::Stat))?,
+    )
+}
+
+fn require_restricted_acl(file: &File, metadata: &Metadata) -> Result<(), HostError> {
     require_owner_enforcement(file)?;
     // ACL_TYPE_EXTENDED is 0x100. Existing ACLs are inspected, never removed.
     // Private storage accepts empty/deny-only ACLs; any additional allow grant
@@ -388,7 +397,7 @@ fn require_private_security(file: &File, metadata: &Metadata) -> Result<(), Host
         {
             return Err(HostError::IdentityMismatch);
         }
-        return require_private(&current);
+        return Ok(());
     }
     let acl = Acl(std::ptr::NonNull::new(acl).ok_or_else(|| os_error(HostOperation::Stat))?);
     for index in 0..=128 {
@@ -438,6 +447,13 @@ impl HeldDirectory {
     /// opened O_NOFOLLOW; existing permissions are validated, never repaired.
     pub fn open_private(path: &Path) -> Result<Self, HostError> {
         Self::open(path, true)
+    }
+
+    /// Read-only authority for fixed, signed code in a product bundle. Every
+    /// parent is held no-follow with trusted ownership; this does not grant
+    /// storage creation, mutation, or private-file authority.
+    pub fn open_code_directory(path: &Path) -> Result<Self, HostError> {
+        Self::open_security(path, false, true)
     }
 
     fn open(path: &Path, private: bool) -> Result<Self, HostError> {
@@ -1065,6 +1081,36 @@ impl HeldFile {
             return Err(HostError::NotPrivate);
         }
         Ok(())
+    }
+
+    fn require_signed_code_file(&self) -> Result<(), HostError> {
+        self.require_readonly()?;
+        if !self.parent.0.trusted_ancestors || self.initial.links != 1 {
+            return Err(HostError::NotPrivate);
+        }
+        // SAFETY: geteuid has no arguments or ownership effects.
+        let uid = unsafe { libc::geteuid() };
+        if self.initial.uid != uid && self.initial.uid != 0 {
+            return Err(HostError::NotPrivate);
+        }
+        require_restricted_acl(
+            &self.file,
+            &self
+                .file
+                .metadata()
+                .map_err(|e| from_io(e, HostOperation::Stat))?,
+        )?;
+        let mut node = Some(self.parent.0.clone());
+        while let Some(directory) = node {
+            let metadata = directory
+                .file
+                .metadata()
+                .map_err(|e| from_io(e, HostOperation::Stat))?;
+            require_trusted_ancestor(&metadata)?;
+            require_restricted_acl(&directory.file, &metadata)?;
+            node = directory.parent.clone();
+        }
+        self.verify()
     }
 
     pub fn path(&self) -> PathBuf {

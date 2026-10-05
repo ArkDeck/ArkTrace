@@ -40,6 +40,70 @@ fn budget() -> IoBudget {
 }
 
 #[test]
+fn signed_code_directory_has_no_storage_authority_and_retains_binding() {
+    let fixture = Fixture::new();
+    let path = fixture.0.join("Helpers");
+    DirBuilder::new().mode(0o755).create(&path).unwrap();
+    fs::write(path.join("helper"), b"held signed-code input").unwrap();
+    fs::set_permissions(path.join("helper"), Permissions::from_mode(0o555)).unwrap();
+    let code = HeldDirectory::open_code_directory(&path).unwrap();
+    let file = code.open_file("helper").unwrap();
+    file.require_signed_code_file().unwrap();
+    assert!(matches!(
+        code.create_private_child("storage"),
+        Err(HostError::NotPrivate)
+    ));
+    assert!(matches!(
+        HeldDirectory::open_private(&path),
+        Err(HostError::NotPrivate)
+    ));
+    fs::rename(&path, fixture.0.join("retired")).unwrap();
+    DirBuilder::new().mode(0o755).create(&path).unwrap();
+    assert!(file.require_signed_code_file().is_err());
+}
+
+#[test]
+fn signed_code_directory_rejects_writable_linked_and_development_inputs() {
+    let fixture = Fixture::new();
+    let path = fixture.0.join("Helpers");
+    DirBuilder::new().mode(0o755).create(&path).unwrap();
+    fs::write(path.join("helper"), b"not a Mach-O fixture").unwrap();
+    fs::set_permissions(path.join("helper"), Permissions::from_mode(0o555)).unwrap();
+    let code = HeldDirectory::open_code_directory(&path).unwrap();
+    assert!(matches!(
+        VerifiedExecutable::verify(
+            code.open_file("helper").unwrap(),
+            &"a".repeat(64),
+            CodeTrustPolicy::DevelopmentPinned,
+            &budget()
+        ),
+        Err(ProcessError::InvalidExecutable)
+    ));
+    fs::hard_link(path.join("helper"), path.join("linked")).unwrap();
+    assert!(
+        code.open_file("helper")
+            .unwrap()
+            .require_signed_code_file()
+            .is_err()
+    );
+    fs::remove_file(path.join("linked")).unwrap();
+    fs::set_permissions(path.join("helper"), Permissions::from_mode(0o755)).unwrap();
+    assert!(
+        code.open_file("helper")
+            .unwrap()
+            .require_signed_code_file()
+            .is_err()
+    );
+    std::os::unix::fs::symlink(&path, fixture.0.join("alias")).unwrap();
+    assert!(HeldDirectory::open_code_directory(&fixture.0.join("alias")).is_err());
+    fs::set_permissions(&path, Permissions::from_mode(0o777)).unwrap();
+    assert!(matches!(
+        HeldDirectory::open_code_directory(&path),
+        Err(HostError::NotPrivate)
+    ));
+}
+
+#[test]
 fn existing_readonly_leases_do_not_create_or_mutate_legacy_locks() {
     let fixture = Fixture::new();
     let root = fixture.held();

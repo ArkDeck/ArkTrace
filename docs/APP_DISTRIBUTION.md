@@ -4,6 +4,9 @@ Status: P3-T08 accessibility and P3-T10 Developer ID distribution evidence
 completed (2026-08-14); the later exact Phase 4 signed candidate, accessibility
 walkthrough, Apple notarization and retained final ZIP were independently
 reverified on 2026-08-15. The large-trace Gate 6/7 and Phase 4 final gate are closed.
+These retained records describe those candidates. The current Rust-backed App
+requires fresh native startup, shutdown, accessibility, signing and notarization
+evidence; its macOS migration acceptance remains open.
 
 ## Target and signing
 
@@ -54,11 +57,25 @@ only after a non-empty partial file is atomically promoted. Success, failure,
 and cancellation all attempt to stop the profiler and remove only paths owned
 by that capture request. See `docs/CAPTURE.md` and AT-APP-014…019.
 
-## Parser bundle boundary
+## Native runtime bundle boundary
 
-The Xcode target copies the executable into the standard nested-code location
-`Contents/Helpers/trace_streamer` and the non-code manifest into
-`Contents/Resources/TraceStreamer/manifest.json`:
+The default App starts one `TraceRustProductRuntime` and publishes its document
+controller after native storage admission succeeds. The native worker admits
+the actual signed tools before the first trace open. It queues an incoming Open URL
+while preparing. Quit closes controller admission, joins current and retired
+operations, flushes view state, closes sessions and awaits native shutdown before
+replying to macOS. A preparation or cleanup failure stays visible and retryable.
+
+`scripts/run-xcodebuild.sh` prepares a production Rust SDK (exact Rust 1.99.0,
+edition 2024, Xcode 27) and fixed resources after syncing its stable source
+mirror. Fixture SDKs cannot be used for the App. The bundle contains:
+
+- `Contents/Helpers/arktrace-host-process`;
+- `Contents/Helpers/trace_streamer`;
+- `Contents/Resources/ArkTraceRuntime/manifest.json`;
+- `Contents/Resources/TraceStreamer/manifest.json`.
+
+The parser's reproducible repository inputs remain:
 
 - `ThirdParty/TraceStreamer/macx/trace_streamer`;
 - `ThirdParty/TraceStreamer/macx/manifest.json`.
@@ -71,28 +88,50 @@ hash, version, or provenance drift returns
 `TRACE_STREAMER_IDENTITY_MISMATCH`. The separate developer resolver accepts an
 explicit URL and is compiled only in Debug builds.
 
-The repository binary is the reproducible **unsigned** input. A distribution
-archive must sign the nested helper first with Developer ID, hardened runtime,
-and trusted timestamp. Because signing changes Mach-O bytes, the candidate
-builder then rewrites only `manifest.binarySHA256`, writes a bounded
-`distribution-signing.json` that binds unsigned SHA → signed SHA → build recipe
-→ exact Team ID/signing identity/certificate SHA-1, and finally re-signs the outer App. The packaging
+Both tool files are read-only (`0555`). Native admission holds their no-follow
+parent chain and verifies byte pins, the actual Developer ID publisher and code
+identifiers. The runtime manifest binds the current ABI contract and helper SHA.
+Missing resources and malformed manifests fail bootstrap. The worker rejects
+drifted tool identities before opening a trace.
+
+Without `ARKTRACE_NATIVE_APP_SIGNING_IDENTITY`, the daily runner produces a
+compile-only bundle whose runtime manifest has no publisher. To run the native
+App locally, supply an available Developer ID Application identity through that
+variable. `ARKTRACE_RUST_XCFRAMEWORK` may select an already verified production
+artifact; otherwise the runner builds it through the session-owned Cargo cache.
+
+The distribution builder captures Git-visible source into a private external
+workspace and signs both nested tools before archiving, using fixed identifiers
+`com.arktrace.ArkTrace.host-process` and `com.arktrace.ArkTrace.trace-streamer`,
+hardened runtime and trusted timestamps. Preparation updates the parser and
+runtime byte pins from the actual signed files. The archive must match all four
+staged resources. Separate bounded `distribution-signing.json` records in the
+TraceStreamer and ArkTraceRuntime resource directories bind unsigned and signed
+bytes, parser recipe/current contract, publisher and certificate SHA-1. The
+builder finally signs the outer App. The packaging
 gate verifies that closure before notarization and again after extracting the
 final ZIP. Candidate App and final ZIP are first written to owner-bound private
 partial names; only a fully copied, signed, stapled, Gatekeeper-accepted artifact
 is atomically published under its final name. The final ZIP is created only after
 the App is notarized and stapled.
-Ad-hoc Debug/Release build smoke tests continue to compare the pre-distribution
-helper and manifest byte-for-byte with the repository inputs.
+Ad-hoc Debug/Release compile smoke tests compare all four resources with the
+verified staged inputs. Process liveness in a compile-only bundle does not prove
+native startup or GUI readiness.
+Run `sh scripts/test_native_app_build.sh` for that current compile gate. The
+historical `test_phase3_batch1.sh` also runs its inherited Phase 2 checks before
+calling the same App gate.
 
 ## Storage
 
-Cache data is dedicated to
-`~/Library/Caches/com.arktrace.ArkTrace/`; original traces are never copied into
+Native cache and staging data are dedicated to
+`~/Library/Caches/com.arktrace.ArkTrace/native-v1/{traces,staging}`; original traces are never copied into
 the cache as user documents. Recent-item/bookmark state belongs in the app's
 Application Support container and is implemented by P3-T05. Existing Runtime
 ownership, lease, quarantine, and path-hardening rules remain the only cache
-mutation implementation.
+mutation implementation. Current-state manual backups belong in
+`~/Library/Application Support/com.arktrace.ArkTrace/view-state-backups`, outside
+the cache roots. Startup creates only missing private directories and refuses
+existing unsafe permissions or linked storage components.
 
 ## Shared implementation
 

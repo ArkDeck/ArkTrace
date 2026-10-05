@@ -50,13 +50,18 @@ signature_certificate_sha1() {
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd -P)
 . "$script_directory/phase3_shell_safety.sh"
+. "$script_directory/native_app_distribution_safety.sh"
 identity=${ARKTRACE_DEVELOPER_ID_APPLICATION:-}
 team=${ARKTRACE_DEVELOPMENT_TEAM:-}
 candidate_directory=${ARKTRACE_PHASE3_CANDIDATE_DIR:-$repository_root/.build/phase3-candidates}
+diagnostic_directory=${ARKTRACE_PHASE3_DIAGNOSTIC_DIR:-}
 [ -n "$identity" ] && [ -n "$team" ] \
     || fail "Developer ID identity and team are required"
 arktrace_validate_reviewed_roots "$repository_root"
 arktrace_validate_owned_directory_request "$candidate_directory" "candidate output"
+if [ -n "$diagnostic_directory" ]; then
+    arktrace_validate_owned_directory_request "$diagnostic_directory" "private build diagnostics"
+fi
 
 # Validate every repository input needed before creating the reviewed build
 # root.  The final release gate exports signing credentials to its inherited
@@ -78,6 +83,8 @@ do
     arktrace_assert_physical_file_within \
         "$repository_root" "$candidate_input" "candidate build input"
 done
+arktrace_assert_physical_file_within "$repository_root" \
+    "$script_directory/prepare_macos_native_app.py" "native App preparation"
 [ -d "$repository_root/ThirdParty/TraceStreamer/LICENSES" ] \
     && [ ! -L "$repository_root/ThirdParty/TraceStreamer/LICENSES" ] \
     && arktrace_assert_physical_directory_chain \
@@ -107,15 +114,43 @@ certificate_sha1=$(awk -v suffix="\"$identity\"" '
 certificate_sha1=$(printf '%s' "$certificate_sha1" | tr '[:lower:]' '[:upper:]')
 candidate_directory=$(arktrace_secure_owned_directory \
     "$candidate_directory" .arktrace-phase3-candidates-v1 "candidate output")
+if [ -n "$diagnostic_directory" ]; then
+    diagnostic_directory=$(arktrace_secure_owned_directory \
+        "$diagnostic_directory" .arktrace-phase3-diagnostics-v1 "private build diagnostics")
+fi
 archive="$temporary_root/ArkTrace.xcarchive"
 build_log="$temporary_root/archive.log"
+if [ -n "$diagnostic_directory" ]; then
+    build_log="$diagnostic_directory/$(basename "$temporary_root")-archive.log"
+    arktrace_require_absent_leaf "$build_log" "private build log"
+fi
+native_preparation="$temporary_root/native-app-preparation.json"
+native_workspace="$temporary_root/workspace"
+arktrace_copy_visible_source "$repository_root" "$native_workspace" \
+    "$temporary_root/native-source-files"
+set -- python3 "$script_directory/prepare_macos_native_app.py" \
+    --workspace "$native_workspace" --signing-identity "$identity"
+if [ -n "${ARKTRACE_RUST_XCFRAMEWORK:-}" ]; then
+    set -- "$@" --sdk "$ARKTRACE_RUST_XCFRAMEWORK"
+fi
+if ! "$@" >"$native_preparation" 2>"$temporary_root/native-preparation.log"; then
+    arktrace_bounded_failure_summary "$temporary_root/native-preparation.log"
+    fail "native App preparation failed"
+fi
+jq -e '.runtimeUsable == true and .releaseAcceptance == false' \
+    "$native_preparation" >/dev/null || fail "signed native App inputs are required"
+ARKTRACE_RUST_XCFRAMEWORK=$(jq -er '.relativeSDK' "$native_preparation")
+export ARKTRACE_RUST_XCFRAMEWORK
+unset ARKTRACE_RUST_SDK_FIXTURES
+native_inputs="$native_workspace/.arktrace-native/AppInputs"
 if ! xcodebuild -quiet \
-    -project "$repository_root/ArkTrace.xcodeproj" \
+    -project "$native_workspace/ArkTrace.xcodeproj" \
     -scheme ArkTraceApp \
     -configuration Release \
     -destination 'generic/platform=macOS' \
     -derivedDataPath "$temporary_root/DerivedData" \
     -archivePath "$archive" \
+    ARCHS=arm64 ONLY_ACTIVE_ARCH=YES \
     CODE_SIGN_STYLE=Manual \
     CODE_SIGN_IDENTITY="$certificate_sha1" \
     DEVELOPMENT_TEAM="$team" \
@@ -127,11 +162,13 @@ fi
 
 app="$archive/Products/Applications/ArkTrace.app"
 helper="$app/Contents/Helpers/trace_streamer"
+host_helper="$app/Contents/Helpers/arktrace-host-process"
 manifest="$app/Contents/Resources/TraceStreamer/manifest.json"
+runtime_manifest="$app/Contents/Resources/ArkTraceRuntime/manifest.json"
 [ -d "$app" ] && [ -f "$helper" ] && [ -f "$manifest" ] \
     || fail "archive is missing the App, helper, or manifest"
 for physical_file in \
-    "$helper" "$manifest" "$app/Contents/Info.plist" \
+    "$helper" "$host_helper" "$manifest" "$runtime_manifest" "$app/Contents/Info.plist" \
     "$app/Contents/Resources/LICENSE" \
     "$app/Contents/Resources/THIRD_PARTY_NOTICES.md" \
     "$app/Contents/Resources/license-inventory.json"
@@ -143,25 +180,27 @@ arktrace_assert_physical_directory_chain "$app" \
     || fail "archive license directory is not physical"
 [ -z "$(find "$app/Contents/Resources/Licenses" -type l -print -quit)" ] \
     || fail "archive license directory contains a symlink"
-cmp "$repository_root/ThirdParty/TraceStreamer/macx/trace_streamer" "$helper" \
-    >/dev/null 2>&1 \
-    || fail "archive helper differs from the locked reproducible binary"
-cmp "$repository_root/ThirdParty/TraceStreamer/macx/manifest.json" "$manifest" \
-    >/dev/null 2>&1 \
-    || fail "archive helper manifest drifted before signing"
-
-run_external "nested helper signing failed" \
-    codesign --force --sign "$certificate_sha1" --options runtime --timestamp "$helper"
+for native_resource in \
+    'Helpers/trace_streamer:Contents/Helpers/trace_streamer' \
+    'Helpers/arktrace-host-process:Contents/Helpers/arktrace-host-process' \
+    'TraceStreamer/manifest.json:Contents/Resources/TraceStreamer/manifest.json' \
+    'ArkTraceRuntime/manifest.json:Contents/Resources/ArkTraceRuntime/manifest.json'
+do
+    input_relative=${native_resource%%:*}
+    output_relative=${native_resource#*:}
+    cmp "$native_inputs/$input_relative" "$app/$output_relative" >/dev/null 2>&1 \
+        || fail "archive native input drifted"
+done
+# Xcode's archive preparation may add owner-write to embedded code. These
+# files are verified copies in this build-owned App, so seal their final modes
+# before signing the outer bundle; native storage is never repaired here.
+chmod 555 "$helper" "$host_helper"
 helper_certificate_sha1=$(signature_certificate_sha1 "$helper" helper)
 [ "$helper_certificate_sha1" = "$certificate_sha1" ] \
     || fail "nested helper was signed by an unexpected certificate"
 signed_helper_sha=$(shasum -a 256 "$helper" | awk '{print $1}')
 unsigned_helper_sha=$(jq -er '.binarySHA256' \
     "$repository_root/ThirdParty/TraceStreamer/macx/manifest.json")
-jq --arg sha "$signed_helper_sha" '.binarySHA256 = $sha' "$manifest" \
-    >"$temporary_root/manifest.json" || fail "signed manifest update failed"
-mv "$temporary_root/manifest.json" "$manifest"
-chmod 644 "$manifest"
 distribution_record="$app/Contents/Resources/TraceStreamer/distribution-signing.json"
 arktrace_require_absent_leaf "$distribution_record" "distribution signing record"
 jq -n \
@@ -181,6 +220,20 @@ jq -n \
     }
 ' >"$distribution_record" || fail "distribution signing record could not be created"
 chmod 644 "$distribution_record"
+native_distribution_record="$app/Contents/Resources/ArkTraceRuntime/distribution-signing.json"
+arktrace_require_absent_leaf "$native_distribution_record" "native signing record"
+jq -n \
+    --arg contract "$(jq -er '.contractSHA256' "$runtime_manifest")" \
+    --arg unsigned "$(jq -er '.inputs.unsignedHelperSHA256' "$native_inputs/receipt.json")" \
+    --arg signed "$(shasum -a 256 "$host_helper" | awk '{print $1}')" \
+    --argjson publisher "$(jq -e '.publisher' "$runtime_manifest")" \
+    --arg certificate "$certificate_sha1" '
+    {formatVersion:1,contractSHA256:$contract,unsignedHelperSHA256:$unsigned,
+     signedHelperSHA256:$signed,publisher:$publisher,signingCertificateSHA1:$certificate,
+     signingPolicy:"developer-id-runtime-timestamp"}
+' >"$native_distribution_record" || fail "native signing provenance could not be created"
+chmod 444 "$native_distribution_record"
+arktrace_verify_native_app_closure "$app" "archive"
 run_external "outer App signing failed" codesign --force --sign "$certificate_sha1" --options runtime --timestamp \
     --entitlements "$repository_root/Apps/ArkTraceApp/ArkTraceApp.entitlements" \
     "$app"
@@ -195,7 +248,7 @@ codesign -d --entitlements :- "$app" >"$entitlements" 2>/dev/null \
 [ "$(plutil -p "$entitlements" | tr -d '[:space:]')" = '{}' ] \
     || fail "distribution candidate must have empty entitlements"
 
-for candidate in "$helper" "$app"; do
+for candidate in "$helper" "$host_helper" "$app"; do
     detail="$temporary_root/signature-$(basename "$candidate").txt"
     codesign -dv --verbose=4 "$candidate" 2>"$detail" \
         || fail "candidate signature details are unavailable"
@@ -252,6 +305,7 @@ run_external "candidate copy failed" /usr/bin/ditto --noqtn "$app" "$partial_can
     || fail "candidate copy drifted before publication"
 run_external "candidate copy signature verification failed" \
     codesign --verify --deep --strict --verbose=2 "$partial_candidate"
+arktrace_verify_native_app_closure "$partial_candidate" "candidate copy"
 [ "$(signature_certificate_sha1 \
     "$partial_candidate/Contents/Helpers/trace_streamer" partial-helper)" = \
     "$certificate_sha1" ] || fail "candidate helper certificate drifted"

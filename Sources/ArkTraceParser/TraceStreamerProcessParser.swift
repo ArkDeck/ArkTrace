@@ -1034,11 +1034,11 @@ package struct TraceStreamerProcessParser: TraceParser {
         executableURL: URL,
         manifestURL: URL
     ) -> Bool {
-        let macOSDirectory = executableURL.deletingLastPathComponent()
-        let contentsDirectory = macOSDirectory.deletingLastPathComponent()
+        let helperDirectory = executableURL.deletingLastPathComponent()
+        let contentsDirectory = helperDirectory.deletingLastPathComponent()
         let bundleURL = contentsDirectory.deletingLastPathComponent()
         guard executableURL.lastPathComponent == "trace_streamer",
-            macOSDirectory.lastPathComponent == "MacOS",
+            helperDirectory.lastPathComponent == "Helpers",
             contentsDirectory.lastPathComponent == "Contents",
             bundleURL.pathExtension == "app"
         else { return false }

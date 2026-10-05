@@ -239,6 +239,175 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
     }
 
+    func testProductShutdownJoinsReplacedOpensAndRefusesNewAdmission() async throws {
+        let first = FirstOpenBarrier(), second = FirstOpenBarrier(), recorder = CloseRecorder()
+        let firstStarted = expectation(description: "first open blocked")
+        let secondStarted = expectation(description: "replacement open blocked")
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil,
+            opener: { source, _ in
+                let name = source.lastPathComponent
+                if name == "first.htrace" { firstStarted.fulfill(); await first.wait() }
+                if name == "second.htrace" { secondStarted.fulfill(); await second.wait() }
+                return TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false,
+                    cacheMetadata: nil, close: { await recorder.append(name) })
+            })
+        let root = FileManager.default.temporaryDirectory.appending(path: "arktrace-product-join-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let urls = ["first.htrace", "second.htrace", "current.htrace", "denied.htrace"].map { root.appending(path: $0) }
+        for url in urls { try Data().write(to: url) }
+        controller.open(urls[0]); await fulfillment(of: [firstStarted], timeout: 5)
+        controller.open(urls[1]); await fulfillment(of: [secondStarted], timeout: 5)
+        controller.open(urls[2]); try await waitForViewStateDocument(controller)
+        var finished = false
+        let stopping = Task { try await controller.closeForProductShutdown(); finished = true }
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertFalse(finished, "retired opens still own work despite cancellation")
+        controller.open(urls[3])
+        await first.release()
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertFalse(finished, "every retired open must join")
+        await second.release(); try await stopping.value
+        let closed = await recorder.values()
+        XCTAssertEqual(closed.sorted(), ["current.htrace", "first.htrace", "second.htrace"])
+        XCTAssertEqual(controller.phase, .idle)
+        controller.open(urls[3]); try await controller.closeForProductShutdown()
+        XCTAssertEqual(controller.phase, .idle)
+        let after = await recorder.values()
+        XCTAssertEqual(after, closed, "completed shutdown must not close a session twice")
+    }
+
+    func testProductShutdownJoinsBackupBeforeClosingAndIgnoresCallerCancellation() async throws {
+        let gate = FirstCloseBarrier(), sink = ViewStateSink(), backup = BackupSink()
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { await sink.save($0) },
+            backup: { await gate.close(); return await backup.backup() })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil,
+            opener: { _, _ in TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false,
+                cacheMetadata: nil, viewStateAccess: access, close: { await sink.close() }) })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        controller.backupViewState(sessionID: controller.annotationSessionID)
+        await gate.waitUntilReached()
+        var firstFinished = false, secondFinished = false
+        let first = Task { try await controller.closeForProductShutdown(); firstFinished = true }
+        let second = Task { try await controller.closeForProductShutdown(); secondFinished = true }
+        first.cancel()
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertFalse(firstFinished); XCTAssertFalse(secondFinished)
+        let (_, before) = await sink.snapshot(); XCTAssertEqual(before, 0)
+        await gate.release(); try await first.value; try await second.value
+        let (_, after) = await sink.snapshot(); XCTAssertEqual(after, 1)
+        XCTAssertNil(controller.viewStateBackup, "cancelled backup must not publish after shutdown")
+    }
+
+    func testProductShutdownReportsSaveFailureAfterSessionClose() async throws {
+        let gate = FirstCloseBarrier(), sink = ViewStateSink()
+        let expectedError = ArkTraceError(code: .queryFailed, stage: .querying, message: "final save refused")
+        let access = TraceViewStateAccess(load: { TraceViewStateStore.Restored() }, save: { _ in
+            await gate.close(); throw expectedError
+        })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil,
+            opener: { _, _ in TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false,
+                cacheMetadata: nil, viewStateAccess: access, close: { await sink.close() }) })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        controller.addFlag(atNs: 10, label: "pending")
+        await gate.waitUntilReached()
+        let stopping = Task { try await controller.closeForProductShutdown() }
+        for _ in 0..<20 { await Task.yield() }
+        let (_, before) = await sink.snapshot(); XCTAssertEqual(before, 0)
+        XCTAssertNil(controller.addFlag(atNs: 20), "new edits must not race final flush")
+        await gate.release()
+        do { try await stopping.value; XCTFail("save failure was hidden") }
+        catch {
+            let actual = try XCTUnwrap(error as? ArkTraceError)
+            XCTAssertEqual(actual.code, expectedError.code)
+            XCTAssertEqual(actual.message, expectedError.message)
+        }
+        let (_, after) = await sink.snapshot(); XCTAssertEqual(after, 1)
+        XCTAssertEqual(controller.phase, .failed)
+        XCTAssertEqual(controller.errorPresentation?.reason, "final save refused")
+        do { try await controller.closeForProductShutdown(); XCTFail("unsaved state was discarded") } catch {}
+        let (_, retried) = await sink.snapshot(); XCTAssertEqual(retried, 1)
+    }
+
+    func testProductShutdownCleanupFailureRemainsRetryable() async throws {
+        let closer = FailOnceCloser()
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil,
+            opener: { _, _ in TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false,
+                cacheMetadata: nil, close: { try await closer.close() }) })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        do { try await controller.closeForProductShutdown(); XCTFail("cleanup failure was hidden") }
+        catch { XCTAssertTrue((error as? ArkTraceError)?.isOwnershipCleanupFailure == true) }
+        XCTAssertEqual(controller.phase, .failed)
+        controller.open(source)
+        try await controller.closeForProductShutdown()
+        let count = await closer.count(); XCTAssertEqual(count, 2)
+        XCTAssertEqual(controller.phase, .idle)
+    }
+
+    func testProductShutdownJoinsAnOrdinaryCloseWithoutClosingItTwice() async throws {
+        let gate = FirstCloseBarrier(), recorder = CloseRecorder()
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil,
+            opener: { _, _ in TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false,
+                cacheMetadata: nil, close: { await gate.close(); await recorder.append("closed") }) })
+        let source = try viewStateSource(); defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source); try await waitForViewStateDocument(controller)
+        let closing = Task { await controller.close() }
+        await gate.waitUntilReached()
+        var finished = false
+        let stopping = Task { try await controller.closeForProductShutdown(); finished = true }
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertFalse(finished)
+        await gate.release(); await closing.value; try await stopping.value
+        let closed = await recorder.values(); XCTAssertEqual(closed, ["closed"])
+    }
+
+    func testProductShutdownJoinsExplicitCachePurge() async throws {
+        let gate = FirstCloseBarrier()
+        let empty = TraceCacheInventory(entryCount: 0, totalByteCount: 0, activeEntryCount: 0)
+        let report = TraceCacheMaintenanceReport(before: empty, after: empty, recoveredPrivateDirectoryCount: 0,
+            removedOrphanOwnerMarkerCount: 0, removedEntryCount: 0, skippedActiveEntryCount: 0)
+        let operations = TraceCacheMaintenanceOperations(inventory: { empty }, maintain: { report }, purgeUnused: {
+            await gate.close(); return report
+        })
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenanceOperations: operations,
+            signposts: TraceAppSignposts(subsystem: "ArkTraceProductShutdownTests"), opener: { _, _ in throw CancellationError() })
+        let purging = Task { await controller.purgeUnusedCache() }
+        await gate.waitUntilReached()
+        var finished = false
+        let stopping = Task { try await controller.closeForProductShutdown(); finished = true }
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertFalse(finished)
+        await gate.release(); await purging.value; try await stopping.value
+        XCTAssertEqual(controller.cacheMaintenanceReport, report)
+    }
+
+    func testProductShutdownSurfacesAndRetriesRetiredOpenCleanupFailure() async throws {
+        let gate = FirstOpenBarrier(), closer = FailOnceCloser(), recorder = CloseRecorder()
+        let started = expectation(description: "retired opener started")
+        let controller = TraceDocumentController(recentStore: try viewStateRecentStore(), maintenance: nil, opener: { source, _ in
+            let retired = source.lastPathComponent == "retired.htrace"
+            if retired { started.fulfill(); await gate.wait() }
+            return TraceOpenedDocument(repository: Repository(identity: "a"), cacheHit: false, cacheMetadata: nil,
+                close: { if retired { try await closer.close() } else { await recorder.append("current") } })
+        })
+        let current = try viewStateSource(), retired = current.deletingLastPathComponent().appending(path: "retired.htrace")
+        try Data().write(to: retired)
+        defer { try? FileManager.default.removeItem(at: current); try? FileManager.default.removeItem(at: retired) }
+        controller.open(retired); await fulfillment(of: [started], timeout: 5)
+        controller.open(current); try await waitForViewStateDocument(controller)
+        let stopping = Task { try await controller.closeForProductShutdown() }
+        for _ in 0..<20 { await Task.yield() }
+        await gate.release()
+        do { try await stopping.value; XCTFail("retired cleanup failure was hidden") }
+        catch { XCTAssertTrue((error as? ArkTraceError)?.isOwnershipCleanupFailure == true) }
+        let attempts = await closer.count(); XCTAssertEqual(attempts, 2)
+        try await controller.closeForProductShutdown()
+        let closed = await recorder.values(); XCTAssertEqual(closed, ["current"])
+    }
+
     func testNewOpenGenerationPreventsOldResultFromReplacingDocument() async throws {
         let suite = "ArkTraceControllerTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

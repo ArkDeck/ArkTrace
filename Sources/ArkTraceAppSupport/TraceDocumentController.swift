@@ -481,6 +481,7 @@ public final class TraceDocumentController {
     @ObservationIgnored private let signposts: TraceAppSignposts
     @ObservationIgnored private let loader = TimelineSnapshotLoader()
     @ObservationIgnored private var document: TraceOpenedDocument?
+    @ObservationIgnored private var documentID: UInt64?
     @ObservationIgnored private var viewStateWriter: TraceViewStateWriteQueue?
     @ObservationIgnored private var openTask: Task<Void, Never>?
     @ObservationIgnored private var backupTask: Task<Void, Never>?
@@ -488,6 +489,14 @@ public final class TraceDocumentController {
     @ObservationIgnored private var searchTask: Task<Void, Never>?
     @ObservationIgnored private var analysisTask: Task<Void, Never>?
     @ObservationIgnored private var maintenanceTask: Task<Void, Never>?
+    // A replaced task remains owned until it finishes. The current-task slots
+    // above support UI cancellation; this set supports the product exit join.
+    @ObservationIgnored private var ownedTasks: [UInt64: Task<Void, Never>] = [:]
+    @ObservationIgnored private var nextTaskID: UInt64 = 0
+    @ObservationIgnored private var productShutdownRequested = false
+    @ObservationIgnored private var productShutdownTask: Task<Void, any Error>?
+    @ObservationIgnored private var pendingCleanupDocuments: [TraceOpenedDocument] = []
+    @ObservationIgnored private var pendingCleanupError: (any Error)?
     /// Internal gate for proving that background housekeeping never gates Ready.
     @ObservationIgnored private let beforeCacheMaintenance: (@Sendable () async -> Void)?
     @ObservationIgnored private var documentGeneration: UInt64 = 0
@@ -645,12 +654,14 @@ public final class TraceDocumentController {
         maintenanceTask?.cancel()
         argumentsTask?.cancel()
         densityResolutionTask?.cancel()
+        for task in ownedTasks.values { task.cancel() }
         if let closing {
             Task { try? await writer?.flush(); try? await closing.close() }
         }
     }
 
     public func open(_ url: URL) {
+        guard !productShutdownRequested else { return }
         signposts.event("OpenRequested")
         cancelOutstandingWork()
         documentGeneration &+= 1
@@ -662,7 +673,7 @@ public final class TraceDocumentController {
         loadingFraction = nil
         errorPresentation = nil
         announce(.openingTrace)
-        openTask = Task { [weak self] in
+        openTask = ownedTask { [weak self] in
             await self?.performOpen(url.standardizedFileURL, generation: generation)
         }
     }
@@ -681,14 +692,14 @@ public final class TraceDocumentController {
     /// serializes local persistence and backup, without rebuilding a sidecar
     /// from the viewer's normalized favorite array.
     public func backupViewState(sessionID: UInt64) {
-        guard sessionID == documentGeneration, phase == .ready, canBackupViewState,
+        guard !productShutdownRequested, sessionID == documentGeneration, phase == .ready, canBackupViewState,
               !isBackingUpViewState,
               let access = document?.viewStateAccess else { return }
         let generation = documentGeneration, writer = viewStateWriter
         isBackingUpViewState = true
         viewStateBackup = nil
         viewStateBackupError = nil
-        backupTask = Task { [weak self] in
+        backupTask = ownedTask { [weak self] in
             guard let self else { return }
             defer {
                 if generation == self.documentGeneration { self.isBackingUpViewState = false; self.backupTask = nil }
@@ -712,6 +723,7 @@ public final class TraceDocumentController {
     }
 
     public func cancel() {
+        guard !productShutdownRequested else { return }
         cancelOutstandingWork()
         documentGeneration &+= 1
         viewStateBackup = nil
@@ -723,6 +735,11 @@ public final class TraceDocumentController {
     }
 
     public func close() async {
+        guard !productShutdownRequested else { return }
+        await ownedTask { [self] in await closeDocument() }.value
+    }
+
+    private func closeDocument() async {
         cancelOutstandingWork()
         documentGeneration &+= 1
         viewStateBackup = nil
@@ -731,21 +748,101 @@ public final class TraceDocumentController {
         isBackingUpViewState = false
         let generation = documentGeneration
         let closing = document
+        let closingID = documentID
         let writer = viewStateWriter
         viewStateWriter = nil
         do {
             try await Self.flushAndClose(writer, document: closing)
+            if documentID == closingID { document = nil; documentID = nil }
             guard generation == documentGeneration else { return }
             document = nil
             viewStateWriter = nil
             resetDocumentState()
             announce(.traceClosed)
         } catch {
+            if productShutdownRequested || generation != documentGeneration { rememberCleanupFailure(error) }
             guard generation == documentGeneration else { return }
             let typed = Self.typed(error, stage: .openingDatabase)
             errorPresentation = TraceAppErrorPresentation(error: typed)
             phase = .failed
             announce(errorAnnouncement(fallback: .traceCloseFailed), priority: .urgent)
+        }
+    }
+
+    /// Stops admission and joins every owned operation, including replaced
+    /// opens, before saving and releasing the document. The product owner must
+    /// await this barrier before shutting down its shared native Engine.
+    /// Caller cancellation does not abandon cleanup. A failed barrier can be
+    /// retried, while admission remains closed.
+    public func closeForProductShutdown() async throws {
+        if let productShutdownTask { return try await productShutdownTask.value }
+        productShutdownRequested = true
+        documentGeneration &+= 1
+        let tasks = Array(ownedTasks.values)
+        cancelOutstandingWork()
+        maintenanceTask?.cancel()
+        for task in tasks { task.cancel() }
+        let task = Task { [self] in
+            defer { productShutdownTask = nil }
+            for task in tasks { await task.value }
+            var failure = pendingCleanupError
+            pendingCleanupError = nil
+            let residuals = pendingCleanupDocuments
+            pendingCleanupDocuments = []
+            for residual in residuals {
+                do { try await residual.close() }
+                catch {
+                    pendingCleanupDocuments.append(residual)
+                    failure = error
+                }
+            }
+            var persistenceError: (any Error)?
+            do { try await viewStateWriter?.flush(); viewStateWriter = nil }
+            catch { persistenceError = error }
+            do {
+                if let document { try await document.close() }
+                document = nil
+                documentID = nil
+            } catch { failure = error }
+            if failure == nil { failure = persistenceError }
+            if let failure {
+                errorPresentation = TraceAppErrorPresentation(error: Self.typed(failure, stage: .openingDatabase))
+                phase = .failed
+                announce(errorAnnouncement(fallback: .traceCloseFailed), priority: .urgent)
+                throw failure
+            }
+            document = nil
+            viewStateWriter = nil
+            resetDocumentState()
+            announce(.traceClosed)
+        }
+        productShutdownTask = task
+        try await task.value
+    }
+
+    private func ownedTask(_ operation: @escaping @MainActor @Sendable () async -> Void) -> Task<Void, Never> {
+        let id = nextTaskID
+        nextTaskID &+= 1
+        let task = Task { [weak self] in
+            defer { self?.ownedTasks.removeValue(forKey: id) }
+            await operation()
+        }
+        ownedTasks[id] = task
+        return task
+    }
+
+    private func rememberCleanupFailure(_ error: any Error) {
+        if (error as? ArkTraceError)?.isOwnershipCleanupFailure == true, pendingCleanupError == nil {
+            pendingCleanupError = error
+        }
+    }
+
+    private func closeUnpublishedDocument(_ opened: TraceOpenedDocument) async -> (any Error)? {
+        do { try await opened.close(); return nil }
+        catch {
+            pendingCleanupDocuments.append(opened)
+            if pendingCleanupError == nil { pendingCleanupError = error }
+            return error
         }
     }
 
@@ -886,6 +983,7 @@ public final class TraceDocumentController {
     /// was in flight, on the same generation rule every other query here
     /// follows (AT-LOD-005).
     public func selectDensityBand(_ hit: TimelineDensityHit) {
+        guard !productShutdownRequested else { return }
         densityResolutionTask?.cancel()
         guard let repository = document?.repository,
             let track = trackGroups.flatMap(\.tracks).first(where: {
@@ -895,7 +993,7 @@ public final class TraceDocumentController {
         let documentGeneration = documentGeneration
         let viewportGeneration = viewportGeneration
         let loader = loader
-        densityResolutionTask = Task { [weak self] in
+        densityResolutionTask = ownedTask { [weak self] in
             let resolved = try? await loader.resolveEvent(
                 hit,
                 track: track,
@@ -923,6 +1021,7 @@ public final class TraceDocumentController {
     /// simply yields none — the Inspector then shows no section at all rather
     /// than an empty one or an error (AT-DB-004 optional capability).
     private func loadArguments(for key: EventKey?) {
+        guard !productShutdownRequested else { return }
         argumentsTask?.cancel()
         selectedEventArguments = []
         selectedEventArgumentsTruncated = false
@@ -931,7 +1030,7 @@ public final class TraceDocumentController {
             let repository = document?.repository
         else { return }
         let generation = documentGeneration
-        argumentsTask = Task { [weak self] in
+        argumentsTask = ownedTask { [weak self] in
             guard !Task.isCancelled, let argSetID = await Self.argumentSetID(
                 for: event, in: repository
             ), !Task.isCancelled else { return }
@@ -985,12 +1084,13 @@ public final class TraceDocumentController {
     }
 
     public func selectRange(_ range: TraceTimeRange?) {
+        guard !productShutdownRequested else { return }
         analysisTask?.cancel()
         selectedRange = range
         rangeAnalysis = nil
         guard let range, let repository = document?.repository else { return }
         let generation = documentGeneration
-        analysisTask = Task { [weak self] in
+        analysisTask = ownedTask { [weak self] in
             do {
                 // Dragging may update the selection every frame. Debounce the
                 // Store/Analysis work while keeping the canvas interaction synchronous.
@@ -1054,6 +1154,7 @@ public final class TraceDocumentController {
     }
 
     public func search(_ text: String) {
+        guard !productShutdownRequested else { return }
         searchTask?.cancel()
         searchGeneration &+= 1
         let generation = searchGeneration
@@ -1064,7 +1165,7 @@ public final class TraceDocumentController {
             return
         }
         isSearching = true
-        searchTask = Task { [weak self] in
+        searchTask = ownedTask { [weak self] in
             do {
                 let result = try await TraceViewerSearchEngine(repository: repository).search(
                     // Processes belong to the sidebar's filter now. Leaving
@@ -1185,7 +1286,7 @@ public final class TraceDocumentController {
     /// distinguishable without asking the user to pick one.
     @discardableResult
     public func addFlag(atNs timestampNs: Int64, label: String? = nil) -> TimelineFlag? {
-        guard !isBackingUpViewState else { return nil }
+        guard !productShutdownRequested, !isBackingUpViewState else { return nil }
         guard let bounds = try? traceBounds() else { return nil }
         let clamped = min(max(timestampNs, bounds.startNs), bounds.endNs)
         let flag = TimelineFlag(
@@ -1200,7 +1301,7 @@ public final class TraceDocumentController {
     }
 
     public func updateFlag(id: Int, label: String? = nil, colorIndex: Int? = nil) {
-        guard !isBackingUpViewState else { return }
+        guard !productShutdownRequested, !isBackingUpViewState else { return }
         guard let index = annotations.flags.firstIndex(where: { $0.id == id }) else {
             return
         }
@@ -1210,7 +1311,7 @@ public final class TraceDocumentController {
     }
 
     public func removeFlag(id: Int) {
-        guard !isBackingUpViewState else { return }
+        guard !productShutdownRequested, !isBackingUpViewState else { return }
         annotations.flags.removeAll { $0.id == id }
         persistViewState()
     }
@@ -1220,7 +1321,7 @@ public final class TraceDocumentController {
     /// mark; `Shift+m` accumulates.
     @discardableResult
     public func addMark(isPersistent: Bool, label: String? = nil) -> TimelineMark? {
-        guard !isBackingUpViewState else { return nil }
+        guard !productShutdownRequested, !isBackingUpViewState else { return nil }
         let range = selectedRange ?? selectedEvent.map(\.range)
         guard let range, range.startNs < range.endNs else { return nil }
         if !isPersistent { annotations.marks.removeAll { !$0.isPersistent } }
@@ -1237,7 +1338,7 @@ public final class TraceDocumentController {
     }
 
     public func updateMark(id: Int, label: String? = nil, colorIndex: Int? = nil) {
-        guard !isBackingUpViewState else { return }
+        guard !productShutdownRequested, !isBackingUpViewState else { return }
         guard let index = annotations.marks.firstIndex(where: { $0.id == id }) else {
             return
         }
@@ -1247,7 +1348,7 @@ public final class TraceDocumentController {
     }
 
     public func removeMark(id: Int) {
-        guard !isBackingUpViewState else { return }
+        guard !productShutdownRequested, !isBackingUpViewState else { return }
         annotations.marks.removeAll { $0.id == id }
         persistViewState()
     }
@@ -1255,6 +1356,7 @@ public final class TraceDocumentController {
     /// IO runs outside MainActor. The queue retains only the active and latest
     /// snapshots and begins immediately; document close/replacement drains it.
     private func persistViewState() {
+        guard !productShutdownRequested else { return }
         viewStateWriter?.submit(TraceViewStateStore.Restored(
             annotations: annotations, favoriteTrackIDs: favoriteTrackIDs))
     }
@@ -1276,7 +1378,7 @@ public final class TraceDocumentController {
     /// Pins or unpins a lane. Pinning also makes it visible — pinning a hidden
     /// lane and then not seeing it would be a trap.
     public func toggleFavorite(_ id: TimelineTrackID) {
-        guard !isBackingUpViewState else { return }
+        guard !productShutdownRequested, !isBackingUpViewState else { return }
         if favoriteTrackIDs.contains(id) {
             favoriteTrackIDs.removeAll { $0 == id }
         } else {
@@ -1297,7 +1399,7 @@ public final class TraceDocumentController {
     /// Reorders the pinned set. Upstream lets the user drag pinned rows; the
     /// order is the whole point of pinning several at once.
     public func moveFavorite(from source: Int, to destination: Int) {
-        guard !isBackingUpViewState else { return }
+        guard !productShutdownRequested, !isBackingUpViewState else { return }
         let visible = favoriteTracks().map(\.id)
         guard visible.indices.contains(source), (0...visible.count).contains(destination)
         else { return }
@@ -1435,9 +1537,14 @@ public final class TraceDocumentController {
     public func zoomOut() { zoomBy(scale: 2) }
 
     public func refreshCacheInventory() async {
-        guard let maintenance else { return }
-        do { cacheInventory = try await maintenance.inventory() }
-        catch { presentNonfatal(error, generation: documentGeneration) }
+        guard !productShutdownRequested, let maintenance else { return }
+        await ownedTask { [self] in
+            do { cacheInventory = try await maintenance.inventory() }
+            catch {
+                rememberCleanupFailure(error)
+                presentNonfatal(error, generation: documentGeneration)
+            }
+        }.value
     }
 
     /// Cache housekeeping is not a precondition for reading a trace, so it no
@@ -1450,10 +1557,10 @@ public final class TraceDocumentController {
     /// relevant, and the entry that was just opened holds a shared lease, so
     /// maintenance skips it rather than competing for it.
     private func scheduleCacheMaintenance() {
-        guard let maintenance, maintenanceTask == nil else { return }
+        guard !productShutdownRequested, let maintenance, maintenanceTask == nil else { return }
         let generation = documentGeneration
         let beforeCacheMaintenance = self.beforeCacheMaintenance
-        maintenanceTask = Task { [weak self] in
+        maintenanceTask = ownedTask { [weak self] in
             let outcome: Result<TraceCacheMaintenanceReport, any Error>
             do {
                 await beforeCacheMaintenance?()
@@ -1472,6 +1579,7 @@ public final class TraceDocumentController {
                 // residual behind is, and the rest of the codebase gives that
                 // priority too.
                 if (error as? ArkTraceError)?.isOwnershipCleanupFailure == true {
+                    self.rememberCleanupFailure(error)
                     self.presentNonfatal(error, generation: generation)
                 }
             }
@@ -1486,21 +1594,26 @@ public final class TraceDocumentController {
     }
 
     public func purgeUnusedCache() async {
-        guard let maintenance else { return }
-        do {
-            cacheMaintenanceReport = try await maintenance.purgeUnused()
-            cacheInventory = cacheMaintenanceReport?.after
-        } catch {
-            presentNonfatal(error, generation: documentGeneration)
-        }
+        guard !productShutdownRequested, let maintenance else { return }
+        await ownedTask { [self] in
+            do {
+                cacheMaintenanceReport = try await maintenance.purgeUnused()
+                cacheInventory = cacheMaintenanceReport?.after
+            } catch {
+                rememberCleanupFailure(error)
+                presentNonfatal(error, generation: documentGeneration)
+            }
+        }.value
     }
 
     private func performOpen(_ url: URL, generation: UInt64) async {
         let previous = document
+        let previousID = documentID
         let previousWriter = viewStateWriter
         var opened: TraceOpenedDocument?
         do {
             try await Self.flushAndClose(previousWriter, document: previous)
+            if documentID == previousID { document = nil; documentID = nil; viewStateWriter = nil }
             guard generation == documentGeneration, !Task.isCancelled else { return }
             document = nil
             viewStateWriter = nil
@@ -1519,14 +1632,14 @@ public final class TraceDocumentController {
             opened = try await opener(url, progress)
             signposts.event("CacheParserReady")
             guard generation == documentGeneration, !Task.isCancelled else {
-                if let opened { try? await opened.close() }
+                if let opened { _ = await closeUnpublishedDocument(opened) }
                 return
             }
             guard let opened else { return }
             let catalog = try await Self.loadCatalog(repository: opened.repository)
             signposts.event("CatalogReady")
             guard generation == documentGeneration, !Task.isCancelled else {
-                try? await opened.close()
+                _ = await closeUnpublishedDocument(opened)
                 return
             }
             await loader.resetLayoutCache()
@@ -1553,16 +1666,17 @@ public final class TraceDocumentController {
                 loaded = try await loader.load(request, repository: opened.repository)
             }
             guard generation == documentGeneration, !Task.isCancelled else {
-                try? await opened.close()
+                _ = await closeUnpublishedDocument(opened)
                 return
             }
             let access = opened.viewStateAccess
             let restoration = try await access?.restore()
             guard generation == documentGeneration, !Task.isCancelled else {
-                try? await opened.close()
+                _ = await closeUnpublishedDocument(opened)
                 return
             }
             document = opened
+            documentID = generation
             viewStateWriter = access.map { access in
                 TraceViewStateWriteQueue(save: { try await access.save($0) }, failed: { [weak self] error in
                     self?.presentNonfatal(error, generation: generation)
@@ -1592,10 +1706,14 @@ public final class TraceDocumentController {
             if let restoreError = restoration?.error { presentNonfatal(restoreError, generation: generation) }
             scheduleCacheMaintenance()
         } catch {
-            if let opened { try? await opened.close() }
+            rememberCleanupFailure(error)
+            var reportedError = error
+            if let opened, let cleanupError = await closeUnpublishedDocument(opened) {
+                reportedError = cleanupError
+            }
             guard generation == documentGeneration else { return }
-            let typed = Self.typed(error, stage: .openingDatabase)
-            if typed.code == .cancelled || Task.isCancelled {
+            let typed = Self.typed(reportedError, stage: .openingDatabase)
+            if !typed.isOwnershipCleanupFailure && (typed.code == .cancelled || Task.isCancelled) {
                 phase = .loading(.cancelled)
                 announce(.openingCancelled)
             } else {
@@ -1646,6 +1764,7 @@ public final class TraceDocumentController {
     }
 
     private func scheduleSnapshot(preference: TimelineDetailPreference) {
+        guard !productShutdownRequested else { return }
         viewportTask?.cancel()
         guard let repository = document?.repository,
             let viewport = snapshot?.viewport
@@ -1654,7 +1773,7 @@ public final class TraceDocumentController {
         let viewportGeneration = viewport.generation
         let tracks = trackGroups.flatMap(\.tracks)
         let focusedEventKey = pendingSelectionKey
-        viewportTask = Task { [weak self] in
+        viewportTask = ownedTask { [weak self] in
             do {
                 if preference == .automatic {
                     try await Task.sleep(for: Self.viewportQueryCoalescingDelay)

@@ -133,6 +133,7 @@ reviewed_artifact() {
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd -P)
 . "$script_directory/phase3_shell_safety.sh"
+. "$script_directory/native_app_distribution_safety.sh"
 identity=${ARKTRACE_DEVELOPER_ID_APPLICATION:-}
 team=${ARKTRACE_DEVELOPMENT_TEAM:-}
 notary_profile=${ARKTRACE_NOTARY_PROFILE:-}
@@ -208,6 +209,7 @@ arktrace_assert_physical_directory_chain "$app" \
     || fail "reviewed App license directory contains a symlink"
 signature_detail "$helper" helper
 signature_detail "$app" app
+arktrace_verify_native_app_closure "$app" "reviewed App"
 run_external "reviewed App nested signatures are invalid" \
     codesign --verify --deep --strict --verbose=2 "$app"
 
@@ -364,6 +366,7 @@ arktrace_assert_physical_directory_chain "$final_app" \
 [ -z "$(find "$final_app/Contents/Resources/Licenses" -type l -print -quit)" ] \
     || fail "final archive license directory contains a symlink"
 signature_detail "$final_helper" final-helper
+arktrace_verify_native_app_closure "$final_app" "final App"
 signature_detail "$final_app" final-app
 run_external "final archive nested signatures are invalid" \
     codesign --verify --deep --strict --verbose=2 "$final_app"

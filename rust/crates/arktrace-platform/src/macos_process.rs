@@ -130,8 +130,14 @@ impl VerifiedExecutable {
         policy: CodeTrustPolicy,
         budget: &IoBudget,
     ) -> Result<Self, ProcessError> {
-        if !file.private || file.initial.mode & 0o100 == 0 || file.initial.mode & 0o200 != 0 {
+        if file.initial.mode & 0o100 == 0 || file.initial.mode & 0o200 != 0 {
             return Err(ProcessError::InvalidExecutable);
+        }
+        if !file.private {
+            if !matches!(policy, CodeTrustPolicy::DeveloperId { .. }) {
+                return Err(ProcessError::InvalidExecutable);
+            }
+            file.require_signed_code_file()?;
         }
         if expected_sha256.len() != 64
             || !expected_sha256
@@ -175,6 +181,9 @@ impl VerifiedExecutable {
         &self.verdict
     }
     pub fn verify_binding(&self) -> Result<(), ProcessError> {
+        if !self.file.private {
+            self.file.require_signed_code_file()?;
+        }
         self.file.verify().map_err(Into::into)
     }
 }
@@ -690,10 +699,14 @@ fn emit(event: Event) -> Result<(), ProcessError> {
     Ok(())
 }
 
-fn open_private_file(path: &Path) -> Result<HeldFile, ProcessError> {
-    let parent = HeldDirectory::open_private(path.parent().ok_or(ProcessError::InvalidArguments)?)?;
+fn open_tool_file(path: &Path, policy: &CodeTrustPolicy) -> Result<HeldFile, ProcessError> {
+    let path_parent = path.parent().ok_or(ProcessError::InvalidArguments)?;
+    let parent = match policy {
+        CodeTrustPolicy::DeveloperId { .. } => HeldDirectory::open_code_directory(path_parent)?,
+        CodeTrustPolicy::DevelopmentPinned => HeldDirectory::open_private(path_parent)?,
+    };
     let name = super::component(path.file_name().ok_or(ProcessError::InvalidArguments)?)?;
-    Ok(parent.open_file_component(name, true)?)
+    Ok(parent.open_file_component(name, parent.0.private)?)
 }
 
 fn local_run(request: Request) -> Result<ProcessOutcome, ProcessError> {
@@ -722,7 +735,7 @@ fn local_run(request: Request) -> Result<ProcessOutcome, ProcessError> {
     budget.check()?;
     let mut watcher = ParentWatch::start(token, budget.termination_grace)?;
     let path = PathBuf::from(OsString::from_vec(request.executable));
-    let file = open_private_file(&path)?;
+    let file = open_tool_file(&path, &request.policy)?;
     if file.snapshot() != request.snapshot {
         return Err(ProcessError::Host(HostError::Changed));
     }

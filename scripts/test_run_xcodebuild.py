@@ -23,6 +23,8 @@ class RunXcodebuildTests(unittest.TestCase):
             "#!/bin/sh\n"
             "printf 'CLANG_MODULE_CACHE_PATH=%s\\n' \"$CLANG_MODULE_CACHE_PATH\"\n"
             "printf 'SWIFTPM_MODULECACHE_OVERRIDE=%s\\n' \"$SWIFTPM_MODULECACHE_OVERRIDE\"\n"
+            "printf 'ARKTRACE_RUST_XCFRAMEWORK=%s\\n' \"$ARKTRACE_RUST_XCFRAMEWORK\"\n"
+            "printf 'ARKTRACE_RUST_SDK_FIXTURES=%s\\n' \"${ARKTRACE_RUST_SDK_FIXTURES-unset}\"\n"
             "printf 'ARG:%s\\n' \"$@\"\n"
             "exit \"${FAKE_XCODEBUILD_EXIT:-0}\"\n",
             encoding="utf-8",
@@ -36,6 +38,20 @@ class RunXcodebuildTests(unittest.TestCase):
         script = root / "scripts/run-xcodebuild.sh"
         script.parent.mkdir(parents=True)
         shutil.copy2(SCRIPT, script)
+        # This test exercises runner orchestration without compiling or
+        # signing tools. Real artifact admission has separate contract tests.
+        (script.parent / "prepare_macos_native_app.py").write_text(
+            "import argparse,json,os,sys\n"
+            "from pathlib import Path\n"
+            "p=argparse.ArgumentParser();p.add_argument('--workspace',type=Path,required=True)\n"
+            "p.add_argument('--sdk');p.add_argument('--signing-identity');a=p.parse_args()\n"
+            "if os.environ.get('FAKE_PREPARATION_EXIT'): sys.exit(int(os.environ['FAKE_PREPARATION_EXIT']))\n"
+            "target=a.workspace/'.arktrace-native';target.mkdir(exist_ok=True)\n"
+            "(target/'source.txt').write_text((a.workspace/'Apps/ArkTraceApp/App.swift').read_text())\n"
+            "print(json.dumps({'relativeSDK':'.arktrace-native/test/CArkTrace.xcframework',"
+            "'sdkArgument':a.sdk,'signingIdentityArgument':a.signing_identity}))\n",
+            encoding="utf-8",
+        )
         project = root / "ArkTrace.xcodeproj/project.pbxproj"
         project.parent.mkdir(parents=True)
         project.write_text("// project\n", encoding="utf-8")
@@ -49,7 +65,7 @@ class RunXcodebuildTests(unittest.TestCase):
         manifest = {"binarySHA256": hashlib.sha256(parser.read_bytes()).hexdigest()}
         (parser.parent / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
         (root / ".gitignore").write_text(
-            "ThirdParty/TraceStreamer/macx/trace_streamer\n", encoding="utf-8"
+            "ThirdParty/TraceStreamer/macx/trace_streamer\n.arktrace-native/\n", encoding="utf-8"
         )
         subprocess.run(["git", "init", "-q", str(root)], check=True)
         subprocess.run(["git", "-C", str(root), "add", "."], check=True)
@@ -64,6 +80,7 @@ class RunXcodebuildTests(unittest.TestCase):
         *,
         output_root: Path | None = None,
         exit_code: str = "0",
+        overrides: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
         environment.update(
@@ -75,6 +92,7 @@ class RunXcodebuildTests(unittest.TestCase):
         )
         if output_root is not None:
             environment["ARKTRACE_XCODE_OUTPUT_ROOT"] = str(output_root)
+        environment.update(overrides or {})
         return subprocess.run(
             ["/bin/sh", str(script)],
             text=True,
@@ -111,10 +129,35 @@ class RunXcodebuildTests(unittest.TestCase):
         self.assertIn("ARCHS=arm64", arguments)
         self.assertIn("ONLY_ACTIVE_ARCH=YES", arguments)
         self.assertEqual(arguments[-1], "build")
+        self.assertIn("ARKTRACE_RUST_XCFRAMEWORK=.arktrace-native/test/CArkTrace.xcframework", lines)
+        self.assertIn("ARKTRACE_RUST_SDK_FIXTURES=unset", lines)
         self.assertEqual(
             (canonical / "workspace/ThirdParty/TraceStreamer/macx/trace_streamer").read_bytes(),
             b"approved parser",
         )
+
+    def test_native_preparation_follows_source_sync_and_rejects_failures(self) -> None:
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        script, source = self.make_repo(temporary / "repo", "let value = 1\n", 1_700_000_000)
+        cache = temporary / "cache"
+        executable = self.make_fake_xcodebuild(temporary)
+        overrides = {
+            "ARKTRACE_RUST_XCFRAMEWORK": str(temporary / "normal-sdk"),
+            "ARKTRACE_NATIVE_APP_SIGNING_IDENTITY": "Developer ID test argument",
+            "ARKTRACE_RUST_SDK_FIXTURES": "1",
+        }
+        first = self.invoke(script, cache, executable, overrides=overrides)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        source.write_text("let value = 2\n", encoding="utf-8")
+        second = self.invoke(script, cache, executable, overrides=overrides)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertEqual((cache / "workspace/.arktrace-native/source.txt").read_text(), "let value = 2\n")
+        preparation = json.loads((cache / "native-app-preparation.json").read_text())
+        self.assertEqual(preparation["sdkArgument"], overrides["ARKTRACE_RUST_XCFRAMEWORK"])
+        self.assertEqual(preparation["signingIdentityArgument"], overrides["ARKTRACE_NATIVE_APP_SIGNING_IDENTITY"])
+        rejected = self.invoke(script, cache, executable, overrides={"FAKE_PREPARATION_EXIT": "65"})
+        self.assertEqual(rejected.returncode, 65)
+        self.assertNotIn("ARG:", rejected.stdout)
 
     def test_identical_worktree_content_preserves_mirror_identity(self) -> None:
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))

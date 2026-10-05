@@ -285,6 +285,15 @@ jobs:
           fi
           echo "DEVELOPER_DIR=$PINNED_DEVELOPER_DIR" >> "$GITHUB_ENV"
 
+      - name: Install exact Rust toolchain for the native App
+        run: rustup toolchain install 1.99.0 --profile minimal
+
+      - name: Set external native build caches
+        run: |
+          echo "ARKTRACE_CARGO_CACHE_ROOT=$RUNNER_TEMP/arktrace-app-cargo" >> "$GITHUB_ENV"
+          echo "ARKTRACE_RUST_SDK_CACHE_ROOT=$RUNNER_TEMP/arktrace-app-sdk" >> "$GITHUB_ENV"
+          echo "ARKTRACE_NATIVE_APP_INPUT_CACHE_ROOT=$RUNNER_TEMP/arktrace-app-inputs" >> "$GITHUB_ENV"
+
       # Never trust a parser binary that appears on the runner (self-hosted
       # leftovers, restored artifacts): re-verify its bytes against the pinned
       # manifest before letting the copy phase embed it in the bundle. The
@@ -332,8 +341,8 @@ jobs:
             xcobj-v2-${{ runner.os }}-${{ runner.arch }}-xcode27.0-
 
       # The app target lives in the Xcode project, outside the SwiftPM graph,
-      # so `swift build` never compiles it. It also has a "Copy Pinned
-      # TraceStreamer Bytes" phase that dittos the parser into the bundle, so
+      # so `swift build` never compiles it. The runner builds the production
+      # Rust SDK/helper and stages the locked parser into the bundle, so
       # it cannot build at all without that binary. These steps therefore run
       # only where it is present -- a self-hosted runner, or a hosted one that
       # restored it (and re-passed the manifest check above). On a stock
@@ -415,6 +424,7 @@ jobs:
           sh scripts/test_ci_plan.sh
           python3 scripts/test_run_swiftpm.py
           python3 scripts/test_run_xcodebuild.py
+          python3 scripts/test_native_app_resources.py
           python3 scripts/test_run_cargo.py
           python3 scripts/test_cargo_cache.py
           python3 scripts/test_stage_macos_rust_sdk.py

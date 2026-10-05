@@ -207,6 +207,7 @@ verify_product_identity() {
 verify_bundled_closure() {
     closure_app=$1
     label=$2
+    arktrace_verify_native_app_closure "$closure_app" "$label"
     helper_path="$closure_app/Contents/Helpers/trace_streamer"
     manifest_path="$closure_app/Contents/Resources/TraceStreamer/manifest.json"
     signing_path="$closure_app/Contents/Resources/TraceStreamer/distribution-signing.json"
@@ -247,6 +248,7 @@ verify_bundled_closure() {
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 repository_root=$(CDPATH= cd -- "$script_directory/.." && pwd -P)
 . "$script_directory/phase3_shell_safety.sh"
+. "$script_directory/native_app_distribution_safety.sh"
 
 identity=${ARKTRACE_DEVELOPER_ID_APPLICATION:-}
 team=${ARKTRACE_DEVELOPMENT_TEAM:-}

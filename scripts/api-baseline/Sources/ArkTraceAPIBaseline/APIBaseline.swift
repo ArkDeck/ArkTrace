@@ -102,6 +102,7 @@ private func pinAppSupportSurface(
     await controller.refreshCacheInventory()
     await controller.purgeUnusedCache()
     await controller.close()
+    try? await controller.closeForProductShutdown()
 
     _ = TraceDocumentController(bundleURL: URL(filePath: "/dev/null"))
     let parserLocation = try! TraceBundledParserLocation(

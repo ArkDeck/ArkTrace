@@ -86,7 +86,7 @@ final class TraceStreamerIdentityTests: XCTestCase {
         try requirePinnedFiles()
         let bundle = FileManager.default.temporaryDirectory
             .appending(path: "ArkDeck-\(UUID().uuidString).app", directoryHint: .isDirectory)
-        let executable = bundle.appending(path: "Contents/MacOS/trace_streamer")
+        let executable = bundle.appending(path: "Contents/Helpers/trace_streamer")
         let manifest = bundle.appending(
             path: "Contents/Resources/TraceStreamer/manifest.json"
         )
@@ -113,6 +113,18 @@ final class TraceStreamerIdentityTests: XCTestCase {
             try TraceStreamerManifest.load(from: Self.manifestURL).binarySHA256
         )
         XCTAssertTrue(FileManager.default.fileExists(atPath: executable.path))
+
+        let formerLocation = bundle.appending(path: "Contents/MacOS/trace_streamer")
+        try FileManager.default.createDirectory(at: formerLocation.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.moveItem(at: executable, to: formerLocation)
+        let formerParser = try TraceStreamerProcessParser(executableURL: formerLocation, manifestURL: manifest,
+            executionMode: .signedBundleInPlace)
+        do {
+            _ = try await formerParser.cacheIdentity()
+            XCTFail("the current signed layout must not admit another nested location")
+        } catch let error as ArkTraceError {
+            XCTAssertEqual(error.details["reason"], "invalidSignedBundleLayout")
+        }
     }
 
     func testSignedBundleModeRejectsUnreviewedLayout() async throws {

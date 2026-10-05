@@ -36,7 +36,10 @@ public struct RustResult: Sendable {
     }
     public func withBytes<R>(_ body: (Span<UInt8>) throws -> R) rethrows -> R {
         try withExtendedLifetime(self) {
-            let span = unsafe Span(_unsafeStart: lease.pointer, count: count)
+            // Span borrows this local pointer value. Projecting the class
+            // field directly gives optimized SIL a shorter temporary borrow.
+            let pointer = unsafe lease.pointer
+            let span = unsafe Span(_unsafeStart: pointer, count: count)
             return try body(span)
         }
     }

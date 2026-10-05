@@ -133,6 +133,13 @@ expect "stable build runner change fails closed to every lane" "$all_lanes" \
     'scripts/run-swiftpm.sh
 scripts/test_run_xcodebuild.py'
 
+expect "native App preparation selects every lane" "$all_lanes" \
+    'scripts/prepare_macos_native_app.py
+scripts/copy_native_app_resources.py
+scripts/test_native_app_resources.py
+scripts/native_app_distribution_safety.sh
+scripts/test_native_app_build.sh'
+
 expect "unknown path fails closed to every lane" "$all_lanes" \
     'mystery/new-subsystem.c'
 

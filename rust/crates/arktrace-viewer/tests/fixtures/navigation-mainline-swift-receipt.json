@@ -30,13 +30,18 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceBundledParserResolver.swift",
-      "byteCount": 3880,
-      "sha256": "c396bc0de76f9e1c7645153364648a99be144c0f3262bf0e1f2c59e5e0b76ef3"
+      "byteCount": 3872,
+      "sha256": "b2f8400920591121e79c2bd759a9fe292552d82c149a2e8081336fc8ab6f24d7"
+    },
+    {
+      "path": "Sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
+      "byteCount": 9329,
+      "sha256": "599b6ca04b9d046b64277b767ecdb50afec01eb0fc18e0e6bc4525cec9ee2185"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 98611,
-      "sha256": "0fce255320ae6962401e1882efa9ef8c479bb0c6066af0a4d4f2fcd8c915006d"
+      "byteCount": 104435,
+      "sha256": "69b8f117bb5bbd04d2ad9a30d23a1b3576c8238074fca30fd18e35430789accc"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -292,8 +297,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "f0e466c21764a3da27d0afeee785e572292483a226dc4a64abab6f37b49eff9e",
-      "byteCount": 100082
+      "sha256": "b505113928cfa9cc79bdb376becb0aa3fb85e410b6568bd6ef119d068a81b687",
+      "byteCount": 105906
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -303,15 +308,15 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "cfaa54ed001a8e9c3c0f9c5a19d61c926cba1dcdefe72ad704a367881a2109cc",
-    "byteCount": 5860
+    "sha256": "f6f40675bd7302556650521f34720ba2ede1b2e53cc69665e400bb6471e31e27",
+    "byteCount": 6162
   },
   "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "0fce255320ae6962401e1882efa9ef8c479bb0c6066af0a4d4f2fcd8c915006d",
-      "byteCount": 98611
+      "sha256": "69b8f117bb5bbd04d2ad9a30d23a1b3576c8238074fca30fd18e35430789accc",
+      "byteCount": 104435
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -395,7 +400,7 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "04538fd3af7e5ab78c2d12990d8483efb3120113",
-  "previousReceiptSHA256": "048a88e143129f8b24abc2980e595ccb551fd7092683184eff02c63e0fe532e2",
+  "revalidatedBaseCommit": "71d3707541f6e395bb64b15cc78f6dfac75c483a",
+  "previousReceiptSHA256": "7a96cf81b3775dc89f82f41a73f7ea287f6239d8ef33798e65e02ef0b9df4bbd",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
 }
