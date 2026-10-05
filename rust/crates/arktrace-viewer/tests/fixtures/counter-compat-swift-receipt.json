@@ -347,18 +347,18 @@
     "environment": {
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-counter-mainline-swift",
       "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
-      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-string-pool-regressions-20261006/oracle-refresh/fresh-swift-counter-oracle.json",
+      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-packed-wire-regressions-20261006/oracle-refresh/fresh-swift-counter-oracle.json",
       "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
-      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-string-pool-regressions-20261006/oracle-refresh/fresh-swift-counter-reveal.json",
+      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-packed-wire-regressions-20261006/oracle-refresh/fresh-swift-counter-reveal.json",
       "COUNTER_REVEAL_DATABASES": "/private/tmp/arktrace-counter-mainline-swift/databases",
       "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
     },
     "exitCode": 0,
-    "elapsedSeconds": 6.144130000000587,
+    "elapsedSeconds": 7.134999041008996,
     "log": {
-      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-string-pool-regressions-20261006/oracle-refresh/fresh-swift-canonical-and-regressions.log",
-      "byteCount": 6191,
-      "sha256": "f45b7617fad21771b30eebc821d80d9f174c0f6518339a8a0a4b955391bc42e5"
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-packed-wire-regressions-20261006/oracle-refresh/fresh-swift-canonical-and-regressions.log",
+      "byteCount": 6201,
+      "sha256": "5d76f8e58235d081bceca94e3570a38bc0247d20f5efeddad7a4dbb4556f23ef"
     }
   },
   "databases": [
@@ -385,6 +385,6 @@
   "setupLimitations": [
     "Prior mainline setup limitations remain in the previous receipt; this fresh replay uses its independently audited access seams and unchanged frozen DBs."
   ],
-  "previousReceiptSHA256": "f68123043efd4e08a56ccfa870a2df9b17a8a7b146097218cd898f0624302034",
-  "revalidatedBaseCommit": "5348ae0b462ce4f9443e5f014da107152a6ae47f"
+  "previousReceiptSHA256": "eff5bac9ebefa8d22e7b2ec2e9acc6449dd05d3c4d19b9a5c6a69c51bfe4f2ae",
+  "revalidatedBaseCommit": "313e039f8c50009d1a1ca367f905059f7927b104"
 }

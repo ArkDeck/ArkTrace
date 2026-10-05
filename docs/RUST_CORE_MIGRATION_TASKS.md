@@ -18,6 +18,8 @@
 > 修正契约声明仍为格式 1、实际 producer/consumer 已为格式 2 的不一致，统一生成常量；
 > 当前新 SDK/App、真实 medium cold/cache/Inspector 及适用 macOS checks 通过。
 > 见[快照格式契约记录](migration-runs/AT-RUST-012-013-2026-10-06-snapshot-format-contract.md)；总验收仍 open。
+> 后续实际 Rust pack → Swift convert 的 5 个 scenes / 598 字段回归通过，默认 CI 同时核对
+> producer 与冻结 records。见[packed conversion 记录](migration-runs/AT-RUST-011-013-2026-10-06-packed-conversion.md)。
 
 ## 1. 执行规则与完成语义
 
