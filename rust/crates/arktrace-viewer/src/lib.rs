@@ -5,6 +5,7 @@
 mod detail;
 mod geometry;
 mod hot_snapshot;
+mod hot_snapshot_hit;
 mod interaction;
 mod loader;
 mod navigation;
@@ -18,6 +19,7 @@ mod wire_records;
 pub use detail::*;
 pub use geometry::*;
 pub use hot_snapshot::*;
+pub use hot_snapshot_hit::*;
 pub use interaction::*;
 pub use loader::*;
 pub use navigation::*;

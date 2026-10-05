@@ -240,7 +240,7 @@ pub struct DensityHitIntent {
     pub fallback: ResolutionQuery,
 }
 impl DensityHitIntent {
-    fn new(
+    pub(crate) fn new(
         track_id: String,
         source: TraceDensitySource,
         bucket: TraceTimeRange,

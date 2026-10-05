@@ -34,6 +34,10 @@
 > native 全套 763 项通过，错误后与最后 owner 释放后额度回到 opening 基线，close 后归零。
 > 见[取消与 deadline 回归记录](migration-runs/AT-RUST-012-013-2026-10-06-native-load-cancellation.md)；
 > in-flight 取消、Rust retained hit 接线及完整 macOS 验收仍 open。
+> 已补 retained HotSnapshot 的纯 Rust hit，接受显式显示 viewport/scale 和 detail/density 模式，
+> 复用现有几何与 density intent；54 个当前 Swift/Rust 命中对照（含 loading 重投影）和
+> 12 个负例通过。见[retained hit 记录](migration-runs/AT-RUST-011-012-2026-10-06-retained-hit.md)；
+> C ABI/SDK/NSView 的生产接线与整体验收仍 open。
 
 ## 1. 执行规则与完成语义
 

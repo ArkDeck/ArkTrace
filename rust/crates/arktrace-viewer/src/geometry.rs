@@ -75,15 +75,32 @@ pub fn band_frame(
     viewport: &Viewport,
     backing_scale: f64,
 ) -> Result<Rect, ViewerError> {
-    validate_track_geometry(track)?;
+    band_frame_for(
+        range,
+        track.y,
+        track.height,
+        track.depth_row_count,
+        viewport,
+        backing_scale,
+    )
+}
+pub(crate) fn band_frame_for(
+    range: TraceTimeRange,
+    y: f64,
+    height: f64,
+    depth_rows: usize,
+    viewport: &Viewport,
+    backing_scale: f64,
+) -> Result<Rect, ViewerError> {
+    validate_track_layout(y, height, depth_rows)?;
     validate_scale(backing_scale)?;
     let start = viewport.x(range.start_ns());
     let end = viewport.x(range.end_ns());
     let result = Rect {
         x: start,
-        y: RULER_HEIGHT + track.y + TRACK_VERTICAL_INSET,
+        y: RULER_HEIGHT + y + TRACK_VERTICAL_INSET,
         width: (end - start).max(1.0 / backing_scale.max(1.0)),
-        height: (track.height - 2.0 * TRACK_VERTICAL_INSET).max(1.0),
+        height: (height - 2.0 * TRACK_VERTICAL_INSET).max(1.0),
     };
     result.validate()?;
     Ok(result)
@@ -94,16 +111,34 @@ pub fn detail_frame(
     viewport: &Viewport,
     backing_scale: f64,
 ) -> Result<Rect, ViewerError> {
-    validate_track_geometry(track)?;
+    detail_frame_for(
+        detail.range,
+        detail.depth,
+        track.y,
+        track.height,
+        track.depth_row_count,
+        viewport,
+        backing_scale,
+    )
+}
+pub(crate) fn detail_frame_for(
+    range: TraceTimeRange,
+    depth: i64,
+    y: f64,
+    height: f64,
+    depth_rows: usize,
+    viewport: &Viewport,
+    backing_scale: f64,
+) -> Result<Rect, ViewerError> {
+    validate_track_layout(y, height, depth_rows)?;
     validate_scale(backing_scale)?;
-    let span =
-        ((track.height - 2.0 * TRACK_VERTICAL_INSET) / track.depth_row_count as f64).max(1.0);
-    let row = detail.depth.max(0).min(track.depth_row_count as i64 - 1);
-    let start = viewport.x(detail.range.start_ns());
-    let end = viewport.x(detail.range.end_ns());
+    let span = ((height - 2.0 * TRACK_VERTICAL_INSET) / depth_rows as f64).max(1.0);
+    let row = depth.max(0).min(depth_rows as i64 - 1);
+    let start = viewport.x(range.start_ns());
+    let end = viewport.x(range.end_ns());
     let result = Rect {
         x: start,
-        y: RULER_HEIGHT + track.y + TRACK_VERTICAL_INSET + row as f64 * span,
+        y: RULER_HEIGHT + y + TRACK_VERTICAL_INSET + row as f64 * span,
         width: (end - start).max(1.0 / backing_scale.max(1.0)),
         height: span.max(1.0),
     };
@@ -131,15 +166,18 @@ pub(crate) fn validate_scale(scale: f64) -> Result<(), ViewerError> {
     }
 }
 pub(crate) fn validate_track_geometry(track: &TrackInput) -> Result<(), ViewerError> {
-    if !track.y.is_finite()
-        || track.y < 0.0
-        || !track.height.is_finite()
-        || track.height <= 0.0
-        || !(1..=MAXIMUM_DEPTH_ROWS).contains(&track.depth_row_count)
+    validate_track_layout(track.y, track.height, track.depth_row_count)
+}
+fn validate_track_layout(y: f64, height: f64, depth_rows: usize) -> Result<(), ViewerError> {
+    if !y.is_finite()
+        || y < 0.0
+        || !height.is_finite()
+        || height <= 0.0
+        || !(1..=MAXIMUM_DEPTH_ROWS).contains(&depth_rows)
     {
         return Err(ViewerError::InvalidGeometry);
     }
-    finite(RULER_HEIGHT + track.y + track.height)?;
+    finite(RULER_HEIGHT + y + height)?;
     Ok(())
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]

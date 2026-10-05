@@ -1,0 +1,1251 @@
+{
+  "baseCommit": "5c20a4a564626718ffd728696003731eb5b9a644",
+  "scope": "Pure retained HotSnapshot hit with display viewport/scale and modes; C ABI/SDK/NSView production hit not connected",
+  "rootReceipts": [
+    {
+      "label": "01-current-packed-hit",
+      "exitCode": 0,
+      "receiptSHA256": "ff5f4bb48ccbee725f653e5e730b9377d8f05d282ecb402958269e128858f6b3"
+    },
+    {
+      "label": "02-current-swift-canonical",
+      "exitCode": 1,
+      "receiptSHA256": "2a08b2c6e7c327a4c1a332a170046d4fba415f57409cb1f97b2c4b8dff3c238d"
+    },
+    {
+      "label": "03-current-swift-canonical",
+      "exitCode": 1,
+      "receiptSHA256": "db79b96abed45bf26c30b084703e88088f8f1578247fbd08b2989993103d8196"
+    },
+    {
+      "label": "04-format",
+      "exitCode": 0,
+      "receiptSHA256": "bd97eb251fdfe74bb5e27f8a654058fa69d40b5c8f07fa73b4e6582094bcb595"
+    },
+    {
+      "label": "05-current-swift-canonical",
+      "exitCode": 0,
+      "receiptSHA256": "f0c19b12e3aa3d1d7a406b45e98a585ced5db4c93f33deb234cf4585b49d7409"
+    },
+    {
+      "label": "06-display-packed-hit",
+      "exitCode": 101,
+      "receiptSHA256": "f325d5eca72c43cafa070feed504bf2a1bdfbeed3722af6813802a551bd4c16d"
+    },
+    {
+      "label": "07-display-packed-hit",
+      "exitCode": 0,
+      "receiptSHA256": "91bc391b80c27f67bcbfbcda51a7cbb8075c2121f4fbc36a6708a291bf854d00"
+    },
+    {
+      "label": "08-format",
+      "exitCode": 0,
+      "receiptSHA256": "9c838da54303e5f78b6fdda9757a649dbb9c7763d148ea25b9951187f9798f51"
+    },
+    {
+      "label": "09-sdk-fixtures",
+      "exitCode": 0,
+      "receiptSHA256": "d1ac128998e36d0297fc49b293861e2411bb5199a75b0c4a475a972f889e7a39"
+    },
+    {
+      "label": "09-sdk-normal",
+      "exitCode": 0,
+      "receiptSHA256": "a13b66845aba1e8452b20411f9457132a1fa42331d09a18bc079cd22661a5e18"
+    },
+    {
+      "label": "10-facts-refresh",
+      "exitCode": 0,
+      "receiptSHA256": "076f0c93eb112404f9c0c139ff6bf6fd697a4711be59d215b1481fc01125168e"
+    },
+    {
+      "label": "11-migration-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "345c2e16143f97794060b86de0d3b47190016b76e3f46bbe1e71f46886c8d188"
+    },
+    {
+      "label": "12b-default-build",
+      "exitCode": 0,
+      "receiptSHA256": "7cc17a63b66c387859b2e518bf7d30d0545000f5136eefe484dd19ecd2095bb3"
+    },
+    {
+      "label": "13b-default-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "582cc5f25a3f4bfe864811c404b9a47d4d56e5627f17cc9395880c436186fae9"
+    },
+    {
+      "label": "14-native-full-test",
+      "exitCode": 0,
+      "receiptSHA256": "9ce0b0146a51e73b7180e1ccd73639262a1b45bc69f9fc7659d050d879991a92"
+    },
+    {
+      "label": "17-api",
+      "exitCode": 0,
+      "receiptSHA256": "5efa6a55739c835c95f5cc3473a94c42eb171cca4987b742982ff6cf4d5a48cf"
+    },
+    {
+      "label": "18-app-debug",
+      "exitCode": 0,
+      "receiptSHA256": "6f0a3b35080cc97b07376e0290c770668b9e1b675113ce739b5429a0bb89be4d"
+    },
+    {
+      "label": "19-app-document-types",
+      "exitCode": 0,
+      "receiptSHA256": "16dc18d40ac1ffed7553b8224a30025e87df7778517b5b72e266584243471420"
+    },
+    {
+      "label": "20-fmt",
+      "exitCode": 0,
+      "receiptSHA256": "c5c8cb1c761a6ca5108122e8063d8c4fbc588075be5b13bdc9c27366180f5f09"
+    },
+    {
+      "label": "21-clippy",
+      "exitCode": 0,
+      "receiptSHA256": "9c389f8056e6c11d3cc253c2727645864236452f577b3130616d126b361259da"
+    },
+    {
+      "label": "22-rust-workspace",
+      "exitCode": 0,
+      "receiptSHA256": "798c7fdf73e42dbdf5b77090d48b2d29f7f88826668581fe6c85cdb38215d945"
+    },
+    {
+      "label": "23-workspace-verifier",
+      "exitCode": 0,
+      "receiptSHA256": "1c13c4d4a882b1c340873589dafeeb360475b6d26b89dd905d1ca164c9426ef0"
+    },
+    {
+      "label": "24-generator",
+      "exitCode": 0,
+      "receiptSHA256": "ad08fad1498fa9bb57252b26b49d8a5b724754dae71dead8243bf25a3fe4bd26"
+    },
+    {
+      "label": "25-migration-contract-tests",
+      "exitCode": 0,
+      "receiptSHA256": "62e535a138688ce8ced8597d3077f154d8f3aef7c1c36a751addb7d6760d1d9b"
+    },
+    {
+      "label": "26-rust-build",
+      "exitCode": 0,
+      "receiptSHA256": "73ce20875cdfab1536b8532f898945d93ecf2786385e5160639c8b6e35988f46"
+    },
+    {
+      "label": "27-migration-smoke",
+      "exitCode": 0,
+      "receiptSHA256": "e9869609f4c5584df6aff80d527b00d0e7aee3199b09644c8635952db130c3e3"
+    },
+    {
+      "label": "28-json-roundtrip",
+      "exitCode": 0,
+      "receiptSHA256": "c00c93fa8c52e79e83e8c6b39986095e544546f1e483146f09b206f063e67149"
+    },
+    {
+      "label": "29-ffi-contract",
+      "exitCode": 0,
+      "receiptSHA256": "e453820f711210e7a57b61a38e3cc4d167e911850ea3d6050fccb0f44eced899"
+    },
+    {
+      "label": "30-sdk-consumer",
+      "exitCode": 0,
+      "receiptSHA256": "1bb645c8a0cc95de718c8f79e39898e96a52b0f87db7724b0e0159277a1cdbb5"
+    },
+    {
+      "label": "31-sdk-reference-1",
+      "exitCode": 0,
+      "receiptSHA256": "3a096504423dbc1d5f16f5c1f1910a794642bb0a372e1752c557e2842cc9b058"
+    },
+    {
+      "label": "31-sdk-reference-2",
+      "exitCode": 0,
+      "receiptSHA256": "4e7e4db10b3d2eea0dbe4c82dbafcd4a1680fbe2b5f5123ff5397ea7e5b9fb98"
+    },
+    {
+      "label": "31-sdk-reference-3",
+      "exitCode": 0,
+      "receiptSHA256": "86e801c3bdb3245a4d48773f04f08e482450f0d95d2fe8e8f7a3b3c0a26b9074"
+    },
+    {
+      "label": "31-sdk-reference-4",
+      "exitCode": 0,
+      "receiptSHA256": "854f38aadbf33a9b144de9e99ef8c08aef9d975e8a94590b226f08e332f92e55"
+    },
+    {
+      "label": "31-sdk-reference-5",
+      "exitCode": 0,
+      "receiptSHA256": "04260eb96a7c3030a3dc7fb7f998f92e42450ea13f2d2bd51c12dfefd799323d"
+    },
+    {
+      "label": "32-sdk-artifact",
+      "exitCode": 0,
+      "receiptSHA256": "b2ed2bd73ddbcdd3fdf8fb7ddf254544d478ea9590a7a1654d336835dc6eee02"
+    }
+  ],
+  "rootReceiptCount": 35,
+  "nonzeroRootGateExits": 3,
+  "expectedDevelopmentFailures": {
+    "02-current-swift-canonical": 1,
+    "03-current-swift-canonical": 1,
+    "06-display-packed-hit": 101
+  },
+  "formatCachePathUtilityFailure": {
+    "argv": [
+      "python3",
+      "scripts/run-cargo.py",
+      "fmt",
+      "--all"
+    ],
+    "exitCode": 1,
+    "message": "Operation not permitted at default Library/Caches owner runner.lock",
+    "reason": "Explicit existing writable cache root was omitted",
+    "correction": "Use /private/tmp/arktrace-migration-cargo, same owner and target; no escalation or new cache"
+  },
+  "failedScreenScaleBootstrapOutputsSeparatelyFrozen": false,
+  "allFinalGatesPassed": true,
+  "finalSelectedMacOSGates": [
+    "12b-default-build",
+    "13b-default-full-test",
+    "14-native-full-test",
+    "11-migration-verifier",
+    "20-fmt",
+    "21-clippy",
+    "22-rust-workspace",
+    "23-workspace-verifier",
+    "24-generator",
+    "25-migration-contract-tests",
+    "26-rust-build",
+    "27-migration-smoke",
+    "28-json-roundtrip",
+    "29-ffi-contract",
+    "30-sdk-consumer",
+    "31-sdk-reference-1",
+    "31-sdk-reference-2",
+    "31-sdk-reference-3",
+    "31-sdk-reference-4",
+    "31-sdk-reference-5",
+    "32-sdk-artifact",
+    "17-api",
+    "18-app-debug",
+    "19-app-document-types"
+  ],
+  "selectedMacOSGates": 21,
+  "supplementalCurrentSDKAppAPIGates": 3,
+  "swift": {
+    "05-current-swift-canonical": {
+      "passed": 3,
+      "skipped": 0,
+      "failed": 0,
+      "skippedTests": []
+    },
+    "13b-default-full-test": {
+      "passed": 644,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTests": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    },
+    "14-native-full-test": {
+      "passed": 766,
+      "skipped": 6,
+      "failed": 0,
+      "skippedTests": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    }
+  },
+  "rust": {
+    "passed": 572,
+    "includesDocTests": 6,
+    "failed": 0,
+    "ignored": 0
+  },
+  "canonical": {
+    "initialThreeWayPoints": 45,
+    "finalThreeWayPoints": 54,
+    "negativeCases": 12,
+    "actualRustViewerLoads": 6,
+    "actualRustPacks": 6,
+    "actualCurrentSwiftLoadsPerRun": 6,
+    "actualNSViewsPerRun": 6,
+    "actualNSWindowScaleControlled": true,
+    "sourceScale": 2,
+    "staleDisplayScale": 1,
+    "actualEventMethodsPerRun": 54,
+    "actualDensityMethodsPerRun": 54,
+    "passingSwiftCanonicalRuns": 3,
+    "pointerKeyboardAXDrawCallsInNewOracle": 0,
+    "actualEngineLoadCallsInNewCanonical": 0,
+    "additionalRustVisibilityScaleModeRegression": true
+  },
+  "oracleScenes": [
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-swift.json",
+      "sha256": "3772fa286a400b57944864d1f015ac37c9b3f6291e65d57eab11e9a87d1144a8",
+      "actualLoads": 1,
+      "scenes": [
+        {
+          "actualNSViews": 1,
+          "backingScaleBits": "4611686018427387904",
+          "directDensityCalls": 9,
+          "directEventCalls": 9,
+          "displayViewport": {
+            "generation": 21,
+            "heightPoints": 400.5,
+            "nsPerPoint": 5.772005772005772,
+            "range": {
+              "endNs": 9007199254741993,
+              "startNs": 9007199254740993
+            },
+            "verticalOffsetPoints": 0,
+            "widthPoints": 173.25
+          },
+          "frames": [
+            [
+              "4617537883193202442",
+              "4627730092099895296",
+              "4602678819172646912",
+              "4626885667169763328"
+            ],
+            [
+              "4630073371281011507",
+              "4627730092099895296",
+              "4626691379067088798",
+              "4626885667169763328"
+            ],
+            [
+              "4633730786759645593",
+              "4632655904192331776",
+              "4637624817140577076",
+              "4626885667169763328"
+            ],
+            [
+              "4634576970908382003",
+              "4632655904192331776",
+              "4602678819172646912",
+              "4626885667169763328"
+            ]
+          ],
+          "points": [
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 0,
+                  "table": "measure"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4617819358169913098",
+                "4630263366890291200"
+              ],
+              "x": 5.4475,
+              "y": 36
+            },
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 0,
+                  "table": "measure"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4616411983286359818",
+                "4630263366890291200"
+              ],
+              "x": 4.1975,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4616411870696369134",
+                "4630263366890291200"
+              ],
+              "x": 4.1974,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4617819358169913098",
+                "4626885667169763328"
+              ],
+              "x": 5.4475,
+              "y": 22
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4617819358169913098",
+                "4632233691727265792"
+              ],
+              "x": 5.4475,
+              "y": 50
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4617819358169913098",
+                "4626604192193052672"
+              ],
+              "x": 5.4475,
+              "y": 21
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "13830554455654793216",
+                "4630263366890291200"
+              ],
+              "x": -1,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640299709028630528",
+                "4630263366890291200"
+              ],
+              "x": 173.25,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640334893400719360",
+                "4630263366890291200"
+              ],
+              "x": 174.25,
+              "y": 36
+            }
+          ],
+          "variant": "detail"
+        }
+      ]
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-swift.json",
+      "sha256": "80f3389d295e8733583d93f79cda6b31683888008aa2a392493b4a52bcfb4076",
+      "actualLoads": 1,
+      "scenes": [
+        {
+          "actualNSViews": 1,
+          "backingScaleBits": "4611686018427387904",
+          "directDensityCalls": 9,
+          "directEventCalls": 9,
+          "displayViewport": {
+            "generation": 21,
+            "heightPoints": 400.5,
+            "nsPerPoint": 5.772005772005772,
+            "range": {
+              "endNs": 9007199254741993,
+              "startNs": 9007199254740993
+            },
+            "verticalOffsetPoints": 0,
+            "widthPoints": 173.25
+          },
+          "frames": [
+            [
+              "4619488504781807288",
+              "4627730092099895296",
+              "4602678819172646912",
+              "4626885667169763328"
+            ],
+            [
+              "4621066172026270515",
+              "4631811479262199808",
+              "4625569771653641012",
+              "4626885667169763328"
+            ],
+            [
+              "4628495704036548280",
+              "4631811479262199808",
+              "4639324398234328105",
+              "4626885667169763328"
+            ]
+          ],
+          "points": [
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 0,
+                  "table": "frame_slice"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4619769979758517944",
+                "4630263366890291200"
+              ],
+              "x": 7.18,
+              "y": 36
+            },
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 0,
+                  "table": "frame_slice"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4618362604874964664",
+                "4630263366890291200"
+              ],
+              "x": 5.93,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4618362492284973980",
+                "4630263366890291200"
+              ],
+              "x": 5.9299,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4619769979758517944",
+                "4626885667169763328"
+              ],
+              "x": 7.18,
+              "y": 22
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4619769979758517944",
+                "4634766966517661696"
+              ],
+              "x": 7.18,
+              "y": 72
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4619769979758517944",
+                "4626604192193052672"
+              ],
+              "x": 7.18,
+              "y": 21
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "13830554455654793216",
+                "4630263366890291200"
+              ],
+              "x": -1,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640299709028630528",
+                "4630263366890291200"
+              ],
+              "x": 173.25,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640334893400719360",
+                "4630263366890291200"
+              ],
+              "x": 174.25,
+              "y": 36
+            }
+          ],
+          "variant": "detail"
+        }
+      ]
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-swift.json",
+      "sha256": "d0518862f8631bd4dd81a0932cd2639ad7e63304adb52f89dcfafefdec7c7542",
+      "actualLoads": 4,
+      "scenes": [
+        {
+          "actualNSViews": 1,
+          "backingScaleBits": "4611686018427387904",
+          "directDensityCalls": 9,
+          "directEventCalls": 9,
+          "displayViewport": {
+            "generation": 21,
+            "heightPoints": 400.5,
+            "nsPerPoint": 5.772005772005772,
+            "range": {
+              "endNs": 9007199254741993,
+              "startNs": 9007199254740993
+            },
+            "verticalOffsetPoints": 0,
+            "widthPoints": 173.25
+          },
+          "frames": [
+            [
+              "4610481305527066296",
+              "4627730092099895296",
+              "4602678819172646912",
+              "4626885667169763328"
+            ],
+            [
+              "4614984905154436792",
+              "4634555860285128704",
+              "4625569771653641011",
+              "4626885667169763328"
+            ],
+            [
+              "4627032737845094646",
+              "4631811479262199808",
+              "4639507269008259809",
+              "4626885667169763328"
+            ]
+          ],
+          "points": [
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 0,
+                  "table": "callstack"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4611607205433908920",
+                "4630263366890291200"
+              ],
+              "x": 1.9825,
+              "y": 36
+            },
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 0,
+                  "table": "callstack"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4604772992999374192",
+                "4630263366890291200"
+              ],
+              "x": 0.7324999999999999,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4604772092279448718",
+                "4630263366890291200"
+              ],
+              "x": 0.7323999999999999,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4611607205433908920",
+                "4626885667169763328"
+              ],
+              "x": 1.9825,
+              "y": 22
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4611607205433908920",
+                "4636315078889570304"
+              ],
+              "x": 1.9825,
+              "y": 94
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4611607205433908920",
+                "4626604192193052672"
+              ],
+              "x": 1.9825,
+              "y": 21
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "13830554455654793216",
+                "4630263366890291200"
+              ],
+              "x": -1,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640299709028630528",
+                "4630263366890291200"
+              ],
+              "x": 173.25,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640334893400719360",
+                "4630263366890291200"
+              ],
+              "x": 174.25,
+              "y": 36
+            }
+          ],
+          "variant": "detail"
+        },
+        {
+          "actualNSViews": 1,
+          "backingScaleBits": "4611686018427387904",
+          "directDensityCalls": 9,
+          "directEventCalls": 9,
+          "displayViewport": {
+            "generation": 21,
+            "heightPoints": 400.5,
+            "nsPerPoint": 5.772005772005772,
+            "range": {
+              "endNs": 9007199254741993,
+              "startNs": 9007199254740993
+            },
+            "verticalOffsetPoints": 0,
+            "widthPoints": 173.25
+          },
+          "frames": [
+            [
+              "0",
+              "4627730092099895296",
+              "4640299709028630528",
+              "4626885667169763328"
+            ]
+          ],
+          "points": [
+            {
+              "hit": {
+                "bucket": {
+                  "endNs": 9007199254741993,
+                  "startNs": 9007199254740993
+                },
+                "kind": "density",
+                "source": {
+                  "namedSlice": {
+                    "_0": {
+                      "itid": 0
+                    }
+                  }
+                },
+                "timeNs": 9007199254741493,
+                "trackID": "named-slice:0"
+              },
+              "pointBits": [
+                "4635796109401260032",
+                "4630263366890291200"
+              ],
+              "x": 86.625,
+              "y": 36
+            },
+            {
+              "hit": {
+                "bucket": {
+                  "endNs": 9007199254741993,
+                  "startNs": 9007199254740993
+                },
+                "kind": "density",
+                "source": {
+                  "namedSlice": {
+                    "_0": {
+                      "itid": 0
+                    }
+                  }
+                },
+                "timeNs": 9007199254740993,
+                "trackID": "named-slice:0"
+              },
+              "pointBits": [
+                "0",
+                "4630263366890291200"
+              ],
+              "x": 0,
+              "y": 36
+            },
+            {
+              "hit": {
+                "bucket": {
+                  "endNs": 9007199254741993,
+                  "startNs": 9007199254740993
+                },
+                "kind": "density",
+                "source": {
+                  "namedSlice": {
+                    "_0": {
+                      "itid": 0
+                    }
+                  }
+                },
+                "timeNs": 9007199254740993,
+                "trackID": "named-slice:0"
+              },
+              "pointBits": [
+                "0",
+                "4630263366890291200"
+              ],
+              "x": 0,
+              "y": 36
+            },
+            {
+              "hit": {
+                "bucket": {
+                  "endNs": 9007199254741993,
+                  "startNs": 9007199254740993
+                },
+                "kind": "density",
+                "source": {
+                  "namedSlice": {
+                    "_0": {
+                      "itid": 0
+                    }
+                  }
+                },
+                "timeNs": 9007199254741493,
+                "trackID": "named-slice:0"
+              },
+              "pointBits": [
+                "4635796109401260032",
+                "4626885667169763328"
+              ],
+              "x": 86.625,
+              "y": 22
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4635796109401260032",
+                "4632233691727265792"
+              ],
+              "x": 86.625,
+              "y": 50
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4635796109401260032",
+                "4626604192193052672"
+              ],
+              "x": 86.625,
+              "y": 21
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "13830554455654793216",
+                "4630263366890291200"
+              ],
+              "x": -1,
+              "y": 36
+            },
+            {
+              "hit": {
+                "bucket": {
+                  "endNs": 9007199254741993,
+                  "startNs": 9007199254740993
+                },
+                "kind": "density",
+                "source": {
+                  "namedSlice": {
+                    "_0": {
+                      "itid": 0
+                    }
+                  }
+                },
+                "timeNs": 9007199254741993,
+                "trackID": "named-slice:0"
+              },
+              "pointBits": [
+                "4640299709028630528",
+                "4630263366890291200"
+              ],
+              "x": 173.25,
+              "y": 36
+            },
+            {
+              "hit": {
+                "bucket": {
+                  "endNs": 9007199254741993,
+                  "startNs": 9007199254740993
+                },
+                "kind": "density",
+                "source": {
+                  "namedSlice": {
+                    "_0": {
+                      "itid": 0
+                    }
+                  }
+                },
+                "timeNs": 9007199254741993,
+                "trackID": "named-slice:0"
+              },
+              "pointBits": [
+                "4640334893400719360",
+                "4630263366890291200"
+              ],
+              "x": 174.25,
+              "y": 36
+            }
+          ],
+          "variant": "density"
+        },
+        {
+          "actualNSViews": 1,
+          "backingScaleBits": "4611686018427387904",
+          "directDensityCalls": 9,
+          "directEventCalls": 9,
+          "displayViewport": {
+            "generation": 21,
+            "heightPoints": 400.5,
+            "nsPerPoint": 5.598845598845599,
+            "range": {
+              "endNs": 9007199254741993,
+              "startNs": 9007199254741023
+            },
+            "verticalOffsetPoints": 0,
+            "widthPoints": 173.25
+          },
+          "frames": [
+            [
+              "0",
+              "4634555860285128704",
+              "4625217855387655601",
+              "4626885667169763328"
+            ],
+            [
+              "4625720592910491901",
+              "4631811479262199808",
+              "4639671287125085152",
+              "4626885667169763328"
+            ]
+          ],
+          "points": [
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 1,
+                  "table": "callstack"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "4620714255760285105",
+                "4635329916471083008"
+              ],
+              "x": 8.037371134020619,
+              "y": 80
+            },
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 1,
+                  "table": "callstack"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "0",
+                "4635329916471083008"
+              ],
+              "x": 0,
+              "y": 80
+            },
+            {
+              "hit": {
+                "eventKey": {
+                  "rowID": 1,
+                  "table": "callstack"
+                },
+                "kind": "detail"
+              },
+              "pointBits": [
+                "0",
+                "4635329916471083008"
+              ],
+              "x": 0,
+              "y": 80
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4620714255760285105",
+                "4626885667169763328"
+              ],
+              "x": 8.037371134020619,
+              "y": 22
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4620714255760285105",
+                "4636315078889570304"
+              ],
+              "x": 8.037371134020619,
+              "y": 94
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4620714255760285105",
+                "4626604192193052672"
+              ],
+              "x": 8.037371134020619,
+              "y": 21
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "13830554455654793216",
+                "4635329916471083008"
+              ],
+              "x": -1,
+              "y": 80
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640299709028630528",
+                "4635329916471083008"
+              ],
+              "x": 173.25,
+              "y": 80
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4640334893400719360",
+                "4635329916471083008"
+              ],
+              "x": 174.25,
+              "y": 80
+            }
+          ],
+          "variant": "clipped"
+        },
+        {
+          "actualNSViews": 1,
+          "backingScaleBits": "4607182418800017408",
+          "directDensityCalls": 9,
+          "directEventCalls": 9,
+          "displayViewport": {
+            "generation": 22,
+            "heightPoints": 420.5,
+            "nsPerPoint": 11.197691197691197,
+            "range": {
+              "endNs": 9007199254741993,
+              "startNs": 9007199254741023
+            },
+            "verticalOffsetPoints": 10,
+            "widthPoints": 86.625
+          },
+          "frames": [
+            [
+              "0",
+              "4627730092099895296",
+              "4607182418800017408",
+              "4626885667169763328"
+            ],
+            [
+              "0",
+              "4634555860285128704",
+              "4620714255760285105",
+              "4626885667169763328"
+            ],
+            [
+              "4621216993283121405",
+              "4631811479262199808",
+              "4635167687497714656",
+              "4626885667169763328"
+            ]
+          ],
+          "points": [
+            {
+              "hit": null,
+              "pointBits": [
+                "4602678819172646912",
+                "4630263366890291200"
+              ],
+              "x": 0.5,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "0",
+                "4630263366890291200"
+              ],
+              "x": 0,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "0",
+                "4630263366890291200"
+              ],
+              "x": 0,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4602678819172646912",
+                "4626885667169763328"
+              ],
+              "x": 0.5,
+              "y": 22
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4602678819172646912",
+                "4636315078889570304"
+              ],
+              "x": 0.5,
+              "y": 94
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4602678819172646912",
+                "4626604192193052672"
+              ],
+              "x": 0.5,
+              "y": 21
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "13830554455654793216",
+                "4630263366890291200"
+              ],
+              "x": -1,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4635796109401260032",
+                "4630263366890291200"
+              ],
+              "x": 86.625,
+              "y": 36
+            },
+            {
+              "hit": null,
+              "pointBits": [
+                "4635866478145437696",
+                "4630263366890291200"
+              ],
+              "x": 87.625,
+              "y": 36
+            }
+          ],
+          "variant": "stale"
+        }
+      ]
+    }
+  ],
+  "sdk": [
+    {
+      "role": "normal",
+      "path": "/private/tmp/arktrace-cache-session-artifacts/2040aa90d0d4c47b6b52fd033ec4e09a204e9752382517536897e3ca9c4325f5/CArkTrace.xcframework",
+      "library": {
+        "byteCount": 30845080,
+        "sha256": "2040aa90d0d4c47b6b52fd033ec4e09a204e9752382517536897e3ca9c4325f5"
+      },
+      "contractSHA256": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+      "memberCount": 4
+    },
+    {
+      "role": "fixtures",
+      "path": "/private/tmp/arktrace-cache-session-artifacts/63050e1fd50aae7af05c04969790b28cec6fcd7f32e060b2e5c53a04635549f0/CArkTrace.xcframework",
+      "library": {
+        "byteCount": 30904400,
+        "sha256": "63050e1fd50aae7af05c04969790b28cec6fcd7f32e060b2e5c53a04635549f0"
+      },
+      "contractSHA256": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+      "memberCount": 4
+    }
+  ],
+  "nativeExecutingArtifact": {
+    "sourcePath": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Products/Debug/ArkTraceRenderingTests.xctest/Contents/MacOS/ArkTraceRenderingTests",
+    "frozenPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hot-hit-mainline-20261006/native-executing-artifact/ArkTraceRenderingTests",
+    "bytes": 19563616,
+    "sha256": "669f7909e7b0054deab21e09cb92e39af7bef37f6a62b84939832f2b7db384e2",
+    "mtime": 1791241884.6957562,
+    "fullSuiteStarted": 1791241842.630204,
+    "receiptEndedAtPin": false
+  },
+  "sourceChanges": [
+    "Tests/ArkTraceRenderingTests/HotSnapshotHitCanonicalTests.swift",
+    "docs/RUST_CORE_MIGRATION_TASKS.md",
+    "docs/migration-runs/AT-RUST-011-012-2026-10-06-retained-hit.json",
+    "docs/migration-runs/AT-RUST-011-012-2026-10-06-retained-hit.md",
+    "rust/crates/arktrace-viewer/src/geometry.rs",
+    "rust/crates/arktrace-viewer/src/hot_snapshot_hit.rs",
+    "rust/crates/arktrace-viewer/src/lib.rs",
+    "rust/crates/arktrace-viewer/src/snapshot.rs",
+    "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-input.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-swift.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-input.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-swift.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-input.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-swift.json",
+    "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+    "rust/crates/arktrace-viewer/tests/hot_snapshot_hit.rs"
+  ],
+  "ABI": 2,
+  "snapshotFormat": 2,
+  "CExports": 26,
+  "currentContractDigest": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+  "toolchain": {
+    "rust": "1.99.0",
+    "xcode": "27.0",
+    "xcodeBuild": "27A266a",
+    "swift": "6.4"
+  },
+  "actualCurrentSDKRebuilt": true,
+  "actualNewAppBuild": true,
+  "appSigning": "Unsigned Debug build; no release/notarization acceptance",
+  "appOptionalMetadataWarnings": 1,
+  "compilationWarnings": 0,
+  "WindowsNativeAcceptance": false,
+  "GUIAcceptance": false,
+  "fullCompilerInputClosureProven": false,
+  "fullProcessForestProven": false,
+  "hitCABIConnected": false,
+  "hitSwiftSDKConnected": false,
+  "hitProductionNSViewConnected": false,
+  "goalComplete": false,
+  "goalManagerStatus": "blocked",
+  "remaining": [
+    "retained hit C ABI/Swift SDK/production NSView",
+    "in-flight cancellation",
+    "actual GUI/manual backup",
+    "large/performance",
+    "real Capture",
+    "ArkDeck schema-4 integration",
+    "applicable release acceptance"
+  ]
+}
