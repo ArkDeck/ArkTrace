@@ -568,9 +568,19 @@
       "sha256": "332d8c76c30fb7dcd6b2a37cb168df65d4faf31163e8d06da440bb0a7212bc73"
     },
     {
+      "path": "Tests/ArkTraceAppSupportTests/NativeRangeAnalysisBudgetRecoveryTests.swift",
+      "byteCount": 36556,
+      "sha256": "25856d386c083bacb0a968e41703fdb1dd2062756aa3d48f767f112ccec807b1"
+    },
+    {
       "path": "Tests/ArkTraceAppSupportTests/ObservationBoundaryTests.swift",
       "byteCount": 4907,
       "sha256": "796cba188da93ba3cf4704cfbec0fab6d2182d994538ad68283e67461167c4a0"
+    },
+    {
+      "path": "Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "byteCount": 26316,
+      "sha256": "a542e9aa078bf4b8c782a599bd0dca07bf8e5954770e53613f68ce4c421fd421"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/SelectedEventArgumentLookupTests.swift",
@@ -706,6 +716,11 @@
       "path": "Tests/ArkTraceRenderingTests/NativeSnapshotLoadOwnershipTests.swift",
       "byteCount": 16212,
       "sha256": "378508e53f8220ce7f921f96060de43b1436b42e9927e948f0a2dff43cc0d285"
+    },
+    {
+      "path": "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+      "byteCount": 26762,
+      "sha256": "2a100045d2e96b51ae7ac7fa953da80325175f4139d77d093eae5456bc7a6316"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityWireIdentityTests.swift",
@@ -988,29 +1003,29 @@
       "environment": {
         "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
         "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
-        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/fresh-inspector-swift.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-inspector-swift.json",
         "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
-        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/fresh-event-index-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-event-index-swift.json",
         "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
-        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/fresh-action-keyboard-swift.json",
-        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/fresh-action-display-swift.json"
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-action-display-swift.json"
       },
       "exitCode": 0,
-      "elapsedSeconds": 34.03875494003296,
+      "elapsedSeconds": 13.345659971237183,
       "log": {
-        "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/39-facts-1.stdout",
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/24-current-facts.stdout",
         "byteCount": 5818,
-        "sha256": "6f17ab57a8fa4fb8445e8c2bf4a936cb95a8be55638e9f79779da88d687f2134"
+        "sha256": "349f139e4a723fd7834b7d3d9292c2f322cb2edb971d29636ea7dac6113c17c1"
       },
       "stderr": {
-        "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/39-facts-1.log",
-        "byteCount": 839,
-        "sha256": "fd6b24ca24183441ba5d52e6fa4f03ab921a7a5f7b3dfe177f5c56fe9ea23139"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/24-current-facts.log",
+        "byteCount": 539,
+        "sha256": "b0627b1cf8dda89d331e05404dbf7a14b77565cbf107d03c610efe1108285bc8"
       },
       "gateReceipt": {
-        "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/39-facts-1.receipt.json",
-        "byteCount": 2227,
-        "sha256": "e0fb1ff7c605e7833d29fac2cd5d36c911fd94ef9c91f26261b4b0852f6ab327"
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/24-current-facts.receipt.json",
+        "byteCount": 2679,
+        "sha256": "a54ec9db95160d7dd74b2fb1c4a47ec58fffc2f30f9d03deaba9e9b0388fe446"
       }
     },
     {
@@ -1084,6 +1099,8 @@
     "Native-key recordings do not prove user IME/focus/menu acceptance",
     "Independent module capacity accounting excludes owner aggregate, allocator and scratch"
   ],
-  "previousReceiptSHA256": "685ad8b8ea47f32df363abcb2123be52042d093d4f00debc91fd64f305e842e9",
-  "revalidatedBaseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569"
+  "previousReceiptSHA256": "d1becdbbafa41d9ce2d2af58240f3000fa6157f1746d67bdcff3b40655073165",
+  "revalidatedBaseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+  "paintTestAdditionNote": "Four canonical producers recompiled/replayed after exact paint and natural-completion regression additions; previous related forty tests and production bytes unchanged since 4c901b1",
+  "nativeRangeGuardAdditionNote": "Four actual canonical Swift producers freshly recompiled/replayed after exact N35 conditional test import; all previous source and augmented pins verified unchanged; prior related40 retained explicitly, not fresh full native runtime acceptance"
 }

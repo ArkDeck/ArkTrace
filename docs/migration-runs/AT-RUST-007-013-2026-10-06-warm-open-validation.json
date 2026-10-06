@@ -1,0 +1,815 @@
+{
+  "schemaVersion": 1,
+  "atUnix": 1791275238.961029,
+  "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+  "scope": "Current warm cache validation fix, exact N35 sole physical guard import, unlocked macOS App/window checks and source-bounded regression/compile gates; full migration goal not achieved",
+  "toolchains": {
+    "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "deploymentTarget": "26.0",
+    "host": "macOS arm64",
+    "swiftLanguageMode": 6
+  },
+  "productionChange": {
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "createdAtUnix": 1791269563.569459,
+    "source": "rust/crates/arktrace-engine/src/no_cache/persistent.rs",
+    "sourceSHA256": "6a84ca5d29672cae1def67797e69b7883e6677c75ca482035690d315807b3df8",
+    "scope": "Warm cache lookup retains full StoreReader.open validation then uses existing verify_snapshot after metadata update; source hash, owner/lease/metadata guards, immutable held file and public verify remain intact",
+    "diagnostic": "medium-cached-store-validation-profile-20261006/04-readonly-current-medium-validation.stdout",
+    "diagnosticFullOpenMilliseconds": 901.22225,
+    "diagnosticFullVerifyMilliseconds": 312.226709,
+    "diagnosticSnapshotVerifyMilliseconds": 0.100875,
+    "newFormal20SampleCohort": "Three after-fix admissions ended with Engine0; no actual new cohort/p95",
+    "oldA43N36Artifacts": "MAIN will not change old normal library260a/modules/objects or old sealed signed tools; new normal library content-addressed stage and new standalone consumer path",
+    "largeNamespace": "N36 frozen approval-blocked; authority returned to MAIN; no MAIN actual large access in this increment",
+    "MacOSAcceptance": false
+  },
+  "sourceDiff": "diff --git a/rust/crates/arktrace-engine/src/no_cache/persistent.rs b/rust/crates/arktrace-engine/src/no_cache/persistent.rs\nindex cea0678..07790f4 100644\n--- a/rust/crates/arktrace-engine/src/no_cache/persistent.rs\n+++ b/rust/crates/arktrace-engine/src/no_cache/persistent.rs\n@@ -352,8 +352,11 @@ pub(super) fn lookup(\n     source\n         .verify()\n         .map_err(|e| host(EngineStage::SourceSnapshot, e))?;\n+    // validate_entry fully inspected this exact held immutable database.\n+    // Recheck its binding, timestamps, mode, sidecars and budget after the\n+    // metadata update without repeating the full SQLite integrity scan.\n     reader\n-        .verify(&budget.validation())\n+        .verify_snapshot(&budget.validation())\n         .map_err(|e| failure(EngineStage::CacheLookup, EngineFailure::Store(e)))?;\n     current_file\n         .verify()\n",
+  "N35": {
+    "source": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceAppSupportTests/NativeRangeAnalysisBudgetRecoveryTests.swift",
+      "byteCount": 36556,
+      "sha256": "25856d386c083bacb0a968e41703fdb1dd2062756aa3d48f767f112ccec807b1"
+    },
+    "guardPassedCases": 15,
+    "allOwnDescriptorClosesConfirmed": true,
+    "cleanupJoined": true,
+    "EngineCreateOpenCalls": 0,
+    "MAINReadyAccessCalls": 0,
+    "nativeRangeRecoveryProven": false,
+    "guardReport": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/N35-main-current-guard-integration-20261006/guard-result.json",
+      "byteCount": 6373,
+      "sha256": "a276d40eb9166c3f0e269e72ca7358884f6ce72cd2624e4fd84b2a51a4eb1fe5"
+    }
+  },
+  "normalSDK": {
+    "xcframework": "/private/tmp/arktrace-cache-session-artifacts/63365301a6b12c06b25e06a8f55c2e823b8f38abc2a395e004b51e91ee390691/CArkTrace.xcframework",
+    "receipt": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": false,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30911584,
+        "sha256": "63365301a6b12c06b25e06a8f55c2e823b8f38abc2a395e004b51e91ee390691"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30911584,
+          "sha256": "63365301a6b12c06b25e06a8f55c2e823b8f38abc2a395e004b51e91ee390691",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    }
+  },
+  "fixtureSDK": {
+    "xcframework": "/private/tmp/arktrace-cache-session-artifacts/01512add5cad24d7b8eb9726f6c60413995aa13601e95716e964e4b5f9cdf4c1/CArkTrace.xcframework",
+    "receipt": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30967696,
+        "sha256": "01512add5cad24d7b8eb9726f6c60413995aa13601e95716e964e4b5f9cdf4c1"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30967696,
+          "sha256": "01512add5cad24d7b8eb9726f6c60413995aa13601e95716e964e4b5f9cdf4c1",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    }
+  },
+  "normalPublicAPI": "31-current-native-api-baseline exit0, actual full external consumer compile; no runtime invocation",
+  "defaultPublicAPI": "29-current-default-api-baseline exit0",
+  "SDKCompileAndTests": {
+    "gate": "28-current-strict-sdk",
+    "developmentFixtures": true,
+    "passed": 97,
+    "failed": 0,
+    "skipped": 0,
+    "borrowCompileRejections": 4
+  },
+  "testAndWarningAudit": {
+    "atUnix": 1791273676.27632,
+    "freshPassedGateCount": 29,
+    "freshPassedGates": [
+      {
+        "name": "01-fmt.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "54da55ec09d8dcae264774da44f09e77babc2d4d9f55b0011d7a9feab777857b"
+      },
+      {
+        "name": "02-clippy.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "053348363be0a0ff862cfeaa9fac61817a8035f82c686dcf7961c3f5485ea47d"
+      },
+      {
+        "name": "03-related-tests.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "083eb9905ee7406569161884c67d7eb33ec4238ab07308c669b3e6ab1e7c1d22"
+      },
+      {
+        "name": "04-workspace-verifier.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "c3a48b91d984b489cd009406bfd655792842bbcd7f77bc670ec1407ce4d22f56"
+      },
+      {
+        "name": "05-current-normal-sdk.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "c3f4b858db76c71db88cd8f2c9176645b3b7a381bc3ab11e13e0be2480933f2b"
+      },
+      {
+        "name": "06-current-app.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "2fb260790e0749ba035e850184fb3f6a041274b1c3721ffa405a654a1558ff0c"
+      },
+      {
+        "name": "07-current-default-full.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "a99c0d02a5b5df371d1eadc09d2ac46b6d7e9cb57656ba959d262279574011ec"
+      },
+      {
+        "name": "08-current-native-external-api.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "d7aac6ee7deceeba5d015351c194e45495cd3ef8d2749ff77ac734ac02070adb"
+      },
+      {
+        "name": "09-workspace-build.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "8a7d84c982d2edd640af059794cfcf2c028aa06d1232bc1753383734b2673bf2"
+      },
+      {
+        "name": "10-workspace-clippy.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "860761a4cd3771f3b925fd434e18c1d86784af5de5d0e58cfbf60a54086f7fe7"
+      },
+      {
+        "name": "11-workspace-tests.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "eba0aec51b34cf04ae784f070f9affb72b06bafad8e1fae9188ff14ac4103638"
+      },
+      {
+        "name": "13-current-outer-development-seal.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "fae0455de731e210cfb8eafede4a633473a8142409b7f17d16ddee1a35b01cea"
+      },
+      {
+        "name": "14-current-final-app-signature.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "2d9863a4c005bb0923c4fa3bed40f34d1f5bfb76951799cdeb95b00ec85ff880"
+      },
+      {
+        "name": "17-ffi-bindings-current.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "01bc8477287c67bd01e0120b2a1d793313298620d5001878d2331b1e0c9d57b6"
+      },
+      {
+        "name": "18-migration-smoke.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "5231de3f727cad27a52a9485d84e61446fa6897b30d11308d49dba62422c8b26"
+      },
+      {
+        "name": "19-viewer-json-roundtrip.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "e2d424c638ddb995a15f9f7b8bcc1dd3f5e211a9d1a77926b15c493316ef3367"
+      },
+      {
+        "name": "20-ffi-contract.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "020c99347865cc77f5161b777f2cdf27877006284fcb116a78a1667aa618d5f5"
+      },
+      {
+        "name": "21-app-document-types.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "6e16adf59ec28601cd81bfc4da556e1225f46fc412019a9b5349995b6e1ea200"
+      },
+      {
+        "name": "22-licenses.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "1474b3343f3eda8cfda267e6df3c179a565979b154e56a9f61fb869efc3d9b74"
+      },
+      {
+        "name": "23-parser-lock.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "0c93c7d9e152d4d2f64b39f7899c405f069d375092f84f20fe2f15648b3e3c6a"
+      },
+      {
+        "name": "24-current-facts.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "a54ec9db95160d7dd74b2fb1c4a47ec58fffc2f30f9d03deaba9e9b0388fe446"
+      },
+      {
+        "name": "25-migration-contracts-current.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "3fa400f31ee929613b4f6c0ea604d85be42184c5d016942fd39c121d58f43ba3"
+      },
+      {
+        "name": "26-migration-contract-tests-current.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "f96b8c8997bf00b2ac158de12dc59c6f0cad2395069cbff8c3c440d6c5762476"
+      },
+      {
+        "name": "27-current-fixture-sdk.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "2ad9a1006b366c48e0ee50e2eaae8e3fa97684eb8062be02604ff0c919b0dea0"
+      },
+      {
+        "name": "28-current-strict-sdk.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "54aefad8ebde509cf6e0c236a4ec5db9aa7a3529c112cf34c6de2468ee29c974"
+      },
+      {
+        "name": "29-current-default-api-baseline.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "a75c40feb6b90823b71570f11d6e7940a97c539ba6993a4d3c3c58c227c9e262"
+      },
+      {
+        "name": "30-current-normal-api-stage.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "2c267d7b5aac336d635d5dbb559157ec75e1f20bfb068835a93ace51101abb7e"
+      },
+      {
+        "name": "31-current-native-api-baseline.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "01209526aa0617d86f8a6fc3f014637ac0bc2a8766d9eade4f7fc9018dd788a3"
+      },
+      {
+        "name": "32-current-native-focused.receipt.json",
+        "exitCode": 0,
+        "receiptSHA256": "6ec961723a3e326b043a86e613c453bd8a85b89ab3673cd29e9a25aa88c88cc6"
+      }
+    ],
+    "preservedFailedGates": [
+      {
+        "name": "12-current-app-signature.receipt.json",
+        "exitCode": 1,
+        "receiptSHA256": "c786a8fb495e3ea28502a3644119f43056118f7f65fa7c7294c798c7d057b9c9"
+      },
+      {
+        "name": "15-migration-contracts.receipt.json",
+        "exitCode": 1,
+        "receiptSHA256": "ace72c8091b1c4c298f62443f1a6b4bb1baee94eee47722a2dfa8475f85b0a70"
+      },
+      {
+        "name": "16-migration-contract-tests.receipt.json",
+        "exitCode": 1,
+        "receiptSHA256": "f6fd59e35fa947303bbfb7a638163b47177d2c1dfc2acee8b8f20464eb33445a"
+      }
+    ],
+    "warnings": [
+      {
+        "gate": "06-current-app",
+        "channel": "stdout",
+        "text": "2026-10-06 15:21:09.427 appintentsmetadataprocessor[15488:26057678] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+      }
+    ],
+    "SwiftRustCompilerWarnings": 0,
+    "AppIntentsMetadataWarningRetained": true,
+    "defaultFull": {
+      "passed": 652,
+      "failed": 0,
+      "runtimeSkips": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "unexpectedSkips": 0
+    },
+    "strictSDK": {
+      "passed": 97,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "RustRuntime + external consumer; not fullnative all tests"
+    },
+    "RustWorkspace": {
+      "passed": 577,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 65,
+      "zeroTestHarnesses": 11,
+      "receipt": "11-workspace-tests.receipt.json"
+    },
+    "currentFullNativeSwift": "Not run: opted-in actual large recovery approval-blocked; no exclusion or skip waiver; prior full SQLite14 failure preserved",
+    "nativeFocused": {
+      "atUnix": 1791273676.2756748,
+      "passed": 36,
+      "failed": [],
+      "skipped": [],
+      "warnings": [],
+      "tests": [
+        "-[ArkTraceAppSupportTests.RangeAnalysisDocumentGenerationTests testClosedAndReopenedSameURLRejectsLateBudgetFailure]",
+        "-[ArkTraceAppSupportTests.RangeAnalysisDocumentGenerationTests testReplacedDocumentRejectsLateSuccessAfterCurrentBudgetFailure]",
+        "-[ArkTraceRenderingTests.NativePackedCanvasKeyboardTests testCountersNativeCanvasKeyboard]",
+        "-[ArkTraceRenderingTests.NativePackedCanvasKeyboardTests testFramesNativeCanvasKeyboard]",
+        "-[ArkTraceRenderingTests.NativePackedCanvasKeyboardTests testNamedSlicesNativeCanvasKeyboard]",
+        "-[ArkTraceRenderingTests.NativeSnapshotConcurrentByteAdmissionTests testTwoActualLoadsCompeteForLastMeasuredByteCreditAndRecover]",
+        "-[ArkTraceRenderingTests.NativeSnapshotConcurrentRetainedHitTests testTwoSendableConsumersReadRetainedOwnersAfterEngineRelease]",
+        "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testExactInt64NullableZeroUTF8AndNativeGeometryReachRenderer]",
+        "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testMalformedFieldsFailWithoutPublishingPartialScene]",
+        "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testOpenDurationRemainsNilAndEmptyNameRemainsPresent]",
+        "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testViewportWireCarriesOriginalContinuousDeadlineAndExplicitNil]",
+        "-[ArkTraceRenderingTests.NativeSnapshotDensityHitModeWireTests testActualDensityModesWireAndRetainedRelease]",
+        "-[ArkTraceRenderingTests.NativeSnapshotHitCBufferBoundaryTests testActualRetainedHitCBufferBoundariesAndRelease]",
+        "-[ArkTraceRenderingTests.NativeSnapshotHitTests testActualNativeHitMatchesCurrentSwiftCopyAndSurvivesEngineRelease]",
+        "-[ArkTraceRenderingTests.NativeSnapshotLoadCancellationDeadlineTests testExpiredAbsoluteDeadlineActualNativeLoadReleasesAndRecovers]",
+        "-[ArkTraceRenderingTests.NativeSnapshotLoadCancellationDeadlineTests testPreCancelledActualNativeLoadReleasesAndRecovers]",
+        "-[ArkTraceRenderingTests.NativeSnapshotLoadOwnershipTests testActualLoadByteAndOwnerRefusalsReleaseNewLeaseAndRecover]",
+        "-[ArkTraceRenderingTests.NativeSnapshotLoadOwnershipTests testLoadedSnapshotSurvivesCloseAndFinalOwnerRefunds]",
+        "-[ArkTraceRenderingTests.NativeSnapshotLoadOwnershipTests testValueCopiesShareCreditAndCodableCopyHasNoNativeOwner]",
+        "-[ArkTraceRenderingTests.NativeSnapshotProcessCounterDensityPaintParityTests testActualProcessCounterDensityPaintMatchesCurrentSwift]",
+        "-[ArkTraceRenderingTests.NativeSnapshotProcessCounterDensityWireIdentityTests testActualProcessCounterOptionalWireIdentity]",
+        "-[ArkTraceRenderingTests.NativeSnapshotProcessCounterHitParityTests testActualProcessCounterMatchesCurrentSwiftLoaderAndHit]",
+        "-[ArkTraceRenderingTests.NativeSnapshotRecordBoundaryTests testDensityFlagsDominantAndMachineQualityMatrix]",
+        "-[ArkTraceRenderingTests.NativeSnapshotRecordBoundaryTests testExactRecordCountsDepthRowsAndVisibilityBoundary]",
+        "-[ArkTraceRenderingTests.NativeSnapshotRecordBoundaryTests testSixSourcesOwnersAndContinuousPrimitivePartitions]",
+        "-[ArkTraceRenderingTests.NativeSnapshotRetainedHitCancellationTests testCancellationBetweenRetainedHitsStopsOneConsumerAndCleansOwners]",
+        "-[ArkTraceRenderingTests.NativeSnapshotSelectiveOwnerReleaseTests testActualSwiftAliasAndSelectiveIndependentOwnerRelease]",
+        "-[ArkTraceRenderingTests.NativeStringPoolAdmissionTests testAllNullableStringSlotsAndSharedPoolReuse]",
+        "-[ArkTraceRenderingTests.NativeStringPoolAdmissionTests testByteLimitUInt32BoundsAndPoolEndSemantics]",
+        "-[ArkTraceRenderingTests.NativeStringPoolAdmissionTests testUTF8AndOffsetAdmissionAcrossRecordPositions]",
+        "-[ArkTraceRenderingTests.PackedWireNativeConversionTests testCountersActualPackedWire]",
+        "-[ArkTraceRenderingTests.PackedWireNativeConversionTests testFramesActualPackedWire]",
+        "-[ArkTraceRenderingTests.PackedWireNativeConversionTests testNamedSlicesActualPackedWire]",
+        "-[ArkTraceRenderingTests.TimelineNativeHitRoutingTests testLoadingDisplayPreservesOwnerAndCodingRemovesIt]",
+        "-[ArkTraceRenderingTests.TimelineNativeHitRoutingTests testNativeResultAndMissDoNotFallThroughToCopiedPrimitives]",
+        "-[ArkTraceRenderingTests.TimelineNativeHitRoutingTests testOnlyBusyUsesSwiftFallbackAndInvalidNativeResultFailsClosed]"
+      ],
+      "fixtureSDK": "01512add5cad24d7b8eb9726f6c60413995aa13601e95716e964e4b5f9cdf4c1",
+      "scope": "Fresh focused native adapters only; no fullnative or normalSDK actual large recovery/performance/cold cancellation claim",
+      "allSmallFixtureInputsOwnedRoots": true
+    }
+  },
+  "nativeFocused": {
+    "atUnix": 1791273676.2756748,
+    "passed": 36,
+    "failed": [],
+    "skipped": [],
+    "warnings": [],
+    "tests": [
+      "-[ArkTraceAppSupportTests.RangeAnalysisDocumentGenerationTests testClosedAndReopenedSameURLRejectsLateBudgetFailure]",
+      "-[ArkTraceAppSupportTests.RangeAnalysisDocumentGenerationTests testReplacedDocumentRejectsLateSuccessAfterCurrentBudgetFailure]",
+      "-[ArkTraceRenderingTests.NativePackedCanvasKeyboardTests testCountersNativeCanvasKeyboard]",
+      "-[ArkTraceRenderingTests.NativePackedCanvasKeyboardTests testFramesNativeCanvasKeyboard]",
+      "-[ArkTraceRenderingTests.NativePackedCanvasKeyboardTests testNamedSlicesNativeCanvasKeyboard]",
+      "-[ArkTraceRenderingTests.NativeSnapshotConcurrentByteAdmissionTests testTwoActualLoadsCompeteForLastMeasuredByteCreditAndRecover]",
+      "-[ArkTraceRenderingTests.NativeSnapshotConcurrentRetainedHitTests testTwoSendableConsumersReadRetainedOwnersAfterEngineRelease]",
+      "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testExactInt64NullableZeroUTF8AndNativeGeometryReachRenderer]",
+      "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testMalformedFieldsFailWithoutPublishingPartialScene]",
+      "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testOpenDurationRemainsNilAndEmptyNameRemainsPresent]",
+      "-[ArkTraceRenderingTests.NativeSnapshotConversionTests testViewportWireCarriesOriginalContinuousDeadlineAndExplicitNil]",
+      "-[ArkTraceRenderingTests.NativeSnapshotDensityHitModeWireTests testActualDensityModesWireAndRetainedRelease]",
+      "-[ArkTraceRenderingTests.NativeSnapshotHitCBufferBoundaryTests testActualRetainedHitCBufferBoundariesAndRelease]",
+      "-[ArkTraceRenderingTests.NativeSnapshotHitTests testActualNativeHitMatchesCurrentSwiftCopyAndSurvivesEngineRelease]",
+      "-[ArkTraceRenderingTests.NativeSnapshotLoadCancellationDeadlineTests testExpiredAbsoluteDeadlineActualNativeLoadReleasesAndRecovers]",
+      "-[ArkTraceRenderingTests.NativeSnapshotLoadCancellationDeadlineTests testPreCancelledActualNativeLoadReleasesAndRecovers]",
+      "-[ArkTraceRenderingTests.NativeSnapshotLoadOwnershipTests testActualLoadByteAndOwnerRefusalsReleaseNewLeaseAndRecover]",
+      "-[ArkTraceRenderingTests.NativeSnapshotLoadOwnershipTests testLoadedSnapshotSurvivesCloseAndFinalOwnerRefunds]",
+      "-[ArkTraceRenderingTests.NativeSnapshotLoadOwnershipTests testValueCopiesShareCreditAndCodableCopyHasNoNativeOwner]",
+      "-[ArkTraceRenderingTests.NativeSnapshotProcessCounterDensityPaintParityTests testActualProcessCounterDensityPaintMatchesCurrentSwift]",
+      "-[ArkTraceRenderingTests.NativeSnapshotProcessCounterDensityWireIdentityTests testActualProcessCounterOptionalWireIdentity]",
+      "-[ArkTraceRenderingTests.NativeSnapshotProcessCounterHitParityTests testActualProcessCounterMatchesCurrentSwiftLoaderAndHit]",
+      "-[ArkTraceRenderingTests.NativeSnapshotRecordBoundaryTests testDensityFlagsDominantAndMachineQualityMatrix]",
+      "-[ArkTraceRenderingTests.NativeSnapshotRecordBoundaryTests testExactRecordCountsDepthRowsAndVisibilityBoundary]",
+      "-[ArkTraceRenderingTests.NativeSnapshotRecordBoundaryTests testSixSourcesOwnersAndContinuousPrimitivePartitions]",
+      "-[ArkTraceRenderingTests.NativeSnapshotRetainedHitCancellationTests testCancellationBetweenRetainedHitsStopsOneConsumerAndCleansOwners]",
+      "-[ArkTraceRenderingTests.NativeSnapshotSelectiveOwnerReleaseTests testActualSwiftAliasAndSelectiveIndependentOwnerRelease]",
+      "-[ArkTraceRenderingTests.NativeStringPoolAdmissionTests testAllNullableStringSlotsAndSharedPoolReuse]",
+      "-[ArkTraceRenderingTests.NativeStringPoolAdmissionTests testByteLimitUInt32BoundsAndPoolEndSemantics]",
+      "-[ArkTraceRenderingTests.NativeStringPoolAdmissionTests testUTF8AndOffsetAdmissionAcrossRecordPositions]",
+      "-[ArkTraceRenderingTests.PackedWireNativeConversionTests testCountersActualPackedWire]",
+      "-[ArkTraceRenderingTests.PackedWireNativeConversionTests testFramesActualPackedWire]",
+      "-[ArkTraceRenderingTests.PackedWireNativeConversionTests testNamedSlicesActualPackedWire]",
+      "-[ArkTraceRenderingTests.TimelineNativeHitRoutingTests testLoadingDisplayPreservesOwnerAndCodingRemovesIt]",
+      "-[ArkTraceRenderingTests.TimelineNativeHitRoutingTests testNativeResultAndMissDoNotFallThroughToCopiedPrimitives]",
+      "-[ArkTraceRenderingTests.TimelineNativeHitRoutingTests testOnlyBusyUsesSwiftFallbackAndInvalidNativeResultFailsClosed]"
+    ],
+    "fixtureSDK": "01512add5cad24d7b8eb9726f6c60413995aa13601e95716e964e4b5f9cdf4c1",
+    "scope": "Fresh focused native adapters only; no fullnative or normalSDK actual large recovery/performance/cold cancellation claim",
+    "allSmallFixtureInputsOwnedRoots": true
+  },
+  "currentApp": {
+    "buildGate": "06-current-app",
+    "initialOuterSignatureFailure": "12-current-app-signature exit1",
+    "outerDevelopmentSeal": "13-current-outer-development-seal exit0; fixed nested signed tools retained",
+    "finalLocalDeepStrictSignature": "14-current-final-app-signature exit0",
+    "pins": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-app-post-development-seal-pins.json",
+      "byteCount": 6415,
+      "sha256": "3c7c2e6034d62d88b0d8389d4be8fd4e1bec996c0439b16c6a409ae4218140e2"
+    },
+    "nativePreparation": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-app-native-preparation.json",
+      "byteCount": 398,
+      "sha256": "b92a343f5b58fda5ccd0e77f367756d46f5394d12a1dec3faf3c3f975aea5677"
+    },
+    "releaseAcceptance": false
+  },
+  "actualUnlockedGUI": {
+    "atUnix": 1791272291.2060711,
+    "appPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-app/ArkTrace.app",
+    "SDKIdentity": "63365301a6b12c06b25e06a8f55c2e823b8f38abc2a395e004b51e91ee390691",
+    "actualUI": {
+      "specification": "docs/SPECIFICATION.md:1199: sheet/dialog/disclosure closes restore focus to invoking control",
+      "source": "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+      "implementation": "@FocusState backupFocused; sheet onDismiss sets true; toolbar SwiftUI Button",
+      "actualCurrentAppObservation": "medium 265MB Ready/124 tracks/cache Hit/restored Flag1; Create initially focused; Return: Ready/1flag/0marks/0favorites; Escape: Timeline focus, not backup button",
+      "scope": "CUA full current App path; ps confirms current PID19204, old density PID33091 also running; exclusive AX process binding not established",
+      "productionUIChangeThisIncrement": false
+    },
+    "focusRestoration": "FAIL: Timeline after Escape",
+    "limitations": [
+      "VoiceOver not executed",
+      "No OS settings changed",
+      "No Capture/HDC",
+      "Other old density App running; exclusive AX PID mapping not proved"
+    ],
+    "processPathReceipt": "current-gui-process-path-readback.json",
+    "repeatAfterOldAppQuit": {
+      "atUnix": 1791272368.5094259,
+      "cuaRequestedPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-app/ArkTrace.app",
+      "runningArkTraceAppCount": 1,
+      "candidates": [
+        {
+          "pid": 19204,
+          "executablePath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-app/ArkTrace.app/Contents/MacOS/ArkTrace"
+        }
+      ],
+      "observation": "Prior old density App quit via CUA; repeat backup sheet Escape still returns AX focus to Timeline"
+    }
+  },
+  "windowRegressions": {
+    "restrictedUnchangedTests": "unlocked-window-regressions-20261006/01: failed two tests",
+    "hostUnchangedTests": "unlocked-window-regressions-20261006/02: passed two tests",
+    "currentHostDefaultFullAlsoPassed": true,
+    "historicalCauseIndependentlyProven": false
+  },
+  "warmPerformance": {
+    "beforeFix": {
+      "validSamples": 20,
+      "allCacheHits": true,
+      "parsing": false,
+      "p50Milliseconds": 1149.822625,
+      "p95Milliseconds": 1204.730167,
+      "maximumMilliseconds": 1693.276041,
+      "originalSLOMilliseconds": 1000,
+      "passed": false,
+      "frozenPacket": "medium-normal-ready-and-cache-open-SLO-failed-current-20261006",
+      "frozenManifestSHA256": "399bcf72fd13c84e00343fbae677644c3562a59e93ddca616e5e91bb6f6075af"
+    },
+    "validationProfile": {
+      "scope": "One held immutable store readonly localization observation; not p95 or Engine performance",
+      "fullOpenMilliseconds": 901.22225,
+      "fullVerifyMilliseconds": 312.226709,
+      "snapshotVerifyMilliseconds": 0.100875
+    },
+    "afterFix": {
+      "currentNormalSDKStaticLibrarySHA256": "63365301a6b12c06b25e06a8f55c2e823b8f38abc2a395e004b51e91ee390691",
+      "newConsumerSourceIdentical": true,
+      "samples": 0,
+      "productGroups": 0,
+      "p95Milliseconds": null,
+      "passed": false,
+      "measured": false,
+      "attempts": [
+        {
+          "packet": "medium-cache-open-after-single-validation-current-20261006",
+          "report": {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-current-20261006/performance-report.json",
+            "byteCount": 5936,
+            "sha256": "5e4720434841abbddec1d93861221f82fccac764d209328f0e4ca2b653982140"
+          },
+          "status": "failed-or-unqualified",
+          "error": "initial-host-qualification-failed",
+          "actualProductGroups": 0,
+          "actualSamples": 0,
+          "p95Milliseconds": null,
+          "capturedQualificationRecords": 28,
+          "lastCapturedQualification": {
+            "startedMonotonicNS": 194404227168000,
+            "endedMonotonicNS": 194404284201041,
+            "load1Minute": 4.0634765625,
+            "blocked": [],
+            "quiet": false
+          }
+        },
+        {
+          "packet": "medium-cache-open-after-single-validation-qualified-R1-20261006",
+          "report": {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-qualified-R1-20261006/performance-report.json",
+            "byteCount": 3091,
+            "sha256": "2f40e5b777c4e3427e318e6878c1a1d21cecacb31d68a26186e6f3f5ce236d0c"
+          },
+          "status": "failed-or-unqualified",
+          "error": "initial-host-qualification-failed",
+          "actualProductGroups": 0,
+          "actualSamples": 0,
+          "p95Milliseconds": null,
+          "capturedQualificationRecords": 12,
+          "lastCapturedQualification": {
+            "startedMonotonicNS": 194874658218625,
+            "endedMonotonicNS": 194874707414666,
+            "load1Minute": 4.89453125,
+            "blocked": [],
+            "quiet": false
+          }
+        },
+        {
+          "packet": "medium-cache-open-after-single-validation-qualified-R2-20261006",
+          "report": {
+            "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-qualified-R2-20261006/performance-report.json",
+            "byteCount": 1666,
+            "sha256": "29153855e399317394a0f60397a62ed637ae08538c52114d934db399b4446e97"
+          },
+          "status": "failed-or-unqualified",
+          "error": "initial-host-qualification-failed",
+          "actualProductGroups": 0,
+          "actualSamples": 0,
+          "p95Milliseconds": null,
+          "capturedQualificationRecords": 4,
+          "lastCapturedQualification": {
+            "startedMonotonicNS": 196978787771000,
+            "endedMonotonicNS": 196978837661500,
+            "load1Minute": 4.0673828125,
+            "blocked": [],
+            "quiet": false
+          }
+        }
+      ],
+      "qualificationUnchanged": "60sec quiet, load1<4, no named compilers/parser/helper/xctest; exactly20 samples; no filter, replacement or warmup;1000ms p95",
+      "allOriginalFailuresPreserved": true,
+      "failureCauseAssignedToParallelAgent": false
+    }
+  },
+  "rawAndReadyUnchanged": {
+    "atUnix": 1791274393.100811,
+    "files": [
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/.build/phase3-fixtures/pbreader.htrace",
+        "byteCount": 265032803,
+        "sha256": "695a160f3c99472cc746a09c75ae70c2dcef2d0323028fdb39e02196e1e6a7f9",
+        "mode": "0o400",
+        "device": 16777233,
+        "inode": 273045008,
+        "mtimeNS": 1791267547651424249,
+        "ctimeNS": 1791267965814870218
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-medium-695a160f-20261006/traces/695a160f3c99472cc746a09c75ae70c2dcef2d0323028fdb39e02196e1e6a7f9/c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd/trace.sqlite",
+        "byteCount": 256655360,
+        "sha256": "343198c06e2a569c6298e76a5e3706eba6f97e613f6b7409238ef3e4310e7cc1",
+        "mode": "0o400",
+        "device": 16777233,
+        "inode": 273046053,
+        "mtimeNS": 1791267982422192698,
+        "ctimeNS": 1791267982727802154
+      }
+    ],
+    "namespaceMembership": [
+      ".actors",
+      ".actors/.owners"
+    ],
+    "largeReadyAccessed": false,
+    "sourceDBHashesUnchanged": true,
+    "sourceOrDBCopied": false
+  },
+  "borrowedOldNormal101Inputs": {
+    "atUnix": 1791274361.528117,
+    "count": 101,
+    "matchedCount": 101,
+    "changed": [],
+    "allFreshlyVerifiedMatched": true,
+    "scope": "No causation assigned; readonly readback of immutable-borrowed intended101 producer inputs; no file repaired or rewritten"
+  },
+  "explicitUnchangedReferenceReuse": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-unchanged-reference-reuse.json",
+    "byteCount": 40661,
+    "sha256": "a0eed4b674cbde9b08bacfb5046d2a4d5a93c972e6927701efc98025195f55e2"
+  },
+  "explicitUnchangedOfflineReuse": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-unchanged-offline-reuse.json",
+    "byteCount": 5063,
+    "sha256": "fe635f3abc13e6e1fb0e26dff9fcd4002d2ab3cfa122b2fab2379f5d5f60fa72"
+  },
+  "currentCanonicalProducers": {
+    "atUnix": 1791272536.238497,
+    "canonicalTestsPassed": 4,
+    "expectedOutputsUnchanged": true,
+    "comparisons": [
+      {
+        "fresh": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-inspector-swift.json",
+        "expected": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift.json",
+        "canonicalJSONEqual": true,
+        "expectedBytesUnchanged": true,
+        "freshSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "expectedSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9"
+      },
+      {
+        "fresh": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-event-index-swift.json",
+        "expected": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+        "canonicalJSONEqual": true,
+        "expectedBytesUnchanged": true,
+        "freshSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "expectedSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c"
+      },
+      {
+        "fresh": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-action-keyboard-swift.json",
+        "expected": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-keyboard-swift.json",
+        "canonicalJSONEqual": true,
+        "expectedBytesUnchanged": true,
+        "freshSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "expectedSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76"
+      },
+      {
+        "fresh": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-facts-output/fresh-action-display-swift.json",
+        "expected": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-display-swift.json",
+        "canonicalJSONEqual": true,
+        "expectedBytesUnchanged": true,
+        "freshSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "expectedSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975"
+      }
+    ],
+    "freshReceipt": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "byteCount": 46709,
+      "sha256": "deefb4d82215c57d72327a30cb7c40fb90a961496dce6b51c9680fb7a161b858"
+    }
+  },
+  "sourceClosure": {
+    "pins": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-source-pins.json",
+      "byteCount": 166497,
+      "sha256": "25c3f50cd6f210a63fdda2fefcfe243887ba5d13ccfd83e16f50ac0bf358c70c"
+    },
+    "allCompilerObjectTransitiveClosureClaimed": false,
+    "rawTraceOrReadyDatabaseCopied": false
+  },
+  "CI": {
+    "completeDiffPaths": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-complete-diff-paths.txt",
+      "byteCount": 1409,
+      "sha256": "9fad2349abeaac1b1bad2a752331439a6ec75405e610d7fa7836ce547f651456"
+    },
+    "plannerOutput": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/current-ci-plan.txt",
+      "byteCount": 97,
+      "sha256": "f39cc6e163e4b747746cecf2cf045ab906845da7cd090c18280e36d0a465441d"
+    },
+    "lanes": {
+      "lane_swiftpm": "true",
+      "lane_app": "false",
+      "lane_contracts": "true",
+      "lane_rust_macos": "true",
+      "lane_rust_windows": "true"
+    },
+    "selectedLanesFullyPassed": false,
+    "WindowsNativeExecuted": false,
+    "fullNativeSwiftExecuted": false,
+    "sourceUnchangedChecksExplicitlyReused": true,
+    "finalDiffPaths": 24,
+    "finalCompleteDiffPaths": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/final-complete-diff-paths.txt",
+      "byteCount": 1706,
+      "sha256": "3e987138ff0dfba74d5f962c6d5910d1deb1ca9edb37f96cab43d724f0151243"
+    },
+    "finalPlannerOutput": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006/final-ci-plan.txt",
+      "byteCount": 97,
+      "sha256": "f39cc6e163e4b747746cecf2cf045ab906845da7cd090c18280e36d0a465441d"
+    },
+    "finalLanes": {
+      "lane_swiftpm": "true",
+      "lane_app": "false",
+      "lane_contracts": "true",
+      "lane_rust_macos": "true",
+      "lane_rust_windows": "true"
+    }
+  },
+  "N36": {
+    "state": "FROZEN APPROVAL-BLOCKED CLOSED",
+    "actualEngineCalls": 0,
+    "actualProductGroups": 0,
+    "ReadyMutation": 0,
+    "ReadyAuthority": "returned to MAIN",
+    "newDirectHumanApproval": false,
+    "blockedAction": "Actual shared large Ready same-session recovery",
+    "automaticApprovalReviewReason": "Delegate messages were not accepted as direct human authorization for shared namespace metadata/journal/lifecycle effects",
+    "bypass": false
+  },
+  "backupFocusCandidate": {
+    "productionSourceUnchanged": true,
+    "candidateOnly": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-main-candidate-20261006/TraceViewStateBackupButton.swift",
+      "byteCount": 5354,
+      "sha256": "c58fac255c538cc378a2c8fde06f3fab02f48b4e842d01bda3f2785b09fe9e1b"
+    },
+    "candidateCompiledOrExecuted": false,
+    "latestCoordinatorOwner": "A46 snapshot proposal/harness only, production GUI MAIN owned",
+    "actualBug": "SPECIFICATION1199 trigger-control restoration violated; Timeline focus after Escape",
+    "currentProductionSource": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+      "byteCount": 4479,
+      "sha256": "c13d631365dfc6d7b6d16c72edaf3cefcb4843910fb4c906d060d8e67b12f0a5"
+    },
+    "existingHelperSource": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "byteCount": 2793,
+      "sha256": "b6f3d297311928674b189e098168883ba1151ae557d1bd21ec86666f830386d5"
+    }
+  },
+  "remaining": [
+    "warm medium cached-open new20 valid samples/SLO",
+    "other required performance and complete product process forest",
+    "raw source nonblocking admission/race fix before actual cold cancellation",
+    "actual cold cancellation with current normalSDK",
+    "approved actual large same-session budget recovery",
+    "complete current native suite and unresolved prior SQLite14 full failure",
+    "backup trigger focus restoration and full actual GUI/VoiceOver/ReduceMotion",
+    "pending Capture discovery authorization and applicable real-device gate",
+    "ArkDeck schema4/native current integration",
+    "Windows native CI; no macOS crosscompile substitute",
+    "applicable release/signing/notarization gates"
+  ],
+  "wholeMacOSAcceptance": false,
+  "goalStatus": "blocked",
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006",
+  "localGitCommitThisIncrement": false,
+  "pushedThisIncrement": false,
+  "coldCancellationAdmissionReview": {
+    "A45ScopedSourceAndPureGuardsReviewed": true,
+    "currentNormal633RuntimeValidated": false,
+    "actualEngineCalls": 0,
+    "actualCancelCalls": 0,
+    "rawSourceOpenPremise": "checkSource preflight regular raw source followed by O_NOFOLLOW open without O_NONBLOCK; replacement race can block; review/repair required before actual cold runtime",
+    "A45InputRepairDoesNotCoverThis": true,
+    "N37ControlledKernelFixture": "failed before admit; not product forest/cancel evidence",
+    "proposalsImportedByMAIN": false
+  }
+}

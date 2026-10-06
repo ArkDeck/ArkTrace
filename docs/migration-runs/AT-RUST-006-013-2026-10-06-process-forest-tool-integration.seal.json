@@ -1,0 +1,58 @@
+{
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006",
+  "manifest": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/manifest.json",
+    "byteCount": 29509,
+    "sha256": "c32dfd860293a34660e5d8b1fc43528e4d6194efc9cf78fb45bde67e9aeba8c7"
+  },
+  "seal": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/seal.json",
+    "byteCount": 936,
+    "sha256": "8ae6a664c57202824cd0f39a8522c036749e47bb6951d66b53f22eb949907ac3"
+  },
+  "report": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/integration-report.json",
+    "byteCount": 46044,
+    "sha256": "5635dc4092c5489f1c4aee82b9317a9f5b3b5c00364ab0d8f0f0d0ae9e68e6f4"
+  },
+  "CI": {
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "paths": [
+      "Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+      "docs/TASKS.md",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.json",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.md",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.seal.json",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.sha256",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.seal.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.sha256",
+      "docs/migration-runs/AT-RUST-007-013-2026-10-06-normal-ready-preparation.json",
+      "docs/migration-runs/AT-RUST-007-013-2026-10-06-normal-ready-preparation.md",
+      "docs/migration-runs/AT-RUST-007-013-2026-10-06-normal-ready-preparation.sha256",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "scripts/native-process-forest/README.md",
+      "scripts/native-process-forest/proc_bridge.c",
+      "scripts/native-process-forest/process_forest_sampler.py"
+    ],
+    "pathCount": 18,
+    "argv": [
+      "sh",
+      "scripts/ci_plan.sh"
+    ],
+    "stdinSHA256": "3b42396a2512e4d5212d34fee3a298493d47e1b7e00269891b5cb0f23e282648",
+    "exitCode": 0,
+    "stdout": "lane_swiftpm=true\nlane_app=false\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "stderr": "",
+    "planner": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/ci_plan.sh",
+      "byteCount": 7754,
+      "sha256": "3ef646582b0c75cbaa661e458ef1cdfa4608636a606bfa0561bc98a786590fa7"
+    },
+    "selectionOnly": true,
+    "nativeWindowsExecuted": false
+  },
+  "wholeMacOSAcceptance": false
+}

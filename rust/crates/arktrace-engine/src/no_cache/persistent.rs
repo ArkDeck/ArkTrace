@@ -352,8 +352,11 @@ pub(super) fn lookup(
     source
         .verify()
         .map_err(|e| host(EngineStage::SourceSnapshot, e))?;
+    // validate_entry fully inspected this exact held immutable database.
+    // Recheck its binding, timestamps, mode, sidecars and budget after the
+    // metadata update without repeating the full SQLite integrity scan.
     reader
-        .verify(&budget.validation())
+        .verify_snapshot(&budget.validation())
         .map_err(|e| failure(EngineStage::CacheLookup, EngineFailure::Store(e)))?;
     current_file
         .verify()

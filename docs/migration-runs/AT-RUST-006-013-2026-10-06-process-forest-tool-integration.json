@@ -1,0 +1,809 @@
+{
+  "schemaVersion": 1,
+  "scope": "MAIN exact reviewed macOS read-only process sampler source integration and current ABI/tool contract checks; real product measurements remain pending",
+  "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+  "toolchains": {
+    "rust": "1.99.0",
+    "xcode": "27.0",
+    "swift": "6.4",
+    "host": "macOS 27 arm64",
+    "deploymentTarget": "macOS 26+"
+  },
+  "imports": {
+    "rootReview": {
+      "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/build/agent-coordination-recovery/arktrace/coordinator-20261005-015934/A41R1-owned-exact-scoped-root-review-20261006-0526.json",
+      "byteCount": 7523,
+      "sha256": "a2a3aa428dfa2161d16056c07f55ffc7904c43bd671b0dc454637ed1e31cdcdf"
+    },
+    "soleFiles": [
+      {
+        "source": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/native-process-forest-sampler-r1-20261006/tools/native-process-forest-sampler-r1-20261006/process_forest_sampler.py",
+        "destination": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/native-process-forest/process_forest_sampler.py",
+        "byteCount": 16327,
+        "sha256": "1a0033d2104dd6f29705c5f70b02fd797c447bf3daedaa063c92c1182046312a",
+        "copiedExactly": true
+      },
+      {
+        "source": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/native-process-forest-sampler-r1-20261006/tools/native-process-forest-sampler-r1-20261006/proc_bridge.c",
+        "destination": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/native-process-forest/proc_bridge.c",
+        "byteCount": 3085,
+        "sha256": "c19a322e29deef6493dc2a226b9125b2da8e85b04556fab749efa798d24aa20c",
+        "copiedExactly": true
+      },
+      {
+        "source": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/native-process-forest-sampler-r1-20261006/tools/native-process-forest-sampler-r1-20261006/README.md",
+        "destination": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/native-process-forest/README.md",
+        "byteCount": 6248,
+        "sha256": "5a725c3ccb10ca0c12931b4f796c1303e288d44110789458195c10e599584cc5",
+        "copiedExactly": true
+      }
+    ],
+    "libraryBinaryImported": false,
+    "productionSourcesChanged": false
+  },
+  "independentCurrentBridgeSHA256": "731187d0b74c0ad1148fcab9817a898c5918587d40272108bc6c691900a19dda",
+  "candidateBridgeImported": false,
+  "currentABI": {
+    "actualCurrentABIFacts": {
+      "allPIDsFlavor": 1,
+      "bridgeVersion": 1,
+      "bsdInfoBytes": 136,
+      "bsdInfoFlavor": 3,
+      "residentBytesOffset": 8,
+      "rowBytes": 56,
+      "startMicrosecondsOffset": 128,
+      "startSecondsOffset": 120,
+      "taskInfoBytes": 96,
+      "taskInfoFlavor": 4,
+      "zombieState": 5
+    },
+    "astParsed": true,
+    "procListIdentityRSSCalls": 0,
+    "productMeasurement": false
+  },
+  "freshCommands": [
+    {
+      "name": "01-compile",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/01-compile.receipt.json",
+        "byteCount": 1263,
+        "sha256": "75b8cf6a6b2d54e09321521fcb06eae7ed4ab4ded528ba935be5ba9c357237a8"
+      },
+      "actualReceipt": {
+        "argv": [
+          "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+          "-std=c17",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-O2",
+          "-fno-modules",
+          "-dynamiclib",
+          "-arch",
+          "arm64",
+          "-mmacosx-version-min=26.0",
+          "-isysroot",
+          "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-tools/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-process-forest/proc_bridge.c",
+          "-lproc",
+          "-o",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-tools/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-process-forest/proc_bridge.dylib"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "scope": "Independent current Xcode27 local bridge compile from exact reviewed source; stable owned tool staging outside Git, no reused candidate dylib or Rust SDK rebuild",
+        "startedAtUnix": 1791265720.6654358,
+        "exitCode": 0,
+        "finishedAtUnix": 1791265720.911764,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/01-compile.stdout",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/01-compile.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "02-abi",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/02-abi.receipt.json",
+        "byteCount": 715,
+        "sha256": "1a2f031f21c2a641fcd7ec871ea55758f702f5ad34f3d484788981a018b7bf09"
+      },
+      "actualReceipt": {
+        "argv": [
+          "python3",
+          "-B",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/check-current-abi.py"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "scope": "Current independently compiled bridge ABI/help verification; zero process queries, no reused functional proof or product measurement",
+        "startedAtUnix": 1791265808.052094,
+        "exitCode": 0,
+        "finishedAtUnix": 1791265808.538501,
+        "stdoutSHA256": "b9fac01450563d86f9d0635f226212389da8e0f8884c51a258505651de4eaf18",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/02-abi.stdout",
+        "byteCount": 349,
+        "sha256": "b9fac01450563d86f9d0635f226212389da8e0f8884c51a258505651de4eaf18"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/02-abi.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "03-help",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/03-help.receipt.json",
+        "byteCount": 719,
+        "sha256": "b1417ab9696a915910090859fffb529db5d9deb4be65dd6dd803e5f46cad01e6"
+      },
+      "actualReceipt": {
+        "argv": [
+          "python3",
+          "-B",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-tools/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-process-forest/process_forest_sampler.py",
+          "--help"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "scope": "Current independently compiled bridge ABI/help verification; zero process queries, no reused functional proof or product measurement",
+        "startedAtUnix": 1791265808.052511,
+        "exitCode": 0,
+        "finishedAtUnix": 1791265808.096695,
+        "stdoutSHA256": "c190cb92b75ec488981b9d140e9f4f741d455f98a34902b7dee5d0e8a548c571",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/03-help.stdout",
+        "byteCount": 1140,
+        "sha256": "c190cb92b75ec488981b9d140e9f4f741d455f98a34902b7dee5d0e8a548c571"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/03-help.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "04-licenses",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/04-licenses.receipt.json",
+        "byteCount": 825,
+        "sha256": "21b244bef8faf2ef9e79c3e58bf99b5844d9668534e58597cddd87244de4fa15"
+      },
+      "actualReceipt": {
+        "argv": [
+          "sh",
+          "scripts/verify_licenses.sh"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "scope": "Applicable new verification-tool/source additions; current license/parser trust and selected complete-diff planner contracts",
+        "startedAtUnix": 1791265943.526794,
+        "exitCode": 0,
+        "finishedAtUnix": 1791265943.928556,
+        "stdoutSHA256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/04-licenses.stdout",
+        "byteCount": 102,
+        "sha256": "750ad15769dc93d81e9b8c7473f164563bb79aec12300785177fd836b74816fc"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/04-licenses.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "05-parser-lock",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/05-parser-lock.receipt.json",
+        "byteCount": 836,
+        "sha256": "3ede885674aca8cf8a3994d174948fa41fc6f79364143dfe60d8cfe48e3a08ae"
+      },
+      "actualReceipt": {
+        "argv": [
+          "sh",
+          "scripts/verify_trace_streamer_lock.sh"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "scope": "Applicable new verification-tool/source additions; current license/parser trust and selected complete-diff planner contracts",
+        "startedAtUnix": 1791265943.532747,
+        "exitCode": 0,
+        "finishedAtUnix": 1791265943.629117,
+        "stdoutSHA256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/05-parser-lock.stdout",
+        "byteCount": 120,
+        "sha256": "272f5b02b6560908464ce618275a20a3c27aaad113db089dfb44c50853942f5f"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/05-parser-lock.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "06-ci-plan-contract",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/06-ci-plan-contract.receipt.json",
+        "byteCount": 823,
+        "sha256": "2cc550ffbb00b860a796eb965ef2f6a38034ef98c63341ce53852e829f422714"
+      },
+      "actualReceipt": {
+        "argv": [
+          "sh",
+          "scripts/test_ci_plan.sh"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "scope": "Applicable new verification-tool/source additions; current license/parser trust and selected complete-diff planner contracts",
+        "startedAtUnix": 1791265943.527929,
+        "exitCode": 0,
+        "finishedAtUnix": 1791265943.8081841,
+        "stdoutSHA256": "e09680fd49f018ab88f7cfe580ea3ee0cda08f8ba344dcecc57603c9fbd4cc88",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/06-ci-plan-contract.stdout",
+        "byteCount": 4525,
+        "sha256": "e09680fd49f018ab88f7cfe580ea3ee0cda08f8ba344dcecc57603c9fbd4cc88"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/06-ci-plan-contract.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "07-migration-contracts",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/07-migration-contracts.receipt.json",
+        "byteCount": 623,
+        "sha256": "728441662013ea1fd3f5b260ccdaf1b89dae2af3a3dc0e298b405b9e5f146b52"
+      },
+      "actualReceipt": {
+        "argv": [
+          "python3",
+          "scripts/verify_migration_contracts.py"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Current changed viewer facts receipt and exact source/contract verification; no oracle replay or real device run",
+        "startedAtUnix": 1791266306.4024372,
+        "exitCode": 0,
+        "finishedAtUnix": 1791266306.601516,
+        "stdoutSHA256": "790ad3aa0231bd742e25493885c64e21ce7d4689698260c4a209840b408d7398",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/07-migration-contracts.stdout",
+        "byteCount": 1319,
+        "sha256": "790ad3aa0231bd742e25493885c64e21ce7d4689698260c4a209840b408d7398"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/07-migration-contracts.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "08-migration-contract-tests",
+      "freshThisIncrement": true,
+      "receipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/08-migration-contract-tests.receipt.json",
+        "byteCount": 621,
+        "sha256": "cba1f925f013ffc8591a4d2a912781e0d013622f1e74b105065dd06cf8448fd7"
+      },
+      "actualReceipt": {
+        "argv": [
+          "python3",
+          "scripts/test_migration_contracts.py"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Current changed viewer facts receipt and exact source/contract verification; no oracle replay or real device run",
+        "startedAtUnix": 1791266313.915381,
+        "exitCode": 0,
+        "finishedAtUnix": 1791266314.2058501,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "6ac0ef7f0ddcae159c23f54df2a4d5ba136f8288925b3dd6da995a82668fe94b"
+      },
+      "rawStdout": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/08-migration-contract-tests.stdout",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "rawStderr": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/08-migration-contract-tests.log",
+        "byteCount": 400,
+        "sha256": "6ac0ef7f0ddcae159c23f54df2a4d5ba136f8288925b3dd6da995a82668fe94b"
+      }
+    }
+  ],
+  "reusedOfflineGates": [
+    {
+      "gate": "14-offline-03",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/verify_palette.py",
+        "--report"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-03.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-04",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_palette_verifier.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-04.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-05",
+      "actualPriorArgv": [
+        "sh",
+        "scripts/test_phase6.sh"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-05.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-07",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_run_swiftpm.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-07.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-08",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_run_xcodebuild.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-08.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-09",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_native_app_resources.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-09.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-10",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_run_cargo.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-10.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-11",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_cargo_cache.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-11.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-12",
+      "actualPriorArgv": [
+        "python3",
+        "scripts/test_stage_macos_rust_sdk.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-12.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    },
+    {
+      "gate": "14-offline-15",
+      "actualPriorArgv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts/rollback_conformance",
+        "-p",
+        "test_*.py"
+      ],
+      "actualPriorExitCode": 0,
+      "freshThisIncrement": false,
+      "sourcePacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+      "copiedRawReceipt": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-offline-gates/14-offline-15.receipt.json",
+      "reason": "No relevant check input source changed against current tracked baseline; original gates reuse only. Current selected lane is not thereby newly executed or fully passed."
+    }
+  ],
+  "reusedBuildGates": [
+    {
+      "name": "05-native-full.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/05-native-full.receipt.json",
+        "byteCount": 5519,
+        "sha256": "b6be84f2dabf9ec03269b91264bf8c6e835a4d0ab05c37d42c1f4d954d81a655"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/05-native-full.receipt.json",
+        "byteCount": 5519,
+        "sha256": "b6be84f2dabf9ec03269b91264bf8c6e835a4d0ab05c37d42c1f4d954d81a655"
+      },
+      "actualPriorExitCode": 1,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "06-default-full.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/06-default-full.receipt.json",
+        "byteCount": 1233,
+        "sha256": "6c7b27889ff7e44e94f5b0c83b131f3a8e77907a73ed0ae8494e0f4202254fb7"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/06-default-full.receipt.json",
+        "byteCount": 1233,
+        "sha256": "6c7b27889ff7e44e94f5b0c83b131f3a8e77907a73ed0ae8494e0f4202254fb7"
+      },
+      "actualPriorExitCode": 1,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "07-rust-fmt.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/07-rust-fmt.receipt.json",
+        "byteCount": 938,
+        "sha256": "f072d5dd52037cb13e3370aae8bd6cfcf74d60aa81b304b75d5763b1b45a6ade"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/07-rust-fmt.receipt.json",
+        "byteCount": 938,
+        "sha256": "f072d5dd52037cb13e3370aae8bd6cfcf74d60aa81b304b75d5763b1b45a6ade"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "08-rust-clippy.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/08-rust-clippy.receipt.json",
+        "byteCount": 1001,
+        "sha256": "0ab7d25bc546f5e78f93c5747a63731988f98bbca35402835f2869ad22d1f80d"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/08-rust-clippy.receipt.json",
+        "byteCount": 1001,
+        "sha256": "0ab7d25bc546f5e78f93c5747a63731988f98bbca35402835f2869ad22d1f80d"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "09-rust-workspace-test.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/09-rust-workspace-test.receipt.json",
+        "byteCount": 942,
+        "sha256": "d59a5b7435579dc517f494e8777af553107ce2a4a7bac05dd48edc860c028182"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/09-rust-workspace-test.receipt.json",
+        "byteCount": 942,
+        "sha256": "d59a5b7435579dc517f494e8777af553107ce2a4a7bac05dd48edc860c028182"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "10-facts-verify.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/10-facts-verify.receipt.json",
+        "byteCount": 564,
+        "sha256": "67c88e91630b53e9193ffaadbfbf2d90df3f9ab3ee79f496e80b49203580f039"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/10-facts-verify.receipt.json",
+        "byteCount": 564,
+        "sha256": "67c88e91630b53e9193ffaadbfbf2d90df3f9ab3ee79f496e80b49203580f039"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "11-workspace-verify.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/11-workspace-verify.receipt.json",
+        "byteCount": 814,
+        "sha256": "28cd44c1bd888931ecc53f773945ce7b2e5efe9e9e9bcc42c76d1f6b9454c51c"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/11-workspace-verify.receipt.json",
+        "byteCount": 814,
+        "sha256": "28cd44c1bd888931ecc53f773945ce7b2e5efe9e9e9bcc42c76d1f6b9454c51c"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "12-bindings-verify.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006/12-bindings-verify.receipt.json",
+        "byteCount": 832,
+        "sha256": "3951a479d570b725428feedde4a22eff6159de368fa901c7b595a71458efe5d3"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/12-bindings-verify.receipt.json",
+        "byteCount": 832,
+        "sha256": "3951a479d570b725428feedde4a22eff6159de368fa901c7b595a71458efe5d3"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "08-sdk-consumer.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006/08-sdk-consumer.receipt.json",
+        "byteCount": 1162,
+        "sha256": "3babe4ac96c8d3a79b83e41ddce1bbf8936de917ed5f48c6f33a35790c65a903"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/08-sdk-consumer.receipt.json",
+        "byteCount": 1162,
+        "sha256": "3babe4ac96c8d3a79b83e41ddce1bbf8936de917ed5f48c6f33a35790c65a903"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "09-api.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006/09-api.receipt.json",
+        "byteCount": 1745,
+        "sha256": "3b7470c857567f87c1ff77ef17fdbf098fa8e070e1b9873ab68507179b1ffbb9"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/09-api.receipt.json",
+        "byteCount": 1745,
+        "sha256": "3b7470c857567f87c1ff77ef17fdbf098fa8e070e1b9873ab68507179b1ffbb9"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "10-app.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006/10-app.receipt.json",
+        "byteCount": 1269,
+        "sha256": "fdfacaecda178495d5081c45e75cbd7a6c8f869c3612930ba64bdf35d0371bff"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/10-app.receipt.json",
+        "byteCount": 1269,
+        "sha256": "fdfacaecda178495d5081c45e75cbd7a6c8f869c3612930ba64bdf35d0371bff"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "16-app-document-types.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006/16-app-document-types.receipt.json",
+        "byteCount": 676,
+        "sha256": "6a8147017c04a07f4d01fbf673270accd4400c44ec9758782b50a73a169f3b66"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/16-app-document-types.receipt.json",
+        "byteCount": 676,
+        "sha256": "6a8147017c04a07f4d01fbf673270accd4400c44ec9758782b50a73a169f3b66"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    },
+    {
+      "name": "19-final-app-signature.receipt.json",
+      "freshThisIncrement": false,
+      "originalReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006/19-final-app-signature.receipt.json",
+        "byteCount": 774,
+        "sha256": "41adcde957f6dcdaf8d856be889c9e003233a538c00465dd416bf064f24f71da"
+      },
+      "copiedReceipt": {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/reused-build-gates/19-final-app-signature.receipt.json",
+        "byteCount": 774,
+        "sha256": "41adcde957f6dcdaf8d856be889c9e003233a538c00465dd416bf064f24f71da"
+      },
+      "actualPriorExitCode": 0,
+      "reason": "Relevant current source/SDK inputs match independently read current 688-code and tracked-check input records. Preserve original failure or pass; no new full lane or App claim."
+    }
+  ],
+  "currentCodeInputReadback": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/current-code-inputs-readback.json",
+    "byteCount": 134719,
+    "sha256": "e73fbb2efbe2a290aee91b212655890b3b68baa618c5e1a116ee4d6aeecca9ed"
+  },
+  "currentTrackedCheckInputReadback": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/current-tracked-check-inputs.json",
+    "byteCount": 357199,
+    "sha256": "15fbadd66bd344d41b042ab01a0bae2d01caca70d0e0525648d4327ee2e5e5c2"
+  },
+  "currentHeadersAndBridge": {
+    "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/current-bridge-header-pins.json",
+    "byteCount": 1869,
+    "sha256": "26d7d24ac49da2b0b0cb2df48329d3b70645827720e64b4e635eae7d0836bb18"
+  },
+  "historicalFunctionalEvidence": {
+    "review": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006/root-reviewed-delivery.json",
+      "byteCount": 7523,
+      "sha256": "a2a3aa428dfa2161d16056c07f55ffc7904c43bd671b0dc454637ed1e31cdcdf"
+    },
+    "originalControlledTrees": 1,
+    "originalSyntheticDecisionGroups": 3,
+    "freshFunctionalGroupsThisIncrement": 0,
+    "freshProductGroupsThisIncrement": 0,
+    "knownLiveSampledRSSLowerBoundBytes": 73891840,
+    "originalA41RemainsFailed": true,
+    "completeProcessForestClaimed": false,
+    "newProductPeakOrP95OrCancelClaimed": false
+  },
+  "CI": {
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "paths": [
+      "Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+      "docs/TASKS.md",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.json",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.md",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.seal.json",
+      "docs/migration-runs/AT-RUST-006-013-2026-10-06-process-forest-tool-integration.sha256",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.seal.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.sha256",
+      "docs/migration-runs/AT-RUST-007-013-2026-10-06-normal-ready-preparation.json",
+      "docs/migration-runs/AT-RUST-007-013-2026-10-06-normal-ready-preparation.md",
+      "docs/migration-runs/AT-RUST-007-013-2026-10-06-normal-ready-preparation.sha256",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "scripts/native-process-forest/README.md",
+      "scripts/native-process-forest/proc_bridge.c",
+      "scripts/native-process-forest/process_forest_sampler.py"
+    ],
+    "pathCount": 18,
+    "argv": [
+      "sh",
+      "scripts/ci_plan.sh"
+    ],
+    "stdinSHA256": "3b42396a2512e4d5212d34fee3a298493d47e1b7e00269891b5cb0f23e282648",
+    "exitCode": 0,
+    "stdout": "lane_swiftpm=true\nlane_app=false\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "stderr": "",
+    "planner": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/scripts/ci_plan.sh",
+      "byteCount": 7754,
+      "sha256": "3ef646582b0c75cbaa661e458ef1cdfa4608636a606bfa0561bc98a786590fa7"
+    },
+    "selectionOnly": true,
+    "nativeWindowsExecuted": false
+  },
+  "selectedLanesFullyPassed": false,
+  "unchangedProductSDKABI": true,
+  "fullCompilerObjectClosureClaimed": false,
+  "currentFullSwiftSuites": {
+    "native": "previous actual 784 unique passed, 3 cases failed, 6 existing opt-in skips; not rerun without changed inputs or environment",
+    "default": "previous actual 650 unique passed, 2 cases failed, 6 existing opt-in skips; not rerun without changed inputs or environment",
+    "windowFailuresRemain": true,
+    "SQLite14RootCauseProven": false,
+    "newSkipOrAssertionRelaxation": false
+  },
+  "currentMacRust": "previous actual fmt/clippy/workspace 577 passed/0 ignored/65 harnesses and verifier/bindings passed; same Rust source inputs, explicitly reused",
+  "APIAndApp": "previous actual normal SDK/API/App/document-types/development signature gates reused, no new build or distribution acceptance",
+  "normalReadyAccessedAfterHandoff": false,
+  "normalReadyExclusiveOwner": "N34R2 until explicit return",
+  "originalFailuresPreserved": [
+    "Original A41 deadline failure",
+    "Current full native/default test failures",
+    "Original tracked-input assertion assuming no physical Git line conversion; actual CRLF attributes recorded without changing any file"
+  ],
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/process-forest-tool-main-20261006",
+  "wholeMacOSAcceptance": false,
+  "goalStatus": "blocked",
+  "localPublicationThisIncrement": false,
+  "remaining": [
+    "Latest error/retry GUI and two WindowServer drawing tests after usable desktop",
+    "Independent SQLite14 cause and original full suite failures",
+    "Actual normal Ready native range budget rejection/recovery",
+    "Current product App/helper/parser/SDK/PID-start/open-cancel event binding and process sampling",
+    "Quiet 20-sample performance, FPS and actual cancellation latency",
+    "Keyboard navigation/VoiceOver, pending Capture device discovery authorization and actual device gates",
+    "ArkDeck schema-4/direct SDK and reviewed CLI consumer checks",
+    "Applicable distribution/install/rollback/Swift retirement and native Windows evidence"
+  ]
+}

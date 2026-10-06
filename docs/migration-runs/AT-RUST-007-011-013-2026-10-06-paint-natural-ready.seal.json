@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006",
+  "manifestSHA256": "50eccd18f223b3023e25a7ed7ca24c6391ff93de4b276065f827a6e19db25151",
+  "fileCount": 345,
+  "payloadByteCount": 8439432,
+  "allBytesAndModesReadBack": true,
+  "reportSHA256": "84ed3433bfaea758b68d38fffd73c03cf9d9cffb4e599913659374ae9a798f5e",
+  "completeDiffCIPlan": {
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "changedPaths": [
+      "Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+      "docs/TASKS.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.seal.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.sha256",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+    ],
+    "pathCount": 8,
+    "argv": [
+      "sh",
+      "scripts/ci_plan.sh"
+    ],
+    "stdinSHA256": "b176d830395df4ac78a6b0bb0f43b764790997b45eca0e6513afe7c80597ecac",
+    "exitCode": 0,
+    "stdout": "lane_swiftpm=true\nlane_app=false\nlane_contracts=false\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "plannerSHA256": "3ef646582b0c75cbaa661e458ef1cdfa4608636a606bfa0561bc98a786590fa7",
+    "nativeWindowsExecuted": false
+  },
+  "wholeMacOSAcceptance": false,
+  "fullSuitesPassed": false
+}

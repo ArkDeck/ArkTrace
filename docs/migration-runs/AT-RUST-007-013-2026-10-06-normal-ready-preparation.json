@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "scope": "Normal production SDK one bounded actual cold preparation plus same-path cache-hit and exclusive handoff; no product range/performance/fullmac claim",
+  "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+  "preparation": {
+    "actualColdParsesAllowed": 1,
+    "actualNormalEngine": true,
+    "actualRangeQueries": 0,
+    "cached": {
+      "cacheHit": true,
+      "databaseByteCount": 2214297600,
+      "durationNs": 598338869077,
+      "elapsedSeconds": 5.162859417,
+      "indexSchemaVersion": 4,
+      "parserBinarySHA256": "d458c933dbd43045746c6ae2ce21c2ecf91677d0b00fce6159d4cb8dc841a4a4",
+      "parserKey": "c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd",
+      "progress": [
+        "hashing",
+        "preparing",
+        "ready"
+      ],
+      "sourceByteCount": 674044067,
+      "sourceSHA256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3",
+      "traceSHA256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3"
+    },
+    "cleanup": {
+      "nativeBytesBeforeShutdown": 0,
+      "normalSDKColdCountersExposed": false,
+      "normalSDKRegistryCountersExposed": false,
+      "shutdownJoined": true
+    },
+    "cold": {
+      "cacheHit": false,
+      "databaseByteCount": 2214297600,
+      "durationNs": 598338869077,
+      "elapsedSeconds": 93.339414625,
+      "indexSchemaVersion": 4,
+      "parserBinarySHA256": "d458c933dbd43045746c6ae2ce21c2ecf91677d0b00fce6159d4cb8dc841a4a4",
+      "parserKey": "c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd",
+      "progress": [
+        "hashing",
+        "preparing",
+        "parsing",
+        "indexing",
+        "validating",
+        "preparing",
+        "ready"
+      ],
+      "sourceByteCount": 674044067,
+      "sourceSHA256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3",
+      "traceSHA256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3"
+    },
+    "status": "ready",
+    "wholeMacOSAcceptance": false
+  },
+  "handoff": {
+    "schemaVersion": 1,
+    "status": "prepared-awaiting-coordinator-review-and-N34R1-exclusive-start",
+    "handoffCreatedMonotonic": 188900.837703375,
+    "remainingInheritedN34Seconds": 994.497007583006,
+    "createdAtUnix": 1791264970.012788,
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "source": "Actual normal SDK create/open using original signed tools, one real cold parse, same physical cache then actual cache hit; no copied/forged owner, no clone or fixture mode",
+    "normalSDKStaticLibrarySHA256": "260a2663272ccc56a0e635ac0af778ffb00a987809515359358ed9f00af1fb02",
+    "fixtureDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006",
+    "namespace": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/staging",
+    "cacheDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces",
+    "entryDirectoryIdentity": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3/c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd",
+      "device": 16777233,
+      "inode": 273036642,
+      "mode": "0o700"
+    },
+    "generatedFormat4Owner": {
+      "formatVersion": 4,
+      "state": "ready",
+      "device": 16777233,
+      "inode": 273036642,
+      "relativePath": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3/c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd",
+      "cache": {
+        "keyIdentifier": "8286b9eda2b3d35ee85c99fa3947f580224d051ccf48223789b1d39337bb3a9a",
+        "entryRelativePath": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3/c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd",
+        "leaseDevice": 16777233,
+        "leaseInode": 273036635
+      }
+    },
+    "physicalCacheFilesAtHandoff": [
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3/c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd/trace.sqlite",
+        "byteCount": 2214297600,
+        "sha256": "f0d041fa593aa3ffe39f26bb3bb5fa74c3aaa3a49dbe375a9f00d86ee6f68d5a",
+        "device": 16777233,
+        "inode": 273036766,
+        "mode": "0o400",
+        "modificationNs": 1791264745666068136
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3/c5b94545c5de0eb0bfdf2ecef80fb06348b465b84bbb1c546b7394e8e6be62cd/metadata.json",
+        "byteCount": 1535,
+        "sha256": "e2b810653d0b69dfe2f24e863df6e4347cc1c6cbfee64db816afe0fc0b763528",
+        "device": 16777233,
+        "inode": 273036869,
+        "mode": "0o400",
+        "modificationNs": 1791264788294183689
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/.staging/.owners/entry-3e26bcdf-9c1c-4cf2-953a-2ea54675b41d.json",
+        "byteCount": 509,
+        "sha256": "b14cb347f5e64b1c605c3b69689742ca0cef7eb60ae80583f9dcbc21b1dd6f5e",
+        "device": 16777233,
+        "inode": 273036850,
+        "mode": "0o400",
+        "modificationNs": 1791264777105089247
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/.leases/8286b9eda2b3d35ee85c99fa3947f580224d051ccf48223789b1d39337bb3a9a.lease",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 16777233,
+        "inode": 273036635,
+        "mode": "0o600",
+        "modificationNs": 1791264693058054955
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/.locks/8286b9eda2b3d35ee85c99fa3947f580224d051ccf48223789b1d39337bb3a9a.lock",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 16777233,
+        "inode": 273036634,
+        "mode": "0o600",
+        "modificationNs": 1791264693057947122
+      },
+      {
+        "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-fixtures/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-large-087105c0-20261006/traces/.staging/.owners/entry-3e26bcdf-9c1c-4cf2-953a-2ea54675b41d.lock",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "device": 16777233,
+        "inode": 273036640,
+        "mode": "0o600",
+        "modificationNs": 1791264693075275328
+      }
+    ],
+    "sourceInput": {
+      "path": "/private/tmp/arktrace-reviewed-large-087105c0/arktrace-dayu200-20260815T081830Z-600s.htrace",
+      "byteCount": 674044067,
+      "sha256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3",
+      "device": 16777233,
+      "inode": 272623681,
+      "mode": "0o400",
+      "modificationNs": 1791251300309906074
+    },
+    "input": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/input.json",
+      "byteCount": 3357,
+      "sha256": "54edddba4e358f72c68e8f5498d9067c3ac6a7d8d1df3a2f349495e12393e9fe"
+    },
+    "preparation": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/preparation.json",
+      "byteCount": 1698,
+      "sha256": "363a8575a6c0a0b288e2a2cf7d1261a4dd1b20e67f9f915713dde8f0572ae732"
+    },
+    "actualGate": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/07-host-normal-preparation.receipt.json",
+      "byteCount": 1038,
+      "sha256": "5785ba53768f1a6cade0e854252f9c244030447aaf4a36481bf3d47d2bc5de2c"
+    },
+    "stdout": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/07-host-normal-preparation.stdout",
+      "byteCount": 1699,
+      "sha256": "0aaf4002ddc7eb55c8cd2d6eedba1d23e467d94242c36a70a3ad5fcf6cfc465c"
+    },
+    "stderr": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/07-host-normal-preparation.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "readyOwnerReadback": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/ready-owner-readback.json",
+      "byteCount": 6239,
+      "sha256": "f499517f5d39b701154f8f0eaae6973d702ba48bd0d83d4d0a22aeba41d692b3"
+    },
+    "compilerInputs": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/compiler-inputs.json",
+      "byteCount": 30411,
+      "sha256": "50afa903589dfd13142430a0c760e1a4642a387beee90ab0fcaff8f19cdc7794"
+    },
+    "consumerSource": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/ReadyPreparation.swift",
+      "byteCount": 6981,
+      "sha256": "424fe0c7cad726fd884e732be73078d2f4088eb297ae0d6e8cc10a0d6d37fa75"
+    },
+    "consumerBinary": {
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006/ready-preparation",
+      "byteCount": 14950816,
+      "sha256": "70af6afae1739f64f71698369a42bc1aa069f833dc322d4aa936bfa7dc9cb064"
+    },
+    "normalSDKInternalCountersRead": false,
+    "cleanupObserved": {
+      "bothSessionClosesJoined": true,
+      "EngineShutdownJoined": true,
+      "nativeRetainedBytesBeforeShutdown": 0,
+      "keyEntryOwnerLocksObservedUnheld": true,
+      "namespaceHasNoFiles": true,
+      "cacheHasNoActiveStagingBuildDirectories": true,
+      "preparationProcessExit": 0
+    },
+    "MAINStoppedCacheAccessAtMonotonic": 188900.837703375,
+    "exclusiveConsumer": "N34R1 only; MAIN will not open, read or write this namespace/cache after handing off",
+    "N34R1RequiredGuard": [
+      "Use exactly supplied cacheDirectory traces, not its parent; do not clone cache/owners/leases",
+      "Before open require matching source/helper/parser/library/config hashes and physical same entry/format4 owner/lease identities; missing or invalid premise stops group without fresh parse",
+      "Preserve pre/post identity and byte snapshots; normal metadata lastAccessedAt update may atomically replace metadata inode, must be recorded as ordinary Engine cachehit work",
+      "Require actual cacheHit true and no parsing before any range query; unexpected cold result closes/shuts down and fails, no further group",
+      "Only one normal product group after coordinator release, within inherited whole deadline and cleanup/evidence budget; no production source/Package/SDK/owner policy change"
+    ],
+    "productAcceptance": false,
+    "performanceAcceptance": false,
+    "wholeMacOSAcceptance": false
+  },
+  "durableEvidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/normal-ready-preparation-20261006",
+  "seal": {
+    "fileCount": 46,
+    "payloadByteCount": 15156338,
+    "manifestSHA256": "9846df2279896725fcdeebbdf8aa8df6e5a8f8598f98d99268b09fbf83a67545",
+    "handoffSHA256": "b31595b5c62c990db82b089a22d7696dff206443e803484261b87115cd388f01",
+    "allBytesReadBack": true,
+    "cacheAccessStopped": true,
+    "normalActualPreparationPassed": true,
+    "wholeMacOSAcceptance": false
+  },
+  "wholeMacOSAcceptance": false,
+  "previousFullSuitesPassed": false,
+  "goalStatus": "blocked"
+}

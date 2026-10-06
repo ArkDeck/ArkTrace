@@ -1,0 +1,1258 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact actual offscreen density paint and synthetic cross-document natural completion regressions; complete suites fail and remain open",
+  "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+  "toolchains": {
+    "rust": "1.99.0 b940084d7 2026-09-28 edition2024",
+    "xcode": "27.0 27A266a",
+    "swift": "6.4 swiftlang-6.4.0.34.1"
+  },
+  "imports": {
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "imports": [
+      {
+        "source": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/process-counter-density-paint-parity-r4-20261006/Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+        "destination": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+        "byteCount": 26762,
+        "sha256": "2a100045d2e96b51ae7ac7fa953da80325175f4139d77d093eae5456bc7a6316",
+        "adapted": false
+      }
+    ],
+    "n33R2": {
+      "source": "/Users/fuhanfeng/.codex/visualizations/2026/10/04/01a10493-9d12-75e2-83ae-994f0b53adfa/range-analysis-document-generation-r2-20261006/tools/range-analysis-document-generation-r2-20261006/experiment/Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "destination": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "byteCount": 26316,
+      "sha256": "a542e9aa078bf4b8c782a599bd0dca07bf8e5954770e53613f68ce4c421fd421",
+      "copiedExactly": true,
+      "scope": "sole new synthetic two-case regression; no Package, production source or shared helper imported",
+      "deliveredSource": "/Users/fuhanfeng/.codex/visualizations/2026/10/04/01a10493-9d12-75e2-83ae-994f0b53adfa/range-analysis-document-generation-r2-20261006/Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "rootReview": {
+        "path": "/Users/fuhanfeng/Dropbox/Code/Github/ArkTrace/build/agent-coordination-recovery/arktrace/coordinator-20261005-015934/N33R2-exact-natural-ready-delivery-root-review-20261006-0415.json",
+        "byteCount": 3564,
+        "sha256": "47ac1abc4e5347d0d0f670659ddfa4de7bd38eb9e4e4acfff4fdbd51fa41774c"
+      },
+      "deliveredAndExperimentBytesEqual": true
+    }
+  },
+  "codeInputReadback": {
+    "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/current-code-inputs.json",
+    "byteCount": 135131,
+    "sha256": "e9939611b4f68886be7f205f37e892216d8168dff1562b12b7b52273ab70abe9"
+  },
+  "actualPaint": {
+    "focusedTestPassed": true,
+    "nativeFullTestPassed": true,
+    "actualCacheDisplayCalls": 2,
+    "independentPNGReadback": {
+      "independentCRCAndPNGFilterDecode": true,
+      "width": 800,
+      "height": 600,
+      "fullRGBAEqual": true,
+      "allInteriorSamplesDecodedAndMatched": 8,
+      "native": {
+        "PNGBytes": 13439,
+        "PNGSHA256": "8a8f07a6d70a48b069bedb907821b08b7c44495806012f834bdb4175e43dd7f9",
+        "decodedRGBASHA256": "1c887f4772e2b1116c64d2d76f85c2c1d8848e28aea68bf5480f45a7ac40fe8f",
+        "chunks": [
+          "IHDR",
+          "sRGB",
+          "eXIf",
+          "IDAT",
+          "IEND"
+        ],
+        "filterKinds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "swift": {
+        "PNGBytes": 13439,
+        "PNGSHA256": "8a8f07a6d70a48b069bedb907821b08b7c44495806012f834bdb4175e43dd7f9",
+        "decodedRGBASHA256": "1c887f4772e2b1116c64d2d76f85c2c1d8848e28aea68bf5480f45a7ac40fe8f",
+        "chunks": [
+          "IHDR",
+          "sRGB",
+          "eXIf",
+          "IDAT",
+          "IEND"
+        ],
+        "filterKinds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "GUIAcceptance": false,
+      "performanceAcceptance": false
+    },
+    "comparison": {
+      "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/paint-output/actual-paint-comparison.json",
+      "byteCount": 5580,
+      "sha256": "789e1ba180aff930f0e6411b6913903dfa3681ea31f953bfc5af639742501611"
+    },
+    "cleanup": {
+      "cleanupErrors": [],
+      "engineShutdown": true,
+      "final": {
+        "bytes": 0,
+        "owners": 0,
+        "requests": 0,
+        "sessions": 0,
+        "stagingBytes": 0,
+        "stagingOwners": 0
+      },
+      "firstError": null,
+      "nativeAfterCloseBeforeShutdown": 0,
+      "nativeAfterEngineRelease": null,
+      "repositoryClosed": true
+    },
+    "independentSwiftDatabaseBackend": false,
+    "GUIAcceptance": false
+  },
+  "naturalReady": {
+    "focusedTestsPassed": 2,
+    "actualNativeLoads": 0,
+    "generationGuardIndependentlyIsolated": false,
+    "receipts": [
+      {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/n33-output/different-document-old-success.json",
+        "byteCount": 3630,
+        "sha256": "b41710f81791fa01cfae15584229d6b54826dd495df135e7fac64377c20dd9d0"
+      },
+      {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/n33-output/same-url-old-error.json",
+        "byteCount": 4800,
+        "sha256": "c3e77fc678465b614a1474d69cb441f59431ed53201a258dc0d9d94ba7920188"
+      }
+    ]
+  },
+  "suites": {
+    "fullNative": {
+      "passedUnique": 784,
+      "failedUnique": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheMaintenanceEvictsLeastRecentlyAccessedReadyEntryFirst]",
+        "-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]",
+        "-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]"
+      ],
+      "skippedUnique": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "assertionFailures": [
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:993: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - the paint request was consumed",
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1018: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - the paint request was consumed",
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1020: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - reapplying the same pending frame must not invalidate it",
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1026: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - an empty pending frame keeps the displayed fallback",
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:944: error: -[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw] : XCTAssertFalse failed - the request was consumed",
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:949: error: -[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw] : XCTAssertFalse failed - an unchanged generation draws the same pixels",
+        "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace/Sources/ArkTraceRuntime/TraceSession.swift:169: error: -[ArkTraceIntegrationTests.ParserIntegrationTests testCacheMaintenanceEvictsLeastRecentlyAccessedReadyEntryFirst] : failed: caught error: \"ArkTraceError(code: ArkTraceCore.ArkTraceError.Code.traceDatabaseInvalid, stage: ArkTraceCore.ArkTraceError.Stage.openingDatabase, message: \"Cannot open SQLite database\", retryable: false, details: [\"sqliteCode\": \"14\"])\""
+      ]
+    },
+    "fullDefault": {
+      "passedUnique": 650,
+      "failedUnique": [
+        "-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]",
+        "-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]"
+      ],
+      "skippedUnique": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "assertionFailures": [
+        "/private/tmp/arktrace-swiftpm-current/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:993: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - the paint request was consumed",
+        "/private/tmp/arktrace-swiftpm-current/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1018: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - the paint request was consumed",
+        "/private/tmp/arktrace-swiftpm-current/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1020: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - reapplying the same pending frame must not invalidate it",
+        "/private/tmp/arktrace-swiftpm-current/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:1026: error: -[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns] : XCTAssertFalse failed - an empty pending frame keeps the displayed fallback",
+        "/private/tmp/arktrace-swiftpm-current/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:944: error: -[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw] : XCTAssertFalse failed - the request was consumed",
+        "/private/tmp/arktrace-swiftpm-current/workspace/Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift:949: error: -[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw] : XCTAssertFalse failed - an unchanged generation draws the same pixels"
+      ]
+    },
+    "cacheIsolated": {
+      "passedUnique": 1,
+      "failedUnique": [],
+      "skippedUnique": [],
+      "assertionFailures": []
+    },
+    "rust": {
+      "passed": 577,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 65
+    },
+    "originalFullFailuresPreserved": true,
+    "productionCodeChanged": false,
+    "wholeMacOSAcceptance": false,
+    "windowIsolated": {
+      "passedUnique": 0,
+      "failedUnique": [
+        "-[ArkTraceRenderingTests.TimelineRenderingTests testAPendingViewportIsDrawnBeforeItsQueryReturns]",
+        "-[ArkTraceRenderingTests.TimelineRenderingTests testReapplyingTheSameSnapshotAsksForNoRedraw]"
+      ],
+      "skippedUnique": []
+    },
+    "parserSuiteIsolated": {
+      "passedUnique": 59,
+      "failedUnique": [],
+      "skippedUnique": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ]
+    },
+    "cacheCauseConfirmed": false,
+    "windowCauseConfirmed": false,
+    "latestDesktopReadback": "Mac locked; automatic unlock failed",
+    "fullSuitesPassed": false
+  },
+  "compilerWarnings": 0,
+  "unexpectedSkips": 0,
+  "actualFreshCanonicalOutputs": 4,
+  "canonicalOutputsByteIdentical": true,
+  "factsReadback": {
+    "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-final-readback.json",
+    "byteCount": 5901,
+    "sha256": "698cab9de1d820b076327e660a63fe2508ac7bf19976e96a2608f5acfe1f311d"
+  },
+  "relatedFortyGateReused": true,
+  "freshCommands": [
+    {
+      "gate": "01-actual-density-paint",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/01-actual-density-paint.receipt.json",
+        "byteCount": 5080,
+        "sha256": "6a857a5ab4ede5553a3b7128eac4854fa83487d8605475faef6c0a88992509d2"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/security",
+          "--filter",
+          "NativeSnapshotProcessCounterDensityPaintParityTests"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/d65f5b8a63934aa8d61a5ad63b3cadbbe621e21c5e73228b76a7d5038488d075/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_FIXTURES": "1",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+          "ARKTRACE_N22_SWIFT_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_n22_swift_output",
+          "ARKTRACE_NATIVE_OWNERSHIP_INPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_native_ownership_input.json",
+          "ARKTRACE_N24_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_n24_output",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_INPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_native_cancel_deadline_input.json",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_native_cancel_deadline_output",
+          "ARKTRACE_N27_FIXTURES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit",
+          "ARKTRACE_NATIVE_HIT_INPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_native_hit_input.json",
+          "ARKTRACE_NATIVE_HIT_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_native_hit_output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_BYTE_R1_INPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_native_concurrent_byte_r1_input.json",
+          "ARKTRACE_A34_R1_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/arktrace_a34_r1_output",
+          "ARKTRACE_N32_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n32-counter-input.json",
+          "ARKTRACE_N32_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n32-counter-output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_HIT_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a35-input.json",
+          "ARKTRACE_NATIVE_CONSUMER_CANCEL_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a36-input.json",
+          "ARKTRACE_N29_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n29-input.json",
+          "ARKTRACE_N30_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n30-input.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PARITY_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a39-input.json",
+          "ARKTRACE_N31_INPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n31-input.json",
+          "ARKTRACE_A35_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a35-output",
+          "ARKTRACE_A36_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a36-output",
+          "ARKTRACE_A39_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a39-output",
+          "ARKTRACE_N29_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n29-output.json",
+          "ARKTRACE_N30_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n30-output.json",
+          "ARKTRACE_N31_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n31-output.json",
+          "ARKTRACE_N28_MATRIX_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/n28-output.json",
+          "ARKTRACE_N30_ORACLE": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a35-output/oracle.json",
+          "ARKTRACE_N31_ORACLE": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/a35-output/oracle.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PAINT_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/paint-input.json",
+          "ARKTRACE_A40_PAINT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/paint-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "MAIN exact reviewed A40R4 sole paint regression on current fixture SDK; detached actual NSView drawing, no GUI acceptance",
+        "startedAtUnix": 1791261716.649212,
+        "exitCode": 0,
+        "finishedAtUnix": 1791261750.803672,
+        "stdoutSHA256": "d5861b83fe3aa1b7667c51a7d49ea4cada8d394d6f3b04f1b6220e5acd256e24",
+        "stderrSHA256": "98f019b82ad279a9dd1b71da8046b9e425a9c09b431198fad5647eb778b08276"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/01-actual-density-paint.stdout",
+        "byteCount": 5034,
+        "sha256": "d5861b83fe3aa1b7667c51a7d49ea4cada8d394d6f3b04f1b6220e5acd256e24"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/01-actual-density-paint.log",
+        "byteCount": 3874,
+        "sha256": "98f019b82ad279a9dd1b71da8046b9e425a9c09b431198fad5647eb778b08276"
+      }
+    },
+    {
+      "gate": "02-current-facts",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/02-current-facts.receipt.json",
+        "byteCount": 2218,
+        "sha256": "7b243acda6f7fb9991442b720ab2ba113a3943c5a3a7f25f1c3102dccaeec319"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-viewer-facts-swift/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-viewer-facts-swift/security",
+          "--filter",
+          "InspectorProjectionOracleTests|SnapshotEventIndexCanonicalOracleTests|ActionCatalogDisplayOracleTests|TimelineNavigationKeyTests.testActualActionCatalogKeyboardOracle"
+        ],
+        "cwd": "/private/tmp/arktrace-viewer-facts-swift/oracle-source",
+        "environmentOverrides": {
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
+          "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+          "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-output/fresh-inspector-swift.json",
+          "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+          "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-output/fresh-event-index-swift.json",
+          "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+          "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-output/fresh-action-keyboard-swift.json",
+          "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-output/fresh-action-display-swift.json"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Current four canonical Swift facts after sole native paint test addition; other production and related scope inputs unchanged",
+        "startedAtUnix": 1791261956.697698,
+        "exitCode": 0,
+        "finishedAtUnix": 1791261967.9431748,
+        "stdoutSHA256": "fbb903922ef79df3b404c0aeebb3c54562a3b782702d5cb953e738918a963991",
+        "stderrSHA256": "995bfcdb4fff672aff5b5726bada694e8bfb7bca606011eb69ed59f02423e1a2"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/02-current-facts.stdout",
+        "byteCount": 5818,
+        "sha256": "fbb903922ef79df3b404c0aeebb3c54562a3b782702d5cb953e738918a963991"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/02-current-facts.log",
+        "byteCount": 510,
+        "sha256": "995bfcdb4fff672aff5b5726bada694e8bfb7bca606011eb69ed59f02423e1a2"
+      }
+    },
+    {
+      "gate": "03-natural-ready",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/03-natural-ready.receipt.json",
+        "byteCount": 1330,
+        "sha256": "85e777f32de93ddf6f97b42644b8e729b4fb30ddfd49121696e5e1b6abec39ae"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-swiftpm-current/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-swiftpm-current/security",
+          "--filter",
+          "RangeAnalysisDocumentGenerationTests"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-swiftpm-current",
+          "ARKTRACE_N33_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/n33-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "MAIN exact N33R2 synthetic natural old task completion while new document remains Ready; no native or GUI claim",
+        "startedAtUnix": 1791262258.2132092,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262267.286243,
+        "stdoutSHA256": "2637b775b6f6350fb44bd1d0d6eaac4b7c6baa36a6f2cbb93e3217951d75e480",
+        "stderrSHA256": "57519f45b9bb691b6e3a61210f3ef4fd836f427920f72a7c2a1d364a9dfb8627"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/03-natural-ready.stdout",
+        "byteCount": 4739,
+        "sha256": "2637b775b6f6350fb44bd1d0d6eaac4b7c6baa36a6f2cbb93e3217951d75e480"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/03-natural-ready.log",
+        "byteCount": 614,
+        "sha256": "57519f45b9bb691b6e3a61210f3ef4fd836f427920f72a7c2a1d364a9dfb8627"
+      }
+    },
+    {
+      "gate": "04-current-facts-final",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/04-current-facts-final.receipt.json",
+        "byteCount": 2252,
+        "sha256": "998003d7ce17c16bd5506532d7d45f1e3d3828e3474c395676537383159e0274"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-viewer-facts-swift/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-viewer-facts-swift/security",
+          "--filter",
+          "InspectorProjectionOracleTests|SnapshotEventIndexCanonicalOracleTests|ActionCatalogDisplayOracleTests|TimelineNavigationKeyTests.testActualActionCatalogKeyboardOracle"
+        ],
+        "cwd": "/private/tmp/arktrace-viewer-facts-swift/oracle-source",
+        "environmentOverrides": {
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
+          "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+          "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-final-output/fresh-inspector-swift.json",
+          "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+          "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-final-output/fresh-event-index-swift.json",
+          "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+          "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-final-output/fresh-action-keyboard-swift.json",
+          "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/facts-final-output/fresh-action-display-swift.json"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Four actual canonical Swift producers after exact A40R4 and N33R2 test imports; unchanged related forty tests and production source bytes",
+        "startedAtUnix": 1791262287.506985,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262299.05641,
+        "stdoutSHA256": "c827a617fae814c7fe5552d0246f85b54be4aeb44f7c2e4f95bf38d9bb653848",
+        "stderrSHA256": "b122844d98a2f5d0ac5919b76f62443f960f7e74b9a59c8d748f7b184b8b8d78"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/04-current-facts-final.stdout",
+        "byteCount": 5818,
+        "sha256": "c827a617fae814c7fe5552d0246f85b54be4aeb44f7c2e4f95bf38d9bb653848"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/04-current-facts-final.log",
+        "byteCount": 549,
+        "sha256": "b122844d98a2f5d0ac5919b76f62443f960f7e74b9a59c8d748f7b184b8b8d78"
+      }
+    },
+    {
+      "gate": "05-native-full",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/05-native-full.receipt.json",
+        "byteCount": 5519,
+        "sha256": "b6be84f2dabf9ec03269b91264bf8c6e835a4d0ab05c37d42c1f4d954d81a655"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/security"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/d65f5b8a63934aa8d61a5ad63b3cadbbe621e21c5e73228b76a7d5038488d075/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_FIXTURES": "1",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+          "ARKTRACE_N22_SWIFT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_n22_swift_output",
+          "ARKTRACE_NATIVE_OWNERSHIP_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_ownership_input.json",
+          "ARKTRACE_N24_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_n24_output",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_cancel_deadline_input.json",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_cancel_deadline_output",
+          "ARKTRACE_N27_FIXTURES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit",
+          "ARKTRACE_NATIVE_HIT_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_hit_input.json",
+          "ARKTRACE_NATIVE_HIT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_hit_output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_BYTE_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_concurrent_byte_r1_input.json",
+          "ARKTRACE_A34_R1_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_a34_r1_output",
+          "ARKTRACE_N32_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n32-counter-input.json",
+          "ARKTRACE_N32_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n32-counter-output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_HIT_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-input.json",
+          "ARKTRACE_NATIVE_CONSUMER_CANCEL_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a36-input.json",
+          "ARKTRACE_N29_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n29-input.json",
+          "ARKTRACE_N30_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n30-input.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PARITY_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a39-input.json",
+          "ARKTRACE_N31_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n31-input.json",
+          "ARKTRACE_A35_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output",
+          "ARKTRACE_A36_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a36-output",
+          "ARKTRACE_A39_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a39-output",
+          "ARKTRACE_N29_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n29-output.json",
+          "ARKTRACE_N30_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n30-output.json",
+          "ARKTRACE_N31_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n31-output.json",
+          "ARKTRACE_N28_MATRIX_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n28-output.json",
+          "ARKTRACE_N30_ORACLE": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output/oracle.json",
+          "ARKTRACE_N31_ORACLE": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output/oracle.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PAINT_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/paint-input.json",
+          "ARKTRACE_A40_PAINT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/paint-output",
+          "ARKTRACE_N33_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n33-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Full native fixture Swift suite after exact A40R4 and N33R2 test additions; actual bitmap and synthetic natural completion have separate claims",
+        "startedAtUnix": 1791262301.4579751,
+        "exitCode": 1,
+        "finishedAtUnix": 1791262384.550273,
+        "stdoutSHA256": "94e257389af33ee68f8527b82fe1ee3338eee43b1902f1d2ec751635a3b2165d",
+        "stderrSHA256": "840257be63851480ca1b50252f9857d81715182aa13db3af435e1c240d6a3ff1"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/05-native-full.stdout",
+        "byteCount": 306837,
+        "sha256": "94e257389af33ee68f8527b82fe1ee3338eee43b1902f1d2ec751635a3b2165d"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/05-native-full.log",
+        "byteCount": 604,
+        "sha256": "840257be63851480ca1b50252f9857d81715182aa13db3af435e1c240d6a3ff1"
+      }
+    },
+    {
+      "gate": "06-default-full",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/06-default-full.receipt.json",
+        "byteCount": 1233,
+        "sha256": "6c7b27889ff7e44e94f5b0c83b131f3a8e77907a73ed0ae8494e0f4202254fb7"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-swiftpm-current/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-swiftpm-current/security"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-swiftpm-current",
+          "ARKTRACE_N33_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/default-n33-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Full default Swift suite after exact A40R4 and N33R2 test additions",
+        "startedAtUnix": 1791262301.457953,
+        "exitCode": 1,
+        "finishedAtUnix": 1791262364.073002,
+        "stdoutSHA256": "a3fe9de51d175b0f2e73c453c19c8ce4c00f917c22ecac9e0d71296c273dd266",
+        "stderrSHA256": "03cc5fd98f46ff20701155f0b0f37eefda9806769e7b626312e2433577c5232d"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/06-default-full.stdout",
+        "byteCount": 239437,
+        "sha256": "a3fe9de51d175b0f2e73c453c19c8ce4c00f917c22ecac9e0d71296c273dd266"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/06-default-full.log",
+        "byteCount": 248,
+        "sha256": "03cc5fd98f46ff20701155f0b0f37eefda9806769e7b626312e2433577c5232d"
+      }
+    },
+    {
+      "gate": "07-rust-fmt",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/07-rust-fmt.receipt.json",
+        "byteCount": 938,
+        "sha256": "f072d5dd52037cb13e3370aae8bd6cfcf74d60aa81b304b75d5763b1b45a6ade"
+      },
+      "actual": {
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Applicable complete diff checks after two sole test additions and freshly replayed viewer facts receipt",
+        "startedAtUnix": 1791262399.741344,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262401.0133061,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/07-rust-fmt.stdout",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/07-rust-fmt.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "08-rust-clippy",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/08-rust-clippy.receipt.json",
+        "byteCount": 1001,
+        "sha256": "0ab7d25bc546f5e78f93c5747a63731988f98bbca35402835f2869ad22d1f80d"
+      },
+      "actual": {
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--all-features",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Applicable complete diff checks after two sole test additions and freshly replayed viewer facts receipt",
+        "startedAtUnix": 1791262425.968797,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262426.9903848,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "9a30d54c8b16d7e49510b182028079bca120aeebb7d662e88f8566e6196a49f6"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/08-rust-clippy.stdout",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/08-rust-clippy.log",
+        "byteCount": 72,
+        "sha256": "9a30d54c8b16d7e49510b182028079bca120aeebb7d662e88f8566e6196a49f6"
+      }
+    },
+    {
+      "gate": "09-rust-workspace-test",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/09-rust-workspace-test.receipt.json",
+        "byteCount": 942,
+        "sha256": "d59a5b7435579dc517f494e8777af553107ce2a4a7bac05dd48edc860c028182"
+      },
+      "actual": {
+        "argv": [
+          "python3",
+          "scripts/run-cargo.py",
+          "test",
+          "--workspace",
+          "--all-features"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Applicable complete diff checks after two sole test additions and freshly replayed viewer facts receipt",
+        "startedAtUnix": 1791262447.4707751,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262474.497626,
+        "stdoutSHA256": "889ef572b7705e5a2b80c85b9b7d6e1891c6826dd0b8d21f70144c6e01391723",
+        "stderrSHA256": "e9ce327a0866251b01b153a074b324f28377d9f5b10495b6a7946d94c01e3e01"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/09-rust-workspace-test.stdout",
+        "byteCount": 58751,
+        "sha256": "889ef572b7705e5a2b80c85b9b7d6e1891c6826dd0b8d21f70144c6e01391723"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/09-rust-workspace-test.log",
+        "byteCount": 8062,
+        "sha256": "e9ce327a0866251b01b153a074b324f28377d9f5b10495b6a7946d94c01e3e01"
+      }
+    },
+    {
+      "gate": "10-facts-verify",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/10-facts-verify.receipt.json",
+        "byteCount": 564,
+        "sha256": "67c88e91630b53e9193ffaadbfbf2d90df3f9ab3ee79f496e80b49203580f039"
+      },
+      "actual": {
+        "argv": [
+          "python3",
+          "scripts/verify_viewer_facts_oracles.py"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Actual fresh four canonical output receipt verifier",
+        "startedAtUnix": 1791262400.9131389,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262400.9879448,
+        "stdoutSHA256": "8a37a8a50076b203b203dbb693e8706dd0bae0a54595ddab8a008c10b95b4ded",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/10-facts-verify.stdout",
+        "byteCount": 145,
+        "sha256": "8a37a8a50076b203b203dbb693e8706dd0bae0a54595ddab8a008c10b95b4ded"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/10-facts-verify.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "11-workspace-verify",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/11-workspace-verify.receipt.json",
+        "byteCount": 814,
+        "sha256": "28cd44c1bd888931ecc53f773945ce7b2e5efe9e9e9bcc42c76d1f6b9454c51c"
+      },
+      "actual": {
+        "argv": [
+          "python3",
+          "scripts/verify_rust_workspace.py"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Applicable complete diff checks after two sole test additions and freshly replayed viewer facts receipt",
+        "startedAtUnix": 1791262400.91314,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262401.415741,
+        "stdoutSHA256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/11-workspace-verify.stdout",
+        "byteCount": 125,
+        "sha256": "57e3cddd32c073294f1b3d35e156210e343945ec17be215a4ffc81836a7c336c"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/11-workspace-verify.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "12-bindings-verify",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/12-bindings-verify.receipt.json",
+        "byteCount": 832,
+        "sha256": "3951a479d570b725428feedde4a22eff6159de368fa901c7b595a71458efe5d3"
+      },
+      "actual": {
+        "argv": [
+          "python3",
+          "scripts/generate_ffi_bindings.py",
+          "--check"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Applicable complete diff checks after two sole test additions and freshly replayed viewer facts receipt",
+        "startedAtUnix": 1791262400.9131541,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262401.0168378,
+        "stdoutSHA256": "87c67240acf2e104e94695513185bada255241fe63a304a682e9efb79e383ace",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/12-bindings-verify.stdout",
+        "byteCount": 105,
+        "sha256": "87c67240acf2e104e94695513185bada255241fe63a304a682e9efb79e383ace"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/12-bindings-verify.log",
+        "byteCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "13-cache-isolated",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/13-cache-isolated.receipt.json",
+        "byteCount": 5582,
+        "sha256": "4b603ff053098fca5087922c275912337730ebf035e45fc1e2aa87fa1bcfa55d"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/security",
+          "--filter",
+          "ParserIntegrationTests.testCacheMaintenanceEvictsLeastRecentlyAccessedReadyEntryFirst"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/d65f5b8a63934aa8d61a5ad63b3cadbbe621e21c5e73228b76a7d5038488d075/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_FIXTURES": "1",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+          "ARKTRACE_N22_SWIFT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_n22_swift_output",
+          "ARKTRACE_NATIVE_OWNERSHIP_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_ownership_input.json",
+          "ARKTRACE_N24_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_n24_output",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_cancel_deadline_input.json",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_cancel_deadline_output",
+          "ARKTRACE_N27_FIXTURES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit",
+          "ARKTRACE_NATIVE_HIT_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_hit_input.json",
+          "ARKTRACE_NATIVE_HIT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_hit_output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_BYTE_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_concurrent_byte_r1_input.json",
+          "ARKTRACE_A34_R1_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_a34_r1_output",
+          "ARKTRACE_N32_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n32-counter-input.json",
+          "ARKTRACE_N32_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n32-counter-output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_HIT_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-input.json",
+          "ARKTRACE_NATIVE_CONSUMER_CANCEL_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a36-input.json",
+          "ARKTRACE_N29_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n29-input.json",
+          "ARKTRACE_N30_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n30-input.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PARITY_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a39-input.json",
+          "ARKTRACE_N31_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n31-input.json",
+          "ARKTRACE_A35_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output",
+          "ARKTRACE_A36_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a36-output",
+          "ARKTRACE_A39_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a39-output",
+          "ARKTRACE_N29_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n29-output.json",
+          "ARKTRACE_N30_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n30-output.json",
+          "ARKTRACE_N31_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n31-output.json",
+          "ARKTRACE_N28_MATRIX_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n28-output.json",
+          "ARKTRACE_N30_ORACLE": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output/oracle.json",
+          "ARKTRACE_N31_ORACLE": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output/oracle.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PAINT_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/paint-input.json",
+          "ARKTRACE_A40_PAINT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/paint-output",
+          "ARKTRACE_N33_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n33-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Isolated actual existing LRU integration failure reproduction; original full-suite error preserved",
+        "startedAtUnix": 1791262503.133665,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262510.105609,
+        "stdoutSHA256": "608930bfa72fd9b589ff4dc522f4ba3f3a17e849636d974172845b62d4c38664",
+        "stderrSHA256": "64cfd055150ef6279c679423dc50b75bab66d2758197b2bc82b6fa53a09d58d6"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/13-cache-isolated.stdout",
+        "byteCount": 4829,
+        "sha256": "608930bfa72fd9b589ff4dc522f4ba3f3a17e849636d974172845b62d4c38664"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/13-cache-isolated.log",
+        "byteCount": 262,
+        "sha256": "64cfd055150ef6279c679423dc50b75bab66d2758197b2bc82b6fa53a09d58d6"
+      }
+    },
+    {
+      "gate": "14-window-isolated",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/14-window-isolated.receipt.json",
+        "byteCount": 1448,
+        "sha256": "08e52f4a33838e828d155402241aeab1b69bcd08e4f9141a51197b1aa0d99d60"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-swiftpm-current/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-swiftpm-current/security",
+          "--filter",
+          "TimelineRenderingTests.test(APendingViewportIsDrawnBeforeItsQueryReturns|ReapplyingTheSameSnapshotAsksForNoRedraw)"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-swiftpm-current",
+          "ARKTRACE_N33_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/default-n33-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Isolated unchanged NSWindow display bookkeeping regressions with current legally available WindowServer state; no test guard/assertion changed",
+        "startedAtUnix": 1791262533.0546088,
+        "exitCode": 1,
+        "finishedAtUnix": 1791262538.6549718,
+        "stdoutSHA256": "307f0f04683dd1aa082b12a8f2882a0f23e119e4a0f1074d054288c383cc7620",
+        "stderrSHA256": "46393073a49e4de21338de656b9fbade317dea06edef35f1da8ad987b9795b5b"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/14-window-isolated.stdout",
+        "byteCount": 6373,
+        "sha256": "307f0f04683dd1aa082b12a8f2882a0f23e119e4a0f1074d054288c383cc7620"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/14-window-isolated.log",
+        "byteCount": 260,
+        "sha256": "46393073a49e4de21338de656b9fbade317dea06edef35f1da8ad987b9795b5b"
+      }
+    },
+    {
+      "gate": "15-parser-suite-isolated",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/15-parser-suite-isolated.receipt.json",
+        "byteCount": 5565,
+        "sha256": "adbb24d23b904c43c17ae8bd433b7771314b5da08eb12999617f6978b5bc88b8"
+      },
+      "actual": {
+        "argv": [
+          "sh",
+          "scripts/run-swiftpm.sh",
+          "test",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-cache-session-final-consumer/arktrace/security",
+          "--filter",
+          "ParserIntegrationTests"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/d65f5b8a63934aa8d61a5ad63b3cadbbe621e21c5e73228b76a7d5038488d075/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_FIXTURES": "1",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+          "ARKTRACE_N22_SWIFT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_n22_swift_output",
+          "ARKTRACE_NATIVE_OWNERSHIP_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_ownership_input.json",
+          "ARKTRACE_N24_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_n24_output",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_cancel_deadline_input.json",
+          "ARKTRACE_NATIVE_CANCEL_DEADLINE_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_cancel_deadline_output",
+          "ARKTRACE_N27_FIXTURES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit",
+          "ARKTRACE_NATIVE_HIT_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_hit_input.json",
+          "ARKTRACE_NATIVE_HIT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_hit_output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_BYTE_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_native_concurrent_byte_r1_input.json",
+          "ARKTRACE_A34_R1_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/arktrace_a34_r1_output",
+          "ARKTRACE_N32_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n32-counter-input.json",
+          "ARKTRACE_N32_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n32-counter-output.json",
+          "ARKTRACE_NATIVE_CONCURRENT_HIT_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-input.json",
+          "ARKTRACE_NATIVE_CONSUMER_CANCEL_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a36-input.json",
+          "ARKTRACE_N29_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n29-input.json",
+          "ARKTRACE_N30_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n30-input.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PARITY_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a39-input.json",
+          "ARKTRACE_N31_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n31-input.json",
+          "ARKTRACE_A35_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output",
+          "ARKTRACE_A36_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a36-output",
+          "ARKTRACE_A39_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a39-output",
+          "ARKTRACE_N29_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n29-output.json",
+          "ARKTRACE_N30_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n30-output.json",
+          "ARKTRACE_N31_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n31-output.json",
+          "ARKTRACE_N28_MATRIX_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n28-output.json",
+          "ARKTRACE_N30_ORACLE": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output/oracle.json",
+          "ARKTRACE_N31_ORACLE": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/a35-output/oracle.json",
+          "ARKTRACE_NATIVE_PROCESS_COUNTER_PAINT_R1_INPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/paint-input.json",
+          "ARKTRACE_A40_PAINT_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/paint-output",
+          "ARKTRACE_N33_OUTPUT": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/native-full/n33-output"
+        },
+        "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+        "scope": "Full existing ParserIntegrationTests process after isolated LRU success; actual cache lifecycle reproduction without source or assertion changes",
+        "startedAtUnix": 1791262577.627459,
+        "exitCode": 0,
+        "finishedAtUnix": 1791262608.248705,
+        "stdoutSHA256": "6e63d5b0e825568a1d2dead0ca48821b78b0a2f868727170e6317e91911cb959",
+        "stderrSHA256": "37bf31ac53fc04288abe7596f1f3ea6f02a7192a071ae353266b5b0f7dea9002"
+      },
+      "stdout": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/15-parser-suite-isolated.stdout",
+        "byteCount": 24051,
+        "sha256": "6e63d5b0e825568a1d2dead0ca48821b78b0a2f868727170e6317e91911cb959"
+      },
+      "stderr": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/15-parser-suite-isolated.log",
+        "byteCount": 275,
+        "sha256": "37bf31ac53fc04288abe7596f1f3ea6f02a7192a071ae353266b5b0f7dea9002"
+      }
+    }
+  ],
+  "reusedBaselineGates": [
+    {
+      "gate": "08-sdk-consumer",
+      "freshThisIncrement": false,
+      "reason": "Production/API/SDK/App build inputs unchanged in current 688-entry input readback; solely regression/test receipt additions",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/reused-baseline-gates/08-sdk-consumer.receipt.json",
+        "byteCount": 1162,
+        "sha256": "3babe4ac96c8d3a79b83e41ddce1bbf8936de917ed5f48c6f33a35790c65a903"
+      },
+      "actualPriorReceipt": {
+        "argv": [
+          "python3",
+          "scripts/test_macos_rust_sdk.py",
+          "--build-only"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/d65f5b8a63934aa8d61a5ad63b3cadbbe621e21c5e73228b76a7d5038488d075/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer"
+        },
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "scope": "Actual current package-external SDK compile and strict 97-unit matrix admission",
+        "startedAtUnix": 1791260906.928513,
+        "exitCode": 0,
+        "finishedAtUnix": 1791260954.403157,
+        "stdoutSHA256": "8f215f65c517625c0e33042c27567c7898d12a780824467fadd4c9486256610d",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "09-api",
+      "freshThisIncrement": false,
+      "reason": "Production/API/SDK/App build inputs unchanged in current 688-entry input readback; solely regression/test receipt additions",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/reused-baseline-gates/09-api.receipt.json",
+        "byteCount": 1745,
+        "sha256": "3b7470c857567f87c1ff77ef17fdbf098fa8e070e1b9873ab68507179b1ffbb9"
+      },
+      "actualPriorReceipt": {
+        "argv": [
+          "sh",
+          "scripts/test_api_baseline.sh",
+          "--scratch-path",
+          "/private/tmp/arktrace-event-api-baseline/build",
+          "--cache-path",
+          "/private/tmp/arktrace-event-api-baseline/dependencies",
+          "--disable-sandbox",
+          "--config-path",
+          "/private/tmp/arktrace-event-api-baseline/configuration",
+          "--security-path",
+          "/private/tmp/arktrace-event-api-baseline/security",
+          "-Xswiftc",
+          "-warnings-as-errors"
+        ],
+        "cwd": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/workspace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer/arktrace",
+          "ARKTRACE_RUST_XCFRAMEWORK": ".arktrace-native/f5d2b32246b1efd3232ab9031967dd703bafb62314cdeb6599f89c1d3b29e1b6/CArkTrace.xcframework",
+          "ARKTRACE_RUST_SDK_CONSUMER_CACHE_ROOT": "/private/tmp/arktrace-cache-session-final-consumer",
+          "CLANG_MODULE_CACHE_PATH": "/private/tmp/arktrace-event-api-baseline/ModuleCache",
+          "SWIFTPM_MODULECACHE_OVERRIDE": "/private/tmp/arktrace-event-api-baseline/ModuleCache",
+          "ARKTRACE_RUST_SDK_FIXTURES": "0"
+        },
+        "scope": "Current public API consumer baseline; completion seam remains package scoped",
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "startedAtUnix": 1791261014.4725142,
+        "exitCode": 0,
+        "finishedAtUnix": 1791261033.396044,
+        "stdoutSHA256": "7f7b921d0e8728d204f27131abc5b31b1fe23f10151a6aee395758815b82aaf9",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "10-app",
+      "freshThisIncrement": false,
+      "reason": "Production/API/SDK/App build inputs unchanged in current 688-entry input readback; solely regression/test receipt additions",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/reused-baseline-gates/10-app.receipt.json",
+        "byteCount": 1269,
+        "sha256": "fdfacaecda178495d5081c45e75cbd7a6c8f869c3612930ba64bdf35d0371bff"
+      },
+      "actualPriorReceipt": {
+        "argv": [
+          "sh",
+          "scripts/run-xcodebuild.sh"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {
+          "ARKTRACE_CARGO_CACHE_ROOT": "/private/tmp/arktrace-migration-cargo",
+          "ARKTRACE_CARGO_OWNER": "01a0fd3c-37ab-7753-8e7a-d6850eec66cf",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_INCREMENTAL": "0",
+          "ARKTRACE_RUST_SDK_CACHE_ROOT": "/private/tmp/arktrace-cache-session-artifacts",
+          "ARKTRACE_RUST_XCFRAMEWORK": "/private/tmp/arktrace-cache-session-artifacts/260a2663272ccc56a0e635ac0af778ffb00a987809515359358ed9f00af1fb02/CArkTrace.xcframework",
+          "ARKTRACE_XCODE_CACHE_ROOT": "/private/tmp/arktrace-lifecycle-xcode",
+          "ARKTRACE_XCODE_OUTPUT_ROOT": "/private/tmp/arktrace-lifecycle-xcode-output",
+          "ARKTRACE_NATIVE_APP_SIGNING_IDENTITY": "Developer ID Application: Hanfeng Fu (8AQTYW5FKR)"
+        },
+        "scope": "Current native App build after package-scoped completion seam",
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "startedAtUnix": 1791260835.024919,
+        "exitCode": 0,
+        "finishedAtUnix": 1791260845.4999611,
+        "stdoutSHA256": "abe096f4051c905e921f0f0bad5201b72c7136cfd0afd254cb1f24d5068da80c",
+        "stderrSHA256": "a0227d9f3d2931a7ccaec7328a01c3e976862ec0dfad8ecad5caa03951a7a425"
+      }
+    },
+    {
+      "gate": "16-app-document-types",
+      "freshThisIncrement": false,
+      "reason": "Production/API/SDK/App build inputs unchanged in current 688-entry input readback; solely regression/test receipt additions",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/reused-baseline-gates/16-app-document-types.receipt.json",
+        "byteCount": 676,
+        "sha256": "6a8147017c04a07f4d01fbf673270accd4400c44ec9758782b50a73a169f3b66"
+      },
+      "actualPriorReceipt": {
+        "argv": [
+          "sh",
+          "scripts/verify_app_document_types.sh",
+          "/private/tmp/arktrace-lifecycle-xcode-output/Debug/ArkTrace.app"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "scope": "Latest normal-SDK App artifact after package completion seam; local signature and document types only",
+        "startedAtUnix": 1791261065.75173,
+        "exitCode": 0,
+        "finishedAtUnix": 1791261065.7669492,
+        "stdoutSHA256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011",
+        "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "gate": "19-final-app-signature",
+      "freshThisIncrement": false,
+      "reason": "Production/API/SDK/App build inputs unchanged in current 688-entry input readback; solely regression/test receipt additions",
+      "receipt": {
+        "path": "/private/tmp/arktrace-native-paint-integration-01a0fd3c-20261006/reused-baseline-gates/19-final-app-signature.receipt.json",
+        "byteCount": 774,
+        "sha256": "41adcde957f6dcdaf8d856be889c9e003233a538c00465dd416bf064f24f71da"
+      },
+      "actualPriorReceipt": {
+        "argv": [
+          "/usr/bin/codesign",
+          "--verify",
+          "--deep",
+          "--strict",
+          "--verbose=2",
+          "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/final-current-app/ArkTrace.app"
+        ],
+        "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+        "environmentOverrides": {},
+        "baseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+        "scope": "Copied current App development resource seal; fixed Developer ID nested tools retained; no notarization or distribution acceptance",
+        "startedAtUnix": 1791261110.824111,
+        "exitCode": 0,
+        "finishedAtUnix": 1791261110.857152,
+        "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSHA256": "67950d380cbd2f510add9df3e510f3afe0ad6c2eb1216a5c61f8846443639135"
+      }
+    }
+  ],
+  "completeDiffCIPlan": {
+    "baseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "changedPaths": [
+      "Tests/ArkTraceAppSupportTests/RangeAnalysisDocumentGenerationTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityPaintParityTests.swift",
+      "docs/TASKS.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.seal.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-paint-natural-ready.sha256",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+    ],
+    "pathCount": 8,
+    "argv": [
+      "sh",
+      "scripts/ci_plan.sh"
+    ],
+    "stdinSHA256": "b176d830395df4ac78a6b0bb0f43b764790997b45eca0e6513afe7c80597ecac",
+    "exitCode": 0,
+    "stdout": "lane_swiftpm=true\nlane_app=false\nlane_contracts=false\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "plannerSHA256": "3ef646582b0c75cbaa661e458ef1cdfa4608636a606bfa0561bc98a786590fa7",
+    "nativeWindowsExecuted": false
+  },
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-current-20261006",
+  "previousEndedDurableSnapshot": {
+    "directory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/native-paint-natural-ready-ended-20261006",
+    "manifestSHA256": "dd35dfdcb8fa7dcad83c9473fc1c90eaddca20e63d9f55d60c05500c2a8b5a33",
+    "fileCount": 318,
+    "payloadByteCount": 7829128,
+    "allBytesReadBack": true,
+    "activeParserOutputExcluded": true
+  },
+  "fullCompilerObjectClosureClaimed": false,
+  "wholeProductProcessForestClaimed": false,
+  "wholeMacOSAcceptance": false,
+  "latestGUIReadback": "Mac locked; automatic unlock failed after user unlock response",
+  "remaining": [
+    "Full default/native suite fresh ended0 after resolving/legally reproducing window conditions; original SQLite14 cause remains unconfirmed",
+    "Latest native range error/recovery GUI",
+    "Keyboard Navigation and VoiceOver authorization; Capture device-discovery authorization",
+    "Quiet 20-sample performance and actual product process-forest RSS/cancellation",
+    "ArkDeck current index3/source pin requires schema4 cutover and matching reviewed distribution",
+    "Applicable signing/notarization/install/rollback and Swift retirement; native Windows separate"
+  ],
+  "goalStatus": "blocked",
+  "localPublication": {
+    "thisIncrementCommitted": false,
+    "head": "4c901b144741ba05362f63899be53676ecf17ca8",
+    "pushed": false,
+    "published": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "atUnix": 1791275466.976223,
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-single-validation-fix-20261006",
+  "manifestSHA256": "9071a2947af3a175e0c8c0d46375124b6a6f29082b5dd35ddc39658cb1200aa6",
+  "reportSHA256": "82ad06c18f76c4f2e58eee9d6d33ea246fbd7d96b30e5c1b81a3218152836c91",
+  "payloadFileCount": 1364,
+  "payloadBytes": 81617024,
+  "sourceAndDBNotCopied": true,
+  "allManifestFilesReadbackMatched": true,
+  "fullCompilerObjectClosureClaimed": false,
+  "wholeMacOSAcceptance": false,
+  "goalStatus": "blocked"
+}
