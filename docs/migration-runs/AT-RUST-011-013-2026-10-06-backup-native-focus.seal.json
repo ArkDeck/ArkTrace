@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "atUnix": 1791282059.167032,
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006",
+  "manifestSHA256": "c3f07de50cf5083ae0d93de7bb26657a67fc7f07bc1097dfdd944ed199aac543",
+  "reportSHA256": "cfa2667eb4970171e1f2288bfc51c4138636d58c703f435e24cd81b9abe35d21",
+  "payloadFileCount": 340,
+  "payloadBytes": 160518258,
+  "allManifestFilesReadbackMatched": true,
+  "rawTraceOrReadyDatabaseCopied": false,
+  "fullCompilerTransitiveClosureClaimed": false,
+  "wholeMacOSAcceptance": false,
+  "goalStatus": "blocked"
+}

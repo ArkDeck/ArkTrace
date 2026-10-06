@@ -366,6 +366,11 @@ jobs:
         if: steps.app_build.outcome == 'success'
         run: scripts/verify_app_document_types.sh "$RUNNER_TEMP/sym/Debug/ArkTrace.app"
 
+      - name: Native button focus and keyboard regressions
+        env:
+          ARKTRACE_XCODE_CACHE_ROOT: ${{ runner.temp }}/arktrace-xcode
+        run: python3 scripts/test_native_focus_button.py
+
       - name: Note skipped app checks
         if: steps.parser.outputs.present != 'true'
         run: |

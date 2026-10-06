@@ -1,0 +1,515 @@
+{
+  "schemaVersion": 1,
+  "atUnix": 1791281931.832406,
+  "baseCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
+  "scope": "Final backup native focus helper software increment; actual desktop sheet focus remains unverified",
+  "toolchains": {
+    "rust": "1.99.0",
+    "xcode": "27.0 / 27A266a",
+    "swift": "6.4 / language mode 6",
+    "minimumMacOS": "26.0"
+  },
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006",
+  "actualEndedGates": [
+    {
+      "name": "01-current-app.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "4ada37e951f593c6f54e3daf26df9b2cb4576fb5be6177c0a6924524a8ec940b",
+      "stdoutSHA256": "fcd226065fea1844031409c6f15151a4b9c8b17d647c7c0f523a6a35ad798340",
+      "stderrSHA256": "cd5a858e077c4e1de0fc7691c598c89836d25891db7075a6c3050698503da1d9"
+    },
+    {
+      "name": "03-current-outer-development-seal.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "8ab15e27096ce55a8200285d95674039d3560d29d560b65a7665e9dee665d30d",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "7920af53cea90bf6059b47927e118bf3f2333d4e2efbe1cbefeebebb76117395"
+    },
+    {
+      "name": "04-current-final-app-signature.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "c48d5a7cf7eccc996c44b150905e76dbdfae512add366f120bd0d8ba34ea45c0",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "05-final-current-app.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "b6b80d306e78d7d3b322eef46a4739d74fedb41912b372e992578f8d716d69f9",
+      "stdoutSHA256": "cb6ff56389b3415409b4d583c70509f6427dfe583d5700618d60b9ad7c220094",
+      "stderrSHA256": "932676f124e0b6e522cd9c0fac872206bb084760ea35525fcbe61737e9839f3c"
+    },
+    {
+      "name": "06-backup-controller-tests.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "bad8b9310e629f0880dae8dd276abc210f2387496eca9fdc218c724a773d71f6",
+      "stdoutSHA256": "c50d7e44b69a535ea00782fc19f2712dc680887bd18ce73f8bd047139927147b",
+      "stderrSHA256": "0fbe65fbdd3e399caf623bcacae0956aa9e1592461a3e97d59c237efa7ab7424"
+    },
+    {
+      "name": "07-final-app-initial-signature.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "8389ec33ee61b5aed4ae9c834019fda0dfb81e5744606e3a9ba02262ce2712b0",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "b529208fd76db903359ed177bb01524da7eb002e2bfc04a45de9efa947977af2"
+    },
+    {
+      "name": "08-final-outer-development-seal.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "12d86b0a9f2085a3715f335f40017486f0c9c164dbce4571fc1ad9f3ba2b10f9",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "9c17cade74ba2556f5dfc1c9974cfdffe2d6b88f14896ef4c8f73ba4ee387aca"
+    },
+    {
+      "name": "09-final-app-signature.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "9002aabfb5e24ee0b2003f4c7ce67b4e8f9d7edee60361b5723ffa81537b7fae",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "10-native-focus-regression.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "a9df8ed784609a2af8f5bef197f9d4d469983f570725241956b091908d6f6a13",
+      "stdoutSHA256": "c3477a41239df068541664605bd60b6fb406e7c418117e08bfc1ca7dd2e1c430",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "11-native-focus-lifecycle-regression.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "53d3c7704ab73bf6cfb01bedb45f214a26fce8bbfe8d115dcc20b1e3a2cfba8f",
+      "stdoutSHA256": "12346772e8615bec463906497c64451073b3a168be756f0859832854f3db6bec",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "12-final-tested-helper-app.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "e825c7ba25eb0a42b377970cb4286b20f1bad0ab56b2e52d6a438a9f5084499b",
+      "stdoutSHA256": "17aeb7c16d2f26d399f32bfcdace0ff0f1bd4d5b4e868a26c5ddfb497ff76de0",
+      "stderrSHA256": "5f808547cc052ca00a53d78606b128cca101ccecd2c796ac8f103e07485148cc"
+    },
+    {
+      "name": "13-app-command-tests.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "547a13a37935f9b098306a415425bef02f8466c8eabcd6d00cc96965bfbafd89",
+      "stdoutSHA256": "2b228596d2ada6c28aeb96fc9507b25ae72f6a80c1182d51af94c79048a49ebb",
+      "stderrSHA256": "e36c14d4dba184c8ea8e4cd1a068275e6c4634b5d648517920150115cfbf1a1c"
+    },
+    {
+      "name": "14-final-pinned-review-app.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "185f06c53308f3039e360a13ccca497eb84451d90ac5d74392e48da2b1c744c2",
+      "stdoutSHA256": "b69624ef2f7ce93ad3fbdd3c72019e94453e3d6794f6eedacf42382aca9d58a7",
+      "stderrSHA256": "3591bc8383d3cd70f04fdd29ca73d9777583fe8f6cfc0e2e75932945f4141c87"
+    },
+    {
+      "name": "15-current-document-types.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "1ce25b320384c14b85dce5ea9457cd09f3a9f0744eeb753c31cb1fe80376e595",
+      "stdoutSHA256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "16-tested-app-initial-signature.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "9d4e67a668451f11e8101b3c90392e208573e32e2b35f6f2dfac2c9d1db7aba8",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "727075b0439b7bf736ffe05be9cdbfea605adf1dc91f8102b1b48d5bca4b9150"
+    },
+    {
+      "name": "17-tested-app-outer-development-seal.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "c7d344ff910e4f981d31532f418dcbda31115b7eb4c6053a0a6bbbf008e3df47",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "08c9d5e3e952322a343aa3e9a3d75fea18e84196fa29f68c783096a5fdc7f081"
+    },
+    {
+      "name": "18-tested-app-signature.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "c049c935afc38b65f38baa76df7c33042ff94ffe465b961f9a54fc47c9d7de0f",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "19-current-default-full.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "b75ff6f9d590822e74d28330266b807c29e1a12466f53b086665446575d6179e",
+      "stdoutSHA256": "bde70f568a6b0cb5e7279288fae994bc263dd0a3178336fe4dfb362575e5f8c4",
+      "stderrSHA256": "9f69f94a7198e77c839f1ec987fa23d95b9cde78a6c571a90c31f5efda0b4a2b"
+    },
+    {
+      "name": "20-current-migration-contracts.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "07e7b7ddaf335431a3cff05dec85849c03fe6ad1042e56b152b383f2bc759124",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "348cdfc23bc9bc19885627645b6b39206ee1d4d10cd8fc8e901cdf5e4edacd7c"
+    },
+    {
+      "name": "21-current-migration-contract-tests.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "ab00dee8c357a7ac5c5dbc991d688ae883b1b441252d8c0500815934aa6d8aca",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "11e8633c690b23a2b5744e30aa83fbcbd0d65d6bc098b4648c7f9db5f2291531"
+    },
+    {
+      "name": "22-ci-planner-contracts.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "a385160a4242b4624ab2428cfe610bdfac7c8fd7418e35881134d635572cacb7",
+      "stdoutSHA256": "e09680fd49f018ab88f7cfe580ea3ee0cda08f8ba344dcecc57603c9fbd4cc88",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "23-current-canonical-producers.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "958949da0c80836a8920504071c8fdc38ed2f3e3dd355fe3e860397822617872",
+      "stdoutSHA256": "b0c87c287e91a2d59760af0e166fdddd3def576e203177eb465ffce3cd9b0800",
+      "stderrSHA256": "f6d2e13e157d4a4fe45752a66498410273538affe6206287f6a07e683bb58023"
+    },
+    {
+      "name": "24-refreshed-migration-contracts.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "44f7f8ed193df8f6dd4198e5d397f61909bed25acfcba9ca639c240ffaa371b5",
+      "stdoutSHA256": "790ad3aa0231bd742e25493885c64e21ce7d4689698260c4a209840b408d7398",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "25-refreshed-migration-contract-tests.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "c962c17d530117ea4b4243530007595e5f1ae37264ae92f122ea3f1f8409507b",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "8d9f4bfa0eaf60ee73812dea5d1efe28ec49eb2226a2303a2ed478310729268a"
+    },
+    {
+      "name": "26-live-context-focus-regression.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "1d1483fac0029b8411030a64a3c2b85395c308f428cb1e71df64d2f55d1a7eb3",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "43604526cacc55def76e724b1107d4ef3939624b3b495b2ca773f325c6168125"
+    },
+    {
+      "name": "27-live-context-focus-regression.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "fef5ccdaba7e08b7a33c0f1855f9e9d5f4f3d1e93444956d08b8f3403681ab46",
+      "stdoutSHA256": "98d43f8fc95e17119a0a93a5d7a4c3b1f4a8f41a2e5a4c3a4d708b490f178f92",
+      "stderrSHA256": "3a04897be286cc0bc871c40289b5094e00e37df62ad82dba004c1dc6efb6e8d3"
+    },
+    {
+      "name": "28-live-context-current-app.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "6082c6398137fb155b527bd0e745f3f6f3057ecfd0b63affb45eab577244afc7",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "cd55606f582a79e202ea13358f811b1499d342fc1cbcc85d424e74500ba516cd"
+    },
+    {
+      "name": "29-live-context-current-app-host.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "1a70a4fc3e7fbdb1c6e1a2022e1b29abaffa1827e4375804c3e9000b34a11ba4",
+      "stdoutSHA256": "3aad37f0c085cea9646695144ebd3b7224a9a81c57b9c843416f065bb048bc1d",
+      "stderrSHA256": "cd5a858e077c4e1de0fc7691c598c89836d25891db7075a6c3050698503da1d9"
+    },
+    {
+      "name": "30-live-context-canonical-producers.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "5dd79429f580781f81201f762ef613029782d9099233dafe6b22cf98ea6e7f22",
+      "stdoutSHA256": "dc7846fbeab27488e36ca4a4ffb48bfa55e48108883da5317752b28f9b4afb17",
+      "stderrSHA256": "f8ca16771845cbfa1e1305ed93e5e845202642111c8e41358ce6cdda00bfb52c"
+    },
+    {
+      "name": "31-live-app-initial-signature.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "2a9af3c2568adb112ed751ffae1629a81f872036fe4f1927c6c98405e3f1aca8",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "d5508eec289397f34817df2d70804d491818bc5e5f300edaf0263e129347d352"
+    },
+    {
+      "name": "32-live-app-outer-development-seal.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "453962a47a2a1dbd1e2f7f7e35456eb3e84aacf31a08fd73caa32ffc83fa634c",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "a14b96aff4889623ae2562d65ea92bf51264da4217815c87a8f5980c0fda4e95"
+    },
+    {
+      "name": "33-live-app-signature.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "54ba031ff60096b11f1117d284669ff36e06ac3171ca0df60eb5fdd996d714af",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "7b95e3ca7b7cc6510cd9a6a346cc5fe85be587e243e4518b3aeb0a9670c6117b"
+    },
+    {
+      "name": "34-live-app-host-signature.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "2d2682bb36003def7304dc2d65520f430decfe1afcde918b593daeba0fa49060",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "35-live-context-migration-contracts.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "b4da921d18cf775776a5a13e8abe24642e0ca19431ba20e16a2971b80778d81a",
+      "stdoutSHA256": "790ad3aa0231bd742e25493885c64e21ce7d4689698260c4a209840b408d7398",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "36-live-context-migration-contract-tests.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "92f65bf3ad1e47fac0cecaea45134daa336bdc089f323b5a64b732a8f4fe80a0",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "a34d9efc5426b0596c826aa0257d88a18355c471e9833e4492ea69672200dd47"
+    },
+    {
+      "name": "37-final-backup-app-tests.receipt.json",
+      "exitCode": 1,
+      "receiptSHA256": "cde54c2727ddd2542789c2117fb092ce4ebf216b2f54f83094a5c0258a40487d",
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "514c4847f01fddef5b98273660a9d6b19044ed7b0ff3a2b7bd1b10db5d7161d2"
+    },
+    {
+      "name": "38-final-backup-app-host-tests.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "020d083d6de682e1af21d8952c27a590f75b69a48788d6a34a5478fade3ff515",
+      "stdoutSHA256": "ea78ae1b69214adbac88dc3a4240d267600b1f8af1c75a75d540b7286af4122f",
+      "stderrSHA256": "c6d0359f4f75bb9ce1256ddc3ba07db8791a557bb79b7ac9090bd3fd7c7ad7da"
+    },
+    {
+      "name": "39-live-app-document-types.receipt.json",
+      "exitCode": 0,
+      "receiptSHA256": "75430e5025813ebc2f50ef8ce91a8115d4a5942453ad084097cab30a74ba262d",
+      "stdoutSHA256": "09444ddd530828cc6b6466b4b157c4d9cd3452389c8e41b0fc894ad3682df011",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "nativeFocusRegression": {
+    "activationCalls": 0,
+    "actualDesktopSheetFocusVerified": false,
+    "actualNativeObjects": true,
+    "caseCount": 29,
+    "finallyActive": false,
+    "globalKeyboardEvents": 0,
+    "initiallyActive": false,
+    "orderFrontCalls": 0,
+    "passed": [
+      "physical-windows-hidden",
+      "physical-windows-not-key",
+      "native-other-responder-2",
+      "coalesced-one-job",
+      "latest-request-only",
+      "job-drained",
+      "native-other-responder-6",
+      "duplicate-no-focus",
+      "nil-invalidates-queued-focus",
+      "document-replacement-invalidates",
+      "session-replacement-invalidates",
+      "hidden-ancestor-rejects",
+      "disabled-rejects",
+      "detachment-invalidates",
+      "reattachment-does-not-replay",
+      "second-native-responder",
+      "reparenting-invalidates",
+      "invisible-admission-rejects",
+      "inactive-admission-rejects",
+      "fresh-focus-after-rejections",
+      "focused-return-space-activate-once",
+      "repeat-modified-key-do-not-activate",
+      "native-other-responder-22",
+      "unfocused-key-does-not-activate",
+      "dismantle-invalidates-and-drains",
+      "queued-work-does-not-retain-detached-button",
+      "live-context-change-before-view-update-rejects",
+      "no-foreground-activation",
+      "physical-window-cleanup"
+    ],
+    "scheduledFocusResidue": 0,
+    "windowAdmissionFlagsSimulated": true,
+    "windowsClosed": 2
+  },
+  "finalRelatedSwiftTests": {
+    "passed": 20,
+    "skipped": 0,
+    "failed": 0,
+    "receipt": "38-final-backup-app-host-tests.receipt.json"
+  },
+  "earlierDefaultFullTests": {
+    "passed": 652,
+    "skipped": 6,
+    "receipt": "19-current-default-full.receipt.json",
+    "beforeFinalLiveContextAddition": true,
+    "newFinalFullRunClaimed": false
+  },
+  "canonical": {
+    "atUtc": "2026-10-06T10:10:48.897322+00:00",
+    "baseCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
+    "sourceDelta": [
+      "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
+    ],
+    "actualCanonicalTests": [
+      "-[ArkTraceAppSupportTests.ActionCatalogDisplayOracleTests testActualShortcutCatalog]",
+      "-[ArkTraceAppSupportTests.SnapshotEventIndexCanonicalOracleTests testActualControllerFirstMatchHoverAndSelection]",
+      "-[ArkTraceRenderingTests.InspectorProjectionOracleTests testActualLoaderInspectorFacts]",
+      "-[ArkTraceRenderingTests.TimelineNavigationKeyTests testActualActionCatalogKeyboardOracle]"
+    ],
+    "gateReceiptPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/30-live-context-canonical-producers.receipt.json",
+    "gateReceiptSHA256": "5dd79429f580781f81201f762ef613029782d9099233dafe6b22cf98ea6e7f22",
+    "fourFreshOutputs": [
+      {
+        "actual": "fresh-inspector-swift.json",
+        "expected": "inspector-projection-swift.json",
+        "actualSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "expectedSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 340307
+      },
+      {
+        "actual": "fresh-event-index-swift.json",
+        "expected": "snapshot-event-index-swift-oracle.json",
+        "actualSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "expectedSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 2674042
+      },
+      {
+        "actual": "fresh-action-keyboard-swift.json",
+        "expected": "action-catalog-keyboard-swift.json",
+        "actualSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "expectedSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 123896
+      },
+      {
+        "actual": "fresh-action-display-swift.json",
+        "expected": "action-catalog-display-swift.json",
+        "actualSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "expectedSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 10837
+      }
+    ],
+    "related40PriorProofReusedWithUnchangedAlgorithmSources": true,
+    "wholeMacOSAcceptance": false,
+    "previousActualRefreshReceiptSHA256": "958949da0c80836a8920504071c8fdc38ed2f3e3dd355fe3e860397822617872",
+    "actualDesktopFocusVerified": false
+  },
+  "explicitPreviousCheckReuse": {
+    "unchangedNamedInputs": 860,
+    "changedNamedInputs": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "previousSHA256": "0a0c54b4555d4ceb9ab58c493fe74e7b52b0aef8934e0a4f0d0cbc856c6d64e8",
+        "currentSHA256": "87d5583ae8b7767baddd511c0fd2e35c0c320d62a8816c0108e2ee40b460df1e"
+      },
+      {
+        "path": "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+        "previousSHA256": "b6f3d297311928674b189e098168883ba1151ae557d1bd21ec86666f830386d5",
+        "currentSHA256": "436bf3341206d8c721d8473a0982c172b615cf7e297f5599249910ccdd98107c"
+      },
+      {
+        "path": "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+        "previousSHA256": "c13d631365dfc6d7b6d16c72edaf3cefcb4843910fb4c906d060d8e67b12f0a5",
+        "currentSHA256": "290bd2c32865cb34c60c6265f33548e54b28d2b83128b69b3a71bcdfb36a232f"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+        "previousSHA256": "deefb4d82215c57d72327a30cb7c40fb90a961496dce6b51c9680fb7a161b858",
+        "currentSHA256": "076405c210832995878a20b29b1370d8d9b2d5a09dd7d60e278308a42be713f5"
+      }
+    ],
+    "record": "explicit-unchanged-input-and-gate-reuse.json",
+    "fullCompilerTransitiveClosureClaimed": false
+  },
+  "currentApp": {
+    "directory": "live-context-app/ArkTrace.app",
+    "compileReceipt": "29-live-context-current-app-host.receipt.json",
+    "localOuterSealReceipt": "32-live-app-outer-development-seal.receipt.json",
+    "hostDeepStrictSignatureReceipt": "34-live-app-host-signature.receipt.json",
+    "documentTypesReceipt": "39-live-app-document-types.receipt.json",
+    "releaseAcceptance": false
+  },
+  "warnings": {
+    "SwiftCompilerWarnings": 0,
+    "AppIntentsOptionalMetadataWarningCount": 1,
+    "originalAdmissionAndFixtureFailuresPreserved": true
+  },
+  "desktop": {
+    "latestToolResponse": "The Mac is locked and automatic unlock could not unlock it. Ask the user to unlock the Mac manually before continuing.",
+    "actualSheetFocusVerified": false,
+    "VoiceOverVerified": false,
+    "unlockQuestionPending": true
+  },
+  "afterFixMediumPerformance": {
+    "admissionsFailed": 4,
+    "latestFirstLoad": 4.9404296875,
+    "EngineCalls": 0,
+    "sampleGroups": 0,
+    "samples": 0,
+    "newP95Milliseconds": null,
+    "originalP95Milliseconds": 1204.730167,
+    "original1000msTargetPassed": false,
+    "latestPacket": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-qualified-R3-20261006",
+    "copiedActualFailureRecordPins": [
+      {
+        "name": "performance-report.json",
+        "bytes": 1136,
+        "SHA256": "995b1e4c22c4efdc74324c3582a4dd1d1e152706c338caaad95e4149024c31cd"
+      },
+      {
+        "name": "02-host-qualified-new-normal-cache-open.receipt.json",
+        "bytes": 850,
+        "SHA256": "972a97cd648aeb1109822d25f33e8806699592fcafb9e53656e81c0a0510ac46"
+      },
+      {
+        "name": "02-host-qualified-new-normal-cache-open.config.json",
+        "bytes": 583,
+        "SHA256": "61020b17b1ecbbaa475de02446c0c8af44337766219630fe6c26d21b5200f3f6"
+      },
+      {
+        "name": "02-host-qualified-new-normal-cache-open.stdout",
+        "bytes": 134,
+        "SHA256": "e8c101b7d0af3b4291f09b06ade4e9d06d1c2e0db425ef5f56191bc77abfcf1f"
+      },
+      {
+        "name": "02-host-qualified-new-normal-cache-open.log",
+        "bytes": 0,
+        "SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "preparation.json",
+        "bytes": 3542,
+        "SHA256": "9750d5735fb083168deb453798453f9b75ce89e595660dd79f8d2db17e498220"
+      },
+      {
+        "name": "input.json",
+        "bytes": 3384,
+        "SHA256": "8a56b02e3cecc80ca20b7186fb6bf24b34b7297fdeb1f8ac42e664b4f5f48e50"
+      }
+    ]
+  },
+  "actualCurrent633ColdCancellationStarted": false,
+  "peerCandidatesImportedThisIncrement": false,
+  "normalSDKLibrarySHA256": "63365301a6b12c06b25e06a8f55c2e823b8f38abc2a395e004b51e91ee390691",
+  "wholeMacOSAcceptance": false,
+  "goalStatus": "blocked",
+  "softwareMainAlreadyPublishedCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
+  "currentIncrementCommitted": false,
+  "CI": {
+    "completeDiffPaths": [
+      ".github/workflows/ci.yml",
+      "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
+      "docs/TASKS.md",
+      "docs/migration-runs/AT-RUST-011-013-2026-10-06-backup-native-focus.json",
+      "docs/migration-runs/AT-RUST-011-013-2026-10-06-backup-native-focus.md",
+      "docs/migration-runs/AT-RUST-011-013-2026-10-06-backup-native-focus.seal.json",
+      "docs/migration-runs/AT-RUST-011-013-2026-10-06-backup-native-focus.sha256",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "scripts/native-focus-button/Regression.swift",
+      "scripts/test_native_focus_button.py"
+    ],
+    "plannerOutput": "lane_swiftpm=true\nlane_app=true\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "WindowsNativeExecuted": false,
+    "wholeSelectedLaneFreshPassClaimed": false
+  }
+}

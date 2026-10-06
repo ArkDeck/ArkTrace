@@ -59,8 +59,8 @@
     },
     {
       "path": "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
-      "byteCount": 2793,
-      "sha256": "b6f3d297311928674b189e098168883ba1151ae557d1bd21ec86666f830386d5"
+      "byteCount": 6912,
+      "sha256": "436bf3341206d8c721d8473a0982c172b615cf7e297f5599249910ccdd98107c"
     },
     {
       "path": "Apps/ArkTraceApp/Inspector/InspectorToolbarToggle.swift",
@@ -214,8 +214,8 @@
     },
     {
       "path": "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift",
-      "byteCount": 4479,
-      "sha256": "c13d631365dfc6d7b6d16c72edaf3cefcb4843910fb4c906d060d8e67b12f0a5"
+      "byteCount": 5977,
+      "sha256": "290bd2c32865cb34c60c6265f33548e54b28d2b83128b69b3a71bcdfb36a232f"
     },
     {
       "path": "Apps/ArkTraceApp/Viewer/TraceViewerRootView.swift",
@@ -1069,6 +1069,62 @@
         "byteCount": 2728,
         "sha256": "fadd97057c749b77a0fac949dff836e344f4fcfa582928cd39b093f34608ae11"
       }
+    },
+    {
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-viewer-facts-swift/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-viewer-facts-swift/security",
+        "--filter",
+        "InspectorProjectionOracleTests|SnapshotEventIndexCanonicalOracleTests|ActionCatalogDisplayOracleTests|TimelineNavigationKeyTests.testActualActionCatalogKeyboardOracle"
+      ],
+      "cwd": "/private/tmp/arktrace-viewer-facts-swift/oracle-source",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
+        "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/current-facts-output/fresh-inspector-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/current-facts-output/fresh-event-index-swift.json",
+        "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/current-facts-output/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/current-facts-output/fresh-action-display-swift.json"
+      },
+      "exitCode": 0,
+      "scope": "Four fresh actual current Swift canonical producers for UIfocus identity refresh, expectedJSON unchanged; prior40 algorithm checks explicitly reused",
+      "receiptSHA256": "958949da0c80836a8920504071c8fdc38ed2f3e3dd355fe3e860397822617872"
+    },
+    {
+      "argv": [
+        "sh",
+        "scripts/run-swiftpm.sh",
+        "test",
+        "--disable-sandbox",
+        "--config-path",
+        "/private/tmp/arktrace-viewer-facts-swift/configuration",
+        "--security-path",
+        "/private/tmp/arktrace-viewer-facts-swift/security",
+        "--filter",
+        "InspectorProjectionOracleTests|SnapshotEventIndexCanonicalOracleTests|ActionCatalogDisplayOracleTests|TimelineNavigationKeyTests.testActualActionCatalogKeyboardOracle"
+      ],
+      "cwd": "/private/tmp/arktrace-viewer-facts-swift/oracle-source",
+      "environmentOverrides": {
+        "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-viewer-facts-swift",
+        "ARKTRACE_INSPECTOR_PROJECTION_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+        "ARKTRACE_INSPECTOR_PROJECTION_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/live-context-facts-output/fresh-inspector-swift.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "ARKTRACE_SNAPSHOT_EVENT_INDEX_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/live-context-facts-output/fresh-event-index-swift.json",
+        "ARKTRACE_ACTION_CATALOG_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+        "ARKTRACE_ACTION_CATALOG_KEYBOARD_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/live-context-facts-output/fresh-action-keyboard-swift.json",
+        "ARKTRACE_ACTION_CATALOG_DISPLAY_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/live-context-facts-output/fresh-action-display-swift.json"
+      },
+      "exitCode": 0,
+      "scope": "Four actual canonical producers refreshed after final live-context source guard; expectedJSON unchanged",
+      "receiptSHA256": "5dd79429f580781f81201f762ef613029782d9099233dafe6b22cf98ea6e7f22"
     }
   ],
   "augmentedSources": [
@@ -1102,5 +1158,119 @@
   "previousReceiptSHA256": "d1becdbbafa41d9ce2d2af58240f3000fa6157f1746d67bdcff3b40655073165",
   "revalidatedBaseCommit": "4c901b144741ba05362f63899be53676ecf17ca8",
   "paintTestAdditionNote": "Four canonical producers recompiled/replayed after exact paint and natural-completion regression additions; previous related forty tests and production bytes unchanged since 4c901b1",
-  "nativeRangeGuardAdditionNote": "Four actual canonical Swift producers freshly recompiled/replayed after exact N35 conditional test import; all previous source and augmented pins verified unchanged; prior related40 retained explicitly, not fresh full native runtime acceptance"
+  "nativeRangeGuardAdditionNote": "Four actual canonical Swift producers freshly recompiled/replayed after exact N35 conditional test import; all previous source and augmented pins verified unchanged; prior related40 retained explicitly, not fresh full native runtime acceptance",
+  "previousCurrentUIFocusProducerRefresh": {
+    "atUtc": "2026-10-06T09:52:46.528982+00:00",
+    "baseCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
+    "sourceDelta": [
+      "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
+    ],
+    "actualCanonicalTests": [
+      "-[ArkTraceAppSupportTests.ActionCatalogDisplayOracleTests testActualShortcutCatalog]",
+      "-[ArkTraceAppSupportTests.SnapshotEventIndexCanonicalOracleTests testActualControllerFirstMatchHoverAndSelection]",
+      "-[ArkTraceRenderingTests.InspectorProjectionOracleTests testActualLoaderInspectorFacts]",
+      "-[ArkTraceRenderingTests.TimelineNavigationKeyTests testActualActionCatalogKeyboardOracle]"
+    ],
+    "gateReceiptPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/23-current-canonical-producers.receipt.json",
+    "gateReceiptSHA256": "958949da0c80836a8920504071c8fdc38ed2f3e3dd355fe3e860397822617872",
+    "fourFreshOutputs": [
+      {
+        "actual": "fresh-inspector-swift.json",
+        "expected": "inspector-projection-swift.json",
+        "actualSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "expectedSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 340307
+      },
+      {
+        "actual": "fresh-event-index-swift.json",
+        "expected": "snapshot-event-index-swift-oracle.json",
+        "actualSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "expectedSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 2674042
+      },
+      {
+        "actual": "fresh-action-keyboard-swift.json",
+        "expected": "action-catalog-keyboard-swift.json",
+        "actualSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "expectedSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 123896
+      },
+      {
+        "actual": "fresh-action-display-swift.json",
+        "expected": "action-catalog-display-swift.json",
+        "actualSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "expectedSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 10837
+      }
+    ],
+    "related40PriorProofReusedWithUnchangedAlgorithmSources": true,
+    "wholeMacOSAcceptance": false
+  },
+  "currentUIFocusProducerRefresh": {
+    "atUtc": "2026-10-06T10:10:48.897322+00:00",
+    "baseCommit": "e0c6d390bcb17a544598c4265c3dd7cc6626f7cb",
+    "sourceDelta": [
+      "Apps/ArkTraceApp/Inspector/InspectorFocusButton.swift",
+      "Apps/ArkTraceApp/Viewer/TraceViewStateBackupButton.swift"
+    ],
+    "actualCanonicalTests": [
+      "-[ArkTraceAppSupportTests.ActionCatalogDisplayOracleTests testActualShortcutCatalog]",
+      "-[ArkTraceAppSupportTests.SnapshotEventIndexCanonicalOracleTests testActualControllerFirstMatchHoverAndSelection]",
+      "-[ArkTraceRenderingTests.InspectorProjectionOracleTests testActualLoaderInspectorFacts]",
+      "-[ArkTraceRenderingTests.TimelineNavigationKeyTests testActualActionCatalogKeyboardOracle]"
+    ],
+    "gateReceiptPath": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/backup-focus-recovery-current-20261006/30-live-context-canonical-producers.receipt.json",
+    "gateReceiptSHA256": "5dd79429f580781f81201f762ef613029782d9099233dafe6b22cf98ea6e7f22",
+    "fourFreshOutputs": [
+      {
+        "actual": "fresh-inspector-swift.json",
+        "expected": "inspector-projection-swift.json",
+        "actualSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "expectedSHA256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 340307
+      },
+      {
+        "actual": "fresh-event-index-swift.json",
+        "expected": "snapshot-event-index-swift-oracle.json",
+        "actualSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "expectedSHA256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 2674042
+      },
+      {
+        "actual": "fresh-action-keyboard-swift.json",
+        "expected": "action-catalog-keyboard-swift.json",
+        "actualSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "expectedSHA256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 123896
+      },
+      {
+        "actual": "fresh-action-display-swift.json",
+        "expected": "action-catalog-display-swift.json",
+        "actualSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "expectedSHA256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975",
+        "exactByteEqual": true,
+        "JSONEqual": true,
+        "actualBytes": 10837
+      }
+    ],
+    "related40PriorProofReusedWithUnchangedAlgorithmSources": true,
+    "wholeMacOSAcceptance": false,
+    "previousActualRefreshReceiptSHA256": "958949da0c80836a8920504071c8fdc38ed2f3e3dd355fe3e860397822617872",
+    "actualDesktopFocusVerified": false
+  }
 }

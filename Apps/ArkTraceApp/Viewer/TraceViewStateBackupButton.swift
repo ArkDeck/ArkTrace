@@ -6,24 +6,62 @@ import SwiftUI
 struct TraceViewStateBackupButton: View {
     var controller: TraceDocumentController
     @State private var review: Review?
-    @FocusState private var backupFocused: Bool
+    @State private var reviewedContext: InspectorFocusButton.FocusContext?
+    @State private var focusRequestID: UInt64?
+    @State private var focusRequestGeneration: UInt64 = 0
 
-    private struct Review: Identifiable { let id: UInt64 }
+    private struct Review: Identifiable {
+        let id: UInt64
+        let controller: TraceDocumentController
+    }
+
+    private var focusContext: InspectorFocusButton.FocusContext {
+        .init(documentID: ObjectIdentifier(controller), sessionID: controller.annotationSessionID)
+    }
 
     var body: some View {
         if controller.canBackupViewState {
-            Button("Back Up Saved State…", systemImage: "square.and.arrow.up", action: show)
+            InspectorFocusButton(
+                title: String(localized: "Back Up Saved State…"),
+                systemImage: "square.and.arrow.up",
+                showsTitle: false,
+                focusRequestID: focusRequestID,
+                focusContext: focusContext,
+                isFocusContextCurrent: { context in
+                    context?.documentID == ObjectIdentifier(controller)
+                        && context?.sessionID == controller.annotationSessionID
+                        && controller.canBackupViewState
+                },
+                onFocusRequestConsumed: { requestID in
+                    if focusRequestID == requestID { focusRequestID = nil }
+                },
+                action: show
+            )
                 .arktraceAccessibleTarget()
                 .focusable()
-                .focused($backupFocused)
                 .onKeyPress(keys: [.space, .return], phases: .down) { _ in show(); return .handled }
-                .sheet(item: $review, onDismiss: { backupFocused = true }) { item in
-                    TraceViewStateBackupReview(controller: controller, sessionID: item.id)
+                .sheet(item: $review, onDismiss: restoreFocus) { item in
+                    TraceViewStateBackupReview(controller: item.controller, sessionID: item.id)
                 }
-                .onChange(of: controller.annotationSessionID) { _, _ in review = nil }
+                .onChange(of: focusContext) { _, _ in
+                    reviewedContext = nil
+                    focusRequestID = nil
+                    review = nil
+                }
         }
     }
-    private func show() { review = Review(id: controller.annotationSessionID) }
+    private func show() {
+        guard review == nil, controller.canBackupViewState else { return }
+        reviewedContext = focusContext
+        review = Review(id: controller.annotationSessionID, controller: controller)
+    }
+    private func restoreFocus() {
+        defer { reviewedContext = nil }
+        guard reviewedContext == focusContext,
+              controller.canBackupViewState else { return }
+        focusRequestGeneration &+= 1
+        focusRequestID = focusRequestGeneration
+    }
 }
 
 private struct TraceViewStateBackupReview: View {
