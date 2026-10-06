@@ -426,6 +426,9 @@ public final class TraceDocumentController {
     /// side in a chosen order.
     public private(set) var favoriteTrackIDs: [TimelineTrackID] = []
     public private(set) var rangeAnalysis: TraceRangeAnalysis?
+    /// Failure for the current selection. An ended request must not leave the
+    /// range Inspector displaying progress, or publish into a newer selection.
+    public private(set) var rangeAnalysisError: TraceAppErrorPresentation?
     public private(set) var searchResults = TraceSearchResults(items: [], truncated: false) {
         didSet {
             guard searchResults != oldValue else { return }
@@ -1061,8 +1064,12 @@ public final class TraceDocumentController {
     public func selectRange(_ range: TraceTimeRange?) {
         guard !productShutdownRequested else { return }
         analysisTask?.cancel()
+        if let previousError = rangeAnalysisError, errorPresentation == previousError {
+            errorPresentation = nil
+        }
         selectedRange = range
         rangeAnalysis = nil
+        rangeAnalysisError = nil
         guard let range, let repository = document?.repository else { return }
         let generation = documentGeneration
         analysisTask = ownedTask { [weak self] in
@@ -1081,7 +1088,14 @@ public final class TraceDocumentController {
                     self.announce(.rangeAnalysisComplete)
                 }
             } catch {
-                self?.presentNonfatal(error, generation: generation)
+                guard !Task.isCancelled, let self,
+                    self.documentGeneration == generation,
+                    self.selectedRange == range
+                else { return }
+                let typed = Self.typed(error, stage: .analyzing)
+                guard typed.code != .cancelled else { return }
+                self.rangeAnalysisError = TraceAppErrorPresentation(error: typed)
+                self.presentNonfatal(typed, generation: generation)
             }
         }
     }
@@ -1884,6 +1898,7 @@ public final class TraceDocumentController {
         favoriteTrackIDs = []
         nextAnnotationID = 1
         rangeAnalysis = nil
+        rangeAnalysisError = nil
         searchResults = TraceSearchResults(items: [], truncated: false)
         processFilterText = ""
         isSearching = false

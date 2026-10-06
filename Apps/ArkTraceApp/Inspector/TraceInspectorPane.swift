@@ -54,6 +54,7 @@ struct TraceInspectorPane: View {
                     RangeInspectorView(
                         range: range,
                         analysis: controller.rangeAnalysis,
+                        error: controller.rangeAnalysisError,
                         onRevealSlice: { controller.revealSliceAggregate($0) }
                     )
                 } else if let hovered = controller.hoveredEvent {

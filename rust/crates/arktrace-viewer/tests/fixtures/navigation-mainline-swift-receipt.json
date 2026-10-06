@@ -40,13 +40,13 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
-      "byteCount": 9329,
-      "sha256": "599b6ca04b9d046b64277b767ecdb50afec01eb0fc18e0e6bc4525cec9ee2185"
+      "byteCount": 9614,
+      "sha256": "1a4ac9004681ef3d0f72b9f1c5221e36d4e7845cb4dedf930600c5abd613c097"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 103253,
-      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445"
+      "byteCount": 104086,
+      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -317,8 +317,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "a05793ed8e8ad4b98d59f65a31b8d8881bccdddfcd604e516fc4c3d5eb4ad7c9",
-      "byteCount": 104724
+      "sha256": "7c38442621e5efa9be69274a180591087475d7b5b9abcb62ac02d5688e6f31c9",
+      "byteCount": 105557
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -327,16 +327,16 @@
     }
   ],
   "log": {
-    "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "013d4560f226bd7d45278c69ee9a25ce839de83315e894d749a305c69e7c5720",
-    "byteCount": 5328
+    "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/navigation-producer.log",
+    "byteCount": 7967,
+    "sha256": "1c9ee8f7cea7be20276874e6fa632e7d5350ae4baddbb1e75836789504ca1402"
   },
-  "rawReceiptSHA256": "a4255ecbd86ae49a24ce4ef930b3dc1ed30c8a18ec5eff71da17d0efc8f341a7",
+  "rawReceiptSHA256": "c0104451e59ca7997eddebd484eff48f4402160cd02f4470703c1df216b1ef81",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445",
-      "byteCount": 103253
+      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059",
+      "byteCount": 104086
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -420,7 +420,34 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "141ab1e8280eb7b7cda07fe5415730059e48818f",
-  "previousReceiptSHA256": "0b1982b7a06cda6d607f05c9fdbc9c6fc48a59cbdb1558bc4b8a51a29f351db8",
-  "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound."
+  "revalidatedBaseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2",
+  "previousReceiptSHA256": "95ac64f3589c313e6b77c2b63c11aff79a6f447444e5c5758d237bc005436ef8",
+  "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound.",
+  "replayCommandReceipt": {
+    "command": [
+      "python3",
+      "rust/crates/arktrace-viewer/oracle/navigation_run_swift.py"
+    ],
+    "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+    "environment": {
+      "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-navigation-mainline-swiftpm"
+    },
+    "exitCode": 0,
+    "elapsedSeconds": 24.328206300735474,
+    "log": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/41-navigation.stdout",
+      "byteCount": 98,
+      "sha256": "0013d42c0f5451e891658db5d42f4de010900f7d225eea28ba07e9568a8ddf8e"
+    },
+    "stderr": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/41-navigation.log",
+      "byteCount": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "gateReceipt": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/41-navigation.receipt.json",
+      "byteCount": 717,
+      "sha256": "44061c75ae3c2513cc96b388ab890aa14688282294a0e129d56c8eb855f91e1d"
+    }
+  }
 }

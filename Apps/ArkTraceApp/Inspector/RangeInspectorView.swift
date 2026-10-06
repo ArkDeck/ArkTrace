@@ -1,4 +1,5 @@
 import ArkTraceAnalysis
+import ArkTraceAppSupport
 import ArkTraceCore
 import ArkTraceRendering
 import SwiftUI
@@ -6,6 +7,7 @@ import SwiftUI
 struct RangeInspectorView: View {
     let range: TraceTimeRange
     let analysis: TraceRangeAnalysis?
+    let error: TraceAppErrorPresentation?
     var onRevealSlice: (TraceSliceNameAggregate) -> Void = { _ in }
 
     @State private var sliceSort: SliceAggregateSort = .total
@@ -282,6 +284,13 @@ struct RangeInspectorView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+            } else if let error {
+                Label("Range analysis could not finish", systemImage: "exclamationmark.triangle")
+                    .font(.subheadline)
+                Text(error.reason).font(.caption)
+                Text("Select another range to try again.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             } else {
                 ProgressView("Analyzing range…")
                     .controlSize(.small)

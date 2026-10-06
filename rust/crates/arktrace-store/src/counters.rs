@@ -18,6 +18,7 @@ use std::collections::{BTreeMap, BTreeSet};
 struct SampleSchema {
     duration: bool,
     row_id: Option<&'static str>,
+    filter_seek_index: bool,
 }
 pub(crate) struct CounterSchema {
     samples: BTreeMap<CounterSampleTable, SampleSchema>,
@@ -52,11 +53,21 @@ impl CounterSchema {
                         .find(|alias| !columns.iter().any(|c| c.eq_ignore_ascii_case(alias)))
                 })
                 .flatten();
+            let filter_seek_index = db.query(
+                "SELECT EXISTS(SELECT 1 FROM pragma_index_list(?) l \
+                 JOIN pragma_index_info(l.name) c ON c.seqno=0 \
+                 WHERE l.partial=0 AND c.name='filter_id')",
+                [table.name()],
+                1,
+                DEFAULT_VM_BUDGET,
+                |row| integer(row, 0),
+            )? == [1];
             samples.insert(
                 table,
                 SampleSchema {
                     duration: columns.iter().any(|c| c == "dur"),
                     row_id,
+                    filter_seek_index,
                 },
             );
         }
@@ -266,7 +277,25 @@ impl CounterSchema {
             for table in tables {
                 let schema = self.samples.get(table).ok_or(StoreError::InvalidDatabase)?;
                 let (predicate, values) = time_filter(inspection, query.range, schema.duration)?;
-                exists.push(format!("EXISTS(SELECT 1 FROM {} m WHERE m.filter_id=f.id AND typeof(m.filter_id)='integer' AND typeof(m.ts)='integer' AND typeof(m.value)='integer' AND ({predicate}))", table.name()));
+                let valid = format!(
+                    "typeof(m.filter_id)='integer' AND typeof(m.ts)='integer' AND typeof(m.value)='integer' AND ({predicate})"
+                );
+                // Keep indexed early-exit seeks. Without a filter-prefix
+                // index (including real process_measure exports), materialize
+                // matching IDs once instead of per-filter scans or an implicit
+                // temporary covering index. Both paths retain the same VM,
+                // deadline, type, interval and descriptor result bounds.
+                exists.push(if schema.filter_seek_index {
+                    format!(
+                        "EXISTS(SELECT 1 FROM {} m WHERE m.filter_id=f.id AND {valid})",
+                        table.name()
+                    )
+                } else {
+                    format!(
+                        "f.id IN (SELECT m.filter_id FROM {} m WHERE {valid})",
+                        table.name()
+                    )
+                });
                 bindings.extend(values);
             }
             bindings.push(Value::Integer(query.limit as i64 + 1));

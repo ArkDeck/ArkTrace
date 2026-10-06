@@ -140,7 +140,7 @@ impl Default for RuntimeLimits {
             maximum_result_bytes: 16 * 1024 * 1024,
             maximum_retained_result_bytes: 128 * 1024 * 1024,
             maximum_source_bytes: 2 * 1024 * 1024 * 1024,
-            maximum_database_bytes: 2 * 1024 * 1024 * 1024,
+            maximum_database_bytes: crate::DEFAULT_MAXIMUM_DATABASE_BYTES,
         }
     }
 }

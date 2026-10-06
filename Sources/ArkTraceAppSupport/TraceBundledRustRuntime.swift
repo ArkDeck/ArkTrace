@@ -30,7 +30,11 @@ public extension TraceRustProductRuntime {
         guard configuration.configuredContractDigest == manifest.contractSHA256 else {
             throw TraceBundledRustRuntime.unavailable()
         }
-        let runtime = try await create(configuration: profile, runtimeConfiguration: configuration)
+        // Cold opening includes parsing, indexes and immutable file validation.
+        // Use the existing five-minute opening ceiling for real large traces;
+        // interactive repository operations retain their independent budgets.
+        let runtime = try await create(configuration: profile, runtimeConfiguration: configuration,
+            openTimeoutMilliseconds: 300_000)
         do {
             // Admit held storage roots before publishing the controller. The
             // worker admits the actual signed tools before its first open.

@@ -100,6 +100,35 @@ final class LocalizationCatalogTests: XCTestCase {
         }
     }
 
+    /// Any language emitted by the catalog becomes a bundle localization.
+    /// Missing typed keys then fall back to the key (or a bare count), not to
+    /// the English message. Every advertised language needs the complete set.
+    func testEveryCatalogLanguageCoversTypedMessages() throws {
+        let strings = try loadCatalogStrings()
+        let languages = Set(strings.values.flatMap {
+            ($0["localizations"] as? [String: Any])?.keys.map { $0 } ?? []
+        })
+        for language in languages.sorted() {
+            for key in Self.typedKeySymbols.keys.sorted() {
+                let entry = try XCTUnwrap(strings[key])
+                let localized = try XCTUnwrap(
+                    format(of: entry, language: language),
+                    "'\(key)' has no \(language) localization"
+                )
+                XCTAssertFalse(localized.isEmpty)
+                if key.hasPrefix("a11y.") || key.hasPrefix("error.title.") {
+                    XCTAssertNotEqual(localized, key, "typed keys need a readable message")
+                }
+                let english = try XCTUnwrap(format(of: entry, language: "en"))
+                XCTAssertEqual(
+                    localized.components(separatedBy: "%lld").count,
+                    english.components(separatedBy: "%lld").count,
+                    "placeholder signature of '\(key)' differs between en and \(language)"
+                )
+            }
+        }
+    }
+
     /// German must cover every typed key with the same `%lld` signature as
     /// English, and formatting with a representative count must succeed.
     func testGermanLocalizationsMatchEnglishPlaceholderSignatures() throws {

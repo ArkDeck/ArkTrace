@@ -1,4 +1,7 @@
 //! Shared composition root. Native lifecycle remains behind host ports.
+/// Indexed exports can exceed the raw trace size. Keep the SDK's finite
+/// database ceiling aligned with the existing CLI distribution budget.
+pub const DEFAULT_MAXIMUM_DATABASE_BYTES: u64 = 4 * 1024 * 1024 * 1024;
 #[cfg(target_os = "macos")]
 mod async_runtime;
 mod metadata;

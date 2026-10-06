@@ -30,13 +30,13 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
-      "byteCount": 9329,
-      "sha256": "599b6ca04b9d046b64277b767ecdb50afec01eb0fc18e0e6bc4525cec9ee2185"
+      "byteCount": 9614,
+      "sha256": "1a4ac9004681ef3d0f72b9f1c5221e36d4e7845cb4dedf930600c5abd613c097"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 103253,
-      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445"
+      "byteCount": 104086,
+      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -240,8 +240,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 118961,
-      "sha256": "bb87295ab9a0c6724eb7b42b8a1165bac81c4c4ea1fd230d0f9e46babf764731"
+      "byteCount": 124713,
+      "sha256": "29fce106cd476392509fc7f3545aacb3a6eb6267f67b6b0f6ed361f75c85d20a"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
@@ -347,18 +347,28 @@
     "environment": {
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-counter-mainline-swift",
       "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
-      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/oracle-refresh/fresh-swift-counter-oracle.json",
+      "COUNTER_SWIFT_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/fresh-swift-counter-oracle.json",
       "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
-      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/oracle-refresh/fresh-swift-counter-reveal.json",
+      "COUNTER_REVEAL_SWIFT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/fresh-swift-counter-reveal.json",
       "COUNTER_REVEAL_DATABASES": "/private/tmp/arktrace-counter-mainline-swift/databases",
       "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
     },
     "exitCode": 0,
-    "elapsedSeconds": 7.039147250005044,
+    "elapsedSeconds": 25.199838876724243,
     "log": {
-      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/oracle-refresh/fresh-swift-canonical-and-regressions.log",
-      "byteCount": 6282,
-      "sha256": "82a42a9c9466d95cb1d083e343fdbb5bd2664524b58323dd018118b4dafc08ac"
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/40-counter.stdout",
+      "byteCount": 6389,
+      "sha256": "168d37c86b2df7392357cc841e410d4dc93518c8db924d811927ac7497c6ed9e"
+    },
+    "stderr": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/40-counter.log",
+      "byteCount": 740,
+      "sha256": "637fb3aaf1edc212fc4560ec3f8570ec2fbe92b663bda3202e54ed6f0054df86"
+    },
+    "gateReceipt": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/40-counter.receipt.json",
+      "byteCount": 1952,
+      "sha256": "fed61991a0ed2da5ceaf0016c592c2665376d61b3f0dcfb50d572ac91413f8f3"
     }
   },
   "databases": [
@@ -385,6 +395,6 @@
   "setupLimitations": [
     "Prior mainline setup limitations remain in the previous receipt; this fresh replay uses its independently audited access seams and unchanged frozen DBs."
   ],
-  "previousReceiptSHA256": "0fc3f3f538f5604830fa0c5079635575511ff6a9967610287c20e5f4965d6b5c",
-  "revalidatedBaseCommit": "b5616f317522449e5e497b872716f1f8038fc9b8"
+  "previousReceiptSHA256": "46deec48a6dedf9c1aa6836a798ab88f59a51cbc8a02ec35e06a3393982d7f6c",
+  "revalidatedBaseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2"
 }

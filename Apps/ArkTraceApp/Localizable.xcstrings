@@ -16,6 +16,12 @@
             "state": "translated",
             "value": "ArkTrace and third-party license notices"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ArkTrace 与第三方许可说明"
+          }
         }
       }
     },
@@ -106,6 +112,12 @@
             "state": "translated",
             "value": "Opening cancelled"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消打开"
+          }
         }
       }
     },
@@ -123,6 +135,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Opening trace"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在打开 Trace"
           }
         }
       }
@@ -142,6 +160,12 @@
             "state": "translated",
             "value": "Operation failed"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作失败"
+          }
         }
       }
     },
@@ -159,6 +183,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Range analysis complete"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "区间分析已完成"
           }
         }
       }
@@ -178,6 +208,12 @@
             "state": "translated",
             "value": "Search found at least %lld results"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索找到至少 %lld 个结果"
+          }
         }
       }
     },
@@ -195,6 +231,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Search found %lld results"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索找到 %lld 个结果"
           }
         }
       }
@@ -214,6 +256,12 @@
             "state": "translated",
             "value": "Trace close failed"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法关闭 Trace"
+          }
         }
       }
     },
@@ -231,6 +279,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trace closed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace 已关闭"
           }
         }
       }
@@ -250,6 +304,12 @@
             "state": "translated",
             "value": "Trace loaded, %lld visible tracks"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace 已加载，%lld 条可见轨道"
+          }
         }
       }
     },
@@ -267,6 +327,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trace loaded, no timed events"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace 已加载，没有带时间的事件"
           }
         }
       }
@@ -286,6 +352,12 @@
             "state": "translated",
             "value": "Trace failed"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace 加载失败"
+          }
         }
       }
     },
@@ -303,6 +375,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trace Timeline"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace 时间线"
           }
         }
       }
@@ -322,6 +400,12 @@
             "state": "translated",
             "value": "Bundled parser is unavailable"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随附解析器不可用"
+          }
         }
       }
     },
@@ -339,6 +423,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trace cache needs attention"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trace 缓存需要处理"
           }
         }
       }
@@ -358,6 +448,12 @@
             "state": "translated",
             "value": "ArkTrace could not finish"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ArkTrace 无法完成操作"
+          }
         }
       }
     },
@@ -376,6 +472,12 @@
             "state": "translated",
             "value": "Opening was cancelled"
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消打开"
+          }
         }
       }
     },
@@ -393,6 +495,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trace could not be opened"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开 Trace"
           }
         }
       }
@@ -797,6 +905,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "ArkTrace wird gestartet…"
+          }
+        }
+      }
+    },
+    "Range analysis could not finish": {
+      "comment": "Shown after analysis of the selected range ends with a bounded query failure.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Range analysis could not finish"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereichsanalyse konnte nicht abgeschlossen werden"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "范围分析未能完成"
+          }
+        }
+      }
+    },
+    "Select another range to try again.": {
+      "comment": "Shown after analysis of the selected range ends with a bounded query failure.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select another range to try again."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle einen anderen Bereich, um es erneut zu versuchen."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择另一范围以重试。"
           }
         }
       }

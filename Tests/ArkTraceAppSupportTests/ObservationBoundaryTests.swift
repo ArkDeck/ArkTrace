@@ -47,7 +47,7 @@ final class ObservationBoundaryTests: XCTestCase {
         try assertNoRead(
             of: [
                 "snapshot", "phase", "selectedEvent", "selectedRange", "hoveredEvent",
-                "searchResults", "searchFieldText", "isSearching", "rangeAnalysis",
+                "searchResults", "searchFieldText", "isSearching", "rangeAnalysis", "rangeAnalysisError",
                 "errorPresentation", "accessibilityAnnouncement", "cacheInventory",
                 "metadata", "recentDocuments", "trackGroups", "timelineFocusRequestID",
                 "canBackupViewState", "isBackingUpViewState", "viewStateBackup", "viewStateBackupError",
@@ -61,7 +61,7 @@ final class ObservationBoundaryTests: XCTestCase {
         try assertNoRead(
             of: [
                 "snapshot", "phase", "selectedEvent", "selectedRange", "hoveredEvent",
-                "rangeAnalysis", "cacheInventory", "errorPresentation", "metadata",
+                "rangeAnalysis", "rangeAnalysisError", "cacheInventory", "errorPresentation", "metadata",
                 "timelineFocusRequestID",
             ],
             in: "TraceViewerSidebar"

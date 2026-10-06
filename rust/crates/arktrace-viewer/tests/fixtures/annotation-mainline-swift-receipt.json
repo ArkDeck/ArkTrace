@@ -58,13 +58,13 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceBundledRustRuntime.swift",
-      "byteCount": 9329,
-      "sha256": "599b6ca04b9d046b64277b767ecdb50afec01eb0fc18e0e6bc4525cec9ee2185"
+      "byteCount": 9614,
+      "sha256": "1a4ac9004681ef3d0f72b9f1c5221e36d4e7845cb4dedf930600c5abd613c097"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 103253,
-      "sha256": "c7b8a8fcbcd91953f3eb37d422f6e75658d6b621a9f98dbccd9895e65937f445"
+      "byteCount": 104086,
+      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -303,8 +303,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 118961,
-      "sha256": "bb87295ab9a0c6724eb7b42b8a1165bac81c4c4ea1fd230d0f9e46babf764731"
+      "byteCount": 124713,
+      "sha256": "29fce106cd476392509fc7f3545aacb3a6eb6267f67b6b0f6ed361f75c85d20a"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
@@ -350,13 +350,13 @@
   "cacheOnlyAugmentedSources": [
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 105608,
-      "sha256": "f08f7a6a30fe5948db483067f4783bf2a392f4520823c0aecf2b16fb23b718a1"
+      "byteCount": 106441,
+      "sha256": "81846e4d64a2f04c7337d8fe13fa5d185d36f347c1357fd655a00de9fe4c1425"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 128846,
-      "sha256": "713b586466ff1af21022f13be332aabb02f627341faf4d8050cbdb10c0902166"
+      "byteCount": 134598,
+      "sha256": "13b6fcceff3d120dec245cff9c5f6093933b683b14021ba0ab55147020b5a012"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Package.swift",
@@ -390,10 +390,38 @@
   ],
   "exitCode": 0,
   "log": {
-    "path": ".build/agent-coordination/arktrace/annotations-mainline-20261004/swift-oracle.log",
-    "sha256": "7c889e65791fd29cc7a90bfd5e7a25a732bb9b8559a1d9556b03bee3689eae83"
+    "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/annotation-producer.log",
+    "byteCount": 56885,
+    "sha256": "2a331bf495419f818cfb489e91986848c03dbf170203f5e93ee277df8b0a0f18"
   },
-  "rawReceiptSHA256": "e96998afbb88e3ae7dfc4ed3facd12898b2760907fb1d025689bfe24d969918a",
-  "revalidatedBaseCommit": "141ab1e8280eb7b7cda07fe5415730059e48818f",
-  "previousReceiptSHA256": "b4b13d9e80d4f7f91628d60818602f1d1454adbeee90c44f7b0857dc30a07c01"
+  "rawReceiptSHA256": "845864ba89d5d7c5f2cf3bc41c3c4998327b6939909ecb6422bf6f20d3d6604d",
+  "revalidatedBaseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2",
+  "previousReceiptSHA256": "8be420c96e4a9e7a955bed4d34646cf58d90ec9aa0d664801af8f8dd2657cb17",
+  "replayCommandReceipt": {
+    "command": [
+      "python3",
+      "rust/crates/arktrace-viewer/oracle/annotation_swift.py"
+    ],
+    "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+    "environment": {
+      "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-annotations-mainline-swiftpm"
+    },
+    "exitCode": 0,
+    "elapsedSeconds": 20.619622707366943,
+    "log": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/42-annotation.stdout",
+      "byteCount": 135,
+      "sha256": "809554a48160062b0fe6638c692fb3bab3fd26de209797bac017c830fa619f76"
+    },
+    "stderr": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/42-annotation.log",
+      "byteCount": 30,
+      "sha256": "bbc8b176d3c74d4c5a7fd00b40280f98168e116d5272273bfe8e71407625540e"
+    },
+    "gateReceipt": {
+      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/42-annotation.receipt.json",
+      "byteCount": 714,
+      "sha256": "31d52c0571e2b8a429db3009ef47ec9d2334141503f9b04234d9fb75693522dc"
+    }
+  }
 }

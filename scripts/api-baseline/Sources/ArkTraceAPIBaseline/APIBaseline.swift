@@ -39,6 +39,7 @@ private func pinAppSupportSurface(
     _ = controller.hoveredEvent
     _ = controller.selectedRange
     _ = controller.rangeAnalysis
+    _ = controller.rangeAnalysisError
     _ = controller.searchResults.items
     _ = controller.searchResults.truncated
     _ = controller.isSearching

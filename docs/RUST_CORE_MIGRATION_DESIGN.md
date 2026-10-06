@@ -344,9 +344,17 @@ preflight 和 request-scoped worker 只复用该 reader 所持同一个不可变
 入口由私有 `VerifiedReadSnapshot` 绑定，不能由调用者传入 inspection 代替验证。每次仍检查
 文件大小、只读权限、inode、mtime/ctime、父目录/名称绑定、无 journal/WAL/shm、取消与期限；
 变化直接失败，不更新缓存 inspection。连接在各自 worker 创建和关闭，查询及内存预算不变。
-Density 在一条 SQL 的原 2,000,000 VM-step budget 内流式折叠全部匹配行，只保留固定 bucket
-状态，不采样、不积累事件数组。索引 schema 4 与真实 medium 验证见
-[当前记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)。
+Density 在一条 SQL 内流式折叠全部匹配行，只保留固定 bucket 状态，不采样、不积累事件数组。
+真实 large 的四条 CPU lane 均超过原 detail-page 的 2,000,000 VM steps，因此 streaming
+statement 使用独立固定 50,000,000-step 上限；普通查询、schema 和 density identity lookups
+继续使用原额度。statement 不分段重置 credit，查询 deadline、取消和 decoded byte credit
+同时生效，达到任何上限即失败，不发布部分聚合。索引 schema 4 与真实 medium 验证见
+[medium 记录](migration-runs/AT-RUST-007-013-2026-10-06-medium-queries.md)，large 的诊断与
+实际 GUI 结果见[本轮记录](migration-runs/AT-RUST-006-007-013-2026-10-06-real-large-gui.md)。
+Engine/FFI 的共享默认 database ceiling 为 4 GiB，容纳真实 large 的 2.214 GB indexed
+Ready；source ceiling 仍为 2 GiB。仅 standalone bundled App 的打开默认期限为 300 s，
+generic SDK 仍为 60 s；交互 query 默认 30 s。结构 quick_check 的独立 work credit 按
+验证后的物理页大小有界计算，普通查询预算不变。上述默认值不构成性能或发行验收通过。
 
 ## 7. FFI、SDK 与数据所有权
 

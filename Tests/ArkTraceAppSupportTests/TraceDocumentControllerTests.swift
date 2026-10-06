@@ -19,6 +19,9 @@ final class TraceDocumentControllerTests: XCTestCase {
         let counterRows: [CounterSeries]
         let argumentRows: [Int64: [TraceEventArgument]]
         let argumentDelay: Duration
+        let rangeFailureStartNs: Int64?
+        let rangeFailureBarrier: FirstOpenBarrier?
+        private var returnedRangeFailures = 0
         private var sliceArgumentDeadlines: [ContinuousClock.Instant] = []
         private var argumentDeadlines: [ContinuousClock.Instant] = []
         private var returnedArgumentPages = 0
@@ -36,7 +39,9 @@ final class TraceDocumentControllerTests: XCTestCase {
             cpuSlices: [CpuSlice] = [],
             counters: [CounterSeries] = [],
             arguments: [Int64: [TraceEventArgument]] = [:],
-            argumentDelay: Duration = .zero
+            argumentDelay: Duration = .zero,
+            rangeFailureStartNs: Int64? = nil,
+            rangeFailureBarrier: FirstOpenBarrier? = nil
         ) {
             self.identity = identity
             self.durationNs = durationNs
@@ -47,6 +52,8 @@ final class TraceDocumentControllerTests: XCTestCase {
             counterRows = counters
             argumentRows = arguments
             self.argumentDelay = argumentDelay
+            self.rangeFailureStartNs = rangeFailureStartNs
+            self.rangeFailureBarrier = rangeFailureBarrier
         }
 
         func metadata() async throws -> TraceMetadata {
@@ -111,6 +118,16 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
 
         func slices(_ query: TraceSliceQuery) async throws -> TraceEventPage<TraceSlice> {
+            if query.minimumDurationNs == 0, query.range.startNs == rangeFailureStartNs {
+                // A native callback can finish after task cancellation. Keep
+                // this failure alive to test the controller's publication guard.
+                if let rangeFailureBarrier { await rangeFailureBarrier.wait() }
+                returnedRangeFailures += 1
+                throw ArkTraceError(
+                    code: .queryLimitExceeded, stage: .querying,
+                    message: "Range query exceeded its work budget", retryable: true
+                )
+            }
             if query.includesArgumentSet { sliceArgumentDeadlines.append(query.deadline) }
             let matches = sliceRows.filter { slice in
                 let nameMatches: Bool
@@ -163,12 +180,99 @@ final class TraceDocumentControllerTests: XCTestCase {
         }
 
         func argumentPagesReturned() -> Int { returnedArgumentPages }
+        func rangeFailuresReturned() -> Int { returnedRangeFailures }
     }
 
     private actor CloseRecorder {
         private var names: [String] = []
         func append(_ name: String) { names.append(name) }
         func values() -> [String] { names }
+    }
+
+    func testRangeFailureEndsProgressAndClearsOnNewSelectionOrClose() async throws {
+        let suite = "ArkTraceRangeFailureTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let repository = Repository(identity: "a", rangeFailureStartNs: 100)
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults), maintenance: nil,
+            opener: { _, _ in
+            TraceOpenedDocument(repository: repository, cacheHit: false, cacheMetadata: nil, close: {})
+        })
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-range-failure-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+        let failed = try TraceTimeRange.query(startNs: 100, endNs: 150)
+        controller.selectRange(failed)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(3))
+        while controller.rangeAnalysisError == nil, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        XCTAssertNil(controller.rangeAnalysis)
+        let failure = try XCTUnwrap(controller.rangeAnalysisError)
+        XCTAssertTrue(failure.diagnostic.contains("QUERY_LIMIT_EXCEEDED"))
+        XCTAssertEqual(controller.errorPresentation, failure)
+        XCTAssertEqual(controller.selectedRange, failed)
+
+        controller.selectRange(try TraceTimeRange.query(startNs: 200, endNs: 250))
+        XCTAssertNil(controller.rangeAnalysisError)
+        XCTAssertNil(controller.errorPresentation)
+        let retryDeadline = ContinuousClock.now.advanced(by: .seconds(3))
+        while controller.rangeAnalysis == nil, ContinuousClock.now < retryDeadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        XCTAssertNotNil(controller.rangeAnalysis)
+        XCTAssertNil(controller.rangeAnalysisError)
+        controller.selectRange(nil)
+        XCTAssertNil(controller.rangeAnalysis)
+        XCTAssertNil(controller.rangeAnalysisError)
+        await controller.close()
+        XCTAssertNil(controller.rangeAnalysisError)
+    }
+
+    func testCancelledRangeFailureCannotReplaceNewAnalysisOrErrorState() async throws {
+        let suite = "ArkTraceStaleRangeFailureTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let barrier = FirstOpenBarrier()
+        let repository = Repository(
+            identity: "a", rangeFailureStartNs: 100, rangeFailureBarrier: barrier
+        )
+        let controller = TraceDocumentController(
+            recentStore: TraceRecentDocumentStore(defaults: defaults), maintenance: nil,
+            opener: { _, _ in
+            TraceOpenedDocument(repository: repository, cacheHit: false, cacheMetadata: nil, close: {})
+        })
+        let source = FileManager.default.temporaryDirectory
+            .appending(path: "arktrace-range-stale-\(UUID().uuidString).htrace")
+        FileManager.default.createFile(atPath: source.path, contents: Data())
+        defer { try? FileManager.default.removeItem(at: source) }
+        controller.open(source)
+        while controller.phase != .ready { await Task.yield() }
+        controller.selectRange(try TraceTimeRange.query(startNs: 100, endNs: 150))
+        await barrier.waitUntilReached()
+        let replacement = try TraceTimeRange.query(startNs: 200, endNs: 250)
+        controller.selectRange(replacement)
+        let deadline = ContinuousClock.now.advanced(by: .seconds(3))
+        while controller.rangeAnalysis == nil, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        XCTAssertEqual(controller.rangeAnalysis?.range, replacement)
+        await barrier.release()
+        let failureDeadline = ContinuousClock.now.advanced(by: .seconds(3))
+        while await repository.rangeFailuresReturned() == 0, ContinuousClock.now < failureDeadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        try await Task.sleep(for: .milliseconds(20))
+        let returnedFailures = await repository.rangeFailuresReturned()
+        XCTAssertEqual(returnedFailures, 1)
+        XCTAssertEqual(controller.rangeAnalysis?.range, replacement)
+        XCTAssertNil(controller.rangeAnalysisError)
+        XCTAssertNil(controller.errorPresentation)
+        await controller.close()
     }
 
     private actor FirstOpenBarrier {

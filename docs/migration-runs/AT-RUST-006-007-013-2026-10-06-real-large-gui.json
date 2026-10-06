@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "baseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2",
+  "scope": "Actual reviewed large native Store/GUI fault corrections and bounded range failure presentation",
+  "goalStatus": "blocked",
+  "wholeMacOSAcceptance": false,
+  "rustVersion": "1.99.0",
+  "edition": 2024,
+  "xcodeVersion": "27.0",
+  "xcodeBuild": "27A266a",
+  "swiftVersion": "6.4",
+  "host": "macOS 27.0 arm64",
+  "source": {
+    "bytes": 674044067,
+    "sha256": "087105c0eca1b766b7907fdf044c9e19f1f571f49b96e893883eb0ccea4ff6d3",
+    "reviewedProvenance": "Fixtures/release-evidence/phase3-large/provenance.json",
+    "readOnly": true,
+    "rawDatabaseBytes": 675749888,
+    "indexedReadyBytes": 2214297600
+  },
+  "compatibility": {
+    "indexSchemaVersion": 4,
+    "ABI": 2,
+    "exports": 27,
+    "layoutRecords": 11,
+    "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+    "defaultDatabaseBytes": 4294967296,
+    "maximumSourceBytes": 2147483648,
+    "bundledOpeningTimeoutMilliseconds": 300000,
+    "genericSDKOpeningTimeoutMilliseconds": 60000,
+    "queryTimeoutMilliseconds": 30000,
+    "ordinaryVMWorkSteps": 2000000,
+    "densityStreamingVMWorkSteps": 50000000,
+    "densityStatementSegmentedOrSampled": false
+  },
+  "checks": {
+    "default": {
+      "receipt": "60-default-full-windowserver.receipt.json",
+      "passedUnique": 650,
+      "skipped": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "native": {
+      "receipt": "61-native-full-windowserver.receipt.json",
+      "passedUnique": 776,
+      "skipped": [
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+        "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "rust": {
+      "receipt": "50-workspace-test.receipt.json",
+      "passed": 577,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 65,
+      "zeroTestHarnesses": 11,
+      "warnings": []
+    },
+    "app": {
+      "receipt": "51-app-build-keychain.receipt.json",
+      "warnings": [
+        "2026-10-06 11:43:28.546 appintentsmetadataprocessor[40538:24488290] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+      ]
+    }
+  },
+  "SDK": {
+    "normal": {
+      "library": {
+        "byteCount": 30911872,
+        "sha256": "260a2663272ccc56a0e635ac0af778ffb00a987809515359358ed9f00af1fb02"
+      },
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "abiVersion": 2,
+      "developmentFixtures": false,
+      "receipt": "17-normal-sdk.stdout"
+    },
+    "fixtures": {
+      "library": {
+        "byteCount": 30967696,
+        "sha256": "d65f5b8a63934aa8d61a5ad63b3cadbbe621e21c5e73228b76a7d5038488d075"
+      },
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "abiVersion": 2,
+      "developmentFixtures": true,
+      "receipt": "18-fixture-sdk.stdout"
+    }
+  },
+  "sdkTests": 96,
+  "focusedRangeAndBoundaryTests": 58,
+  "canonicalInputOutputJSONByteIdentical": 36,
+  "rootEndedReceiptCount": 72,
+  "retainedNonzeroReceipts": [
+    "03-density-regression-before.receipt.json",
+    "36-range-swift-tests.receipt.json",
+    "37-range-swift-tests.receipt.json",
+    "45-default-full.receipt.json",
+    "46-app-build.receipt.json",
+    "48-native-full.receipt.json",
+    "56-range-signature.receipt.json"
+  ],
+  "largeReadOnlyDensity": {
+    "rowCounts": [
+      659192,
+      649663,
+      648291,
+      642105
+    ],
+    "total": 2599251,
+    "functionalSingleQuerySeconds": [
+      0.159991375,
+      0.167207,
+      0.145280709,
+      0.158143583
+    ],
+    "twentySampleP95Acceptance": false,
+    "receipt": "05-density-diagnostic-after.receipt.json"
+  },
+  "rangeReadOnlyDiagnostic": {
+    "prescribedRangeNs": [
+      10100000000,
+      10300000000
+    ],
+    "pageCounts": [
+      76,
+      265,
+      4
+    ],
+    "truncated": false,
+    "laterRangeNs": [
+      40554000000,
+      40720000000
+    ],
+    "laterPageResults": [
+      "VmBudgetExceeded",
+      "VmBudgetExceeded",
+      "VmBudgetExceeded"
+    ],
+    "endToEndAnalysisAcceptance": false,
+    "receipt": "35-range-query-diagnostic-before.receipt.json"
+  },
+  "actualLargeGUI": {
+    "app": "final-density-app/ArkTrace.app",
+    "normalSDKReceipt": "17-normal-sdk.stdout",
+    "openedAt": "2026-10-06T03:26:38.511Z",
+    "readyObservedAt": "2026-10-06T03:27:37.940Z",
+    "timingScope": "AX observation interval only, not exact open latency or 20-sample performance",
+    "cacheState": "Hit",
+    "metadataAX": {
+      "duration": "598.339 s",
+      "source": "674 MB",
+      "schemaPrefix": "cb34d8b668c2"
+    },
+    "initialTimelineAX": "Timeline, viewport 0 ns to 598.339 s, 20 visible tracks",
+    "actualNativeScreenshot": "presented in conversation, no local image export claimed",
+    "selectedEvent": {
+      "key": "callstack:101835",
+      "name": "binder transaction",
+      "startAX": "35.120 s",
+      "durationAX": "617.750 µs",
+      "pid": 905,
+      "tid": 905,
+      "ipid": 142,
+      "itid": 24,
+      "process": "SaInit0",
+      "thread": "SaInit0",
+      "argumentsObserved": 10
+    },
+    "zoomViewportAX": "17.560 s to 316.729 s",
+    "panViewportAX": "47.477 s to 346.646 s",
+    "resetViewportAX": "0 ns to 598.339 s",
+    "eventKeyPreservedAcrossZoomPanReset": true,
+    "rangeInteractions": [
+      {
+        "rangeAX": "39.889 s to 49.862 s",
+        "durationAX": "9.972 s",
+        "FViewportMatches": true,
+        "analysis": "QUERY_LIMIT_EXCEEDED nonfatal banner; timeline retained"
+      },
+      {
+        "rangeAX": "40.554 s to 40.720 s",
+        "durationAX": "166.205 ms",
+        "analysis": "Final unchanged AX progress, and actual pinned Store three corresponding queries each VmBudgetExceeded; GUI selected-range result never appeared"
+      }
+    ],
+    "voiceOverVerified": false,
+    "captureWindowOpened": false,
+    "formalMacOSAcceptance": false,
+    "newRangeErrorStateApp": {
+      "app": "final-range-state-app/ArkTrace.app",
+      "GUIVerified": false,
+      "reason": "Mac locked again and automatic unlock failed; manual unlock requested",
+      "buildReceipt": "51-app-build-keychain.receipt.json"
+    }
+  },
+  "originalEvidenceLoss": {
+    "detectedApproximateUTC": "2026-10-06T03:12:00Z",
+    "originalLooseLogsAndConfigurationsRecovered": false,
+    "originalAppCopiesRetained": true,
+    "causeConfirmed": false,
+    "rerunsRecordedAsNewEvidence": true,
+    "testToolOldSHAReconstructed": false,
+    "newTestToolsCodeSectionsAndUUIDMatchedRetainedApp": true,
+    "readback": "tool-reconstruction-code-readback.json"
+  },
+  "finalApp": {
+    "pins": "current-range-app-pins.json",
+    "actualGUIAfterRangeStateChangeVerified": false,
+    "nestedTools": "fixed Developer ID",
+    "outerSeal": "local ad-hoc",
+    "notarizedDistributionAcceptance": false
+  },
+  "remaining": [
+    "Latest range-error GUI inspection after manual unlock",
+    "Arbitrary later-range query availability under current VM ceiling",
+    "Complete GUI and authorized VoiceOver/keyboard-navigation checks",
+    "Quiet 20-sample performance and draw/frame evidence",
+    "Product process forest peak RSS and one-second cancellation bound",
+    "Capture device discovery authorization and real capture",
+    "ArkDeck index-schema-4 consumers",
+    "Applicable signed distribution/install/rollback",
+    "Swift retirement",
+    "Native Windows x64 verification"
+  ],
+  "evidencePacket": {
+    "relativeRoot": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/real-large-gui-current-20261006",
+    "manifest": "packet-manifest.json",
+    "sha256": "9cf87ebff801cbead8dd79caf4d1e02066094610616fa816022a3190b0e7f1bc",
+    "files": 499
+  },
+  "noPushPRPublicationOrUpload": true
+}

@@ -445,6 +445,26 @@ fn series_uses_its_own_deadline_and_bounded_range_before_samples() {
         assert_eq!(schema.series(&db, &i, &q), Err(StoreError::InvalidQuery));
     }
 }
+
+#[test]
+fn unindexed_series_discovery_does_not_rescan_samples_for_each_empty_filter() {
+    let (conn, inspection) = fixture(
+        "WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<30000)
+         INSERT INTO process_measure SELECT 1001,7,20,0 FROM n;
+         WITH RECURSIVE n(i) AS (VALUES(21) UNION ALL SELECT i+1 FROM n WHERE i<120)
+         INSERT INTO process_measure_filter SELECT i,'empty',-10,'bytes' FROM n;",
+    );
+    // Do not let an implicit temporary index conceal the repeated scan. The
+    // production query also has to fit when no filter-prefix seek is present.
+    conn.pragma_update(None, "automatic_index", false).unwrap();
+    let unindexed = series(&conn, &inspection, 2000).unwrap();
+    assert_eq!(unindexed.items.len(), 2);
+    assert!(!unindexed.truncated);
+    conn.pragma_update(None, "query_only", false).unwrap();
+    conn.execute_batch("CREATE INDEX filter_seek ON process_measure(filter_id,ts)")
+        .unwrap();
+    assert_eq!(series(&conn, &inspection, 2000).unwrap(), unindexed);
+}
 #[test]
 fn fresh_inspection_and_query_clamps_remain_separate_machine_observations() {
     let (conn, _) = fixture("INSERT INTO measure VALUES(900,7,10,300);");

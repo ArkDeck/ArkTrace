@@ -19,6 +19,12 @@ use rusqlite::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
+// A density reads the complete matching source into fixed bucket state. Its
+// work bound must cover a large lane, unlike a limit+1 detail page. This credit
+// applies to the one streaming statement only; metadata/identity lookups keep
+// DEFAULT_VM_BUDGET. Deadlines, cancellation and decoded credit still apply.
+const STREAMING_VM_BUDGET: u64 = 50_000_000;
+
 pub(crate) fn density(
     db: &Database<'_>,
     inspection: &DatabaseInspection,
@@ -316,62 +322,67 @@ fn aggregate_rows(
     // The caller credited bucket state before allocation. No event Vec or
     // decoded strings survive a source row, and VM credit is not reset.
     let mut state = vec![Accumulator::default(); query.bucket_count];
-    db.visit(sql, params_from_iter(bindings), DEFAULT_VM_BUDGET, |row| {
-        let identity = optional_integer(row, 0)?;
-        let timestamp = optional_integer(row, 1)?.ok_or(StoreError::InvalidDatabase)?;
-        let duration = optional_integer(row, 2)?;
-        let weight = if counter { Some(0) } else { duration };
-        let index = if timestamp <= start {
-            0
-        } else {
-            timestamp
-                .checked_sub(start)
-                .ok_or(StoreError::InvalidDatabase)?
-                / width
-        }
-        .min(query.bucket_count as i64 - 1) as usize;
-        let aggregate = &mut state[index];
-        // SQLite's single MAX retains the first equal non-null maximum; when
-        // every weight is NULL, its bare witness comes from the last row.
-        if aggregate.count == 0
-            || aggregate.weight.is_none()
-            || weight.is_some_and(|value| aggregate.weight.is_some_and(|old| value > old))
-        {
-            aggregate.identity = identity;
-            aggregate.weight = weight;
-        }
-        aggregate.count = aggregate
-            .count
-            .checked_add(1)
-            .ok_or(StoreError::InvalidDatabase)?;
-        if timestamp < inspection.trace_start_ts || timestamp > inspection.trace_end_ts {
-            aggregate.clamped = aggregate
-                .clamped
+    db.visit(
+        sql,
+        params_from_iter(bindings),
+        STREAMING_VM_BUDGET,
+        |row| {
+            let identity = optional_integer(row, 0)?;
+            let timestamp = optional_integer(row, 1)?.ok_or(StoreError::InvalidDatabase)?;
+            let duration = optional_integer(row, 2)?;
+            let weight = if counter { Some(0) } else { duration };
+            let index = if timestamp <= start {
+                0
+            } else {
+                timestamp
+                    .checked_sub(start)
+                    .ok_or(StoreError::InvalidDatabase)?
+                    / width
+            }
+            .min(query.bucket_count as i64 - 1) as usize;
+            let aggregate = &mut state[index];
+            // SQLite's single MAX retains the first equal non-null maximum; when
+            // every weight is NULL, its bare witness comes from the last row.
+            if aggregate.count == 0
+                || aggregate.weight.is_none()
+                || weight.is_some_and(|value| aggregate.weight.is_some_and(|old| value > old))
+            {
+                aggregate.identity = identity;
+                aggregate.weight = weight;
+            }
+            aggregate.count = aggregate
+                .count
                 .checked_add(1)
                 .ok_or(StoreError::InvalidDatabase)?;
-        }
-        if counter {
-            let malformed = !matches!(
-                row.get_ref(2).map_err(crate::database::sqlite_error)?,
-                ValueRef::Integer(_) | ValueRef::Null
-            );
-            let clamped = duration.is_some_and(|value| {
-                value > 0
-                    && (value > inspection.duration_ns
-                        || i128::from(timestamp) + i128::from(value)
-                            > i128::from(inspection.trace_end_ts))
-            });
-            aggregate.invalid_duration = aggregate
-                .invalid_duration
-                .checked_add(i64::from(malformed))
-                .ok_or(StoreError::InvalidDatabase)?;
-            aggregate.clamped_duration = aggregate
-                .clamped_duration
-                .checked_add(i64::from(clamped))
-                .ok_or(StoreError::InvalidDatabase)?;
-        }
-        Ok(())
-    })?;
+            if timestamp < inspection.trace_start_ts || timestamp > inspection.trace_end_ts {
+                aggregate.clamped = aggregate
+                    .clamped
+                    .checked_add(1)
+                    .ok_or(StoreError::InvalidDatabase)?;
+            }
+            if counter {
+                let malformed = !matches!(
+                    row.get_ref(2).map_err(crate::database::sqlite_error)?,
+                    ValueRef::Integer(_) | ValueRef::Null
+                );
+                let clamped = duration.is_some_and(|value| {
+                    value > 0
+                        && (value > inspection.duration_ns
+                            || i128::from(timestamp) + i128::from(value)
+                                > i128::from(inspection.trace_end_ts))
+                });
+                aggregate.invalid_duration = aggregate
+                    .invalid_duration
+                    .checked_add(i64::from(malformed))
+                    .ok_or(StoreError::InvalidDatabase)?;
+                aggregate.clamped_duration = aggregate
+                    .clamped_duration
+                    .checked_add(i64::from(clamped))
+                    .ok_or(StoreError::InvalidDatabase)?;
+            }
+            Ok(())
+        },
+    )?;
     Ok(state
         .into_iter()
         .enumerate()
@@ -571,6 +582,31 @@ mod cpu_stream_tests {
         rows.into_iter()
             .map(|r| (r.bucket, r.count, r.identity, r.clamped))
             .collect()
+    }
+    #[test]
+    fn large_cpu_density_keeps_all_rows_under_bounded_streaming_credit() {
+        let (c, inspection) = fixture(
+            "WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<600000)
+            INSERT INTO sched_slice SELECT i,1000+i,1,0,1,1 FROM n;",
+        );
+        let b = budget();
+        let db = Database::borrow_writable(&c, &b).unwrap();
+        let q = request(0, 999000, 300);
+        let mut bindings = Vec::new();
+        let sql = interval_source(&inspection, &q, &mut bindings).unwrap();
+        assert_eq!(
+            db.visit(&sql, params_from_iter(bindings), DEFAULT_VM_BUDGET, |_| Ok(
+                ()
+            )),
+            Err(StoreError::VmBudgetExceeded)
+        );
+        let expected = reference(&db, &inspection, &q, 100_000_000).unwrap();
+        let actual = cpu_aggregate(&db, &inspection, &q, 0, 3330).unwrap();
+        assert_eq!(
+            actual.iter().map(|row| row.count.unwrap()).sum::<i64>(),
+            600000
+        );
+        assert_eq!(compared(actual), expected);
     }
     #[test]
     fn full_cpu_density_fits_existing_credit_and_matches_sqlite_without_sampling() {

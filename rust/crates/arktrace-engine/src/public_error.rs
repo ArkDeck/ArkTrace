@@ -103,6 +103,12 @@ impl EngineError {
                 StoreError::SQLite { .. } if self.stage == EngineStage::Querying => {
                     make(Code::QueryFailed)
                 }
+                // SQLITE_FULL includes the bounded max_page_count ceiling.
+                // An index that cannot fit is an execution failure, not proof
+                // that the parser's input database is corrupt.
+                StoreError::SQLite { code: 13 } if self.stage == EngineStage::Indexing => {
+                    make(Code::TraceParseFailed)
+                }
                 _ => make(Code::TraceDatabaseInvalid),
             },
         }
@@ -112,6 +118,20 @@ impl EngineError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn index_space_exhaustion_does_not_indict_the_trace_database() {
+        for (stage, code) in [
+            (EngineStage::Indexing, Code::TraceParseFailed),
+            (EngineStage::Querying, Code::QueryFailed),
+        ] {
+            let error = EngineError {
+                stage,
+                failure: EngineFailure::Store(StoreError::SQLite { code: 13 }),
+            }
+            .public_error();
+            assert_eq!(error.code(), code);
+        }
+    }
     #[test]
     fn summary_request_errors_keep_request_stage_and_overflow_is_query_failed() {
         let request = EngineError {

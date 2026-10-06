@@ -252,6 +252,66 @@ fn vm_interruption_resets_handler_and_cancellation_and_deadline_are_distinct() {
         Err(StoreError::DeadlineExceeded)
     ));
 }
+
+#[test]
+fn quick_check_accepts_valid_database_beyond_small_trace_vm_work() {
+    // NOT NULL checks make a compact, valid database exceed the former fixed
+    // 50M instruction ceiling without requiring a reviewed large trace in CI.
+    let connection = Connection::open_in_memory().unwrap();
+    let columns = (0..32)
+        .map(|index| format!("c{index} INTEGER NOT NULL"))
+        .collect::<Vec<_>>()
+        .join(",");
+    let values = ["0"; 32].join(",");
+    connection
+        .execute_batch(&format!(
+            "CREATE TABLE compact({columns});
+             WITH RECURSIVE rows(n) AS (
+                 VALUES(1) UNION ALL SELECT n+1 FROM rows WHERE n<1000000
+             ) INSERT INTO compact SELECT {values} FROM rows;"
+        ))
+        .unwrap();
+    {
+        let mut statement = connection.prepare("PRAGMA quick_check(1)").unwrap();
+        assert_eq!(
+            statement
+                .query_row([], |row| row.get::<_, String>(0))
+                .unwrap(),
+            "ok"
+        );
+        assert!(statement.get_status(rusqlite::StatementStatus::VmStep) > 50_000_000);
+    }
+    let request = ValidationBudget {
+        deadline: Instant::now() + Duration::from_secs(30),
+        ..budget()
+    };
+    let db = Database::new(connection, &request).unwrap();
+    assert_eq!(
+        db.query("PRAGMA quick_check(1)", [], 2, 50_000_000, |row| {
+            crate::database::text(row, 0)
+        }),
+        Err(StoreError::VmBudgetExceeded)
+    );
+    db.quick_check().unwrap();
+    // The larger validation workload must still honor request cancellation.
+    request.cancellation.cancel();
+    assert_eq!(db.quick_check(), Err(StoreError::Cancelled));
+}
+
+#[test]
+fn quick_check_does_not_expand_work_for_database_over_the_byte_limit() {
+    let request = ValidationBudget {
+        maximum_database_bytes: 1,
+        ..budget()
+    };
+    let db = Database::new(fixture(""), &request).unwrap();
+    assert_eq!(
+        db.quick_check(),
+        Err(StoreError::Host(
+            arktrace_platform::HostError::LimitExceeded
+        ))
+    );
+}
 #[test]
 fn active_sqlite_statement_observes_external_cancellation() {
     let request = budget();

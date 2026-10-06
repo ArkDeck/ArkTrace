@@ -167,7 +167,35 @@ impl<'a> Database<'a> {
         crate::schema::validate(self)
     }
     pub(crate) fn quick_check(&self) -> Result<(), StoreError> {
-        let check = self.query("PRAGMA quick_check(1)", [], 2, 50_000_000, |row| {
+        // quick_check visits rows and index entries. A fixed small-trace VM
+        // ceiling rejects valid large exports before bootstrap can begin.
+        // Scale only this structural scan with bounded physical database size;
+        // semantic probes and queries retain their independent work limits.
+        let page_count = self.query("PRAGMA page_count", [], 1, DEFAULT_VM_BUDGET, |row| {
+            integer(row, 0)
+        })?[0];
+        let page_size = self.query("PRAGMA page_size", [], 1, DEFAULT_VM_BUDGET, |row| {
+            integer(row, 0)
+        })?[0];
+        if page_count < 0
+            || !(512..=65536).contains(&page_size)
+            || !(page_size as u64).is_power_of_two()
+        {
+            return Err(StoreError::InvalidDatabase);
+        }
+        let database_bytes = (page_count as u64)
+            .checked_mul(page_size as u64)
+            .ok_or(StoreError::InvalidDatabase)?;
+        if database_bytes > self.budget.maximum_database_bytes {
+            return Err(StoreError::Host(
+                arktrace_platform::HostError::LimitExceeded,
+            ));
+        }
+        let vm_budget = database_bytes
+            .checked_mul(4)
+            .ok_or(StoreError::InvalidBudget)?
+            .max(50_000_000);
+        let check = self.query("PRAGMA quick_check(1)", [], 2, vm_budget, |row| {
             text(row, 0)
         })?;
         if check != ["ok".to_owned()] {
