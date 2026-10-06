@@ -1,0 +1,54 @@
+{
+  "cases": {
+    "first-event-cancel-before-second-frame": {
+      "cancelCallbackAfterEvent": true,
+      "deadlineRule": "unchanged original group deadline",
+      "decoderCalls": 1,
+      "errorCode": "HASH_CANCELLED",
+      "eventCalls": 1,
+      "finishCalls": 0,
+      "firstFailureCode": "stdout_protocol_admission_failed",
+      "firstLineSHA256": "a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e",
+      "hashBytesRead": 0,
+      "hashReadCalls": 0,
+      "offeredBytes": 13,
+      "recordCount": 1,
+      "remainingBufferBytes": 7,
+      "remainingBufferHex": "7365636f6e640a",
+      "remainingBufferSHA256": "480c2336b410f1ad5f8bf1b28944490255804b65350c527787e74ebdd511e3a4",
+      "sameBudgetPolicyDeadlineCallback": true
+    },
+    "first-event-original-deadline-before-second-frame": {
+      "cancelCallbackAfterEvent": false,
+      "deadlineRule": "min(original group deadline, caseStart + 20000000ns) once",
+      "decoderCalls": 1,
+      "errorCode": "HASH_DEADLINE_EXCEEDED",
+      "eventCalls": 1,
+      "finishCalls": 0,
+      "firstFailureCode": "stdout_protocol_admission_failed",
+      "firstLineSHA256": "a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e",
+      "hashBytesRead": 0,
+      "hashReadCalls": 0,
+      "maxFixtureWaitNS": 50000000,
+      "offeredBytes": 13,
+      "recordCount": 1,
+      "remainingBufferBytes": 7,
+      "remainingBufferHex": "7365636f6e640a",
+      "remainingBufferSHA256": "480c2336b410f1ad5f8bf1b28944490255804b65350c527787e74ebdd511e3a4",
+      "sameBudgetPolicyDeadlineCallback": true
+    }
+  },
+  "driverSHA256": "8f63cb966d0db48b5e6a50a50086aeb4214252f5c9435629fbddf1bc472defea",
+  "exactCaseCount": 2,
+  "groupCount": 1,
+  "groupMaxNS": 30000000000,
+  "independentExpectedBytes": "literal first newline second newline",
+  "registeredBeforeGuard": true,
+  "schemaVersion": 1,
+  "sourceSHA256": {
+    "controller.py": "2c85e0e396a5c13601787713295074f18b12c819e6452bf76e4cc1bd37db0ce0",
+    "hash_budget.py": "a68fd1a55953284616a370b271a2fc73110c810925e5151c0f4b6fa1e9f129e2"
+  },
+  "spyDecoderOriginalSegmentSHA256": "ad6fd83250d0fc0517e4f459bc3d0f71e025efd975f2516c2f53adbabe37844d",
+  "syntheticTotalCapBytes": 65536
+}

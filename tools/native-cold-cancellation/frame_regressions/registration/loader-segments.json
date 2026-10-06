@@ -1,0 +1,46 @@
+{
+  "baselineControllerSHA256": "2c85e0e396a5c13601787713295074f18b12c819e6452bf76e4cc1bd37db0ce0",
+  "extractedMethods": [
+    "fail",
+    "on_stdout_bytes"
+  ],
+  "finishExecuted": false,
+  "fullControllerModuleExecuted": false,
+  "productionMethodsUnmodified": true,
+  "replacements": [
+    "A55 loader root becomes file-relative owned N48 root",
+    "method selection omits finish",
+    "isolated module namespaces become N48",
+    "small Path byte reads replace A55 generic IO/forest helpers",
+    "fixture constructor/check/event/SpyDecoder and inert port replace production authority"
+  ],
+  "segments": [
+    {
+      "endLine": 20,
+      "name": "SupervisorError",
+      "originalASTSHA256": "c8a4568ab7efed0d1cba17a481eba72bc5050c5691dc9e5ff91e4e94bc4e26d2",
+      "originalSourceSegment": "class SupervisorError(ValueError):\n    pass",
+      "segmentSHA256": "4e25496896fbbfa039b44e8bcbfd76457fbb552a5fc605391ae84e07f3a2415d",
+      "segmentUTF8Bytes": 43,
+      "startLine": 19
+    },
+    {
+      "endLine": 58,
+      "name": "fail",
+      "originalASTSHA256": "47cdcc377cf1d0cfb8978df80b6a66021308663ccc33d7731b7702551a933999",
+      "originalSourceSegment": "def fail(self, code):\n        if self.failure_code is None:\n            self.failure_code = code\n        raise SupervisorError(code)",
+      "segmentSHA256": "f1d6c16c012597a9bbd076092017a57f571381de75a8cc5f46317efebef710e1",
+      "segmentUTF8Bytes": 132,
+      "startLine": 55
+    },
+    {
+      "endLine": 94,
+      "name": "on_stdout_bytes",
+      "originalASTSHA256": "748e27544020b158c4e3d8b6b2a4fd757cf6e483325cebb89a864c6fdcd424df",
+      "originalSourceSegment": "def on_stdout_bytes(self, chunk, port):\n        self.check(port)\n        try:\n            if type(chunk) is not bytes or not 0 < len(chunk) <= 8192:\n                self.fail(\"stdout_quantum_invalid\")\n            self.offered_bytes += len(chunk)\n            if self.offered_bytes > 131072:\n                self.fail(\"stdout_stream_limit\")\n            self.buffer.extend(chunk)\n            while b\"\\n\" in self.buffer:\n                self.budget.checkpoint()\n                newline = self.buffer.index(10)\n                if newline > 65536 or self.record_count >= 256:\n                    self.fail(\"stdout_record_limit\")\n                line = bytes(self.buffer[:newline])\n                del self.buffer[:newline + 1]\n                record = self.decoder.feed(line)\n                self.record_count += 1\n                self.event(record, port)\n                self.budget.checkpoint()\n            if len(self.buffer) > 65536:\n                self.fail(\"stdout_line_limit\")\n            self.budget.checkpoint()\n        except Exception:\n            if self.failure_code is None:\n                self.failure_code = \"stdout_protocol_admission_failed\"\n            raise",
+      "segmentSHA256": "b586aeaf4869e9dc4285e73d992ab7d45d8744d27dbdd2d1284eb6c73ae58074",
+      "segmentUTF8Bytes": 1172,
+      "startLine": 68
+    }
+  ]
+}

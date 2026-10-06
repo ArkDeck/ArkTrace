@@ -1,0 +1,154 @@
+{
+  "ProtocolSourceSHA256": "64fbdf32e563db8dab69834b842f188383c0d7627d7e38859e7605b806f47354",
+  "ProtocolStaticTypeAndCallerPremises": [
+    {
+      "endLine": 31,
+      "originalSourceSegment": "ENVELOPE={'schemaVersion','sequence','event','clockID','monotonicNs','controlNonce'}\nMETRICS={'cancelCalls','cancelMeasured','cancelToJoinedNs','joinWaitNs','joinWaitScope','withinCancelSLO'}\nFIELDS={\n 'consumer.bootstrap':{'pid','parentPID','normalPublicSDK','storagePolicy'},'clock.calibration':set(),\n 'engine.create.before':set(),'engine.create.joined':set(),'open.before':{'timeoutMilliseconds','openTasks'},\n 'open.progress':{'stage'},'open.returned':{'success','failure'},\n 'cancel.before':{'callMonotonicNs','measuredGate','cancelCalls','mode'},'cancel.after':{'callMonotonicNs','cancelCalls'},\n 'open.joined':{'success','joinedMonotonicNs'}|METRICS,\n 'unexpectedSession.close.before':set(),'unexpectedSession.close.joined':set(),\n 'retained.beforeShutdown':{'bytes'},'engine.shutdown.before':set(),'engine.shutdown.joined':set(),\n 'engine.shutdown.failure':{'failure'},'cleanup.flush.joined':set(),'consumer.failure':{'failure'},\n 'consumer.result':{'passed','cancelCalls','normalShutdownJoined','privateRequestCounts','privateColdCounts','descendantActualExitCodes','descendantWaitReaped','completeProcessForestProven'}|METRICS,\n 'protocol.guard.before':set(),'protocol.guard.joinOnly':METRICS,'protocol.guard.unmeasuredCleanup':METRICS,\n 'protocol.guard.inputCase':{'name','passed','expectedSuccess','rejected','openedDescriptors','closedDescriptors','allClosedEBADF','returnedBytes'},\n 'protocol.guard.inputResult':{'passed','caseCount','engineCreateCalls','openCalls','cancelCalls'},\n 'protocol.guard.result':{'passed','caseCount','engineCreateCalls','openCalls','cancelCalls','actualCancellationValidated'}}\nOPTIONAL={'open.joined':{'unexpectedSuccess','failure','cancelSLOMilliseconds'},'retained.beforeShutdown':{'scope','privateColdCounts','privateRegistryCounts','failure'},'engine.shutdown.joined':{'postShutdownHandleQueryExecuted'}}\nERROR_CODES=WIRE_CODES|frozenset(('semantic_invalid','duplicate_key','nonfinite_json','decoder_invalid','json_invalid','json_recursion','incomplete_terminal','nonce_invalid','mode_invalid'))\nLEGACY_CODES={'duplicate JSON key':'duplicate_key','nonfinite JSON':'nonfinite_json','decoder closed/rejected':'decoder_invalid','rejected stream':'decoder_invalid','incomplete terminal proof':'incomplete_terminal','canonical UUID nonce':'nonce_invalid','mode':'mode_invalid'}\nclass ProtocolError(ValueError):\n def __init__(self,code):\n  self.code=code if code in ERROR_CODES else LEGACY_CODES.get(code,'semantic_invalid');super().__init__(self.code)\ndef canonical_nonce(nonce):\n if type(nonce) is not str or len(nonce)!=36:return False\n",
+      "segmentSHA256": "1b026e36147f44bbce5ac250fffed62776b72581c8c1edf904c4e827503db708",
+      "startLine": 8
+    },
+    {
+      "endLine": 49,
+      "originalSourceSegment": " require(type(x['type']) is str and 0<len(x['type'])<=512 and nullable_string(x['code']) and nullable_string(x['stage']) and boolean(x['isCancellation']),'failure types')\ndef unique_pairs(pairs):\n result={}\n for k,v in pairs:\n  require(k not in result,'duplicate JSON key');result[k]=v\n return result\nclass Decoder:\n def __init__(self,nonce,mode='normal',*,absolute_deadline_ns,cancelled):\n  try:self._wire=WireBudget(absolute_deadline_ns,cancelled)\n",
+      "segmentSHA256": "a1f339325ffd75861931a92cadc592ba3defbb676960237ae0ac94ee84bcbdf6",
+      "startLine": 41
+    },
+    {
+      "endLine": 108,
+      "originalSourceSegment": "  if event=='open.progress':\n   require(type(x['stage']) is str and x['stage'] in STAGES,'typed public stage');self.stage=x['stage'];self.last_progress_received=time.monotonic_ns()\n  if event=='open.returned':\n   require(x['success']==(x['failure'] is None),'terminal result');self.terminal=True\n  if event=='cancel.before':\n   require('open.joined' not in self.seen and (not x['measuredGate'] or not self.terminal),'cancel after terminal/join')\n   require(not x['measuredGate'] or self.cancel_authorized,'stdout cannot authorize measured cancel')\n   require(x['cancelCalls']==1 and x['mode']==('observedParsingAndParentHandshake' if x['measuredGate'] else 'unmeasuredCleanup'),'cancel mode');self.cancel_start=x['callMonotonicNs'];self.measured=x['measuredGate']\n   require(self.cancel_start<=x['monotonicNs'],'call clock')\n  if event=='cancel.after':\n   require('open.joined' not in self.seen,'cancel.after after join')\n   require(x['cancelCalls']==1 and x['callMonotonicNs']==self.cancel_start,'cancel pairing')\n  if 'bytes' in x:require(x['bytes'] is None or uint(x['bytes']),'retained bytes')\n  for k in ('privateColdCounts','privateRegistryCounts','privateRequestCounts','descendantActualExitCodes','descendantWaitReaped'):\n   if k in x:require(x[k] is None,'unsupported private proof')\n  if METRICS<=set(x):\n   require(boolean(x['cancelMeasured']),'measured bool')\n   if x['cancelMeasured']:\n",
+      "segmentSHA256": "421bd916e4db0404df9398156554617f05e6c535d2b5024526f0b14385585bc1",
+      "startLine": 91
+    },
+    {
+      "endLine": 145,
+      "originalSourceSegment": "    require('engine.create.joined' in self.seen and (self.consumer_failed or self.joined is not None),'shutdown before joining open')\n    if self.joined is not None and self.joined['success']:\n     require('unexpectedSession.close.joined' in self.seen or self.consumer_failed,'shutdown before session close')\n   if event=='engine.shutdown.joined':require(not self.shutdown_failed,'shutdown joined after failure')\n   if event=='engine.shutdown.failure':self.shutdown_failed=True\n   if event=='consumer.failure':self.consumer_failed=True\n   if event=='consumer.result':\n    validate_result(self.returned,self.joined,x,self.cancel_before,self.cancel_after,'engine.shutdown.joined' in self.seen and not self.shutdown_failed,'cleanup.flush.joined' in self.seen,self.consumer_failed);self.closed=True\n  elif event=='protocol.guard.result':\n   require('protocol.guard.inputResult' in self.seen and 'protocol.guard.joinOnly' in self.seen and 'protocol.guard.unmeasuredCleanup' in self.seen,'guard closure');self.closed=True\n  self._wire.check()\n  self.seq=x['sequence'];self.clock=x['monotonicNs'];self.bytes+=len(line);self.seen.add(event);return x\n def _checkpoint(self):\n  try:\n   require(not self.invalid,'rejected stream');self._wire.check()\n  except (WireError,ProtocolError) as error:\n   self.invalid=True;self.cancel_authorized=False\n   raise ProtocolError(error.code) from None\n",
+      "segmentSHA256": "9d73fb6441c15996e05548e7fd2f2a246dfacdb8482f23d1a22ea7e5292d4c2a",
+      "startLine": 128
+    },
+    {
+      "endLine": 175,
+      "originalSourceSegment": " def cancel_gate(self,ownership=None):\n  self._checkpoint()\n  if ownership is not None:require(type(ownership) is KernelOwnership,'kernel witness required')\n  fresh=self.last_progress_received is not None and time.monotonic_ns()-self.last_progress_received<=100_000_000\n  return self._checked_result(self.protocol_allows_cancel and fresh and ownership is not None and ownership.revalidate())\n\n def authorize_cancel(self,ownership):\n  self._checkpoint()\n  require(not self.cancel_authorized and 'cancel.before' not in self.seen and self.cancel_gate(ownership),'live parsing and independent kernel admission required')\n  self.cancel_authorized=True\n  return self._checked_result('cancel:'+self.nonce+'\\n')\n\n def finish(self):\n  self._checkpoint()\n  if self.invalid:raise ProtocolError('rejected stream')\n  if self.closed:return self._checked_result({'complete':True,'failureEvidence':False})\n  if self.mode=='normal' and (self.consumer_failed or self.shutdown_failed):return self._checked_result({'complete':False,'failureEvidence':True})\n  raise ProtocolError('incomplete terminal proof')\n\n @property\n def protocol_allows_cancel(self):\n  return self.mode=='normal' and not self.invalid and not self.closed and not self.consumer_failed and not self.shutdown_failed and not self.terminal and self.stage=='parsing' and 'clock.calibration' in self.seen\n",
+      "segmentSHA256": "8ca866fdf3968b5f40b28fbc42dfcd063ee2ebf6af83497e4194461cbbcad329",
+      "startLine": 150
+    }
+  ],
+  "SwiftCompileCount": 0,
+  "SwiftProvenance": [
+    {
+      "endLine": 51,
+      "name": "typedFailure",
+      "originalSourceSegment": "private struct Failure: Sendable {\n    let type: String\n    let code: String?\n    let stage: String?\n    let isCancellation: Bool\n    init(_ error: any Error) {\n        type = String(reflecting: Swift.type(of: error))\n        if let value = error as? ArkTraceError {\n            code = value.code.rawValue\n            stage = value.stage.rawValue\n            isCancellation = value.code == .cancelled && value.publicContractViolation == nil\n        } else if let value = error as? RustAdmission {\n            code = String(value.rawValue)\n            stage = nil\n            isCancellation = value == .cancelled\n        } else {\n            code = nil\n            stage = nil\n            isCancellation = error is CancellationError\n        }\n    }\n    var fields: [String: Any] {\n        [\"type\": type, \"code\": code as Any? ?? NSNull(),\n         \"stage\": stage as Any? ?? NSNull(), \"isCancellation\": isCancellation]\n    }\n}\n",
+      "segmentSHA256": "7f6cf4840a325a0b1a115454f966a31b795d64857a47e2a074727ecbe8d43a65",
+      "segmentUTF8Bytes": 924,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 26
+    },
+    {
+      "endLine": 75,
+      "name": "open.returned",
+      "originalSourceSegment": "    func terminal(_ failure: Failure?) {\n        lock.withLock {\n            finished = true\n            emitLocked(\"open.returned\", [\"success\": failure == nil, \"failure\": failure?.fields as Any? ?? NSNull()])\n        }\n    }\n",
+      "segmentSHA256": "73a570cf105c02f4cdd82b54271f548bc26b0339850250d2e25abef617574ba2",
+      "segmentUTF8Bytes": 226,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 70
+    },
+    {
+      "endLine": 99,
+      "name": "envelopeAndWireCaps",
+      "originalSourceSegment": "    private func emitLocked(_ event: String, _ fields: [String: Any]) {\n            guard healthy else { return }\n            var record = fields\n            record[\"schemaVersion\"] = 3\n            sequence += 1\n            record[\"sequence\"] = sequence\n            record[\"event\"] = event\n            record[\"clockID\"] = \"Swift.DispatchTime.uptimeNanoseconds\"\n            record[\"monotonicNs\"] = DispatchTime.now().uptimeNanoseconds\n            record[\"controlNonce\"] = nonce\n            do {\n                var data = try JSONSerialization.data(withJSONObject: record, options: [.sortedKeys])\n                data.append(0x0a)\n                guard data.count <= 65_536, bytes + data.count <= 131_072 else {\n                    healthy = false\n                    return\n                }\n                try FileHandle.standardOutput.write(contentsOf: data)\n                bytes += data.count\n            } catch { healthy = false }\n    }\n",
+      "segmentSHA256": "089c9774371c893bc9983d767736f8d284cf5348c4765d0a730fc178867be38b",
+      "segmentUTF8Bytes": 944,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 79
+    },
+    {
+      "endLine": 110,
+      "name": "joinMetrics",
+      "originalSourceSegment": "// Ordinary joining and unmeasured cleanup never produce a cancellation metric.\nprivate func joinMetrics(measured: Bool, start: UInt64, joined: UInt64, calls: Int) -> [String: Any] {\n    let elapsed = joined - start\n    return [\"cancelCalls\": calls, \"cancelMeasured\": measured,\n            \"cancelToJoinedNs\": measured ? elapsed as Any : NSNull(),\n            \"joinWaitNs\": measured ? NSNull() : elapsed as Any,\n            \"joinWaitScope\": measured ? NSNull() : \"ordinaryJoinOrUnmeasuredCleanup\",\n            \"withinCancelSLO\": measured ? (elapsed <= 1_000_000_000) as Any : NSNull()]\n}\n",
+      "segmentSHA256": "d92a53f699e1c7f2816774fc8e17c1c4ad5336a97fc2385ca2ac21c7f867be87",
+      "segmentUTF8Bytes": 588,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 102
+    },
+    {
+      "endLine": 648,
+      "name": "returnedOutcomeBinding",
+      "originalSourceSegment": "            let opening = Task<Outcome, Never> {\n                do {\n                    let session = try await created.open(URL(fileURLWithPath: input.source),\n                        format: .htrace, timeoutMilliseconds: 300_000, progress: { log.progress($0) })\n                    log.terminal(nil)\n                    return .success(session)\n                } catch {\n                    let failure = Failure(error)\n                    log.terminal(failure)\n                    return .failure(failure)\n                }\n",
+      "segmentSHA256": "dc9c618c06baad38dfb291f0fcbe1a8d033fc31ba3ec57268900ab1c9c1f333a",
+      "segmentUTF8Bytes": 529,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 638
+    },
+    {
+      "endLine": 664,
+      "name": "cancelPairAndOriginalJoin",
+      "originalSourceSegment": "            let control: String\n            do { control = try await command() }\n            catch { control = \"cleanup:\" + input.controlNonce }\n            let measured = control == \"cancel:\" + input.controlNonce && log.cancellationGate\n            let joinOnly = control == \"join:\" + input.controlNonce\n            let cancelStart = DispatchTime.now().uptimeNanoseconds\n            if !joinOnly {\n                log.emit(\"cancel.before\", [\"callMonotonicNs\": cancelStart, \"measuredGate\": measured,\n                    \"cancelCalls\": 1, \"mode\": measured ? \"observedParsingAndParentHandshake\" : \"unmeasuredCleanup\"])\n                opening.cancel()\n                log.emit(\"cancel.after\", [\"callMonotonicNs\": cancelStart, \"cancelCalls\": 1])\n            }\n            let result = await opening.value\n            let joined = DispatchTime.now().uptimeNanoseconds\n            let metrics = joinMetrics(measured: measured, start: cancelStart, joined: joined, calls: joinOnly ? 0 : 1)\n",
+      "segmentSHA256": "f19d77f7fbb0f8a9b4ce5a0c81261ae3a14ef33ebaae709bae0780741a6a6905",
+      "segmentUTF8Bytes": 983,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 650
+    },
+    {
+      "endLine": 672,
+      "name": "open.joined.success",
+      "originalSourceSegment": "            case .success(let session):\n                log.emit(\"open.joined\", [\"success\": true, \"unexpectedSuccess\": true,\n                    \"joinedMonotonicNs\": joined].merging(metrics) { _, new in new })\n                log.emit(\"unexpectedSession.close.before\")\n                try await session.close()\n                log.emit(\"unexpectedSession.close.joined\")\n",
+      "segmentSHA256": "5d77d60afa173a5765aaf64cc703d3c9fa7ada348fd7f230cb657f4d8b3093ea",
+      "segmentUTF8Bytes": 370,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 667
+    },
+    {
+      "endLine": 677,
+      "name": "open.joined.failureAnd1000ms",
+      "originalSourceSegment": "            case .failure(let failure):\n                cancellation = failure.isCancellation\n                log.emit(\"open.joined\", [\"success\": false, \"failure\": failure.fields,\n                    \"joinedMonotonicNs\": joined, \"cancelSLOMilliseconds\": 1_000].merging(metrics) { _, new in new })\n            }\n",
+      "segmentSHA256": "b826c749ab57dc78413f5f51bf34085369ceeb13390bfb5968d5aac667e0bae1",
+      "segmentUTF8Bytes": 311,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 673
+    },
+    {
+      "endLine": 699,
+      "name": "shutdownCleanupResult",
+      "originalSourceSegment": "            shutdownStarted = true\n            log.emit(\"engine.shutdown.before\")\n            try await created.shutdown()\n            engine = nil\n            log.emit(\"engine.shutdown.joined\", [\"postShutdownHandleQueryExecuted\": false])\n            try await RustCleanup.flush()\n            log.emit(\"cleanup.flush.joined\")\n            let passed = measured && cancellation && !joinOnly && joined - cancelStart <= 1_000_000_000 && log.outputHealthy\n            log.emit(\"consumer.result\", [\"passed\": passed, \"cancelMeasured\": measured,\n                \"cancelCalls\": joinOnly ? 0 : 1,\n                \"normalShutdownJoined\": true, \"privateRequestCounts\": NSNull(),\n                \"privateColdCounts\": NSNull(), \"descendantActualExitCodes\": NSNull(),\n                \"descendantWaitReaped\": NSNull(), \"completeProcessForestProven\": false].merging(metrics) { _, new in new })\n            exit(passed ? 0 : 2)\n",
+      "segmentSHA256": "8aeabeb2f32c2107bfee75f83f39cf1ad7980e3da289a8b8cdca3be677340e22",
+      "segmentUTF8Bytes": 910,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 686
+    },
+    {
+      "endLine": 710,
+      "name": "consumerFailureAndShutdownFailure",
+      "originalSourceSegment": "        } catch {\n            journal?.emit(\"consumer.failure\", [\"failure\": Failure(error).fields])\n            if let engine, !shutdownStarted {\n                shutdownStarted = true\n                do {\n                    journal?.emit(\"engine.shutdown.before\")\n                    try await engine.shutdown()\n                    journal?.emit(\"engine.shutdown.joined\")\n                } catch { journal?.emit(\"engine.shutdown.failure\", [\"failure\": Failure(error).fields]) }\n            }\n            exit(2)\n",
+      "segmentSHA256": "626ca5e8b48a842d8bf0d488367f3f23f75e7ca9cb9dbcef8717c1d5f7a48fb6",
+      "segmentUTF8Bytes": 513,
+      "sourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+      "startLine": 700
+    }
+  ],
+  "SwiftRuntimeCount": 0,
+  "SwiftSourceBytes": 35624,
+  "SwiftSourceSHA256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+  "cancelSLOMilliseconds": 1000,
+  "caseRecordsSynthetic": true,
+  "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+  "expectedFailureKeys": [
+    "type",
+    "code",
+    "stage",
+    "isCancellation"
+  ],
+  "metricKeys": [
+    "cancelMeasured",
+    "cancelCalls",
+    "cancelToJoinedNs",
+    "joinWaitNs",
+    "joinWaitScope",
+    "withinCancelSLO"
+  ],
+  "productionAuthorityExecuted": false,
+  "reflectionRawValueLimitation": "Supplied Swift defines type=String(reflecting:), ArkTrace code/stage rawValue, Rust rawValue converted to String. It does not define literal CANCELLED/9/stage enum values; fixtures use terminal_proof expected literals with no SDK rawValue or actual runtime claim.",
+  "schemaVersion": 1,
+  "schemaVersionWire": 3,
+  "staticOnly": true,
+  "unmeasuredScope": "ordinaryJoinOrUnmeasuredCleanup"
+}

@@ -1,0 +1,56 @@
+{
+  "dependenciesImported": false,
+  "segments": [
+    {
+      "astSHA256": "6ac6de3d59628983204543124ddd7728a26aafb42b51c8932108c63a5bcfcbaa",
+      "endLine": 2,
+      "name": "METRIC_KEYS",
+      "originalSourceSegment": "METRIC_KEYS=('cancelMeasured','cancelCalls','cancelToJoinedNs','joinWaitNs','joinWaitScope','withinCancelSLO')",
+      "sourceSHA256": "3db8c6a6ae6a0a59e646d4236f31bf3a64021875c87e1e1e6706ca8ad213577e",
+      "startLine": 2
+    },
+    {
+      "astSHA256": "826b6e7c06eeba65c890471d4407bf35348cfc4b5dcc4b7ad1638370b1701399",
+      "endLine": 3,
+      "name": "TerminalProofError",
+      "originalSourceSegment": "class TerminalProofError(ValueError):pass",
+      "sourceSHA256": "0a908c343b50eeda550d1ab7244843693f871f8b4afad6875ff7c3d43384b021",
+      "startLine": 3
+    },
+    {
+      "astSHA256": "73726fec84a8f246850dfa908598cae3d73aa0fc088845ab7f1ec3e4a6f2c578",
+      "endLine": 5,
+      "name": "require",
+      "originalSourceSegment": "def require(ok,why):\n if not ok:raise TerminalProofError(why)",
+      "sourceSHA256": "590b6dcea71c22efcf3fa3e5eb985592c35cc7af8cac132ddea18850ad82355e",
+      "startLine": 4
+    },
+    {
+      "astSHA256": "9d1a83bd089ea845336974b572632266c0216c370651f250ee376298f594c5c8",
+      "endLine": 10,
+      "name": "cancellation",
+      "originalSourceSegment": "def cancellation(failure):\n if not isinstance(failure,dict) or failure.get('isCancellation') is not True:return False\n if failure.get('type')=='ArkTraceCore.ArkTraceError':return failure.get('code')=='CANCELLED' and failure.get('stage') in ('request','preparing','hashing','cacheLookup','parsing','validating','indexing','openingDatabase','querying','analyzing','encoding')\n if failure.get('type')=='ArkTraceRustRuntime.RustAdmission':return failure.get('code')=='9' and failure.get('stage') is None\n return failure.get('type') in ('Swift.CancellationError','_Concurrency.CancellationError') and failure.get('code') is None and failure.get('stage') is None",
+      "sourceSHA256": "950cce052caf27f897cc1d050041d791dbbda67b17610ae8d69bbea855e2221b",
+      "startLine": 6
+    },
+    {
+      "astSHA256": "de83401285eb1e202560cabc872c4dd0c2e1e70e92350efa7e65e06368b35d48",
+      "endLine": 30,
+      "name": "validate_join",
+      "originalSourceSegment": "def validate_join(returned,joined,cancel_before,cancel_after):\n require(returned is not None,'missing open.returned')\n require(joined['success']==returned['success'],'joined/returned success mismatch')\n if returned['success']:\n  require(joined.get('unexpectedSuccess') is True and 'failure' not in joined,'success join shape')\n else:\n  require(joined.get('failure')==returned['failure'] and 'failure' in joined and 'unexpectedSuccess' not in joined,'joined failure not bound to returned')\n  require(joined.get('cancelSLOMilliseconds')==1000,'cancel SLO contract')\n calls=1 if cancel_before is not None else 0\n require(joined['cancelCalls']==calls and (calls==0 or cancel_after is not None),'joined call count/pair mismatch')\n measured=cancel_before is not None and cancel_before['measuredGate'] is True\n require(joined['cancelMeasured']==measured,'joined measurement mismatch')\n if calls:\n  require(cancel_before['cancelCalls']==cancel_after['cancelCalls']==1 and cancel_before['callMonotonicNs']==cancel_after['callMonotonicNs'],'cancel pair')\n if measured:\n  start=cancel_before['callMonotonicNs'];end=joined['joinedMonotonicNs']\n  require(end>=start and joined['cancelToJoinedNs']==end-start,'joined duration binding')\n  require(joined['withinCancelSLO']==(joined['cancelToJoinedNs']<=1_000_000_000),'joined SLO binding')\n else:require(joined['cancelToJoinedNs'] is None and joined['withinCancelSLO'] is None,'unmeasured join metric')",
+      "sourceSHA256": "a6afc0e98d79accc47f893efd0702e3a22fdf361bd4e74f6241405e2363338f6",
+      "startLine": 12
+    },
+    {
+      "astSHA256": "56ca5198d2e28b1fe435b77bf24133c89f2fa200b978b27df6b6d86e58609bb1",
+      "endLine": 41,
+      "name": "validate_result",
+      "originalSourceSegment": "def validate_result(returned,joined,result,cancel_before,cancel_after,shutdown_joined,cleanup_joined,consumer_failed=False):\n require(joined is not None,'missing open.joined')\n validate_join(returned,joined,cancel_before,cancel_after)\n require(all(result[k]==joined[k] for k in METRIC_KEYS),'result/joined metrics mismatch')\n require(result['normalShutdownJoined'] is True and shutdown_joined and cleanup_joined and not consumer_failed,'missing/failed shutdown or cleanup')\n if result['passed']:\n  require(result['cancelMeasured'] is True and result['cancelCalls']==1 and result['withinCancelSLO'] is True,'passed without measured in-SLO cancellation')\n  require(returned['success'] is False and joined['success'] is False and cancellation(returned['failure']),'passed without matching typed cancellation failure')\n return True",
+      "sourceSHA256": "7219865f4c42f647f038a89f12041467c2fde3594902b1922c6c94e8d9d782dd",
+      "startLine": 33
+    }
+  ],
+  "sourceByteCount": 3217,
+  "sourceSHA256": "4292fda74b892286bb69d79a5b17a788b17b8546461b996a9d1e52c055331829",
+  "wholePureModuleLoadedUnmodified": true
+}

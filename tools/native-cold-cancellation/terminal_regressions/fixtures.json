@@ -1,0 +1,641 @@
+{
+  "canonicalSchemaWire": {
+    "measured": [
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "consumer.bootstrap",
+        "monotonicNs": 50000000,
+        "normalPublicSDK": true,
+        "parentPID": 2,
+        "pid": 1,
+        "schemaVersion": 3,
+        "sequence": 1,
+        "storagePolicy": "ephemeral"
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "clock.calibration",
+        "monotonicNs": 50001000,
+        "schemaVersion": 3,
+        "sequence": 2
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.create.before",
+        "monotonicNs": 50002000,
+        "schemaVersion": 3,
+        "sequence": 3
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.create.joined",
+        "monotonicNs": 50003000,
+        "schemaVersion": 3,
+        "sequence": 4
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.before",
+        "monotonicNs": 50004000,
+        "openTasks": 1,
+        "schemaVersion": 3,
+        "sequence": 5,
+        "timeoutMilliseconds": 300000
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.progress",
+        "monotonicNs": 50005000,
+        "schemaVersion": 3,
+        "sequence": 6,
+        "stage": "parsing"
+      },
+      {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cancel.before",
+        "measuredGate": true,
+        "mode": "observedParsingAndParentHandshake",
+        "monotonicNs": 100000000,
+        "schemaVersion": 3,
+        "sequence": 7
+      },
+      {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cancel.after",
+        "monotonicNs": 100001000,
+        "schemaVersion": 3,
+        "sequence": 8
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.returned",
+        "failure": {
+          "code": "CANCELLED",
+          "isCancellation": true,
+          "stage": "parsing",
+          "type": "ArkTraceCore.ArkTraceError"
+        },
+        "monotonicNs": 300000000,
+        "schemaVersion": 3,
+        "sequence": 9,
+        "success": false
+      },
+      {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelSLOMilliseconds": 1000,
+        "cancelToJoinedNs": 250000000,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.joined",
+        "failure": {
+          "code": "CANCELLED",
+          "isCancellation": true,
+          "stage": "parsing",
+          "type": "ArkTraceCore.ArkTraceError"
+        },
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "joinedMonotonicNs": 350000000,
+        "monotonicNs": 350000000,
+        "schemaVersion": 3,
+        "sequence": 10,
+        "success": false,
+        "withinCancelSLO": true
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.shutdown.before",
+        "monotonicNs": 350001000,
+        "schemaVersion": 3,
+        "sequence": 11
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.shutdown.joined",
+        "monotonicNs": 350002000,
+        "postShutdownHandleQueryExecuted": false,
+        "schemaVersion": 3,
+        "sequence": 12
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cleanup.flush.joined",
+        "monotonicNs": 350003000,
+        "schemaVersion": 3,
+        "sequence": 13
+      },
+      {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelToJoinedNs": 250000000,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "completeProcessForestProven": false,
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "descendantActualExitCodes": null,
+        "descendantWaitReaped": null,
+        "event": "consumer.result",
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "monotonicNs": 350004000,
+        "normalShutdownJoined": true,
+        "passed": true,
+        "privateColdCounts": null,
+        "privateRequestCounts": null,
+        "schemaVersion": 3,
+        "sequence": 14,
+        "withinCancelSLO": true
+      }
+    ],
+    "noncancel": [
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "consumer.bootstrap",
+        "monotonicNs": 50000000,
+        "normalPublicSDK": true,
+        "parentPID": 2,
+        "pid": 1,
+        "schemaVersion": 3,
+        "sequence": 1,
+        "storagePolicy": "ephemeral"
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "clock.calibration",
+        "monotonicNs": 50001000,
+        "schemaVersion": 3,
+        "sequence": 2
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.create.before",
+        "monotonicNs": 50002000,
+        "schemaVersion": 3,
+        "sequence": 3
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.create.joined",
+        "monotonicNs": 50003000,
+        "schemaVersion": 3,
+        "sequence": 4
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.before",
+        "monotonicNs": 50004000,
+        "openTasks": 1,
+        "schemaVersion": 3,
+        "sequence": 5,
+        "timeoutMilliseconds": 300000
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.progress",
+        "monotonicNs": 50005000,
+        "schemaVersion": 3,
+        "sequence": 6,
+        "stage": "parsing"
+      },
+      {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cancel.before",
+        "measuredGate": true,
+        "mode": "observedParsingAndParentHandshake",
+        "monotonicNs": 100000000,
+        "schemaVersion": 3,
+        "sequence": 7
+      },
+      {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cancel.after",
+        "monotonicNs": 100001000,
+        "schemaVersion": 3,
+        "sequence": 8
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.returned",
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "monotonicNs": 300000000,
+        "schemaVersion": 3,
+        "sequence": 9,
+        "success": false
+      },
+      {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelSLOMilliseconds": 1000,
+        "cancelToJoinedNs": 250000000,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.joined",
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "joinedMonotonicNs": 350000000,
+        "monotonicNs": 350000000,
+        "schemaVersion": 3,
+        "sequence": 10,
+        "success": false,
+        "withinCancelSLO": true
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.shutdown.before",
+        "monotonicNs": 350001000,
+        "schemaVersion": 3,
+        "sequence": 11
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.shutdown.joined",
+        "monotonicNs": 350002000,
+        "postShutdownHandleQueryExecuted": false,
+        "schemaVersion": 3,
+        "sequence": 12
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cleanup.flush.joined",
+        "monotonicNs": 350003000,
+        "schemaVersion": 3,
+        "sequence": 13
+      },
+      {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelToJoinedNs": 250000000,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "completeProcessForestProven": false,
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "descendantActualExitCodes": null,
+        "descendantWaitReaped": null,
+        "event": "consumer.result",
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "monotonicNs": 350004000,
+        "normalShutdownJoined": true,
+        "passed": false,
+        "privateColdCounts": null,
+        "privateRequestCounts": null,
+        "schemaVersion": 3,
+        "sequence": 14,
+        "withinCancelSLO": true
+      }
+    ],
+    "unmeasured": [
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "consumer.bootstrap",
+        "monotonicNs": 50000000,
+        "normalPublicSDK": true,
+        "parentPID": 2,
+        "pid": 1,
+        "schemaVersion": 3,
+        "sequence": 1,
+        "storagePolicy": "ephemeral"
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "clock.calibration",
+        "monotonicNs": 50001000,
+        "schemaVersion": 3,
+        "sequence": 2
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.create.before",
+        "monotonicNs": 50002000,
+        "schemaVersion": 3,
+        "sequence": 3
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.create.joined",
+        "monotonicNs": 50003000,
+        "schemaVersion": 3,
+        "sequence": 4
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.before",
+        "monotonicNs": 50004000,
+        "openTasks": 1,
+        "schemaVersion": 3,
+        "sequence": 5,
+        "timeoutMilliseconds": 300000
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.progress",
+        "monotonicNs": 50005000,
+        "schemaVersion": 3,
+        "sequence": 6,
+        "stage": "parsing"
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.returned",
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "monotonicNs": 300000000,
+        "schemaVersion": 3,
+        "sequence": 7,
+        "success": false
+      },
+      {
+        "cancelCalls": 0,
+        "cancelMeasured": false,
+        "cancelSLOMilliseconds": 1000,
+        "cancelToJoinedNs": null,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "open.joined",
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "joinWaitNs": 250000000,
+        "joinWaitScope": "ordinaryJoinOrUnmeasuredCleanup",
+        "joinedMonotonicNs": 350000000,
+        "monotonicNs": 350000000,
+        "schemaVersion": 3,
+        "sequence": 8,
+        "success": false,
+        "withinCancelSLO": null
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.shutdown.before",
+        "monotonicNs": 350001000,
+        "schemaVersion": 3,
+        "sequence": 9
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "engine.shutdown.joined",
+        "monotonicNs": 350002000,
+        "postShutdownHandleQueryExecuted": false,
+        "schemaVersion": 3,
+        "sequence": 10
+      },
+      {
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "event": "cleanup.flush.joined",
+        "monotonicNs": 350003000,
+        "schemaVersion": 3,
+        "sequence": 11
+      },
+      {
+        "cancelCalls": 0,
+        "cancelMeasured": false,
+        "cancelToJoinedNs": null,
+        "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+        "completeProcessForestProven": false,
+        "controlNonce": "00000000-0000-4000-8000-000000000049",
+        "descendantActualExitCodes": null,
+        "descendantWaitReaped": null,
+        "event": "consumer.result",
+        "joinWaitNs": 250000000,
+        "joinWaitScope": "ordinaryJoinOrUnmeasuredCleanup",
+        "monotonicNs": 350004000,
+        "normalShutdownJoined": true,
+        "passed": false,
+        "privateColdCounts": null,
+        "privateRequestCounts": null,
+        "schemaVersion": 3,
+        "sequence": 12,
+        "withinCancelSLO": null
+      }
+    ]
+  },
+  "models": {
+    "measured": {
+      "cancel_after": {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1
+      },
+      "cancel_before": {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1,
+        "measuredGate": true,
+        "mode": "observedParsingAndParentHandshake"
+      },
+      "events": [
+        "engine.shutdown.before",
+        "engine.shutdown.joined",
+        "cleanup.flush.joined"
+      ],
+      "joined": {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelSLOMilliseconds": 1000,
+        "cancelToJoinedNs": 250000000,
+        "failure": {
+          "code": "CANCELLED",
+          "isCancellation": true,
+          "stage": "parsing",
+          "type": "ArkTraceCore.ArkTraceError"
+        },
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "joinedMonotonicNs": 350000000,
+        "success": false,
+        "withinCancelSLO": true
+      },
+      "result": {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelToJoinedNs": 250000000,
+        "completeProcessForestProven": false,
+        "descendantActualExitCodes": null,
+        "descendantWaitReaped": null,
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "normalShutdownJoined": true,
+        "passed": true,
+        "privateColdCounts": null,
+        "privateRequestCounts": null,
+        "withinCancelSLO": true
+      },
+      "returned": {
+        "failure": {
+          "code": "CANCELLED",
+          "isCancellation": true,
+          "stage": "parsing",
+          "type": "ArkTraceCore.ArkTraceError"
+        },
+        "success": false
+      }
+    },
+    "noncancel": {
+      "cancel_after": {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1
+      },
+      "cancel_before": {
+        "callMonotonicNs": 100000000,
+        "cancelCalls": 1,
+        "measuredGate": true,
+        "mode": "observedParsingAndParentHandshake"
+      },
+      "events": [
+        "engine.shutdown.before",
+        "engine.shutdown.joined",
+        "cleanup.flush.joined"
+      ],
+      "joined": {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelSLOMilliseconds": 1000,
+        "cancelToJoinedNs": 250000000,
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "joinedMonotonicNs": 350000000,
+        "success": false,
+        "withinCancelSLO": true
+      },
+      "result": {
+        "cancelCalls": 1,
+        "cancelMeasured": true,
+        "cancelToJoinedNs": 250000000,
+        "completeProcessForestProven": false,
+        "descendantActualExitCodes": null,
+        "descendantWaitReaped": null,
+        "joinWaitNs": null,
+        "joinWaitScope": null,
+        "normalShutdownJoined": true,
+        "passed": false,
+        "privateColdCounts": null,
+        "privateRequestCounts": null,
+        "withinCancelSLO": true
+      },
+      "returned": {
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "success": false
+      }
+    },
+    "unmeasured": {
+      "cancel_after": null,
+      "cancel_before": null,
+      "events": [
+        "engine.shutdown.before",
+        "engine.shutdown.joined",
+        "cleanup.flush.joined"
+      ],
+      "joined": {
+        "cancelCalls": 0,
+        "cancelMeasured": false,
+        "cancelSLOMilliseconds": 1000,
+        "cancelToJoinedNs": null,
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "joinWaitNs": 250000000,
+        "joinWaitScope": "ordinaryJoinOrUnmeasuredCleanup",
+        "joinedMonotonicNs": 350000000,
+        "success": false,
+        "withinCancelSLO": null
+      },
+      "result": {
+        "cancelCalls": 0,
+        "cancelMeasured": false,
+        "cancelToJoinedNs": null,
+        "completeProcessForestProven": false,
+        "descendantActualExitCodes": null,
+        "descendantWaitReaped": null,
+        "joinWaitNs": 250000000,
+        "joinWaitScope": "ordinaryJoinOrUnmeasuredCleanup",
+        "normalShutdownJoined": true,
+        "passed": false,
+        "privateColdCounts": null,
+        "privateRequestCounts": null,
+        "withinCancelSLO": null
+      },
+      "returned": {
+        "failure": {
+          "code": null,
+          "isCancellation": false,
+          "stage": null,
+          "type": "Fixture.OtherError"
+        },
+        "success": false
+      }
+    }
+  },
+  "rawValueLiteralsFromTerminalContractNotVerifiedSwiftRuntime": true,
+  "syntheticOnly": true
+}

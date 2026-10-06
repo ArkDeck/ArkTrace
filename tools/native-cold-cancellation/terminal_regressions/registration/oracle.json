@@ -1,0 +1,269 @@
+{
+  "SwiftCompileRuntime": 0,
+  "adversarialDecoderAdmissionNotClaimed": true,
+  "adversarialMetricMutationsTypeValid": true,
+  "baselineSHA256": {
+    "NativeColdOpenCancellation.swift": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e",
+    "protocol.py": "64fbdf32e563db8dab69834b842f188383c0d7627d7e38859e7605b806f47354",
+    "terminal_proof.py": "4292fda74b892286bb69d79a5b17a788b17b8546461b996a9d1e52c055331829"
+  },
+  "cases": [
+    {
+      "checkCount": 4,
+      "checks": [
+        "schema-and-join",
+        "typed-cancellation",
+        "duration-and-SLO",
+        "result-with-shutdown-cleanup-metrics"
+      ],
+      "name": "canonical-measured-cancellation-success-chain"
+    },
+    {
+      "checkCount": 2,
+      "checks": [
+        "unmeasured-false",
+        "measured-noncancel-false"
+      ],
+      "name": "canonical-failure-or-unmeasured-preserves-false"
+    },
+    {
+      "checkCount": 1,
+      "checks": [
+        "different-typed-failure"
+      ],
+      "name": "returned-joined-failure-binding-rejected"
+    },
+    {
+      "checkCount": 6,
+      "checks": [
+        "cancelMeasured",
+        "cancelCalls",
+        "cancelToJoinedNs",
+        "joinWaitNs",
+        "joinWaitScope",
+        "withinCancelSLO"
+      ],
+      "name": "each-result-cross-event-metric-mismatch-rejected"
+    },
+    {
+      "checkCount": 6,
+      "checks": [
+        "missing-shutdown",
+        "failed-shutdown",
+        "missing-cleanup",
+        "cleanup-failure-consumer-event",
+        "consumer-failure",
+        "normal-shutdown-flag-false"
+      ],
+      "name": "missing-failed-shutdown-cleanup-or-consumer-failure-rejected"
+    },
+    {
+      "checkCount": 11,
+      "checks": [
+        "wrong-type",
+        "ark-code",
+        "ark-stage",
+        "rust-code",
+        "rust-stage",
+        "swift-code",
+        "swift-stage",
+        "cancellation-flag-false",
+        "over-SLO",
+        "SLO-claim-mismatch",
+        "unmeasured-claims-passed"
+      ],
+      "name": "typed-cancellation-or-measured-SLO-invalid-rejected"
+    }
+  ],
+  "exactCases": 6,
+  "exactChecks": 30,
+  "expected": {
+    "canonical-failure-or-unmeasured-preserves-false": {
+      "measured-noncancel-false": {
+        "errorText": null,
+        "errorType": null,
+        "outcome": "ACCEPT"
+      },
+      "unmeasured-false": {
+        "errorText": null,
+        "errorType": null,
+        "outcome": "ACCEPT"
+      }
+    },
+    "canonical-measured-cancellation-success-chain": {
+      "duration-and-SLO": {
+        "errorText": null,
+        "errorType": null,
+        "outcome": "ACCEPT"
+      },
+      "result-with-shutdown-cleanup-metrics": {
+        "errorText": null,
+        "errorType": null,
+        "outcome": "ACCEPT"
+      },
+      "schema-and-join": {
+        "errorText": null,
+        "errorType": null,
+        "outcome": "ACCEPT"
+      },
+      "typed-cancellation": {
+        "errorText": null,
+        "errorType": null,
+        "outcome": "ACCEPT"
+      }
+    },
+    "each-result-cross-event-metric-mismatch-rejected": {
+      "cancelCalls": {
+        "errorText": "result/joined metrics mismatch",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "cancelMeasured": {
+        "errorText": "result/joined metrics mismatch",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "cancelToJoinedNs": {
+        "errorText": "result/joined metrics mismatch",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "joinWaitNs": {
+        "errorText": "result/joined metrics mismatch",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "joinWaitScope": {
+        "errorText": "result/joined metrics mismatch",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "withinCancelSLO": {
+        "errorText": "result/joined metrics mismatch",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      }
+    },
+    "missing-failed-shutdown-cleanup-or-consumer-failure-rejected": {
+      "cleanup-failure-consumer-event": {
+        "errorText": "missing/failed shutdown or cleanup",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "consumer-failure": {
+        "errorText": "missing/failed shutdown or cleanup",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "failed-shutdown": {
+        "errorText": "missing/failed shutdown or cleanup",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "missing-cleanup": {
+        "errorText": "missing/failed shutdown or cleanup",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "missing-shutdown": {
+        "errorText": "missing/failed shutdown or cleanup",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "normal-shutdown-flag-false": {
+        "errorText": "missing/failed shutdown or cleanup",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      }
+    },
+    "returned-joined-failure-binding-rejected": {
+      "different-typed-failure": {
+        "errorText": "joined failure not bound to returned",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      }
+    },
+    "typed-cancellation-or-measured-SLO-invalid-rejected": {
+      "SLO-claim-mismatch": {
+        "errorText": "joined SLO binding",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "ark-code": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "ark-stage": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "cancellation-flag-false": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "over-SLO": {
+        "errorText": "passed without measured in-SLO cancellation",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "rust-code": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "rust-stage": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "swift-code": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "swift-stage": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "unmeasured-claims-passed": {
+        "errorText": "passed without measured in-SLO cancellation",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      },
+      "wrong-type": {
+        "errorText": "passed without matching typed cancellation failure",
+        "errorType": "TerminalProofError",
+        "outcome": "REJECT"
+      }
+    }
+  },
+  "expectedMeasured": {
+    "cancelCalls": 1,
+    "durationNs": 250000000,
+    "joinWaitNs": null,
+    "joinWaitScope": null,
+    "joinedNs": 350000000,
+    "startNs": 100000000,
+    "withinSLO": true
+  },
+  "expectedUnmeasured": {
+    "cancelCalls": 0,
+    "cancelToJoinedNs": null,
+    "joinWaitNs": 250000000,
+    "joinWaitScope": "ordinaryJoinOrUnmeasuredCleanup",
+    "passed": false,
+    "withinCancelSLO": null
+  },
+  "fixturesSHA256": "21d26d19de6d6e2c5a01f196b14873cf28e07088cd37810d18d52c3635ccb124",
+  "groupMaxNS": 30000000000,
+  "groupRuns": 1,
+  "registeredBeforeGuard": true,
+  "schemaVersion": 1,
+  "sourceUnmodified": true,
+  "syntheticPreparedFixtureBytes": 19846,
+  "syntheticTotalCapBytes": 65536
+}

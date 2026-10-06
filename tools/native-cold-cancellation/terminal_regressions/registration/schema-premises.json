@@ -1,0 +1,145 @@
+{
+  "clockID": "Swift.DispatchTime.uptimeNanoseconds",
+  "envelope": [
+    "clockID",
+    "controlNonce",
+    "event",
+    "monotonicNs",
+    "schemaVersion",
+    "sequence"
+  ],
+  "fields": {
+    "cancel.after": [
+      "callMonotonicNs",
+      "cancelCalls"
+    ],
+    "cancel.before": [
+      "callMonotonicNs",
+      "cancelCalls",
+      "measuredGate",
+      "mode"
+    ],
+    "cleanup.flush.joined": [],
+    "clock.calibration": [],
+    "consumer.bootstrap": [
+      "normalPublicSDK",
+      "parentPID",
+      "pid",
+      "storagePolicy"
+    ],
+    "consumer.failure": [
+      "failure"
+    ],
+    "consumer.result": [
+      "cancelCalls",
+      "cancelMeasured",
+      "cancelToJoinedNs",
+      "completeProcessForestProven",
+      "descendantActualExitCodes",
+      "descendantWaitReaped",
+      "joinWaitNs",
+      "joinWaitScope",
+      "normalShutdownJoined",
+      "passed",
+      "privateColdCounts",
+      "privateRequestCounts",
+      "withinCancelSLO"
+    ],
+    "engine.create.before": [],
+    "engine.create.joined": [],
+    "engine.shutdown.before": [],
+    "engine.shutdown.failure": [
+      "failure"
+    ],
+    "engine.shutdown.joined": [],
+    "open.before": [
+      "openTasks",
+      "timeoutMilliseconds"
+    ],
+    "open.joined": [
+      "cancelCalls",
+      "cancelMeasured",
+      "cancelToJoinedNs",
+      "joinWaitNs",
+      "joinWaitScope",
+      "joinedMonotonicNs",
+      "success",
+      "withinCancelSLO"
+    ],
+    "open.progress": [
+      "stage"
+    ],
+    "open.returned": [
+      "failure",
+      "success"
+    ],
+    "protocol.guard.before": [],
+    "protocol.guard.inputCase": [
+      "allClosedEBADF",
+      "closedDescriptors",
+      "expectedSuccess",
+      "name",
+      "openedDescriptors",
+      "passed",
+      "rejected",
+      "returnedBytes"
+    ],
+    "protocol.guard.inputResult": [
+      "cancelCalls",
+      "caseCount",
+      "engineCreateCalls",
+      "openCalls",
+      "passed"
+    ],
+    "protocol.guard.joinOnly": [
+      "cancelCalls",
+      "cancelMeasured",
+      "cancelToJoinedNs",
+      "joinWaitNs",
+      "joinWaitScope",
+      "withinCancelSLO"
+    ],
+    "protocol.guard.result": [
+      "actualCancellationValidated",
+      "cancelCalls",
+      "caseCount",
+      "engineCreateCalls",
+      "openCalls",
+      "passed"
+    ],
+    "protocol.guard.unmeasuredCleanup": [
+      "cancelCalls",
+      "cancelMeasured",
+      "cancelToJoinedNs",
+      "joinWaitNs",
+      "joinWaitScope",
+      "withinCancelSLO"
+    ],
+    "retained.beforeShutdown": [
+      "bytes"
+    ],
+    "unexpectedSession.close.before": [],
+    "unexpectedSession.close.joined": []
+  },
+  "fixtureShapeCheckerScope": "exact keys/type/value ranges and canonical metric shapes only; no kernel admission, nonce authority, ordering authority, wire budget or actual Swift runtime",
+  "fullDecoderExecuted": false,
+  "optional": {
+    "engine.shutdown.joined": [
+      "postShutdownHandleQueryExecuted"
+    ],
+    "open.joined": [
+      "cancelSLOMilliseconds",
+      "failure",
+      "unexpectedSuccess"
+    ],
+    "retained.beforeShutdown": [
+      "failure",
+      "privateColdCounts",
+      "privateRegistryCounts",
+      "scope"
+    ]
+  },
+  "protocolSHA256": "64fbdf32e563db8dab69834b842f188383c0d7627d7e38859e7605b806f47354",
+  "staticLiteralASTOnly": true,
+  "terminalHelperCallerRequirement": "original Decoder bounded/typechecked records and trusted caller checkpoint; terminal helper has no budget or cancellation interface"
+}
