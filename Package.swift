@@ -21,6 +21,33 @@ let firstPartySwiftSettings: [SwiftSetting] = [
 // frozen with the release artifact; there is no floating network fallback.
 let nativeSDKPath = ProcessInfo.processInfo.environment["ARKTRACE_RUST_XCFRAMEWORK"]
 let nativeSDKFixtures = ProcessInfo.processInfo.environment["ARKTRACE_RUST_SDK_FIXTURES"] == "1"
+// Native SDK cache identity. SwiftPM copies binary headers to a stable include
+// path; changing the binary target path alone can reuse stale Clang modules and
+// Swift macro initializers. Pin both compiler contexts to the immutable receipt.
+func nativeSDKBuildFingerprint(_ path: String) throws -> String {
+    let packageRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+    let sdk = URL(fileURLWithPath: path, relativeTo: packageRoot)
+    let data = try Data(contentsOf: sdk.deletingLastPathComponent().appendingPathComponent("receipt.json"))
+    guard let receipt = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+        let files = receipt["files"] as? [[String: Any]], files.count == 4 else {
+        throw NSError(domain: "ArkTraceNativeSDK", code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "Native SDK requires a complete immutable receipt"])
+    }
+    let ordered = files.sorted { ($0["relativePath"] as? String ?? "") < ($1["relativePath"] as? String ?? "") }
+    let hashes = try ordered.map { entry -> String in
+        guard let digest = entry["sha256"] as? String, digest.utf8.count == 64,
+            digest.utf8.allSatisfy({ (48...57).contains($0) || (97...102).contains($0) }) else {
+            throw NSError(domain: "ArkTraceNativeSDK", code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "Native SDK receipt has an invalid content digest"])
+        }
+        return digest
+    }
+    return "ARKTRACE_NATIVE_SDK_" + hashes.joined(separator: "_")
+}
+let nativeSDKFingerprint = try nativeSDKPath.map(nativeSDKBuildFingerprint)
+let nativeSDKCSettings: [CSetting] = nativeSDKFingerprint.map { [.define($0)] } ?? []
+let nativeSDKSwiftSettings: [SwiftSetting] = nativeSDKFingerprint.map { [.define($0)] } ?? []
+// End native SDK cache identity.
 let nativeAppSupportDependencies: [Target.Dependency] = nativeSDKPath == nil ? [] : ["ArkTraceRustRuntime"]
 let nativeProducts: [Product] = nativeSDKPath == nil ? [] : [
     .library(name: "ArkTraceRustRuntime", targets: ["ArkTraceRustRuntime"])
@@ -29,15 +56,17 @@ let nativeTargets: [Target] = if let nativeSDKPath {
     [
         .binaryTarget(name: "CArkTrace", path: nativeSDKPath),
         .target(name: "ArkTraceRustRuntime", dependencies: ["ArkTraceCore", "CArkTrace"],
-            swiftSettings: firstPartySwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : []),
+            cSettings: nativeSDKCSettings,
+            swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : []),
             linkerSettings: [.linkedFramework("Security"), .linkedFramework("CoreFoundation")]),
         .testTarget(name: "ArkTraceRustRuntimeTests", dependencies: ["ArkTraceRustRuntime"],
-            swiftSettings: firstPartySwiftSettings),
+            cSettings: nativeSDKCSettings, swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings),
     ] + (nativeSDKFixtures ? [
         // Package-scoped Core DTOs are intentionally not promoted for tests.
         // This development-only consumer exercises the actual shared adapter.
         .executableTarget(name: "ArkTraceRustCoreConformance", dependencies: ["ArkTraceCore", "ArkTraceRustRuntime", "ArkTraceAppSupport"],
-            path: "scripts/swift-sdk-core", swiftSettings: firstPartySwiftSettings + [.unsafeFlags(["-parse-as-library"])])
+            path: "scripts/swift-sdk-core", cSettings: nativeSDKCSettings,
+            swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + [.unsafeFlags(["-parse-as-library"])])
     ] : [])
 } else { [] }
 
@@ -83,7 +112,8 @@ let package = Package(
         .target(
             name: "ArkTraceRendering",
             dependencies: ["ArkTraceCore"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
-            swiftSettings: firstPartySwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
+            cSettings: nativeSDKCSettings,
+            swiftSettings: firstPartySwiftSettings + nativeSDKSwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
         ),
         .target(
             name: "ArkTraceAppSupport",
@@ -91,7 +121,9 @@ let package = Package(
                 "ArkTraceCore", "ArkTraceParser", "ArkTraceRuntime",
                 "ArkTraceAnalysis", "ArkTraceRendering",
             ] + nativeAppSupportDependencies,
+            cSettings: nativeSDKCSettings,
             swiftSettings: firstPartySwiftSettings
+                + nativeSDKSwiftSettings
                 + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
                 + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
         ),
@@ -144,7 +176,8 @@ let package = Package(
         .testTarget(
             name: "ArkTraceRenderingTests",
             dependencies: ["ArkTraceRendering"] + nativeAppSupportDependencies + (nativeSDKPath == nil ? [] : ["CArkTrace"]),
-            swiftSettings: (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
+            cSettings: nativeSDKCSettings,
+            swiftSettings: nativeSDKSwiftSettings + (nativeSDKPath == nil ? [] : [.define("ARKTRACE_NATIVE_RUNTIME")])
                 + (nativeSDKFixtures ? [.define("ARKTRACE_RUST_PROCESS_FIXTURES")] : [])
         ),
         .testTarget(

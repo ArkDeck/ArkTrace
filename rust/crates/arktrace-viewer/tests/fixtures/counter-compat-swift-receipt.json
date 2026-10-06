@@ -10,8 +10,8 @@
   "sourceDigests": [
     {
       "path": "Package.swift",
-      "byteCount": 8551,
-      "sha256": "cb4ee0fe861196c7eeedfa99a9e235048dd535bea7dbee552fc81685170d71c7"
+      "byteCount": 10778,
+      "sha256": "1b8bb2f2ac8db595f76bf060ee7cd21f8140eb0ebea04852114940c52d79b20f"
     },
     {
       "path": "Sources/ArkTraceAppSupport/AppDistribution.swift",
@@ -347,18 +347,18 @@
     "environment": {
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-counter-mainline-swift",
       "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
-      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-swift-counter-oracle.json",
+      "COUNTER_SWIFT_OUTPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/oracle-refresh/fresh-swift-counter-oracle.json",
       "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
-      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-swift-counter-reveal.json",
+      "COUNTER_REVEAL_SWIFT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/oracle-refresh/fresh-swift-counter-reveal.json",
       "COUNTER_REVEAL_DATABASES": "/private/tmp/arktrace-counter-mainline-swift/databases",
       "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
     },
     "exitCode": 0,
-    "elapsedSeconds": 32.004723791993456,
+    "elapsedSeconds": 7.039147250005044,
     "log": {
-      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/retained-hit-cabi-sdk-canvas-20261006/oracle-refresh/fresh-swift-canonical-and-regressions.log",
-      "byteCount": 6746,
-      "sha256": "e5090b46839e70ebf99349da44146d7c3eb8579419b531471db22e9d0059e2d4"
+      "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/oracle-refresh/fresh-swift-canonical-and-regressions.log",
+      "byteCount": 6282,
+      "sha256": "82a42a9c9466d95cb1d083e343fdbb5bd2664524b58323dd018118b4dafc08ac"
     }
   },
   "databases": [
@@ -385,6 +385,6 @@
   "setupLimitations": [
     "Prior mainline setup limitations remain in the previous receipt; this fresh replay uses its independently audited access seams and unchanged frozen DBs."
   ],
-  "previousReceiptSHA256": "22c2d900369cde5015476f1897a5f45e275c1383c0eb5786549bc3936ba592ef",
-  "revalidatedBaseCommit": "141ab1e8280eb7b7cda07fe5415730059e48818f"
+  "previousReceiptSHA256": "0fc3f3f538f5604830fa0c5079635575511ff6a9967610287c20e5f4965d6b5c",
+  "revalidatedBaseCommit": "b5616f317522449e5e497b872716f1f8038fc9b8"
 }

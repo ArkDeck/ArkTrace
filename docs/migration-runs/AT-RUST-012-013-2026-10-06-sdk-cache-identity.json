@@ -1,0 +1,2020 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "baseCommit": "b5616f317522449e5e497b872716f1f8038fc9b8",
+  "scope": "SDK compiler cache fingerprint and actual native last-byte credit concurrency",
+  "goalStatus": "blocked",
+  "wholeMacOSAcceptance": false,
+  "rootReceiptCount": 44,
+  "rootNonzeroReceipts": {
+    "02-mini-fingerprint": 1,
+    "35-ffi-contract": 1
+  },
+  "originalNoFingerprintSwitchCommand": {
+    "toolSession": 42123,
+    "observedExitCode": 1,
+    "scope": "Original miniature cache switch compile failure, no native Engine calls",
+    "oldActualDigest": {
+      "configuration": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617",
+      "engine": "bf21cbfb22e4afc34b8169f9961c27119ffa789154e441a838de4240ad3b8617"
+    },
+    "newCompileFailedWithStalePCM": true,
+    "completeRootCommandReceiptAvailable": false,
+    "logs": [
+      "before-old.build.log",
+      "before-new.build.log"
+    ],
+    "knownNoProductionSourceChangedAtAttempt": true
+  },
+  "selectedMacOSGates": [
+    "03-current-package-cache-contract",
+    "15-sdk-fixtures",
+    "20-default-build",
+    "21-default-full-test",
+    "22c-native-full-test",
+    "23c-api",
+    "24b-app-debug",
+    "25b-app-document-types",
+    "14-migration-verifier",
+    "26-fmt",
+    "27-clippy",
+    "28b-rust-workspace",
+    "29-workspace-verifier",
+    "30-generator",
+    "31-migration-contract-tests",
+    "32-rust-build",
+    "33-migration-smoke",
+    "34-json-roundtrip",
+    "35b-ffi-contract",
+    "36c-sdk-consumer",
+    "37-sdk-reference-1",
+    "38-sdk-reference-2",
+    "39-sdk-reference-3",
+    "40-sdk-reference-4",
+    "41-sdk-reference-5",
+    "50-offline-01",
+    "50-offline-02",
+    "50-offline-03",
+    "50-offline-04",
+    "50-offline-05",
+    "50-offline-06",
+    "50-offline-07",
+    "50-offline-08",
+    "50-offline-09",
+    "50-offline-10",
+    "50-offline-11",
+    "50-offline-12",
+    "50-offline-15"
+  ],
+  "selectedGateCount": 38,
+  "defaultSwift": {
+    "passed": 647,
+    "failed": 0,
+    "skipped": [
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+    ]
+  },
+  "nativeSwift": {
+    "passed": 773,
+    "failed": 0,
+    "skipped": [
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testCacheCrossProcessWorker]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase1GateWritesBoundedMachineEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase2GateWritesCachedOpenBenchmarkEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3CachedContextDiagnosticWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3GateWritesViewportPerformanceEvidenceWhenRequested]",
+      "-[ArkTraceIntegrationTests.ParserIntegrationTests testPhase3LargeTraceCancellationLeavesNoReadyOrPrivateBuildWhenRequested]"
+    ]
+  },
+  "focused": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": []
+  },
+  "rust": {
+    "passed": 572,
+    "doctests": 6,
+    "failed": 0,
+    "ignored": 0
+  },
+  "SDK": {
+    "normal": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": false,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30854704,
+        "sha256": "17d37bc972a68b59cee2094f377f43553bee8a25051a06f959aca334eb24bba4"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30854704,
+          "sha256": "17d37bc972a68b59cee2094f377f43553bee8a25051a06f959aca334eb24bba4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    },
+    "fixtures": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30914120,
+        "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30914120,
+          "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    }
+  },
+  "SDKConsumer": {
+    "artifactIdentity": "affa7ffd38cb87c8ee57606c9725ec9867a60b55a28b4da85ec4c577bcbcf67b",
+    "artifactReceipt": {
+      "abiVersion": 2,
+      "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+      "developmentFixtures": true,
+      "deploymentTarget": "26.0",
+      "xcode": "Xcode 27.0\nBuild version 27A266a",
+      "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "library": {
+        "byteCount": 30914120,
+        "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9"
+      },
+      "headers": [
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/arktrace_ffi.h",
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4"
+        },
+        {
+          "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/bindings/c/module.modulemap",
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc"
+        }
+      ],
+      "files": [
+        {
+          "byteCount": 761,
+          "sha256": "462cd2a060c1b3fcdb77ecbc6771d9f9c70c5ec593b5f2f7c6157efe6f45b8b5",
+          "relativePath": "CArkTrace.xcframework/Info.plist"
+        },
+        {
+          "byteCount": 29872,
+          "sha256": "0a473e930350c1833127bf73b7411636e1a786cf8ca4da7fbb58afe245d963e4",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/arktrace_ffi.h"
+        },
+        {
+          "byteCount": 62,
+          "sha256": "5896da7a8e395c4d697aa26d6621a1a1d85d570000b2e05ca0d515385a2b0acc",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/Headers/module.modulemap"
+        },
+        {
+          "byteCount": 30914120,
+          "sha256": "ef39f888a12c85b1cc76482a0e4caece58c18451b39d4b3cb3aa7fe199cf2be9",
+          "relativePath": "CArkTrace.xcframework/macos-arm64/libarktrace_ffi.a"
+        }
+      ],
+      "releaseAcceptance": false
+    },
+    "consumerExecutable": {
+      "byteCount": 14598048,
+      "sha256": "5cbcc25405762566db44118568f2963affd63f087b2ca9d13e7e78068b83faf1"
+    },
+    "lifecycleExecutable": {
+      "byteCount": 14247472,
+      "sha256": "009e1a7b540fb89e86046fa6a450f25ba0a019cb0a9fc762ce37c49bef426d60"
+    },
+    "directoryExecutable": {
+      "byteCount": 14310416,
+      "sha256": "e1d68f4b522b0ac16bd9a25b3e0149d91bf335ee74c5efbe1fc7e4e828dce2c9"
+    },
+    "summaryExecutable": {
+      "byteCount": 14097264,
+      "sha256": "5895f02b882891d64117e2d46f66177dc3eada33a94d96a5e0a061c3ccd0f864"
+    },
+    "coreExecutable": {
+      "byteCount": 25644944,
+      "sha256": "ccb631cdc6cb549299437361cbd346624144211beebe51c26d4f515bbe7b2e54"
+    },
+    "viewStateExecutable": {
+      "byteCount": 14105616,
+      "sha256": "4507c909a62108a93f91ba144629fa56013560c9d5299b202b2672673d2c2bc9"
+    },
+    "coreConsumerBuildLogSHA256": "1e3767a1b2827002c4d64c13eb34a865b7864b95314328edcf0505f0440e128f",
+    "sdkBuildLogSHA256": "59deaabd59db521a0df4d59417744fd8b0f24d9c891d8fdd92106a428320099a",
+    "consumerBuildLogSHA256": "8e730a34d53b7fbe538e392274f10a830b9a0dc765f95d2b270f05a5fd7d6315",
+    "sdkUnitTests": {
+      "passed": 96,
+      "failed": 0,
+      "skipped": 0,
+      "logSHA256": "7790062c36f882efc0589d53ea19ef2845de1c4bc199894b08c732e06f3cf964"
+    },
+    "borrowCompileRejections": [
+      {
+        "case": "BorrowCapture.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "f34991fda622dbaf3f0b0ce51cd0b066fd9fd711a39df51292516c95bb894656"
+      },
+      {
+        "case": "BorrowEscape.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "00e5c11eb11f9606932e7b6070c4cc5f99f30f35fbf0a5eb69b34ac3e84ccf6f"
+      },
+      {
+        "case": "TextBorrowCapture.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "e2b0b3d1f2c81ee1b12bb36f1a15e8313d5a2597551257641abf159acbd68d9d"
+      },
+      {
+        "case": "TextBorrowEscape.swift.invalid",
+        "exitCode": 1,
+        "logSHA256": "fd7424534873e1e5c1fdcb984f2414cfe87e530bfb251846cb37bb98769f0ba7"
+      }
+    ]
+  },
+  "ffi": {
+    "abiVersion": 2,
+    "consumer": {
+      "abiVersion": 2,
+      "capabilities": 247,
+      "consumer": "Swift C import",
+      "nativeEngineAcceptance": false,
+      "snapshotFormatVersion": 2
+    },
+    "contractSHA256": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+    "exports": 27,
+    "fields": 135,
+    "nativeEngineAcceptance": false,
+    "records": 11,
+    "validAllocationFuzzCases": 1000
+  },
+  "concurrentByteTranscripts": [
+    {
+      "actualEngineOpenCalls": 1,
+      "actualNativeLoadAttempts": 4,
+      "actualNativeLoadFailures": 1,
+      "actualNativeLoadSuccesses": 3,
+      "bothActualEntriesBeforeFirstTerminal": true,
+      "childrenJoined": [
+        0,
+        1
+      ],
+      "childrenReady": [
+        0,
+        1
+      ],
+      "closeExecuted": true,
+      "competitionWinners": 1,
+      "completeFacts": {
+        "colors": [
+          [
+            55,
+            126,
+            167
+          ],
+          [
+            34,
+            133,
+            140
+          ]
+        ],
+        "geometryBits": [
+          [
+            0,
+            4627730092099895296,
+            4607182418800017408,
+            4626885667169763328
+          ],
+          [
+            4592426176690888162,
+            4627730092099895296,
+            4607182418800017408,
+            4626885667169763328
+          ]
+        ],
+        "inspectors": [
+          {
+            "isOpenEnded": false,
+            "key": {
+              "rowID": 0,
+              "table": "callstack"
+            },
+            "name": "H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()",
+            "pid": 6709,
+            "processKey": {
+              "ipid": 1
+            },
+            "range": {
+              "endNs": 798000,
+              "startNs": 0
+            },
+            "semanticDurationNs": 798000,
+            "threadKey": {
+              "itid": 1
+            },
+            "tid": 6709,
+            "type": "namedSlice"
+          },
+          {
+            "isOpenEnded": false,
+            "key": {
+              "rowID": 3,
+              "table": "callstack"
+            },
+            "name": "H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)",
+            "pid": 6709,
+            "processKey": {
+              "ipid": 1
+            },
+            "range": {
+              "endNs": 5916000,
+              "startNs": 4337000
+            },
+            "semanticDurationNs": 1579000,
+            "threadKey": {
+              "itid": 1
+            },
+            "tid": 6709,
+            "type": "namedSlice"
+          }
+        ],
+        "labelsUTF8": [
+          [
+            72,
+            58,
+            118,
+            105,
+            114,
+            116,
+            117,
+            97,
+            108,
+            32,
+            115,
+            112,
+            116,
+            114,
+            60,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            73,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            73,
+            110,
+            115,
+            116,
+            97,
+            108,
+            108,
+            101,
+            114,
+            62,
+            32,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            77,
+            103,
+            114,
+            80,
+            114,
+            111,
+            120,
+            121,
+            58,
+            58,
+            71,
+            101,
+            116,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            73,
+            110,
+            115,
+            116,
+            97,
+            108,
+            108,
+            101,
+            114,
+            40,
+            41
+          ],
+          [
+            72,
+            58,
+            118,
+            105,
+            114,
+            116,
+            117,
+            97,
+            108,
+            32,
+            98,
+            111,
+            111,
+            108,
+            32,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            77,
+            103,
+            114,
+            80,
+            114,
+            111,
+            120,
+            121,
+            58,
+            58,
+            68,
+            117,
+            109,
+            112,
+            73,
+            110,
+            102,
+            111,
+            115,
+            40,
+            99,
+            111,
+            110,
+            115,
+            116,
+            32,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            68,
+            117,
+            109,
+            112,
+            70,
+            108,
+            97,
+            103,
+            44,
+            32,
+            99,
+            111,
+            110,
+            115,
+            116,
+            32,
+            115,
+            116,
+            100,
+            58,
+            58,
+            115,
+            116,
+            114,
+            105,
+            110,
+            103,
+            32,
+            38,
+            44,
+            32,
+            105,
+            110,
+            116,
+            51,
+            50,
+            95,
+            116,
+            44,
+            32,
+            115,
+            116,
+            100,
+            58,
+            58,
+            115,
+            116,
+            114,
+            105,
+            110,
+            103,
+            32,
+            38,
+            41
+          ]
+        ],
+        "snapshot": "eyJkYXRhUXVhbGl0eSI6eyJpc3N1ZXMiOlt7ImNhdGVnb3J5IjoiZHJvcHBlZFZhbHVlIiwiY291bnQiOjQxNiwic2NvcGUiOiJzdGF0LnN0YXRfdHlwZSJ9LHsiY2F0ZWdvcnkiOiJwcm9iZVRydW5jYXRlZCIsInNjb3BlIjoiY2FsbHN0YWNrLmNvb2tpZSJ9LHsiY2F0ZWdvcnkiOiJwcm9iZVRydW5jYXRlZCIsInNjb3BlIjoiY2FsbHN0YWNrLmRlcHRoIn0seyJjYXRlZ29yeSI6InByb2JlVHJ1bmNhdGVkIiwic2NvcGUiOiJjYWxsc3RhY2suZHVyIn0seyJjYXRlZ29yeSI6InByb2JlVHJ1bmNhdGVkIiwic2NvcGUiOiJjYWxsc3RhY2sucGFyZW50X2lkIn0seyJjYXRlZ29yeSI6InByb2JlVHJ1bmNhdGVkIiwic2NvcGUiOiJjYWxsc3RhY2sudHMifV0sInN0YXR1cyI6Indhcm5pbmdzIiwid2FybmluZ3MiOltdfSwiZ2VuZXJhdGlvbiI6MSwiaXNMb2FkaW5nIjpmYWxzZSwidHJhY2tzIjpbeyJkZXB0aFJvd0NvdW50IjoxLCJkZXNjcmlwdG9yIjp7ImlkIjp7InJhd1ZhbHVlIjoibmFtZWQtc2xpY2U6MSJ9LCJpc0NvbGxhcHNlZCI6ZmFsc2UsInNob3dzTmVzdGVkRGVwdGgiOnRydWUsInNvdXJjZSI6eyJuYW1lZFNsaWNlIjp7Il8wIjp7Iml0aWQiOjF9fX0sInRpdGxlIjoibmFtZWQgc2xpY2VzIn0sImhlaWdodCI6MjgsInByaW1pdGl2ZXMiOlt7ImRldGFpbCI6eyJfMCI6eyJkZXB0aCI6MCwiZXZlbnRLZXkiOnsicm93SUQiOjAsInRhYmxlIjoiY2FsbHN0YWNrIn0sImluc3BlY3RvciI6eyJpc09wZW5FbmRlZCI6ZmFsc2UsImtleSI6eyJyb3dJRCI6MCwidGFibGUiOiJjYWxsc3RhY2sifSwibmFtZSI6Ikg6dmlydHVhbCBzcHRyPE9IT1M6OkFwcEV4ZWNGd2s6OklCdW5kbGVJbnN0YWxsZXI+IE9IT1M6OkFwcEV4ZWNGd2s6OkJ1bmRsZU1nclByb3h5OjpHZXRCdW5kbGVJbnN0YWxsZXIoKSIsInBpZCI6NjcwOSwicHJvY2Vzc0tleSI6eyJpcGlkIjoxfSwicmFuZ2UiOnsiZW5kTnMiOjc5ODAwMCwic3RhcnROcyI6MH0sInNlbWFudGljRHVyYXRpb25OcyI6Nzk4MDAwLCJ0aHJlYWRLZXkiOnsiaXRpZCI6MX0sInRpZCI6NjcwOSwidHlwZSI6Im5hbWVkU2xpY2UifSwiamFua1RhZyI6MCwibGFiZWwiOiJIOnZpcnR1YWwgc3B0cjxPSE9TOjpBcHBFeGVjRndrOjpJQnVuZGxlSW5zdGFsbGVyPiBPSE9TOjpBcHBFeGVjRndrOjpCdW5kbGVNZ3JQcm94eTo6R2V0QnVuZGxlSW5zdGFsbGVyKCkiLCJyYW5nZSI6eyJlbmROcyI6Nzk4MDAwLCJzdGFydE5zIjowfSwidHJhY2tJRCI6eyJyYXdWYWx1ZSI6Im5hbWVkLXNsaWNlOjEifX19fSx7ImRldGFpbCI6eyJfMCI6eyJkZXB0aCI6MCwiZXZlbnRLZXkiOnsicm93SUQiOjMsInRhYmxlIjoiY2FsbHN0YWNrIn0sImluc3BlY3RvciI6eyJpc09wZW5FbmRlZCI6ZmFsc2UsImtleSI6eyJyb3dJRCI6MywidGFibGUiOiJjYWxsc3RhY2sifSwibmFtZSI6Ikg6dmlydHVhbCBib29sIE9IT1M6OkFwcEV4ZWNGd2s6OkJ1bmRsZU1nclByb3h5OjpEdW1wSW5mb3MoY29uc3QgT0hPUzo6QXBwRXhlY0Z3azo6RHVtcEZsYWcsIGNvbnN0IHN0ZDo6c3RyaW5nICYsIGludDMyX3QsIHN0ZDo6c3RyaW5nICYpIiwicGlkIjo2NzA5LCJwcm9jZXNzS2V5Ijp7ImlwaWQiOjF9LCJyYW5nZSI6eyJlbmROcyI6NTkxNjAwMCwic3RhcnROcyI6NDMzNzAwMH0sInNlbWFudGljRHVyYXRpb25OcyI6MTU3OTAwMCwidGhyZWFkS2V5Ijp7Iml0aWQiOjF9LCJ0aWQiOjY3MDksInR5cGUiOiJuYW1lZFNsaWNlIn0sImphbmtUYWciOjAsImxhYmVsIjoiSDp2aXJ0dWFsIGJvb2wgT0hPUzo6QXBwRXhlY0Z3azo6QnVuZGxlTWdyUHJveHk6OkR1bXBJbmZvcyhjb25zdCBPSE9TOjpBcHBFeGVjRndrOjpEdW1wRmxhZywgY29uc3Qgc3RkOjpzdHJpbmcgJiwgaW50MzJfdCwgc3RkOjpzdHJpbmcgJikiLCJyYW5nZSI6eyJlbmROcyI6NTkxNjAwMCwic3RhcnROcyI6NDMzNzAwMH0sInRyYWNrSUQiOnsicmF3VmFsdWUiOiJuYW1lZC1zbGljZToxIn19fX1dLCJ5IjowfV0sInZpZXdwb3J0Ijp7ImdlbmVyYXRpb24iOjEsImhlaWdodFBvaW50cyI6NjAwLCJuc1BlclBvaW50Ijo0MDI2MzI4My43NSwicmFuZ2UiOnsiZW5kTnMiOjMyMjEwNjI3MDAwLCJzdGFydE5zIjowfSwidmVydGljYWxPZmZzZXRQb2ludHMiOjAsIndpZHRoUG9pbnRzIjo4MDB9fQ==",
+        "snapshotSHA256": "eee10bd565ee0df5a80406c014abb19c9cf627442fcbfe5656b4495ec378e74c"
+      },
+      "CWorkerSimultaneityClaimed": false,
+      "events": [
+        {
+          "action": "load-enter",
+          "child": -1,
+          "sequence": 0
+        },
+        {
+          "action": "load-success",
+          "child": -1,
+          "sequence": 1
+        },
+        {
+          "action": "child-ready",
+          "child": 0,
+          "sequence": 2
+        },
+        {
+          "action": "child-ready",
+          "child": 1,
+          "sequence": 3
+        },
+        {
+          "action": "timer-cancelled",
+          "sequence": 4
+        },
+        {
+          "action": "timer-joined",
+          "sequence": 5
+        },
+        {
+          "action": "gate-release",
+          "sequence": 6
+        },
+        {
+          "action": "load-enter",
+          "child": 0,
+          "sequence": 7
+        },
+        {
+          "action": "load-enter",
+          "child": 1,
+          "sequence": 8
+        },
+        {
+          "action": "load-refusal",
+          "admission": 12,
+          "child": 1,
+          "sequence": 9
+        },
+        {
+          "action": "load-success",
+          "child": 0,
+          "sequence": 10
+        },
+        {
+          "action": "child-joined",
+          "child": 0,
+          "sequence": 11
+        },
+        {
+          "action": "child-joined",
+          "child": 1,
+          "sequence": 12
+        },
+        {
+          "action": "load-enter",
+          "child": 2,
+          "sequence": 13
+        },
+        {
+          "action": "load-success",
+          "child": 2,
+          "sequence": 14
+        }
+      ],
+      "failureLeaseRefundedAfterJoinFlush": true,
+      "finalColdBytes": 0,
+      "finalColdOwners": 0,
+      "finalRequests": 0,
+      "finalSessions": 0,
+      "finalStagingBytes": 0,
+      "finalStagingOwners": 0,
+      "firstCompetitionTerminalSequence": 9,
+      "gateAborted": false,
+      "gateDeadline": "Instant(_value: 169666.52430504098 seconds)",
+      "gateReleased": true,
+      "injectedBytes": 134208552,
+      "injectedCredits": 1,
+      "maximumBytes": 134217728,
+      "maximumOwners": 256,
+      "measuredCharge": 9176,
+      "nativeLeaseDelta": 3280,
+      "postReleaseNativeCounter": null,
+      "requestedAdmissionRaw": 12,
+      "sameOriginalLoadDeadline": "Instant(_value: 169679.517994583 seconds)",
+      "samples": {
+        "baseline": {
+          "bytes": 0,
+          "native": 0,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 0,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "closed": {
+          "bytes": 0,
+          "native": 0,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 0,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "competitionJoinedFlush": {
+          "bytes": 134217728,
+          "native": 7184,
+          "owners": 2,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "injected": {
+          "bytes": 134208552,
+          "native": 3904,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "injectionDropped": {
+          "bytes": 9176,
+          "native": 7184,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "measurementDropped": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "measurementHeld": {
+          "bytes": 9176,
+          "native": 7184,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "opening": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "recoveryDropped": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "recoveryHeld": {
+          "bytes": 9176,
+          "native": 7184,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "winnerDropped": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        }
+      },
+      "shutdownExecuted": true,
+      "timerCancelledJoined": true,
+      "typedAdmissionRaw": 12,
+      "typedContractMatchesRequest": true
+    },
+    {
+      "actualEngineOpenCalls": 1,
+      "actualNativeLoadAttempts": 4,
+      "actualNativeLoadFailures": 1,
+      "actualNativeLoadSuccesses": 3,
+      "bothActualEntriesBeforeFirstTerminal": true,
+      "childrenJoined": [
+        0,
+        1
+      ],
+      "childrenReady": [
+        0,
+        1
+      ],
+      "closeExecuted": true,
+      "competitionWinners": 1,
+      "completeFacts": {
+        "colors": [
+          [
+            55,
+            126,
+            167
+          ],
+          [
+            34,
+            133,
+            140
+          ]
+        ],
+        "geometryBits": [
+          [
+            0,
+            4627730092099895296,
+            4607182418800017408,
+            4626885667169763328
+          ],
+          [
+            4592426176690888162,
+            4627730092099895296,
+            4607182418800017408,
+            4626885667169763328
+          ]
+        ],
+        "inspectors": [
+          {
+            "isOpenEnded": false,
+            "key": {
+              "rowID": 0,
+              "table": "callstack"
+            },
+            "name": "H:virtual sptr<OHOS::AppExecFwk::IBundleInstaller> OHOS::AppExecFwk::BundleMgrProxy::GetBundleInstaller()",
+            "pid": 6709,
+            "processKey": {
+              "ipid": 1
+            },
+            "range": {
+              "endNs": 798000,
+              "startNs": 0
+            },
+            "semanticDurationNs": 798000,
+            "threadKey": {
+              "itid": 1
+            },
+            "tid": 6709,
+            "type": "namedSlice"
+          },
+          {
+            "isOpenEnded": false,
+            "key": {
+              "rowID": 3,
+              "table": "callstack"
+            },
+            "name": "H:virtual bool OHOS::AppExecFwk::BundleMgrProxy::DumpInfos(const OHOS::AppExecFwk::DumpFlag, const std::string &, int32_t, std::string &)",
+            "pid": 6709,
+            "processKey": {
+              "ipid": 1
+            },
+            "range": {
+              "endNs": 5916000,
+              "startNs": 4337000
+            },
+            "semanticDurationNs": 1579000,
+            "threadKey": {
+              "itid": 1
+            },
+            "tid": 6709,
+            "type": "namedSlice"
+          }
+        ],
+        "labelsUTF8": [
+          [
+            72,
+            58,
+            118,
+            105,
+            114,
+            116,
+            117,
+            97,
+            108,
+            32,
+            115,
+            112,
+            116,
+            114,
+            60,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            73,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            73,
+            110,
+            115,
+            116,
+            97,
+            108,
+            108,
+            101,
+            114,
+            62,
+            32,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            77,
+            103,
+            114,
+            80,
+            114,
+            111,
+            120,
+            121,
+            58,
+            58,
+            71,
+            101,
+            116,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            73,
+            110,
+            115,
+            116,
+            97,
+            108,
+            108,
+            101,
+            114,
+            40,
+            41
+          ],
+          [
+            72,
+            58,
+            118,
+            105,
+            114,
+            116,
+            117,
+            97,
+            108,
+            32,
+            98,
+            111,
+            111,
+            108,
+            32,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            66,
+            117,
+            110,
+            100,
+            108,
+            101,
+            77,
+            103,
+            114,
+            80,
+            114,
+            111,
+            120,
+            121,
+            58,
+            58,
+            68,
+            117,
+            109,
+            112,
+            73,
+            110,
+            102,
+            111,
+            115,
+            40,
+            99,
+            111,
+            110,
+            115,
+            116,
+            32,
+            79,
+            72,
+            79,
+            83,
+            58,
+            58,
+            65,
+            112,
+            112,
+            69,
+            120,
+            101,
+            99,
+            70,
+            119,
+            107,
+            58,
+            58,
+            68,
+            117,
+            109,
+            112,
+            70,
+            108,
+            97,
+            103,
+            44,
+            32,
+            99,
+            111,
+            110,
+            115,
+            116,
+            32,
+            115,
+            116,
+            100,
+            58,
+            58,
+            115,
+            116,
+            114,
+            105,
+            110,
+            103,
+            32,
+            38,
+            44,
+            32,
+            105,
+            110,
+            116,
+            51,
+            50,
+            95,
+            116,
+            44,
+            32,
+            115,
+            116,
+            100,
+            58,
+            58,
+            115,
+            116,
+            114,
+            105,
+            110,
+            103,
+            32,
+            38,
+            41
+          ]
+        ],
+        "snapshot": "eyJkYXRhUXVhbGl0eSI6eyJpc3N1ZXMiOlt7ImNhdGVnb3J5IjoiZHJvcHBlZFZhbHVlIiwiY291bnQiOjQxNiwic2NvcGUiOiJzdGF0LnN0YXRfdHlwZSJ9LHsiY2F0ZWdvcnkiOiJwcm9iZVRydW5jYXRlZCIsInNjb3BlIjoiY2FsbHN0YWNrLmNvb2tpZSJ9LHsiY2F0ZWdvcnkiOiJwcm9iZVRydW5jYXRlZCIsInNjb3BlIjoiY2FsbHN0YWNrLmRlcHRoIn0seyJjYXRlZ29yeSI6InByb2JlVHJ1bmNhdGVkIiwic2NvcGUiOiJjYWxsc3RhY2suZHVyIn0seyJjYXRlZ29yeSI6InByb2JlVHJ1bmNhdGVkIiwic2NvcGUiOiJjYWxsc3RhY2sucGFyZW50X2lkIn0seyJjYXRlZ29yeSI6InByb2JlVHJ1bmNhdGVkIiwic2NvcGUiOiJjYWxsc3RhY2sudHMifV0sInN0YXR1cyI6Indhcm5pbmdzIiwid2FybmluZ3MiOltdfSwiZ2VuZXJhdGlvbiI6MSwiaXNMb2FkaW5nIjpmYWxzZSwidHJhY2tzIjpbeyJkZXB0aFJvd0NvdW50IjoxLCJkZXNjcmlwdG9yIjp7ImlkIjp7InJhd1ZhbHVlIjoibmFtZWQtc2xpY2U6MSJ9LCJpc0NvbGxhcHNlZCI6ZmFsc2UsInNob3dzTmVzdGVkRGVwdGgiOnRydWUsInNvdXJjZSI6eyJuYW1lZFNsaWNlIjp7Il8wIjp7Iml0aWQiOjF9fX0sInRpdGxlIjoibmFtZWQgc2xpY2VzIn0sImhlaWdodCI6MjgsInByaW1pdGl2ZXMiOlt7ImRldGFpbCI6eyJfMCI6eyJkZXB0aCI6MCwiZXZlbnRLZXkiOnsicm93SUQiOjAsInRhYmxlIjoiY2FsbHN0YWNrIn0sImluc3BlY3RvciI6eyJpc09wZW5FbmRlZCI6ZmFsc2UsImtleSI6eyJyb3dJRCI6MCwidGFibGUiOiJjYWxsc3RhY2sifSwibmFtZSI6Ikg6dmlydHVhbCBzcHRyPE9IT1M6OkFwcEV4ZWNGd2s6OklCdW5kbGVJbnN0YWxsZXI+IE9IT1M6OkFwcEV4ZWNGd2s6OkJ1bmRsZU1nclByb3h5OjpHZXRCdW5kbGVJbnN0YWxsZXIoKSIsInBpZCI6NjcwOSwicHJvY2Vzc0tleSI6eyJpcGlkIjoxfSwicmFuZ2UiOnsiZW5kTnMiOjc5ODAwMCwic3RhcnROcyI6MH0sInNlbWFudGljRHVyYXRpb25OcyI6Nzk4MDAwLCJ0aHJlYWRLZXkiOnsiaXRpZCI6MX0sInRpZCI6NjcwOSwidHlwZSI6Im5hbWVkU2xpY2UifSwiamFua1RhZyI6MCwibGFiZWwiOiJIOnZpcnR1YWwgc3B0cjxPSE9TOjpBcHBFeGVjRndrOjpJQnVuZGxlSW5zdGFsbGVyPiBPSE9TOjpBcHBFeGVjRndrOjpCdW5kbGVNZ3JQcm94eTo6R2V0QnVuZGxlSW5zdGFsbGVyKCkiLCJyYW5nZSI6eyJlbmROcyI6Nzk4MDAwLCJzdGFydE5zIjowfSwidHJhY2tJRCI6eyJyYXdWYWx1ZSI6Im5hbWVkLXNsaWNlOjEifX19fSx7ImRldGFpbCI6eyJfMCI6eyJkZXB0aCI6MCwiZXZlbnRLZXkiOnsicm93SUQiOjMsInRhYmxlIjoiY2FsbHN0YWNrIn0sImluc3BlY3RvciI6eyJpc09wZW5FbmRlZCI6ZmFsc2UsImtleSI6eyJyb3dJRCI6MywidGFibGUiOiJjYWxsc3RhY2sifSwibmFtZSI6Ikg6dmlydHVhbCBib29sIE9IT1M6OkFwcEV4ZWNGd2s6OkJ1bmRsZU1nclByb3h5OjpEdW1wSW5mb3MoY29uc3QgT0hPUzo6QXBwRXhlY0Z3azo6RHVtcEZsYWcsIGNvbnN0IHN0ZDo6c3RyaW5nICYsIGludDMyX3QsIHN0ZDo6c3RyaW5nICYpIiwicGlkIjo2NzA5LCJwcm9jZXNzS2V5Ijp7ImlwaWQiOjF9LCJyYW5nZSI6eyJlbmROcyI6NTkxNjAwMCwic3RhcnROcyI6NDMzNzAwMH0sInNlbWFudGljRHVyYXRpb25OcyI6MTU3OTAwMCwidGhyZWFkS2V5Ijp7Iml0aWQiOjF9LCJ0aWQiOjY3MDksInR5cGUiOiJuYW1lZFNsaWNlIn0sImphbmtUYWciOjAsImxhYmVsIjoiSDp2aXJ0dWFsIGJvb2wgT0hPUzo6QXBwRXhlY0Z3azo6QnVuZGxlTWdyUHJveHk6OkR1bXBJbmZvcyhjb25zdCBPSE9TOjpBcHBFeGVjRndrOjpEdW1wRmxhZywgY29uc3Qgc3RkOjpzdHJpbmcgJiwgaW50MzJfdCwgc3RkOjpzdHJpbmcgJikiLCJyYW5nZSI6eyJlbmROcyI6NTkxNjAwMCwic3RhcnROcyI6NDMzNzAwMH0sInRyYWNrSUQiOnsicmF3VmFsdWUiOiJuYW1lZC1zbGljZToxIn19fX1dLCJ5IjowfV0sInZpZXdwb3J0Ijp7ImdlbmVyYXRpb24iOjEsImhlaWdodFBvaW50cyI6NjAwLCJuc1BlclBvaW50Ijo0MDI2MzI4My43NSwicmFuZ2UiOnsiZW5kTnMiOjMyMjEwNjI3MDAwLCJzdGFydE5zIjowfSwidmVydGljYWxPZmZzZXRQb2ludHMiOjAsIndpZHRoUG9pbnRzIjo4MDB9fQ==",
+        "snapshotSHA256": "eee10bd565ee0df5a80406c014abb19c9cf627442fcbfe5656b4495ec378e74c"
+      },
+      "CWorkerSimultaneityClaimed": false,
+      "events": [
+        {
+          "action": "load-enter",
+          "child": -1,
+          "sequence": 0
+        },
+        {
+          "action": "load-success",
+          "child": -1,
+          "sequence": 1
+        },
+        {
+          "action": "child-ready",
+          "child": 0,
+          "sequence": 2
+        },
+        {
+          "action": "child-ready",
+          "child": 1,
+          "sequence": 3
+        },
+        {
+          "action": "timer-cancelled",
+          "sequence": 4
+        },
+        {
+          "action": "timer-joined",
+          "sequence": 5
+        },
+        {
+          "action": "gate-release",
+          "sequence": 6
+        },
+        {
+          "action": "load-enter",
+          "child": 1,
+          "sequence": 7
+        },
+        {
+          "action": "load-enter",
+          "child": 0,
+          "sequence": 8
+        },
+        {
+          "action": "load-success",
+          "child": 1,
+          "sequence": 9
+        },
+        {
+          "action": "load-refusal",
+          "admission": 12,
+          "child": 0,
+          "sequence": 10
+        },
+        {
+          "action": "child-joined",
+          "child": 0,
+          "sequence": 11
+        },
+        {
+          "action": "child-joined",
+          "child": 1,
+          "sequence": 12
+        },
+        {
+          "action": "load-enter",
+          "child": 2,
+          "sequence": 13
+        },
+        {
+          "action": "load-success",
+          "child": 2,
+          "sequence": 14
+        }
+      ],
+      "failureLeaseRefundedAfterJoinFlush": true,
+      "finalColdBytes": 0,
+      "finalColdOwners": 0,
+      "finalRequests": 0,
+      "finalSessions": 0,
+      "finalStagingBytes": 0,
+      "finalStagingOwners": 0,
+      "firstCompetitionTerminalSequence": 9,
+      "gateAborted": false,
+      "gateDeadline": "Instant(_value: 169777.90863241602 seconds)",
+      "gateReleased": true,
+      "injectedBytes": 134208552,
+      "injectedCredits": 1,
+      "maximumBytes": 134217728,
+      "maximumOwners": 256,
+      "measuredCharge": 9176,
+      "nativeLeaseDelta": 3280,
+      "postReleaseNativeCounter": null,
+      "requestedAdmissionRaw": 12,
+      "sameOriginalLoadDeadline": "Instant(_value: 169790.902213208 seconds)",
+      "samples": {
+        "baseline": {
+          "bytes": 0,
+          "native": 0,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 0,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "closed": {
+          "bytes": 0,
+          "native": 0,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 0,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "competitionJoinedFlush": {
+          "bytes": 134217728,
+          "native": 7184,
+          "owners": 2,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "injected": {
+          "bytes": 134208552,
+          "native": 3904,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "injectionDropped": {
+          "bytes": 9176,
+          "native": 7184,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "measurementDropped": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "measurementHeld": {
+          "bytes": 9176,
+          "native": 7184,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "opening": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "recoveryDropped": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "recoveryHeld": {
+          "bytes": 9176,
+          "native": 7184,
+          "owners": 1,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        },
+        "winnerDropped": {
+          "bytes": 0,
+          "native": 3904,
+          "owners": 0,
+          "requests": 0,
+          "sessions": 1,
+          "stagingBytes": 0,
+          "stagingOwners": 0
+        }
+      },
+      "shutdownExecuted": true,
+      "timerCancelledJoined": true,
+      "typedAdmissionRaw": 12,
+      "typedContractMatchesRequest": true
+    }
+  ],
+  "syntheticCompilerContract": {
+    "scope": "Synthetic header cache invalidation only",
+    "nativeEngineAcceptance": false,
+    "sameCacheRoot": "/private/tmp/arktrace-native-sdk-cache-regression",
+    "sourceConfigurationSHA256": "93305eed641eb2bfabe56a6044be929562d23f3b25b2a9f280d9fafacb9ab257",
+    "actualPackageIdentityCodeSHA256": "65296b882cf3c37a33bd4a395fed85eb7225eac0c17c916bdcd772b4c64c534a",
+    "builds": [
+      {
+        "sdk": "old",
+        "expectedDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "actual": {
+          "configuration": "0000000000000000000000000000000000000000000000000000000000000000",
+          "engine": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "matched": true,
+        "objectsBefore": {
+          "Engine.o": {
+            "sha256": "57b568c9351b81940de594a295d0ba34908c0eed6ee7ac04c73702db5c38414a",
+            "mtimeNs": 1791245410279065675
+          },
+          "Configuration.o": {
+            "sha256": "1b98a76105d778f4bba1f2bb3d687ff7407737a6bd0003d170fec76e32dd776c",
+            "mtimeNs": 1791245410278971050
+          }
+        },
+        "objectsAfter": {
+          "Engine.o": {
+            "sha256": "0e4254ccea442d1e275918c026061f77a55bb2e3076f181e3d66f33a816b8353",
+            "mtimeNs": 1791245576123345267
+          },
+          "Configuration.o": {
+            "sha256": "5a9dcf57ba3b11c1192d43e7b9745667078bfc8fe3d236b511e5db323ef3dd37",
+            "mtimeNs": 1791245576124528226
+          }
+        },
+        "unchangedObjectsPreserved": false,
+        "logSHA256": "8db46c58fbd075ae7faa392751efd1b3d012387a5ad47122a421ed35a06bbd21"
+      },
+      {
+        "sdk": "new",
+        "expectedDigest": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+        "actual": {
+          "configuration": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+          "engine": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a"
+        },
+        "matched": true,
+        "objectsBefore": {
+          "Engine.o": {
+            "sha256": "0e4254ccea442d1e275918c026061f77a55bb2e3076f181e3d66f33a816b8353",
+            "mtimeNs": 1791245576123345267
+          },
+          "Configuration.o": {
+            "sha256": "5a9dcf57ba3b11c1192d43e7b9745667078bfc8fe3d236b511e5db323ef3dd37",
+            "mtimeNs": 1791245576124528226
+          }
+        },
+        "objectsAfter": {
+          "Engine.o": {
+            "sha256": "cebee2fff5ad50e18767df9b4c6480577c6970feac2ee023307b98834e4f18e5",
+            "mtimeNs": 1791245578776529412
+          },
+          "Configuration.o": {
+            "sha256": "851aebaad2fa20d67be875e3c2b9ccbf551c926ae2995c6b3f3fbde9cd333837",
+            "mtimeNs": 1791245578777681246
+          }
+        },
+        "unchangedObjectsPreserved": false,
+        "logSHA256": "5278f183187c62e8e5877a3f7f3e089767682d06b4130810205942e480dda706"
+      },
+      {
+        "sdk": "old",
+        "expectedDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "actual": {
+          "configuration": "0000000000000000000000000000000000000000000000000000000000000000",
+          "engine": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "matched": true,
+        "objectsBefore": {
+          "Engine.o": {
+            "sha256": "cebee2fff5ad50e18767df9b4c6480577c6970feac2ee023307b98834e4f18e5",
+            "mtimeNs": 1791245578776529412
+          },
+          "Configuration.o": {
+            "sha256": "851aebaad2fa20d67be875e3c2b9ccbf551c926ae2995c6b3f3fbde9cd333837",
+            "mtimeNs": 1791245578777681246
+          }
+        },
+        "objectsAfter": {
+          "Engine.o": {
+            "sha256": "0e4254ccea442d1e275918c026061f77a55bb2e3076f181e3d66f33a816b8353",
+            "mtimeNs": 1791245580699828862
+          },
+          "Configuration.o": {
+            "sha256": "5a9dcf57ba3b11c1192d43e7b9745667078bfc8fe3d236b511e5db323ef3dd37",
+            "mtimeNs": 1791245580700807738
+          }
+        },
+        "unchangedObjectsPreserved": false,
+        "logSHA256": "85556e91023b045660354ca71410dba9f4ca9d7a8f551e11e17cbd8208101f11"
+      },
+      {
+        "sdk": "new",
+        "expectedDigest": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+        "actual": {
+          "configuration": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+          "engine": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a"
+        },
+        "matched": true,
+        "objectsBefore": {
+          "Engine.o": {
+            "sha256": "0e4254ccea442d1e275918c026061f77a55bb2e3076f181e3d66f33a816b8353",
+            "mtimeNs": 1791245580699828862
+          },
+          "Configuration.o": {
+            "sha256": "5a9dcf57ba3b11c1192d43e7b9745667078bfc8fe3d236b511e5db323ef3dd37",
+            "mtimeNs": 1791245580700807738
+          }
+        },
+        "objectsAfter": {
+          "Engine.o": {
+            "sha256": "cebee2fff5ad50e18767df9b4c6480577c6970feac2ee023307b98834e4f18e5",
+            "mtimeNs": 1791245583366773725
+          },
+          "Configuration.o": {
+            "sha256": "851aebaad2fa20d67be875e3c2b9ccbf551c926ae2995c6b3f3fbde9cd333837",
+            "mtimeNs": 1791245583361346722
+          }
+        },
+        "unchangedObjectsPreserved": false,
+        "logSHA256": "3031d923534722499b672c57b423d07f08eb721345d91a511c1fb45bd123202d"
+      },
+      {
+        "sdk": "new",
+        "expectedDigest": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+        "actual": {
+          "configuration": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a",
+          "engine": "ce00cd2a0e14056cb08604ec79be40346c3b9ebe6bb1e404f96e5f5d6b321b1a"
+        },
+        "matched": true,
+        "objectsBefore": {
+          "Engine.o": {
+            "sha256": "cebee2fff5ad50e18767df9b4c6480577c6970feac2ee023307b98834e4f18e5",
+            "mtimeNs": 1791245583366773725
+          },
+          "Configuration.o": {
+            "sha256": "851aebaad2fa20d67be875e3c2b9ccbf551c926ae2995c6b3f3fbde9cd333837",
+            "mtimeNs": 1791245583361346722
+          }
+        },
+        "objectsAfter": {
+          "Engine.o": {
+            "sha256": "cebee2fff5ad50e18767df9b4c6480577c6970feac2ee023307b98834e4f18e5",
+            "mtimeNs": 1791245583366773725
+          },
+          "Configuration.o": {
+            "sha256": "851aebaad2fa20d67be875e3c2b9ccbf551c926ae2995c6b3f3fbde9cd333837",
+            "mtimeNs": 1791245583361346722
+          }
+        },
+        "unchangedObjectsPreserved": true,
+        "logSHA256": "3692b76bcb95eb15a89181b3dc2fd7ef6a8ad27f423476db213ad3d4e032ee63"
+      }
+    ]
+  },
+  "productionNoop": {
+    "objectCount": 77,
+    "bytesSHAAndMtimeUnchanged": true,
+    "sameSDK": true,
+    "wholeCacheCleaned": false
+  },
+  "sourceOnlyCandidate": {
+    "source": "/Users/fuhanfeng/.codex/visualizations/2026/10/03/01a0ff9d-69c0-7760-a824-330620e0369a/native-load-concurrent-byte-admission-r2-20261005/Tests/ArkTraceRenderingTests/NativeSnapshotConcurrentByteAdmissionTests.swift",
+    "byteCount": 18615,
+    "sha256": "08f54a89f5bc51e232269fdf7d6fecbffd0afc4b74877bd510701fe16fb7a6c1",
+    "target": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Tests/ArkTraceRenderingTests/NativeSnapshotConcurrentByteAdmissionTests.swift",
+    "sourceOnlyImport": true,
+    "priorSDKCoveredCurrentWire": false,
+    "rootCurrentSDKValidationPending": true
+  },
+  "oracle": {
+    "actualGroups": 2,
+    "changedReceipts": [
+      "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json"
+    ],
+    "unchangedNonReceiptOutputs": [
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-display-swift.json",
+        "byteCount": 10837,
+        "sha256": "a2f2e9cf07e28fd1fad5d6a90984604a13848fe0665f8dd1fc722bee50d83975"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-inputs.json",
+        "byteCount": 266960,
+        "sha256": "b5fe00e561ab5417d7f636472722458c44b492c4a7374cb818d197b340306816"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/action-catalog-keyboard-swift.json",
+        "byteCount": 123896,
+        "sha256": "fa6834cfe19163031a1b46712b1529aab60bc4b91be87a2744902bd9a70e9d76"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-inputs.json",
+        "byteCount": 273525,
+        "sha256": "77d8727d9ba5c420cae0ab3b202f13afd421440375ad5330077f98627217f220"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-oracle.json",
+        "byteCount": 6150862,
+        "sha256": "bb027933e3de12696b080dca4e2a83e3099f890770bd75ded02742cad268dbb4"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/boundary-inputs.json",
+        "byteCount": 832,
+        "sha256": "8e63aee5abd0b7b235e693f26a0b1624027ed0183ba451ea0f9f99f7f66c5eb8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-inputs.json",
+        "byteCount": 20556,
+        "sha256": "e0904c2a842bdfa7817b03320e29268243681d01f2c997a642f318d94062e2a3"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-oracle.json",
+        "byteCount": 11327,
+        "sha256": "5613dd5e6d8003bdcbb0c542562d424b8c2fa032a12c822a7f392524b88e42c2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-navigation-compat-inputs.json",
+        "byteCount": 13893,
+        "sha256": "cebf85e2b8eb0831803c041afefedc07725e2362fbe018f029b1a0519292d289"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/detail-inputs.json",
+        "byteCount": 13331,
+        "sha256": "3f4c1c84a7ace5011a9d9e320db8d21732341b7bcc4bf62c8d5fbb3430a032b1"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/geometry-inputs.json",
+        "byteCount": 304469,
+        "sha256": "35dc59b0616955e58f1b29af397daff4cfc771d5c0fffd36b4f284bfbc0f9889"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-input.json",
+        "byteCount": 967,
+        "sha256": "0e9df20590e88fe23c43e7daf4669e78b994d61eb64769743ba24f90d7d8a991"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/counters-swift.json",
+        "byteCount": 1761,
+        "sha256": "3772fa286a400b57944864d1f015ac37c9b3f6291e65d57eab11e9a87d1144a8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-input.json",
+        "byteCount": 962,
+        "sha256": "546b8704fed6ce7562efea5803160f651a78a2ddf8dbc0f2178025c68eae63dc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/frames-swift.json",
+        "byteCount": 1687,
+        "sha256": "80f3389d295e8733583d93f79cda6b31683888008aa2a392493b4a52bcfb4076"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-input.json",
+        "byteCount": 1364,
+        "sha256": "97222af84a3f0a6830c5b46e0a3360c51b1f6b33d8aa4f63162fb22d19e5fdc6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-snapshot-hit/named-slices-swift.json",
+        "byteCount": 6688,
+        "sha256": "d0518862f8631bd4dd81a0932cd2639ad7e63304adb52f89dcfafefdec7c7542"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/counters-input.json",
+        "byteCount": 967,
+        "sha256": "0e9df20590e88fe23c43e7daf4669e78b994d61eb64769743ba24f90d7d8a991"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/counters-swift.json",
+        "byteCount": 4137,
+        "sha256": "20c56e7fdd4a6fe920bab01c3ccd217e8f2b0663c6251166e88d95bb3a84e8eb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/frames-input.json",
+        "byteCount": 962,
+        "sha256": "546b8704fed6ce7562efea5803160f651a78a2ddf8dbc0f2178025c68eae63dc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/frames-swift.json",
+        "byteCount": 3230,
+        "sha256": "9f2048830a15d2dfa4ce185fbe9c7494667632597c41d49b9ccbbff4cbe2070d"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/named-slices-input.json",
+        "byteCount": 1364,
+        "sha256": "97222af84a3f0a6830c5b46e0a3360c51b1f6b33d8aa4f63162fb22d19e5fdc6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/hot-wire-render-facts/named-slices-swift.json",
+        "byteCount": 3615,
+        "sha256": "2ab05b2789791aa57af49ad0f4d912a9a97be1f552c5b49a5461a09abae2d428"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-inputs.json",
+        "byteCount": 281931,
+        "sha256": "f19b09342df67acdac5e0afc5fc2304ac20ab98e0fa0457f01cd27b3236e67cd"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/inspector-projection-swift.json",
+        "byteCount": 340307,
+        "sha256": "b3ae927a32c21141a06c9b760d5c5390640c06eb4a412156a799553554434eb9"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-inputs.json",
+        "byteCount": 27471,
+        "sha256": "764301d329540c92f22ec3df9eb268f2363c9437f153b54be836d1022ff037fe"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-inputs.json",
+        "byteCount": 126403,
+        "sha256": "4c7fe192ca59a5827c2a513a4c76b348a79ced780f4477cbbb4e4a36e040262a"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-rendering-swift-oracle.json",
+        "byteCount": 13300,
+        "sha256": "7c3db9a4bcb5c8400273d08b8fc0ad100073ede8f03fe8a1c858be3843967fe0"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-inputs.json",
+        "byteCount": 15936,
+        "sha256": "f6c19176fb8a993e45c06263cf021369d6b52db52449e1de26ae471f99cf30b8"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-restore-swift-oracle.json",
+        "byteCount": 57471,
+        "sha256": "0513a9064dbf8898332111e5b9b225029a6d22c56c494c855adec281da42e1de"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-oracle.json",
+        "byteCount": 1299044,
+        "sha256": "23374b2445cd0f3017fbb26c0db9f749889bd51e041d16da39ee16eb2f818deb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/navigation-whitespace-swift-oracle.json",
+        "byteCount": 196,
+        "sha256": "b7e91cf48f65e2d8ccf1cc394bf61dd282ce8bb61d918db8ebb554924d46dfc3"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/counters-input.json",
+        "byteCount": 967,
+        "sha256": "0e9df20590e88fe23c43e7daf4669e78b994d61eb64769743ba24f90d7d8a991"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/counters-packed.json",
+        "byteCount": 5120,
+        "sha256": "0895250cb683f28ffdb0abeb48a86329081c251ce990ef65d63afa884c5ec3db"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/counters-swift.json",
+        "byteCount": 4137,
+        "sha256": "20c56e7fdd4a6fe920bab01c3ccd217e8f2b0663c6251166e88d95bb3a84e8eb"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/frames-input.json",
+        "byteCount": 962,
+        "sha256": "546b8704fed6ce7562efea5803160f651a78a2ddf8dbc0f2178025c68eae63dc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/frames-packed.json",
+        "byteCount": 4166,
+        "sha256": "bb3dd6ad62ecb4c2afe33e96ab70105a09cc994486a920d08945b6795e4c8cf4"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/frames-swift.json",
+        "byteCount": 3230,
+        "sha256": "9f2048830a15d2dfa4ce185fbe9c7494667632597c41d49b9ccbbff4cbe2070d"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/named-slices-input.json",
+        "byteCount": 1364,
+        "sha256": "97222af84a3f0a6830c5b46e0a3360c51b1f6b33d8aa4f63162fb22d19e5fdc6"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/named-slices-packed.json",
+        "byteCount": 8106,
+        "sha256": "f5bfc4e94fd2f2b3d23f2777b615ae0030241e0a13c1e8c1efd9bf1e48bd3ec7"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/packed-wire-native-conversion/named-slices-swift.json",
+        "byteCount": 3615,
+        "sha256": "2ab05b2789791aa57af49ad0f4d912a9a97be1f552c5b49a5461a09abae2d428"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/plan-inputs.json",
+        "byteCount": 74498,
+        "sha256": "01e76fcc00118baaa8ba5dd3caf728cdfcf33e2867557fd6f5012b7d82467fbd"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-inputs.json",
+        "byteCount": 299512,
+        "sha256": "7901cc228208d6b52fc6f0371a701b5efb07125b60d0095c089d97dfecd2a908"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/presentation-swift-oracle.json",
+        "byteCount": 828932,
+        "sha256": "fd8d0dc7034397b19fa548d92c1978e77e2574b5b157b326f90771c92503dff2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-counters-inputs.json",
+        "byteCount": 3779,
+        "sha256": "b390794df541449bd528316863ffa445d17dba01478ded591ae4b770719779e2"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/scoped-slices-inputs.json",
+        "byteCount": 2760,
+        "sha256": "a3a90ff0f271ba7ab4d6f31832d4752aecce5a1199bf844e9cd51d2b28610f14"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-environment.json",
+        "byteCount": 899,
+        "sha256": "1af8bca4e080bb00a7ed0f311488bfd22a4239a7c27633a47bb483534e60dced"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-inputs.json",
+        "byteCount": 11601319,
+        "sha256": "0f1a85eb7f56dfca37517e507d227ce0ee4125c7783ea94be3d2083d9cae645c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/snapshot-event-index-swift-oracle.json",
+        "byteCount": 2674042,
+        "sha256": "4f7d52ce125ef36400f81076da6345e2aef580453bb97ab917da07617874401c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-boundary-oracle.json",
+        "byteCount": 1330,
+        "sha256": "8a86a13bb51d8d062977c5b69c8c1e9e25f1be9b6c04a3a54dc8dd026b554ebc"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-detail-oracle.json",
+        "byteCount": 8427,
+        "sha256": "15fe145fa7f84e4127cde06be1ce6e225f0e7bacd49732230065d9a362c23745"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-geometry-oracle.json",
+        "byteCount": 149596,
+        "sha256": "63c5c245fe004a0192170e3dd7949cd0e1dfcbe8d490ebe94e0c25eb6740df31"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-migration-oracle.json",
+        "byteCount": 105784,
+        "sha256": "9b8d0a7f0de2f5ad1eb677c3b3e52bc50ba781744c3544e713bf1b62799f287c"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-plan-oracle.json",
+        "byteCount": 113089,
+        "sha256": "cf9f881793ad76501f3294cf5857be38c510de73f27056b6ba7b4de0912aaa97"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-counters.json",
+        "byteCount": 9354,
+        "sha256": "5ad9aa6533eaf1efc5bed86bbe93e13af47c53a255805ea1799492333c02423d"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices-before.json",
+        "byteCount": 18830,
+        "sha256": "dbcf330cda94e271aadb26c54f2c4448745007cd6160d1e755b4ec5200961bd7"
+      },
+      {
+        "path": "rust/crates/arktrace-viewer/tests/fixtures/swift-scoped-slices.json",
+        "byteCount": 17217,
+        "sha256": "1ac27b1de972f77b4b30bd5a9bb2b60806093e451e44822f45c025d7750d6e91"
+      }
+    ]
+  },
+  "warningAudit": {
+    "03-current-package-cache-contract": [],
+    "15-sdk-fixtures": [],
+    "20-default-build": [],
+    "21-default-full-test": [],
+    "22c-native-full-test": [],
+    "23c-api": [],
+    "24b-app-debug": [
+      "2026-10-06 08:28:07.329 appintentsmetadataprocessor[62643:22972821] warning: Metadata extraction skipped, no AppIntents.framework dependency found"
+    ],
+    "25b-app-document-types": [],
+    "14-migration-verifier": [],
+    "26-fmt": [],
+    "27-clippy": [],
+    "28b-rust-workspace": [],
+    "29-workspace-verifier": [],
+    "30-generator": [],
+    "31-migration-contract-tests": [],
+    "32-rust-build": [],
+    "33-migration-smoke": [],
+    "34-json-roundtrip": [],
+    "35b-ffi-contract": [],
+    "36c-sdk-consumer": [],
+    "37-sdk-reference-1": [],
+    "38-sdk-reference-2": [],
+    "39-sdk-reference-3": [],
+    "40-sdk-reference-4": [],
+    "41-sdk-reference-5": [],
+    "50-offline-01": [],
+    "50-offline-02": [],
+    "50-offline-03": [],
+    "50-offline-04": [],
+    "50-offline-05": [],
+    "50-offline-06": [],
+    "50-offline-07": [],
+    "50-offline-08": [],
+    "50-offline-09": [],
+    "50-offline-10": [],
+    "50-offline-11": [],
+    "50-offline-12": [],
+    "50-offline-15": []
+  },
+  "nativeExecutingArtifacts": {
+    "observedAfter": "22c-native-full-test",
+    "observedAtUnix": 1791246465.9299,
+    "files": [
+      {
+        "source": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Products/Debug/ArkTraceRenderingTests.xctest/Contents/MacOS/ArkTraceRenderingTests",
+        "frozen": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/native-executing-artifacts/ArkTraceRenderingTests",
+        "byteCount": 20287776,
+        "sha256": "28cfbf35584f18066b6e5edfb3dec8eb3b8fc4cbcf8b26b8d7882b176f6517b9",
+        "mtimeNs": 1791245596829224834
+      },
+      {
+        "source": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRustRuntime-t.build/Objects-normal/arm64/RustConfiguration.o",
+        "frozen": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/native-executing-artifacts/RustConfiguration.o",
+        "byteCount": 155344,
+        "sha256": "86c37f8dac0b98b081b5035b8dabbc5ef9e2da5cb447b463e7b9f753ecea365f",
+        "mtimeNs": 1791245585666486885
+      },
+      {
+        "source": "/private/tmp/arktrace-cache-session-final-consumer/arktrace/build/out/Intermediates.noindex/ArkTrace.build/Debug/ArkTraceRustRuntime-t.build/Objects-normal/arm64/RustEngine.o",
+        "frozen": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/sdk-cache-identity-20261006/native-executing-artifacts/RustEngine.o",
+        "byteCount": 436168,
+        "sha256": "f309ae61c5299ea289acd52a32633385605a7f506e752907321dd307be4c3c68",
+        "mtimeNs": 1791245585692390736
+      }
+    ],
+    "fullCompilerInputClosure": false,
+    "fullProcessForest": false
+  },
+  "desktop": {
+    "observedAtUnix": 1791248951.0159,
+    "tool": "cua.getState",
+    "currentDesktopAvailable": true,
+    "inventoryErrors": [],
+    "GUIActionsExecutedInSoftwarePacket": 0,
+    "GUIAcceptance": false,
+    "latestHumanUnlockReplyPresent": true
+  },
+  "ciPlan": "lane_swiftpm=true\nlane_app=true\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+  "sourcePins": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "byteCount": 32562,
+      "sha256": "0a0c54b4555d4ceb9ab58c493fe74e7b52b0aef8934e0a4f0d0cbc856c6d64e8"
+    },
+    {
+      "path": "Package.swift",
+      "byteCount": 10778,
+      "sha256": "1b8bb2f2ac8db595f76bf060ee7cd21f8140eb0ebea04852114940c52d79b20f"
+    },
+    {
+      "path": "Tests/ArkTraceRenderingTests/NativeSnapshotConcurrentByteAdmissionTests.swift",
+      "byteCount": 18615,
+      "sha256": "08f54a89f5bc51e232269fdf7d6fecbffd0afc4b74877bd510701fe16fb7a6c1"
+    },
+    {
+      "path": "docs/RUST_CORE_MIGRATION_TASKS.md",
+      "byteCount": 98800,
+      "sha256": "2f0cd7f18ac5726a4c81f9f407d3e7532a0f13b771683ed55fba4f2ed7c555f2"
+    },
+    {
+      "path": "docs/migration-runs/AT-RUST-012-013-2026-10-06-sdk-cache-identity.md",
+      "byteCount": 4537,
+      "sha256": "47a1f4deb793c2dd4c6b4bb936dd257bed94ce14b81ace6f113914ab4ae5ad18"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+      "byteCount": 16157,
+      "sha256": "7428c0f78105a2f0c9eb01280c49b9478a6745aed198878814604f013097d7fd"
+    },
+    {
+      "path": "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "byteCount": 43100,
+      "sha256": "dd429f20093c44233830cc459520eefbd73f188b935319a610c0529a639c34e5"
+    },
+    {
+      "path": "scripts/test_native_sdk_cache.py",
+      "byteCount": 6919,
+      "sha256": "452e809ca0ab578130bd65e62b9652ad13e33553e3aa715b25481cc8079ccfa7"
+    }
+  ],
+  "fullCompilerInputClosure": false,
+  "fullProcessForest": false,
+  "performanceAcceptance": false,
+  "RSSAcceptance": false,
+  "releaseAcceptance": false,
+  "WindowsNativeExecuted": false,
+  "remaining": [
+    "actual GUI",
+    "in-flight cancellation",
+    "large >500 MiB/performance/RSS",
+    "full process forest",
+    "actual Capture",
+    "ArkDeck schema/index 4 consumer",
+    "applicable signing/distribution"
+  ],
+  "observedAtUnix": 1791249002.374455
+}

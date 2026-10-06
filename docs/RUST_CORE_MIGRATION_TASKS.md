@@ -42,6 +42,9 @@
 > 改 viewport 时保留 owner，detail/density 分模式命中。真实 Engine 的 96 点对照三轮通过，
 > 包括 Engine release 后读取；SDK 字段矩阵明确区分 nil/zero 与 Int64 精度。见
 > [retained hit 接线记录](migration-runs/AT-RUST-011-012-013-2026-10-06-retained-hit-wire.md)；总验收仍 open。
+> SDK 切换缓存增量：Package 将四个 pinned artifact member 的 digest 纳入 C/Swift compiler
+> context，修复旧 Clang module 复用；当前 native 全套 773 项与实际最后 byte-credit 并发
+> 拒绝/退款/恢复/close-zero 通过。见[缓存身份记录](migration-runs/AT-RUST-012-013-2026-10-06-sdk-cache-identity.md)；完整 macOS 验收仍 open。
 
 ## 1. 执行规则与完成语义
 

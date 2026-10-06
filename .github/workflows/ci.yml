@@ -476,6 +476,7 @@ jobs:
         run: |
           python3 scripts/build_macos_rust_sdk.py --fixtures > sdk-artifact.json
           export ARKTRACE_RUST_XCFRAMEWORK="$(python3 -c 'import json; print(json.load(open("sdk-artifact.json"))["xcframework"])')"
+          python3 scripts/test_native_sdk_cache.py --cache-root "${{ runner.temp }}/arktrace-sdk-cache-contract" > sdk-cache-contract.json
           python3 scripts/test_macos_rust_sdk.py --build-only > sdk-consumer.json
           ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-event-reference" python3 scripts/test_macos_event_sdk.py --reference-build-only > sdk-event-reference.json
           ARKTRACE_EVENT_ORACLE_CACHE_ROOT="${{ runner.temp }}/arktrace-density-reference" python3 scripts/test_macos_density_sdk.py --reference-build-only > sdk-density-reference.json
@@ -491,6 +492,7 @@ jobs:
           name: swift-sdk-compile-receipts
           path: |
             sdk-artifact.json
+            sdk-cache-contract.json
             sdk-consumer.json
             sdk-event-reference.json
             sdk-density-reference.json
@@ -505,6 +507,7 @@ jobs:
             ${{ runner.temp }}/arktrace-sdk-consumer/consumer-build.log
             ${{ runner.temp }}/arktrace-sdk-consumer/sdk-unit-tests.log
             ${{ runner.temp }}/arktrace-sdk-consumer/*.invalid.log
+            ${{ runner.temp }}/arktrace-sdk-cache-contract/compiler-contract-logs/*.log
           if-no-files-found: ignore
           retention-days: 7
 
