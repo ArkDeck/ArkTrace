@@ -35,8 +35,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 104086,
-      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059"
+      "byteCount": 104519,
+      "sha256": "62e343666d02cf72b67862f46c23886ff865c6f94f779ae974dc63152dce1e5b"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -240,8 +240,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 124713,
-      "sha256": "29fce106cd476392509fc7f3545aacb3a6eb6267f67b6b0f6ed361f75c85d20a"
+      "byteCount": 124788,
+      "sha256": "2ff26c85cf7bd9435340910aca8f85b78acdc88e8f4af5c771c595581ca9ed7d"
     },
     {
       "path": "Tests/ArkTraceRenderingTests/TimelineRenderingTests.swift",
@@ -347,28 +347,28 @@
     "environment": {
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-counter-mainline-swift",
       "COUNTER_SWIFT_INPUT": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-detail-presentation-compat-20261004/fixtures/swift-vectors.json",
-      "COUNTER_SWIFT_OUTPUT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/fresh-swift-counter-oracle.json",
+      "COUNTER_SWIFT_OUTPUT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/fresh-swift-counter-oracle.json",
       "COUNTER_REVEAL_CASES": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/cases.json",
-      "COUNTER_REVEAL_SWIFT": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/fresh-swift-counter-reveal.json",
+      "COUNTER_REVEAL_SWIFT": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/fresh-swift-counter-reveal.json",
       "COUNTER_REVEAL_DATABASES": "/private/tmp/arktrace-counter-mainline-swift/databases",
       "COUNTER_REVEAL_PARSER": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/tools/parallel-counter-reveal-compat-20261004/fixtures/parser-identity.json"
     },
     "exitCode": 0,
-    "elapsedSeconds": 25.199838876724243,
+    "elapsedSeconds": 25.237982988357544,
     "log": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/40-counter.stdout",
-      "byteCount": 6389,
-      "sha256": "168d37c86b2df7392357cc841e410d4dc93518c8db924d811927ac7497c6ed9e"
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/40-counter.stdout",
+      "byteCount": 5677,
+      "sha256": "74e8b687f8033384c02f3c07381a8412a5df94a9190a09ff91fa74d5bd95d073"
     },
     "stderr": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/40-counter.log",
-      "byteCount": 740,
-      "sha256": "637fb3aaf1edc212fc4560ec3f8570ec2fbe92b663bda3202e54ed6f0054df86"
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/40-counter.log",
+      "byteCount": 847,
+      "sha256": "4513a390e9bd8b993093d75c5d74f94a644353baee3d86756d87b95b16488366"
     },
     "gateReceipt": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/40-counter.receipt.json",
-      "byteCount": 1952,
-      "sha256": "fed61991a0ed2da5ceaf0016c592c2665376d61b3f0dcfb50d572ac91413f8f3"
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/40-counter.receipt.json",
+      "byteCount": 1964,
+      "sha256": "120464703c04fed7de898905c67a3d07e3089caef49f9af917d21d0ce0bd559a"
     }
   },
   "databases": [
@@ -395,6 +395,6 @@
   "setupLimitations": [
     "Prior mainline setup limitations remain in the previous receipt; this fresh replay uses its independently audited access seams and unchanged frozen DBs."
   ],
-  "previousReceiptSHA256": "46deec48a6dedf9c1aa6836a798ab88f59a51cbc8a02ec35e06a3393982d7f6c",
-  "revalidatedBaseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2"
+  "previousReceiptSHA256": "efdf1ef00ea597df91cc3d605fcd9fed4c5a1e0a01b0020291acf69debbb6937",
+  "revalidatedBaseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569"
 }

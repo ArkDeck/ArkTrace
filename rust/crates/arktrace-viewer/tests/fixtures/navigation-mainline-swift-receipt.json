@@ -45,8 +45,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 104086,
-      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059"
+      "byteCount": 104519,
+      "sha256": "62e343666d02cf72b67862f46c23886ff865c6f94f779ae974dc63152dce1e5b"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -317,8 +317,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "7c38442621e5efa9be69274a180591087475d7b5b9abcb62ac02d5688e6f31c9",
-      "byteCount": 105557
+      "sha256": "f9df4db3b6c8cb37a1232437bcdf640d1865d45ad79b950139251b65e56b574a",
+      "byteCount": 105990
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -327,16 +327,16 @@
     }
   ],
   "log": {
-    "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/navigation-producer.log",
-    "byteCount": 7967,
-    "sha256": "1c9ee8f7cea7be20276874e6fa632e7d5350ae4baddbb1e75836789504ca1402"
+    "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/navigation-producer.log",
+    "byteCount": 5961,
+    "sha256": "b94718cb57f950758b307d9f6f8178a1f6581ac7d3903d891358dab1913fdd3a"
   },
-  "rawReceiptSHA256": "c0104451e59ca7997eddebd484eff48f4402160cd02f4470703c1df216b1ef81",
+  "rawReceiptSHA256": "bf742ea0190fe9325df1389165ae5d1a58789bf2185a803f395457986c2d0e5a",
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059",
-      "byteCount": 104086
+      "sha256": "62e343666d02cf72b67862f46c23886ff865c6f94f779ae974dc63152dce1e5b",
+      "byteCount": 104519
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -420,8 +420,8 @@
       "byteCount": 196
     }
   ],
-  "revalidatedBaseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2",
-  "previousReceiptSHA256": "95ac64f3589c313e6b77c2b63c11aff79a6f447444e5c5758d237bc005436ef8",
+  "revalidatedBaseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+  "previousReceiptSHA256": "c4957044bf3f0805a001388c614a3e393c96dc04e14ddbcd3185d168340e1639",
   "compatibilityChange": "Preserve unmatched favorite records; visible unique known lanes alone define reorder indices and the twelve-lane display bound.",
   "replayCommandReceipt": {
     "command": [
@@ -433,21 +433,21 @@
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-navigation-mainline-swiftpm"
     },
     "exitCode": 0,
-    "elapsedSeconds": 24.328206300735474,
+    "elapsedSeconds": 29.790354013442993,
     "log": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/41-navigation.stdout",
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/41-navigation.stdout",
       "byteCount": 98,
       "sha256": "0013d42c0f5451e891658db5d42f4de010900f7d225eea28ba07e9568a8ddf8e"
     },
     "stderr": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/41-navigation.log",
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/41-navigation.log",
       "byteCount": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "gateReceipt": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/41-navigation.receipt.json",
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/41-navigation.receipt.json",
       "byteCount": 717,
-      "sha256": "44061c75ae3c2513cc96b388ab890aa14688282294a0e129d56c8eb855f91e1d"
+      "sha256": "50f2b41f78900577215d828a9fd44b8ef3a7120417b3156fa2956121df21ca8a"
     }
   }
 }

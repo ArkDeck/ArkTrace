@@ -17,8 +17,8 @@
   "sourceFiles": [
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059",
-      "byteCount": 104086
+      "sha256": "62e343666d02cf72b67862f46c23886ff865c6f94f779ae974dc63152dce1e5b",
+      "byteCount": 104519
     },
     {
       "path": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -49,8 +49,8 @@
   "patchedSources": [
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "sha256": "7c38442621e5efa9be69274a180591087475d7b5b9abcb62ac02d5688e6f31c9",
-      "byteCount": 105557
+      "sha256": "f9df4db3b6c8cb37a1232437bcdf640d1865d45ad79b950139251b65e56b574a",
+      "byteCount": 105990
     },
     {
       "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle-source/Sources/ArkTraceRendering/TimelineNSView.swift",
@@ -94,8 +94,8 @@
   ],
   "log": {
     "path": "/private/tmp/arktrace-navigation-mainline-swiftpm/navigation-oracle.log",
-    "sha256": "1c9ee8f7cea7be20276874e6fa632e7d5350ae4baddbb1e75836789504ca1402",
-    "byteCount": 7967
+    "sha256": "b94718cb57f950758b307d9f6f8178a1f6581ac7d3903d891358dab1913fdd3a",
+    "byteCount": 5961
   },
   "note": "Synthetic typed repository facts; no real DB corpus and no parser. Only access/logging changed; catalog and actions execute original code. Unicode matcher is a host port.",
   "outputs": [

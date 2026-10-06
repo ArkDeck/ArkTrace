@@ -1,0 +1,43 @@
+{
+  "evidenceDirectory": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/reviewed-hit-regressions-current-20261006",
+  "fileCountIncludingManifest": 487,
+  "totalBytesExcludingManifest": 43218178,
+  "manifestSHA256": "618162491ddb620bcf4b005217929992ce56c02ef6f5538d203afcc00fd39fb9",
+  "reportSHA256": "7550a9c35f39621d2e83d5eb737775b349602f449273b09dc4bc38d76e40ad94",
+  "allBytesAndModesReadBack": true,
+  "finalCompleteDiffCIPlan": {
+    "argv": [
+      "sh",
+      "scripts/ci_plan.sh"
+    ],
+    "cwd": "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace",
+    "paths": [
+      "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
+      "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotConcurrentRetainedHitTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotDensityHitModeWireTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotHitCBufferBoundaryTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterDensityWireIdentityTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotProcessCounterHitParityTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotRetainedHitCancellationTests.swift",
+      "Tests/ArkTraceRenderingTests/NativeSnapshotSelectiveOwnerReleaseTests.swift",
+      "Tests/ArkTraceRustRuntimeTests/RustSnapshotHitWireFieldMatrixTests.swift",
+      "docs/TASKS.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-reviewed-hit-regressions.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-reviewed-hit-regressions.md",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-reviewed-hit-regressions.seal.json",
+      "docs/migration-runs/AT-RUST-007-011-013-2026-10-06-reviewed-hit-regressions.sha256",
+      "rust/crates/arktrace-viewer/tests/fixtures/annotation-mainline-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/annotation-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/counter-compat-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/navigation-mainline-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/navigation-swift-receipt.json",
+      "rust/crates/arktrace-viewer/tests/fixtures/viewer-facts-mainline-swift-receipt.json",
+      "scripts/test_macos_rust_sdk.py"
+    ],
+    "exitCode": 0,
+    "stdout": "lane_swiftpm=true\nlane_app=true\nlane_contracts=true\nlane_rust_macos=true\nlane_rust_windows=true\n",
+    "includesSealSidecar": true,
+    "nativeWindowsExecuted": false
+  }
+}

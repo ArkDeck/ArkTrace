@@ -63,8 +63,8 @@
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 104086,
-      "sha256": "0fd5da01667f17189801ef6f2d4a1c67f3ad6374d29c4c943e59aae906526059"
+      "byteCount": 104519,
+      "sha256": "62e343666d02cf72b67862f46c23886ff865c6f94f779ae974dc63152dce1e5b"
     },
     {
       "path": "Sources/ArkTraceAppSupport/TraceOfflineInspectionService.swift",
@@ -303,8 +303,8 @@
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 124713,
-      "sha256": "29fce106cd476392509fc7f3545aacb3a6eb6267f67b6b0f6ed361f75c85d20a"
+      "byteCount": 124788,
+      "sha256": "2ff26c85cf7bd9435340910aca8f85b78acdc88e8f4af5c771c595581ca9ed7d"
     },
     {
       "path": "Tests/ArkTraceAppSupportTests/TraceViewStateStoreTests.swift",
@@ -350,13 +350,13 @@
   "cacheOnlyAugmentedSources": [
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Sources/ArkTraceAppSupport/TraceDocumentController.swift",
-      "byteCount": 106441,
-      "sha256": "81846e4d64a2f04c7337d8fe13fa5d185d36f347c1357fd655a00de9fe4c1425"
+      "byteCount": 106874,
+      "sha256": "5a3b582d9f695201db8b1d2a3a45c48731ba8bcb59f400dddc8653350fb50ab9"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Tests/ArkTraceAppSupportTests/TraceDocumentControllerTests.swift",
-      "byteCount": 134598,
-      "sha256": "13b6fcceff3d120dec245cff9c5f6093933b683b14021ba0ab55147020b5a012"
+      "byteCount": 134673,
+      "sha256": "e41ee070ef574d96e2da22bc143901c6695c8fff6eaca2cb255236326babc410"
     },
     {
       "path": "/private/tmp/arktrace-annotations-mainline-swiftpm/oracle-source/Package.swift",
@@ -390,13 +390,13 @@
   ],
   "exitCode": 0,
   "log": {
-    "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/current-oracle-replay/annotation-producer.log",
-    "byteCount": 56885,
-    "sha256": "2a331bf495419f818cfb489e91986848c03dbf170203f5e93ee277df8b0a0f18"
+    "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/current-oracle-replay/annotation-producer.log",
+    "byteCount": 1817,
+    "sha256": "1f5a11c5d5085b60fc32ab5f60be27df69fd488a84bb3e3925e0f43642a1d169"
   },
-  "rawReceiptSHA256": "845864ba89d5d7c5f2cf3bc41c3c4998327b6939909ecb6422bf6f20d3d6604d",
-  "revalidatedBaseCommit": "68e8cd36b7df5af1db23f2cb67d8a5b3f0c6c0d2",
-  "previousReceiptSHA256": "8be420c96e4a9e7a955bed4d34646cf58d90ec9aa0d664801af8f8dd2657cb17",
+  "rawReceiptSHA256": "98ea24485a602e61427b239263d83297cc961868c073bbada6179f43239508af",
+  "revalidatedBaseCommit": "debfa123fc9d83b4d0694f99e0a7fa606ccba569",
+  "previousReceiptSHA256": "d9cb3f68fba031e93383dac0e5ba0f3a77d96b96eca183aa7b84a0a3e267ae3d",
   "replayCommandReceipt": {
     "command": [
       "python3",
@@ -407,21 +407,21 @@
       "ARKTRACE_SWIFTPM_CACHE_ROOT": "/private/tmp/arktrace-annotations-mainline-swiftpm"
     },
     "exitCode": 0,
-    "elapsedSeconds": 20.619622707366943,
+    "elapsedSeconds": 26.753819227218628,
     "log": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/42-annotation.stdout",
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/42-annotation.stdout",
       "byteCount": 135,
       "sha256": "809554a48160062b0fe6638c692fb3bab3fd26de209797bac017c830fa619f76"
     },
     "stderr": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/42-annotation.log",
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/42-annotation.log",
       "byteCount": 30,
       "sha256": "bbc8b176d3c74d4c5a7fd00b40280f98168e116d5272273bfe8e71407625540e"
     },
     "gateReceipt": {
-      "path": "/private/tmp/arktrace-large-gui-evidence-01a0fd3c-20261006/42-annotation.receipt.json",
+      "path": "/private/tmp/arktrace-reviewed-test-integration-01a0fd3c-20261006/42-annotation.receipt.json",
       "byteCount": 714,
-      "sha256": "31d52c0571e2b8a429db3009ef47ec9d2334141503f9b04234d9fb75693522dc"
+      "sha256": "db26fa1cb555e875456994b5ca452e8ef15fb79de33c45dece529bac77c3a823"
     }
   }
 }

@@ -254,6 +254,7 @@ final class TraceDocumentControllerTests: XCTestCase {
         while controller.phase != .ready { await Task.yield() }
         controller.selectRange(try TraceTimeRange.query(startNs: 100, endNs: 150))
         await barrier.waitUntilReached()
+        let oldOperationsFinished = controller.ownedOperationsCompletionForTesting()
         let replacement = try TraceTimeRange.query(startNs: 200, endNs: 250)
         controller.selectRange(replacement)
         let deadline = ContinuousClock.now.advanced(by: .seconds(3))
@@ -261,14 +262,14 @@ final class TraceDocumentControllerTests: XCTestCase {
             try await Task.sleep(for: .milliseconds(1))
         }
         XCTAssertEqual(controller.rangeAnalysis?.range, replacement)
+        let currentGeneration = controller.annotationSessionID
         await barrier.release()
-        let failureDeadline = ContinuousClock.now.advanced(by: .seconds(3))
-        while await repository.rangeFailuresReturned() == 0, ContinuousClock.now < failureDeadline {
-            try await Task.sleep(for: .milliseconds(1))
-        }
-        try await Task.sleep(for: .milliseconds(20))
+        await oldOperationsFinished()
         let returnedFailures = await repository.rangeFailuresReturned()
         XCTAssertEqual(returnedFailures, 1)
+        XCTAssertEqual(controller.phase, .ready)
+        XCTAssertEqual(controller.annotationSessionID, currentGeneration)
+        XCTAssertEqual(controller.selectedRange, replacement)
         XCTAssertEqual(controller.rangeAnalysis?.range, replacement)
         XCTAssertNil(controller.rangeAnalysisError)
         XCTAssertNil(controller.errorPresentation)

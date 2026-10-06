@@ -823,6 +823,14 @@ public final class TraceDocumentController {
         try await task.value
     }
 
+    /// Captures the currently owned operations for semantic regression tests.
+    /// Waiting neither cancels them nor changes the document generation. The
+    /// caller captures this before replacing a document and bounds its gates.
+    package func ownedOperationsCompletionForTesting() -> @Sendable () async -> Void {
+        let tasks = Array(ownedTasks.values)
+        return { for task in tasks { await task.value } }
+    }
+
     private func ownedTask(_ operation: @escaping @MainActor @Sendable () async -> Void) -> Task<Void, Never> {
         let id = nextTaskID
         nextTaskID &+= 1
