@@ -1,0 +1,613 @@
+{
+  "CI": {
+    "AppAPIAndCanonicalReuse": "unchanged source/dependency graph; existing 0cc evidence explicitly reused, no new full App claim",
+    "WindowsNativeExecuted": false,
+    "fullSelectedCICompleted": false,
+    "planner": {
+      "app": true,
+      "contracts": true,
+      "rustMacOS": true,
+      "rustWindows": true,
+      "swiftpm": true
+    },
+    "reason": "unknown new tooling paths fail closed"
+  },
+  "baseCommit": "0cc74c92582ade37f087aea952af67e39fb95ca1",
+  "cachedMediumOpen": {
+    "actualSamples": 20,
+    "allCacheHit": true,
+    "loadThresholdExclusive": 4,
+    "maxMilliseconds": 1531.74425,
+    "p50Milliseconds": 863.912875,
+    "p95Milliseconds": 958.0170420000001,
+    "p95SLOMilliseconds": 1000,
+    "passed": true,
+    "quietSnapshots": 144,
+    "quietWindowSeconds": 60,
+    "report": {
+      "byteCount": 31029,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-qualified-R5-20261006/performance-report.json",
+      "sha256": "30156d73a176eebb71ee9d1445cc7e0186877a4be995035da1e03c7461c559c6"
+    },
+    "samples": {
+      "byteCount": 13824,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-qualified-R5-20261006/samples.json",
+      "sha256": "aca8e2765e7f1d7bf074d864b16d5c2b87faffce0b104cc7c840f9c66dc9603b"
+    },
+    "samplesFiltered": false
+  },
+  "currentSources": [
+    {
+      "byteCount": 3005,
+      "path": "tools/native-cold-cancellation/README.md",
+      "sha256": "87c4af5ef4eeb05ea31c69926970250443114ab4e08410442f364d1e23db4df1"
+    },
+    {
+      "byteCount": 4027,
+      "path": "tools/native-cold-cancellation/bounded_log_pin.py",
+      "sha256": "ccf01ceabf420b94190d9259f96b9db2a0a7a93633033598b106523ab048da69"
+    },
+    {
+      "byteCount": 631,
+      "path": "tools/native-cold-cancellation/child_count.py",
+      "sha256": "5c7e216b5904b22049f7ef97b7b53003df1a9ced6efc3dda89e50f07e1db69e6"
+    },
+    {
+      "byteCount": 3086,
+      "path": "tools/native-cold-cancellation/clock_admission.py",
+      "sha256": "f06f2f1d5095b5b5889796eb6999c045116a1018bb6864e8d6eb5b0a23acefc3"
+    },
+    {
+      "byteCount": 9764,
+      "path": "tools/native-cold-cancellation/controller.py",
+      "sha256": "2c85e0e396a5c13601787713295074f18b12c819e6452bf76e4cc1bd37db0ce0"
+    },
+    {
+      "byteCount": 2364,
+      "path": "tools/native-cold-cancellation/frame_regressions/pure_loader.py",
+      "sha256": "feeb86fa7727f53a515d0f1f30561443bf806d18c7cfd2c7f2ce44d64da9f2f1"
+    },
+    {
+      "byteCount": 3020,
+      "path": "tools/native-cold-cancellation/frame_regressions/registration/loader-segments.json",
+      "sha256": "9df5182378f43941f12b98818e368eedb2dbbade0d72f93e2c5bd75848f8fad6"
+    },
+    {
+      "byteCount": 2215,
+      "path": "tools/native-cold-cancellation/frame_regressions/registration/oracle.json",
+      "sha256": "ade6582550fd5170a0541b3d16bcf81b33762d04fdc8d6d93ff492da5f2fd044"
+    },
+    {
+      "byteCount": 419,
+      "path": "tools/native-cold-cancellation/frame_regressions/run.py",
+      "sha256": "9ab1df036b441b180ec8146997ced48f951544c6366fc46b4f4250721c5a9891"
+    },
+    {
+      "byteCount": 7823,
+      "path": "tools/native-cold-cancellation/frame_regressions/test_frame_checkpoints.py",
+      "sha256": "8f63cb966d0db48b5e6a50a50086aeb4214252f5c9435629fbddf1bc472defea"
+    },
+    {
+      "byteCount": 849,
+      "path": "tools/native-cold-cancellation/group_relation.py",
+      "sha256": "dc13cf24741c281e620a7aa6a4e94392bfcbd199a7edf49fac9ef920e03c7d53"
+    },
+    {
+      "byteCount": 3963,
+      "path": "tools/native-cold-cancellation/hash_budget.py",
+      "sha256": "a68fd1a55953284616a370b271a2fc73110c810925e5151c0f4b6fa1e9f129e2"
+    },
+    {
+      "byteCount": 19931,
+      "path": "tools/native-cold-cancellation/interactive_process.py",
+      "sha256": "7d2ae063a7a79a2ab3c4374a040442505a18fbcb39f1387d575412803c00df27"
+    },
+    {
+      "byteCount": 1823,
+      "path": "tools/native-cold-cancellation/kernel_bridge.c",
+      "sha256": "eed40a29aca448aeab12475919bb3d90e565780c7a9cfc63e29daae7753cafb5"
+    },
+    {
+      "byteCount": 10005,
+      "path": "tools/native-cold-cancellation/kernel_observer.py",
+      "sha256": "1859998c2ef399620ce67142eab0d1fd851bf51faf7ccbb356962010ea49aa51"
+    },
+    {
+      "byteCount": 6419,
+      "path": "tools/native-cold-cancellation/namespace_guard.py",
+      "sha256": "b5637c9ba44f8292db05bbff4a8eaf13fcc710b680d0acee7af4c89c5c8b67d8"
+    },
+    {
+      "byteCount": 7346,
+      "path": "tools/native-cold-cancellation/ownership.py",
+      "sha256": "9f034ece383c3593af8486214e8ea92c45a224416aaaacea9a8576fba61633e3"
+    },
+    {
+      "byteCount": 14650,
+      "path": "tools/native-cold-cancellation/protocol.py",
+      "sha256": "64fbdf32e563db8dab69834b842f188383c0d7627d7e38859e7605b806f47354"
+    },
+    {
+      "byteCount": 5328,
+      "path": "tools/native-cold-cancellation/protocol_fixtures.py",
+      "sha256": "dbab4c921009e217d19e5d27ac1db27818b885bb7f3e0b64ef7949c92362aa39"
+    },
+    {
+      "byteCount": 18185,
+      "path": "tools/native-cold-cancellation/receipt_contract.py",
+      "sha256": "9d5fac4c523e23b1c2d15eadf4449f3f07246aa57ffd4be851341d3010403851"
+    },
+    {
+      "byteCount": 8100,
+      "path": "tools/native-cold-cancellation/receipt_report.py",
+      "sha256": "9b1a9d3a33f43994c3386ce5b1c7b89bac55674f52b7f535ae749fe84db3bca2"
+    },
+    {
+      "byteCount": 1253,
+      "path": "tools/native-cold-cancellation/rss_bridge.c",
+      "sha256": "0f463c53cbd5579a1fa3573ac7f93da3935bc3f5511a35bc47b6be24381112bf"
+    },
+    {
+      "byteCount": 4137,
+      "path": "tools/native-cold-cancellation/source_guard.py",
+      "sha256": "8bd67a491180c747a895bd457e4d23403e9917a3ed487e6c63ad425039d996a9"
+    },
+    {
+      "byteCount": 14673,
+      "path": "tools/native-cold-cancellation/supervisor.py",
+      "sha256": "dc852c9e73b46542702198642d7afbd9b52ec548cceeccee1856ca23afa9790c"
+    },
+    {
+      "byteCount": 3217,
+      "path": "tools/native-cold-cancellation/terminal_proof.py",
+      "sha256": "4292fda74b892286bb69d79a5b17a788b17b8546461b996a9d1e52c055331829"
+    },
+    {
+      "byteCount": 19310,
+      "path": "tools/native-cold-cancellation/terminal_regressions/canonical.json",
+      "sha256": "6a3c0a2489e8328442e9499670ea2e164a8fcb148790934f1f74bfdb577f7dac"
+    },
+    {
+      "byteCount": 19846,
+      "path": "tools/native-cold-cancellation/terminal_regressions/fixtures.json",
+      "sha256": "21d26d19de6d6e2c5a01f196b14873cf28e07088cd37810d18d52c3635ccb124"
+    },
+    {
+      "byteCount": 750,
+      "path": "tools/native-cold-cancellation/terminal_regressions/pure_loader.py",
+      "sha256": "6d5f308931544cbe76e8a7eb5e701fda3cded3d33ad25d6b964d613b9e01c2a1"
+    },
+    {
+      "byteCount": 8069,
+      "path": "tools/native-cold-cancellation/terminal_regressions/registration/oracle.json",
+      "sha256": "d685d1db4a1c0ef58236d59d0e677edf65c950c4abc7191dae837a04e04581d5"
+    },
+    {
+      "byteCount": 3476,
+      "path": "tools/native-cold-cancellation/terminal_regressions/registration/schema-premises.json",
+      "sha256": "6daadbb17b03abe1e1d0878841ba6eac4dc821b69c378ae7121614cf8113be07"
+    },
+    {
+      "byteCount": 5160,
+      "path": "tools/native-cold-cancellation/terminal_regressions/registration/terminal-segments.json",
+      "sha256": "c9335cb8f03e1350f0eea6463e86eb9219fe02e80233b640cc0c527e7e3ca85b"
+    },
+    {
+      "byteCount": 422,
+      "path": "tools/native-cold-cancellation/terminal_regressions/run.py",
+      "sha256": "8cb70b721eb81589ee5ab00f1fa29db22f525492da6709527081bbdcdbc6f906"
+    },
+    {
+      "byteCount": 12477,
+      "path": "tools/native-cold-cancellation/terminal_regressions/test_terminal_consistency.py",
+      "sha256": "7e6f77a2c36ead9486aeea479e71690492dcb64a0d37081104742cb498b8bd2f"
+    },
+    {
+      "byteCount": 2250,
+      "path": "tools/native-cold-cancellation/test_clock_admission.py",
+      "sha256": "8911ccf763d4983780ac995fece3e482d897560610e3c28b15d1f2036cd77770"
+    },
+    {
+      "byteCount": 4337,
+      "path": "tools/native-cold-cancellation/test_digest_extent.py",
+      "sha256": "c3a6e4523c272eefbfb2754948b3fb28e7c01f1e8dcb990ee26e34cff3be733f"
+    },
+    {
+      "byteCount": 2800,
+      "path": "tools/native-cold-cancellation/test_kernel_observer.py",
+      "sha256": "b2112fd58dec9e2f0712305b3685ceb4aff7fe250b0191ecef7ae54f8963583b"
+    },
+    {
+      "byteCount": 4212,
+      "path": "tools/native-cold-cancellation/test_namespace_guard.py",
+      "sha256": "8b1eba5f98aabfe3be0964fbc6d4067bd3abe9828ce67811056d4e3bc0c10226"
+    },
+    {
+      "byteCount": 1719,
+      "path": "tools/native-cold-cancellation/test_protocol_fixtures.py",
+      "sha256": "bcab5b2878262f9fdada1b8d023dd5501fd54b486cf5e14345c247a82dbc4f39"
+    },
+    {
+      "byteCount": 4502,
+      "path": "tools/native-cold-cancellation/test_source_guard.py",
+      "sha256": "297e1b9028ebb55306f0293c43d7c63f77d18f1decea642c361e4b832250f2e8"
+    },
+    {
+      "byteCount": 2622,
+      "path": "tools/native-cold-cancellation/test_transport_close.py",
+      "sha256": "a18513f1bd6c81e0ae0471c8b2ff8fd7f8c715097d265f85eca63d042ac72c61"
+    },
+    {
+      "byteCount": 3958,
+      "path": "tools/native-cold-cancellation/wire_preflight.py",
+      "sha256": "75ce7352df65d3ea0c85af4ea33e7dcf3c0a31e408df11a42ca8454d98c2ec70"
+    },
+    {
+      "byteCount": 35624,
+      "path": "scripts/swift-sdk-cancel/NativeColdOpenCancellation.swift",
+      "sha256": "10fc197f4fd0a1b65584aae39d9d87e24f0dbe1e37c77eb38cb847b6dec0c87e"
+    }
+  ],
+  "desktop": {
+    "actualBackupGUIValidated": false,
+    "available": false,
+    "latestObservedState": "Mac locked"
+  },
+  "evidenceSeals": [
+    {
+      "byteCount": 96092,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/EVIDENCE-MANIFEST.json",
+      "sha256": "03516a5fa86c2a4e1156b44285a83e18a1536b6d48c8450f5399a5fc796138c3"
+    },
+    {
+      "byteCount": 3351,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/medium-cache-open-after-single-validation-qualified-R5-20261006/EVIDENCE-MANIFEST.json",
+      "sha256": "435865c8bc4bd2e8fdce28abdcaac24c30be505742c5a55e830e578a269dcfc8"
+    }
+  ],
+  "goalStatus": "blocked / incomplete",
+  "guard": {
+    "EngineCalls": 0,
+    "TaskCancelCalls": 0,
+    "inputCases": 21,
+    "protocolCases": 14,
+    "records": 38,
+    "report": {
+      "byteCount": 6986,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/11-current633-protocol-guard/supervisor-report.json",
+      "sha256": "733c3926e36ff7d267d43d2fb5fe63867296b2a2c2cc862910ce9943915737e8"
+    }
+  },
+  "mainlineGates": {
+    "RustPassed": 577,
+    "allExitCodeZero": true,
+    "commandCount": 22,
+    "commands": [
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/test_clock_admission.py"
+        ],
+        "endMonotonicNs": 215539975992375,
+        "exitCode": 0,
+        "startMonotonicNs": 215539936366208,
+        "stem": "01"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/test_digest_extent.py"
+        ],
+        "endMonotonicNs": 215540066863208,
+        "exitCode": 0,
+        "startMonotonicNs": 215539976195458,
+        "stem": "02"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/test_source_guard.py"
+        ],
+        "endMonotonicNs": 215540110913583,
+        "exitCode": 0,
+        "startMonotonicNs": 215540067024500,
+        "stem": "03"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/test_namespace_guard.py"
+        ],
+        "endMonotonicNs": 215540163619583,
+        "exitCode": 0,
+        "startMonotonicNs": 215540111059000,
+        "stem": "04"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/test_transport_close.py"
+        ],
+        "endMonotonicNs": 215540203692958,
+        "exitCode": 0,
+        "startMonotonicNs": 215540163788916,
+        "stem": "05"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/frame_regressions/run.py"
+        ],
+        "endMonotonicNs": 215540260808166,
+        "exitCode": 0,
+        "startMonotonicNs": 215540203880208,
+        "stem": "06"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "tools/native-cold-cancellation/test_kernel_observer.py",
+          "/Users/fuhanfeng/.codex/worktrees/f975/ArkTrace/build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/kernel-observer.dylib"
+        ],
+        "endMonotonicNs": 215540298270583,
+        "exitCode": 0,
+        "startMonotonicNs": 215540260969291,
+        "stem": "07"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/run-cargo.py",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "endMonotonicNs": 215541425710083,
+        "exitCode": 0,
+        "startMonotonicNs": 215540298422041,
+        "stem": "08"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/run-cargo.py",
+          "build",
+          "--workspace"
+        ],
+        "endMonotonicNs": 215541936311458,
+        "exitCode": 0,
+        "startMonotonicNs": 215541425942958,
+        "stem": "09"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/run-cargo.py",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--all-features",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "endMonotonicNs": 215542543362000,
+        "exitCode": 0,
+        "startMonotonicNs": 215541936477625,
+        "stem": "10"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/run-cargo.py",
+          "test",
+          "--workspace",
+          "--all-features"
+        ],
+        "endMonotonicNs": 215570897394250,
+        "exitCode": 0,
+        "startMonotonicNs": 215542543533791,
+        "stem": "11"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/run-cargo.py",
+          "run",
+          "--bin",
+          "arktrace-migration-smoke"
+        ],
+        "endMonotonicNs": 215571784224250,
+        "exitCode": 0,
+        "startMonotonicNs": 215570897591666,
+        "stem": "12"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/verify_rust_workspace.py"
+        ],
+        "endMonotonicNs": 215572274720208,
+        "exitCode": 0,
+        "startMonotonicNs": 215571784613250,
+        "stem": "13"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/verify_migration_contracts.py"
+        ],
+        "endMonotonicNs": 215572518163000,
+        "exitCode": 0,
+        "startMonotonicNs": 215572274903625,
+        "stem": "14"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/test_migration_contracts.py"
+        ],
+        "endMonotonicNs": 215572819339250,
+        "exitCode": 0,
+        "startMonotonicNs": 215572518340041,
+        "stem": "15"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/generate_ffi_bindings.py",
+          "--check"
+        ],
+        "endMonotonicNs": 215572920905250,
+        "exitCode": 0,
+        "startMonotonicNs": 215572819547833,
+        "stem": "16"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/test_ffi_contract.py"
+        ],
+        "endMonotonicNs": 215578531912291,
+        "exitCode": 0,
+        "startMonotonicNs": 215572921092500,
+        "stem": "17"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/test_viewer_json_roundtrip.py"
+        ],
+        "endMonotonicNs": 215579939274708,
+        "exitCode": 0,
+        "startMonotonicNs": 215578532198833,
+        "stem": "18"
+      },
+      {
+        "command": [
+          "sh",
+          "scripts/verify_licenses.sh"
+        ],
+        "endMonotonicNs": 215580382749583,
+        "exitCode": 0,
+        "startMonotonicNs": 215579939510875,
+        "stem": "19"
+      },
+      {
+        "command": [
+          "sh",
+          "scripts/verify_trace_streamer_lock.sh"
+        ],
+        "endMonotonicNs": 215580469074583,
+        "exitCode": 0,
+        "startMonotonicNs": 215580382942125,
+        "stem": "20"
+      },
+      {
+        "command": [
+          "/opt/homebrew/opt/python@3.14/bin/python3.14",
+          "scripts/verify_palette.py",
+          "--report"
+        ],
+        "endMonotonicNs": 215580740333750,
+        "exitCode": 0,
+        "startMonotonicNs": 215580469266541,
+        "stem": "21"
+      },
+      {
+        "command": [
+          "sh",
+          "scripts/test_ci_plan.sh"
+        ],
+        "endMonotonicNs": 215581001887708,
+        "exitCode": 0,
+        "startMonotonicNs": 215580740519000,
+        "stem": "22"
+      }
+    ],
+    "failed": 0,
+    "ignored": 0,
+    "rustWarningLines": 0
+  },
+  "nativeFixtureFull": {
+    "RepositoryTestsWithinFull": 126,
+    "SDKTestsWithinFull": 97,
+    "compilerWarningLines": 0,
+    "failed": 0,
+    "passed": 787,
+    "receipt": {
+      "byteCount": 9204,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/18-native-full-current-output-prepared/receipt.json",
+      "sha256": "7e5989217c05dc91ef4cdd4bff4ef3bfd56d9a2947aef8b6db4fc202a80c4eab"
+    },
+    "scope": "development fixture SDK; no normal SDK product acceptance inferred",
+    "skipped": 8
+  },
+  "normalColdCancellation": {
+    "cancelCallsPerOperation": 1,
+    "cancelSLOMilliseconds": 1000,
+    "completeForestProven": false,
+    "completePeakRSSProven": false,
+    "directNaturalWaitResult": 0,
+    "finalReport": {
+      "byteCount": 15927,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/16-current633-normal-final-report/supervisor-report.json",
+      "sha256": "2b50d36ea9584215af011c5210c51333b5080e7fa3bf1ad1eee7c5539c60b782"
+    },
+    "finalTypedReportCancelToJoinedNs": 712116458,
+    "firstReport": {
+      "byteCount": 15889,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/13-current633-normal-cancellation-host/supervisor-report.json",
+      "sha256": "48af632cbfc83ac7f2c67bba9a9260301aecb506eaf47c8cd50dc6fd1bb50abe"
+    },
+    "initialCancelToJoinedNs": 718065459,
+    "normalShutdownAndCleanupJoined": true,
+    "observedOwnedFDClosesEBADF": 7,
+    "privateCountersProven": false,
+    "publicRetainedBytesBeforeShutdown": 0,
+    "registeredPIDAbsenceObservations": 3
+  },
+  "physicalGuardAfterFull": {
+    "EngineCalls": 0,
+    "ReadyAccessCalls": 0,
+    "cases": 15,
+    "passedTests": 1,
+    "receipt": {
+      "byteCount": 691,
+      "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/cold-cancellation-current633-main-preparation-20261006/20-current-native-physical-guard-prepared/receipt.json",
+      "sha256": "c1a7227d9a485319f071cb20a7459ce6f29514a4fb07e76189278a6544c8731e"
+    }
+  },
+  "preservedFailures": {
+    "R4": "executable bit absent; actual product groups 0 despite original intent marker1",
+    "guard10": "missing prepared inputs; natural SIGTRAP",
+    "guard19": "owned prefix and epoch marker preparation invalid",
+    "native17": "missing new output parent directories; mktemp ENOENT",
+    "normal12": "sandbox parser identity rejection before parsing; no cancel",
+    "oldPerformance": "original p95 1204.730167ms and prior quiet admissions preserved"
+  },
+  "productCodeChanged": false,
+  "readback": {
+    "byteCount": 839,
+    "path": "build/agent-evidence/01a0fd3c-37ab-7753-8e7a-d6850eec66cf/MAIN-cold-cancellation-and-R5-sealed-readback-20261006.json",
+    "sha256": "00220edd0f03b412e9caaffa1449ca7844608969cabebd6f48ef9d76242b2afb"
+  },
+  "remaining": [
+    "shared large same-session recovery approval",
+    "other specified performance workloads and complete product resource evidence",
+    "actual backup focus/VoiceOver/Reduce Motion GUI",
+    "Capture discovery and applicable actual device evidence",
+    "ArkDeck current schema4/native integration",
+    "applicable release gates"
+  ],
+  "schemaVersion": 1,
+  "scope": "current normal SDK medium cold parsing cancellation, bounded local supervisor and qualified cached-medium open",
+  "toolchains": {
+    "Rust": "1.99.0",
+    "Swift": "6.4 / language 6",
+    "Xcode": "27.0 (27A266a)",
+    "deploymentTarget": "macOS 26 arm64"
+  },
+  "wholeMacOSAcceptance": false
+}
