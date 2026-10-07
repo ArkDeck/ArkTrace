@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from unittest.mock import patch
 
@@ -24,6 +25,9 @@ class CargoRunnerTests(unittest.TestCase):
         (self.root / "rust/crates/example/src").mkdir(parents=True)
         (self.root / "rust/rust-toolchain.toml").write_text('[toolchain]\nchannel = "1.99.0"\n')
         (self.root / "rust/Cargo.lock").write_text('version = 4\n')
+        (self.root / "rust/Cargo.toml").write_text(
+            '[workspace]\n[profile.dev]\nincremental=false\ndebug="line-tables-only"\n'
+            '[profile.dev.package."*"]\ndebug=false\n[profile.release]\npanic="unwind"\n')
         self.source = self.root / "rust/crates/example/src/lib.rs"
         self.source.write_text("pub fn example() {}\n")
         self.cache = self.base / "external-cache"
@@ -31,11 +35,20 @@ class CargoRunnerTests(unittest.TestCase):
         self.compiler_version = "rustc 1.99.0 (test)"
         self.xcode_version = "Xcode 27.0\nBuild version 27A266a\n"
         self.compiler_host = None
+        self.mbx = self.base / 'mbx'
+        self.mbx.write_bytes(b'fixed compiler cache')
+        self.mbx_version = 'mbx 1.22.0\n'
+
+    def mbx_environment(self):
+        return {'ARKTRACE_CARGO_MBX': str(self.mbx), 'ARKTRACE_CARGO_MBX_SHA256': RUNNER.digest(self.mbx),
+                'ARKTRACE_CARGO_MBX_CACHE_ROOT': str(self.base / 'shared-store')}
 
     def fake_run(self, arguments, **kwargs):
         if arguments == ["/usr/bin/xcodebuild", "-version"]:
             return subprocess.CompletedProcess(arguments, 0, stdout=self.xcode_version, stderr="")
         if arguments[-1] == "--version":
+            if arguments[0] == str(self.mbx):
+                return subprocess.CompletedProcess(arguments, 0, stdout=self.mbx_version, stderr='')
             return subprocess.CompletedProcess(arguments, 0, stdout=self.compiler_version, stderr="")
         if arguments[-1] == "-vV":
             host = self.compiler_host or ("aarch64-apple-darwin" if RUNNER.platform.system() == "Darwin" else "x86_64-pc-windows-msvc")
@@ -166,6 +179,35 @@ class CargoRunnerTests(unittest.TestCase):
             with RUNNER.managed_consumer('wire', files) as second:
                 self.assertEqual((second.root / 'src/main.rs').stat().st_mtime_ns, original)
 
+    def test_consumer_profiles_follow_workspace_even_with_conflicting_manifest(self):
+        files = lambda root: {'Cargo.toml': b'[package]\nname="consumer"\n'
+                              b'[profile.dev]\ndebug=true\nincremental=true\n',
+                              'src/main.rs': b'fn main() {}\n'}
+        with self.mocked_tools():
+            with RUNNER.managed_consumer('wire', files) as consumer:
+                configuration = consumer.root / '.cargo/config.toml'
+                original = configuration.stat().st_mtime_ns
+                actual = tomllib.loads(configuration.read_text())['profile']
+                self.assertEqual(actual, tomllib.loads((self.root / 'rust/Cargo.toml').read_text())['profile'])
+                self.assertFalse(actual['dev']['incremental'])
+            with RUNNER.managed_consumer('wire', files) as consumer:
+                self.assertEqual(configuration.stat().st_mtime_ns, original)
+            manifest = self.root / 'rust/Cargo.toml'
+            manifest.write_text(manifest.read_text().replace('line-tables-only', 'limited'))
+            with RUNNER.managed_consumer('wire', files) as consumer:
+                self.assertEqual(tomllib.loads(configuration.read_text())['profile']['dev']['debug'], 'limited')
+
+    def test_consumer_rejects_linked_profile_configuration_before_writing(self):
+        outside = self.base / 'outside'
+        outside.mkdir()
+        consumer_root = self.cache / 'workspace/consumers/wire'
+        consumer_root.mkdir(parents=True)
+        (consumer_root / '.cargo').symlink_to(outside, target_is_directory=True)
+        with self.mocked_tools(), self.assertRaisesRegex(ValueError, 'link'):
+            with RUNNER.managed_consumer('wire', lambda root: {'Cargo.toml': b'[package]\n'}):
+                self.fail('linked configuration must be rejected')
+        self.assertEqual(list(outside.iterdir()), [])
+
     def test_source_override_requires_exact_identity_and_cannot_write(self):
         with self.mocked_tools():
             identity = RUNNER.source_identity(self.root)['sourceSHA256']
@@ -176,6 +218,39 @@ class CargoRunnerTests(unittest.TestCase):
                 self.invoke(*command, environment=environment)
         with self.assertRaisesRegex(SystemExit, 'exact source-identity'):
             self.invoke('check', environment=environment | {'ARKTRACE_CARGO_SOURCE_SHA256': '0' * 64})
+
+    def test_mbx_wraps_only_compilation_with_pinned_toolchain_and_owned_target(self):
+        with patch.object(RUNNER.platform, 'system', return_value='Darwin'), patch.object(RUNNER.platform, 'machine', return_value='arm64'):
+            for command in ('build', 'check', 'test', 'clippy', 'run', 'metadata', 'fmt', 'generate-lockfile'):
+                self.invoke(command, environment=self.mbx_environment())
+                argv, kw = self.calls[-1]
+                self.assertEqual(argv[0], str(self.mbx) if command in RUNNER.COMPILE_COMMANDS else 'tool')
+                self.assertEqual(argv[1], '+1.99.0')
+                self.assertEqual(kw['env']['CARGO_TARGET_DIR'], str(self.cache / 'target'))
+                if command in RUNNER.COMPILE_COMMANDS:
+                    self.assertEqual(kw['env']['MBX_TARGET_VIEWS'], '0')
+                    self.assertEqual(kw['env']['MBX_TARGET_LANES'], '0')
+                    self.assertEqual(kw['env']['MBX_REMOTE_MODE'], 'write-only')
+                    self.assertEqual(kw['env']['MBX_GC_MAX_TOTAL_SIZE'], str(2 * 1024 ** 3) + 'B')
+            with self.mocked_tools(self.mbx_environment()):
+                with RUNNER.managed_consumer('wire', lambda root: {'Cargo.toml': b'[package]\n'}) as consumer:
+                    consumer.run('run', [])
+                    self.assertEqual(self.calls[-1][0][0], str(self.mbx))
+                    consumer.run('metadata', [])
+                    self.assertEqual(self.calls[-1][0][0], 'tool')
+
+    def test_mbx_wrong_identity_version_storage_or_ci_fails_without_cargo_fallback(self):
+        with patch.object(RUNNER.platform, 'system', return_value='Darwin'), patch.object(RUNNER.platform, 'machine', return_value='arm64'):
+            for overrides, message in [({'ARKTRACE_CARGO_MBX_SHA256': '0' * 64}, 'SHA256'),
+                                       ({'ARKTRACE_CARGO_MBX_CACHE_ROOT': str(self.cache / 'shared')}, 'disjoint'),
+                                       ({'ARKTRACE_CARGO_MBX_CACHE_ROOT': ''}, 'external shared'),
+                                       ({'CI': 'true'}, 'local-only')]:
+                with self.subTest(overrides=overrides), self.assertRaisesRegex(SystemExit, message):
+                    self.invoke('check', environment=self.mbx_environment() | overrides)
+            self.mbx_version = 'mbx 1.23.0\n'
+            with self.assertRaisesRegex(SystemExit, 'exact version'):
+                self.invoke('check', environment=self.mbx_environment())
+        self.assertFalse(self.calls)
 
     def test_registered_cache_rejects_ended_owner_before_cargo(self):
         from cargo_cache import transition

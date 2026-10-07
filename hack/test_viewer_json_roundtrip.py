@@ -46,7 +46,7 @@ def main():
     assert toolchain == '1.99.0'
     base = Path(tempfile.mkdtemp(prefix='arktrace-viewer-wire-')).resolve()
     def inputs(workspace_root):
-        manifest = '[package]\nname="arktrace-viewer-wire-consumer"\nversion="0.0.0"\nedition="2024"\nrust-version="1.99"\n\n[dependencies]\narktrace-viewer={path='+json.dumps(str(workspace_root/'rust/crates/arktrace-viewer'))+'}\nserde_json='+json.dumps(dependency['version'])+'\n\n[features]\nproduct-json=["serde_json/float_roundtrip"]\n\n[profile.dev]\nincremental=false\ndebug="line-tables-only"\n\n[profile.dev.package."*"]\ndebug=false\n'
+        manifest = '[package]\nname="arktrace-viewer-wire-consumer"\nversion="0.0.0"\nedition="2024"\nrust-version="1.99"\n\n[dependencies]\narktrace-viewer={path='+json.dumps(str(workspace_root/'rust/crates/arktrace-viewer'))+'}\nserde_json='+json.dumps(dependency['version'])+'\n\n[features]\nproduct-json=["serde_json/float_roundtrip"]\n'
         return {'Cargo.toml': manifest.encode(), 'src/main.rs': PROGRAM.encode()}
     commands=[]
     with RUNNER.managed_consumer('viewer-json', inputs) as consumer:
@@ -70,7 +70,7 @@ def main():
         package=next(p for p in metadata['packages'] if p['name']=='serde_json')
         node=next(n for n in metadata['resolve']['nodes'] if n['id']==package['id'])
         assert 'float_roundtrip' in node['features']
-        for relative in ['Cargo.toml', 'Cargo.lock', 'src/main.rs']:
+        for relative in ['Cargo.toml', 'Cargo.lock', '.cargo/config.toml', 'src/main.rs']:
             destination=base/relative;destination.parent.mkdir(parents=True,exist_ok=True)
             shutil.copyfile(consumer.root/relative,destination)
         provenance={'commands':commands,'sourceRoot':str(consumer.workspace.source_root),

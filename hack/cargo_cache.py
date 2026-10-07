@@ -280,6 +280,143 @@ def plan(cache, owner):
             targetLogicalBytes=sum(item['byteCount'] for item in target), freeBytes=shutil.disk_usage(cache).free)
 
 
+def parse_size(value):
+    match = re.fullmatch(r'([0-9]+)\s*(B|KiB|MiB|GiB|TiB)?', value)
+    require(match is not None, 'size must be a positive integer with optional B/KiB/MiB/GiB/TiB')
+    size = int(match[1]) * 1024 ** ('B', 'KiB', 'MiB', 'GiB', 'TiB').index(match[2] or 'B')
+    require(size > 0, 'size must be positive')
+    return size
+
+
+def usage_paths(caches, archives, shared):
+    caches = sorted(cache_root(path) for path in caches)
+    require(bool(caches), 'at least one cache required')
+    archives = sorted(external_path(path) for path in archives)
+    shared = sorted(external_path(path) for path in shared)
+    paths = [*caches, *archives, *shared]
+    for i, path in enumerate(paths):
+        require(path.is_dir(), 'usage directory is missing')
+        for other in paths[i + 1:]:
+            require(not path.is_relative_to(other) and not other.is_relative_to(path),
+                    'usage roots must be unique and disjoint')
+    for directory in archives:
+        for cache in caches:
+            archive_directory(directory, cache)
+    return caches, archives, shared
+
+
+def tree_usage(root, allow_links=False):
+    """Stat only: budget inspection must not hash gigabytes of compiler output."""
+    totals = dict(fileCount=0, logicalBytes=0, allocatedBytes=0)
+    groups = {}
+    for path in sorted(root.rglob('*')):
+        if allow_links and is_link(path):
+            # Tool-owned shims can be links. Count the link, never its referent.
+            within(path.parent, root)
+            info = path.lstat()
+        else:
+            within(path, root)
+            if path.is_dir():
+                continue
+            regular_file(path, root)
+            info = path.stat()
+        relative = path.relative_to(root)
+        group = '/'.join(relative.parts[:3] if relative.parts[0] == 'target' else relative.parts[:1])
+        if relative.parts[0] == 'target' and len(relative.parts) < 4:
+            group = '/'.join(relative.parts[:2]) + '/(root)'
+        entry = groups.setdefault(group, dict(fileCount=0, logicalBytes=0, allocatedBytes=0))
+        for counts in (totals, entry):
+            counts['fileCount'] += 1
+            counts['logicalBytes'] += info.st_size
+            allocated = getattr(info, 'st_blocks', None)
+            counts['allocatedBytes'] = (counts['allocatedBytes'] + allocated * 512
+                                       if allocated is not None and counts['allocatedBytes'] is not None else None)
+    return totals | dict(groups=groups)
+
+
+def usage_locked(caches, archives, max_total_bytes, shared=()):
+    entries = []
+    for root in caches:
+        regular_file(root / STATE, root)
+        require((root / STATE).stat().st_size <= 1024 * 1024, 'owner record too large')
+        owner = json.loads((root / STATE).read_text())['owner']
+        state = load_state(root, owner)
+        entries.append(dict(kind='cache', root=str(root), owner=owner, lifecycle=state['lifecycle'], **tree_usage(root)))
+    for root in archives:
+        entries.append(dict(kind='archive', root=str(root), **tree_usage(root)))
+    for root in shared:
+        entries.append(dict(kind='sharedCache', root=str(root), **tree_usage(root, allow_links=True)))
+    logical = sum(item['logicalBytes'] for item in entries)
+    allocations = [item['allocatedBytes'] for item in entries]
+    return dict(formatVersion=1, roots=entries, totalLogicalBytes=logical,
+                totalAllocatedBytes=sum(allocations) if all(value is not None for value in allocations) else None,
+                maxTotalBytes=max_total_bytes, overBudgetBytes=max(0, logical - max_total_bytes),
+                budgetSatisfied=logical <= max_total_bytes)
+
+
+@contextlib.contextmanager
+def usage_locks(caches):
+    with contextlib.ExitStack() as stack:
+        for root in caches:
+            stack.enter_context(runner_lock(root))
+        yield
+
+
+def usage(caches, archives, max_total_bytes, shared=()):
+    require(type(max_total_bytes) is int and max_total_bytes > 0, 'positive byte budget required')
+    caches, archives, shared = usage_paths(caches, archives, shared)
+    with usage_locks(caches):
+        return usage_locked(caches, archives, max_total_bytes, shared)
+
+
+def collect(caches, archives, max_total_bytes, apply=False, shared=()):
+    """Bound the selected caches plus archives without discarding any evidence."""
+    require(type(max_total_bytes) is int and max_total_bytes > 0, 'positive byte budget required')
+    caches, archives, shared = usage_paths(caches, archives, shared)
+    with usage_locks(caches):
+        before = usage_locked(caches, archives, max_total_bytes, shared)
+        candidates, protected = [], []
+        receipts = {}
+        if not before['budgetSatisfied']:
+            for directory in archives:
+                if (directory / 'archive.json').exists():
+                    receipt = verify_archive(directory)
+                    receipts.setdefault(receipt['cacheRoot'], []).append((directory, receipt))
+            for entry in before['roots']:
+                if entry['kind'] != 'cache':
+                    continue
+                root = Path(entry['root'])
+                if entry['lifecycle'] != 'ended':
+                    protected.append(dict(cacheRoot=str(root), reason='owner is ' + entry['lifecycle']))
+                    continue
+                state = load_state(root, entry['owner'])
+                matches = [(directory, receipt) for directory, receipt in receipts.get(str(root), [])
+                           if receipt['owner'] == entry['owner'] and receipt['epoch'] == state['epoch']]
+                if not matches:
+                    protected.append(dict(cacheRoot=str(root), reason='matching verified archive required'))
+                    continue
+                directory, receipt = matches[0]
+                validate_plan(root, entry['owner'], receipt['plan'])
+                candidates.append(dict(cacheRoot=str(root), owner=entry['owner'], archiveRoot=str(directory),
+                                       targetLogicalBytes=receipt['plan']['targetLogicalBytes']))
+        remaining = before['totalLogicalBytes']
+        selected = []
+        for candidate in sorted(candidates, key=lambda item: (-item['targetLogicalBytes'], item['cacheRoot'])):
+            if remaining <= max_total_bytes:
+                break
+            selected.append(candidate)
+            remaining -= candidate['targetLogicalBytes']
+        results = []
+        if apply:
+            for candidate in selected:
+                results.append(retire_locked(Path(candidate['cacheRoot']), candidate['owner'], Path(candidate['archiveRoot'])))
+        after = usage_locked(caches, archives, max_total_bytes, shared) if results else before
+        return dict(formatVersion=1, dryRun=not apply, before=before, after=after, actions=selected,
+                    protected=protected, projectedLogicalBytes=remaining, budgetAchievable=remaining <= max_total_bytes,
+                    retiredTargetLogicalBytes=sum(item['targetLogicalBytes'] for item in selected) if results else 0,
+                    retirements=results)
+
+
 def validate_plan(cache, owner, expected):
     state = load_state(cache, owner)
     require(state['lifecycle'] == 'ended', 'owner must be explicitly ended before archive or retirement')
@@ -416,39 +553,51 @@ def retire(cache, owner, directory):
     cache = cache_root(cache)
     directory = archive_directory(directory, cache)
     with runner_lock(cache):
-        receipt = verify_archive(directory)
-        state = validate_plan(cache, owner, receipt['plan'])
-        require(receipt['owner'] == owner and receipt['cacheRoot'] == str(cache) and receipt['epoch'] == state['epoch'],
-                'archive belongs to another owner or epoch')
-        # Re-flush the verified durable files immediately before removing data.
-        for name in ('payload.tar.gz', 'archive.json'):
-            with (directory / name).open('rb') as stream:
-                os.fsync(stream.fileno())
-        sync_directory(directory); sync_directory(directory.parent)
-        free_before = shutil.disk_usage(cache).free
-        target = cache / 'target'
-        if target.exists():
-            retiring = cache / ('.retiring-target-' + uuid.uuid4().hex)
-            target.rename(retiring)
-            try:
-                shutil.rmtree(retiring)
-            except OSError:
-                state.update(lifecycle='retirementFailed', epoch=uuid.uuid4().hex, residuePath=str(retiring), archiveRoot=str(directory))
-                save_state(cache, state)
-                raise
-        state.update(lifecycle='retired', epoch=uuid.uuid4().hex)
-        save_state(cache, state)
-        result = dict(owner=owner, cacheRoot=str(cache), archiveSHA256=receipt['archiveSHA256'],
-            retiredTargetAllocatedBytes=receipt['plan']['targetAllocatedBytes'],
-            freeBytesBefore=free_before, freeBytesAfter=shutil.disk_usage(cache).free)
-        atomic_json(directory / 'retirement.json', result, durable=True)
-        return result
+        return retire_locked(cache, owner, directory)
+
+
+def retire_locked(cache, owner, directory):
+    receipt = verify_archive(directory)
+    state = validate_plan(cache, owner, receipt['plan'])
+    require(receipt['owner'] == owner and receipt['cacheRoot'] == str(cache) and receipt['epoch'] == state['epoch'],
+            'archive belongs to another owner or epoch')
+    # Re-flush the verified durable files immediately before removing data.
+    for name in ('payload.tar.gz', 'archive.json'):
+        with (directory / name).open('rb') as stream:
+            os.fsync(stream.fileno())
+    sync_directory(directory); sync_directory(directory.parent)
+    free_before = shutil.disk_usage(cache).free
+    target = cache / 'target'
+    if target.exists():
+        retiring = cache / ('.retiring-target-' + uuid.uuid4().hex)
+        target.rename(retiring)
+        try:
+            shutil.rmtree(retiring)
+        except OSError:
+            state.update(lifecycle='retirementFailed', epoch=uuid.uuid4().hex, residuePath=str(retiring), archiveRoot=str(directory))
+            save_state(cache, state)
+            raise
+    state.update(lifecycle='retired', epoch=uuid.uuid4().hex)
+    save_state(cache, state)
+    result = dict(owner=owner, cacheRoot=str(cache), archiveSHA256=receipt['archiveSHA256'],
+        retiredTargetAllocatedBytes=receipt['plan']['targetAllocatedBytes'],
+        freeBytesBefore=free_before, freeBytesAfter=shutil.disk_usage(cache).free)
+    atomic_json(directory / 'retirement.json', result, durable=True)
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest='command', required=True)
     identity = subcommands.add_parser('source-identity'); identity.add_argument('--source-root', type=Path, required=True)
+    for command in ('stats', 'gc'):
+        options = subcommands.add_parser(command)
+        options.add_argument('--cache-root', type=Path, action='append', required=True)
+        options.add_argument('--archive-dir', type=Path, action='append', default=[])
+        options.add_argument('--shared-cache-dir', type=Path, action='append', default=[])
+        options.add_argument('--max-total-size', type=parse_size, required=True)
+        if command == 'gc':
+            options.add_argument('--apply', action='store_true', help='retire eligible ended targets; default is preview only')
     for command in ('register', 'rebind', 'activate', 'end', 'plan', 'archive', 'retire'):
         options = subcommands.add_parser(command)
         options.add_argument('--cache-root', type=Path, required=True); options.add_argument('--owner', required=True)
@@ -465,6 +614,8 @@ def main():
             options.add_argument('--archive-dir', type=Path, required=True)
     args = parser.parse_args()
     if args.command == 'source-identity': result = source_identity(args.source_root)
+    elif args.command == 'stats': result = usage(args.cache_root, args.archive_dir, args.max_total_size, args.shared_cache_dir)
+    elif args.command == 'gc': result = collect(args.cache_root, args.archive_dir, args.max_total_size, args.apply, args.shared_cache_dir)
     elif args.command == 'register': result = register(args.cache_root, args.owner, args.source_root, args.adopt_existing)
     elif args.command == 'rebind': result = rebind(args.cache_root, args.owner, args.source_root, args.source_sha256)
     elif args.command in {'activate', 'end'}: result = transition(args.cache_root, args.owner, 'active' if args.command == 'activate' else 'ended')

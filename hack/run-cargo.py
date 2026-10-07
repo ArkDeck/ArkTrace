@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run the pinned Rust workspace using a serialized, stable external cache."""
 import contextlib
+import json
 import os
 from pathlib import Path
 import platform
@@ -10,11 +11,13 @@ import subprocess
 import sys
 import tomllib
 from dataclasses import dataclass
-from cargo_cache import (STATE, cache_root, is_link, load_state, owner_id, register,
+from cargo_cache import (STATE, cache_root, digest, external_path, is_link, load_state, owner_id, parse_size, register,
                          regular_file, runner_lock, source_identity, source_paths, within)
 
 ROOT = Path(__file__).resolve().parent.parent
 COMMANDS = {"build", "check", "test", "clippy", "fmt", "metadata", "generate-lockfile", "run"}
+COMPILE_COMMANDS = {'build', 'check', 'test', 'clippy', 'run'}
+MBX_VERSION = '1.22.0'
 
 
 def fail(message):
@@ -71,6 +74,28 @@ def sync_sources(workspace, source_root=None):
     return wanted
 
 
+def consumer_profiles(workspace):
+    """Cargo ignores dependency profiles; copy the workspace policy to each root."""
+    profiles = tomllib.loads((workspace / 'rust/Cargo.toml').read_text()).get('profile', {})
+    lines = ['# Managed by run-cargo.py from rust/Cargo.toml.']
+
+    def table(keys, values):
+        lines.append('\n[' + '.'.join(json.dumps(key) for key in keys) + ']')
+        for key, value in values.items():
+            if isinstance(value, dict):
+                continue
+            if not isinstance(value, (str, bool, int, list)):
+                fail('unsupported Cargo profile value')
+            lines.append(json.dumps(key) + ' = ' + json.dumps(value))
+        for key, value in values.items():
+            if isinstance(value, dict):
+                table([*keys, key], value)
+
+    for name, values in profiles.items():
+        table(['profile', name], values)
+    return ('\n'.join(lines) + '\n').encode()
+
+
 @dataclass(frozen=True)
 class Workspace:
     root: Path
@@ -81,6 +106,50 @@ class Workspace:
     pin: str
     sources: set
     capture: Path | None
+    mbx: str | None = None
+
+
+def compiler_cache(environment, host, cache, source_root):
+    """Opt-in pilot: mbx owns only its action store, never the owner target."""
+    executable = environment.get('ARKTRACE_CARGO_MBX')
+    if not executable:
+        return None
+    if host != 'macos-arm64':
+        fail('mbx pilot is qualified only for native macOS arm64')
+    if any(environment.get(key) for key in ('CI', 'GITHUB_ACTIONS', 'GITLAB_CI')):
+        fail('mbx pilot is local-only; CI continues to use pinned Cargo directly')
+    binary = external_path(Path(executable))
+    regular_file(binary)
+    expected = environment.get('ARKTRACE_CARGO_MBX_SHA256', '')
+    if len(expected) != 64 or digest(binary) != expected:
+        fail('mbx executable requires its exact SHA256')
+    version = subprocess.run([str(binary), '--version'], capture_output=True, text=True)
+    if version.returncode or version.stdout.strip() != 'mbx ' + MBX_VERSION:
+        fail('mbx pilot requires exact version ' + MBX_VERSION)
+    store_value = environment.get('ARKTRACE_CARGO_MBX_CACHE_ROOT')
+    if not store_value:
+        fail('mbx pilot requires an explicit external shared cache root')
+    store = cache_root(Path(store_value))
+    for boundary in (cache, ROOT.resolve(), source_root.resolve()):
+        if store.is_relative_to(boundary) or boundary.is_relative_to(store):
+            fail('mbx shared cache must be disjoint from owner cache and sources')
+    budget = parse_size(environment.get('ARKTRACE_CARGO_MBX_MAX_TOTAL_SIZE', '2GiB'))
+    environment.update(MBX_CACHE_DIR=str(store), MBX_GC_MAX_TOTAL_SIZE=str(budget) + 'B',
+                       MBX_GC_MAX_SIZE=str(budget) + 'B', MBX_GC_MIN_FREE_SIZE='5GiB', MBX_GC_AUTO='1',
+                       MBX_TARGET_VIEWS='0', MBX_TARGET_LANES='0', MBX_INCREMENTAL='0',
+                       MBX_EAGER_INCREMENTAL='0', MBX_SHARE_WORKSPACE_ROOT='0',
+                       MBX_RESTORE_HARDLINK='0', MBX_DISPLAY='plain', MBX_SUMMARY='off', MBX_SAVINGS='off')
+    # Upstream disables write-only remote access outside trusted CI.
+    environment['MBX_REMOTE_MODE'] = 'write-only'
+    return str(binary)
+
+
+def invocation(workspace, command, options):
+    executable = workspace.mbx if workspace.mbx and command in COMPILE_COMMANDS else workspace.cargo
+    arguments = [executable, '+' + workspace.pin, command]
+    if command not in {'fmt', 'generate-lockfile'}:
+        arguments.append('--locked')
+    return [*arguments, *options]
 
 
 @contextlib.contextmanager
@@ -193,7 +262,8 @@ def managed_workspace(command, options):
             fail("pinned source changed before mirror synchronization")
         sources = sync_sources(workspace, source_root)
         native_configuration(workspace / 'rust', dependency)
-        yield Workspace(workspace, cache, source_root, environment, cargo, pin, sources, capture)
+        mbx = compiler_cache(environment, host, cache, source_root) if command in COMPILE_COMMANDS else None
+        yield Workspace(workspace, cache, source_root, environment, cargo, pin, sources, capture, mbx)
 
 
 @dataclass
@@ -209,12 +279,8 @@ class Consumer:
             fail("unsupported standalone consumer command")
         if any(option.split("=", 1)[0] in {"--manifest-path", "--target-dir", "--target", "--config", "--lockfile-path"} for option in options):
             fail("standalone consumer paths and native host are managed")
-        invocation = [self.workspace.cargo, "+" + self.workspace.pin, command]
-        if command != "generate-lockfile":
-            invocation.append("--locked")
-        invocation.extend(options)
         native_configuration(self.root, Path(self.workspace.environment['CARGO_HOME']))
-        return subprocess.run(invocation, cwd=self.root, env=self.workspace.environment, **kwargs)
+        return subprocess.run(invocation(self.workspace, command, options), cwd=self.root, env=self.workspace.environment, **kwargs)
 
 
 @contextlib.contextmanager
@@ -246,6 +312,12 @@ def managed_consumer(name, source_files):
         for path in root.rglob("*.rs"):
             if path.relative_to(root).as_posix() not in files:
                 path.unlink()
+        configuration = root / '.cargo/config.toml'
+        within(configuration, workspace.root)
+        configuration.parent.mkdir(parents=True, exist_ok=True)
+        data = consumer_profiles(workspace.root)
+        if not configuration.exists() or configuration.read_bytes() != data:
+            configuration.write_bytes(data)
         consumer = Consumer(workspace, root)
         try:
             yield consumer
@@ -260,14 +332,12 @@ def main():
         print("ARKTRACE_CARGO_CACHE_ROOT: absolute external cache; ARKTRACE_CARGO_HOME: optional external dependency cache")
         print("ARKTRACE_CARGO_OWNER: registered stable session owner; default caches use CODEX_THREAD_ID or local")
         print("ARKTRACE_CARGO_SOURCE_ROOT + ARKTRACE_CARGO_SOURCE_SHA256: explicit pinned source override")
+        print("ARKTRACE_CARGO_MBX + ARKTRACE_CARGO_MBX_SHA256 + ARKTRACE_CARGO_MBX_CACHE_ROOT: opt-in local mbx pilot")
+        print("ARKTRACE_CARGO_MBX_MAX_TOTAL_SIZE: shared-store collection budget (default 2GiB)")
         return 0
     command, *options = arguments
     with managed_workspace(command, options) as workspace:
-        invocation = [workspace.cargo, "+" + workspace.pin, command]
-        if command not in {"fmt", "generate-lockfile"}:
-            invocation.append("--locked")
-        invocation.extend(options)
-        result = subprocess.run(invocation, cwd=workspace.root / "rust", env=workspace.environment)
+        result = subprocess.run(invocation(workspace, command, options), cwd=workspace.root / "rust", env=workspace.environment)
         if result.returncode == 0 and workspace.capture:
             shutil.copyfile(workspace.cache / "target/release/libarktrace_ffi.a", workspace.capture)
         if result.returncode == 0 and command == "generate-lockfile":
