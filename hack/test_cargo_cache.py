@@ -147,6 +147,112 @@ class CargoCacheTests(unittest.TestCase):
             link.unlink()
         self.assertEqual((outside / 'keep').read_text(), 'keep')
 
+    def test_capacity_stats_include_dependencies_archives_and_target_breakdown_without_hashing(self):
+        (self.root / 'dependencies').mkdir()
+        (self.root / 'dependencies/registry').write_bytes(b'dependency')
+        self.destination.mkdir()
+        (self.destination / 'payload').write_bytes(b'archive')
+        expected = sum(path.stat().st_size for root in (self.root, self.destination)
+                       for path in root.rglob('*') if path.is_file())
+        with patch.object(cache, 'digest', side_effect=AssertionError('stats must not hash outputs')):
+            stats = cache.usage([self.root], [self.destination], 1)
+        self.assertEqual(stats['totalLogicalBytes'], expected)
+        self.assertEqual(stats['overBudgetBytes'], expected - 1)
+        self.assertEqual(stats['roots'][0]['groups']['target/debug/(root)']['fileCount'], 2)
+        self.assertFalse(stats['budgetSatisfied'])
+        self.assert_untouched()
+
+    def test_capacity_roots_must_be_disjoint_regular_directories_and_budget_positive(self):
+        for roots, archives in [([self.root, self.root], []), ([self.root], [self.root / 'target'])]:
+            with self.assertRaisesRegex(ValueError, 'disjoint'):
+                cache.usage(roots, archives, 1)
+        outside = self.base / 'outside'; outside.mkdir()
+        (self.root / 'dependencies').symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, 'link'):
+            cache.usage([self.root], [], 1)
+        for value in ('0', '-1GiB', '1.5GiB', 'unknown'):
+            with self.assertRaises(ValueError):
+                cache.parse_size(value)
+        self.assertEqual(cache.parse_size('2GiB'), 2 * 1024 ** 3)
+
+    def test_shared_cache_links_are_counted_without_following_external_referents(self):
+        outside = self.base / 'outside'; outside.mkdir()
+        (outside / 'large').write_bytes(b'x' * 100000)
+        shared = self.base / 'shared'; shared.mkdir()
+        link = shared / 'shim'; link.symlink_to(outside, target_is_directory=True)
+        stats = cache.usage([self.root], [], 1, [shared])
+        measured = next(item for item in stats['roots'] if item['kind'] == 'sharedCache')
+        self.assertEqual(measured['fileCount'], 1)
+        self.assertEqual(measured['logicalBytes'], link.lstat().st_size)
+        self.assertEqual((outside / 'large').stat().st_size, 100000)
+
+    @unittest.skipIf(os.name == 'nt', 'directory durability awaits native Windows qualification')
+    def test_multi_owner_budget_counts_shared_store_and_retires_only_archived_ended_target(self):
+        (self.root / 'target/debug/product').write_bytes(b'x' * 200000)
+        self.make_archive()
+        active = self.base / 'active-cache'
+        (active / 'target').mkdir(parents=True)
+        (active / 'target/keep').write_bytes(b'active output')
+        cache.register(active, 'other-owner', self.source, adopt_existing=True)
+        shared = self.base / 'shared-store'; shared.mkdir()
+        (shared / 'object').write_bytes(b'shared cached compiler output')
+        stats = cache.usage([self.root, active], [self.destination], 1, [shared])
+        self.assertEqual(next(item for item in stats['roots'] if item['kind'] == 'sharedCache')['logicalBytes'],
+                         (shared / 'object').stat().st_size)
+        target = cache.plan(self.root, self.owner)['targetLogicalBytes']
+        budget = stats['totalLogicalBytes'] - target + 10000
+        result = cache.collect([self.root, active], [self.destination], budget, apply=True, shared=[shared])
+        self.assertEqual(result['retiredTargetLogicalBytes'], target)
+        self.assertTrue(result['after']['budgetSatisfied'])
+        self.assertEqual((active / 'target/keep').read_bytes(), b'active output')
+        self.assertEqual((shared / 'object').read_bytes(), b'shared cached compiler output')
+        self.assertEqual(cache.load_state(active, 'other-owner')['lifecycle'], 'active')
+
+    def test_budget_collection_protects_active_unarchived_and_locked_owners(self):
+        preview = cache.collect([self.root], [], 1, apply=True)
+        self.assertEqual(preview['retiredTargetLogicalBytes'], 0)
+        self.assertEqual(preview['actions'], [])
+        self.assertEqual(preview['protected'][0]['reason'], 'owner is active')
+        self.assert_untouched()
+        cache.transition(self.root, self.owner, 'ended')
+        preview = cache.collect([self.root], [], 1, apply=True)
+        self.assertIn('archive required', preview['protected'][0]['reason'])
+        with cache.runner_lock(self.root), self.assertRaisesRegex(ValueError, 'lock is active'):
+            cache.collect([self.root], [], 1, apply=True)
+        self.assert_untouched()
+
+    @unittest.skipIf(os.name == 'nt', 'directory durability awaits native Windows qualification')
+    def test_budget_preview_and_collection_preserve_archive_and_report_unattainable_budget(self):
+        self.make_archive()
+        original_archive = cache.digest(self.destination / 'payload.tar.gz')
+        preview = cache.collect([self.root], [self.destination], 1)
+        self.assertEqual(len(preview['actions']), 1)
+        self.assertEqual(preview['retiredTargetLogicalBytes'], 0)
+        self.assertFalse(preview['budgetAchievable'])
+        self.assert_untouched()
+        result = cache.collect([self.root], [self.destination], 1, apply=True)
+        self.assertGreater(result['retiredTargetLogicalBytes'], 0)
+        self.assertFalse((self.root / 'target').exists())
+        self.assertFalse(result['after']['budgetSatisfied'])
+        self.assertEqual(cache.digest(self.destination / 'payload.tar.gz'), original_archive)
+        self.assertEqual(cache.verify_archive(self.destination)['owner'], self.owner)
+
+    @unittest.skipIf(os.name == 'nt', 'directory durability awaits native Windows qualification')
+    def test_collection_under_budget_does_not_retire_and_stale_or_corrupt_archives_cannot_delete(self):
+        self.make_archive()
+        result = cache.collect([self.root], [self.destination], 1024 ** 3, apply=True)
+        self.assertEqual(result['actions'], [])
+        self.assert_untouched()
+        cache.transition(self.root, self.owner, 'ended')
+        result = cache.collect([self.root], [self.destination], 1, apply=True)
+        self.assertEqual(result['actions'], [])
+        self.assert_untouched()
+        with (self.destination / 'payload.tar.gz').open('ab') as stream:
+            stream.write(b'corrupt')
+        with self.assertRaisesRegex(ValueError, 'digest mismatch'):
+            cache.collect([self.root], [self.destination], 1, apply=True)
+        self.assert_untouched()
+
     def test_missing_archive_cannot_retire(self):
         self.ended_plan()
         with self.assertRaisesRegex(ValueError, 'missing'):
