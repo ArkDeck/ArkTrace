@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "platform": "windows-x86_64",
+  "policy": "Windows-only additions to license-inventory.json: the SHA-locked Windows build tools and the runtime the mingw-builds toolchain links statically into trace_streamer.exe. The shared component closure stays in license-inventory.json.",
+  "toolchainLock": "windows-toolchain-lock.json",
+  "buildTools": [
+    {"name":"GN","artifactURL":"https://repo.huaweicloud.com/openharmony/compiler/gn/1744/windows/gn-windows-amd64.zip","artifactSHA256":"05cda0f687b7cb254f642799a900e8506a4773f5365db126663142613fc1a019","artifactByteCount":1066548,"licenseExpression":"BSD-3-Clause","licenseFile":"LICENSES-windows/gn-BSD-3-Clause.txt","licenseSHA256":"845022e0c1db1abb41a6ba4cd3c4b674ec290f3359d9d3c78ae558d4c0ed9308","licenseByteCount":1559,"usage":"build-tool-not-distributed"},
+    {"name":"Ninja","artifactURL":"https://repo.huaweicloud.com/openharmony/compiler/ninja/1.9.0/windows/ninja-win.zip","artifactSHA256":"2d70010633ddaacc3af4ffbd21e22fae90d158674a09e132e06424ba3ab036e9","artifactByteCount":254497,"licenseExpression":"Apache-2.0","licenseFile":"LICENSES-windows/ninja-Apache-2.0.txt","licenseSHA256":"eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea","licenseByteCount":11358,"usage":"build-tool-not-distributed"},
+    {"name":"mingw-builds GCC","artifactURL":"https://github.com/niXman/mingw-builds-binaries/releases/download/12.1.0-rt_v10-rev3/x86_64-12.1.0-release-posix-sjlj-rt_v10-rev3.7z","artifactSHA256":"fd744f5f09cd76dc98ae6abce88cd83c044191c2e6f2769936b901bd20171bc9","artifactByteCount":76102280,"licenseExpression":"GPL-3.0-or-later","licenseFile":"LICENSES-windows/gcc-GPL-3.0.txt","licenseSHA256":"0b383d5a63da644f628d99c33976ea6487ed89aaa59f0b3257992deac1171e6b","licenseByteCount":35821,"usage":"build-tool-not-distributed"}
+  ],
+  "staticRuntime": [
+    {"name":"GCC runtime libraries (libstdc++, libgcc)","licenseExpression":"GPL-3.0-or-later WITH GCC-exception-3.1","licenseFile":"LICENSES-windows/gcc-GPL-3.0.txt","licenseSHA256":"0b383d5a63da644f628d99c33976ea6487ed89aaa59f0b3257992deac1171e6b","licenseByteCount":35821,"usage":"shipped-static","additionalLicenseFiles":[{"path":"LICENSES-windows/gcc-GCC-exception-3.1.txt","sha256":"90077ba306ee9d8ed966cab1b4abd69b6e728acf08777283cc50283cd9503fa6","byteCount":3397}]},
+    {"name":"winpthreads","licenseExpression":"MIT AND BSD-3-Clause","licenseFile":"LICENSES-windows/winpthreads-MIT-and-BSD-3-Clause.txt","licenseSHA256":"1c8d23063c3772b9435831410b31b51fef3d9cf2138a442dc367ef5d72239f67","licenseByteCount":2940,"usage":"shipped-static"},
+    {"name":"mingw-w64 runtime","licenseExpression":"LicenseRef-MinGW-w64-runtime","licenseFile":"LICENSES-windows/mingw-w64-runtime.txt","licenseSHA256":"e7a33fd8d164abd188ee629bbe3b07912419b29192a6bbfdce29de0ad4f0e7fb","licenseByteCount":11158,"usage":"shipped-static"}
+  ]
+}
