@@ -163,6 +163,11 @@ mod macos {
         Processes(ProcessQuery),
         Threads(ThreadQuery),
         Query(crate::EventQuery),
+        Context {
+            time: arktrace_engine::ContextTime,
+            filters: arktrace_engine::AgentFilters,
+        },
+        Analyze(crate::arguments::AnalyzeOptions),
     }
     /// Swift `CLIMachineSummaryResult`: the summary without its fingerprint,
     /// quality and truncated sections, which the envelope carries.
@@ -1044,6 +1049,19 @@ mod macos {
         issues: Vec<arktrace_contract::QualityIssue>,
         sections: Vec<&'static str>,
     ) -> Result<Vec<u8>, CommandError> {
+        let maximum = context.limits.max_output_bytes;
+        envelope_bounded(context, request, result, issues, sections, maximum)
+    }
+    /// `maximum` bounds only the encoding; the envelope still reports the
+    /// invocation's own limits.
+    fn envelope_bounded<R: HumanResult>(
+        context: &CommandContext<'_>,
+        request: Request<'_>,
+        result: R,
+        issues: Vec<arktrace_contract::QualityIssue>,
+        sections: Vec<&'static str>,
+        maximum: usize,
+    ) -> Result<Vec<u8>, CommandError> {
         let CommandContext {
             session,
             tool,
@@ -1116,7 +1134,7 @@ mod macos {
         match format {
             OutputFormat::Machine { pretty } => encode_formatted(
                 &value,
-                limits.max_output_bytes,
+                maximum,
                 budget.deadline,
                 &budget.cancellation,
                 pretty,
@@ -1124,7 +1142,7 @@ mod macos {
             OutputFormat::Human => {
                 let mut writer = BoundedWriter {
                     bytes: Vec::new(),
-                    maximum: limits.max_output_bytes,
+                    maximum,
                     deadline: budget.deadline,
                     cancellation: &budget.cancellation,
                     failure: None,
@@ -1450,11 +1468,678 @@ mod macos {
                         sections,
                     )
                 }
+                DirectoryCommand::Context { time, filters } => {
+                    context_command(&context, time, filters)
+                }
+                DirectoryCommand::Analyze(options) => analyze_command(&context, options),
             }
         })();
         session.close().map_err(CommandError::Engine)?;
         check(budget)?;
         output
+    }
+    // ---- context / analyze (AT-RUST-009, AT-RUST-010) ----
+
+    /// The engine's analysis-stage mapping (`no_cache::analysis_error`); a
+    /// request-bound failure stays the usage error Swift reports.
+    fn analysis_failure(error: arktrace_engine::AnalysisError) -> CommandError {
+        use arktrace_engine::{
+            AnalysisError as E, AnalysisFailure, EngineError, EngineFailure, EngineStage,
+        };
+        use arktrace_platform::HostError;
+        let failure = match error {
+            E::InvalidBounds => return CommandError::InvalidArguments,
+            E::Cancelled => EngineFailure::Host(HostError::Cancelled),
+            E::DeadlineReached => EngineFailure::Host(HostError::DeadlineExceeded),
+            E::InputBudgetExceeded => EngineFailure::Analysis(AnalysisFailure::InputBudgetExceeded),
+            E::InvalidEvidence => EngineFailure::Analysis(AnalysisFailure::InvalidEvidence),
+            E::Quality(_) => EngineFailure::Analysis(AnalysisFailure::InvalidQuality),
+        };
+        CommandError::Engine(EngineError {
+            stage: EngineStage::Analyzing,
+            failure,
+        })
+    }
+    fn analysis_check(
+        budget: &EngineBudget,
+    ) -> impl FnMut() -> Result<(), arktrace_engine::AnalysisError> + '_ {
+        move || {
+            if budget.cancellation.is_cancelled() {
+                Err(arktrace_engine::AnalysisError::Cancelled)
+            } else if Instant::now() >= budget.deadline {
+                Err(arktrace_engine::AnalysisError::DeadlineReached)
+            } else {
+                Ok(())
+            }
+        }
+    }
+
+    #[derive(Serialize)]
+    struct AnalyzeResult {
+        analysis: arktrace_engine::DeterministicAnalysis,
+        kind: &'static str,
+    }
+    impl HumanResult for AnalyzeResult {
+        /// Swift `CLIHumanRenderer.analyze`.
+        fn human(
+            &self,
+            _trace: &Trace<'_>,
+            quality: &DataQuality,
+            _truncation: &Truncation,
+            writer: &mut BoundedWriter<'_>,
+        ) -> std::io::Result<()> {
+            let a = &self.analysis;
+            writeln!(writer, "Analysis: {}", self.kind)?;
+            writeln!(
+                writer,
+                "Range ns: [{}, {})",
+                a.range.start_ns(),
+                a.range.end_ns()
+            )?;
+            match self.kind {
+                "cpu" => {
+                    for item in &a.cpu_utilization {
+                        writeln!(
+                            writer,
+                            "cpu={} runningNs={} rawRunningNs={} slices={}",
+                            item.cpu, item.occupied_ns, item.raw_running_ns, item.slice_count
+                        )?;
+                    }
+                }
+                "scheduling" => {
+                    let s = &a.scheduling_latency;
+                    writeln!(writer, "Supported: {}", s.supported)?;
+                    writeln!(writer, "Count: {}", s.count)?;
+                    if let Some(p) = &s.percentiles {
+                        writeln!(
+                            writer,
+                            "p50={} p90={} p95={} p99={} max={}",
+                            p.p50_ns, p.p90_ns, p.p95_ns, p.p99_ns, p.max_ns
+                        )?;
+                    }
+                }
+                "slices" => {
+                    for item in &a.long_slices {
+                        writeln!(
+                            writer,
+                            "durationNs={} name={} event={}:{}",
+                            item.range.duration_ns(),
+                            terminal(&item.name),
+                            table_raw(item.key.table),
+                            item.key.row_id
+                        )?;
+                    }
+                }
+                "range" => {
+                    writeln!(writer, "CPUs: {}", a.cpu_utilization.len())?;
+                    writeln!(writer, "Top processes: {}", a.top_processes.len())?;
+                    writeln!(writer, "Top threads: {}", a.top_threads.len())?;
+                    writeln!(writer, "State rows: {}", a.thread_state_distribution.len())?;
+                    writeln!(writer, "Long slices: {}", a.long_slices.len())?;
+                }
+                _ => {
+                    for item in &a.hot_intervals {
+                        writeln!(
+                            writer,
+                            "[{},{}) score={} cpuBusyNs={}",
+                            item.range.start_ns(),
+                            item.range.end_ns(),
+                            item.score.total,
+                            item.score.cpu_busy_ns
+                        )?;
+                    }
+                }
+            }
+            writeln!(
+                writer,
+                "Data quality: {}",
+                if quality.status == QualityStatus::Ok {
+                    "ok"
+                } else {
+                    "warnings"
+                }
+            )
+        }
+    }
+    fn table_raw(table: EventTable) -> &'static str {
+        match table {
+            EventTable::SchedSlice => "sched_slice",
+            EventTable::ThreadState => "thread_state",
+            EventTable::Callstack => "callstack",
+            EventTable::Measure => "measure",
+            EventTable::ProcessMeasure => "process_measure",
+            EventTable::FrameSlice => "frame_slice",
+        }
+    }
+
+    /// Swift `CLIProductionCommandExecutor` `.analyze` + the deterministic
+    /// engine: one event budget per section, the global row retention, and
+    /// the envelope truncation sections.
+    fn analyze_command(
+        context: &CommandContext<'_>,
+        options: crate::arguments::AnalyzeOptions,
+    ) -> Result<Vec<u8>, CommandError> {
+        let (session, budget, limits) = (context.session, context.budget, context.limits);
+        let inspection = session.inspection();
+        let duration = inspection.duration_ns;
+        let range = match options.range {
+            Some(range) => range,
+            None => {
+                TraceTimeRange::query(0, duration).map_err(|_| CommandError::InvalidArguments)?
+            }
+        };
+        if range.end_ns() > duration {
+            return Err(CommandError::InvalidArguments);
+        }
+        let f = &options.filters;
+        let filters = arktrace_engine::IdentityFilters {
+            process_key: f.process_key,
+            pid: f.pid,
+            thread_key: f.thread_key,
+            tid: f.tid,
+        };
+        let request = arktrace_engine::DeterministicRequest::cli(
+            range,
+            filters,
+            limits.max_events,
+            options.limit,
+            options.threshold_ns,
+            limits.timeout_ms,
+        );
+        request.validate().map_err(analysis_failure)?;
+        // Swift deduplicates identical typed queries: with one event budget
+        // every CPU role, and every named role, shares one immutable page.
+        let events = limits.max_events;
+        let cpu = session
+            .cpu_slices(
+                &arktrace_contract::CpuSliceQuery {
+                    range,
+                    cpu: None,
+                    process_key: f.process_key,
+                    pid: f.pid,
+                    thread_key: f.thread_key,
+                    tid: f.tid,
+                    limit: events,
+                },
+                budget,
+            )
+            .map_err(CommandError::Engine)?;
+        let state_query = arktrace_contract::ThreadStateQuery {
+            range,
+            cpu: None,
+            process_key: f.process_key,
+            pid: f.pid,
+            thread_key: f.thread_key,
+            tid: f.tid,
+            raw_state: None,
+            state: None,
+            limit: events,
+        };
+        let states = session
+            .thread_states(&state_query, budget)
+            .map_err(CommandError::Engine)?;
+        let runnable = session
+            .thread_states(
+                &arktrace_contract::ThreadStateQuery {
+                    state: Some(arktrace_contract::TraceThreadState::Runnable),
+                    ..state_query
+                },
+                budget,
+            )
+            .map_err(CommandError::Engine)?;
+        let named = session
+            .slices(
+                &arktrace_contract::TraceSliceQuery {
+                    range,
+                    event_key: None,
+                    process_key: f.process_key,
+                    pid: f.pid,
+                    thread_key: f.thread_key,
+                    tid: f.tid,
+                    name: None,
+                    name_match: DirectoryNameMatch::Exact,
+                    minimum_duration_ns: Some(options.threshold_ns),
+                    depth: None,
+                    unattributed_only: false,
+                    includes_argument_set: false,
+                    limit: events,
+                },
+                budget,
+            )
+            .map_err(CommandError::Engine)?;
+        let capabilities = &inspection.capabilities;
+        let mut checker = analysis_check(budget);
+        let mut analysis = arktrace_engine::deterministic_analysis(
+            &request,
+            arktrace_engine::DeterministicInput {
+                cpu: &cpu,
+                processes: &cpu,
+                threads: &cpu,
+                states: &states,
+                named: &named,
+                scheduling_cpu: &cpu,
+                scheduling_states: &runnable,
+                hot_cpu: &cpu,
+                hot_named: &named,
+                scheduling_capable: capabilities.cpu_scheduling && capabilities.thread_states,
+                trace_quality: &inspection.data_quality.warnings,
+            },
+            &mut checker,
+        )
+        .map_err(analysis_failure)?;
+        // Recheck retained Ready authority after the pure reduction.
+        session.verify(budget).map_err(CommandError::Engine)?;
+        analysis.retain_rows(limits.max_rows);
+        let mut sections = analysis.sections.truncated_names();
+        sections.sort_unstable();
+        let issues = analysis.data_quality.warnings.clone();
+        envelope(
+            context,
+            Request {
+                command: "analyze",
+                parameters: crate::event_query::analyze_parameters(&options),
+            },
+            AnalyzeResult {
+                analysis,
+                kind: options.kind,
+            },
+            issues,
+            sections,
+        )
+    }
+
+    /// Swift `TraceSummary` in its Machine context shape (`CLIMachineContextSummary`).
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct ContextSummary<'a> {
+        #[serde(flatten)]
+        base: SummaryResult<'a>,
+        schema_fingerprint: &'a str,
+        data_quality: DataQuality,
+        truncated_sections: Vec<&'static str>,
+    }
+    #[derive(Serialize)]
+    #[serde(transparent)]
+    struct ContextResult<'a>(arktrace_engine::ContextDocument<'a, ContextSummary<'a>>);
+    impl HumanResult for ContextResult<'_> {
+        /// Swift `CLIHumanRenderer.context`.
+        fn human(
+            &self,
+            _trace: &Trace<'_>,
+            quality: &DataQuality,
+            _truncation: &Truncation,
+            writer: &mut BoundedWriter<'_>,
+        ) -> std::io::Result<()> {
+            let c = &self.0;
+            writeln!(
+                writer,
+                "Range ns: [{}, {})\nProcesses: {}\nThreads: {}\nCPU slices: {}\nThread states: {}\nNamed slices: {}\nCounter samples: {}\nData quality: {}\nTruncated: {}",
+                c.range.start_ns(),
+                c.range.end_ns(),
+                c.processes.len(),
+                c.threads.len(),
+                c.cpu_slices.len(),
+                c.thread_states.len(),
+                c.slices.len(),
+                c.counters.iter().map(|v| v.samples.len()).sum::<usize>(),
+                if quality.status == QualityStatus::Ok {
+                    "ok"
+                } else {
+                    "warnings"
+                },
+                c.truncation.truncated(),
+            )
+        }
+    }
+    /// One-row identity probes (Swift `repository.processes/threads(limit: 1)`).
+    struct DirectoryProbe<'s> {
+        session: &'s NoCacheSession,
+        budget: &'s EngineBudget,
+        failure: Option<CommandError>,
+    }
+    impl arktrace_engine::ContextDirectory for DirectoryProbe<'_> {
+        fn process(
+            &mut self,
+            key: i64,
+        ) -> Result<Option<TraceProcess>, arktrace_engine::AnalysisError> {
+            let query = ProcessQuery {
+                process_key: Some(key),
+                pid: None,
+                name: None,
+                name_match: DirectoryNameMatch::Exact,
+                limit: 1,
+            };
+            match self.session.processes(&query, self.budget) {
+                Ok(page) => Ok(page.items.into_iter().next()),
+                Err(error) => {
+                    self.failure = Some(CommandError::Engine(error));
+                    Err(arktrace_engine::AnalysisError::InvalidEvidence)
+                }
+            }
+        }
+        fn thread(
+            &mut self,
+            key: i64,
+        ) -> Result<Option<TraceThread>, arktrace_engine::AnalysisError> {
+            let query = ThreadQuery {
+                process_key: None,
+                pid: None,
+                thread_key: Some(key),
+                tid: None,
+                name: None,
+                name_match: DirectoryNameMatch::Exact,
+                limit: 1,
+            };
+            match self.session.threads(&query, self.budget) {
+                Ok(page) => Ok(page.items.into_iter().next()),
+                Err(error) => {
+                    self.failure = Some(CommandError::Engine(error));
+                    Err(arktrace_engine::AnalysisError::InvalidEvidence)
+                }
+            }
+        }
+    }
+    /// Exact compact UTF-8 JSON byte count, stopping once past `maximum`.
+    struct CountingWriter {
+        count: usize,
+        maximum: usize,
+    }
+    impl Write for CountingWriter {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.count = self.count.saturating_add(bytes.len());
+            if self.count > self.maximum {
+                return Err(io::Error::other("measured past maximum"));
+            }
+            Ok(bytes.len())
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+    fn measured<T: Serialize>(
+        value: &T,
+        maximum: usize,
+    ) -> Result<usize, arktrace_engine::AnalysisError> {
+        let mut writer = CountingWriter { count: 0, maximum };
+        match serde_json::to_writer(&mut writer, value) {
+            Ok(()) => Ok(writer.count),
+            Err(_) if writer.count > maximum => Ok(writer.count),
+            Err(_) => Err(arktrace_engine::AnalysisError::InvalidEvidence),
+        }
+    }
+    fn context_failure(error: arktrace_engine::ContextError) -> CommandError {
+        match error {
+            arktrace_engine::ContextError::Analysis(error) => analysis_failure(error),
+            arktrace_engine::ContextError::OutputLimitExceeded { .. } => {
+                CommandError::OutputLimitExceeded
+            }
+            arktrace_engine::ContextError::DuplicateDirectoryIdentity
+            | arktrace_engine::ContextError::Inconsistent => CommandError::InvalidMachineValue,
+        }
+    }
+    const SUMMARY_SECTION_ORDER: [&str; 8] = [
+        "cpuCount",
+        "processCount",
+        "threadCount",
+        "cpuSliceCount",
+        "threadStateCount",
+        "namedSliceCount",
+        "counterSeriesCount",
+        "eventCountBySource",
+    ];
+
+    /// Swift `TraceContextBuilder.build` behind `envelopeFittedContext`.
+    fn context_command(
+        context: &CommandContext<'_>,
+        time: arktrace_engine::ContextTime,
+        filters: arktrace_engine::AgentFilters,
+    ) -> Result<Vec<u8>, CommandError> {
+        let (session, budget, limits) = (context.session, context.budget, context.limits);
+        time.validate().map_err(analysis_failure)?;
+        filters.validate().map_err(analysis_failure)?;
+        let inspection = session.inspection();
+        let (range, center) = time
+            .normalized(inspection.duration_ns)
+            .map_err(analysis_failure)?;
+        let (events, rows) = (limits.max_events, limits.max_rows);
+        let engine = CommandError::Engine;
+        let cpu = session
+            .query_cpu_slices(
+                &arktrace_contract::CpuSliceQuery {
+                    range,
+                    cpu: filters.cpu,
+                    process_key: filters.process_key,
+                    pid: filters.pid,
+                    thread_key: filters.thread_key,
+                    tid: filters.tid,
+                    limit: events,
+                },
+                budget,
+            )
+            .map_err(engine)?;
+        let states = session
+            .query_thread_states(
+                &arktrace_contract::ThreadStateQuery {
+                    range,
+                    cpu: filters.cpu,
+                    process_key: filters.process_key,
+                    pid: filters.pid,
+                    thread_key: filters.thread_key,
+                    tid: filters.tid,
+                    raw_state: filters.raw_state.clone(),
+                    state: filters.normalized_state,
+                    limit: events,
+                },
+                budget,
+            )
+            .map_err(engine)?;
+        let slices = session
+            .query_slices(
+                &arktrace_contract::TraceSliceQuery {
+                    range,
+                    event_key: None,
+                    process_key: filters.process_key,
+                    pid: filters.pid,
+                    thread_key: filters.thread_key,
+                    tid: filters.tid,
+                    name: filters.name.clone(),
+                    name_match: filters.name_match,
+                    minimum_duration_ns: filters.minimum_duration_ns,
+                    depth: filters.depth,
+                    unattributed_only: false,
+                    includes_argument_set: false,
+                    limit: events,
+                },
+                budget,
+            )
+            .map_err(engine)?;
+        let capabilities = &inspection.capabilities;
+        let scope_conflict =
+            filters.cpu.is_some() && (filters.process_key.is_some() || filters.pid.is_some());
+        let counters = if scope_conflict {
+            EventPage {
+                items: Vec::new(),
+                truncated: false,
+                capability_available: capabilities.cpu_counters || capabilities.process_counters,
+                data_quality: inspection.data_quality.clone(),
+            }
+        } else {
+            session
+                .query_counters(
+                    &arktrace_contract::CounterQuery {
+                        range,
+                        scope: None,
+                        filter_id: filters.counter_filter_id,
+                        cpu: filters.cpu,
+                        process_key: filters.process_key,
+                        pid: filters.pid,
+                        name: None,
+                        name_match: DirectoryNameMatch::Exact,
+                        limit: events,
+                    },
+                    budget,
+                )
+                .map_err(engine)?
+        };
+        let processes = session
+            .processes(
+                &ProcessQuery {
+                    process_key: filters.process_key,
+                    pid: filters.pid,
+                    name: None,
+                    name_match: DirectoryNameMatch::Exact,
+                    limit: rows,
+                },
+                budget,
+            )
+            .map_err(engine)?;
+        let threads = session
+            .threads(
+                &ThreadQuery {
+                    process_key: filters.process_key,
+                    pid: filters.pid,
+                    thread_key: filters.thread_key,
+                    tid: filters.tid,
+                    name: None,
+                    name_match: DirectoryNameMatch::Exact,
+                    limit: rows,
+                },
+                budget,
+            )
+            .map_err(engine)?;
+        let (summary_base, facts_issues, sorted_sections) =
+            summary_result(session, Some(range), limits, budget)?;
+        let mut summary_quality = inspection.data_quality.warnings.clone();
+        summary_quality.extend(facts_issues);
+        let summary_dq = {
+            let mut seen = BTreeSet::new();
+            let unique: Vec<_> = summary_quality
+                .iter()
+                .filter(|issue| {
+                    seen.insert((
+                        issue.category,
+                        issue.scope.clone(),
+                        issue.count,
+                        issue.message.clone(),
+                    ))
+                })
+                .cloned()
+                .collect();
+            DataQuality::machine(
+                if unique.is_empty() {
+                    QualityStatus::Ok
+                } else {
+                    QualityStatus::Warnings
+                },
+                unique,
+            )
+            .map_err(|_| CommandError::InvalidMachineValue)?
+        };
+        let truncated_sections: Vec<&'static str> = SUMMARY_SECTION_ORDER
+            .into_iter()
+            .filter(|name| sorted_sections.contains(name))
+            .collect();
+        let summary_truncated = !truncated_sections.is_empty();
+        let metadata = session.metadata();
+        let summary = ContextSummary {
+            base: summary_base,
+            schema_fingerprint: &metadata.schema_fingerprint,
+            data_quality: summary_dq,
+            truncated_sections,
+        };
+        let loaded = arktrace_engine::ContextLoaded {
+            range,
+            center,
+            filters: &filters,
+            processes,
+            threads,
+            cpu,
+            states,
+            slices,
+            counters,
+            summary: &summary,
+            summary_quality: &summary_quality,
+            summary_truncated,
+        };
+        let mut probe = DirectoryProbe {
+            session,
+            budget,
+            failure: None,
+        };
+        let mut checker = analysis_check(budget);
+        let prepared = arktrace_engine::prepare_context(&loaded, rows, &mut probe, &mut checker)
+            .map_err(|error| {
+                probe
+                    .failure
+                    .take()
+                    .unwrap_or_else(|| context_failure(error))
+            })?;
+        let mut measure = |document: &arktrace_engine::ContextDocument<'_, ContextSummary<'_>>,
+                           maximum: usize| measured(document, maximum);
+        let request = || Request {
+            command: "context",
+            parameters: crate::event_query::context_parameters(&time, &filters),
+        };
+        let finish = |document: arktrace_engine::ContextDocument<'_, ContextSummary<'_>>,
+                      maximum: usize| {
+            let mut sections = document.truncation.truncated_names();
+            sections.sort_unstable();
+            let issues = document.data_quality.warnings.clone();
+            envelope_bounded(
+                context,
+                request(),
+                ContextResult(document),
+                issues,
+                sections,
+                maximum,
+            )
+        };
+        let mut maximum_bytes = limits.max_output_bytes;
+        if !matches!(context.format, OutputFormat::Machine { .. }) {
+            let document = arktrace_engine::retain_context(
+                &prepared,
+                events,
+                rows,
+                maximum_bytes,
+                &mut measure,
+                &mut checker,
+            )
+            .map_err(context_failure)?;
+            session.verify(budget).map_err(engine)?;
+            return finish(document, limits.max_output_bytes);
+        }
+        // Swift `envelopeFittedContext`: near the boundary, the measured full
+        // envelope overage tightens the domain limit for a bounded re-run.
+        let mut prior_raw = None;
+        for _ in 0..16 {
+            check(budget)?;
+            let document = arktrace_engine::retain_context(
+                &prepared,
+                events,
+                rows,
+                maximum_bytes,
+                &mut measure,
+                &mut checker,
+            )
+            .map_err(context_failure)?;
+            let raw = measured(&document, usize::MAX).map_err(analysis_failure)?;
+            let bytes = finish(document, usize::MAX)?;
+            if bytes.len() <= limits.max_output_bytes {
+                session.verify(budget).map_err(engine)?;
+                return Ok(bytes);
+            }
+            let overage = bytes.len() - limits.max_output_bytes;
+            let Some(candidate) = raw.checked_sub(overage) else {
+                return Err(CommandError::OutputLimitExceeded);
+            };
+            let next = (maximum_bytes - 1).min(candidate);
+            if next < 1_024 || next >= maximum_bytes || prior_raw == Some(raw) {
+                return Err(CommandError::OutputLimitExceeded);
+            }
+            prior_raw = Some(raw);
+            maximum_bytes = next;
+        }
+        Err(CommandError::OutputLimitExceeded)
     }
     #[cfg(test)]
     mod tests {

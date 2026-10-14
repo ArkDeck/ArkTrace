@@ -38,7 +38,10 @@ mod no_cache;
 #[cfg(any(target_os = "macos", windows))]
 mod public_error;
 pub use arktrace_analysis::{
-    AnalysisRequest as BoundedAnalysisRequest, AnalysisResult as BoundedAnalysisResult,
+    AgentFilters, AnalysisError, AnalysisRequest as BoundedAnalysisRequest,
+    AnalysisResult as BoundedAnalysisResult, ContextDirectory, ContextDocument, ContextError,
+    ContextLoaded, ContextMeasure, ContextTime, DeterministicAnalysis, DeterministicInput,
+    DeterministicRequest, IdentityFilters, deterministic_analysis, prepare_context, retain_context,
 };
 use arktrace_contract::{ContractError, TraceTimeRange};
 use arktrace_platform::{NativeHost, native_host};

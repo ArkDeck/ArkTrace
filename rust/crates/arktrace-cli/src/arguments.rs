@@ -3,6 +3,7 @@ use arktrace_contract::{
     CounterQuery, CpuSliceQuery, DirectoryNameMatch, ProcessQuery, ThreadQuery, ThreadStateQuery,
     TraceSliceQuery, TraceThreadState, TraceTimeRange,
 };
+use arktrace_engine::{AgentFilters, ContextTime};
 use std::{collections::BTreeSet, ffi::OsString, path::PathBuf};
 
 pub const MAXIMUM_ARGUMENTS: usize = 256;
@@ -60,6 +61,25 @@ pub enum Command {
         trace: PathBuf,
         query: EventQuery,
     },
+    Context {
+        trace: PathBuf,
+        time: ContextTime,
+        filters: AgentFilters,
+    },
+    Analyze {
+        trace: PathBuf,
+        options: AnalyzeOptions,
+    },
+}
+/// Swift `CLIAnalyzeOptions`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AnalyzeOptions {
+    /// Swift `CLIAnalyzeKind` raw value.
+    pub kind: &'static str,
+    pub range: Option<TraceTimeRange>,
+    pub filters: AgentFilters,
+    pub threshold_ns: i64,
+    pub limit: usize,
 }
 impl Command {
     pub fn name(&self) -> &'static str {
@@ -72,8 +92,215 @@ impl Command {
             Self::Processes { .. } => "processes",
             Self::Threads { .. } => "threads",
             Self::Query { .. } => "query",
+            Self::Context { .. } => "context",
+            Self::Analyze { .. } => "analyze",
         }
     }
+}
+/// Swift `parseAgentFilter`: the shared agent filter options. Returns false
+/// for an option it does not own.
+fn agent_filter(
+    option: &str,
+    args: &[&str],
+    index: &mut usize,
+    seen: &mut BTreeSet<String>,
+    filters: &mut AgentFilters,
+) -> Result<bool, CommandError> {
+    let nonnegative = |args: &[&str], index: &mut usize| {
+        let n = number(args, index)?;
+        if n < 0 { invalid() } else { Ok(n) }
+    };
+    let stable_key = |args: &[&str], index: &mut usize| {
+        let n = number(args, index)?;
+        if n == 0 { invalid() } else { Ok(n) }
+    };
+    let text = |args: &[&str], index: &mut usize| {
+        let value = value(args, index)?;
+        if value.is_empty() || value.len() > 256 {
+            invalid()
+        } else {
+            Ok(value.to_owned())
+        }
+    };
+    match option {
+        "--cpu" | "--process-key" | "--pid" | "--thread-key" | "--tid" | "--raw-state"
+        | "--state" | "--name" | "--name-match" | "--min-duration-ns" | "--depth"
+        | "--filter-id" => once(seen, option)?,
+        _ => return Ok(false),
+    }
+    match option {
+        "--cpu" => filters.cpu = Some(nonnegative(args, index)?),
+        "--process-key" => filters.process_key = Some(stable_key(args, index)?),
+        "--pid" => filters.pid = Some(nonnegative(args, index)?),
+        "--thread-key" => filters.thread_key = Some(stable_key(args, index)?),
+        "--tid" => filters.tid = Some(nonnegative(args, index)?),
+        "--raw-state" => filters.raw_state = Some(text(args, index)?),
+        "--state" => {
+            filters.normalized_state = Some(match value(args, index)? {
+                "running" => TraceThreadState::Running,
+                "runnable" => TraceThreadState::Runnable,
+                "sleeping" => TraceThreadState::Sleeping,
+                "blocked" => TraceThreadState::Blocked,
+                "stopped" => TraceThreadState::Stopped,
+                _ => return invalid(),
+            })
+        }
+        "--name" => filters.name = Some(text(args, index)?),
+        "--name-match" => {
+            filters.name_match = match value(args, index)? {
+                "exact" => DirectoryNameMatch::Exact,
+                "prefix" => DirectoryNameMatch::Prefix,
+                "contains" => DirectoryNameMatch::Contains,
+                _ => return invalid(),
+            }
+        }
+        "--min-duration-ns" => filters.minimum_duration_ns = Some(nonnegative(args, index)?),
+        "--depth" => filters.depth = Some(nonnegative(args, index)?),
+        _ => filters.counter_filter_id = Some(number(args, index)?),
+    }
+    Ok(true)
+}
+fn checked_filters(filters: AgentFilters) -> Result<AgentFilters, CommandError> {
+    if filters.process_key.is_some() && filters.pid.is_some()
+        || filters.thread_key.is_some() && filters.tid.is_some()
+        || filters.validate().is_err()
+    {
+        return invalid();
+    }
+    Ok(filters)
+}
+/// Swift `parseContext`.
+fn parse_context(tail: &[&str], terminated: bool) -> Result<Command, CommandError> {
+    let mut seen = BTreeSet::new();
+    let mut filters = AgentFilters::default();
+    let (mut timestamp, mut window_ms, mut start, mut end) = (None, None, None, None);
+    let positionals = parse_local(tail, terminated, |option, args, index| {
+        let slot = match option {
+            "--timestamp-ns" | "--window-ms" => {
+                once(&mut seen, option)?;
+                let n = number(args, index)?;
+                if n < 0 {
+                    return invalid();
+                }
+                if option == "--timestamp-ns" {
+                    timestamp = Some(n);
+                } else {
+                    window_ms = Some(n);
+                }
+                return Ok(true);
+            }
+            "--start-ns" => &mut start,
+            "--end-ns" => &mut end,
+            _ => return agent_filter(option, args, index, &mut seen, &mut filters),
+        };
+        once(&mut seen, option)?;
+        *slot = Some(number(args, index)?);
+        Ok(true)
+    })?;
+    let time = match (timestamp, window_ms, start, end) {
+        (Some(timestamp_ns), Some(window), None, None) => {
+            let window_ns = window
+                .checked_mul(1_000_000)
+                .filter(|v| *v > 0)
+                .ok_or(CommandError::InvalidArguments)?;
+            ContextTime::Timestamp {
+                timestamp_ns,
+                window_before_ns: window_ns,
+                window_after_ns: window_ns,
+            }
+        }
+        (None, None, Some(start), Some(end)) => ContextTime::Range(
+            TraceTimeRange::query(start, end).map_err(|_| CommandError::InvalidArguments)?,
+        ),
+        _ => return invalid(),
+    };
+    let filters = checked_filters(filters)?;
+    Ok(Command::Context {
+        trace: exactly_one_trace(&positionals)?,
+        time,
+        filters,
+    })
+}
+/// Swift `parseAnalyze`.
+fn parse_analyze(
+    tail: &[&str],
+    terminated: bool,
+    limits: CommandLimits,
+) -> Result<Command, CommandError> {
+    let mut seen = BTreeSet::new();
+    let mut filters = AgentFilters::default();
+    let maximum = 1_000.min(limits.max_rows.min(limits.max_events));
+    let (mut kind, mut start, mut end, mut threshold, mut limit) = (None, None, None, 0, maximum);
+    let positionals = parse_local(tail, terminated, |option, args, index| {
+        match option {
+            "--kind" => {
+                once(&mut seen, option)?;
+                kind = Some(match value(args, index)? {
+                    "cpu" => "cpu",
+                    "scheduling" => "scheduling",
+                    "slices" => "slices",
+                    "range" => "range",
+                    "hot-intervals" => "hot-intervals",
+                    _ => return invalid(),
+                });
+            }
+            "--start-ns" | "--end-ns" => {
+                once(&mut seen, option)?;
+                let n = number(args, index)?;
+                if option == "--start-ns" {
+                    start = Some(n);
+                } else {
+                    end = Some(n);
+                }
+            }
+            "--threshold-ns" => {
+                once(&mut seen, option)?;
+                threshold = number(args, index)?;
+                if threshold < 0 {
+                    return invalid();
+                }
+            }
+            "--limit" => {
+                once(&mut seen, option)?;
+                let n = number(args, index)?;
+                if n < 1 || n as u64 > maximum as u64 {
+                    return invalid();
+                }
+                limit = n as usize;
+            }
+            _ => return agent_filter(option, args, index, &mut seen, &mut filters),
+        }
+        Ok(true)
+    })?;
+    let kind = kind.ok_or(CommandError::InvalidArguments)?;
+    let range = match (start, end) {
+        (None, None) => None,
+        (Some(start), Some(end)) => {
+            Some(TraceTimeRange::query(start, end).map_err(|_| CommandError::InvalidArguments)?)
+        }
+        _ => return invalid(),
+    };
+    let filters = checked_filters(filters)?;
+    if filters.cpu.is_some()
+        || filters.raw_state.is_some()
+        || filters.normalized_state.is_some()
+        || filters.name.is_some()
+        || filters.minimum_duration_ns.is_some()
+        || filters.depth.is_some()
+        || filters.counter_filter_id.is_some()
+    {
+        return invalid();
+    }
+    Ok(Command::Analyze {
+        trace: exactly_one_trace(&positionals)?,
+        options: AnalyzeOptions {
+            kind,
+            range,
+            filters,
+            threshold_ns: threshold,
+            limit,
+        },
+    })
 }
 /// Swift `parseLocal`: `--` once ends option parsing, every other `--` token
 /// must be accepted by `option`, everything else is a positional operand.
@@ -334,8 +561,12 @@ pub fn parse(arguments: &[OsString]) -> Result<Invocation, CommandError> {
             .copied()
             .ok_or(CommandError::InvalidArguments)?;
         let tail = &remaining[1..];
-        if ["summary", "doctor"].contains(&name) {
-            let command = parse_utility(name, tail, local_terminated)?;
+        if ["summary", "doctor", "context", "analyze"].contains(&name) {
+            let command = match name {
+                "context" => parse_context(tail, local_terminated)?,
+                "analyze" => parse_analyze(tail, local_terminated, presentation.limits)?,
+                _ => parse_utility(name, tail, local_terminated)?,
+            };
             return Ok(Invocation {
                 presentation,
                 parser_override,
@@ -1065,6 +1296,153 @@ mod tests {
             command(&["doctor", "--self-test"]),
             Ok(Command::Doctor { self_test: true })
         );
+    }
+    #[test]
+    fn context_and_analyze_follow_the_swift_grammar_and_arkdeck_argv() {
+        let command = |values: &[&str]| parse(&args(values)).map(|v| v.command);
+        // ArkDeck's summary-free analyzer argv (arktrace_analysis.rs arguments()).
+        let Ok(Command::Context { time, filters, .. }) = command(&[
+            "context",
+            "--json",
+            "--no-cache",
+            "--timeout-ms",
+            "60000",
+            "--max-rows",
+            "60",
+            "--max-events",
+            "150",
+            "--max-output-bytes",
+            "4194304",
+            "--timestamp-ns",
+            "4500000000",
+            "--window-ms",
+            "50",
+            "--process-key",
+            "1",
+            "空 格.systrace",
+        ]) else {
+            panic!("context");
+        };
+        assert_eq!(
+            time,
+            ContextTime::Timestamp {
+                timestamp_ns: 4_500_000_000,
+                window_before_ns: 50_000_000,
+                window_after_ns: 50_000_000
+            }
+        );
+        assert_eq!(filters.process_key, Some(1));
+        let Ok(Command::Analyze { options, .. }) = command(&[
+            "analyze",
+            "--json",
+            "--no-cache",
+            "--max-rows",
+            "100",
+            "--max-events",
+            "20000",
+            "--kind",
+            "hot-intervals",
+            "--start-ns",
+            "0",
+            "--end-ns",
+            "10",
+            "--tid",
+            "0",
+            "--threshold-ns",
+            "1000000",
+            "--limit",
+            "100",
+            "t.htrace",
+        ]) else {
+            panic!("analyze");
+        };
+        assert_eq!(
+            (
+                options.kind,
+                options.threshold_ns,
+                options.limit,
+                options.filters.tid
+            ),
+            ("hot-intervals", 1_000_000, 100, Some(0))
+        );
+        let Ok(Command::Analyze { options, .. }) =
+            command(&["analyze", "--kind", "cpu", "--max-rows", "3", "t.htrace"])
+        else {
+            panic!("default limit");
+        };
+        assert_eq!((options.limit, options.range), (3, None));
+        for invalid in [
+            &["context", "--timestamp-ns", "5", "t"][..],
+            &["context", "--timestamp-ns", "5", "--window-ms", "0", "t"],
+            &[
+                "context",
+                "--start-ns",
+                "1",
+                "--end-ns",
+                "2",
+                "--timestamp-ns",
+                "1",
+                "t",
+            ],
+            &["context", "--start-ns", "2", "--end-ns", "2", "t"],
+            &[
+                "context",
+                "--start-ns",
+                "0",
+                "--end-ns",
+                "2",
+                "--name-match",
+                "prefix",
+                "t",
+            ],
+            &[
+                "context",
+                "--start-ns",
+                "0",
+                "--end-ns",
+                "2",
+                "--pid",
+                "1",
+                "--process-key",
+                "1",
+                "t",
+            ],
+            &[
+                "context",
+                "--start-ns",
+                "0",
+                "--end-ns",
+                "2",
+                "--name",
+                "",
+                "t",
+            ],
+            &["analyze", "t"],
+            &["analyze", "--kind", "flame", "t"],
+            &["analyze", "--kind", "cpu", "--start-ns", "0", "t"],
+            &["analyze", "--kind", "cpu", "--cpu", "0", "t"],
+            &["analyze", "--kind", "cpu", "--name", "x", "t"],
+            &["analyze", "--kind", "cpu", "--threshold-ns", "-1", "t"],
+            &["analyze", "--kind", "cpu", "--limit", "1001", "t"],
+            &[
+                "analyze",
+                "--kind",
+                "cpu",
+                "--max-rows",
+                "5",
+                "--limit",
+                "6",
+                "t",
+            ],
+            &["analyze", "--kind", "cpu", "--kind", "cpu", "t"],
+            &["analyze", "--kind", "cpu", "--thread-key", "0", "t"],
+        ] {
+            assert_eq!(
+                command(invalid),
+                Err(CommandError::InvalidArguments),
+                "{invalid:?}"
+            );
+        }
         assert_eq!(
             command(&["doctor"]),
             Ok(Command::Doctor { self_test: false })

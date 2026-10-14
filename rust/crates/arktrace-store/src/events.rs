@@ -98,7 +98,7 @@ impl EventSchema {
             &sql,
             params_from_iter(values),
             query.limit + 1,
-            DEFAULT_VM_BUDGET,
+            crate::database::EVENT_PAGE_VM_BUDGET,
             |r| {
                 Ok(EventRow {
                     id: optional_integer(r, 0)?,
@@ -243,7 +243,7 @@ impl EventSchema {
             &sql,
             params_from_iter(values),
             query.limit + 1,
-            DEFAULT_VM_BUDGET,
+            crate::database::EVENT_PAGE_VM_BUDGET,
             |r| {
                 Ok(EventRow {
                     id: optional_integer(r, 0)?,

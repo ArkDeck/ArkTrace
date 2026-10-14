@@ -4,12 +4,24 @@
 //! crate never executes queries or infers capabilities. Nanoseconds saturate
 //! on checked overflow, matching the Swift analysis oracle. Fractions are
 //! binary64 division without decimal rounding (percentages are fractions).
+mod context;
+mod deterministic;
 mod hot;
 mod reduce;
 mod scheduling;
 mod search;
 mod types;
 
+pub use context::{
+    AgentFilters, ContextDirectory, ContextDocument, ContextError, ContextLoaded, ContextMeasure,
+    ContextProcess, ContextSectionStatus, ContextThread, ContextTime, ContextTruncation,
+    PreparedContext, prepare_context, retain_context,
+};
+pub use deterministic::{
+    DeterministicAnalysis, DeterministicInput, DeterministicParameters, DeterministicRequest,
+    DeterministicSectionStatus, DeterministicSections, IdentityFilters, LongSlice,
+    deterministic_analysis,
+};
 pub use hot::{CONTEXT_SWITCH_WEIGHT_NS, hot_intervals};
 pub use reduce::{cpu_utilization, state_distribution, top_processes, top_threads};
 pub use scheduling::scheduling_latency;

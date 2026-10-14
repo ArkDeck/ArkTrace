@@ -116,3 +116,78 @@ impl EventQuery {
         result
     }
 }
+
+/// Swift `TraceAgentQueryFilters.machineParameters`: scalar stable keys.
+#[cfg(any(target_os = "macos", windows))]
+pub(crate) fn agent_parameters(
+    f: &arktrace_engine::AgentFilters,
+) -> BTreeMap<&'static str, serde_json::Value> {
+    BTreeMap::from([
+        ("cpu", serde_json::json!(f.cpu)),
+        ("processKey", serde_json::json!(f.process_key)),
+        ("pid", serde_json::json!(f.pid)),
+        ("threadKey", serde_json::json!(f.thread_key)),
+        ("tid", serde_json::json!(f.tid)),
+        ("rawState", serde_json::json!(f.raw_state)),
+        ("normalizedState", serde_json::json!(f.normalized_state)),
+        ("name", serde_json::json!(f.name)),
+        ("nameMatch", serde_json::json!(f.name_match)),
+        (
+            "minimumDurationNs",
+            serde_json::json!(f.minimum_duration_ns),
+        ),
+        ("depth", serde_json::json!(f.depth)),
+        ("counterFilterID", serde_json::json!(f.counter_filter_id)),
+    ])
+}
+/// Swift `machineRequest()` for `context`.
+#[cfg(any(target_os = "macos", windows))]
+pub(crate) fn context_parameters(
+    time: &arktrace_engine::ContextTime,
+    filters: &arktrace_engine::AgentFilters,
+) -> BTreeMap<&'static str, serde_json::Value> {
+    let mut result = agent_parameters(filters);
+    let null = serde_json::Value::Null;
+    match *time {
+        arktrace_engine::ContextTime::Timestamp {
+            timestamp_ns,
+            window_before_ns,
+            window_after_ns,
+        } => result.extend([
+            ("timestampNs", serde_json::json!(timestamp_ns)),
+            ("windowBeforeNs", serde_json::json!(window_before_ns)),
+            ("windowAfterNs", serde_json::json!(window_after_ns)),
+            ("startNs", null.clone()),
+            ("endNs", null),
+        ]),
+        arktrace_engine::ContextTime::Range(range) => result.extend([
+            ("timestampNs", null.clone()),
+            ("windowBeforeNs", null.clone()),
+            ("windowAfterNs", null),
+            ("startNs", serde_json::json!(range.start_ns())),
+            ("endNs", serde_json::json!(range.end_ns())),
+        ]),
+    }
+    result
+}
+/// Swift `machineRequest()` for `analyze`.
+#[cfg(any(target_os = "macos", windows))]
+pub(crate) fn analyze_parameters(
+    options: &crate::arguments::AnalyzeOptions,
+) -> BTreeMap<&'static str, serde_json::Value> {
+    let mut result = agent_parameters(&options.filters);
+    result.extend([
+        ("kind", serde_json::json!(options.kind)),
+        (
+            "startNs",
+            serde_json::json!(options.range.map(|r| r.start_ns())),
+        ),
+        (
+            "endNs",
+            serde_json::json!(options.range.map(|r| r.end_ns())),
+        ),
+        ("thresholdNs", serde_json::json!(options.threshold_ns)),
+        ("limit", serde_json::json!(options.limit)),
+    ]);
+    result
+}
