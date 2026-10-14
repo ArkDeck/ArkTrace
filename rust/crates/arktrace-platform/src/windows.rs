@@ -88,6 +88,18 @@ pub use owner::{
 mod writable;
 pub use directory::SealedDirectory;
 pub use writable::WritableFile;
+#[path = "windows_process.rs"]
+mod process;
+pub use process::{
+    ProcessBudget, ProcessError, ProcessOutcome, ProcessOutputFileBudget, VerifiedExecutable,
+    run_supervised, supervisor_main,
+};
+#[path = "windows_trust.rs"]
+mod trust;
+pub use trust::{CodeTrustPolicy, TrustVerdict};
+#[path = "windows_cli.rs"]
+mod cli;
+pub use cli::{CliSignalGuard, CliWriteFailure, MappedExecutable};
 
 /// The interrupt-time count keeps counting through sleep and hibernation,
 /// like Darwin's `CLOCK_MONOTONIC_RAW` that Swift's ContinuousClock uses;

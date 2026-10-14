@@ -22,6 +22,15 @@ required-features = ["process-fixtures"]
 name = "macos_owners"
 required-features = ["process-fixtures"]
 
+[[bin]]
+name = "arktrace-windows-process-child"
+path = "tests/support/windows_process_child.rs"
+required-features = ["process-fixtures"]
+
+[[test]]
+name = "windows_process"
+required-features = ["process-fixtures"]
+
 [dependencies]
 sha2.workspace = true
 serde.workspace = true
@@ -40,9 +49,18 @@ windows-sys = { workspace = true, features = [
     "Win32_Security",
     "Win32_Security_Authorization",
     "Win32_Security_Cryptography",
+    "Win32_Security_Cryptography_Catalog",
+    "Win32_Security_Cryptography_Sip",
     "Win32_Storage_FileSystem",
+    "Win32_Security_WinTrust",
     "Win32_System_Com",
+    "Win32_System_Console",
     "Win32_System_IO",
+    "Win32_System_JobObjects",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Pipes",
+    "Win32_System_ProcessStatus",
+    "Win32_System_SystemInformation",
     "Win32_System_Threading",
     "Win32_System_WindowsProgramming",
     "Win32_UI_Shell",
