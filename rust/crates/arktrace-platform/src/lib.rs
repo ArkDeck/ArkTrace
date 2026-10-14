@@ -26,6 +26,19 @@ pub use macos::{
     SidecarRecovery, SidecarStore, WritableFile,
 };
 
+#[cfg(windows)]
+#[allow(unsafe_code)]
+mod windows;
+// File, directory, lease and owner ports (AT-RUST-004). Process supervision,
+// code trust and CLI signal ports are not yet available on Windows.
+#[cfg(windows)]
+pub use windows::{
+    EphemeralLease, FileIdentity, FileSnapshot, HeldDirectory, HeldFile, Lease, LeaseMode,
+    OwnedDirectory, OwnerKind, OwnerRecoveryOutcome, OwnerStore, PublishedOwnerEvidence,
+    SealedDirectory, SidecarRecovery, SidecarStore, SourceFacts, WritableFile,
+    user_temporary_workspace,
+};
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NativeHost {
     MacOSArm64,

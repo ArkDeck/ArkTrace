@@ -9,9 +9,9 @@ pub struct ContinuousDeadline {
     pub attoseconds: i64,
 }
 impl ContinuousDeadline {
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     pub fn now() -> Result<Self, crate::HostError> {
-        let (seconds, nanoseconds) = crate::macos::continuous_time()?;
+        let (seconds, nanoseconds) = native_continuous_time()?;
         Ok(Self {
             seconds,
             attoseconds: i64::from(nanoseconds) * 1_000_000_000,
@@ -33,12 +33,17 @@ impl ContinuousDeadline {
             + i128::from(nanoseconds) * 1_000_000_000;
         Ok(now >= deadline)
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     pub fn expired(self) -> Result<bool, crate::HostError> {
-        let (seconds, nanoseconds) = crate::macos::continuous_time()?;
+        let (seconds, nanoseconds) = native_continuous_time()?;
         self.expired_at(seconds, nanoseconds)
     }
 }
+
+#[cfg(target_os = "macos")]
+use crate::macos::continuous_time as native_continuous_time;
+#[cfg(windows)]
+use crate::windows::continuous_time as native_continuous_time;
 
 #[cfg(test)]
 mod tests {
@@ -105,11 +110,11 @@ mod tests {
             .is_err()
         );
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     #[test]
     fn native_continuous_epoch_read_is_ordered_and_zero_is_expired() {
-        let first = crate::macos::continuous_time().unwrap();
-        let second = crate::macos::continuous_time().unwrap();
+        let first = super::native_continuous_time().unwrap();
+        let second = super::native_continuous_time().unwrap();
         assert!(first <= second);
         assert!(
             ContinuousDeadline {

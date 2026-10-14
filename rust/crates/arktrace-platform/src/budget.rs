@@ -32,7 +32,7 @@ impl CancellationToken {
         *self.0.lock().unwrap_or_else(|poison| poison.into_inner())
     }
 
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     pub(crate) fn publication<T>(
         &self,
         action: impl FnOnce() -> Result<T, HostError>,

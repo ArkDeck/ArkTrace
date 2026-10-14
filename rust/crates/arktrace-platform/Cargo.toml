@@ -31,11 +31,28 @@ serde_json.workspace = true
 libc.workspace = true
 rusqlite.workspace = true
 
+[target.'cfg(windows)'.dependencies]
+rusqlite.workspace = true
+windows-sys = { workspace = true, features = [
+    "Wdk_Foundation",
+    "Wdk_Storage_FileSystem",
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Security_Cryptography",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Com",
+    "Win32_System_IO",
+    "Win32_System_Threading",
+    "Win32_System_WindowsProgramming",
+    "Win32_UI_Shell",
+] }
+
 [dev-dependencies]
 serde_json.workspace = true
 
-# Syscalls are confined to the macOS module. All other platform code denies
-# unsafe; every non-platform first-party crate keeps workspace forbid.
+# Syscalls are confined to the macOS and Windows modules. All other platform
+# code denies unsafe; every non-platform first-party crate keeps workspace forbid.
 [lints.rust]
 unsafe_code = "deny"
 

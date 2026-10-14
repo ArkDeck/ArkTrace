@@ -590,6 +590,40 @@
       ]
     },
     {
+      "name": "windows-link",
+      "version": "0.2.1",
+      "license": "MIT OR Apache-2.0",
+      "licenseTexts": [
+        {
+          "path": "rust/licenses/windows-link-0.2.1/license-apache-2.0",
+          "byteCount": 11351,
+          "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
+        },
+        {
+          "path": "rust/licenses/windows-link-0.2.1/license-mit",
+          "byteCount": 1141,
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+      ]
+    },
+    {
+      "name": "windows-sys",
+      "version": "0.61.2",
+      "license": "MIT OR Apache-2.0",
+      "licenseTexts": [
+        {
+          "path": "rust/licenses/windows-sys-0.61.2/license-apache-2.0",
+          "byteCount": 11351,
+          "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
+        },
+        {
+          "path": "rust/licenses/windows-sys-0.61.2/license-mit",
+          "byteCount": 1141,
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+      ]
+    },
+    {
       "name": "zmij",
       "version": "1.0.23",
       "license": "MIT",
