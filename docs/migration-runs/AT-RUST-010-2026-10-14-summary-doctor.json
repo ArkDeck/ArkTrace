@@ -1,0 +1,164 @@
+{
+ "schemaVersion": 1,
+ "task": "AT-RUST-010 summary/doctor",
+ "localRunDate": "2026-10-14",
+ "host": "Windows 11 x64 (native)",
+ "environment": "PATH, SystemRoot, WINDIR only; stdin NUL",
+ "oracle": "docs/migration-runs/AT-RUST-001-2026-10-02-small-oracle.json",
+ "oracleComparison": [
+  {
+   "id": "doctor",
+   "exit": 0,
+   "identityFields": [
+    "/tool/buildRevision"
+   ],
+   "indexFields": [],
+   "otherDifferences": []
+  },
+  {
+   "id": "zlib/summary",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "hiprofiler_data_ability/summary",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "trace_small_10/summary",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "zlib/inspect",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion",
+    "/result/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "hiprofiler_data_ability/inspect",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion",
+    "/result/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "trace_small_10/inspect",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion",
+    "/result/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "zlib/processes",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  },
+  {
+   "id": "trace_small_10/threads",
+   "exit": 0,
+   "identityFields": [
+    "/provenance/parserBuildRecipeVersion",
+    "/tool/buildRevision",
+    "/trace/parser/binarySha256"
+   ],
+   "indexFields": [
+    "/provenance/indexSchemaVersion"
+   ],
+   "otherDifferences": []
+  }
+ ],
+ "behavior": [
+  {
+   "check": "summary:range",
+   "pass": true
+  },
+  {
+   "check": "summary:range-beyond-duration",
+   "pass": true
+  },
+  {
+   "check": "summary:half-range",
+   "pass": true
+  },
+  {
+   "check": "doctor:no-self-test",
+   "pass": true
+  },
+  {
+   "check": "doctor:truncated",
+   "pass": true
+  },
+  {
+   "check": "doctor:human",
+   "pass": true
+  },
+  {
+   "check": "doctor:tampered-self-test-refused",
+   "pass": true
+  },
+  {
+   "check": "doctor:tampered-trace-unused-without-self-test",
+   "pass": true
+  },
+  {
+   "check": "doctor:wrong-parser-refused",
+   "pass": true
+  }
+ ]
+}

@@ -30,7 +30,13 @@ pub(crate) struct Resources {
     pub maximum_source_bytes: u64,
     pub maximum_database_bytes: u64,
     pub storage_namespace: String,
+    /// The bundled `doctor --self-test` trace; read only by the self-test,
+    /// which verifies its pinned whole SHA-256 first.
+    pub self_test_trace: PathBuf,
 }
+/// Fixtures/traces/zlib.htrace, the reviewed bundled self-test trace.
+pub(crate) const SELF_TEST_TRACE_SHA256: &str =
+    "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe";
 fn unavailable() -> PublicError {
     PublicError::new(Code::InternalError, Stage::Preparing)
 }
@@ -81,6 +87,7 @@ mod layout {
     pub const PARSER: &str = "Helpers/trace_streamer";
     pub const HELPER_SNAPSHOT: &str = "host-process";
     pub const PARSER_SNAPSHOT: &str = "trace-streamer";
+    pub const SELF_TEST_TRACE: &str = "Resources/zlib.htrace";
     pub const PARSER_MANIFEST: &[u8] =
         include_bytes!("../../../../ThirdParty/TraceStreamer/macx/manifest.json");
 }
@@ -95,6 +102,7 @@ mod layout {
     pub const PARSER: &str = "resources/Helpers/trace_streamer.exe";
     pub const HELPER_SNAPSHOT: &str = "host-process.exe";
     pub const PARSER_SNAPSHOT: &str = "trace-streamer.exe";
+    pub const SELF_TEST_TRACE: &str = "resources/zlib.htrace";
     pub const PARSER_MANIFEST: &[u8] =
         include_bytes!("../../../../ThirdParty/TraceStreamer/windows-x86_64/manifest.json");
 }
@@ -260,5 +268,6 @@ pub(crate) fn load(
         maximum_source_bytes: manifest.maximum_source_bytes,
         maximum_database_bytes: manifest.maximum_database_bytes,
         storage_namespace: manifest.storage_namespace,
+        self_test_trace: contents.join(layout::SELF_TEST_TRACE),
     })
 }

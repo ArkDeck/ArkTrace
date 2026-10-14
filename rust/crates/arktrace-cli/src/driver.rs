@@ -48,6 +48,13 @@ fn request(invocation: Option<&Invocation>, args: &[OsString]) -> Request {
             ("tid", serde_json::json!(query.tid)),
         ]),
         Command::Query { query, .. } => query.parameters(),
+        Command::Summary { range, .. } => BTreeMap::from([
+            ("endNs", serde_json::json!(range.map(|r| r.end_ns()))),
+            ("startNs", serde_json::json!(range.map(|r| r.start_ns()))),
+        ]),
+        Command::Doctor { self_test } => {
+            BTreeMap::from([("selfTest", serde_json::json!(self_test))])
+        }
         _ => BTreeMap::new(),
     };
     Request {
@@ -209,10 +216,10 @@ fn commit_report(
 mod macos {
     use super::*;
     use crate::public_error::{command_error, host_error};
-    use arktrace_engine::{EngineBudget, ParserTools, SourceFormat, open_no_cache};
+    use arktrace_engine::{EngineBudget, NoCacheSession, ParserTools, SourceFormat, open_no_cache};
     use arktrace_platform::{
         CancellationToken, CliSignalGuard, HeldFile, HostError, IoBudget, MappedExecutable,
-        OwnerKind, OwnerStore, user_temporary_workspace,
+        OwnedDirectory, OwnerKind, OwnerStore, user_temporary_workspace,
     };
     /// The private per-product working root. On Windows a host that runs this
     /// CLI as its own private child (ArkDeck) names a root it owns with
@@ -260,6 +267,7 @@ mod macos {
             .map_err(|e| host_error(e, PublicError::new(Code::InternalError, Stage::Preparing)))?;
         let (path, command) = match &invocation.command {
             Command::Inspect { trace } => (trace, crate::DirectoryCommand::Inspect),
+            Command::Summary { trace, range } => (trace, crate::DirectoryCommand::Summary(*range)),
             Command::Processes { trace, query } => {
                 (trace, crate::DirectoryCommand::Processes(query.clone()))
             }
@@ -306,74 +314,55 @@ mod macos {
                 ));
             }
         };
-        let root = workspace("com.arktrace.ArkTrace.rust-tools").map_err(|e| {
-            host_error(
-                e,
-                PublicError::new(Code::TraceParseFailed, Stage::Preparing),
-            )
-        })?;
-        let staging = root.ensure_private_child(".tool-staging").map_err(|e| {
-            host_error(
-                e,
-                PublicError::new(Code::TraceParseFailed, Stage::Preparing),
-            )
-        })?;
-        let owners = OwnerStore::open(&staging, &root).map_err(|e| {
-            host_error(
-                e,
-                PublicError::new(Code::TraceParseFailed, Stage::Preparing),
-            )
-        })?;
-        let mut owner = owners.create(OwnerKind::Session, budget).map_err(|e| {
-            host_error(
-                e,
-                PublicError::new(Code::TraceParseFailed, Stage::Preparing),
-            )
-        })?;
-        let result = (|| {
+        with_owner(budget, |owner| {
             let resources = crate::resources::load(
                 image,
-                &owner,
+                owner,
                 invocation.parser_override.as_deref(),
                 budget,
             )?;
-            let namespace = workspace(&resources.storage_namespace).map_err(|e| {
-                host_error(
-                    e,
-                    PublicError::new(Code::TraceParseFailed, Stage::Preparing),
-                )
-            })?;
-            let engine_budget = EngineBudget {
-                maximum_source_bytes: resources.maximum_source_bytes,
-                maximum_database_bytes: resources.maximum_database_bytes,
-                deadline: budget.deadline,
-                cancellation: budget.cancellation.clone(),
-            };
-            let tools = ParserTools {
-                helper: &resources.helper,
-                parser: &resources.parser,
-                identity: resources.identity.clone(),
-            };
-            let session =
-                open_no_cache(&source, format, &tools, &namespace, &engine_budget, |_| {})
-                    .map_err(|e| e.public_error())?;
-            let format = if invocation.presentation.json {
-                crate::OutputFormat::Machine {
-                    pretty: invocation.presentation.pretty,
-                }
-            } else {
-                crate::OutputFormat::Human
-            };
+            let (session, engine_budget) = open_session(&source, format, &resources, budget)?;
             crate::execute_no_cache_formatted(
                 session,
                 command,
                 tool,
                 invocation.presentation.limits,
                 &engine_budget,
-                format,
+                output_format(invocation),
             )
             .map_err(command_error)
-        })();
+        })
+    }
+    fn output_format(invocation: &Invocation) -> crate::OutputFormat {
+        if invocation.presentation.json {
+            crate::OutputFormat::Machine {
+                pretty: invocation.presentation.pretty,
+            }
+        } else {
+            crate::OutputFormat::Human
+        }
+    }
+    fn preparing(error: HostError) -> PublicError {
+        host_error(
+            error,
+            PublicError::new(Code::TraceParseFailed, Stage::Preparing),
+        )
+    }
+    /// One session-owned private directory (helper/parser snapshots) for the
+    /// whole invocation, always cleaned up, cleanup failure taking priority.
+    fn with_owner<T>(
+        budget: &IoBudget,
+        operation: impl FnOnce(&OwnedDirectory) -> Result<T, PublicError>,
+    ) -> Result<T, PublicError> {
+        let root = workspace("com.arktrace.ArkTrace.rust-tools").map_err(preparing)?;
+        let staging = root
+            .ensure_private_child(".tool-staging")
+            .map_err(preparing)?;
+        let owners = OwnerStore::open(&staging, &root).map_err(preparing)?;
+        let mut owner = owners
+            .create(OwnerKind::Session, budget)
+            .map_err(preparing)?;
+        let result = operation(&owner);
         let cleanup = IoBudget {
             maximum_bytes: budget.maximum_bytes,
             deadline: Instant::now() + Duration::from_secs(5),
@@ -383,6 +372,169 @@ mod macos {
             .cleanup(&cleanup)
             .map_err(|_| PublicError::cleanup(Stage::Preparing, false))?;
         result
+    }
+    fn open_session(
+        source: &HeldFile,
+        format: SourceFormat,
+        resources: &crate::resources::Resources,
+        budget: &IoBudget,
+    ) -> Result<(NoCacheSession, EngineBudget), PublicError> {
+        let namespace = workspace(&resources.storage_namespace).map_err(preparing)?;
+        let engine_budget = EngineBudget {
+            maximum_source_bytes: resources.maximum_source_bytes,
+            maximum_database_bytes: resources.maximum_database_bytes,
+            deadline: budget.deadline,
+            cancellation: budget.cancellation.clone(),
+        };
+        let tools = ParserTools {
+            helper: &resources.helper,
+            parser: &resources.parser,
+            identity: resources.identity.clone(),
+        };
+        let session = open_no_cache(source, format, &tools, &namespace, &engine_budget, |_| {})
+            .map_err(|e| e.public_error())?;
+        Ok((session, engine_budget))
+    }
+    /// Swift `doctor`: the nine canonical checks; the first failing check's
+    /// typed error is returned instead of a document, as in Swift.
+    fn doctor(
+        invocation: &Invocation,
+        image: &MappedExecutable,
+        tool: &ToolIdentity,
+        budget: &IoBudget,
+        self_test: bool,
+    ) -> Result<Vec<u8>, PublicError> {
+        use crate::DoctorStatus::{Failed, Ok as Passed};
+        let mut first: Option<PublicError> = None;
+        let mut statuses = vec![("tool", Passed), ("os", Passed)];
+        if arktrace_platform::native_host().is_some() {
+            statuses.push(("architecture", Passed));
+        } else {
+            statuses.push(("architecture", Failed));
+            first = Some(PublicError::new(
+                Code::AnalysisUnsupported,
+                Stage::Analyzing,
+            ));
+        }
+        with_owner(budget, |owner| {
+            let resources =
+                crate::resources::load(image, owner, invocation.parser_override.as_deref(), budget);
+            let parser = if resources.is_ok() { Passed } else { Failed };
+            statuses.push(("parserManifest", parser));
+            statuses.push(("parserIdentity", parser));
+            let resources = match resources {
+                Ok(resources) => Some(resources),
+                Err(error) if matches!(error.code(), Code::Cancelled) => return Err(error),
+                Err(error) => {
+                    first.get_or_insert(error);
+                    None
+                }
+            };
+            let sqlite = arktrace_engine::sqlite_runtime_available(
+                budget.deadline,
+                budget.cancellation.clone(),
+            );
+            statuses.push(("sqlite", if sqlite { Passed } else { Failed }));
+            if !sqlite {
+                first.get_or_insert(PublicError::new(
+                    Code::AnalysisUnsupported,
+                    Stage::Analyzing,
+                ));
+            }
+            let namespace = resources
+                .as_ref()
+                .map_or("com.arktrace.ArkTrace.rust-tools", |r| &r.storage_namespace);
+            let cache = workspace(namespace).is_ok();
+            statuses.push(("cache", if cache { Passed } else { Failed }));
+            if !cache {
+                first.get_or_insert(PublicError::new(
+                    Code::TraceCacheCorrupt,
+                    Stage::CacheLookup,
+                ));
+            }
+            let schema = !arktrace_contract::SCHEMA_ADAPTER_VERSION.is_empty();
+            statuses.push(("schemaAdapter", if schema { Passed } else { Failed }));
+            if !schema {
+                first.get_or_insert(PublicError::new(Code::InternalError, Stage::Analyzing));
+            }
+            if self_test {
+                let outcome = match &resources {
+                    Some(resources) => self_test_summary(invocation, resources, budget),
+                    None => Err(PublicError::new(Code::TraceParseFailed, Stage::Parsing)),
+                };
+                match outcome {
+                    Ok(()) => statuses.push(("selfTest", Passed)),
+                    Err(error) if matches!(error.code(), Code::Cancelled) => return Err(error),
+                    Err(error) => {
+                        statuses.push(("selfTest", Failed));
+                        first.get_or_insert(error);
+                    }
+                }
+            }
+            Ok(())
+        })?;
+        if let Some(error) = first {
+            return Err(error);
+        }
+        crate::doctor_document(
+            tool,
+            self_test,
+            &statuses,
+            invocation.presentation.limits,
+            budget.deadline,
+            &budget.cancellation,
+            output_format(invocation),
+        )
+        .map_err(command_error)
+    }
+    /// The bundled reviewed trace (whole SHA-256 pinned) parsed and
+    /// summarized end to end; the summary's schema must be the session's.
+    fn self_test_summary(
+        invocation: &Invocation,
+        resources: &crate::resources::Resources,
+        budget: &IoBudget,
+    ) -> Result<(), PublicError> {
+        let unreadable = |e| {
+            host_error(
+                e,
+                PublicError::new(Code::TraceFileUnreadable, Stage::Preparing),
+            )
+        };
+        let source =
+            HeldFile::open_explicit_source(&resources.self_test_trace).map_err(unreadable)?;
+        if source.facts(budget).map_err(unreadable)?.sha256
+            != crate::resources::SELF_TEST_TRACE_SHA256
+        {
+            return Err(PublicError::new(
+                Code::TraceFileUnreadable,
+                Stage::Preparing,
+            ));
+        }
+        let (session, engine_budget) =
+            open_session(&source, SourceFormat::Htrace, resources, budget)?;
+        let limits = invocation.presentation.limits;
+        let summary = session
+            .summary_facts(
+                &arktrace_contract::TraceSummaryQuery {
+                    range: None,
+                    maximum_rows_per_section: limits.max_rows,
+                    maximum_events_per_section: limits.max_events,
+                },
+                &engine_budget,
+            )
+            .map_err(|e| e.public_error());
+        let consistent =
+            session.metadata().schema_fingerprint == session.inspection().schema_fingerprint;
+        let closed = session.close().map_err(|e| e.public_error());
+        summary?;
+        closed?;
+        if !consistent {
+            return Err(PublicError::new(
+                Code::TraceDatabaseInvalid,
+                Stage::Querying,
+            ));
+        }
+        Ok(())
     }
     pub(super) fn run(arguments: Vec<OsString>) -> i32 {
         let started = Instant::now();
@@ -420,6 +572,15 @@ mod macos {
                 .map_err(|_| PublicError::new(Code::InternalError, Stage::Request))?;
             tool = Some(identify(&current, &budget)?);
             image = Some(current);
+            if let Command::Doctor { self_test } = invocation.command {
+                return doctor(
+                    invocation,
+                    image.as_ref().unwrap(),
+                    tool.as_ref().unwrap(),
+                    &budget,
+                    self_test,
+                );
+            }
             execute(
                 invocation,
                 image.as_ref().unwrap(),

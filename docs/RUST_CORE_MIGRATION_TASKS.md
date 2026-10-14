@@ -632,7 +632,12 @@ quality/truncation 均从 Store page 传递，argument handle 不读取。新增
 - Windows 进展（2026-10-14）：`arktrace.exe` 的 inspect/processes/threads/query 在 Windows 原生运行；
   闭合安装布局、`.exe` helper/parser、Authenticode publisher 或开发 SHA pin、`ARKTRACE_STORAGE_ROOT`
   宿主私有根、Ctrl+C/Break 结构化取消与 kill 后无存活 parser 均已实测（[CLI.md](CLI.md) Windows 节）。
-  summary/context/analyze/doctor/licenses 两平台仍未接通。
+  随后接通 `summary`（Swift `TraceSummaryEngine` 归约：解析范围、固定 truncation 节序、按 UTF-8
+  字节稳定排序的 event source、capability 可空性）与 `doctor [--self-test]`（九项规范检查，首个失败
+  返回 typed error，自测内置 Trace 固定 SHA）；三份 small fixture 的 summary 与 doctor 对 Swift
+  oracle T0（除平台身份与 index 版本），见
+  [summary/doctor 记录](migration-runs/AT-RUST-010-2026-10-14-summary-doctor.md)。context/analyze/licenses
+  两平台仍未接通：analyze 缺 Rust 分析的 long slices 与 Swift 参数投影（009），context 未移植。
 - 平台/输入：两端 CLI、真实 parser/resources；无设备。
 - 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](CLI.md)。
 - 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。
