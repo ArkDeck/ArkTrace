@@ -183,6 +183,8 @@ impl ViewStateDocument {
             .map_err(|_| ViewStateEncodeError::InputBudgetExceeded)?;
         Ok(output.0)
     }
+    // Only the macOS-only `no_cache` session store persists documents.
+    #[cfg(any(target_os = "macos", test))]
     pub(crate) fn persisted(&self) -> Self {
         Self {
             marks: self
@@ -197,6 +199,7 @@ impl ViewStateDocument {
             favorite_track_ids: self.favorite_track_ids.clone(),
         }
     }
+    #[cfg(any(target_os = "macos", test))]
     pub(crate) fn is_empty(&self) -> bool {
         self.flags.is_empty()
             && self.marks.is_empty()
