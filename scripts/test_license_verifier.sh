@@ -20,10 +20,14 @@ cp "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
     "$temporary_root/ThirdParty/TraceStreamer/license-inventory.json"
 cp "$repository_root/ThirdParty/TraceStreamer/source-lock.json" \
     "$temporary_root/ThirdParty/TraceStreamer/source-lock.json"
-cp "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
-    "$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
 cp -R "$repository_root/ThirdParty/TraceStreamer/LICENSES" \
     "$temporary_root/ThirdParty/TraceStreamer/LICENSES"
+cp "$repository_root/ThirdParty/TraceStreamer/windows-license-inventory.json" \
+    "$temporary_root/ThirdParty/TraceStreamer/windows-license-inventory.json"
+cp "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
+    "$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
+cp -R "$repository_root/ThirdParty/TraceStreamer/LICENSES-windows" \
+    "$temporary_root/ThirdParty/TraceStreamer/LICENSES-windows"
 git -C "$temporary_root" add LICENSE THIRD_PARTY_NOTICES.md ThirdParty
 
 verify() {
@@ -75,22 +79,27 @@ jq '.upstream.revision = "0000000000000000000000000000000000000000"' \
 mv "$temporary_root/source-lock-mutated.json" \
     "$temporary_root/ThirdParty/TraceStreamer/source-lock.json"
 if verify; then fail "TraceStreamer notice/source-lock provenance drift was accepted"; fi
-
 cp "$repository_root/ThirdParty/TraceStreamer/source-lock.json" \
     "$temporary_root/ThirdParty/TraceStreamer/source-lock.json"
+
+windows_dir="$temporary_root/ThirdParty/TraceStreamer"
 jq '.compiler.sha256 = "0000000000000000000000000000000000000000000000000000000000000000"' \
     "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
-    >"$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
+    >"$windows_dir/windows-toolchain-lock.json"
 if verify; then fail "Windows compiler lock drift was accepted"; fi
 cp "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
-    "$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
+    "$windows_dir/windows-toolchain-lock.json"
 
-jq 'del(.windows.staticRuntime[] | select(.name == "winpthreads"))' \
-    "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
-    >"$temporary_root/ThirdParty/TraceStreamer/license-inventory.json"
+jq 'del(.staticRuntime[] | select(.name == "winpthreads"))' \
+    "$repository_root/ThirdParty/TraceStreamer/windows-license-inventory.json" \
+    >"$windows_dir/windows-license-inventory.json"
 if verify; then fail "missing Windows static-runtime notice was accepted"; fi
-cp "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
-    "$temporary_root/ThirdParty/TraceStreamer/license-inventory.json"
+cp "$repository_root/ThirdParty/TraceStreamer/windows-license-inventory.json" \
+    "$windows_dir/windows-license-inventory.json"
+
+printf 'undeclared\n' >"$windows_dir/LICENSES-windows/extra.txt"
+if verify; then fail "undeclared Windows license file was accepted"; fi
+rm -f -- "$windows_dir/LICENSES-windows/extra.txt"
 verify || fail "restored Windows evidence did not verify"
 
 [ "$(wc -c <"$temporary_root/error.log" | tr -d ' ')" -le 1024 ] \

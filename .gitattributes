@@ -21,10 +21,8 @@ ThirdParty/TraceStreamer/windows/** -text
 
 ThirdParty/TraceStreamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
 ThirdParty/TraceStreamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
-# Windows static-runtime notices keep the exact CRLF bytes of the pinned mingw-builds archive.
-ThirdParty/TraceStreamer/LICENSES/gcc-*.txt -text
-ThirdParty/TraceStreamer/LICENSES/winpthreads-*.txt -text
-ThirdParty/TraceStreamer/LICENSES/mingw-w64-*.txt -text
+# Windows license texts keep the exact bytes (CRLF for the mingw-builds archive copies).
+ThirdParty/TraceStreamer/LICENSES-windows/** -text
 
 # License hashes bind the exact upstream bytes, including line endings.
 rust/licenses/** -text

@@ -144,11 +144,14 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
   并留下它。生产调用必须继续只解析 session-owned staging 中的源快照（§4 Phase 1 adapter），
   不能让 parser 直接读取用户原始目录。
 
-许可：`license-inventory.json` 的 `windows` 段记录 Windows GN/Ninja/mingw-builds GCC 构建工具
+许可：独立的 `windows-license-inventory.json` 记录 Windows GN/Ninja/mingw-builds GCC 构建工具
 （不分发，与 `windows-toolchain-lock.json` 逐项比对）和静态链接进 exe 的 GCC runtime
 （GPL-3.0-or-later WITH GCC-exception-3.1）、winpthreads（MIT AND BSD-3-Clause）、mingw-w64
-runtime 三项；四份许可文本从锁定 7z 逐字节复制（CRLF，`.gitattributes` 设 `-text`），
-`scripts/verify_licenses.sh` 校验全部 22 份文件的 SHA/字节数，其字节计数改用可移植的 `wc -c`。
+runtime 三项；文本位于 `LICENSES-windows/`（6 份，其中 4 份从锁定 7z 逐字节复制，CRLF，
+`.gitattributes` 设 `-text`）。共享的 `license-inventory.json`、`LICENSES/` 与
+`THIRD_PARTY_NOTICES.md` 不变——macOS App/CLI 按字节 pin 并原样打包它们，Windows 条目不进入
+macOS 分发。Windows 分发（016）需同时附带共享清单与本清单的文本。`scripts/verify_licenses.sh`
+两者都校验，字节计数改用可移植的 `wc -c`。
 
 尚未完成（AT-RUST-003 验收剩余项）：
 
