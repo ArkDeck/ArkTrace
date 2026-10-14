@@ -116,7 +116,7 @@ impl ViewStateDocument {
     /// Borrow the existing arrays and filter transient marks while encoding.
     /// The IO owner supplies the bounded, cancellable writer; this does not
     /// clone labels/favorites or normalize their order or optional presence.
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     pub(crate) fn write_persisted<W: std::io::Write>(
         &self,
         trace_sha256: &str,
@@ -184,7 +184,7 @@ impl ViewStateDocument {
         Ok(output.0)
     }
     // Only the macOS-only `no_cache` session store persists documents.
-    #[cfg(any(target_os = "macos", test))]
+    #[cfg(any(target_os = "macos", windows, test))]
     pub(crate) fn persisted(&self) -> Self {
         Self {
             marks: self
@@ -199,7 +199,7 @@ impl ViewStateDocument {
             favorite_track_ids: self.favorite_track_ids.clone(),
         }
     }
-    #[cfg(any(target_os = "macos", test))]
+    #[cfg(any(target_os = "macos", windows, test))]
     pub(crate) fn is_empty(&self) -> bool {
         self.flags.is_empty()
             && self.marks.is_empty()

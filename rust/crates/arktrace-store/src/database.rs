@@ -1,5 +1,5 @@
 use crate::{DatabaseInspection, SQLITE_SOURCE_ID, SQLITE_VERSION, StoreError, ValidationBudget};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use rusqlite::OpenFlags;
 use rusqlite::{Connection, Params, Row, config::DbConfig, limits::Limit, types::ValueRef};
 use std::{
@@ -13,12 +13,12 @@ use std::{
 const PROGRESS_INTERVAL: i32 = 100;
 pub(crate) const DEFAULT_VM_BUDGET: u64 = 2_000_000;
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub(crate) struct ReadonlyOpenError {
     pub(crate) error: StoreError,
     pub(crate) transient_descriptor_failure: bool,
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub(crate) fn open_readonly(path: &std::path::Path) -> Result<Connection, ReadonlyOpenError> {
     Connection::open_with_flags(
         path,
@@ -55,7 +55,7 @@ pub(crate) struct Database<'a> {
     resources: Option<Arc<crate::query_resources::QueryResources>>,
     vm_work: Option<Arc<crate::query_resources::VmWork>>,
     query_deadline: Option<arktrace_platform::ContinuousDeadline>,
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     writable: Option<Arc<arktrace_platform::WritableFile>>,
 }
 enum ConnectionOwner<'a> {
@@ -135,7 +135,7 @@ impl<'a> Database<'a> {
             resources: None,
             vm_work: None,
             query_deadline: None,
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", windows))]
             writable: None,
         };
         for pragma in [
@@ -280,7 +280,7 @@ impl<'a> Database<'a> {
             resources: None,
             vm_work: None,
             query_deadline: None,
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", windows))]
             writable: self.writable.clone(),
         }
     }
@@ -315,7 +315,7 @@ impl<'a> Database<'a> {
 
     fn check_deadline(&self) -> Result<(), StoreError> {
         self.budget.check()?;
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         if let Some(deadline) = self.query_deadline
             && deadline.expired()?
         {
@@ -328,13 +328,13 @@ impl<'a> Database<'a> {
         if let Some(resources) = &self.resources {
             resources.check()?;
         }
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         if let Some(file) = &self.writable {
             file.verify_sqlite_connection(&self.connection, &self.io_budget())?;
         }
         Ok(())
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     pub(crate) fn with_query_deadline(
         mut self,
         deadline: Option<arktrace_platform::ContinuousDeadline>,
@@ -364,7 +364,7 @@ impl<'a> Database<'a> {
             )?)),
             vm_work: Some(Arc::new(crate::query_resources::VmWork::new(steps))),
             query_deadline: self.query_deadline,
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", windows))]
             writable: self.writable.clone(),
         })
     }
@@ -372,7 +372,7 @@ impl<'a> Database<'a> {
     pub(crate) fn remaining_vm_work_for_test(&self) -> u64 {
         self.vm_work.as_ref().unwrap().remaining_for_test()
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     pub(crate) fn bind_writable(
         &mut self,
         file: Arc<arktrace_platform::WritableFile>,
@@ -380,7 +380,7 @@ impl<'a> Database<'a> {
         self.writable = Some(file);
         self.check()
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     fn io_budget(&self) -> arktrace_platform::IoBudget {
         arktrace_platform::IoBudget {
             maximum_bytes: self.budget.maximum_database_bytes,
@@ -488,23 +488,23 @@ impl<'a> Database<'a> {
         let charged = self.vm_work.as_ref().map(|_| Arc::new(AtomicU64::new(0)));
         let callback_charged = charged.clone();
         let deadline = self.budget.deadline;
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         let query_deadline = self.query_deadline;
         let mut callbacks = vm_budget.div_ceil(PROGRESS_INTERVAL as u64);
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         let file = self.writable.clone();
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         let maximum_bytes = self.budget.maximum_database_bytes;
         let native_error = Arc::new(std::sync::Mutex::new(None::<arktrace_platform::HostError>));
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         let callback_error = native_error.clone();
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         let mut file_callbacks = 0_u16;
         self.connection
             .progress_handler(
                 PROGRESS_INTERVAL,
                 Some(move || {
-                    #[cfg(target_os = "macos")]
+                    #[cfg(any(target_os = "macos", windows))]
                     let continuous_reason =
                         match query_deadline.map(|value| value.expired()).transpose() {
                             Ok(Some(true)) => 2,
@@ -515,7 +515,7 @@ impl<'a> Database<'a> {
                                 4
                             }
                         };
-                    #[cfg(not(target_os = "macos"))]
+                    #[cfg(not(any(target_os = "macos", windows)))]
                     let continuous_reason = 0;
                     let why = if cancellation.is_cancelled()
                         || resources.as_ref().is_some_and(|r| r.abort.is_cancelled())
@@ -536,7 +536,7 @@ impl<'a> Database<'a> {
                         if let Some(charged) = &callback_charged {
                             charged.fetch_add(PROGRESS_INTERVAL as u64, Ordering::Relaxed);
                         }
-                        #[cfg(target_os = "macos")]
+                        #[cfg(any(target_os = "macos", windows))]
                         {
                             file_callbacks += 1;
                             if file_callbacks == 100 {

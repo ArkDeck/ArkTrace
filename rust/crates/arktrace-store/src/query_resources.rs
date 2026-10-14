@@ -1,11 +1,11 @@
 use crate::StoreError;
 
 /// Monotonic SQL work credit shared by all statements of one summary request.
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 pub(crate) struct VmWork {
     remaining: std::sync::atomic::AtomicU64,
 }
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 impl VmWork {
     pub(crate) fn new(steps: u64) -> Self {
         Self {
@@ -54,13 +54,13 @@ impl ReadPoolLimits {
     }
 }
 
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 pub(crate) struct QueryResources {
     pub(crate) abort: arktrace_platform::CancellationToken,
     maximum_bytes: u64,
     used: std::sync::atomic::AtomicU64,
 }
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 impl QueryResources {
     pub(crate) fn new(limits: ReadPoolLimits) -> Result<Self, StoreError> {
         limits.validate()?;
@@ -90,7 +90,7 @@ impl QueryResources {
             .map(|_| ())
             .map_err(|_| StoreError::DecodedBudgetExceeded)
     }
-    #[cfg(any(target_os = "macos", test))]
+    #[cfg(any(target_os = "macos", windows, test))]
     pub(crate) fn used(&self) -> u64 {
         self.used.load(std::sync::atomic::Ordering::Relaxed)
     }

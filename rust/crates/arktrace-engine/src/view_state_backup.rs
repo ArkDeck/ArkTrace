@@ -1,6 +1,6 @@
 //! Fixed, path-free receipts for user-requested rollback snapshots.
 use serde::{Deserialize, Serialize};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use sha2::{Digest, Sha256};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -36,7 +36,7 @@ pub struct ViewStateBackupReport {
     pub status: ViewStateBackupStatus,
     pub receipt: Option<ViewStateBackupReceipt>,
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 impl ViewStateBackupReport {
     pub(crate) fn empty(status: ViewStateBackupStatus) -> Self {
         Self {
@@ -46,7 +46,7 @@ impl ViewStateBackupReport {
     }
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub(crate) fn identifier(trace: &str, parser: &str, document: &str) -> String {
     let mut hash = Sha256::new();
     hash.update(b"ArkTrace.ViewStateRollback.v1\0");

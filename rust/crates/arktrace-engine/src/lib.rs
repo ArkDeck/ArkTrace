@@ -28,14 +28,14 @@ mod handles;
 mod owned_input;
 #[cfg(any(target_os = "macos", test))]
 mod owned_result;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use arktrace_platform::CodeTrustPolicy;
 pub use handles::{HandleError, RuntimeHandle};
 #[cfg(target_os = "macos")]
 pub use owned_result::OwnedResult;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 mod no_cache;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 mod public_error;
 pub use arktrace_analysis::{
     AnalysisRequest as BoundedAnalysisRequest, AnalysisResult as BoundedAnalysisResult,
@@ -43,7 +43,7 @@ pub use arktrace_analysis::{
 use arktrace_contract::{ContractError, TraceTimeRange};
 use arktrace_platform::{NativeHost, native_host};
 pub use arktrace_store::ReadPoolLimits;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use arktrace_store::{ReadPoolOutput, ReadPoolStatistics};
 pub use metadata::CacheMetadata;
 #[cfg(target_os = "macos")]
@@ -52,7 +52,7 @@ mod cache_maintenance;
 pub use cache_maintenance::{
     CacheInventory, CacheMaintenance, CacheMaintenanceReport, CacheWatermarks,
 };
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use no_cache::{
     AnalysisFailure, AnalysisScope, EngineBudget, EngineError, EngineFailure, EngineProgress,
     EngineSession, EngineStage, NoCacheRecoveryOutcome, NoCacheRecoveryRow, NoCacheSession,

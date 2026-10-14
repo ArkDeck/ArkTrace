@@ -1591,6 +1591,11 @@ pub fn open_no_cache(
         report,
     )
 }
+/// The pinned parser's native architecture (its manifest's spelling).
+#[cfg(target_os = "macos")]
+const NATIVE_PARSER_ARCHITECTURE: &str = "arm64";
+#[cfg(windows)]
+const NATIVE_PARSER_ARCHITECTURE: &str = "x86_64";
 fn open_store(
     source: &HeldFile,
     format: SourceFormat,
@@ -1607,7 +1612,7 @@ fn open_store(
         .map_err(|_| failure(EngineStage::ParserIdentity, EngineFailure::InvalidIdentity))?;
     if tools.identity.binary_sha256 != tools.parser.sha256()
         || tools.identity.adapter_version != arktrace_contract::PARSER_ADAPTER_VERSION
-        || tools.identity.architecture != "arm64"
+        || tools.identity.architecture != NATIVE_PARSER_ARCHITECTURE
     {
         return Err(failure(
             EngineStage::ParserIdentity,
@@ -1853,7 +1858,10 @@ fn open_store(
             .ok_or_else(|| failure(EngineStage::Indexing, EngineFailure::CleanupFailed))?
             .directory()
             .clone();
-        let prepared = prepare_snapshot(
+        let arktrace_store::PreparedDatabase {
+            snapshot: prepared_file,
+            preparation,
+        } = prepare_snapshot(
             &export,
             &candidate,
             if cached { "trace.sqlite" } else { "trace.db" },
@@ -1861,7 +1869,7 @@ fn open_store(
             |event| report(EngineProgress::Indexing(event)),
         )
         .map_err(|e| failure(EngineStage::Indexing, EngineFailure::Store(e)))?;
-        let preparation = &prepared.preparation;
+        let preparation = &preparation;
         let timestamp = utc_from_unix_seconds(
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -1901,7 +1909,7 @@ fn open_store(
             )
             .map_err(|e| host(EngineStage::Validating, e))?;
         report(EngineProgress::Validating);
-        let inspection = inspect_indexed_snapshot(&prepared.snapshot, &budget.validation())
+        let inspection = inspect_indexed_snapshot(&prepared_file, &budget.validation())
             .map_err(|e| failure(EngineStage::Validating, EngineFailure::Store(e)))?;
         if inspection.inspection != preparation.inspection
             || inspection.applicable_index_names != preparation.applicable_index_names
@@ -1958,6 +1966,17 @@ fn open_store(
             ),
         }
         .map_err(|e| host(EngineStage::Publishing, e))?;
+        // The reopened files below are compared with these exact snapshots.
+        let prepared_snapshot = prepared_file.snapshot();
+        let metadata_value = metadata_snapshot.snapshot();
+        // NTFS refuses to rename a directory while any file beneath it is
+        // open, so Windows closes the candidate's members before promotion;
+        // the identity comparison after reopening keeps the binding.
+        #[cfg(windows)]
+        {
+            drop(metadata_snapshot);
+            drop(prepared_file);
+        }
         let published = stage
             .promote_sealed_directory_noreplace(&sealed, &ready, publication_name, &publication_io)
             .map_err(|e| host(EngineStage::Publishing, e))?;
@@ -1971,9 +1990,7 @@ fn open_store(
         let metadata_file = published
             .open_file("metadata.json")
             .map_err(|e| host(EngineStage::Validating, e))?;
-        if database.snapshot() != prepared.snapshot.snapshot()
-            || metadata_file.snapshot() != metadata_snapshot.snapshot()
-        {
+        if database.snapshot() != prepared_snapshot || metadata_file.snapshot() != metadata_value {
             return Err(failure(
                 EngineStage::Validating,
                 EngineFailure::InvalidMetadata,

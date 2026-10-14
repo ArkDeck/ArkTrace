@@ -1,7 +1,7 @@
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 use arktrace_platform::CancellationToken;
 use serde::Serialize;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 use std::{
     io::{self, Write},
     time::Instant,
@@ -14,7 +14,7 @@ pub enum CommandError {
     OutputLimitExceeded,
     Cancelled,
     DeadlineExceeded,
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     Engine(arktrace_engine::EngineError),
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -76,7 +76,7 @@ impl ToolIdentity {
         })
     }
 }
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 struct BoundedWriter<'a> {
     bytes: Vec<u8>,
     maximum: usize,
@@ -84,7 +84,7 @@ struct BoundedWriter<'a> {
     cancellation: &'a CancellationToken,
     failure: Option<CommandError>,
 }
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 impl Write for BoundedWriter<'_> {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         let error = if self.cancellation.is_cancelled() {
@@ -116,7 +116,7 @@ fn encode(
 ) -> Result<Vec<u8>, CommandError> {
     encode_formatted(value, maximum, deadline, cancellation, false)
 }
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 pub(crate) fn encode_formatted(
     value: &impl Serialize,
     maximum: usize,
@@ -145,7 +145,7 @@ pub(crate) fn encode_formatted(
     Ok(writer.bytes)
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 mod macos {
     use super::*;
     use arktrace_contract::{
@@ -1478,7 +1478,7 @@ mod macos {
         }
     }
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use macos::{DirectoryCommand, execute_no_cache, execute_no_cache_formatted};
 
 #[cfg(test)]

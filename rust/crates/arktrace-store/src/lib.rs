@@ -1,39 +1,39 @@
 //! Shared SQLite semantics. SQL and connection state are private. Native ports
 //! bind immutable snapshots; Engine retains lifetime and publication authority.
 //! Successful inspection alone does not establish an indexed Ready entry.
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod arguments;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod counters;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod cpu_catalog;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod database;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod density;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod directory;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod events;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod frames;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod indexes;
 mod query_resources;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 mod read_pool;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 mod reader;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod schema;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod slices;
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 mod summary;
 pub use query_resources::ReadPoolLimits;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use read_pool::{ReadPoolOutput, ReadPoolStatistics};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use reader::StoreReader;
 #[cfg(test)]
 mod argument_oracle_tests;
@@ -64,7 +64,7 @@ pub struct SQLiteRuntimeFacts {
     pub file_stat_function_available: bool,
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub fn sqlite_runtime_facts(budget: &ValidationBudget) -> Result<SQLiteRuntimeFacts, StoreError> {
     let connection = rusqlite::Connection::open_in_memory().map_err(database::sqlite_error)?;
     database::Database::new(connection, budget)?.runtime_facts()
@@ -77,7 +77,7 @@ pub struct ValidationBudget {
     pub cancellation: CancellationToken,
 }
 impl ValidationBudget {
-    #[cfg(any(target_os = "macos", test))]
+    #[cfg(any(target_os = "macos", windows, test))]
     pub(crate) fn check(&self) -> Result<(), StoreError> {
         if self.maximum_database_bytes == 0 || self.maximum_database_bytes > i64::MAX as u64 {
             return Err(StoreError::InvalidBudget);
@@ -146,7 +146,7 @@ pub enum CounterSampleTable {
     ProcessMeasure,
 }
 impl CounterSampleTable {
-    #[cfg(any(target_os = "macos", test))]
+    #[cfg(any(target_os = "macos", windows, test))]
     pub(crate) fn name(self) -> &'static str {
         match self {
             Self::Measure => "measure",
@@ -171,7 +171,7 @@ pub struct DatabaseInspection {
     pub process_counter_sample_tables: Vec<CounterSampleTable>,
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub use indexes::{IndexPhase, IndexProgress};
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -185,12 +185,12 @@ pub struct DatabasePreparation {
     pub prepared_database_sha256: String,
     pub prepared_database_byte_count: u64,
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub struct PreparedDatabase {
     pub snapshot: arktrace_platform::HeldFile,
     pub preparation: DatabasePreparation,
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub fn prepare_snapshot(
     source: &arktrace_platform::HeldFile,
     destination: &arktrace_platform::HeldDirectory,
@@ -241,7 +241,7 @@ pub fn prepare_snapshot(
     })
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub fn inspect_snapshot(
     source: &arktrace_platform::HeldFile,
     budget: &ValidationBudget,
@@ -256,7 +256,7 @@ pub struct IndexedDatabaseInspection {
     pub applicable_index_names: Vec<String>,
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub fn inspect_indexed_snapshot(
     source: &arktrace_platform::HeldFile,
     budget: &ValidationBudget,
@@ -269,7 +269,7 @@ pub fn inspect_indexed_snapshot(
     })
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 fn with_readonly_snapshot<T>(
     source: &arktrace_platform::HeldFile,
     budget: &ValidationBudget,
@@ -282,7 +282,7 @@ fn with_readonly_snapshot<T>(
     result
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 fn open_snapshot_connection(
     source: &arktrace_platform::HeldFile,
     budget: &ValidationBudget,
