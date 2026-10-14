@@ -1,10 +1,10 @@
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use crate::CommandError;
 pub use arktrace_contract::{Code, PublicError, Stage};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use arktrace_platform::HostError;
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub(crate) fn host_error(error: HostError, fallback: PublicError) -> PublicError {
     match error {
         HostError::Cancelled => PublicError::new(Code::Cancelled, fallback.stage()),
@@ -13,7 +13,7 @@ pub(crate) fn host_error(error: HostError, fallback: PublicError) -> PublicError
         _ => fallback,
     }
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 pub(crate) fn command_error(error: CommandError) -> PublicError {
     match error {
         CommandError::InvalidArguments => PublicError::new(Code::InvalidArgument, Stage::Request),
@@ -23,7 +23,7 @@ pub(crate) fn command_error(error: CommandError) -> PublicError {
         }
         CommandError::Cancelled => PublicError::new(Code::Cancelled, Stage::Encoding),
         CommandError::DeadlineExceeded => PublicError::new(Code::QueryTimeout, Stage::Encoding),
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         CommandError::Engine(error) => error.public_error(),
     }
 }

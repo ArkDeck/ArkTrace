@@ -349,6 +349,11 @@ publisher 链根/EKU 钉、engine/CLI 接入（006/010）与真实 parser 运行
 ## 8. AT-RUST-006 — 真实 parser 到 Ready DB 的纵向切片
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：004、005；Windows 正向另需 003。
+- Windows 进展（2026-10-14）：`--no-cache` 的真实 parse→validate→index→Ready 在 Windows 11 x64 原生接通
+  （recipe parser `d0e5a197…`，NTFS 上 promote 前关闭候选目录成员句柄、重开后按 snapshot 比对）；
+  三份 small fixture 的 inspect/processes/threads 与 macOS 记录 T0（除平台身份字段、index 3→4 与
+  已知 hiprofiler upstream DB T1），见
+  [Windows no-cache 记录](migration-runs/AT-RUST-006-010-2026-10-14-windows-no-cache-cli.md)。
 - 平台/输入：先 macOS pinned parser，Windows 随 003 接上；真实 fixture，无设备。
 - 需求：AT-PARSE-*、AT-DB-001～006/009/010、AT-SEC-001/003、AT-SYS-004。
 - 路径：`arktrace-parser`、`arktrace-store` schema/staging；移植参考
@@ -624,6 +629,10 @@ quality/truncation 均从 Store page 传递，argument handle 不读取。新增
 ## 12. AT-RUST-010 — Rust CLI 完整替换
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：005–009；Windows 加 003。
+- Windows 进展（2026-10-14）：`arktrace.exe` 的 inspect/processes/threads/query 在 Windows 原生运行；
+  闭合安装布局、`.exe` helper/parser、Authenticode publisher 或开发 SHA pin、`ARKTRACE_STORAGE_ROOT`
+  宿主私有根、Ctrl+C/Break 结构化取消与 kill 后无存活 parser 均已实测（[CLI.md](CLI.md) Windows 节）。
+  summary/context/analyze/doctor/licenses 两平台仍未接通。
 - 平台/输入：两端 CLI、真实 parser/resources；无设备。
 - 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](CLI.md)。
 - 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。

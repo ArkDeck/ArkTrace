@@ -1,0 +1,156 @@
+{
+ "schemaVersion": 1,
+ "task": "AT-RUST-006/010 Windows no-cache",
+ "localRunDate": "2026-10-14",
+ "host": "Windows 11 x64 (native)",
+ "candidate": {
+  "developmentResources": true,
+  "productionSigned": false,
+  "parserSHA256": "d0e5a19762456cf25d17bac7801e38e38f183ee78ebc04aa2417a94f89afc338",
+  "parserBuildRecipeVersion": "ffb9f0c0fd3478f8d9bb4b962cea795469748c69460f396dce949998d0fe7075"
+ },
+ "environment": "PATH, SystemRoot, WINDIR only; stdin NUL",
+ "macOSRecord": "docs/migration-runs/AT-RUST-007-010-2026-10-03-directory-commands.json",
+ "comparisonTolerances": {
+  "identity": [
+   "/tool/buildRevision",
+   "/trace/parser/binarySha256",
+   "/provenance/parserBuildRecipeVersion"
+  ],
+  "indexSchemaBump": [
+   "/provenance/indexSchemaVersion",
+   "/result/indexSchemaVersion"
+  ],
+  "recordedT1": [
+   "/provenance/upstreamDatabaseSha256 (hiprofiler only, per the macOS record)"
+  ]
+ },
+ "directoryComparison": [
+  {
+   "fixture": "zlib.htrace",
+   "command": "inspect",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "zlib.htrace",
+   "command": "processes",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "zlib.htrace",
+   "command": "threads",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "hiprofiler_data_ability.htrace",
+   "command": "inspect",
+   "exit": 0,
+   "otherDifferences": [
+    "/provenance/upstreamDatabaseSha256"
+   ]
+  },
+  {
+   "fixture": "hiprofiler_data_ability.htrace",
+   "command": "processes",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "hiprofiler_data_ability.htrace",
+   "command": "threads",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "trace_small_10.systrace",
+   "command": "inspect",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "trace_small_10.systrace",
+   "command": "processes",
+   "exit": 0,
+   "otherDifferences": []
+  },
+  {
+   "fixture": "trace_small_10.systrace",
+   "command": "threads",
+   "exit": 0,
+   "otherDifferences": []
+  }
+ ],
+ "robustness": [
+  {
+   "check": "path:with space",
+   "pass": true
+  },
+  {
+   "check": "no-residue-next-to-source:with space",
+   "pass": true
+  },
+  {
+   "check": "path:中文 目录",
+   "pass": true
+  },
+  {
+   "check": "no-residue-next-to-source:中文 目录",
+   "pass": true
+  },
+  {
+   "check": "path:émoji 🚀",
+   "pass": true
+  },
+  {
+   "check": "no-residue-next-to-source:émoji 🚀",
+   "pass": true
+  },
+  {
+   "check": "override:private-root",
+   "pass": true
+  },
+  {
+   "check": "override:relative-refused",
+   "pass": true
+  },
+  {
+   "check": "override:absent-refused",
+   "pass": true
+  },
+  {
+   "check": "override:broad-dacl-refused",
+   "pass": true
+  },
+  {
+   "check": "ctrl-break:cancelled",
+   "pass": true
+  },
+  {
+   "check": "ctrl-break:no-live-parser",
+   "pass": true
+  },
+  {
+   "check": "kill:parser-was-running",
+   "pass": true
+  },
+  {
+   "check": "kill:no-live-parser-after",
+   "pass": true
+  },
+  {
+   "check": "kill:next-run-succeeds",
+   "pass": true
+  },
+  {
+   "check": "corrupt:refused",
+   "pass": true
+  },
+  {
+   "check": "missing:refused",
+   "pass": true
+  }
+ ]
+}

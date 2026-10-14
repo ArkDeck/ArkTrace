@@ -235,6 +235,40 @@ Runtime 完成 session/cache cleanup 后才返回。
 signal 可以立即强制退出（`128 + signal`）。Machine consumer 应优先读取 typed error，而不是只
 依赖 status。
 
+## Windows x64（Rust CLI，迁移中）
+
+Rust `arktrace.exe` 在 Windows 11 x64 上原生运行 `--no-cache` 路径（AT-RUST-006/010）。当前已接通
+`inspect`、`processes`、`threads`、`query`；`summary`、`context`、`analyze`、`doctor`、`licenses`
+仍是 Rust CLI 的整体待办（两平台相同），见任务台账 §12。
+
+**安装布局**（相对 `arktrace.exe` 所在目录，闭合、无 PATH 搜索；AT-RUST-016 原样打包）：
+
+```text
+arktrace.exe
+resources/ArkTraceRust/runtime.json
+resources/Helpers/arktrace-host-process.exe
+resources/Helpers/trace_streamer.exe
+```
+
+- 每个 image 均以 `.exe` 命名（`CreateProcessW` 会为无扩展名补 `.exe`，从而执行另一个文件）。
+- parser identity 取自 `ThirdParty/TraceStreamer/windows-x86_64/manifest.json`，`architecture` 为
+  `x86_64`；Machine envelope 中 parser 名称仍为 `trace_streamer`。
+- 信任：`development-resources` 构建只按整文件 SHA-256 pin；release 构建另外要求 Authenticode
+  签名者等于编译时 `ARKTRACE_WINDOWS_PUBLISHER` 指定的 publisher（按 publisher 身份，不钉会轮换的
+  leaf 证书），缺失时 fail closed。
+- 开发候选：`python scripts/stage_windows_cli_candidate.py --output <absent absolute dir> --parser
+  <recipe-built trace_streamer.exe>`；parser SHA 必须等于提交的 Windows manifest，binary 不入 Git。
+
+**存储根**：默认使用 known folder `LocalAppData` 下的私有产品目录。以私有子进程运行本 CLI 的宿主
+（ArkDeck）可设置 `ARKTRACE_STORAGE_ROOT=<absolute path>` 指向它自己的根：该目录必须已存在、
+owner-only（受保护 DACL、仅当前用户，祖先不可被其他主体改写），否则以 typed error 拒绝；
+CLI 不创建、修复或替换该根。macOS 无此覆盖项。
+
+**信号**：第一次 Ctrl+C / Ctrl+Break 触发 structured cancellation（parser Job 立即 `TerminateJobObject`，
+session rollback 后返回 status 8）；第二次立即退出（Ctrl+C/Break 为 130，close/logoff/shutdown 为
+143）。宿主以 `TerminateJobObject` 终止 CLI 时，kill-on-close Job 同时结束 parser，私有残留由下一次
+调用回收且不会被当作 Ready。Exit status 家族与上表相同。
+
 ## Cache 与隐私
 
 默认 content-addressed cache key 绑定 trace SHA、parser SHA/revision、schema adapter 与 index

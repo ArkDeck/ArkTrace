@@ -20,7 +20,8 @@ import time
 import uuid
 
 STATE = '.arktrace-cargo-owner.json'
-SOURCE_PATHS = ('rust', 'contracts', 'ThirdParty/TraceStreamer/macx/manifest.json')
+SOURCE_PATHS = ('rust', 'contracts', 'ThirdParty/TraceStreamer/macx/manifest.json',
+                'ThirdParty/TraceStreamer/windows-x86_64/manifest.json')
 EVIDENCE_KINDS = {'source', 'manifest', 'lockfile', 'dependencyRecord', 'binary', 'log'}
 
 

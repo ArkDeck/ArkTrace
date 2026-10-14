@@ -62,7 +62,7 @@ impl StoreReader {
             crate::cpu_catalog::query(db, self.inspection(), query)
         })
     }
-    #[cfg(test)]
+    #[cfg(all(test, target_os = "macos"))]
     pub(crate) fn snapshot_for_test(&self) -> Arc<HeldFile> {
         self.snapshot.clone()
     }

@@ -88,7 +88,7 @@ fn valid_utc(s: &str) -> bool {
         && number(14, 16) < 60
         && number(17, 19) < 60
 }
-#[cfg(any(target_os = "macos", test))]
+#[cfg(any(target_os = "macos", windows, test))]
 pub(crate) fn utc_from_unix_seconds(seconds: u64) -> Result<String, InvalidMetadata> {
     // A bounded Gregorian conversion avoids ambient timezone/locale and an
     // additional date dependency. At most 8030 year iterations are performed.

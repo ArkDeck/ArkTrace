@@ -1,31 +1,31 @@
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use crate::ToolIdentity;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use crate::arguments::Presentation;
 use crate::arguments::{self, Command, Invocation};
 use crate::public_error::{Code, PublicError, Stage};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use serde::Serialize;
 use std::ffi::OsString;
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "macos", windows)))]
 use std::io::{self, Write};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 use std::{
     collections::BTreeMap,
     time::{Duration, Instant},
 };
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 const HELP: &str = "ArkTrace Rust migration CLI\n\nUsage: arktrace [options] <command> <trace>\n\nCommands: inspect, processes, threads, query\nQuery: --view cpu-slices|thread-states|slices|counters --start-ns N --end-ns N\n       --cpu N --process-key N|--pid N --thread-key N|--tid N\n       --raw-state TEXT --state running|runnable|sleeping|blocked|stopped\n       --name TEXT --name-match exact|prefix|contains\n       --min-duration-ns N --depth N --filter-id N --limit N\nOptions: --json --pretty --no-cache --timeout-ms N --max-rows N\n         --max-events N --max-output-bytes N --trace-streamer /absolute/path\n         --help --version\n\nThis migration executable currently requires --no-cache.\n";
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "macos", windows)))]
 const HELP: &str = "ArkTrace Rust migration CLI\n\nThe native trace runtime is not implemented on this platform yet.\nOptions: --help --version\n";
 #[derive(Serialize)]
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 struct Request {
     command: &'static str,
     parameters: BTreeMap<&'static str, serde_json::Value>,
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 fn request(invocation: Option<&Invocation>, args: &[OsString]) -> Request {
     let Some(invocation) = invocation else {
         return Request {
@@ -57,7 +57,7 @@ fn request(invocation: Option<&Invocation>, args: &[OsString]) -> Request {
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 struct ErrorEnvelope<'a> {
     schema_version: &'static str,
     tool: &'a ToolIdentity,
@@ -71,14 +71,14 @@ fn diagnostic(error: &PublicError) -> Vec<u8> {
         .unwrap_or_else(|| "INTERNAL_ERROR".to_owned());
     format!("{code}: {}\n", error.code().message()).into_bytes()
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "macos", windows)))]
 fn stderr(error: &PublicError, maximum: usize) {
     let message = diagnostic(error);
     if message.len() <= maximum {
         let _ = io::stderr().lock().write_all(&message);
     }
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 fn stderr(
     error: &PublicError,
     maximum: usize,
@@ -96,7 +96,7 @@ fn stderr(
         let _ = signals.write_stderr(&message, &budget);
     }
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "macos", windows)))]
 fn commit(bytes: &[u8], maximum: usize) -> Result<(), PublicError> {
     let mut written = 0;
     let mut output = io::stdout().lock();
@@ -113,7 +113,7 @@ fn commit(bytes: &[u8], maximum: usize) -> Result<(), PublicError> {
     }
     Ok(())
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 fn emit_error(
     mut error: PublicError,
     presentation: Presentation,
@@ -180,7 +180,7 @@ fn emit_error(
     stderr(&error, presentation.limits.max_output_bytes, Some(signals));
     error.code().exit_status()
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 fn commit_report(
     bytes: &[u8],
     maximum: usize,
@@ -205,7 +205,7 @@ fn commit_report(
     })
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", windows))]
 mod macos {
     use super::*;
     use crate::public_error::{command_error, host_error};
@@ -214,6 +214,25 @@ mod macos {
         CancellationToken, CliSignalGuard, HeldFile, HostError, IoBudget, MappedExecutable,
         OwnerKind, OwnerStore, user_temporary_workspace,
     };
+    /// The private per-product working root. On Windows a host that runs this
+    /// CLI as its own private child (ArkDeck) names a root it owns with
+    /// `ARKTRACE_STORAGE_ROOT`: an absolute, existing, owner-private directory,
+    /// refused otherwise (never created, repaired or replaced). Without it the
+    /// known LocalAppData folder is used. macOS has no override.
+    fn workspace(name: &str) -> Result<arktrace_platform::HeldDirectory, HostError> {
+        #[cfg(windows)]
+        if let Some(root) = std::env::var_os(STORAGE_ROOT_VARIABLE) {
+            let root = std::path::PathBuf::from(root);
+            if !root.is_absolute() {
+                return Err(HostError::InvalidPath);
+            }
+            return arktrace_platform::HeldDirectory::open_private(&root)?
+                .ensure_private_child(name);
+        }
+        user_temporary_workspace(name)
+    }
+    #[cfg(windows)]
+    pub(crate) const STORAGE_ROOT_VARIABLE: &str = "ARKTRACE_STORAGE_ROOT";
     fn io(deadline: Instant, token: &CancellationToken) -> IoBudget {
         IoBudget {
             maximum_bytes: 256 * 1024 * 1024,
@@ -287,7 +306,7 @@ mod macos {
                 ));
             }
         };
-        let root = user_temporary_workspace("com.arktrace.ArkTrace.rust-tools").map_err(|e| {
+        let root = workspace("com.arktrace.ArkTrace.rust-tools").map_err(|e| {
             host_error(
                 e,
                 PublicError::new(Code::TraceParseFailed, Stage::Preparing),
@@ -318,13 +337,12 @@ mod macos {
                 invocation.parser_override.as_deref(),
                 budget,
             )?;
-            let namespace =
-                user_temporary_workspace(&resources.storage_namespace).map_err(|e| {
-                    host_error(
-                        e,
-                        PublicError::new(Code::TraceParseFailed, Stage::Preparing),
-                    )
-                })?;
+            let namespace = workspace(&resources.storage_namespace).map_err(|e| {
+                host_error(
+                    e,
+                    PublicError::new(Code::TraceParseFailed, Stage::Preparing),
+                )
+            })?;
             let engine_budget = EngineBudget {
                 maximum_source_bytes: resources.maximum_source_bytes,
                 maximum_database_bytes: resources.maximum_database_bytes,
@@ -485,11 +503,11 @@ mod macos {
 }
 
 pub fn run(arguments: Vec<OsString>) -> i32 {
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", windows))]
     {
         macos::run(arguments)
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(not(any(target_os = "macos", windows)))]
     {
         let presentation = arguments::hint(&arguments);
         let result = arguments::parse(&arguments);
