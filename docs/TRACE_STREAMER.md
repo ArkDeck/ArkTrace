@@ -1,6 +1,6 @@
 # TraceStreamer 依赖记录
 
-> 状态：Phase 1 parser contract 已锁定；Phase 3 完全锁定构建配方候选（2026-08-13）
+> 状态：Phase 1 parser contract 已锁定；Phase 3 完全锁定构建配方候选（2026-08-13）；Windows x64 配方候选（AT-RUST-003，2026-10-14，§4a）
 > 本文回答：ArkTrace 用的是哪个 TraceStreamer revision、它如何构建、如何调用、有哪些必须绕开的行为。
 
 ## 1. Pinned upstream
@@ -76,6 +76,89 @@ scripts/test_trace_streamer_reproducibility.sh
 ```
 
 该 gate 不接受 binary/manifest/fixture/license 缺失或漂移，也不允许 integration skip；它在 private partial DB 上完成 quick_check、schema/range/relationship validation、versioned index migration 与 fsync 后，才以 DB rename 作为 Ready marker。详细结果见 [PHASE_1_VERIFICATION.md](./PHASE_1_VERIFICATION.md)。
+
+## 4a. Windows x64 锁定构建（AT-RUST-003）
+
+在 Windows 11 x64 原生主机上于 2026-10-14 实测打通，使用与 macOS 同一 `447a0a49` upstream、
+同一 13 个 `source-lock.json` exact revision 和同一插件集合。入口在 MSYS2 `MSYS` shell 中运行：
+
+```bash
+ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
+# 产物：ThirdParty/TraceStreamer/windows-x86_64/trace_streamer.exe + manifest.json
+```
+
+构建事实：
+
+1. upstream 的 Windows 入口是原生 MinGW（`.gn_win`、`gcc.exe/g++.exe`、`gn.exe/ninja.exe`），
+   上游文档指定 `gcc 12.1.0 (x86_64-posix-sjlj-rev3, Built by MinGW-W64 project)`。
+   `windows-toolchain-lock.json` 以 URL、SHA-256、字节数锁定该 mingw-builds 发行包，以及上游
+   `dl_tools.sh` 使用的 Windows GN（1744）/Ninja（1.9.0）archive；MSYS2 只提供 POSIX 工具，
+   其自带 GCC 不参与构建。实测 MSYS2 GCC 16.2 因标准头传递包含变化和 mingw-w64 14 的
+   `_pid_t` 定义而无法编译该 pin，不能替代锁定编译器；
+2. 上游 `protoc_w.py` 只在 `platform.system() == "Windows"` 时选用 `protoc.exe` 与
+   `protoreader_plugin.exe`，否则静默跳过 `*.pbreader.h` 生成（且忽略子进程退出码）。
+   因此 `ARKTRACE_TS_PYTHON` 必须是原生 Windows Python，脚本先校验后才构建；Python 只驱动
+   protoc wrapper，版本记入 manifest；
+3. 补丁：沿用 macOS recipe 的上游 faultloggerd/hiperf/llvm 补丁与
+   `proto-reader-sparse-validity.patch`；`faultloggerd-apple-clang.patch` 仅为 Apple clang
+   所需，GCC 不需要。新增 `windows-reproducible-utf8-link.patch` 只改 Windows link 命令：
+   `-Wl,--no-insert-timestamp` 去掉 PE 链接时间戳，并链接
+   `ThirdParty/TraceStreamer/windows/trace_streamer.manifest` 编译出的资源；
+4. 该 application manifest 声明 `activeCodePage=UTF-8`（并 `longPathAware`）。未加时上游
+   以 ANSI 代码页读取 `argv`，任何非 ASCII 输入/输出路径（中文、Latin-1、emoji）都以
+   exit 1 失败且不产出 DB；加入后四类路径全部成功；
+5. 上游 Windows link 已带 `--static`，产物只导入 `ADVAPI32.dll`、`KERNEL32.dll`、
+   `msvcrt.dll`；脚本把 import 集与锁文件 `allowedImports` 精确比对，不随包附带 MinGW DLL；
+6. `//llvm` 经 NTFS junction 指向 work root 内的 llvm-project，不复制源码树；
+7. `buildRecipeVersion` 为构建脚本、两份锁文件、两个本地补丁和两份 Windows 资源文件
+   SHA-256 的稳定编码。产物未签名（manifest `signed: false`），签名后的身份须另行记录。
+
+**可重复性**：提交的脚本在两个互不相干的全新 work root 中串行执行两次 clean build
+（`ARKTRACE_TS_JOBS=2`，各约 28 分钟），产物逐字节相同：
+
+| 项 | 值 |
+|---|---|
+| unsigned `trace_streamer.exe` SHA-256 | `d0e5a19762456cf25d17bac7801e38e38f183ee78ebc04aa2417a94f89afc338` |
+| `buildRecipeVersion` | `ffb9f0c0fd3478f8d9bb4b962cea795469748c69460f396dce949998d0fe7075` |
+| imports | `ADVAPI32.dll`、`KERNEL32.dll`、`msvcrt.dll` |
+| `--version` | `version 4.3.7` |
+
+两份 manifest 只有 `builtAt` 不同；`ThirdParty/TraceStreamer/windows-x86_64/manifest.json`
+为第一次构建的记录。此前工作阶段 4 并发的两次构建因主机内存不足在编译阶段被中止，
+建议 `ARKTRACE_TS_JOBS` 不超过 4 且两次串行执行。
+
+用 recipe 产物和锁定 schema evidence 的两个 fixture，以生产参数 `-e <db> -nm` 解析
+（源快照复制到普通、含空格、中文、Latin-1+emoji 四类目录各跑一次，共 8 次）：
+
+- `trace_small_10.systrace`、`zlib.htrace` 导出 DB 的 SHA-256 在 8 次运行中都与
+  `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`（macOS arm64 parser 锁定值）
+  **逐字节相同**，因此 schema fingerprint（`cb34d8b6…`，91 表）、`quick_check`、trace range、
+  六表 row count 与 macOS 一致，且无 `meta` 表、无绝对路径；
+- 探索构建另解析 `hiprofiler_data_ability.htrace` 成功（91 表，process/thread 各 251），
+  该 fixture 无锁定 macOS 数据库 evidence，未作字节比对；
+- 损坏输入：4 KiB 随机字节以 exit 1 失败且不产出 DB；探索构建对截断+随机字节的 htrace
+  与空文件则 exit 0 并产出无 sched/callstack 数据的库。两者都与 §2“成功判定不依赖退出码”
+  的既有契约一致；能否被拒绝取决于 ArkTrace validation，本次未经 ArkTrace adapter 验证；
+- 未加 UTF-8 manifest 的探索构建只有纯空格路径可成功；
+- 解析 zlib 压缩的 htrace 时，parser 会在**输入文件所在目录**创建 `ts_tmp/unzlib_file.txt`
+  并留下它。生产调用必须继续只解析 session-owned staging 中的源快照（§4 Phase 1 adapter），
+  不能让 parser 直接读取用户原始目录。
+
+许可：独立的 `windows-license-inventory.json` 记录 Windows GN/Ninja/mingw-builds GCC 构建工具
+（不分发，与 `windows-toolchain-lock.json` 逐项比对）和静态链接进 exe 的 GCC runtime
+（GPL-3.0-or-later WITH GCC-exception-3.1）、winpthreads（MIT AND BSD-3-Clause）、mingw-w64
+runtime 三项；文本位于 `LICENSES-windows/`（6 份，其中 4 份从锁定 7z 逐字节复制，CRLF，
+`.gitattributes` 设 `-text`）。共享的 `license-inventory.json`、`LICENSES/` 与
+`THIRD_PARTY_NOTICES.md` 不变——macOS App/CLI 按字节 pin 并原样打包它们，Windows 条目不进入
+macOS 分发。Windows 分发（016）需同时附带共享清单与本清单的文本。`scripts/verify_licenses.sh`
+两者都校验，字节计数改用可移植的 `wc -c`。
+
+尚未完成（AT-RUST-003 验收剩余项）：
+
+- 干净 Windows 11 x64 主机（未装工具链/VC++ 运行库）的运行验收：本次只在构建主机运行；
+- large fixture 的 Windows 解析与 macOS 语义比对；
+- Authenticode 签名与签名后 identity、Windows CI approved asset、ArkTrace Windows 进程
+  adapter 接入（006/010）与分发打包（016）。
 
 ## 5. Re-pin 流程
 

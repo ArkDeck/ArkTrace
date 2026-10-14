@@ -1,0 +1,15 @@
+diff --git a/smartperf_host/trace_streamer/gn/toolchain/BUILD.gn b/smartperf_host/trace_streamer/gn/toolchain/BUILD.gn
+index b950fa5..24041e8 100644
+--- a/smartperf_host/trace_streamer/gn/toolchain/BUILD.gn
++++ b/smartperf_host/trace_streamer/gn/toolchain/BUILD.gn
+@@ -201,7 +201,9 @@ toolchain("gcc_like") {
+     if (is_mac) {
+       command = "$cxx -o {{output}} {{ldflags}} {{inputs}} {{solibs}} {{libs}}"
+     } else if (is_win) {
+-      command = "$cxx {{ldflags}} -o {{output}} --static -Wl,--start-group {{inputs}} {{solibs}} {{libs}} -Wl,--end-group -lshell32 -lole32 -luuid -ladvapi32"
++      # ArkTrace: deterministic PE header and the UTF-8 active-code-page
++      # application manifest compiled by build_trace_streamer_windows.sh.
++      command = "$cxx {{ldflags}} -Wl,--no-insert-timestamp -o {{output}} --static -Wl,--start-group {{inputs}} {{solibs}} {{libs}} -Wl,--end-group ../../arktrace/trace_streamer.res.o -lshell32 -lole32 -luuid -ladvapi32"
+     } else {
+       command = "$cxx {{ldflags}} -o {{output}} -static-libstdc++ -Wl,--start-group {{inputs}} {{solibs}} {{libs}} -Wl,--end-group"
+     }

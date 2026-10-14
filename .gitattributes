@@ -16,8 +16,13 @@
 /rust/crates/arktrace-store/tests/fixtures/summary-*.sql -text whitespace=-blank-at-eol,-blank-at-eof
 /tools/parallel-summary-facts-canonical-20261004/verification/construction-seam-oracle-build.log whitespace=-blank-at-eol
 
+# Windows resource inputs participate in the recipe hash as exact bytes.
+ThirdParty/TraceStreamer/windows/** -text
+
 ThirdParty/TraceStreamer/LICENSES/hiperf-Apache-2.0.txt text eol=crlf
 ThirdParty/TraceStreamer/LICENSES/sqlite-Public-Domain.txt text eol=crlf
+# Windows license texts keep the exact bytes (CRLF for the mingw-builds archive copies).
+ThirdParty/TraceStreamer/LICENSES-windows/** -text
 
 # License hashes bind the exact upstream bytes, including line endings.
 rust/licenses/** -text
