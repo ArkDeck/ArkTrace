@@ -75,7 +75,7 @@
 |---|---|---|---|---|---|
 | 001 | 行为/契约/oracle/性能基线 | 无 | 无 | in-progress | M |
 | 002 | Rust workspace、工具链、双平台 CI | 无 | 无 | in-progress | M |
-| 003 | Windows TraceStreamer 构建与身份 | 无 | 无 | ready | L |
+| 003 | Windows TraceStreamer 构建与身份 | 无 | 无 | in-progress | L |
 | 004 | 文件身份、权限、锁与原子发布端口 | 002 | 001、002 | in-progress | L |
 | 005 | 进程树、取消、输出预算与签名端口 | 002 | 004 | in-progress | L |
 | 006 | 真实解析→校验→索引→Ready | 001、002 | 004、005；Windows 加 003 | in-progress | L |
@@ -211,7 +211,11 @@ flowchart LR
 
 ## 5. AT-RUST-003 — Windows TraceStreamer 可复现构建与 pin
 
-- 状态：ready；开工/完成依赖：无，直接核对当前第三方源码/配方。
+- 状态：in-progress；开工/完成依赖：无，直接核对当前第三方源码/配方。
+- 进展（2026-10-14）：锁定编译器/源码/补丁的探索构建已在 Windows 11 x64 原生主机产出 PE x64
+  parser，两份 evidence fixture 的导出 DB 与 macOS 锁定值逐字节相同；提交的
+  `scripts/build_trace_streamer_windows.sh` 尚未完整跑完两次 clean build；
+  剩余项见 [TRACE_STREAMER.md §4a](TRACE_STREAMER.md#4a-windows-x64-锁定构建at-rust-003)。
 - 平台/输入：Windows 11 x64 构建主机、上游源码、真实 Trace；无设备操作。
 - 需求：AT-SYS-005、AT-PARSE-002/003/004/010、AT-DB-*、AT-SEC-002/005、AT-CLI-011（许可清单）；
   AT-PARSE-001/007 的调用与成功判定由 006 接入。
