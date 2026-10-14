@@ -316,6 +316,16 @@ held CWD identity 与 FD/identity 检查，并修复清理阶段忽略 stdout/st
 [005 输出预算记录](migration-runs/AT-RUST-005-2026-10-03-output-budgets.md)。
 仍需其它取消/launch race/fault 窗口、signedBundleInPlace、
 生产 Developer ID/hardened/notarization、Windows Job Object，以及与 004 owner/crash 协议集成。
+2026-10-14 Windows 进程端口：同名 `run_supervised`/`VerifiedExecutable`/`ProcessBudget` 等以挂起
+`CreateProcessW` + kill-on-close Job（入 Job、映像身份核对后才恢复）、NUL stdin、显式继承句柄表、最小
+环境（`LANG`/`LC_ALL`/System32 `PATH`/`SystemRoot`/`WINDIR`/`TEMP`/`TMP`=私有 CWD）实现；supervisor
+可执行文件只校验并保持绑定、不启动（Job 句柄随 Engine 死亡关闭即取代 macOS 控制管道）。输出文件
+live/final 预算、`.exe` 名与 AMD64 PE 头、`AuthenticodePublisher`（WinVerifyTrust 后按签名者
+`O=`/`CN=` 钉 publisher，leaf 哈希只记录）与仅 SHA 的 `DevelopmentPinned`；CLI 的映射映像
+（`GetMappedFileNameW`）、控制台 Ctrl 事件（首次取消、二次 130/143 立即退出）与可取消的整块
+stdout 提交。37 个单元与 8 个原生集成测试通过，见
+[Windows 进程端口记录](migration-runs/AT-RUST-005-2026-10-14-windows-process.md)。
+publisher 链根/EKU 钉、engine/CLI 接入（006/010）与真实 parser 运行未完成。
 
 交付：
 

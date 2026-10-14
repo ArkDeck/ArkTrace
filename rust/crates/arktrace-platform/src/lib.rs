@@ -29,14 +29,16 @@ pub use macos::{
 #[cfg(windows)]
 #[allow(unsafe_code)]
 mod windows;
-// File, directory, lease and owner ports (AT-RUST-004). Process supervision,
-// code trust and CLI signal ports are not yet available on Windows.
+// File, directory, lease and owner ports (AT-RUST-004); process supervision,
+// Authenticode trust and CLI console ports (AT-RUST-005).
 #[cfg(windows)]
 pub use windows::{
-    EphemeralLease, FileIdentity, FileSnapshot, HeldDirectory, HeldFile, Lease, LeaseMode,
-    OwnedDirectory, OwnerKind, OwnerRecoveryOutcome, OwnerStore, PublishedOwnerEvidence,
-    SealedDirectory, SidecarRecovery, SidecarStore, SourceFacts, WritableFile,
-    user_temporary_workspace,
+    CliSignalGuard, CliWriteFailure, CodeTrustPolicy, EphemeralLease, FileIdentity, FileSnapshot,
+    HeldDirectory, HeldFile, Lease, LeaseMode, MappedExecutable, OwnedDirectory, OwnerKind,
+    OwnerRecoveryOutcome, OwnerStore, ProcessBudget, ProcessError, ProcessOutcome,
+    ProcessOutputFileBudget, PublishedOwnerEvidence, SealedDirectory, SidecarRecovery,
+    SidecarStore, SourceFacts, TrustVerdict, VerifiedExecutable, WritableFile, run_supervised,
+    supervisor_main, user_temporary_workspace,
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
