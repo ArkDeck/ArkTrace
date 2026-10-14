@@ -20,6 +20,8 @@ cp "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
     "$temporary_root/ThirdParty/TraceStreamer/license-inventory.json"
 cp "$repository_root/ThirdParty/TraceStreamer/source-lock.json" \
     "$temporary_root/ThirdParty/TraceStreamer/source-lock.json"
+cp "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
+    "$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
 cp -R "$repository_root/ThirdParty/TraceStreamer/LICENSES" \
     "$temporary_root/ThirdParty/TraceStreamer/LICENSES"
 git -C "$temporary_root" add LICENSE THIRD_PARTY_NOTICES.md ThirdParty
@@ -74,6 +76,23 @@ mv "$temporary_root/source-lock-mutated.json" \
     "$temporary_root/ThirdParty/TraceStreamer/source-lock.json"
 if verify; then fail "TraceStreamer notice/source-lock provenance drift was accepted"; fi
 
-[ "$(stat -f '%z' "$temporary_root/error.log")" -le 1024 ] \
+cp "$repository_root/ThirdParty/TraceStreamer/source-lock.json" \
+    "$temporary_root/ThirdParty/TraceStreamer/source-lock.json"
+jq '.compiler.sha256 = "0000000000000000000000000000000000000000000000000000000000000000"' \
+    "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
+    >"$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
+if verify; then fail "Windows compiler lock drift was accepted"; fi
+cp "$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json" \
+    "$temporary_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
+
+jq 'del(.windows.staticRuntime[] | select(.name == "winpthreads"))' \
+    "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
+    >"$temporary_root/ThirdParty/TraceStreamer/license-inventory.json"
+if verify; then fail "missing Windows static-runtime notice was accepted"; fi
+cp "$repository_root/ThirdParty/TraceStreamer/license-inventory.json" \
+    "$temporary_root/ThirdParty/TraceStreamer/license-inventory.json"
+verify || fail "restored Windows evidence did not verify"
+
+[ "$(wc -c <"$temporary_root/error.log" | tr -d ' ')" -le 1024 ] \
     || fail "negative diagnostic exceeded its byte bound"
 printf 'License verifier regression passed: product, notice, and provenance fail closed\n'

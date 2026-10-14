@@ -144,12 +144,16 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
   并留下它。生产调用必须继续只解析 session-owned staging 中的源快照（§4 Phase 1 adapter），
   不能让 parser 直接读取用户原始目录。
 
+许可：`license-inventory.json` 的 `windows` 段记录 Windows GN/Ninja/mingw-builds GCC 构建工具
+（不分发，与 `windows-toolchain-lock.json` 逐项比对）和静态链接进 exe 的 GCC runtime
+（GPL-3.0-or-later WITH GCC-exception-3.1）、winpthreads（MIT AND BSD-3-Clause）、mingw-w64
+runtime 三项；四份许可文本从锁定 7z 逐字节复制（CRLF，`.gitattributes` 设 `-text`），
+`scripts/verify_licenses.sh` 校验全部 22 份文件的 SHA/字节数，其字节计数改用可移植的 `wc -c`。
+
 尚未完成（AT-RUST-003 验收剩余项）：
 
 - 干净 Windows 11 x64 主机（未装工具链/VC++ 运行库）的运行验收：本次只在构建主机运行；
 - large fixture 的 Windows 解析与 macOS 语义比对；
-- `license-inventory.json` 尚未加入静态链接的 libstdc++/libgcc（GCC Runtime Library
-  Exception）、winpthreads 与 mingw-w64 CRT 条目；
 - Authenticode 签名与签名后 identity、Windows CI approved asset、ArkTrace Windows 进程
   adapter 接入（006/010）与分发打包（016）。
 

@@ -6,18 +6,24 @@ fail() {
     exit 1
 }
 
+# Portable exact byte count (BSD and GNU stat disagree on flags).
+file_bytes() {
+    wc -c <"$1" | tr -d ' '
+}
+
 script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=${ARKTRACE_VERIFY_LICENSE_ROOT:-$(CDPATH= cd -- "$script_directory/.." && pwd)}
 repository_root=$(CDPATH= cd -- "$repository_root" && pwd -P)
 inventory="$repository_root/ThirdParty/TraceStreamer/license-inventory.json"
 source_lock="$repository_root/ThirdParty/TraceStreamer/source-lock.json"
+windows_lock="$repository_root/ThirdParty/TraceStreamer/windows-toolchain-lock.json"
 license_root="$repository_root/ThirdParty/TraceStreamer"
 product_license="$repository_root/LICENSE"
 notice="$repository_root/THIRD_PARTY_NOTICES.md"
 
 [ -f "$product_license" ] && [ ! -L "$product_license" ] \
     || fail "ArkTrace product license is missing or a symlink"
-[ "$(stat -f '%z' "$product_license")" = 1078 ] \
+[ "$(file_bytes "$product_license")" = 1078 ] \
     || fail "ArkTrace product license byte count drifted"
 [ "$(shasum -a 256 "$product_license" | awk '{print $1}')" = \
     27ec10adbe109a67f514a5620190460e52b09352214aaf1d9869be568b6f46d9 ] \
@@ -31,10 +37,10 @@ grep -F 'ArkTrace itself is licensed under the MIT License' "$notice" >/dev/null
 if grep -F 'ArkTrace itself is licensed under Apache-2.0' "$notice" >/dev/null; then
     fail "third-party notice misstates ArkTrace as Apache-2.0"
 fi
-[ "$(stat -f '%z' "$notice")" = 2621 ] \
+[ "$(file_bytes "$notice")" = 3241 ] \
     || fail "third-party notice byte count drifted"
 [ "$(shasum -a 256 "$notice" | awk '{print $1}')" = \
-    0298f7e4ecb1c1b8ffb0bc120aa0ddc1bce93b4baf9983172a047fde3c516dda ] \
+    4e686dd445b9ee2429f7a05ab575d010f932734e84446b40a207a1091d1d2aad ] \
     || fail "third-party notice SHA drifted"
 
 jq -e '
@@ -72,6 +78,37 @@ jq -e '
     ] | all)
 ' "$inventory" >/dev/null || fail "inventory schema is invalid"
 
+jq -e '
+    def license_fields:
+        (.licenseExpression | length > 0)
+        and (.licenseFile | test("^LICENSES/[A-Za-z0-9_.+-]+$") and contains("..") | not)
+        and (.licenseSHA256 | test("^[0-9a-f]{64}$"))
+        and (.licenseByteCount > 0);
+    .windows.toolchainLock == "windows-toolchain-lock.json"
+    and (.windows.buildTools | length == 3)
+    and ([.windows.buildTools[].name] | sort == ["GN","Ninja","mingw-builds GCC"])
+    and ([.windows.buildTools[] |
+        (.artifactURL | startswith("https://"))
+        and (.artifactSHA256 | test("^[0-9a-f]{64}$"))
+        and (.artifactByteCount > 0)
+        and license_fields
+        and .usage == "build-tool-not-distributed"
+    ] | all)
+    and (.windows.staticRuntime | length == 3)
+    and ([.windows.staticRuntime[].name] | unique | length == 3)
+    and ([.windows.staticRuntime[] |
+        license_fields
+        and .usage == "shipped-static"
+        and ((.additionalLicenseFiles // []) | type == "array" and length <= 8)
+        and ([.additionalLicenseFiles[]? |
+            ((keys | sort) == ["byteCount","path","sha256"])
+            and (.path | test("^LICENSES/[A-Za-z0-9_.+-]+$") and contains("..") | not)
+            and (.sha256 | test("^[0-9a-f]{64}$"))
+            and (.byteCount > 0)
+        ] | all)
+    ] | all)
+' "$inventory" >/dev/null || fail "Windows inventory schema is invalid"
+
 [ -d "$license_root/LICENSES" ] && [ ! -L "$license_root/LICENSES" ] \
     || fail "license directory is missing or a symlink"
 physical_license_root=$(CDPATH= cd -- "$license_root/LICENSES" && pwd -P) \
@@ -84,10 +121,12 @@ cleanup_lists() {
     rm -f -- "$expected_license_names" "$actual_license_names" "$license_candidates"
 }
 trap cleanup_lists EXIT HUP INT TERM
-jq -r '[.components[].licenseFile,.buildTools[].licenseFile,.components[].additionalLicenseFiles[]?.path][]' \
+jq -r '[.components[].licenseFile,.buildTools[].licenseFile,.components[].additionalLicenseFiles[]?.path,
+        .windows.buildTools[].licenseFile,.windows.staticRuntime[].licenseFile,
+        .windows.staticRuntime[].additionalLicenseFiles[]?.path][]' \
     "$inventory" | sed 's#^LICENSES/##' | LC_ALL=C sort -u >"$expected_license_names"
-[ "$(wc -l <"$expected_license_names" | tr -d ' ')" = 18 ] \
-    || fail "inventory does not name exactly 18 unique license files"
+[ "$(wc -l <"$expected_license_names" | tr -d ' ')" = 22 ] \
+    || fail "inventory does not name exactly 22 unique license files"
 find "$license_root/LICENSES" -mindepth 1 -maxdepth 1 -print >"$license_candidates"
 while IFS= read -r candidate; do
     [ -f "$candidate" ] && [ ! -L "$candidate" ] \
@@ -114,7 +153,7 @@ verify_license_file() {
         || fail "license path escapes the physical license directory"
     [ -f "$candidate" ] && [ ! -L "$candidate" ] \
         || fail "license file is missing or a symlink"
-    [ "$(stat -f '%z' "$candidate")" = "$expected_bytes" ] \
+    [ "$(file_bytes "$candidate")" = "$expected_bytes" ] \
         || fail "license byte count drifted"
     [ "$(shasum -a 256 "$candidate" | awk '{print $1}')" = "$expected_sha" ] \
         || fail "license SHA drifted"
@@ -131,6 +170,17 @@ locked_sources=$(jq -cS 'reduce .sources[] as $source ({}; .[$source.name] = [$s
 inventory_sources=$(jq -cS 'reduce (.components[] | select(.name != "TraceStreamer")) as $component ({}; .[$component.name] = [$component.repository,$component.revision])' "$inventory")
 [ "$locked_sources" = "$inventory_sources" ] \
     || fail "inventory repository/revision closure differs from source lock"
+
+[ -f "$windows_lock" ] && [ ! -L "$windows_lock" ] \
+    || fail "Windows toolchain lock is missing or a symlink"
+locked_windows_tools=$(jq -cS '{
+    "GN": [.tools.gn.url,.tools.gn.sha256,.tools.gn.byteCount],
+    "Ninja": [.tools.ninja.url,.tools.ninja.sha256,.tools.ninja.byteCount],
+    "mingw-builds GCC": [.compiler.url,.compiler.sha256,.compiler.byteCount]}' "$windows_lock")
+inventory_windows_tools=$(jq -cS 'reduce .windows.buildTools[] as $tool ({};
+    .[$tool.name] = [$tool.artifactURL,$tool.artifactSHA256,$tool.artifactByteCount])' "$inventory")
+[ "$locked_windows_tools" = "$inventory_windows_tools" ] \
+    || fail "Windows build-tool inventory differs from Windows toolchain lock"
 
 locked_upstream=$(jq -cS '[.upstream.repository,.upstream.revision]' "$source_lock")
 inventory_upstream=$(jq -cS '[.components[] | select(.name == "TraceStreamer") | .repository,.revision]' "$inventory")
@@ -155,4 +205,16 @@ while IFS="$(printf '\t')" read -r relative expected_sha expected_bytes; do
     verify_license_file "$relative" "$expected_sha" "$expected_bytes"
 done
 
-printf 'License inventory verified: product=MIT components=14 buildTools=2 policy=conservative-source-closure\n'
+jq -r '(.windows.buildTools[],.windows.staticRuntime[]) | [.licenseFile,.licenseSHA256,.licenseByteCount] | @tsv' \
+    "$inventory" |
+while IFS="$(printf '\t')" read -r relative expected_sha expected_bytes; do
+    verify_license_file "$relative" "$expected_sha" "$expected_bytes"
+done
+
+jq -r '.windows.staticRuntime[].additionalLicenseFiles[]? | [.path,.sha256,.byteCount] | @tsv' \
+    "$inventory" |
+while IFS="$(printf '\t')" read -r relative expected_sha expected_bytes; do
+    verify_license_file "$relative" "$expected_sha" "$expected_bytes"
+done
+
+printf 'License inventory verified: product=MIT components=14 buildTools=2 windowsBuildTools=3 windowsStaticRuntime=3 policy=conservative-source-closure\n'

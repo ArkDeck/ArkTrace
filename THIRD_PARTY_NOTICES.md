@@ -17,6 +17,16 @@ GN and Ninja are SHA-locked build tools and are not distributed with ArkTrace.
 Their exact artifact identities and license texts are included in the same
 inventory so the reproducible build toolchain is auditable as well.
 
+The Windows x64 TraceStreamer executable is built with the SHA-locked
+mingw-builds GCC 12.1.0 toolchain (`windows-toolchain-lock.json`) and links its
+runtime statically: the GCC runtime libraries (libstdc++, libgcc) under
+GPL-3.0-or-later WITH GCC-exception-3.1, winpthreads under MIT and
+BSD-3-Clause, and the mingw-w64 runtime under its own permissive notices. The
+inventory's `windows` section records these and the Windows GN/Ninja/GCC build
+tools; their exact license texts, copied byte for byte from the pinned
+toolchain archive, ship under the same `LICENSES/` directory. The compiler
+itself is not distributed.
+
 No GPL/LGPL-only plugin is enabled in the ArkTrace TraceStreamer recipe.
 `hiperf`, `ebpf`, and `native_hook` are excluded by the locked plugin list.
 The profiler repository's shipped subset is Apache-2.0; its separately marked
