@@ -34,10 +34,15 @@ def main():
             for source_path in platform_sources.rglob("*.rs"):
                 source = source_path.read_text(encoding="utf-8")
                 if source_path.name == "lib.rs":
-                    assert source.count("unsafe_code") == 1
+                    # Exactly the two reviewed syscall boundaries; their
+                    # #[path] children (macos_*.rs, windows_*.rs) inherit it.
+                    assert source.count("unsafe_code") == 2
                     assert '#[cfg(target_os = "macos")]\n#[allow(unsafe_code)]\nmod macos;' in source
-                elif source_path.name != "macos.rs":
+                    assert '#[cfg(windows)]\n#[allow(unsafe_code)]\nmod windows;' in source
+                elif source_path.name not in {"macos.rs", "windows.rs"}:
                     assert "unsafe_code" not in source, "unreviewed unsafe exception"
+                    if not source_path.name.startswith(("macos", "windows")):
+                        assert "unsafe " not in source, "unsafe outside the syscall boundaries"
         elif manifest["package"]["name"] == "arktrace-ffi":
             assert manifest["lints"]["rust"] == {"unsafe_code": "deny", "unsafe_op_in_unsafe_fn": "deny"}
             assert manifest["lints"]["clippy"]["all"] == "deny"
@@ -103,7 +108,7 @@ def main():
     assert len(data) == declaration["byteCount"] and hashlib.sha256(data).hexdigest() == declaration["sha256"]
     store_source = (ROOT / "rust/crates/arktrace-store/src/lib.rs").read_text(encoding="utf-8")
     assert f'"{sqlite_lock["sqliteVersion"]}"' in store_source and f'"{sqlite_lock["sqliteSourceID"]}"' in store_source
-    print(f"Rust workspace: {len(metadata['workspace_members'])} crates, {len(actual)} frozen third-party license expressions; unsafe confined to macOS syscall and FFI export modules")
+    print(f"Rust workspace: {len(metadata['workspace_members'])} crates, {len(actual)} frozen third-party license expressions; unsafe confined to macOS/Windows syscall and FFI export modules")
 
 
 if __name__ == "__main__":

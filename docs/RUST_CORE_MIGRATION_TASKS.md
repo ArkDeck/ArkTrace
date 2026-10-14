@@ -262,6 +262,14 @@ flowchart LR
   及三份真实 parser 的 owner 创建/登记、5 个 session 的后续 Rust 回收通过，见
   [004 owner 记录](migration-runs/AT-RUST-004-2026-10-03-owner-recovery.md)。
   v2 不交给旧 format-1 writer/purger；Ready、未绑定 creating、已失去目录身份的记录不会猜测删除。
+- 2026-10-14 Windows 文件端口：`arktrace-platform` 新增 `windows` 模块（`windows-sys 0.61.2`），
+  以相同公开类型实现 held file/directory、volume/file ID 身份（ReFS 128 位 id 拒绝）、owner-only
+  DACL 私有根、reparse 拒绝、sealed 文件/目录同卷无覆盖发布、SQLite FILESTAT handle 绑定、
+  `LockFileEx` 字节 `u64::MAX-1` 的 shared/exclusive lease（与 `contracts/` 向量及 ArkDeck purger
+  一致）、known-folder 工作区与 owner v2/3/4 ledger；sidecar 与双名原子交换在 Windows 拒绝
+  （无 `RENAME_SWAP`）。28 个 Windows 原生测试通过，见
+  [Windows 文件端口记录](migration-runs/AT-RUST-004-2026-10-14-windows-host-files.md)。
+  进程/信任/CLI 信号端口（005）与 engine/CLI 接入未完成。
 - 平台/输入：macOS APFS、Windows NTFS native tests；无设备。
 - 需求：AT-SEC-001/002/007、AT-PARSE-008、AT-CACHE-003/004/005/006。
 - 路径：`rust/crates/arktrace-platform/`；host identity/lock/promotion 测试。
