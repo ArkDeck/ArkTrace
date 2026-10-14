@@ -38,20 +38,113 @@ pub struct Invocation {
 pub enum Command {
     Help,
     Version,
-    Inspect { trace: PathBuf },
-    Processes { trace: PathBuf, query: ProcessQuery },
-    Threads { trace: PathBuf, query: ThreadQuery },
-    Query { trace: PathBuf, query: EventQuery },
+    Doctor {
+        self_test: bool,
+    },
+    Inspect {
+        trace: PathBuf,
+    },
+    Summary {
+        trace: PathBuf,
+        range: Option<TraceTimeRange>,
+    },
+    Processes {
+        trace: PathBuf,
+        query: ProcessQuery,
+    },
+    Threads {
+        trace: PathBuf,
+        query: ThreadQuery,
+    },
+    Query {
+        trace: PathBuf,
+        query: EventQuery,
+    },
 }
 impl Command {
     pub fn name(&self) -> &'static str {
         match self {
             Self::Help => "help",
             Self::Version => "version",
+            Self::Doctor { .. } => "doctor",
             Self::Inspect { .. } => "inspect",
+            Self::Summary { .. } => "summary",
             Self::Processes { .. } => "processes",
             Self::Threads { .. } => "threads",
             Self::Query { .. } => "query",
+        }
+    }
+}
+/// Swift `parseLocal`: `--` once ends option parsing, every other `--` token
+/// must be accepted by `option`, everything else is a positional operand.
+fn parse_local<'a>(
+    tail: &[&'a str],
+    mut terminated: bool,
+    mut option: impl FnMut(&str, &[&'a str], &mut usize) -> Result<bool, CommandError>,
+) -> Result<Vec<&'a str>, CommandError> {
+    let (mut positionals, mut index) = (Vec::new(), 0);
+    while index < tail.len() {
+        let token = tail[index];
+        if token == "--" && !terminated {
+            terminated = true;
+        } else if token.starts_with("--") && !terminated {
+            if !option(token, tail, &mut index)? {
+                return invalid();
+            }
+        } else {
+            positionals.push(token);
+        }
+        index += 1;
+    }
+    Ok(positionals)
+}
+fn exactly_one_trace(positionals: &[&str]) -> Result<PathBuf, CommandError> {
+    match positionals {
+        [trace] if !trace.is_empty() => Ok(PathBuf::from(trace)),
+        _ => invalid(),
+    }
+}
+/// `summary`, `doctor`: the command-local grammar of the Swift parser.
+fn parse_utility(name: &str, tail: &[&str], terminated: bool) -> Result<Command, CommandError> {
+    let mut seen = BTreeSet::new();
+    match name {
+        "doctor" => {
+            let mut self_test = false;
+            let positionals = parse_local(tail, terminated, |option, _, _| {
+                if option != "--self-test" {
+                    return Ok(false);
+                }
+                once(&mut seen, option)?;
+                self_test = true;
+                Ok(true)
+            })?;
+            if !positionals.is_empty() {
+                return invalid();
+            }
+            Ok(Command::Doctor { self_test })
+        }
+        _ => {
+            let (mut start, mut end) = (None, None);
+            let positionals = parse_local(tail, terminated, |option, args, index| {
+                let slot = match option {
+                    "--start-ns" => &mut start,
+                    "--end-ns" => &mut end,
+                    _ => return Ok(false),
+                };
+                once(&mut seen, option)?;
+                *slot = Some(number(args, index)?);
+                Ok(true)
+            })?;
+            let trace = exactly_one_trace(&positionals)?;
+            let range = match (start, end) {
+                (None, None) => None,
+                (Some(start), Some(end)) => Some(
+                    TraceTimeRange::query(start, end)
+                        .map_err(|_| CommandError::InvalidArguments)?,
+                ),
+                _ => return invalid(),
+            };
+            Ok(Command::Summary { trace, range })
         }
     }
 }
@@ -240,10 +333,19 @@ pub fn parse(arguments: &[OsString]) -> Result<Invocation, CommandError> {
             .first()
             .copied()
             .ok_or(CommandError::InvalidArguments)?;
+        let tail = &remaining[1..];
+        if ["summary", "doctor"].contains(&name) {
+            let command = parse_utility(name, tail, local_terminated)?;
+            return Ok(Invocation {
+                presentation,
+                parser_override,
+                no_cache,
+                command,
+            });
+        }
         if !["inspect", "processes", "threads", "query"].contains(&name) {
             return invalid();
         }
-        let tail = &remaining[1..];
         let (mut seen, mut positionals, mut index) = (BTreeSet::new(), Vec::new(), 0);
         let (mut process_key, mut pid, mut thread_key, mut tid, mut text) =
             (None, None, None, None, None);
@@ -905,5 +1007,67 @@ mod tests {
         ]);
         values.push("界".repeat(86).into());
         assert_eq!(parse(&values), Err(CommandError::InvalidArguments));
+    }
+    #[test]
+    fn summary_and_doctor_follow_the_swift_local_grammar() {
+        let command = |values: &[&str]| parse(&args(values)).map(|v| v.command);
+        assert_eq!(
+            command(&["--json", "--no-cache", "summary", "空 格.htrace"]),
+            Ok(Command::Summary {
+                trace: PathBuf::from("空 格.htrace"),
+                range: None
+            })
+        );
+        assert_eq!(
+            command(&["summary", "--start-ns", "5", "--end-ns", "9", "t.htrace"]),
+            Ok(Command::Summary {
+                trace: PathBuf::from("t.htrace"),
+                range: Some(TraceTimeRange::query(5, 9).unwrap())
+            })
+        );
+        assert_eq!(
+            command(&["summary", "--", "--start-ns"]),
+            Ok(Command::Summary {
+                trace: PathBuf::from("--start-ns"),
+                range: None
+            })
+        );
+        for invalid in [
+            &["summary"][..],
+            &["summary", "a", "b"],
+            &["summary", ""],
+            &["summary", "--start-ns", "5", "t"],
+            &["summary", "--start-ns", "9", "--end-ns", "5", "t"],
+            &[
+                "summary",
+                "--start-ns",
+                "1",
+                "--start-ns",
+                "1",
+                "--end-ns",
+                "2",
+                "t",
+            ],
+            &["summary", "--limit", "1", "t"],
+            &["summary", "--start-ns", "--end-ns", "2", "t"],
+            &["doctor", "trace.htrace"],
+            &["doctor", "--self-test", "--self-test"],
+            &["doctor", "--verbose"],
+            &["licenses"],
+        ] {
+            assert_eq!(
+                command(invalid),
+                Err(CommandError::InvalidArguments),
+                "{invalid:?}"
+            );
+        }
+        assert_eq!(
+            command(&["doctor", "--self-test"]),
+            Ok(Command::Doctor { self_test: true })
+        );
+        assert_eq!(
+            command(&["doctor"]),
+            Ok(Command::Doctor { self_test: false })
+        );
     }
 }

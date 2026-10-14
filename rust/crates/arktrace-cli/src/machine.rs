@@ -159,9 +159,183 @@ mod macos {
 
     pub enum DirectoryCommand {
         Inspect,
+        Summary(Option<TraceTimeRange>),
         Processes(ProcessQuery),
         Threads(ThreadQuery),
         Query(crate::EventQuery),
+    }
+    /// Swift `CLIMachineSummaryResult`: the summary without its fingerprint,
+    /// quality and truncated sections, which the envelope carries.
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct SummaryResult<'a> {
+        range: TraceTimeRange,
+        duration_ns: i64,
+        cpu_count: Option<i64>,
+        process_count: i64,
+        thread_count: i64,
+        cpu_slice_count: Option<i64>,
+        thread_state_count: Option<i64>,
+        named_slice_count: Option<i64>,
+        counter_series_count: Option<i64>,
+        event_count_by_source: Option<Vec<arktrace_contract::TraceEventSourceCount>>,
+        capabilities: &'a TraceCapabilities,
+    }
+    impl HumanResult for SummaryResult<'_> {
+        fn human(
+            &self,
+            trace: &Trace<'_>,
+            quality: &DataQuality,
+            truncation: &Truncation,
+            writer: &mut BoundedWriter<'_>,
+        ) -> std::io::Result<()> {
+            let count = |value: Option<i64>| {
+                value
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "unavailable".to_owned())
+            };
+            writeln!(
+                writer,
+                "Trace SHA-256: {}\nRange ns: [{}, {})\nDuration ns: {}\nCPUs: {}\nProcesses: {}\nThreads: {}\nCPU slices: {}\nThread states: {}\nNamed slices: {}\nCounter series: {}\nData quality: {}",
+                trace.sha256,
+                self.range.start_ns(),
+                self.range.end_ns(),
+                self.duration_ns,
+                count(self.cpu_count),
+                self.process_count,
+                self.thread_count,
+                count(self.cpu_slice_count),
+                count(self.thread_state_count),
+                count(self.named_slice_count),
+                count(self.counter_series_count),
+                if quality.status == QualityStatus::Ok {
+                    "ok"
+                } else {
+                    "warnings"
+                },
+            )?;
+            if truncation.truncated {
+                writeln!(writer, "Truncated: {}", truncation.sections.join(","))?;
+            }
+            Ok(())
+        }
+    }
+    /// Swift `TraceSummaryEngine.summarize` plus the CLI summary contract
+    /// checks: resolved range, fixed truncation section order, event sources
+    /// stably ordered by UTF-8 bytes then count, and capability nullability.
+    fn summary_result<'a>(
+        session: &'a NoCacheSession,
+        requested: Option<TraceTimeRange>,
+        limits: CommandLimits,
+        budget: &EngineBudget,
+    ) -> Result<
+        (
+            SummaryResult<'a>,
+            Vec<arktrace_contract::QualityIssue>,
+            Vec<&'static str>,
+        ),
+        CommandError,
+    > {
+        let inspection = session.inspection();
+        let duration = inspection.duration_ns;
+        let range = match requested {
+            Some(range) if range.end_ns() <= duration => range,
+            Some(_) => return Err(CommandError::InvalidArguments),
+            None => {
+                TraceTimeRange::query(0, duration).map_err(|_| CommandError::InvalidMachineValue)?
+            }
+        };
+        let facts = session
+            .summary_facts(
+                &arktrace_contract::TraceSummaryQuery {
+                    range: requested,
+                    maximum_rows_per_section: limits.max_rows,
+                    maximum_events_per_section: limits.max_events,
+                },
+                budget,
+            )
+            .map_err(CommandError::Engine)?;
+        check(budget)?;
+        let mut sections = Vec::new();
+        for (name, value) in [
+            ("cpuCount", facts.cpu_count),
+            ("processCount", Some(facts.process_count)),
+            ("threadCount", Some(facts.thread_count)),
+            ("cpuSliceCount", facts.cpu_slice_count),
+            ("threadStateCount", facts.thread_state_count),
+            ("namedSliceCount", facts.named_slice_count),
+            ("counterSeriesCount", facts.counter_series_count),
+        ] {
+            if value.is_some_and(|v| v.truncated) {
+                sections.push(name);
+            }
+        }
+        if facts
+            .event_count_by_source
+            .as_ref()
+            .is_some_and(|v| v.truncated)
+        {
+            sections.push("eventCountBySource");
+        }
+        let event_count_by_source = facts.event_count_by_source.map(|counts| {
+            let mut items = counts.items;
+            // Stable: equal sources keep repository order after count order.
+            items.sort_by(|a, b| {
+                a.source
+                    .as_bytes()
+                    .cmp(b.source.as_bytes())
+                    .then(a.count.cmp(&b.count))
+            });
+            items
+        });
+        let c = &inspection.capabilities;
+        let value = |v: Option<arktrace_contract::TraceBoundedCount>| v.map(|v| v.value);
+        let result = SummaryResult {
+            range,
+            duration_ns: range.duration_ns(),
+            cpu_count: value(facts.cpu_count),
+            process_count: facts.process_count.value,
+            thread_count: facts.thread_count.value,
+            cpu_slice_count: value(facts.cpu_slice_count),
+            thread_state_count: value(facts.thread_state_count),
+            named_slice_count: value(facts.named_slice_count),
+            counter_series_count: value(facts.counter_series_count),
+            event_count_by_source,
+            capabilities: c,
+        };
+        let counts = [
+            result.cpu_count,
+            result.cpu_slice_count,
+            result.thread_state_count,
+            result.named_slice_count,
+            result.counter_series_count,
+        ];
+        let sources = result.event_count_by_source.as_deref().unwrap_or_default();
+        if result.duration_ns < 0
+            || result.process_count < 0
+            || result.thread_count < 0
+            || counts.iter().any(|v| v.is_some_and(|v| v < 0))
+            || result.cpu_count.is_some() != c.cpu_scheduling
+            || result.cpu_slice_count.is_some() != c.cpu_scheduling
+            || result.thread_state_count.is_some() != c.thread_states
+            || result.named_slice_count.is_some() != c.named_slices
+            || result.counter_series_count.is_some() != (c.cpu_counters || c.process_counters)
+            || result.process_count > limits.max_rows as i64
+            || result.thread_count > limits.max_rows as i64
+            || counts
+                .iter()
+                .flatten()
+                .any(|v| *v > limits.max_events as i64)
+            || sources.len() > limits.max_events
+            || sources.iter().any(|v| v.count < 0 || v.source.len() > 1024)
+            || sources
+                .windows(2)
+                .any(|pair| pair[0].source.as_bytes() >= pair[1].source.as_bytes())
+        {
+            return Err(CommandError::InvalidMachineValue);
+        }
+        sections.sort_unstable();
+        Ok((result, facts.data_quality_issues, sections))
     }
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
@@ -968,6 +1142,139 @@ mod macos {
             }
         }
     }
+    #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub enum DoctorStatus {
+        Ok,
+        Warning,
+        Failed,
+    }
+    /// Swift `CLIMachineDoctorCheck` canonical identities, names and order.
+    pub const DOCTOR_CHECKS: [(&str, &str); 9] = [
+        ("tool", "ArkTrace tool"),
+        ("os", "Operating system"),
+        ("architecture", "Architecture"),
+        ("parserManifest", "Parser manifest"),
+        ("parserIdentity", "Parser identity"),
+        ("sqlite", "SQLite"),
+        ("cache", "Trace cache"),
+        ("schemaAdapter", "Schema adapter"),
+        ("selfTest", "End-to-end self-test"),
+    ];
+    #[derive(Serialize)]
+    struct DoctorCheck {
+        code: &'static str,
+        name: &'static str,
+        status: DoctorStatus,
+    }
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct DoctorResult {
+        self_test: bool,
+        checks: Vec<DoctorCheck>,
+    }
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct DoctorEnvelope<'a> {
+        schema_version: &'static str,
+        tool: &'a ToolIdentity,
+        trace: Option<()>,
+        request: Request<'a>,
+        limits: CommandLimits,
+        result: DoctorResult,
+        data_quality: DataQuality,
+        truncation: Truncation,
+        provenance: Option<()>,
+    }
+    /// The doctor document: checks in canonical order (a prefix when
+    /// `maxRows` is smaller, reported as the `checks` truncation section),
+    /// no trace, no provenance and empty quality.
+    pub fn doctor_document(
+        tool: &ToolIdentity,
+        self_test: bool,
+        statuses: &[(&'static str, DoctorStatus)],
+        limits: CommandLimits,
+        deadline: Instant,
+        cancellation: &CancellationToken,
+        format: OutputFormat,
+    ) -> Result<Vec<u8>, CommandError> {
+        limits.validate()?;
+        let mut checks = Vec::new();
+        let mut rank = 0;
+        for (code, status) in statuses {
+            let position = DOCTOR_CHECKS
+                .iter()
+                .position(|(known, _)| known == code)
+                .ok_or(CommandError::InvalidMachineValue)?;
+            if position < rank || (position == 8) != (*code == "selfTest") {
+                return Err(CommandError::InvalidMachineValue);
+            }
+            rank = position + 1;
+            checks.push(DoctorCheck {
+                code: DOCTOR_CHECKS[position].0,
+                name: DOCTOR_CHECKS[position].1,
+                status: *status,
+            });
+        }
+        let truncated = checks.len() > limits.max_rows;
+        checks.truncate(limits.max_rows);
+        let value = DoctorEnvelope {
+            schema_version: arktrace_contract::MACHINE_JSON_VERSION,
+            tool,
+            trace: None,
+            request: Request {
+                command: "doctor",
+                parameters: BTreeMap::from([("selfTest", serde_json::json!(self_test))]),
+            },
+            limits,
+            result: DoctorResult { self_test, checks },
+            data_quality: DataQuality::machine(QualityStatus::Ok, Vec::new())
+                .map_err(|_| CommandError::InvalidMachineValue)?,
+            truncation: Truncation {
+                truncated,
+                sections: if truncated {
+                    vec!["checks"]
+                } else {
+                    Vec::new()
+                },
+            },
+            provenance: None,
+        };
+        match format {
+            OutputFormat::Machine { pretty } => encode_formatted(
+                &value,
+                limits.max_output_bytes,
+                deadline,
+                cancellation,
+                pretty,
+            ),
+            OutputFormat::Human => {
+                let mut writer = BoundedWriter {
+                    bytes: Vec::new(),
+                    maximum: limits.max_output_bytes,
+                    deadline,
+                    cancellation,
+                    failure: None,
+                };
+                let written = (|| {
+                    for check in &value.result.checks {
+                        let status = match check.status {
+                            DoctorStatus::Ok => "ok",
+                            DoctorStatus::Warning => "warning",
+                            DoctorStatus::Failed => "failed",
+                        };
+                        writeln!(writer, "{}: {status}", check.name)?;
+                    }
+                    if truncated {
+                        writeln!(writer, "… checks truncated")?;
+                    }
+                    Ok::<_, std::io::Error>(())
+                })();
+                written.map_err(|_| writer.failure.unwrap_or(CommandError::InvalidMachineValue))?;
+                Ok(writer.bytes)
+            }
+        }
+    }
     /// Consumes an ephemeral session. No success bytes escape until bounded
     /// serialization and explicit checked close both finish, including failures.
     pub fn execute_no_cache(
@@ -1030,6 +1337,27 @@ mod macos {
                             index_schema_version: session.metadata().index_schema_version,
                         },
                         Vec::new(),
+                        sections,
+                    )
+                }
+                DirectoryCommand::Summary(requested) => {
+                    let (result, issues, sections) =
+                        summary_result(&session, requested, limits, budget)?;
+                    let parameters = BTreeMap::from([
+                        ("endNs", serde_json::json!(requested.map(|r| r.end_ns()))),
+                        (
+                            "startNs",
+                            serde_json::json!(requested.map(|r| r.start_ns())),
+                        ),
+                    ]);
+                    envelope(
+                        &context,
+                        Request {
+                            command: "summary",
+                            parameters,
+                        },
+                        result,
+                        issues,
                         sections,
                     )
                 }
@@ -1479,7 +1807,10 @@ mod macos {
     }
 }
 #[cfg(any(target_os = "macos", windows))]
-pub use macos::{DirectoryCommand, execute_no_cache, execute_no_cache_formatted};
+pub use macos::{
+    DOCTOR_CHECKS, DirectoryCommand, DoctorStatus, doctor_document, execute_no_cache,
+    execute_no_cache_formatted,
+};
 
 #[cfg(test)]
 mod tests {

@@ -51,6 +51,8 @@ def build_app(output, *, development, namespace):
                "maximumSourceBytes": 1024 * 1024 * 1024, "maximumDatabaseBytes": 4 * 1024 * 1024 * 1024,
                "storageNamespace": namespace}
     (contents / "Resources/ArkTraceRust/runtime.json").write_text(json.dumps(runtime, sort_keys=True) + "\n")
+    # doctor --self-test trace; the CLI pins its whole SHA-256.
+    shutil.copyfile(ROOT / "Fixtures/traces/zlib.htrace", contents / "Resources/zlib.htrace")
     info = {"CFBundleIdentifier": "com.arktrace.ArkTrace.CLI", "CFBundleName": "ArkTrace Rust CLI", "CFBundleExecutable": "arktrace",
             "CFBundlePackageType": "APPL", "CFBundleVersion": "1", "CFBundleShortVersionString": "0.1.0", "LSMinimumSystemVersion": "26.0"}
     (contents / "Info.plist").write_bytes(plistlib.dumps(info))
