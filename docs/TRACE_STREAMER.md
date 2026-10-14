@@ -113,34 +113,39 @@ ARKTRACE_TS_PYTHON=/c/<path>/python.exe scripts/build_trace_streamer_windows.sh
 7. `buildRecipeVersion` 为构建脚本、两份锁文件、两个本地补丁和两份 Windows 资源文件
    SHA-256 的稳定编码。产物未签名（manifest `signed: false`），签名后的身份须另行记录。
 
-实测范围要分清：下列 parser 结果来自同一锁定编译器、同一 sources/插件/上游补丁和
-`proto-reader-sparse-validity.patch` 的探索构建（SHA-256
-`ca4ea696fd5e17c80b7c09d311e6633b522e89f96d8e009ac975b002d168ae5a`，带链接时间戳、未含
-manifest），UTF-8 路径结果来自对它加 manifest 资源与 `--no-insert-timestamp` 的重新链接。
-提交的脚本在两个独立 work root 中已实际跑通编译器安装、锁定源码检出、全部补丁、GN/Ninja
-安装与 manifest 资源编译，随后编译阶段因主机内存不足被中止。因此**尚无 recipe 产物 SHA，
-也尚未完成两次 clean build 的逐字节可重复性比对**；`--version` 报告 `version 4.3.7`。
+**可重复性**：提交的脚本在两个互不相干的全新 work root 中串行执行两次 clean build
+（`ARKTRACE_TS_JOBS=2`，各约 28 分钟），产物逐字节相同：
 
-用锁定 schema evidence 的两个 fixture 以生产参数 `-e <db> -nm` 解析：
+| 项 | 值 |
+|---|---|
+| unsigned `trace_streamer.exe` SHA-256 | `d0e5a19762456cf25d17bac7801e38e38f183ee78ebc04aa2417a94f89afc338` |
+| `buildRecipeVersion` | `ffb9f0c0fd3478f8d9bb4b962cea795469748c69460f396dce949998d0fe7075` |
+| imports | `ADVAPI32.dll`、`KERNEL32.dll`、`msvcrt.dll` |
+| `--version` | `version 4.3.7` |
 
-- `trace_small_10.systrace`、`zlib.htrace` 导出 DB 的 SHA-256/字节数与
+两份 manifest 只有 `builtAt` 不同；`ThirdParty/TraceStreamer/windows-x86_64/manifest.json`
+为第一次构建的记录。此前工作阶段 4 并发的两次构建因主机内存不足在编译阶段被中止，
+建议 `ARKTRACE_TS_JOBS` 不超过 4 且两次串行执行。
+
+用 recipe 产物和锁定 schema evidence 的两个 fixture，以生产参数 `-e <db> -nm` 解析
+（源快照复制到普通、含空格、中文、Latin-1+emoji 四类目录各跑一次，共 8 次）：
+
+- `trace_small_10.systrace`、`zlib.htrace` 导出 DB 的 SHA-256 在 8 次运行中都与
   `Fixtures/databases/trace_streamer_4.3.7.schema-evidence.json`（macOS arm64 parser 锁定值）
   **逐字节相同**，因此 schema fingerprint（`cb34d8b6…`，91 表）、`quick_check`、trace range、
   六表 row count 与 macOS 一致，且无 `meta` 表、无绝对路径；
-- `hiprofiler_data_ability.htrace` 成功（91 表，process/thread 各 251），该 fixture 无锁定
-  macOS 数据库 evidence，未作字节比对；
-- 截断+随机字节的损坏 htrace 与空文件：进程 exit 0 并产出无 sched/callstack 数据的库，
-  与 §2“退出码只表达 0/1、成功判定不依赖退出码”的既有契约一致；能否被拒绝取决于
-  ArkTrace validation，本次未经 ArkTrace adapter 验证；
-- 只含空格的路径在加 manifest 前即可成功；
+- 探索构建另解析 `hiprofiler_data_ability.htrace` 成功（91 表，process/thread 各 251），
+  该 fixture 无锁定 macOS 数据库 evidence，未作字节比对；
+- 损坏输入：4 KiB 随机字节以 exit 1 失败且不产出 DB；探索构建对截断+随机字节的 htrace
+  与空文件则 exit 0 并产出无 sched/callstack 数据的库。两者都与 §2“成功判定不依赖退出码”
+  的既有契约一致；能否被拒绝取决于 ArkTrace validation，本次未经 ArkTrace adapter 验证；
+- 未加 UTF-8 manifest 的探索构建只有纯空格路径可成功；
 - 解析 zlib 压缩的 htrace 时，parser 会在**输入文件所在目录**创建 `ts_tmp/unzlib_file.txt`
   并留下它。生产调用必须继续只解析 session-owned staging 中的源快照（§4 Phase 1 adapter），
   不能让 parser 直接读取用户原始目录。
 
 尚未完成（AT-RUST-003 验收剩余项）：
 
-- 用提交的脚本完成两次独立 clean build，记录 recipe 产物 SHA 并证明逐字节相同（建议
-  `ARKTRACE_TS_JOBS` 不超过 4、两次串行执行），再用该产物重跑上述 fixture/路径检查；
 - 干净 Windows 11 x64 主机（未装工具链/VC++ 运行库）的运行验收：本次只在构建主机运行；
 - large fixture 的 Windows 解析与 macOS 语义比对；
 - `license-inventory.json` 尚未加入静态链接的 libstdc++/libgcc（GCC Runtime Library

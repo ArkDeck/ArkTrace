@@ -212,10 +212,10 @@ flowchart LR
 ## 5. AT-RUST-003 — Windows TraceStreamer 可复现构建与 pin
 
 - 状态：in-progress；开工/完成依赖：无，直接核对当前第三方源码/配方。
-- 进展（2026-10-14）：锁定编译器/源码/补丁的探索构建已在 Windows 11 x64 原生主机产出 PE x64
-  parser，两份 evidence fixture 的导出 DB 与 macOS 锁定值逐字节相同；提交的
-  `scripts/build_trace_streamer_windows.sh` 尚未完整跑完两次 clean build；
-  剩余项见 [TRACE_STREAMER.md §4a](TRACE_STREAMER.md#4a-windows-x64-锁定构建at-rust-003)。
+- 进展（2026-10-14）：`scripts/build_trace_streamer_windows.sh` 在 Windows 11 x64 原生主机两次
+  clean build 产出逐字节相同的 PE x64 parser（`d0e5a197…`，仅导入系统 DLL）；两份 evidence
+  fixture 在四类路径下的导出 DB 与 macOS 锁定值逐字节相同。干净主机、large、license 清单与
+  签名/分发未完成；剩余项见 [TRACE_STREAMER.md §4a](TRACE_STREAMER.md#4a-windows-x64-锁定构建at-rust-003)。
 - 平台/输入：Windows 11 x64 构建主机、上游源码、真实 Trace；无设备操作。
 - 需求：AT-SYS-005、AT-PARSE-002/003/004/010、AT-DB-*、AT-SEC-002/005、AT-CLI-011（许可清单）；
   AT-PARSE-001/007 的调用与成功判定由 006 接入。
