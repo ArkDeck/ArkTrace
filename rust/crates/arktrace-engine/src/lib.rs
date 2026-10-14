@@ -60,6 +60,20 @@ pub use no_cache::{
     recover_no_cache,
 };
 
+/// `doctor`'s SQLite check: the bundled runtime opens, is thread-safe and
+/// exposes the descriptor-bound file-stat function (Store's runtime facts).
+#[cfg(any(target_os = "macos", windows))]
+pub fn sqlite_runtime_available(
+    deadline: std::time::Instant,
+    cancellation: arktrace_platform::CancellationToken,
+) -> bool {
+    arktrace_store::sqlite_runtime_facts(&arktrace_store::ValidationBudget {
+        maximum_database_bytes: 1,
+        deadline,
+        cancellation,
+    })
+    .is_ok_and(|facts| !facts.version.is_empty())
+}
 pub fn contract_smoke() -> Result<(Option<NativeHost>, i64), ContractError> {
     let range = TraceTimeRange::query(i64::MAX - 1, i64::MAX)?;
     Ok((native_host(), range.duration_ns()))

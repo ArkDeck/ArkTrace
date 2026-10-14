@@ -10,6 +10,7 @@ layout documented in docs/CLI.md:
     <output>/resources/ArkTraceRust/runtime.json
     <output>/resources/Helpers/arktrace-host-process.exe
     <output>/resources/Helpers/trace_streamer.exe
+    <output>/resources/zlib.htrace                (doctor --self-test trace)
 
 The parser must be the locally rebuilt recipe binary whose SHA-256 equals
 ThirdParty/TraceStreamer/windows-x86_64/manifest.json; it is never committed.
@@ -25,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "ThirdParty/TraceStreamer/windows-x86_64/manifest.json"
+SELF_TEST_SHA256 = "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe"
 IDENTITY_KEYS = ["name", "reportedVersion", "binarySHA256", "upstreamRepository", "upstreamRevision",
                  "architecture", "adapterVersion", "buildRecipeVersion"]
 
@@ -62,6 +64,11 @@ def stage(output, parser, namespace, release):
     shutil.copyfile(built / "arktrace.exe", output / "arktrace.exe")
     shutil.copyfile(built / "arktrace-host-process.exe", helpers / "arktrace-host-process.exe")
     shutil.copyfile(parser, helpers / "trace_streamer.exe")
+    # doctor --self-test trace; the CLI pins its whole SHA-256.
+    self_test = ROOT / "Fixtures/traces/zlib.htrace"
+    if digest(self_test) != SELF_TEST_SHA256:
+        raise RuntimeError("self-test trace differs from the pinned fixture")
+    shutil.copyfile(self_test, output / "resources/zlib.htrace")
     identity = {key: manifest[key] for key in IDENTITY_KEYS}
     # The manifest names the file; the identity carries the logical parser name.
     identity["name"] = "trace_streamer"
