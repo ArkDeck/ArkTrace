@@ -237,9 +237,9 @@ signal 可以立即强制退出（`128 + signal`）。Machine consumer 应优先
 
 ## Windows x64（Rust CLI，迁移中）
 
-Rust `arktrace.exe` 在 Windows 11 x64 上原生运行 `--no-cache` 路径（AT-RUST-006/010）。当前已接通
-`doctor`、`inspect`、`summary`、`processes`、`threads`、`query`；`context`、`analyze`、`licenses`
-仍是 Rust CLI 的整体待办（两平台相同），见任务台账 §12。
+Rust `arktrace.exe` 在 Windows 11 x64 上原生运行 `--no-cache` 路径（AT-RUST-006/009/010）。当前已接通
+`doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`（两平台同一
+实现）；`licenses` 仍是 Rust CLI 的整体待办，见任务台账 §12。
 
 **安装布局**（相对 `arktrace.exe` 所在目录，闭合、无 PATH 搜索；AT-RUST-016 原样打包）：
 

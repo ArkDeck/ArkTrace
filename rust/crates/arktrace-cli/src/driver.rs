@@ -16,7 +16,7 @@ use std::{
 };
 
 #[cfg(any(target_os = "macos", windows))]
-const HELP: &str = "ArkTrace Rust migration CLI\n\nUsage: arktrace [options] <command> <trace>\n\nCommands: inspect, processes, threads, query\nQuery: --view cpu-slices|thread-states|slices|counters --start-ns N --end-ns N\n       --cpu N --process-key N|--pid N --thread-key N|--tid N\n       --raw-state TEXT --state running|runnable|sleeping|blocked|stopped\n       --name TEXT --name-match exact|prefix|contains\n       --min-duration-ns N --depth N --filter-id N --limit N\nOptions: --json --pretty --no-cache --timeout-ms N --max-rows N\n         --max-events N --max-output-bytes N --trace-streamer /absolute/path\n         --help --version\n\nThis migration executable currently requires --no-cache.\n";
+const HELP: &str = "ArkTrace Rust migration CLI\n\nUsage: arktrace [options] <command> <trace>\n\nCommands: doctor, inspect, summary, processes, threads, query, context, analyze\nContext: --timestamp-ns N --window-ms N | --start-ns N --end-ns N, plus query filters\nAnalyze: --kind cpu|scheduling|slices|range|hot-intervals [--start-ns N --end-ns N]\n         --process-key N|--pid N --thread-key N|--tid N --threshold-ns N --limit N\nQuery: --view cpu-slices|thread-states|slices|counters --start-ns N --end-ns N\n       --cpu N --process-key N|--pid N --thread-key N|--tid N\n       --raw-state TEXT --state running|runnable|sleeping|blocked|stopped\n       --name TEXT --name-match exact|prefix|contains\n       --min-duration-ns N --depth N --filter-id N --limit N\nOptions: --json --pretty --no-cache --timeout-ms N --max-rows N\n         --max-events N --max-output-bytes N --trace-streamer /absolute/path\n         --help --version\n\nThis migration executable currently requires --no-cache.\n";
 #[cfg(not(any(target_os = "macos", windows)))]
 const HELP: &str = "ArkTrace Rust migration CLI\n\nThe native trace runtime is not implemented on this platform yet.\nOptions: --help --version\n";
 #[derive(Serialize)]
@@ -55,6 +55,10 @@ fn request(invocation: Option<&Invocation>, args: &[OsString]) -> Request {
         Command::Doctor { self_test } => {
             BTreeMap::from([("selfTest", serde_json::json!(self_test))])
         }
+        Command::Context { time, filters, .. } => {
+            crate::event_query::context_parameters(time, filters)
+        }
+        Command::Analyze { options, .. } => crate::event_query::analyze_parameters(options),
         _ => BTreeMap::new(),
     };
     Request {
@@ -276,6 +280,20 @@ mod macos {
             }
             Command::Query { trace, query } => {
                 (trace, crate::DirectoryCommand::Query(query.clone()))
+            }
+            Command::Context {
+                trace,
+                time,
+                filters,
+            } => (
+                trace,
+                crate::DirectoryCommand::Context {
+                    time: *time,
+                    filters: filters.clone(),
+                },
+            ),
+            Command::Analyze { trace, options } => {
+                (trace, crate::DirectoryCommand::Analyze(options.clone()))
             }
             _ => return Err(PublicError::new(Code::InternalError, Stage::Request)),
         };

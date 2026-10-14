@@ -12,6 +12,12 @@ use std::{
 
 const PROGRESS_INTERVAL: i32 = 100;
 pub(crate) const DEFAULT_VM_BUDGET: u64 = 2_000_000;
+/// Event pages (CPU slices, thread states, named slices, counter samples)
+/// follow the Swift repository: they are bounded by their row limit, the
+/// decoded-bytes budget, the deadline and cancellation, with no separate
+/// SQLite VM-step cap. A filtered full-trace page (for example Runnable
+/// states) legitimately scans past two million steps.
+pub(crate) const EVENT_PAGE_VM_BUDGET: u64 = u64::MAX;
 
 #[cfg(any(target_os = "macos", windows))]
 pub(crate) struct ReadonlyOpenError {

@@ -586,6 +586,12 @@ Rust 维护消费和其余 008/012/macOS 验收继续待办，见
 ## 11. AT-RUST-009 — 共享 summary/context/analyze 与质量边界
 
 - 状态：in-progress；开工依赖：001、002；完成依赖：007。
+- 进展（2026-10-14）：`arktrace-analysis` 新增 Swift 形状的 deterministic batch（七节、long slices、
+  有效参数块、节状态与命令级行保留）与 `TraceContextBuilder` 移植（候选排序、引用目录探测、闭包、
+  按实测字节的保留二分）；scheduling 按 Swift 以 trace 能力 + 已观测 Runnable 终点证明（取代
+  `Unproven` 占位）。Store 的事件页去掉 Swift 没有的 200 万 VM-step 上限（行数、解码字节、deadline
+  与取消仍约束），全 Trace 20,000 事件页由此可答。实测见
+  [context/analyze 记录](migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。
 - 平台/输入：跨平台纯计算、真实 Store；无设备。
 - 需求：AT-AN-*、AT-CTX-001～005、AT-JSON-002、AT-QUERY-008、AT-ERR-*、AT-PERF-005/006。
 - 路径：`arktrace-analysis`、contract machine validation；对应 Swift analysis oracle。
@@ -636,8 +642,11 @@ quality/truncation 均从 Store page 传递，argument handle 不读取。新增
   字节稳定排序的 event source、capability 可空性）与 `doctor [--self-test]`（九项规范检查，首个失败
   返回 typed error，自测内置 Trace 固定 SHA）；三份 small fixture 的 summary 与 doctor 对 Swift
   oracle T0（除平台身份与 index 版本），见
-  [summary/doctor 记录](migration-runs/AT-RUST-010-2026-10-14-summary-doctor.md)。context/analyze/licenses
-  两平台仍未接通：analyze 缺 Rust 分析的 long slices 与 Swift 参数投影（009），context 未移植。
+  [summary/doctor 记录](migration-runs/AT-RUST-010-2026-10-14-summary-doctor.md)。随后 `context`
+  与 `analyze` 两平台接通（Swift 语法、请求参数、envelope truncation 节、Context 的
+  envelope-fitted 字节重试与人类输出）；ArkDeck 12 份 reviewed Swift envelope 在 Windows 上 T0，见
+  [context/analyze 记录](migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。`licenses`
+  仍未接通。
 - 平台/输入：两端 CLI、真实 parser/resources；无设备。
 - 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](CLI.md)。
 - 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。
