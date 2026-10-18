@@ -260,6 +260,8 @@ Windows 的无扩展名输入使用 parser 的内容识别，与 Artifact ID 存
 `.htrace` 与 `.systrace` 继续受支持，其他显式扩展名仍返回 `TRACE_FORMAT_UNSUPPORTED`。
 安装后的 `arktrace.exe` 完整文件名须少于 260 个 UTF-16 code units；更深的安装路径在
 调用原生签名接口前返回 typed `INTERNAL_ERROR`，不让接口的原生退出逃逸为未知失败。
+由于此时无法提供可信 executable identity，即使带 `--json`，也沿用早期失败的 path-free
+stderr 格式，stdout 为空。
 
 - 每个 image 均以 `.exe` 命名（`CreateProcessW` 会为无扩展名补 `.exe`，从而执行另一个文件）。
 - parser identity 取自 `ThirdParty/TraceStreamer/windows-x86_64/manifest.json`，`architecture` 为

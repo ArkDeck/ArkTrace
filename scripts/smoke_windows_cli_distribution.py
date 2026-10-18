@@ -171,14 +171,16 @@ def main():
 
     # WinTrust can terminate an application whose own filename exceeds the
     # legacy caller limit. The CLI must reject before trust, with a complete
-    # typed error. The launch itself uses an explicit application path.
+    # error. Before executable identity is available, the existing CLI contract
+    # uses its path-free stderr error instead of inventing a Machine tool identity.
+    # The launch itself uses an explicit application path.
     long_tree = work / ('long' * 56) / 'install'
     shutil.copytree(tree, long_tree)
     assert len(str(long_tree / 'arktrace.exe').encode('utf-16-le')) // 2 >= 260
     code, document, _, stderr = run(long_tree, 'licenses', '--json', working_directory=work)
     check('an overlong installation returns a typed error before native trust',
-          code == 9 and not stderr and document and 'result' not in document
-          and document.get('error', {}).get('code') == 'INTERNAL_ERROR', results)
+          code == 9 and document is None
+          and stderr == b'INTERNAL_ERROR: ArkTrace encountered an internal error.\n', results)
 
     moved = work / "moved again"
     if not tree.resolve().is_relative_to(work.resolve()) or moved.exists() or moved.parent.resolve() != work.resolve():

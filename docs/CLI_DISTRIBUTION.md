@@ -236,10 +236,11 @@ actual load/doctor/inspect/analyze/export integration remain separate checks.
 ### Native development qualification (2026-10-18)
 
 The host-trusted development signer verified all three staged images, and the
-signed ZIP from clean source `a189a95ce1b48fcdfc4947c694fc81a143a73e81` passed
-all 26 smoke checks: doctor/self-test, complete common/Windows/Rust attribution
+signed ZIP from clean source `6f2a510bc6da306d786531a4949738609f8d82c7` passed
+all 27 smoke checks: doctor/self-test, complete common/Windows/Rust attribution
 and output budgets, inspect/summary/CPU analysis, extensionless htrace Artifact
-IDs, an extensionless systrace, directory relocation, and resource/parser
+IDs, an extensionless systrace, directory relocation, overlong-installation
+refusal before native trust, and resource/parser
 tamper refusal. The manifest closes 110 files, including 75 Rust license texts.
 This used the CLI's existing `ARKTRACE_STORAGE_ROOT` override
 with an owner-private root; the verifier does not change existing directory ACLs.
@@ -257,9 +258,9 @@ suite assumes a Unix test environment; native focused cache tests and the CI
 planner tests pass. CI validates the selected native lanes separately.
 
 The local package's manifest SHA-256 is
-`8c8e31b910bed9ba7cabb0c6dbd6243e797860f7cf04b87d3eb53fe24fe4123d`,
+`d9098ec016da96093633e4b0fd5a6e0838cc350832d62001f56a3c4c1cd6d42f`,
 and its tree SHA-256 is
-`651e80d271f60253e018aab1866448587a537808c510dbdee0f3cb60d08af4ea`.
+`4cf67778626212ee4ae4f65a33c904cee5475166087cc813c5dfdc8f51eb90d9`.
 The signer is host-trusted development material and no timestamp was claimed.
 CI has not run for this handoff: publishing the branch awaits authorization for
 the `ArkDeck/ArkTrace` GitHub destination.
