@@ -262,5 +262,8 @@ The local package's manifest SHA-256 is
 and its tree SHA-256 is
 `4cf67778626212ee4ae4f65a33c904cee5475166087cc813c5dfdc8f51eb90d9`.
 The signer is host-trusted development material and no timestamp was claimed.
-CI has not run for this handoff: publishing the branch awaits authorization for
-the `ArkDeck/ArkTrace` GitHub destination.
+CI runs on [ArkTrace #37](https://github.com/ArkDeck/ArkTrace/pull/37). The first
+run found stale notice pins in the offline verifier, Swift license resources
+and macOS distribution verifier after the Rust attribution paragraph was added.
+All three now pin the exact 3,068-byte notice and its SHA-256; their existing
+integrity checks remain in force. Current CI results are recorded on the PR.
