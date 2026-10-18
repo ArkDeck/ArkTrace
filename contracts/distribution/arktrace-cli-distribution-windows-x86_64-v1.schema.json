@@ -1,0 +1,507 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "formatVersion",
+    "source",
+    "product",
+    "layout",
+    "tool",
+    "helper",
+    "traceStreamer",
+    "provenance",
+    "signing",
+    "integrity",
+    "attribution",
+    "upgradePolicy"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "arktrace.cli-distribution.windows-x86_64/1"
+    },
+    "formatVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "dirty"
+      ],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "build",
+        "architecture",
+        "jsonContract"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "const": "arktrace"
+        },
+        "version": {
+          "type": "string",
+          "const": "0.1.0"
+        },
+        "build": {
+          "type": "string",
+          "const": "1"
+        },
+        "architecture": {
+          "type": "string",
+          "const": "x86_64"
+        },
+        "jsonContract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "major",
+            "minor"
+          ],
+          "properties": {
+            "major": {
+              "type": "integer",
+              "const": 1
+            },
+            "minor": {
+              "type": "integer",
+              "const": 0
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executable",
+        "helperExecutable",
+        "parserExecutable",
+        "parserManifest",
+        "runtimeManifest",
+        "selfTestFixture",
+        "licenseDirectory"
+      ],
+      "properties": {
+        "executable": {
+          "type": "string",
+          "const": "arktrace.exe"
+        },
+        "helperExecutable": {
+          "type": "string",
+          "const": "resources/Helpers/arktrace-host-process.exe"
+        },
+        "parserExecutable": {
+          "type": "string",
+          "const": "resources/Helpers/trace_streamer.exe"
+        },
+        "parserManifest": {
+          "type": "string",
+          "const": "resources/TraceStreamer/manifest.json"
+        },
+        "runtimeManifest": {
+          "type": "string",
+          "const": "resources/ArkTraceRust/runtime.json"
+        },
+        "selfTestFixture": {
+          "type": "string",
+          "const": "resources/zlib.htrace"
+        },
+        "licenseDirectory": {
+          "type": "string",
+          "const": "resources/licenses"
+        }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binarySHA256",
+        "byteCount",
+        "unsignedBinarySHA256"
+      ],
+      "properties": {
+        "binarySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "unsignedBinarySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "helper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binarySHA256",
+        "byteCount",
+        "unsignedBinarySHA256"
+      ],
+      "properties": {
+        "binarySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "unsignedBinarySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "traceStreamer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unsignedBinarySHA256",
+        "binarySHA256",
+        "byteCount",
+        "manifestSHA256",
+        "manifestByteCount",
+        "reportedVersion",
+        "upstreamRevision",
+        "buildRecipeVersion"
+      ],
+      "properties": {
+        "unsignedBinarySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "binarySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "byteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "manifestSHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "manifestByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "reportedVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "upstreamRevision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "buildRecipeVersion": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parserAdapterVersion",
+        "schemaAdapterVersion",
+        "indexSchemaVersion"
+      ],
+      "properties": {
+        "parserAdapterVersion": {
+          "type": "string",
+          "const": "1"
+        },
+        "schemaAdapterVersion": {
+          "type": "string",
+          "const": "2"
+        },
+        "indexSchemaVersion": {
+          "type": "integer",
+          "const": 4
+        }
+      }
+    },
+    "signing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "publisher",
+        "timestamped"
+      ],
+      "properties": {
+        "policy": {
+          "type": "string",
+          "enum": [
+            "authenticode-publisher",
+            "development-pinned"
+          ]
+        },
+        "publisher": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "timestamped": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "policy": {
+                "const": "development-pinned"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "publisher": {
+                "type": "null"
+              },
+              "timestamped": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "publisher": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "treeDigest",
+        "treeSHA256",
+        "fileCount",
+        "executables",
+        "files"
+      ],
+      "properties": {
+        "treeDigest": {
+          "type": "string",
+          "const": "arktrace-windows-x86_64-tree/1"
+        },
+        "treeSHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "fileCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "executables": {
+          "type": "array",
+          "const": [
+            "arktrace.exe",
+            "resources/Helpers/arktrace-host-process.exe",
+            "resources/Helpers/trace_streamer.exe"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "sha256",
+              "byteCount"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "pattern": "^[A-Za-z0-9_.+-]+(?:/[A-Za-z0-9_.+-]+)*$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "byteCount": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 536870912
+              }
+            }
+          }
+        }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "license",
+        "licenseSHA256",
+        "licenseByteCount",
+        "notice",
+        "noticeSHA256",
+        "noticeByteCount",
+        "inventory",
+        "inventorySHA256",
+        "inventoryByteCount",
+        "windowsInventory",
+        "windowsInventorySHA256",
+        "windowsInventoryByteCount",
+        "licenseFileCount",
+        "windowsLicenseFileCount",
+        "selfTestFixtureSHA256",
+        "selfTestFixtureByteCount"
+      ],
+      "properties": {
+        "license": {
+          "type": "string",
+          "const": "resources/licenses/LICENSE"
+        },
+        "licenseSHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "licenseByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "notice": {
+          "type": "string",
+          "const": "resources/licenses/THIRD_PARTY_NOTICES.md"
+        },
+        "noticeSHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "noticeByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "inventory": {
+          "type": "string",
+          "const": "resources/licenses/license-inventory.json"
+        },
+        "inventorySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "inventoryByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "windowsInventory": {
+          "type": "string",
+          "const": "resources/licenses/windows-license-inventory.json"
+        },
+        "windowsInventorySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "windowsInventoryByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "licenseFileCount": {
+          "type": "integer",
+          "const": 18
+        },
+        "windowsLicenseFileCount": {
+          "type": "integer",
+          "const": 6
+        },
+        "selfTestFixtureSHA256": {
+          "type": "string",
+          "const": "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff5cfe"
+        },
+        "selfTestFixtureByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        }
+      }
+    },
+    "upgradePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "installMode",
+        "pathSelection",
+        "rollback"
+      ],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "const": "distribution-manifest+tool-parser-hashes"
+        },
+        "installMode": {
+          "type": "string",
+          "const": "versioned-directory"
+        },
+        "pathSelection": {
+          "type": "string",
+          "const": "reviewed-absolute-descriptor-only"
+        },
+        "rollback": {
+          "type": "string",
+          "const": "retain-prior-exact-directory"
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arktrace.dev/contracts/distribution/arktrace-cli-distribution-windows-x86_64-v1.schema.json",
+  "$comment": "Generated by scripts/windows_cli_distribution.py; physical tree and cross-field rules also require its verifier."
+}

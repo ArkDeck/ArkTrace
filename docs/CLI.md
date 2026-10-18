@@ -239,7 +239,10 @@ signal 可以立即强制退出（`128 + signal`）。Machine consumer 应优先
 
 Rust `arktrace.exe` 在 Windows 11 x64 上原生运行 `--no-cache` 路径（AT-RUST-006/009/010）。当前已接通
 `doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`（两平台同一
-实现）；`licenses` 仍是 Rust CLI 的整体待办，见任务台账 §12。
+实现）；Windows `licenses` 读取安装目录中的完整许可证集合，核对构建时内嵌的清单、
+notice 和产品许可，以及每份许可证的完整大小与 SHA-256。它同时报告 Windows 构建工具与
+静态 runtime 的许可。缺失、增加、修改或链接资源均拒绝；输出预算不足时返回错误，
+不返回部分归属说明。macOS Rust CLI 的 `licenses` 迁移仍待完成。
 
 **安装布局**（相对 `arktrace.exe` 所在目录，闭合、无 PATH 搜索；AT-RUST-016 原样打包）：
 
@@ -249,6 +252,7 @@ resources/ArkTraceRust/runtime.json
 resources/Helpers/arktrace-host-process.exe
 resources/Helpers/trace_streamer.exe
 resources/zlib.htrace          # doctor --self-test 内置 Trace，整文件 SHA-256 固定
+resources/licenses/           # 两份 inventory、产品许可、notice 和清单中的全部许可文本
 ```
 
 - 每个 image 均以 `.exe` 命名（`CreateProcessW` 会为无扩展名补 `.exe`，从而执行另一个文件）。

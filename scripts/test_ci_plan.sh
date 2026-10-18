@@ -278,6 +278,15 @@ lane_rust_macos=true
 lane_rust_windows=true' "$path"
 done
 
+for path in scripts/stage_windows_cli_candidate.py scripts/package_windows_cli_distribution.py scripts/verify_windows_cli_distribution.py scripts/windows_cli_distribution.py scripts/smoke_windows_cli_distribution.py scripts/test_windows_cli_distribution_contract.py ThirdParty/TraceStreamer/windows-x86_64/manifest.json ThirdParty/TraceStreamer/license-inventory.json ThirdParty/TraceStreamer/windows-license-inventory.json ThirdParty/TraceStreamer/LICENSES/zlib-Zlib.txt ThirdParty/TraceStreamer/LICENSES-windows/gcc-COPYING.RUNTIME; do
+    expect "Windows distribution inputs select its Rust consumer and contract checks" \
+        'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=false
+lane_rust_windows=true' "$path"
+done
+
 if [ "$failures" -gt 0 ]; then
     printf 'ci-plan: %d failure(s)\n' "$failures" >&2
     exit 1

@@ -131,7 +131,12 @@ while IFS= read -r path; do
             swiftpm=true
             contracts=true
             ;;
-        scripts/*|ThirdParty/*|LICENSE|THIRD_PARTY_NOTICES.md)
+        ThirdParty/TraceStreamer/windows-x86_64/manifest.json|ThirdParty/TraceStreamer/license-inventory.json|ThirdParty/TraceStreamer/windows-license-inventory.json|ThirdParty/TraceStreamer/LICENSES/*|ThirdParty/TraceStreamer/LICENSES-windows/*|LICENSE|THIRD_PARTY_NOTICES.md|scripts/stage_windows_cli_candidate.py|scripts/package_windows_cli_distribution.py|scripts/verify_windows_cli_distribution.py|scripts/windows_cli_distribution.py|scripts/smoke_windows_cli_distribution.py|scripts/test_windows_cli_distribution_contract.py)
+            # Embedded by, or packaged with, the Windows Rust CLI.
+            rust_windows=true
+            contracts=true
+            ;;
+        scripts/*|ThirdParty/*)
             contracts=true
             ;;
         docs/PHASE_6_SCENARIO.md)

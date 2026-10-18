@@ -11,6 +11,7 @@ pub use event_query::EventQuery;
 pub use machine::{CommandError, CommandLimits, OutputFormat, ToolIdentity};
 #[cfg(any(target_os = "macos", windows))]
 pub use machine::{
-    DOCTOR_CHECKS, DirectoryCommand, DoctorStatus, doctor_document, execute_no_cache,
-    execute_no_cache_formatted,
+    DOCTOR_CHECKS, DirectoryCommand, DoctorStatus, LicenseFileValue, LicensesValue,
+    WindowsLicenseValue, doctor_document, execute_no_cache, execute_no_cache_formatted,
+    licenses_document,
 };

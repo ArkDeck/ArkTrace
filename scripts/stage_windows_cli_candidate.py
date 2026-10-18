@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from windows_cli_distribution import stage_attribution
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "ThirdParty/TraceStreamer/windows-x86_64/manifest.json"
@@ -69,6 +70,7 @@ def stage(output, parser, namespace, release):
     if digest(self_test) != SELF_TEST_SHA256:
         raise RuntimeError("self-test trace differs from the pinned fixture")
     shutil.copyfile(self_test, output / "resources/zlib.htrace")
+    stage_attribution(ROOT, output / 'resources/licenses')
     identity = {key: manifest[key] for key in IDENTITY_KEYS}
     # The manifest names the file; the identity carries the logical parser name.
     identity["name"] = "trace_streamer"
