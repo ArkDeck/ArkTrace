@@ -1,5 +1,7 @@
 use crate::public_error::{Code, PublicError, Stage, host_error};
 use arktrace_contract::TraceParserIdentity;
+#[cfg(windows)]
+use arktrace_platform::HeldDirectory;
 use arktrace_platform::{
     CodeTrustPolicy, HeldFile, IoBudget, MappedExecutable, OwnedDirectory, ProcessError,
     VerifiedExecutable,
@@ -168,6 +170,372 @@ fn bundle(image: &MappedExecutable) -> Result<(PathBuf, PathBuf), PublicError> {
         .verify_bundle(root, &policy("arktrace")?)
         .map_err(|_| unavailable())?;
     Ok((root.to_owned(), root.to_owned()))
+}
+/// One verified attribution file of the installed `licenses` set.
+#[cfg(windows)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct LicenseFile {
+    pub owner: String,
+    pub license_expression: String,
+    pub resource: String,
+    pub sha256: String,
+    pub byte_count: u64,
+}
+/// The installed, verified Windows license set: the shared TraceStreamer
+/// inventory (as the Swift CLI reports it) plus the Windows-only build tools
+/// and statically linked runtime (`windows-license-inventory.json`).
+#[cfg(windows)]
+pub(crate) struct Licenses {
+    pub product_license_bytes: u64,
+    pub component_count: usize,
+    pub build_tool_count: usize,
+    pub files: Vec<LicenseFile>,
+    pub windows_build_tool_count: usize,
+    pub windows_static_runtime_count: usize,
+    pub windows_files: Vec<LicenseFile>,
+    pub rust_dependency_count: usize,
+    pub rust_files: Vec<LicenseFile>,
+}
+/// Reviewed attribution bytes, embedded at build time; the installed copies
+/// under `resources/licenses` must equal them exactly.
+#[cfg(windows)]
+mod attribution {
+    pub const DIRECTORY: &str = "resources/licenses";
+    pub const PRODUCT_LICENSE: &[u8] = include_bytes!("../../../../LICENSE");
+    pub const NOTICE: &[u8] = include_bytes!("../../../../THIRD_PARTY_NOTICES.md");
+    pub const INVENTORY: &[u8] =
+        include_bytes!("../../../../ThirdParty/TraceStreamer/license-inventory.json");
+    pub const WINDOWS_INVENTORY: &[u8] =
+        include_bytes!("../../../../ThirdParty/TraceStreamer/windows-license-inventory.json");
+    pub const RUST_INVENTORY: &[u8] = include_bytes!("../../../dependency-licenses.json");
+    pub const TOP_LEVEL: [&str; 7] = [
+        "LICENSE",
+        "LICENSES",
+        "LICENSES-windows",
+        "THIRD_PARTY_NOTICES.md",
+        "license-inventory.json",
+        "windows-license-inventory.json",
+        "rust",
+    ];
+}
+/// Every `(owner, expression, path, sha, bytes)` an inventory section names,
+/// including additional files. Paths must be flat names under `prefix/`.
+#[cfg(windows)]
+fn inventory_records(
+    entries: &[serde_json::Value],
+    prefix: &str,
+) -> Result<Vec<LicenseFile>, PublicError> {
+    let text = |value: &serde_json::Value, key: &str| {
+        value
+            .get(key)
+            .and_then(serde_json::Value::as_str)
+            .map(str::to_owned)
+            .ok_or_else(unavailable)
+    };
+    let count = |value: &serde_json::Value, key: &str| {
+        value
+            .get(key)
+            .and_then(serde_json::Value::as_u64)
+            .filter(|n| *n > 0)
+            .ok_or_else(unavailable)
+    };
+    let mut records = Vec::new();
+    for entry in entries {
+        let owner = text(entry, "name")?;
+        let license_expression = text(entry, "licenseExpression")?;
+        records.push(LicenseFile {
+            owner: owner.clone(),
+            license_expression: license_expression.clone(),
+            resource: text(entry, "licenseFile")?,
+            sha256: text(entry, "licenseSHA256")?,
+            byte_count: count(entry, "licenseByteCount")?,
+        });
+        for extra in entry
+            .get("additionalLicenseFiles")
+            .and_then(serde_json::Value::as_array)
+            .map(Vec::as_slice)
+            .unwrap_or_default()
+        {
+            records.push(LicenseFile {
+                owner: owner.clone(),
+                license_expression: license_expression.clone(),
+                resource: text(extra, "path")?,
+                sha256: text(extra, "sha256")?,
+                byte_count: count(extra, "byteCount")?,
+            });
+        }
+    }
+    let flat = |resource: &str| {
+        resource
+            .strip_prefix(prefix)
+            .and_then(|rest| rest.strip_prefix('/'))
+            .is_some_and(|name| {
+                !name.is_empty()
+                    && name != "."
+                    && name != ".."
+                    && name
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_.+-".contains(&b))
+            })
+    };
+    // One entry per (owner, file): a text may serve several owners (the GPL
+    // text of both the GCC build tool and its runtime), but then with one identity.
+    let mut owners = std::collections::BTreeSet::new();
+    let mut identities = std::collections::BTreeMap::new();
+    for record in &records {
+        let key = record.resource.to_ascii_lowercase();
+        let identity = (record.sha256.clone(), record.byte_count);
+        if !flat(&record.resource)
+            || !owners.insert((record.owner.clone(), key.clone()))
+            || identities
+                .insert(key, identity.clone())
+                .is_some_and(|known| known != identity)
+        {
+            return Err(unavailable());
+        }
+    }
+    records.sort_by(|a, b| {
+        (a.resource.as_bytes(), a.owner.as_bytes())
+            .cmp(&(b.resource.as_bytes(), b.owner.as_bytes()))
+    });
+    Ok(records)
+}
+/// Exact membership from the held directory's independent enumeration handle.
+/// File and directory opens below also enforce their required native type.
+#[cfg(windows)]
+fn exact_names(
+    directory: &HeldDirectory,
+    expected: &[&str],
+    budget: &IoBudget,
+) -> Result<(), PublicError> {
+    let mut actual = Vec::new();
+    for name in directory
+        .child_names(budget, 256)
+        .map_err(|e| host_error(e, unavailable()))?
+    {
+        actual.push(name.to_str().ok_or_else(unavailable)?.to_ascii_lowercase());
+    }
+    let mut wanted: Vec<_> = expected.iter().map(|v| v.to_ascii_lowercase()).collect();
+    actual.sort();
+    wanted.sort();
+    if actual == wanted {
+        Ok(())
+    } else {
+        Err(unavailable())
+    }
+}
+#[cfg(windows)]
+fn verified_file(
+    directory: &HeldDirectory,
+    name: &str,
+    record: &LicenseFile,
+    budget: &IoBudget,
+) -> Result<(), PublicError> {
+    let file = directory.open_file(name).map_err(|_| unavailable())?;
+    let facts = file
+        .facts(&IoBudget {
+            maximum_bytes: 1024 * 1024,
+            ..budget.clone()
+        })
+        .map_err(|e| host_error(e, unavailable()))?;
+    if facts.sha256 != record.sha256 || facts.byte_count != record.byte_count {
+        return Err(unavailable());
+    }
+    file.verify().map_err(|_| unavailable())
+}
+#[cfg(windows)]
+fn exact_bytes(
+    directory: &HeldDirectory,
+    name: &str,
+    expected: &[u8],
+    budget: &IoBudget,
+) -> Result<(), PublicError> {
+    let file = directory.open_file(name).map_err(|_| unavailable())?;
+    let bytes = file
+        .read_bounded(&IoBudget {
+            maximum_bytes: 1024 * 1024,
+            ..budget.clone()
+        })
+        .map_err(|e| host_error(e, unavailable()))?;
+    if bytes != expected {
+        return Err(unavailable());
+    }
+    file.verify().map_err(|_| unavailable())
+}
+/// The reviewed Cargo dependency inventory keeps its original paths and bytes.
+/// Its nested directories are closed just like the flat TraceStreamer inventories.
+#[cfg(windows)]
+fn rust_licenses(base: &Path, budget: &IoBudget) -> Result<(usize, Vec<LicenseFile>), PublicError> {
+    let inventory: serde_json::Value =
+        serde_json::from_slice(attribution::RUST_INVENTORY).map_err(|_| unavailable())?;
+    let dependencies = inventory["dependencies"]
+        .as_array()
+        .ok_or_else(unavailable)?;
+    let mut files = Vec::new();
+    for dependency in dependencies {
+        let text = |key| dependency[key].as_str().ok_or_else(unavailable);
+        let owner = format!("{} {}", text("name")?, text("version")?);
+        let expression = text("license")?;
+        for record in dependency["licenseTexts"]
+            .as_array()
+            .ok_or_else(unavailable)?
+        {
+            let text = |key| {
+                record[key]
+                    .as_str()
+                    .map(str::to_owned)
+                    .ok_or_else(unavailable)
+            };
+            files.push(LicenseFile {
+                owner: owner.clone(),
+                license_expression: expression.to_owned(),
+                resource: text("path")?,
+                sha256: text("sha256")?,
+                byte_count: record["byteCount"].as_u64().ok_or_else(unavailable)?,
+            });
+        }
+    }
+    let mut members: std::collections::BTreeMap<String, std::collections::BTreeSet<String>> =
+        std::collections::BTreeMap::new();
+    for path in std::iter::once("rust/dependency-licenses.json")
+        .chain(files.iter().map(|file| file.resource.as_str()))
+    {
+        let components: Vec<_> = path.split('/').collect();
+        if components.first() != Some(&"rust")
+            || components.iter().any(|component| {
+                component.is_empty()
+                    || *component == "."
+                    || *component == ".."
+                    || !component
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_.+-".contains(&b))
+            })
+        {
+            return Err(unavailable());
+        }
+        for index in 1..components.len() {
+            members
+                .entry(components[..index].join("/"))
+                .or_default()
+                .insert(components[index].to_owned());
+        }
+    }
+    let mut held = Vec::new();
+    for (relative, names) in members {
+        let directory =
+            HeldDirectory::open_code_directory(&base.join(&relative)).map_err(|_| unavailable())?;
+        exact_names(
+            &directory,
+            &names.iter().map(String::as_str).collect::<Vec<_>>(),
+            budget,
+        )?;
+        if relative == "rust" {
+            exact_bytes(
+                &directory,
+                "dependency-licenses.json",
+                attribution::RUST_INVENTORY,
+                budget,
+            )?;
+        }
+        for file in &files {
+            if let Some((parent, name)) = file.resource.rsplit_once('/')
+                && parent == relative
+            {
+                verified_file(&directory, name, file, budget)?;
+            }
+        }
+        held.push(directory);
+    }
+    for directory in held {
+        directory.revalidate().map_err(|_| unavailable())?;
+    }
+    files.sort_by(|a, b| a.resource.as_bytes().cmp(b.resource.as_bytes()));
+    Ok((dependencies.len(), files))
+}
+/// `licenses`: the installed attribution set beside `arktrace.exe`, each file
+/// equal to the reviewed bytes or inventory identity, in an exact closure.
+#[cfg(windows)]
+pub(crate) fn licenses(
+    image: &MappedExecutable,
+    budget: &IoBudget,
+) -> Result<Licenses, PublicError> {
+    let (root, _) = bundle(image)?;
+    let base = root.join(attribution::DIRECTORY);
+    let held_base = HeldDirectory::open_code_directory(&base).map_err(|_| unavailable())?;
+    exact_names(&held_base, &attribution::TOP_LEVEL, budget)?;
+    for (name, bytes) in [
+        ("LICENSE", attribution::PRODUCT_LICENSE),
+        ("THIRD_PARTY_NOTICES.md", attribution::NOTICE),
+        ("license-inventory.json", attribution::INVENTORY),
+        (
+            "windows-license-inventory.json",
+            attribution::WINDOWS_INVENTORY,
+        ),
+    ] {
+        exact_bytes(&held_base, name, bytes, budget)?;
+    }
+    let inventory: serde_json::Value =
+        serde_json::from_slice(attribution::INVENTORY).map_err(|_| unavailable())?;
+    let windows: serde_json::Value =
+        serde_json::from_slice(attribution::WINDOWS_INVENTORY).map_err(|_| unavailable())?;
+    let array = |value: &serde_json::Value, key: &str| {
+        value
+            .get(key)
+            .and_then(serde_json::Value::as_array)
+            .cloned()
+            .ok_or_else(unavailable)
+    };
+    let components = array(&inventory, "components")?;
+    let build_tools = array(&inventory, "buildTools")?;
+    let windows_tools = array(&windows, "buildTools")?;
+    let static_runtime = array(&windows, "staticRuntime")?;
+    let files = inventory_records(
+        &[components.clone(), build_tools.clone()].concat(),
+        "LICENSES",
+    )?;
+    let windows_files = inventory_records(
+        &[windows_tools.clone(), static_runtime.clone()].concat(),
+        "LICENSES-windows",
+    )?;
+    for (directory, records) in [("LICENSES", &files), ("LICENSES-windows", &windows_files)] {
+        let mut names: Vec<&str> = records
+            .iter()
+            .map(|r| &r.resource[directory.len() + 1..])
+            .collect();
+        names.dedup();
+        let held_directory =
+            HeldDirectory::open_code_directory(&base.join(directory)).map_err(|_| unavailable())?;
+        exact_names(&held_directory, &names, budget)?;
+        let mut verified = std::collections::BTreeSet::new();
+        for record in records.iter() {
+            if verified.insert(record.resource.as_str()) {
+                verified_file(
+                    &held_directory,
+                    &record.resource[directory.len() + 1..],
+                    record,
+                    budget,
+                )?;
+            }
+        }
+        held_directory.revalidate().map_err(|_| unavailable())?;
+    }
+    let (rust_dependency_count, rust_files) = rust_licenses(&base, budget)?;
+    held_base.revalidate().map_err(|_| unavailable())?;
+    image
+        .verify_bundle(&root, &policy("arktrace")?)
+        .map_err(|_| unavailable())?;
+    budget.check().map_err(|e| host_error(e, unavailable()))?;
+    Ok(Licenses {
+        product_license_bytes: attribution::PRODUCT_LICENSE.len() as u64,
+        component_count: components.len(),
+        build_tool_count: build_tools.len(),
+        files,
+        windows_build_tool_count: windows_tools.len(),
+        windows_static_runtime_count: static_runtime.len(),
+        windows_files,
+        rust_dependency_count,
+        rust_files,
+    })
 }
 pub(crate) fn load(
     image: &MappedExecutable,

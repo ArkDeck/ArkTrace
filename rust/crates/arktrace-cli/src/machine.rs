@@ -1293,6 +1293,132 @@ mod macos {
             }
         }
     }
+    /// One verified attribution file (Swift `CLIMachineLicenseFile`).
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct LicenseFileValue {
+        pub byte_count: u64,
+        pub license_expression: String,
+        pub owner: String,
+        pub resource: String,
+        pub sha256: String,
+    }
+    /// Windows additions: the build tools and the statically linked runtime
+    /// of `windows-license-inventory.json`.
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct WindowsLicenseValue {
+        pub build_tool_count: usize,
+        pub inventory: &'static str,
+        pub license_files: Vec<LicenseFileValue>,
+        pub static_runtime_count: usize,
+    }
+    /// Frozen Cargo dependency closure, including build and platform dependencies.
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct RustLicenseValue {
+        pub dependency_count: usize,
+        pub inventory: &'static str,
+        pub license_files: Vec<LicenseFileValue>,
+    }
+    /// Swift `CLIMachineLicensesResult`'s members, plus the native runtime inventories.
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct LicensesValue {
+        pub build_tool_count: usize,
+        pub component_count: usize,
+        pub inventory: &'static str,
+        pub license_files: Vec<LicenseFileValue>,
+        pub notice: &'static str,
+        pub product_license: &'static str,
+        pub product_license_bytes: u64,
+        pub rust: RustLicenseValue,
+        pub windows: WindowsLicenseValue,
+    }
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct LicensesEnvelope<'a> {
+        schema_version: &'static str,
+        tool: &'a ToolIdentity,
+        trace: Option<()>,
+        request: Request<'a>,
+        limits: CommandLimits,
+        result: &'a LicensesValue,
+        data_quality: DataQuality,
+        truncation: Truncation,
+        provenance: Option<()>,
+    }
+    /// The licenses document: no trace, no provenance, empty quality, never
+    /// truncated (every file of the closed set is reported or the command fails).
+    pub fn licenses_document(
+        tool: &ToolIdentity,
+        value: &LicensesValue,
+        limits: CommandLimits,
+        deadline: Instant,
+        cancellation: &CancellationToken,
+        format: OutputFormat,
+    ) -> Result<Vec<u8>, CommandError> {
+        limits.validate()?;
+        let envelope = LicensesEnvelope {
+            schema_version: arktrace_contract::MACHINE_JSON_VERSION,
+            tool,
+            trace: None,
+            request: Request {
+                command: "licenses",
+                parameters: BTreeMap::new(),
+            },
+            limits,
+            result: value,
+            data_quality: DataQuality::machine(QualityStatus::Ok, Vec::new())
+                .map_err(|_| CommandError::InvalidMachineValue)?,
+            truncation: Truncation {
+                truncated: false,
+                sections: Vec::new(),
+            },
+            provenance: None,
+        };
+        match format {
+            OutputFormat::Machine { pretty } => encode_formatted(
+                &envelope,
+                limits.max_output_bytes,
+                deadline,
+                cancellation,
+                pretty,
+            ),
+            OutputFormat::Human => {
+                let mut writer = BoundedWriter {
+                    bytes: Vec::new(),
+                    maximum: limits.max_output_bytes,
+                    deadline,
+                    cancellation,
+                    failure: None,
+                };
+                let written = (|| {
+                    writeln!(
+                        writer,
+                        "ArkTrace: MIT ({}, {} bytes)",
+                        value.product_license, value.product_license_bytes
+                    )?;
+                    writeln!(writer, "Notice: {}", value.notice)?;
+                    for file in value
+                        .license_files
+                        .iter()
+                        .chain(&value.windows.license_files)
+                        .chain(&value.rust.license_files)
+                    {
+                        writeln!(
+                            writer,
+                            "{}: {} ({})",
+                            file.owner, file.license_expression, file.resource
+                        )?;
+                    }
+                    Ok::<_, std::io::Error>(())
+                })();
+                written.map_err(|_| writer.failure.unwrap_or(CommandError::InvalidMachineValue))?;
+                Ok(writer.bytes)
+            }
+        }
+    }
     /// Consumes an ephemeral session. No success bytes escape until bounded
     /// serialization and explicit checked close both finish, including failures.
     pub fn execute_no_cache(
@@ -2145,6 +2271,111 @@ mod macos {
     mod tests {
         use super::*;
         use std::time::Duration;
+        fn license_value() -> LicensesValue {
+            LicensesValue {
+                build_tool_count: 0,
+                component_count: 1,
+                inventory: "license-inventory.json",
+                license_files: vec![LicenseFileValue {
+                    byte_count: 12,
+                    license_expression: "MIT".to_owned(),
+                    owner: "Example".to_owned(),
+                    resource: "LICENSES/example-MIT.txt".to_owned(),
+                    sha256: "ab".repeat(32),
+                }],
+                notice: "THIRD_PARTY_NOTICES.md",
+                product_license: "LICENSE",
+                product_license_bytes: 100,
+                rust: RustLicenseValue {
+                    dependency_count: 0,
+                    inventory: "rust/dependency-licenses.json",
+                    license_files: Vec::new(),
+                },
+                windows: WindowsLicenseValue {
+                    build_tool_count: 0,
+                    inventory: "windows-license-inventory.json",
+                    license_files: Vec::new(),
+                    static_runtime_count: 0,
+                },
+            }
+        }
+        fn license_limits() -> CommandLimits {
+            CommandLimits {
+                timeout_ms: 30000,
+                max_rows: 1,
+                max_events: 1,
+                max_output_bytes: 8388608,
+            }
+        }
+        #[test]
+        fn licenses_have_no_trace_provenance_or_partial_attribution() {
+            let bytes = licenses_document(
+                &ToolIdentity::from_executable_sha256("ab".repeat(32)).unwrap(),
+                &license_value(),
+                license_limits(),
+                Instant::now() + Duration::from_secs(1),
+                &CancellationToken::default(),
+                OutputFormat::Machine { pretty: false },
+            )
+            .unwrap();
+            let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+            assert!(value["trace"].is_null());
+            assert!(value["provenance"].is_null());
+            assert_eq!(value["request"]["command"], "licenses");
+            assert_eq!(
+                value["truncation"],
+                serde_json::json!({"truncated": false, "sections": []})
+            );
+            assert_eq!(value["result"]["licenseFiles"][0]["owner"], "Example");
+        }
+        #[test]
+        fn licenses_cancel_timeout_and_output_limit_return_no_partial_document() {
+            let tool = ToolIdentity::from_executable_sha256("ab".repeat(32)).unwrap();
+            let token = CancellationToken::default();
+            token.cancel();
+            assert_eq!(
+                licenses_document(
+                    &tool,
+                    &license_value(),
+                    license_limits(),
+                    Instant::now() + Duration::from_secs(1),
+                    &token,
+                    OutputFormat::Machine { pretty: false },
+                ),
+                Err(CommandError::Cancelled)
+            );
+            let token = CancellationToken::default();
+            assert_eq!(
+                licenses_document(
+                    &tool,
+                    &license_value(),
+                    license_limits(),
+                    Instant::now(),
+                    &token,
+                    OutputFormat::Machine { pretty: false },
+                ),
+                Err(CommandError::DeadlineExceeded)
+            );
+            let mut value = license_value();
+            value.license_files[0].owner = "Example".repeat(1000);
+            let limits = CommandLimits {
+                max_output_bytes: 1024,
+                ..license_limits()
+            };
+            for format in [OutputFormat::Machine { pretty: false }, OutputFormat::Human] {
+                assert_eq!(
+                    licenses_document(
+                        &tool,
+                        &value,
+                        limits,
+                        Instant::now() + Duration::from_secs(1),
+                        &token,
+                        format,
+                    ),
+                    Err(CommandError::OutputLimitExceeded)
+                );
+            }
+        }
         #[test]
         fn terminal_controls_are_visible_and_expansion_stays_bounded_on_scalar_boundaries() {
             assert_eq!(
@@ -2493,8 +2724,9 @@ mod macos {
 }
 #[cfg(any(target_os = "macos", windows))]
 pub use macos::{
-    DOCTOR_CHECKS, DirectoryCommand, DoctorStatus, doctor_document, execute_no_cache,
-    execute_no_cache_formatted,
+    DOCTOR_CHECKS, DirectoryCommand, DoctorStatus, LicenseFileValue, LicensesValue,
+    RustLicenseValue, WindowsLicenseValue, doctor_document, execute_no_cache,
+    execute_no_cache_formatted, licenses_document,
 };
 
 #[cfg(test)]

@@ -9,8 +9,10 @@ static NEXT: AtomicU64 = AtomicU64::new(0);
 pub(super) struct Fixture(pub(super) PathBuf, pub(super) HeldDirectory);
 impl Fixture {
     pub(super) fn new() -> Self {
-        let parent =
-            HeldDirectory::open_trusted_temporary_parent(&known_local_app_data().unwrap()).unwrap();
+        let test_parent = std::env::var_os("ARKTRACE_TEST_STORAGE_ROOT")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| known_local_app_data().unwrap());
+        let parent = HeldDirectory::open_trusted_temporary_parent(&test_parent).unwrap();
         let name = component(OsStr::new(&format!(
             "arktrace-windows-{}-{}",
             std::process::id(),

@@ -239,7 +239,11 @@ signal 可以立即强制退出（`128 + signal`）。Machine consumer 应优先
 
 Rust `arktrace.exe` 在 Windows 11 x64 上原生运行 `--no-cache` 路径（AT-RUST-006/009/010）。当前已接通
 `doctor`、`inspect`、`summary`、`processes`、`threads`、`query`、`context`、`analyze`（两平台同一
-实现）；`licenses` 仍是 Rust CLI 的整体待办，见任务台账 §12。
+实现）；Windows `licenses` 读取安装目录中的完整许可证集合，核对构建时内嵌的清单、
+notice 和产品许可，以及每份许可证的完整大小与 SHA-256。它同时报告 Windows 构建工具与
+静态 runtime 的许可，并以 `rust` 返回冻结的 37 项 Cargo 依赖与 75 份许可文本。
+缺失、增加、修改或链接资源均拒绝；输出预算不足时返回错误，
+不返回部分归属说明。macOS Rust CLI 的 `licenses` 迁移仍待完成。
 
 **安装布局**（相对 `arktrace.exe` 所在目录，闭合、无 PATH 搜索；AT-RUST-016 原样打包）：
 
@@ -249,7 +253,15 @@ resources/ArkTraceRust/runtime.json
 resources/Helpers/arktrace-host-process.exe
 resources/Helpers/trace_streamer.exe
 resources/zlib.htrace          # doctor --self-test 内置 Trace，整文件 SHA-256 固定
+resources/licenses/           # 三份 inventory、产品许可、notice 和全部许可文本（Rust 保留嵌套路径）
 ```
+
+Windows 的无扩展名输入使用 parser 的内容识别，与 Artifact ID 存储路径兼容；
+`.htrace` 与 `.systrace` 继续受支持，其他显式扩展名仍返回 `TRACE_FORMAT_UNSUPPORTED`。
+安装后的 `arktrace.exe` 完整文件名须少于 260 个 UTF-16 code units；更深的安装路径在
+调用原生签名接口前返回 typed `INTERNAL_ERROR`，不让接口的原生退出逃逸为未知失败。
+由于此时无法提供可信 executable identity，即使带 `--json`，也沿用早期失败的 path-free
+stderr 格式，stdout 为空。
 
 - 每个 image 均以 `.exe` 命名（`CreateProcessW` 会为无扩展名补 `.exe`，从而执行另一个文件）。
 - parser identity 取自 `ThirdParty/TraceStreamer/windows-x86_64/manifest.json`，`architecture` 为

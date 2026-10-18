@@ -42,6 +42,8 @@ pub enum Command {
     Doctor {
         self_test: bool,
     },
+    /// Windows only: the installed attribution set (macOS keeps the Swift CLI).
+    Licenses,
     Inspect {
         trace: PathBuf,
     },
@@ -87,6 +89,7 @@ impl Command {
             Self::Help => "help",
             Self::Version => "version",
             Self::Doctor { .. } => "doctor",
+            Self::Licenses => "licenses",
             Self::Inspect { .. } => "inspect",
             Self::Summary { .. } => "summary",
             Self::Processes { .. } => "processes",
@@ -350,6 +353,12 @@ fn parse_utility(name: &str, tail: &[&str], terminated: bool) -> Result<Command,
             }
             Ok(Command::Doctor { self_test })
         }
+        "licenses" if cfg!(windows) => {
+            if !parse_local(tail, terminated, |_, _, _| Ok(false))?.is_empty() {
+                return invalid();
+            }
+            Ok(Command::Licenses)
+        }
         _ => {
             let (mut start, mut end) = (None, None);
             let positionals = parse_local(tail, terminated, |option, args, index| {
@@ -561,7 +570,9 @@ pub fn parse(arguments: &[OsString]) -> Result<Invocation, CommandError> {
             .copied()
             .ok_or(CommandError::InvalidArguments)?;
         let tail = &remaining[1..];
-        if ["summary", "doctor", "context", "analyze"].contains(&name) {
+        if ["summary", "doctor", "context", "analyze"].contains(&name)
+            || (cfg!(windows) && name == "licenses")
+        {
             let command = match name {
                 "context" => parse_context(tail, local_terminated)?,
                 "analyze" => parse_analyze(tail, local_terminated, presentation.limits)?,
@@ -1284,7 +1295,8 @@ mod tests {
             &["doctor", "trace.htrace"],
             &["doctor", "--self-test", "--self-test"],
             &["doctor", "--verbose"],
-            &["licenses"],
+            &["licenses", "trace.htrace"],
+            &["licenses", "--self-test"],
         ] {
             assert_eq!(
                 command(invalid),
@@ -1296,6 +1308,19 @@ mod tests {
             command(&["doctor", "--self-test"]),
             Ok(Command::Doctor { self_test: true })
         );
+        // `licenses` is a Windows Rust command; macOS keeps the Swift CLI's.
+        assert_eq!(
+            command(&["licenses"]),
+            if cfg!(windows) {
+                Ok(Command::Licenses)
+            } else {
+                Err(CommandError::InvalidArguments)
+            }
+        );
+        if cfg!(windows) {
+            assert_eq!(command(&["--json", "licenses"]), Ok(Command::Licenses));
+            assert_eq!(command(&["licenses", "--"]), Ok(Command::Licenses));
+        }
     }
     #[test]
     fn context_and_analyze_follow_the_swift_grammar_and_arkdeck_argv() {

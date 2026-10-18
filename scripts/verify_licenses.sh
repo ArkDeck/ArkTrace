@@ -38,10 +38,10 @@ grep -F 'ArkTrace itself is licensed under the MIT License' "$notice" >/dev/null
 if grep -F 'ArkTrace itself is licensed under Apache-2.0' "$notice" >/dev/null; then
     fail "third-party notice misstates ArkTrace as Apache-2.0"
 fi
-[ "$(file_bytes "$notice")" = 2621 ] \
+[ "$(file_bytes "$notice")" = 3068 ] \
     || fail "third-party notice byte count drifted"
 [ "$(shasum -a 256 "$notice" | awk '{print $1}')" = \
-    0298f7e4ecb1c1b8ffb0bc120aa0ddc1bce93b4baf9983172a047fde3c516dda ] \
+    b76b946f5f7cecaac31fc61f8e6710c4febf8a60e990f70cb5def8a375eea784 ] \
     || fail "third-party notice SHA drifted"
 
 jq -e '

@@ -21,7 +21,11 @@ import uuid
 
 STATE = '.arktrace-cargo-owner.json'
 SOURCE_PATHS = ('rust', 'contracts', 'ThirdParty/TraceStreamer/macx/manifest.json',
-                'ThirdParty/TraceStreamer/windows-x86_64/manifest.json')
+                'ThirdParty/TraceStreamer/windows-x86_64/manifest.json',
+                # The Windows `licenses` command embeds the reviewed attribution bytes.
+                'LICENSE', 'THIRD_PARTY_NOTICES.md',
+                'ThirdParty/TraceStreamer/license-inventory.json',
+                'ThirdParty/TraceStreamer/windows-license-inventory.json')
 EVIDENCE_KINDS = {'source', 'manifest', 'lockfile', 'dependencyRecord', 'binary', 'log'}
 
 

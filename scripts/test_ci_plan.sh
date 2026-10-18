@@ -269,12 +269,21 @@ lane_rust_macos=true
 lane_rust_windows=false' "$path"
 done
 
-for path in scripts/generate_ffi_bindings.py scripts/ffi_test_support.py scripts/test_ffi_contract.py scripts/verify_migration_contracts.py scripts/test_migration_contracts.py; do
+for path in scripts/generate_ffi_bindings.py scripts/ffi_test_support.py scripts/test_ffi_contract.py scripts/verify_migration_contracts.py scripts/test_migration_contracts.py rust/dependency-licenses.json rust/licenses/serde-1.0.229/LICENSE-MIT; do
     expect "shared ABI and oracle gates select both Rust host consumers" \
         'lane_swiftpm=false
 lane_app=false
 lane_contracts=true
 lane_rust_macos=true
+lane_rust_windows=true' "$path"
+done
+
+for path in scripts/stage_windows_cli_candidate.py scripts/package_windows_cli_distribution.py scripts/verify_windows_cli_distribution.py scripts/windows_cli_distribution.py scripts/smoke_windows_cli_distribution.py scripts/test_windows_cli_distribution_contract.py ThirdParty/TraceStreamer/windows-x86_64/manifest.json ThirdParty/TraceStreamer/license-inventory.json ThirdParty/TraceStreamer/windows-license-inventory.json ThirdParty/TraceStreamer/LICENSES/zlib-Zlib.txt ThirdParty/TraceStreamer/LICENSES-windows/gcc-COPYING.RUNTIME; do
+    expect "Windows distribution inputs select its Rust consumer and contract checks" \
+        'lane_swiftpm=false
+lane_app=false
+lane_contracts=true
+lane_rust_macos=false
 lane_rust_windows=true' "$path"
 done
 

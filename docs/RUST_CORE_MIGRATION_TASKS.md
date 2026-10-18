@@ -88,7 +88,7 @@
 | 013 | macOS App 接入 Rust SDK | 012 接口冻结 | 008、011、012 | in-progress | L |
 | 014 | Windows 原生 Viewer | 002、012 接口冻结 | 003、008、011、012 | planned | L |
 | 015 | 独立 GUI Capture 共享实现 | 002、004、005 | 004、005、013、014 | planned | L |
-| 016 | 两平台 CLI/SDK/App 发行契约与打包 | 002；Windows recipe 待 003 | 003、005、010、012；GUI 包加 013–015 | planned | L |
+| 016 | 两平台 CLI/SDK/App 发行契约与打包 | 002；Windows recipe 待 003 | 003、005、010、012；GUI 包加 013–015 | in-progress | L |
 | 017 | ArkDeck macOS CLI + SDK 消费接入 | 010、012 接口冻结 | 010、012、013、016 的 macOS 产物 | planned | L |
 | 018 | ArkDeck Windows 离线消费接入 | 010、016 Windows schema 冻结 | 003、010、016 的 Windows CLI 产物 | planned | L |
 | 019 | 差分/故障/性能/资源验证基础设施 | 001、002 | 001、002；具体能力随实现加入 | planned | L |
@@ -645,8 +645,9 @@ quality/truncation 均从 Store page 传递，argument handle 不读取。新增
   [summary/doctor 记录](migration-runs/AT-RUST-010-2026-10-14-summary-doctor.md)。随后 `context`
   与 `analyze` 两平台接通（Swift 语法、请求参数、envelope truncation 节、Context 的
   envelope-fitted 字节重试与人类输出）；ArkDeck 12 份 reviewed Swift envelope 在 Windows 上 T0，见
-  [context/analyze 记录](migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。`licenses`
-  仍未接通。
+  [context/analyze 记录](migration-runs/AT-RUST-009-010-2026-10-14-context-analyze.md)。Windows
+  `licenses` 已接通完整安装归属集合、Windows 静态 runtime 清单和 bounded human/JSON 输出；
+  取消、超时或编码预算不足均不返回部分文档。macOS Rust `licenses` 仍待接通。
 - 平台/输入：两端 CLI、真实 parser/resources；无设备。
 - 需求：AT-CLI-*、AT-JSON-001～008、AT-CTX-005、AT-ERR-*、AT-SEC-*、AT-AD-006/007、[CLI.md](CLI.md)。
 - 路径：`arktrace-cli`、machine/argv corpora、resource locator、signal tests、CLI 文档。
@@ -964,7 +965,10 @@ repository/App 接线与完整 macOS 验收仍待办，见
 
 ## 18. AT-RUST-016 — 发行格式、签名与可部署产物
 
-- 状态：planned；开工依赖：002；Windows recipe 来自 003。
+- 状态：in-progress；开工依赖：002；Windows recipe 来自 003。
+- Windows headless 增量：闭合 ZIP/目录 schema、平台 tree digest、unsigned/signed identity、
+  publisher 信任、PE/DLL 检查、完整许可资源、校验器与原生 smoke 已实现。当前开发签名及
+  原生检查的实际结果见交付记录；生产 publisher、干净主机与 GUI/SDK 发行仍单独验收。
 - 完成依赖：CLI/SDK 需要 003、005、010、012；对应 GUI 包加 013–015。
 - 平台/输入：两端构建/开发证书；生产签名/notary/publisher 是 release 输入。
 - 需求：AT-SEC-*、AT-CLI-001/011、AT-PARSE-002、SPECIFICATION §23.5、现行 CLI/App distribution 边界、

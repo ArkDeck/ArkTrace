@@ -325,6 +325,7 @@ mod macos {
         {
             Some("htrace") => SourceFormat::Htrace,
             Some("systrace") => SourceFormat::Systrace,
+            None => SourceFormat::Automatic,
             _ => {
                 return Err(PublicError::new(
                     Code::TraceFormatUnsupported,
@@ -505,6 +506,58 @@ mod macos {
         )
         .map_err(command_error)
     }
+    /// Windows `licenses`: the verified installed attribution set; any drift,
+    /// extra or missing file refuses the whole command.
+    #[cfg(windows)]
+    fn licenses(
+        invocation: &Invocation,
+        image: &MappedExecutable,
+        tool: &ToolIdentity,
+        budget: &IoBudget,
+    ) -> Result<Vec<u8>, PublicError> {
+        let set = crate::resources::licenses(image, budget)?;
+        let value = |files: Vec<crate::resources::LicenseFile>| {
+            files
+                .into_iter()
+                .map(|file| crate::LicenseFileValue {
+                    byte_count: file.byte_count,
+                    license_expression: file.license_expression,
+                    owner: file.owner,
+                    resource: file.resource,
+                    sha256: file.sha256,
+                })
+                .collect()
+        };
+        let document = crate::LicensesValue {
+            build_tool_count: set.build_tool_count,
+            component_count: set.component_count,
+            inventory: "license-inventory.json",
+            license_files: value(set.files),
+            notice: "THIRD_PARTY_NOTICES.md",
+            product_license: "LICENSE",
+            product_license_bytes: set.product_license_bytes,
+            rust: crate::RustLicenseValue {
+                dependency_count: set.rust_dependency_count,
+                inventory: "rust/dependency-licenses.json",
+                license_files: value(set.rust_files),
+            },
+            windows: crate::WindowsLicenseValue {
+                build_tool_count: set.windows_build_tool_count,
+                inventory: "windows-license-inventory.json",
+                license_files: value(set.windows_files),
+                static_runtime_count: set.windows_static_runtime_count,
+            },
+        };
+        crate::licenses_document(
+            tool,
+            &document,
+            invocation.presentation.limits,
+            budget.deadline,
+            &budget.cancellation,
+            output_format(invocation),
+        )
+        .map_err(command_error)
+    }
     /// The bundled reviewed trace (whole SHA-256 pinned) parsed and
     /// summarized end to end; the summary's schema must be the session's.
     fn self_test_summary(
@@ -581,7 +634,14 @@ mod macos {
                 host_error(e, PublicError::new(Code::InternalError, Stage::Request))
             })?;
             if invocation.command == Command::Help {
-                return Ok(HELP.as_bytes().to_vec());
+                let help = HELP.as_bytes().to_vec();
+                #[cfg(windows)]
+                let help = [
+                    help,
+                    b"\nWindows attribution: arktrace licenses [--json|--pretty]\n".to_vec(),
+                ]
+                .concat();
+                return Ok(help);
             }
             if invocation.command == Command::Version {
                 return Ok(format!("arktrace {}\n", env!("CARGO_PKG_VERSION")).into_bytes());
@@ -597,6 +657,15 @@ mod macos {
                     tool.as_ref().unwrap(),
                     &budget,
                     self_test,
+                );
+            }
+            #[cfg(windows)]
+            if invocation.command == Command::Licenses {
+                return licenses(
+                    invocation,
+                    image.as_ref().unwrap(),
+                    tool.as_ref().unwrap(),
+                    &budget,
                 );
             }
             execute(

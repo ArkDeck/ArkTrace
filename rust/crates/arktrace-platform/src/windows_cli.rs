@@ -2,8 +2,8 @@
 //! boundary: the Windows reading of `macos_cli.rs`.
 //!
 //! * The mapped image is named by the loader (`GetModuleFileNameW`) and
-//!   identified by the file object actually mapped at the module base
-//!   (`GetMappedFileNameW`, which follows a rename), never by a path alone.
+//!   identified by a kernel comparison with its image file object
+//!   (`ProcessImageFileMapping`), never by a cached mapped-image pathname.
 //! * The first Ctrl+C, Ctrl+Break or close/logoff/shutdown event cancels the
 //!   invocation's token (the macOS first SIGINT/SIGTERM); a second one ends
 //!   the process at once with 128 + the POSIX signal number (130 for
@@ -13,19 +13,15 @@
 //!   (`CancelSynchronousIo`) on cancellation or deadline; the exact committed
 //!   byte count is reported, as on macOS.
 use super::{
-    FileIdentity, HeldFile, HostError, IoBudget, SourceFacts, Stat, from_io,
+    FileIdentity, FileSnapshot, HeldFile, HostError, IoBudget, SourceFacts, from_io,
     process::ProcessError,
     trust::{self, CodeTrustPolicy, TrustVerdict},
 };
 use crate::{CancellationToken, HostOperation};
 use std::{
     ffi::OsString,
-    fs::File,
     marker::PhantomData,
-    os::windows::{
-        ffi::OsStringExt,
-        io::{AsRawHandle, FromRawHandle},
-    },
+    os::windows::{ffi::OsStringExt, io::AsRawHandle},
     path::{Component, Path, PathBuf},
     ptr::null_mut,
     rc::Rc,
@@ -36,29 +32,31 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
+use windows_sys::Wdk::Storage::FileSystem::FILE_OPEN;
+use windows_sys::Wdk::System::Threading::{NtQueryInformationProcess, ProcessImageFileMapping};
 use windows_sys::Win32::Foundation::{ERROR_INVALID_HANDLE, INVALID_HANDLE_VALUE};
-use windows_sys::Win32::Storage::FileSystem::{
-    CreateFileW, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_READ_ATTRIBUTES,
-    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING, WriteFile,
-};
+use windows_sys::Win32::Storage::FileSystem::{FILE_EXECUTE, WriteFile};
 use windows_sys::Win32::System::Console::{
     CTRL_BREAK_EVENT, CTRL_C_EVENT, CTRL_CLOSE_EVENT, CTRL_LOGOFF_EVENT, CTRL_SHUTDOWN_EVENT,
     GetStdHandle, STD_ERROR_HANDLE, STD_HANDLE, STD_OUTPUT_HANDLE, SetConsoleCtrlHandler,
 };
 use windows_sys::Win32::System::IO::CancelSynchronousIo;
-use windows_sys::Win32::System::LibraryLoader::{GetModuleFileNameW, GetModuleHandleW};
-use windows_sys::Win32::System::ProcessStatus::GetMappedFileNameW;
+use windows_sys::Win32::System::LibraryLoader::GetModuleFileNameW;
 use windows_sys::Win32::System::Threading::{GetCurrentProcess, TerminateProcess};
 use windows_sys::core::BOOL;
 
 const LONG_PATH: usize = 32_768;
+// The native trust provider on Windows can fail-fast when the *calling image*
+// has a MAX_PATH-length filename, even with a held hFile and extended subject
+// path. Refuse an unsupported installation before invoking that provider.
+const MAXIMUM_CALLER_PATH: usize = 260;
 
 fn module_path() -> Result<PathBuf, HostError> {
     let mut buffer = vec![0_u16; LONG_PATH];
     // SAFETY: the main module of this process and a bounded output buffer.
     let length = unsafe { GetModuleFileNameW(null_mut(), buffer.as_mut_ptr(), buffer.len() as u32) }
         as usize;
-    if length == 0 || length >= buffer.len() {
+    if length == 0 || length >= buffer.len() || length >= MAXIMUM_CALLER_PATH {
         return Err(HostError::InvalidEvidence);
     }
     let path = PathBuf::from(OsString::from_wide(&buffer[..length]));
@@ -68,54 +66,49 @@ fn module_path() -> Result<PathBuf, HostError> {
     Ok(path)
 }
 
-/// The identity of the file object mapped at the main module's base.
-fn mapped_identity() -> Result<FileIdentity, HostError> {
-    // SAFETY: a null name answers this process's main module handle (its
-    // base address), never freed.
-    let base = unsafe { GetModuleHandleW(std::ptr::null()) };
-    if base.is_null() {
-        return Err(HostError::InvalidEvidence);
+/// Bind the held file to the current process's actual executable file object.
+/// The memory manager can retain an old pathname after an installation directory
+/// is renamed. ProcessImageFileMapping instead takes an INPUT file handle and
+/// succeeds only for the process image's file, including after such a rename.
+/// Unsupported or unsuccessful queries fail closed; there is no path fallback.
+fn mapped_identity(held: &HeldFile) -> Result<FileIdentity, HostError> {
+    held.verify()?;
+    // The native comparison requires FILE_EXECUTE. Reopen through the held
+    // parent without following links and bind the complete snapshot, so this
+    // extra access never substitutes a different file for the held image.
+    let executable = super::nt_open(
+        &held.parent.0.file,
+        &super::utf16(&held.name)?,
+        super::READ | FILE_EXECUTE,
+        FILE_OPEN,
+        super::Kind::NonDirectory,
+        None,
+        HostOperation::Open,
+    )?;
+    if FileSnapshot::of(&executable)? != held.snapshot() {
+        return Err(HostError::IdentityMismatch);
     }
-    let mut device = vec![0_u16; LONG_PATH];
-    // SAFETY: the current-process pseudo handle, a mapped address inside
-    // this process and a bounded output buffer.
-    let length = unsafe {
-        GetMappedFileNameW(
+    let mut handle = executable.as_raw_handle();
+    // SAFETY: class 44 consumes a live file HANDLE in a pointer-sized input
+    // buffer. The current-process pseudo handle and file remain valid through
+    // the synchronous call; neither handle is transferred or closed by it.
+    let status = unsafe {
+        NtQueryInformationProcess(
             GetCurrentProcess(),
-            base.cast_const(),
-            device.as_mut_ptr(),
-            device.len() as u32,
-        )
-    } as usize;
-    if length == 0 || length >= device.len() || device[0] != u16::from(b'\\') {
-        return Err(HostError::InvalidEvidence);
-    }
-    let mut global: Vec<u16> = r"\\?\GLOBALROOT".encode_utf16().collect();
-    global.extend_from_slice(&device[..length]);
-    global.push(0);
-    // SAFETY: NUL-terminated device path; attribute-only access; the handle
-    // is owned below; a reparse point is opened as itself.
-    let handle = unsafe {
-        CreateFileW(
-            global.as_ptr(),
-            FILE_READ_ATTRIBUTES,
-            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            std::ptr::null(),
-            OPEN_EXISTING,
-            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
+            ProcessImageFileMapping,
+            std::ptr::from_mut(&mut handle).cast(),
+            std::mem::size_of_val(&handle) as u32,
             null_mut(),
         )
     };
-    if handle.is_null() || handle == INVALID_HANDLE_VALUE {
-        return Err(super::os_error(HostOperation::Open));
+    if status != 0 {
+        return Err(HostError::IdentityMismatch);
     }
-    // SAFETY: a fresh handle owned exactly once.
-    let file = unsafe { File::from_raw_handle(handle) };
-    let stat = Stat::of(&file)?;
-    if !stat.is_file() {
-        return Err(HostError::InvalidEvidence);
+    held.verify()?;
+    if FileSnapshot::of(&executable)? != held.snapshot() {
+        return Err(HostError::IdentityMismatch);
     }
-    stat.identity()
+    Ok(held.snapshot().identity)
 }
 
 pub struct MappedExecutable {
@@ -126,11 +119,8 @@ pub struct MappedExecutable {
 impl MappedExecutable {
     pub fn current() -> Result<Self, HostError> {
         let path = module_path()?;
-        let identity = mapped_identity()?;
         let file = HeldFile::open_explicit_source(&path)?;
-        if file.snapshot().identity != identity {
-            return Err(HostError::IdentityMismatch);
-        }
+        let identity = mapped_identity(&file)?;
         Ok(Self {
             path,
             file,
@@ -148,7 +138,7 @@ impl MappedExecutable {
     }
     fn verify(&self) -> Result<(), HostError> {
         self.file.verify()?;
-        if mapped_identity()? != self.identity {
+        if mapped_identity(&self.file)? != self.identity {
             return Err(HostError::IdentityMismatch);
         }
         Ok(())
@@ -446,5 +436,24 @@ mod tests {
             })
             .unwrap();
         assert_eq!(facts.sha256.len(), 64);
+    }
+
+    #[test]
+    fn identical_bytes_in_another_file_are_not_the_running_image() {
+        let image = MappedExecutable::current().unwrap();
+        let fixture = super::super::tests::Fixture::new();
+        let budget = IoBudget {
+            maximum_bytes: 1 << 30,
+            deadline: Instant::now() + Duration::from_secs(60),
+            cancellation: CancellationToken::default(),
+        };
+        let (copy, facts) = fixture
+            .1
+            .copy_snapshot(&image.file, "copy.exe", true, &budget)
+            .unwrap();
+        assert_eq!(facts, image.facts(&budget).unwrap());
+        assert_ne!(copy.snapshot().identity, image.identity);
+        assert_eq!(mapped_identity(&copy), Err(HostError::IdentityMismatch));
+        image.verify().unwrap();
     }
 }
