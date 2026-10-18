@@ -46,13 +46,17 @@ use windows_sys::Win32::System::Threading::{GetCurrentProcess, TerminateProcess}
 use windows_sys::core::BOOL;
 
 const LONG_PATH: usize = 32_768;
+// The native trust provider on Windows can fail-fast when the *calling image*
+// has a MAX_PATH-length filename, even with a held hFile and extended subject
+// path. Refuse an unsupported installation before invoking that provider.
+const MAXIMUM_CALLER_PATH: usize = 260;
 
 fn module_path() -> Result<PathBuf, HostError> {
     let mut buffer = vec![0_u16; LONG_PATH];
     // SAFETY: the main module of this process and a bounded output buffer.
     let length = unsafe { GetModuleFileNameW(null_mut(), buffer.as_mut_ptr(), buffer.len() as u32) }
         as usize;
-    if length == 0 || length >= buffer.len() {
+    if length == 0 || length >= buffer.len() || length >= MAXIMUM_CALLER_PATH {
         return Err(HostError::InvalidEvidence);
     }
     let path = PathBuf::from(OsString::from_wide(&buffer[..length]));

@@ -40,10 +40,12 @@ CAPTURES = None
 CAPTURE_NUMBER = 0
 
 
-def run(tree, *args, timeout=180):
+def run(tree, *args, timeout=180, working_directory=None):
     global CAPTURE_NUMBER
-    result = subprocess.run([str(tree / "arktrace.exe"), *args], stdin=subprocess.DEVNULL,
-                            capture_output=True, env=ENVIRONMENT, cwd=str(tree.parent), timeout=timeout)
+    executable = str(tree / 'arktrace.exe')
+    result = subprocess.run([executable, *args], executable=executable, stdin=subprocess.DEVNULL,
+                            capture_output=True, env=ENVIRONMENT,
+                            cwd=str(working_directory or tree.parent), timeout=timeout)
     CAPTURE_NUMBER += 1
     name = f'{CAPTURE_NUMBER:03d}-{args[0].lstrip("-")}'
     (CAPTURES / (name + '.stdout')).write_bytes(result.stdout)
@@ -166,6 +168,17 @@ def main():
     code, document, _, _ = run(tree, *summary[:-1], str(unsupported))
     check('an explicit unsupported suffix still refuses', code != 0 and document
           and document.get('error', {}).get('code') == 'TRACE_FORMAT_UNSUPPORTED', results)
+
+    # WinTrust can terminate an application whose own filename exceeds the
+    # legacy caller limit. The CLI must reject before trust, with a complete
+    # typed error. The launch itself uses an explicit application path.
+    long_tree = work / ('long' * 56) / 'install'
+    shutil.copytree(tree, long_tree)
+    assert len(str(long_tree / 'arktrace.exe').encode('utf-16-le')) // 2 >= 260
+    code, document, _, stderr = run(long_tree, 'licenses', '--json', working_directory=work)
+    check('an overlong installation returns a typed error before native trust',
+          code == 9 and not stderr and document and 'result' not in document
+          and document.get('error', {}).get('code') == 'INTERNAL_ERROR', results)
 
     moved = work / "moved again"
     if not tree.resolve().is_relative_to(work.resolve()) or moved.exists() or moved.parent.resolve() != work.resolve():
