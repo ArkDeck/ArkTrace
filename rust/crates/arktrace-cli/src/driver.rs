@@ -325,6 +325,7 @@ mod macos {
         {
             Some("htrace") => SourceFormat::Htrace,
             Some("systrace") => SourceFormat::Systrace,
+            None => SourceFormat::Automatic,
             _ => {
                 return Err(PublicError::new(
                     Code::TraceFormatUnsupported,
@@ -535,6 +536,11 @@ mod macos {
             notice: "THIRD_PARTY_NOTICES.md",
             product_license: "LICENSE",
             product_license_bytes: set.product_license_bytes,
+            rust: crate::RustLicenseValue {
+                dependency_count: set.rust_dependency_count,
+                inventory: "rust/dependency-licenses.json",
+                license_files: value(set.rust_files),
+            },
             windows: crate::WindowsLicenseValue {
                 build_tool_count: set.windows_build_tool_count,
                 inventory: "windows-license-inventory.json",

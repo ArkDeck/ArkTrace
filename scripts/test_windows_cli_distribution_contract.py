@@ -61,16 +61,7 @@ class WindowsDistributionContractTests(unittest.TestCase):
         parser['imports'] = []
         self.write(layout['parserManifest'], encoded(parser))
         self.write(layout['selfTestFixture'], (ROOT / 'Fixtures/traces/zlib.htrace').read_bytes())
-        for name, source in (
-            ('LICENSE', ROOT / 'LICENSE'),
-            ('THIRD_PARTY_NOTICES.md', ROOT / 'THIRD_PARTY_NOTICES.md'),
-            ('license-inventory.json', ROOT / 'ThirdParty/TraceStreamer/license-inventory.json'),
-            ('windows-license-inventory.json', ROOT / 'ThirdParty/TraceStreamer/windows-license-inventory.json'),
-        ):
-            self.write('resources/licenses/' + name, source.read_bytes())
-        for directory in ('LICENSES', 'LICENSES-windows'):
-            for source in (ROOT / 'ThirdParty/TraceStreamer' / directory).iterdir():
-                self.write('resources/licenses/' + directory + '/' + source.name, source.read_bytes())
+        contract.stage_attribution(ROOT, self.tree / 'resources/licenses')
         image_sha = hashlib.sha256(pe_image()).hexdigest()
         identity_keys = ('name', 'reportedVersion', 'binarySHA256', 'upstreamRepository', 'upstreamRevision',
                          'architecture', 'adapterVersion', 'buildRecipeVersion')
@@ -118,12 +109,14 @@ class WindowsDistributionContractTests(unittest.TestCase):
         count, digest = facts[contract.LAYOUT['parserManifest']]
         manifest['traceStreamer'].update(manifestByteCount=count, manifestSHA256=digest)
         for name, filename in (('license', 'LICENSE'), ('notice', 'THIRD_PARTY_NOTICES.md'),
-                               ('inventory', 'license-inventory.json'), ('windowsInventory', 'windows-license-inventory.json')):
+                               ('inventory', 'license-inventory.json'), ('windowsInventory', 'windows-license-inventory.json'),
+                               ('rustInventory', 'rust/dependency-licenses.json')):
             relative = 'resources/licenses/' + filename
             count, digest = facts[relative]
             manifest['attribution'].update({name: relative, name + 'SHA256': digest, name + 'ByteCount': count})
         count, digest = facts[contract.LAYOUT['selfTestFixture']]
         manifest['attribution'].update(licenseFileCount=18, windowsLicenseFileCount=6,
+                                       rustDependencyCount=37, rustLicenseFileCount=75,
                                        selfTestFixtureSHA256=digest, selfTestFixtureByteCount=count)
         files = [{'path': path, 'byteCount': count, 'sha256': digest} for path, (count, digest) in sorted(facts.items())]
         manifest['integrity'].update(fileCount=len(files), files=files,
@@ -192,6 +185,36 @@ class WindowsDistributionContractTests(unittest.TestCase):
         (self.tree / 'unused').mkdir()
         with self.assertRaises(contract.ContractError):
             self.verify()
+
+    def test_rust_license_cannot_be_replaced_with_a_resealed_inventory(self):
+        relative = next(iter(contract.RUST_LICENSES))
+        path = self.tree / 'resources/licenses' / relative
+        changed = path.read_bytes() + b'\n'
+        path.write_bytes(changed)
+        inventory = copy.deepcopy(json.loads(contract.RUST_INVENTORY_BYTES))
+        for dependency in inventory['dependencies']:
+            for record in dependency['licenseTexts']:
+                if record['path'] == relative:
+                    record.update(byteCount=len(changed), sha256=hashlib.sha256(changed).hexdigest())
+        self.write('resources/licenses/rust/dependency-licenses.json', encoded(inventory))
+        self.reseal()
+        with self.assertRaises(contract.ContractError):
+            self.verify()
+
+    def test_rust_inventory_bytes_and_directory_closure_are_fixed(self):
+        path = self.tree / 'resources/licenses/rust/dependency-licenses.json'
+        path.write_bytes(contract.RUST_INVENTORY_BYTES + b'\n')
+        self.reseal()
+        with self.assertRaises(contract.ContractError):
+            self.verify()
+        path.write_bytes(contract.RUST_INVENTORY_BYTES)
+        self.reseal()
+        for relative in ('rust/extra', 'rust/licenses/extra'):
+            extra = self.tree / 'resources/licenses' / relative
+            extra.mkdir()
+            with self.subTest(relative=relative), self.assertRaises(contract.ContractError):
+                self.verify()
+            extra.rmdir()
 
     def test_resealed_wrong_platform_image_is_refused(self):
         for content in (b'not a PE image', pe_image(machine=0x14c)):

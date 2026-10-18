@@ -45,6 +45,13 @@ SELF_TEST_SHA256 = "eb196eeb30c6b959c23d5e18d159ec946ba664ee8d9bc6f1acc32947b4ff
 STORAGE_NAMESPACE = "com.arktrace.ArkTrace.CLI"
 LICENSE_FILE_COUNT = 18
 WINDOWS_LICENSE_FILE_COUNT = 6
+ROOT = Path(__file__).resolve().parent.parent
+RUST_INVENTORY_BYTES = (ROOT / 'rust/dependency-licenses.json').read_bytes()
+RUST_DEPENDENCIES = json.loads(RUST_INVENTORY_BYTES)['dependencies']
+RUST_LICENSES = {entry['path']: (entry['byteCount'], entry['sha256'])
+                 for dependency in RUST_DEPENDENCIES for entry in dependency['licenseTexts']}
+RUST_DEPENDENCY_COUNT = len(RUST_DEPENDENCIES)
+RUST_LICENSE_FILE_COUNT = len(RUST_LICENSES)
 MAXIMUM_FILES = 256
 MAXIMUM_FILE_BYTES = 512 * 1024 * 1024
 MAXIMUM_MANIFEST_BYTES = 64 * 1024
@@ -56,6 +63,9 @@ DIRECTORIES = {
     'resources/ArkTraceRust', 'resources/licenses',
     'resources/licenses/LICENSES', 'resources/licenses/LICENSES-windows',
 }
+for _relative in ['rust/dependency-licenses.json', *RUST_LICENSES]:
+    DIRECTORIES.update('resources/licenses/' + parent.as_posix()
+                       for parent in Path(_relative).parents if parent.as_posix() != '.')
 SYSTEM_DLLS = {
     'advapi32.dll', 'bcrypt.dll', 'bcryptprimitives.dll', 'cabinet.dll',
     'combase.dll', 'comctl32.dll', 'comdlg32.dll', 'crypt32.dll', 'dbghelp.dll', 'gdi32.dll',
@@ -91,6 +101,8 @@ KEYS = {
                     "windowsLicenseFileCount", "selfTestFixtureSHA256", "selfTestFixtureByteCount"],
     "upgradePolicy": list(UPGRADE_POLICY),
 }
+KEYS['attribution'] += ['rustInventory', 'rustInventorySHA256', 'rustInventoryByteCount',
+                        'rustDependencyCount', 'rustLicenseFileCount']
 
 
 class ContractError(Exception):
@@ -118,7 +130,9 @@ def stage_attribution(source_root, destination):
         'THIRD_PARTY_NOTICES.md': source_root / 'THIRD_PARTY_NOTICES.md',
         'license-inventory.json': source_root / 'ThirdParty/TraceStreamer/license-inventory.json',
         'windows-license-inventory.json': source_root / 'ThirdParty/TraceStreamer/windows-license-inventory.json',
+        'rust/dependency-licenses.json': source_root / 'rust/dependency-licenses.json',
     }
+    sources.update({relative: source_root / relative for relative in RUST_LICENSES})
     for directory in ('LICENSES', 'LICENSES-windows'):
         for path in (source_root / 'ThirdParty/TraceStreamer' / directory).iterdir():
             sources[directory + '/' + path.name] = path
@@ -374,16 +388,21 @@ def validate_manifest(manifest):
             "file order")
     attribution = manifest["attribution"]
     _keys(attribution, KEYS["attribution"], "attribution")
-    for name in ("license", "notice", "inventory", "windowsInventory"):
+    for name in ("license", "notice", "inventory", "windowsInventory", "rustInventory"):
         _sha(attribution[name + "SHA256"], name)
         _count(attribution[name + "ByteCount"], name)
     require(attribution["license"] == "resources/licenses/LICENSE"
             and attribution["notice"] == "resources/licenses/THIRD_PARTY_NOTICES.md"
             and attribution["inventory"] == "resources/licenses/license-inventory.json"
-            and attribution["windowsInventory"] == "resources/licenses/windows-license-inventory.json",
+            and attribution["windowsInventory"] == "resources/licenses/windows-license-inventory.json"
+            and attribution['rustInventory'] == 'resources/licenses/rust/dependency-licenses.json',
             "attribution paths")
     require(attribution["licenseFileCount"] == LICENSE_FILE_COUNT
-            and attribution["windowsLicenseFileCount"] == WINDOWS_LICENSE_FILE_COUNT, "license file counts")
+            and attribution["windowsLicenseFileCount"] == WINDOWS_LICENSE_FILE_COUNT
+            and type(attribution['rustDependencyCount']) is int
+            and attribution['rustDependencyCount'] == RUST_DEPENDENCY_COUNT
+            and type(attribution['rustLicenseFileCount']) is int
+            and attribution['rustLicenseFileCount'] == RUST_LICENSE_FILE_COUNT, "license file counts")
     require(attribution["selfTestFixtureSHA256"] == SELF_TEST_SHA256, "self-test fixture")
     _count(attribution["selfTestFixtureByteCount"], "self-test fixture")
     _keys(manifest["upgradePolicy"], KEYS["upgradePolicy"], "upgradePolicy")
@@ -407,7 +426,7 @@ def cross_check(manifest, facts):
     require(facts.get(layout["parserManifest"]) == (parser["manifestByteCount"], parser["manifestSHA256"]),
             "parser manifest identity")
     attribution = manifest["attribution"]
-    for name in ("license", "notice", "inventory", "windowsInventory"):
+    for name in ("license", "notice", "inventory", "windowsInventory", "rustInventory"):
         require(facts.get(attribution[name]) == (attribution[name + "ByteCount"], attribution[name + "SHA256"]),
                 name + " identity")
     require(facts.get(layout["selfTestFixture"]) ==
@@ -416,8 +435,11 @@ def cross_check(manifest, facts):
     windows = [p for p in facts if p.startswith("resources/licenses/LICENSES-windows/")]
     require(len(licenses) == attribution["licenseFileCount"]
             and len(windows) == attribution["windowsLicenseFileCount"], "license closure")
+    rust = {'resources/licenses/' + relative: identity for relative, identity in RUST_LICENSES.items()}
+    require(all(facts.get(relative) == identity for relative, identity in rust.items()), 'Rust license identity')
     allowed = set(layout[k] for k in LAYOUT if k != "licenseDirectory") | {
-        attribution[n] for n in ("license", "notice", "inventory", "windowsInventory")} | set(licenses) | set(windows)
+        attribution[n] for n in ("license", "notice", "inventory", "windowsInventory", "rustInventory")
+    } | set(licenses) | set(windows) | set(rust)
     require(set(facts) == allowed, "undeclared file")
 
 
@@ -450,6 +472,7 @@ def cross_check_content(manifest, read):
     _exact(runtime, expected_runtime, 'runtime manifest content')
     inventory = strict_load(read(manifest["attribution"]["inventory"]))
     windows = strict_load(read(manifest["attribution"]["windowsInventory"]))
+    require(read(manifest['attribution']['rustInventory']) == RUST_INVENTORY_BYTES, 'Rust inventory content')
     for document, sections in ((inventory, {'components': 14, 'buildTools': 2}),
                                (windows, {'buildTools': 3, 'staticRuntime': 3})):
         require(isinstance(document, dict), 'inventory content')
@@ -510,12 +533,15 @@ def manifest_schema():
     parser['upstreamRevision'] = {'type': 'string', 'pattern': '^[0-9a-f]{40}$'}
     attribution = {}
     for name, filename in (('license', 'LICENSE'), ('notice', 'THIRD_PARTY_NOTICES.md'),
-                           ('inventory', 'license-inventory.json'), ('windowsInventory', 'windows-license-inventory.json')):
+                           ('inventory', 'license-inventory.json'), ('windowsInventory', 'windows-license-inventory.json'),
+                           ('rustInventory', 'rust/dependency-licenses.json')):
         attribution[name] = constant('resources/licenses/' + filename)
         attribution[name + 'SHA256'] = sha
         attribution[name + 'ByteCount'] = count
     attribution.update(licenseFileCount=constant(LICENSE_FILE_COUNT),
                        windowsLicenseFileCount=constant(WINDOWS_LICENSE_FILE_COUNT),
+                       rustDependencyCount=constant(RUST_DEPENDENCY_COUNT),
+                       rustLicenseFileCount=constant(RUST_LICENSE_FILE_COUNT),
                        selfTestFixtureSHA256=constant(SELF_TEST_SHA256), selfTestFixtureByteCount=count)
     signing = obj({'policy': {'type': 'string', 'enum': list(SIGNING_POLICIES)},
                    'publisher': {'type': ['string', 'null'], 'minLength': 1, 'maxLength': 256},

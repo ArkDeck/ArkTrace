@@ -1,5 +1,12 @@
 # ArkTrace Third-Party Notices
 
+The Rust CLI and host-process helper also use the Cargo dependency closure
+recorded in `rust/dependency-licenses.json`. It includes all 37 frozen workspace
+dependencies, including build and platform dependencies, and identifies 75
+corresponding license texts under `rust/licenses/`. The Windows CLI distribution
+preserves this inventory and these files under `resources/licenses/rust/`;
+`arktrace licenses` verifies and reports the complete set.
+
 ArkTrace itself is licensed under the MIT License; the exact ArkTrace license
 is distributed separately as `LICENSE`. The distributed macOS App and CLI
 bundle the pinned OpenHarmony TraceStreamer executable. Its conservative

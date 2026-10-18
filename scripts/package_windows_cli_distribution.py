@@ -155,13 +155,16 @@ def package(options):
     attribution = {}
     for key, relative in (("license", "LICENSE"), ("notice", "THIRD_PARTY_NOTICES.md"),
                           ("inventory", "license-inventory.json"),
-                          ("windowsInventory", "windows-license-inventory.json")):
+                          ("windowsInventory", "windows-license-inventory.json"),
+                          ("rustInventory", "rust/dependency-licenses.json")):
         path = layout["licenseDirectory"] + "/" + relative
         attribution[key] = path
         attribution[key + "SHA256"] = measured[path][1]
         attribution[key + "ByteCount"] = measured[path][0]
     attribution.update(licenseFileCount=contract.LICENSE_FILE_COUNT,
                        windowsLicenseFileCount=contract.WINDOWS_LICENSE_FILE_COUNT,
+                       rustDependencyCount=contract.RUST_DEPENDENCY_COUNT,
+                       rustLicenseFileCount=contract.RUST_LICENSE_FILE_COUNT,
                        selfTestFixtureSHA256=measured[layout["selfTestFixture"]][1],
                        selfTestFixtureByteCount=measured[layout["selfTestFixture"]][0])
 

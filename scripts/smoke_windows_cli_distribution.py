@@ -108,12 +108,16 @@ def main():
     licenses_result = (document or {}).get('result', {})
     files = licenses_result.get('licenseFiles', [])
     windows = licenses_result.get('windows', {}).get('licenseFiles', [])
+    rust = licenses_result.get('rust', {})
     # Windows: one entry per (owner, file); the GPL text serves the GCC tool and runtime.
     check("licenses exit 0, 18 + 7 entries over 6 Windows files, counts 14/2/3/3", code == 0 and not stderr
           and document and len(files) == 18 and len(windows) == 7
           and len({f["resource"] for f in windows}) == 6 and document["result"]["componentCount"] == 14
           and document["result"]["buildToolCount"] == 2 and document["result"]["windows"]["buildToolCount"] == 3
           and document["result"]["windows"]["staticRuntimeCount"] == 3, results)
+    check('licenses includes the frozen 37 Rust dependencies and 75 texts',
+          rust.get('dependencyCount') == 37 and len(rust.get('licenseFiles', [])) == 75
+          and rust.get('inventory') == 'rust/dependency-licenses.json', results)
     code, _, human, _ = run(tree, "licenses")
     check("human licenses lists the GCC runtime exception", code == 0 and b"GCC-exception-3.1" in human, results)
     code, _, human, _ = run(tree, '--help')
@@ -146,6 +150,23 @@ def main():
     code, document, _, stderr = run(tree, *analyze)
     check("analyze cpu exit 0", code == 0 and not stderr and document and document["result"] is not None, results)
 
+    artifact_trace = source / 'ART-htrace'
+    shutil.copyfile(trace, artifact_trace)
+    for command in (summary, inspect, analyze):
+        code, document, _, stderr = run(tree, *command[:-1], str(artifact_trace))
+        check(command[0] + ' accepts an extensionless htrace Artifact ID',
+              code == 0 and not stderr and document and document.get('result') is not None, results)
+    systrace = source / 'ART-systrace'
+    shutil.copyfile(ROOT / 'Fixtures/traces/trace_small_10.systrace', systrace)
+    code, document, _, stderr = run(tree, *summary[:-1], str(systrace))
+    check('summary accepts an extensionless systrace Artifact ID',
+          code == 0 and not stderr and document and document.get('result') is not None, results)
+    unsupported = source / 'unsupported.txt'
+    shutil.copyfile(trace, unsupported)
+    code, document, _, _ = run(tree, *summary[:-1], str(unsupported))
+    check('an explicit unsupported suffix still refuses', code != 0 and document
+          and document.get('error', {}).get('code') == 'TRACE_FORMAT_UNSUPPORTED', results)
+
     moved = work / "moved again"
     if not tree.resolve().is_relative_to(work.resolve()) or moved.exists() or moved.parent.resolve() != work.resolve():
         raise SystemExit('smoke move escaped its new private work directory')
@@ -165,6 +186,17 @@ def main():
     code, _, _, _ = run(moved, "licenses", "--json")
     check("extra license file refuses licenses", code != 0, results)
     extra.unlink()
+    rust_license = moved / 'resources/licenses' / next(iter(contract.RUST_LICENSES))
+    original_rust = rust_license.read_bytes()
+    rust_license.write_bytes(original_rust + b'\n')
+    code, _, _, _ = run(moved, 'licenses', '--json')
+    check('modified Rust license refuses licenses', code != 0, results)
+    rust_license.write_bytes(original_rust)
+    extra_rust = moved / 'resources/licenses/rust/licenses/extra'
+    extra_rust.mkdir()
+    code, _, _, _ = run(moved, 'licenses', '--json')
+    check('extra Rust directory refuses licenses', code != 0, results)
+    extra_rust.rmdir()
     parser = moved / contract.LAYOUT["parserExecutable"]
     original_parser = parser.read_bytes()
     parser.write_bytes(original_parser[:-1] + bytes([original_parser[-1] ^ 1]))

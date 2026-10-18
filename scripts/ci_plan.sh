@@ -48,6 +48,11 @@ while IFS= read -r path; do
             rust_macos=true
             rust_windows=true
             ;;
+        rust/dependency-licenses.json|rust/licenses/*)
+            contracts=true
+            rust_macos=true
+            rust_windows=true
+            ;;
         rust/*)
             rust_macos=true
             rust_windows=true

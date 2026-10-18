@@ -172,7 +172,10 @@ ArkTraceCLI-0.1.0-windows-x86_64/
     └── licenses/
         ├── {LICENSE,THIRD_PARTY_NOTICES.md,license-inventory.json,windows-license-inventory.json}
         ├── LICENSES/<18 inventory files>
-        └── LICENSES-windows/<6 inventory files>
+        ├── LICENSES-windows/<6 inventory files>
+        └── rust/
+            ├── dependency-licenses.json
+            └── licenses/<37 dependency directories, 75 exact texts>
 ```
 
 The manifest binds every file's size and SHA-256, the source revision and dirty
@@ -222,7 +225,7 @@ the old directory name after a move; they are not used as identity evidence.
 The native regression also rejects an identical-byte copy as the running image.
 Unavailable native comparison support fails closed.
 
-Windows `licenses` verifies the installed common and Windows-specific
+Windows `licenses` verifies the installed common, Windows-specific and frozen Cargo
 attribution closure and offers bounded human or JSON output. Trace commands
 continue to require `--no-cache`. A new signed version installs beside the
 previous directory; an ArkDeck consumer selects the reviewed manifest and

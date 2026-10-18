@@ -1313,7 +1313,15 @@ mod macos {
         pub license_files: Vec<LicenseFileValue>,
         pub static_runtime_count: usize,
     }
-    /// Swift `CLIMachineLicensesResult`'s members, plus `windows` on Windows.
+    /// Frozen Cargo dependency closure, including build and platform dependencies.
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct RustLicenseValue {
+        pub dependency_count: usize,
+        pub inventory: &'static str,
+        pub license_files: Vec<LicenseFileValue>,
+    }
+    /// Swift `CLIMachineLicensesResult`'s members, plus the native runtime inventories.
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
     pub struct LicensesValue {
@@ -1324,6 +1332,7 @@ mod macos {
         pub notice: &'static str,
         pub product_license: &'static str,
         pub product_license_bytes: u64,
+        pub rust: RustLicenseValue,
         pub windows: WindowsLicenseValue,
     }
     #[derive(Serialize)]
@@ -1395,6 +1404,7 @@ mod macos {
                         .license_files
                         .iter()
                         .chain(&value.windows.license_files)
+                        .chain(&value.rust.license_files)
                     {
                         writeln!(
                             writer,
@@ -2276,6 +2286,11 @@ mod macos {
                 notice: "THIRD_PARTY_NOTICES.md",
                 product_license: "LICENSE",
                 product_license_bytes: 100,
+                rust: RustLicenseValue {
+                    dependency_count: 0,
+                    inventory: "rust/dependency-licenses.json",
+                    license_files: Vec::new(),
+                },
                 windows: WindowsLicenseValue {
                     build_tool_count: 0,
                     inventory: "windows-license-inventory.json",
@@ -2710,8 +2725,8 @@ mod macos {
 #[cfg(any(target_os = "macos", windows))]
 pub use macos::{
     DOCTOR_CHECKS, DirectoryCommand, DoctorStatus, LicenseFileValue, LicensesValue,
-    WindowsLicenseValue, doctor_document, execute_no_cache, execute_no_cache_formatted,
-    licenses_document,
+    RustLicenseValue, WindowsLicenseValue, doctor_document, execute_no_cache,
+    execute_no_cache_formatted, licenses_document,
 };
 
 #[cfg(test)]

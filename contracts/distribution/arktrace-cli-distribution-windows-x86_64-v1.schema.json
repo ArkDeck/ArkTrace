@@ -395,8 +395,13 @@
         "windowsInventory",
         "windowsInventorySHA256",
         "windowsInventoryByteCount",
+        "rustInventory",
+        "rustInventorySHA256",
+        "rustInventoryByteCount",
         "licenseFileCount",
         "windowsLicenseFileCount",
+        "rustDependencyCount",
+        "rustLicenseFileCount",
         "selfTestFixtureSHA256",
         "selfTestFixtureByteCount"
       ],
@@ -453,6 +458,19 @@
           "minimum": 1,
           "maximum": 536870912
         },
+        "rustInventory": {
+          "type": "string",
+          "const": "resources/licenses/rust/dependency-licenses.json"
+        },
+        "rustInventorySHA256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rustInventoryByteCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
         "licenseFileCount": {
           "type": "integer",
           "const": 18
@@ -460,6 +478,14 @@
         "windowsLicenseFileCount": {
           "type": "integer",
           "const": 6
+        },
+        "rustDependencyCount": {
+          "type": "integer",
+          "const": 37
+        },
+        "rustLicenseFileCount": {
+          "type": "integer",
+          "const": 75
         },
         "selfTestFixtureSHA256": {
           "type": "string",

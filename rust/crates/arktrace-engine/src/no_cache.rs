@@ -206,12 +206,17 @@ pub struct ParserTools<'a> {
 pub enum SourceFormat {
     Htrace,
     Systrace,
+    /// A retained Artifact/inode alias has no filename extension. Like the
+    /// Swift parser's source.trace snapshot, let the pinned parser identify
+    /// its stream header instead of treating the alias as a file format.
+    Automatic,
 }
 impl SourceFormat {
     fn name(self) -> &'static str {
         match self {
             Self::Htrace => "source.htrace",
             Self::Systrace => "source.systrace",
+            Self::Automatic => "source.trace",
         }
     }
 }
