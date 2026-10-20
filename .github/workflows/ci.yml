@@ -555,6 +555,10 @@ jobs:
           python scripts/test_viewer_json_roundtrip.py
           python scripts/test_ffi_contract.py
 
+      - name: Windows production acceptance guard regressions
+        shell: pwsh
+        run: ./scripts/Test-WindowsProductionAcceptanceContract.ps1
+
   # The single required check for branch protection. It runs always, and it
   # fails when a planned lane failed, was cancelled, or was skipped despite
   # the plan asking for it -- so job-level skips can never drift past

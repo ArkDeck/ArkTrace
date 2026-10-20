@@ -1,0 +1,156 @@
+name: Windows production acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-production-acceptance
+  cancel-in-progress: false
+
+jobs:
+  admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require the protected default branch
+        env:
+          RELEASE_REF: ${{ github.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_PROTECTED: ${{ github.ref_protected }}
+        run: |
+          test "$RELEASE_REF" = "refs/heads/$DEFAULT_BRANCH"
+          test "$REF_PROTECTED" = true
+
+  package:
+    needs: admission
+    runs-on: [self-hosted, Windows, X64, arktrace-signing]
+    environment: windows-production
+    timeout-minutes: 60
+    outputs:
+      artifact: ${{ steps.package.outputs.artifact }}
+      archive_sha256: ${{ steps.package.outputs.archive_sha256 }}
+      manifest_sha256: ${{ steps.package.outputs.manifest_sha256 }}
+      harness_sha256: ${{ steps.package.outputs.harness_sha256 }}
+      build_host: ${{ steps.package.outputs.build_host }}
+      publisher: ${{ steps.package.outputs.publisher }}
+    env:
+      ARKTRACE_WINDOWS_PUBLISHER: ${{ vars.ARKTRACE_WINDOWS_PUBLISHER }}
+      ARKTRACE_CERT_THUMBPRINT: ${{ vars.ARKTRACE_CERT_THUMBPRINT }}
+      ARKTRACE_TIMESTAMP_URL: ${{ vars.ARKTRACE_TIMESTAMP_URL }}
+      ARKTRACE_PARSER_PATH: ${{ vars.ARKTRACE_PARSER_PATH }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and verify the production delivery
+        id: package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($name in @('ARKTRACE_WINDOWS_PUBLISHER', 'ARKTRACE_CERT_THUMBPRINT', 'ARKTRACE_TIMESTAMP_URL', 'ARKTRACE_PARSER_PATH')) {
+            if (-not [Environment]::GetEnvironmentVariable($name)) { throw "Missing production input: $name" }
+          }
+          if ($env:ARKTRACE_WINDOWS_PUBLISHER -match '[\x00-\x1f\x7f]' -or
+              $env:ARKTRACE_WINDOWS_PUBLISHER.Trim() -cne $env:ARKTRACE_WINDOWS_PUBLISHER -or
+              $env:ARKTRACE_WINDOWS_PUBLISHER.Length -gt 256 -or
+              $env:ARKTRACE_CERT_THUMBPRINT -cnotmatch '^[0-9a-fA-F]{40}$' -or
+              $env:ARKTRACE_TIMESTAMP_URL -notmatch '^https://') { throw 'Invalid production signing inputs.' }
+          $certificate = Get-Item -LiteralPath ('Cert:\CurrentUser\My\' + $env:ARKTRACE_CERT_THUMBPRINT)
+          if (-not $certificate.HasPrivateKey -or $certificate.Subject -eq $certificate.Issuer) {
+            throw 'Production requires an existing non-self-issued signing certificate with a usable private key.'
+          }
+          $delivery = Join-Path $env:RUNNER_TEMP ('arktrace-delivery-' + [guid]::NewGuid().ToString('N'))
+          [void](New-Item -ItemType Directory -Path $delivery -ErrorAction Stop)
+          $package = Join-Path $delivery 'package'
+          $receiptBytes = & python scripts/package_windows_cli_distribution.py --output $package `
+            --parser $env:ARKTRACE_PARSER_PATH --publisher $env:ARKTRACE_WINDOWS_PUBLISHER `
+            --certificate-thumbprint $env:ARKTRACE_CERT_THUMBPRINT --timestamp-url $env:ARKTRACE_TIMESTAMP_URL
+          if ($LASTEXITCODE -ne 0) { throw 'Production packaging failed.' }
+          $receipt = ($receiptBytes -join "`n") | ConvertFrom-Json
+          $manifest = Get-Content -LiteralPath (Join-Path $receipt.distribution 'distribution-manifest.json') -Raw | ConvertFrom-Json
+          if ($receipt.source.revision -cne $env:GITHUB_SHA -or $receipt.source.dirty -or
+              -not $receipt.verifiedTree -or -not $receipt.verifiedArchive -or
+              $receipt.signingPolicy -cne 'authenticode-publisher' -or
+              $receipt.publisher -cne $env:ARKTRACE_WINDOWS_PUBLISHER -or -not $manifest.signing.timestamped -or
+              $receipt.signatures.Count -ne 3 -or
+              @($receipt.signatures | Where-Object { $_.status -cne 'Valid' -or -not $_.timestamped }).Count -ne 0) {
+            throw 'Only the exact clean, timestamped and verified production package can leave the build job.'
+          }
+          $guid = (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Cryptography' -Name MachineGuid).MachineGuid
+          $hostFingerprint = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($guid))).ToLowerInvariant()
+          $export = Join-Path $delivery 'export'
+          [void](New-Item -ItemType Directory -Path $export -ErrorAction Stop)
+          Copy-Item -LiteralPath $receipt.archive -Destination (Join-Path $export 'ArkTrace.windows.zip')
+          Copy-Item -LiteralPath scripts/Test-WindowsInstalledDistribution.ps1 -Destination $export
+          $harnessSha = (Get-FileHash -LiteralPath scripts/Test-WindowsInstalledDistribution.ps1 -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ((Get-FileHash -LiteralPath (Join-Path $export 'ArkTrace.windows.zip')).Hash.ToLowerInvariant() -cne $receipt.archiveSHA256 -or
+              (Get-FileHash -LiteralPath (Join-Path $export 'Test-WindowsInstalledDistribution.ps1')).Hash.ToLowerInvariant() -cne $harnessSha) {
+            throw 'Production delivery changed while copying.'
+          }
+          $record = [ordered]@{
+            schema = 'arktrace.windows-production-delivery/v1'; sourceRevision = $env:GITHUB_SHA
+            runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
+            archiveSha256 = $receipt.archiveSHA256; manifestSha256 = $receipt.manifestSHA256
+            treeSha256 = $receipt.treeSHA256; harnessSha256 = $harnessSha
+            publisher = $receipt.publisher; buildHostFingerprint = $hostFingerprint
+            cleanHostAccepted = $false
+          }
+          $record | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $export 'delivery.json') -Encoding utf8NoBOM
+          "artifact=arktrace-windows-production-$($env:GITHUB_SHA)-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)" >> $env:GITHUB_OUTPUT
+          "archive_sha256=$($receipt.archiveSHA256)" >> $env:GITHUB_OUTPUT
+          "manifest_sha256=$($receipt.manifestSHA256)" >> $env:GITHUB_OUTPUT
+          "harness_sha256=$harnessSha" >> $env:GITHUB_OUTPUT
+          "build_host=$hostFingerprint" >> $env:GITHUB_OUTPUT
+          "publisher=$($receipt.publisher)" >> $env:GITHUB_OUTPUT
+          "ARKTRACE_DELIVERY=$export" >> $env:GITHUB_ENV
+      - name: Retain the verified production package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.package.outputs.artifact }}
+          path: ${{ env.ARKTRACE_DELIVERY }}
+          if-no-files-found: error
+
+  clean-host:
+    needs: package
+    runs-on: [self-hosted, Windows, X64, arktrace-clean]
+    environment: windows-production
+    timeout-minutes: 20
+    env:
+      ARCHIVE_SHA256: ${{ needs.package.outputs.archive_sha256 }}
+      MANIFEST_SHA256: ${{ needs.package.outputs.manifest_sha256 }}
+      HARNESS_SHA256: ${{ needs.package.outputs.harness_sha256 }}
+      BUILD_HOST: ${{ needs.package.outputs.build_host }}
+      PUBLISHER: ${{ needs.package.outputs.publisher }}
+    steps:
+      # No checkout, setup-python, Rust, MSVC, Windows SDK or VC++ runtime install.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.package.outputs.artifact }}
+          path: ${{ runner.temp }}/arktrace-production-input-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Verify and exercise the installed package on the clean host
+        id: accept
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $inputRoot = Join-Path $env:RUNNER_TEMP "arktrace-production-input-$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)"
+          $harness = Join-Path $inputRoot 'Test-WindowsInstalledDistribution.ps1'
+          if ((Get-FileHash -LiteralPath $harness -Algorithm SHA256).Hash.ToLowerInvariant() -cne $env:HARNESS_SHA256) {
+            throw 'Acceptance harness differs from this source revision.'
+          }
+          $work = Join-Path $env:RUNNER_TEMP ('arktrace-installed-' + [guid]::NewGuid().ToString('N'))
+          "report=$work/acceptance.json" >> $env:GITHUB_OUTPUT
+          & $harness -Archive (Join-Path $inputRoot 'ArkTrace.windows.zip') -ArchiveSha256 $env:ARCHIVE_SHA256 `
+            -ManifestSha256 $env:MANIFEST_SHA256 -SourceRevision $env:GITHUB_SHA -Publisher $env:PUBLISHER `
+            -BuildHostFingerprint $env:BUILD_HOST -WorkDirectory $work
+          $report = Get-Content -LiteralPath (Join-Path $work 'acceptance.json') -Raw | ConvertFrom-Json
+          if (-not $report.passed -or -not $report.cleanHost -or $report.completedCommands -ne 6) {
+            throw 'Installed package acceptance did not complete.'
+          }
+      - name: Retain only the path-free installed acceptance receipt
+        if: always() && steps.accept.outputs.report != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: arktrace-windows-installed-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.accept.outputs.report }}
+          if-no-files-found: ignore
