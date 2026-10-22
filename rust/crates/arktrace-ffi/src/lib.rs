@@ -6,3 +6,5 @@ mod model;
 mod registry;
 pub use abi_records::*;
 pub use exports::*;
+#[cfg(feature = "fuzzing")]
+pub use model::{fuzz_admit_session_source, fuzz_decode_engine_config, fuzz_decode_request};

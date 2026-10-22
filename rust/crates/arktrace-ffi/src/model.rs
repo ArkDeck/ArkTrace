@@ -377,6 +377,58 @@ pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, 
     serde_json::from_slice(bytes).map_err(|_| STATUS_INVALID_INPUT)
 }
 
+/// Path and format gate shared with `arktrace_session_open`. Format 1 is
+/// htrace and format 2 is systrace. The pinned TraceStreamer process parses
+/// the file bytes after this gate.
+pub(crate) fn admit_session_source(data: Vec<u8>, format: u32) -> Result<String, u32> {
+    let source = String::from_utf8(data).map_err(|_| STATUS_INVALID_INPUT)?;
+    if source.contains('\0') || !(1..=2).contains(&format) {
+        return Err(STATUS_INVALID_INPUT);
+    }
+    Ok(source)
+}
+
+#[cfg(feature = "fuzzing")]
+fn capped(bytes: &[u8], maximum: u32) -> Result<&[u8], u32> {
+    if bytes.is_empty() || bytes.len() > maximum as usize {
+        Err(STATUS_INVALID_BUFFER)
+    } else {
+        Ok(bytes)
+    }
+}
+
+#[cfg(feature = "fuzzing")]
+pub fn fuzz_decode_request(bytes: &[u8]) -> u32 {
+    match capped(bytes, MAXIMUM_REQUEST_BYTES).and_then(decode::<Operation>) {
+        Ok(operation) => operation.validate().err().unwrap_or(0),
+        Err(status) => status,
+    }
+}
+
+#[cfg(feature = "fuzzing")]
+pub fn fuzz_decode_engine_config(bytes: &[u8]) -> u32 {
+    match capped(bytes, MAXIMUM_CONFIG_BYTES).and_then(decode::<EngineConfig>) {
+        Ok(config) => config.validate(false).err().unwrap_or(0),
+        Err(status) => status,
+    }
+}
+
+/// First byte is the session format (1 htrace, 2 systrace). The rest is the
+/// source path, using the same rejection as `arktrace_session_open`.
+#[cfg(feature = "fuzzing")]
+pub fn fuzz_admit_session_source(bytes: &[u8]) -> u32 {
+    if bytes.is_empty() {
+        return STATUS_INVALID_BUFFER;
+    }
+    let format = u32::from(bytes[0]);
+    match capped(&bytes[1..], MAXIMUM_PATH_BYTES)
+        .and_then(|path| admit_session_source(path.to_vec(), format))
+    {
+        Ok(_) => 0,
+        Err(status) => status,
+    }
+}
+
 #[cfg(test)]
 mod sdk_slice_tests {
     use super::*;
