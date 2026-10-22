@@ -1,8 +1,7 @@
 use std::{env, fs, path::PathBuf};
 
 fn main() {
-    let source =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../api/quality-scopes.json");
+    let source = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../api/quality-scopes.json");
     println!("cargo:rerun-if-changed={}", source.display());
     let scopes: Vec<String> = serde_json::from_slice(&fs::read(source).expect("quality scopes"))
         .expect("closed scope vocabulary");

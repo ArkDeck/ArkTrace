@@ -392,10 +392,8 @@ fn lock_byte_is_the_shared_purger_byte_and_data_stays_readable() {
 
 #[test]
 fn lock_byte_matches_the_frozen_cross_product_contract() {
-    let vectors: serde_json::Value = serde_json::from_str(include_str!(
-        "../../../../api/cache-lease-vectors.json"
-    ))
-    .unwrap();
+    let vectors: serde_json::Value =
+        serde_json::from_str(include_str!("../../../../api/cache-lease-vectors.json")).unwrap();
     let windows = &vectors["protocol"]["windows"];
     assert_eq!(windows["primitive"], "LockFileEx");
     assert_eq!(

@@ -445,7 +445,7 @@
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProcessParser.swift",
       "byteCount": 79370,
-      "sha256": "6ea3b715384ec1083727c216c84e3c08eb9d2d77c796e866ad0b9eb87f960a84"
+      "sha256": "69715c8e7c43bc630273ef3d305a5b4023164a4164d7426a8594e46ff5d3d419"
     },
     {
       "path": "Sources/ArkTraceParser/TraceStreamerProgressScanner.swift",
