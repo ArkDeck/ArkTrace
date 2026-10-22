@@ -11,6 +11,7 @@ crate-type = ["rlib", "staticlib", "cdylib"]
 
 [features]
 process-fixtures = ["arktrace-engine/process-fixtures"]
+fuzzing = []
 
 [dependencies]
 arktrace-contract.workspace = true

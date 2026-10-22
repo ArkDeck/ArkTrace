@@ -263,10 +263,7 @@ pub unsafe extern "C" fn arktrace_session_open(
     guard(engine, || {
         let out = unsafe { output(out, bytes) }?;
         let data = unsafe { input(p, n, MAXIMUM_PATH_BYTES) }?;
-        let source = String::from_utf8(data).map_err(|_| STATUS_INVALID_INPUT)?;
-        if source.contains('\0') || !(1..=2).contains(&format) {
-            return Err(STATUS_INVALID_INPUT);
-        }
+        let source = model::admit_session_source(data, format)?;
         let timeout = timeout(ms)?;
         let host = registry::host(engine)?;
         host.active()?;
