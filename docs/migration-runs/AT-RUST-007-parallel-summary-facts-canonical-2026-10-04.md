@@ -27,11 +27,11 @@
 | 已取消 Swift Task | 原 CancellationError；未观察到 public typed CANCELLED 翻译，也没有 native admission/interrupt 证据 |
 | 零时长 schema 控制 | 原 preparer/validator 拒绝 trace_range(1000,1000)，TRACE_DATABASE_INVALID/validating；child -5 的完整日志保留 |
 
-上述表来自实际输出。完整可空计数对象、eventCountBySource、warnings、每个质量字段、错误、元数据及逐请求 SQL 观测在 [canonical](../../tools/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json)；[16 项 handoff golden](../../tools/parallel-summary-facts-canonical-20261004/fixtures/handoff-golden.json) 不含 SQL。原 encoders 同时保留，handoff 仅补 known optional 的显式 null，不重排或重算任何值。
+上述表来自实际输出。完整可空计数对象、eventCountBySource、warnings、每个质量字段、错误、元数据及逐请求 SQL 观测在 [canonical](archived-tool-evidence/parallel-summary-facts-canonical-20261004/fixtures/canonical-15.json)；[16 项 handoff golden](archived-tool-evidence/parallel-summary-facts-canonical-20261004/fixtures/handoff-golden.json) 不含 SQL。原 encoders 同时保留，handoff 仅补 known optional 的显式 null，不重排或重算任何值。
 
 ## 需要主任务知道的兼容性差异
 
-固定代码并不对所有 section 使用统一的 raw-source-row 上界。目录、stat 和 filter 目录先取 rowid prefix；事件 SQL 先匹配时间、再 LIMIT matching rows；CPU 先 DISTINCT；counter 先时间过滤和 DISTINCT(sample table,filter id)，再配合有独立 prefix 限制的 filter 目录。低预算 namedSlice=1/非 truncated 和 process=0/truncated 是原入口的真实差异。`summaryFacts` 顶部“every table sampled by rowid before filtering or reduction”的注释对事件/CPU/counter 已不准确；相邻实际实现已解释匹配/去重预算。[接口建议](../../tools/parallel-summary-facts-canonical-20261004/fixtures/interface-proposal.json) 按 section 写明此差异；若目标要求统一源行预算，应由主任务明确版本/契约并验证实际 native 工作量，不能把此报告当成其通过证据。
+固定代码并不对所有 section 使用统一的 raw-source-row 上界。目录、stat 和 filter 目录先取 rowid prefix；事件 SQL 先匹配时间、再 LIMIT matching rows；CPU 先 DISTINCT；counter 先时间过滤和 DISTINCT(sample table,filter id)，再配合有独立 prefix 限制的 filter 目录。低预算 namedSlice=1/非 truncated 和 process=0/truncated 是原入口的真实差异。`summaryFacts` 顶部“every table sampled by rowid before filtering or reduction”的注释对事件/CPU/counter 已不准确；相邻实际实现已解释匹配/去重预算。[接口建议](archived-tool-evidence/parallel-summary-facts-canonical-20261004/fixtures/interface-proposal.json) 按 section 写明此差异；若目标要求统一源行预算，应由主任务明确版本/契约并验证实际 native 工作量，不能把此报告当成其通过证据。
 
 `NULL start_ts` 被计入并附 unavailableValue；不应丢弃或猜测成 0。非法 `end_ts<=start_ts` 被排除并标记 lower bound，所以本 fixture 的 final-instant process/thread 行并非合法生命周期，两个 invalidValue 的 count=2。最终 instant 的时间边界证明来自 sched/thread-state/callstack，而不是目录。零时长 Core range 可以建造，但 SQLite trace schema 必须严格正时长；原 summaryFacts 对零时长的注释不能作为 Ready DB 支持证据。
 
@@ -58,7 +58,7 @@
 - `verify.py` 和 handoff QA：实际 values/nullable/flags/order/quality/errors、原编译源 prefix/28源 pins、四 DB 同 inode/字节不变、两旧 SDK 报告不变均通过。没有重跑旧14/18/1000/32/135等矩阵。
 - 失败保留：首次构造访问内部 TraceDatabase 导致 build exit1；后续 async Thread.isMainThread/strict-memory UnsafeCurrentTask 检查 build exit1；修复后 strict build 通过。首次零时长构造 child-5；同 inode合法fixture修复后通过。首次 observe 的 parent preflight 因 SQLite tuple 与 JSON list 比较而 exit1、未启动 child/0请求；规范化编码形状后唯一实际观察通过。没有降低编译检查、预算或时间语义。
 
-完整 argv、exit、warnings、log SHA、source/oracle/fixture/compiled pins 保存在 [verification](../../tools/parallel-summary-facts-canonical-20261004/verification/) 与 JSON报告。固定候选中的历史报告仅含 summary延期、forwarding/stub 或 inventory；未找到此精确 Store facts canonical，所以只填补该缺口。
+完整 argv、exit、warnings、log SHA、source/oracle/fixture/compiled pins 保存在 [verification](archived-tool-evidence/parallel-summary-facts-canonical-20261004/verification/) 与 JSON报告。固定候选中的历史报告仅含 summary延期、forwarding/stub 或 inventory；未找到此精确 Store facts canonical，所以只填补该缺口。
 
 ## 剩余边界与交付
 
