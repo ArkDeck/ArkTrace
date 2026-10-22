@@ -33,6 +33,17 @@
 历史发布通过不证明当前工作树或新分发已通过；留存的未验证项仍需如实报告。
 ArkDeck 是独立仓库，其治理流程不自动适用于 ArkTrace；跨仓库修改需要属于用户任务范围。
 
+## 规格流程
+
+本仓库的现行产品行为以 [SPECIFICATION.md](docs/SPECIFICATION.md) 和 [DESIGN.md](docs/DESIGN.md) 为准。这里不复制一份 ArkDeck `openspec/` 树，也不要为了形式新建未接入检查的 constitution 或空 spec 目录。
+
+和 ArkDeck 交叉的行为沿用 ArkDeck 的 spec-driven 过程（Living Spec 与 change package，入口是 ArkDeck 仓库的 `openspec/README.md`）：
+
+1. 先写 proposal 和 spec delta，写清可观察行为、失败语义和验收场景，再改实现。
+2. 机器边界放在 `contracts/`。`arkdeck-contract.json`、FFI、index definitions 由现有 verifier 对照 Swift 与 Rust 源码常量检查。
+3. ArkDeck 的 profile、硬编码版本和消费代码留在 ArkDeck 的 change package 里修改。ArkTrace 不代改下游仓库。
+4. 规格接受、实现完成、验收证据是三件不同的事。历史 Phase 报告不能代替当前 diff 的检查。
+
 ## 保持的产品边界
 
 - App、CLI 和 ArkDeck 消费方复用共享实现；依赖方向遵守 SPECIFICATION 的 AT-SYS-002/006。产品差异通过 `TraceProductConfiguration` 注入，避免复制模块或硬编码消费方路径。
