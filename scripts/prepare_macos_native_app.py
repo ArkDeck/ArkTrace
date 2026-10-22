@@ -159,7 +159,7 @@ def validate_inputs(directory):
         require(path.stat().st_size == row["byteCount"] and path.stat().st_mode & 0o777 == row["mode"] and sha(path) == row["sha256"], "input bytes or mode drift")
     require(type(receipt["runtimeUsable"]) is bool, "explicit runtime usability required")
     runtime = json.loads((directory / "ArkTraceRuntime/manifest.json").read_text())
-    require(runtime == {"formatVersion": 1, "contractSHA256": (ROOT / "contracts/ffi-v1.sha256").read_text().strip(),
+    require(runtime == {"formatVersion": 1, "contractSHA256": (ROOT / "contracts/ffi-v2.sha256").read_text().strip(),
                         "helperSHA256": sha(directory / "Helpers/arktrace-host-process"),
                         "publisher": receipt["inputs"]["publisher"]}, "runtime manifest provenance mismatch")
     parser = json.loads((directory / "TraceStreamer/manifest.json").read_text())

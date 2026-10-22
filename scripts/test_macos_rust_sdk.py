@@ -196,5 +196,5 @@ def main():
                 cleanup_failure.update(foreignReplacementPreserved=True,originalDerivedBytesPreserved=True,rawSHA256Unchanged=True,unresolvedOwnedResidueExpected=True)
             finally:
                 if process.poll() is None:process.kill();process.wait()
-    print(json.dumps({'nativeMacOSSwiftSDK':True,'fullSDKAcceptance':False,'contractSHA256':(ROOT/'contracts/ffi-v1.sha256').read_text().strip(),'receipt':receipt,'runtimeArtifacts':runtime_artifacts,'swiftOracle':swift_receipt,'sources':reports,'cleanupFailure':cleanup_failure},ensure_ascii=False,indent=2))
+    print(json.dumps({'nativeMacOSSwiftSDK':True,'fullSDKAcceptance':False,'contractSHA256':(ROOT/'contracts/ffi-v2.sha256').read_text().strip(),'receipt':receipt,'runtimeArtifacts':runtime_artifacts,'swiftOracle':swift_receipt,'sources':reports,'cleanupFailure':cleanup_failure},ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

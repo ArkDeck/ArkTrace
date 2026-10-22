@@ -46,7 +46,7 @@ def main():
     abi = ABI(tools / 'library.dylib')
     identity = abi.out('abi_identity', 'AbiIdentity')
     assert identity.capabilities == 191  # native capabilities plus explicit fixtures
-    assert bytes(identity.contract_digest).hex() == sha(ROOT / 'contracts/ffi-v1.json')
+    assert bytes(identity.contract_digest).hex() == sha(ROOT / 'contracts/ffi-v2.json')
     manifest = json.loads((ROOT / 'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
     assert sha(tools / 'parser') == manifest['binarySHA256']
     parser_identity = {k: manifest[k] for k in ('name', 'reportedVersion', 'binarySHA256',
@@ -66,7 +66,7 @@ def main():
         cache = base / 'cache'
         if cached:
             cache.mkdir(mode=0o700, exist_ok=True)
-        config = dict(abiVersion=json.loads((ROOT/'contracts/ffi-v1.json').read_text())['abiVersion'], contractDigest=bytes(identity.contract_digest).hex(),
+        config = dict(abiVersion=json.loads((ROOT/'contracts/ffi-v2.json').read_text())['abiVersion'], contractDigest=bytes(identity.contract_digest).hex(),
                       cachePolicy='contentAddressed' if cached else 'ephemeral', namespace=str(namespace),
                       helper=str(tools / 'helper'), parser=str(tools / 'parser'), helperSHA256=sha(tools / 'helper'),
                       parserIdentity=parser_identity, limits=dict(workers=1, queuePerWorker=8))

@@ -26,7 +26,7 @@ def main():
     for r in layouts:
         typ=TYPES[r['name']];assert C.sizeof(typ)==r['size'] and C.alignment(typ)==r['alignment']
         for name,offset in r['offsets'].items():assert getattr(typ,name).offset==offset;fields+=1
-    identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v1.json').read_bytes()).digest()
+    identity=abi.out('abi_identity','AbiIdentity');expected=hashlib.sha256((ROOT/'contracts/ffi-v2.json').read_bytes()).digest()
     assert bytes(identity.contract_digest)==expected and identity.abi_version==CONTRACT['abiVersion']
     assert identity.capabilities==(sum(K[k] for k in ('CAP_MACOS_ENGINE','CAP_COLD_JSON','CAP_VIEWPORT_RECORDS','CAP_CACHE_MAINTENANCE','CAP_VIEW_STATE','CAP_VIEW_STATE_BACKUP','CAP_SNAPSHOT_HIT')) if sys.platform=='darwin' else 0)
     abi.call('abi_identity',None,C.sizeof(identity),expected=K['STATUS_INVALID_BUFFER'])
@@ -104,7 +104,7 @@ def main():
         else:raise SystemExit('native macOS/Windows required for foreign consumer; no simulated PASS')
         if retained:
             files=[]
-            for source in [library, target/'libarktrace_ffi.a', ROOT/'contracts/ffi-v1.json',
+            for source in [library, target/'libarktrace_ffi.a', ROOT/'contracts/ffi-v2.json',
                            ROOT/'bindings/c/arktrace_ffi.h', ROOT/'bindings/c/module.modulemap',
                            ROOT/'bindings/swift/Smoke.swift', ROOT/'bindings/swift/GeneratedLayouts.swift']:
                 if source.exists():

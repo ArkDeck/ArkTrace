@@ -35,7 +35,7 @@ def build(fixture=False):
     cache=cache.resolve()
     cache.mkdir(parents=True,exist_ok=True)
     destination=cache/identity['sha256'];artifact=destination/'CArkTrace.xcframework'
-    digest=(ROOT/'contracts/ffi-v1.sha256').read_text().strip()
+    digest=(ROOT/'contracts/ffi-v2.sha256').read_text().strip()
     expected_headers=[pin(ROOT/'bindings/c'/n) for n in ['arktrace_ffi.h','module.modulemap']]
     if destination.exists():
         receipt,_=verified_receipt(artifact,fixture)
@@ -49,7 +49,7 @@ def build(fixture=False):
         info=plistlib.loads((base/'CArkTrace.xcframework/Info.plist').read_bytes())
         assert len(info['AvailableLibraries'])==1 and info['AvailableLibraries'][0]['SupportedArchitectures']==['arm64']
         assert info['AvailableLibraries'][0]['SupportedPlatform']=='macos'
-        receipt={'abiVersion':json.loads((ROOT/'contracts/ffi-v1.json').read_text())['abiVersion'],'contractSHA256':digest,'developmentFixtures':fixture,'deploymentTarget':'26.0','xcode':xcode,'rust':subprocess.check_output(['rustc','+1.99.0','--version'],text=True).strip(),'library':identity,'headers':expected_headers,'files':[],'releaseAcceptance':False}
+        receipt={'abiVersion':json.loads((ROOT/'contracts/ffi-v2.json').read_text())['abiVersion'],'contractSHA256':digest,'developmentFixtures':fixture,'deploymentTarget':'26.0','xcode':xcode,'rust':subprocess.check_output(['rustc','+1.99.0','--version'],text=True).strip(),'library':identity,'headers':expected_headers,'files':[],'releaseAcceptance':False}
         for p in sorted((base/'CArkTrace.xcframework').rglob('*')):
             if p.is_file():receipt['files'].append({'byteCount':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'relativePath':p.relative_to(base).as_posix()})
         (base/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')

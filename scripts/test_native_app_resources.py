@@ -16,7 +16,7 @@ class NativeResourcesTests(unittest.TestCase):
         values = {"Helpers/arktrace-host-process": b"synthetic helper", "Helpers/trace_streamer": b"synthetic parser"}
         digest = lambda data: hashlib.sha256(data).hexdigest()
         values["TraceStreamer/manifest.json"] = json.dumps({"binarySHA256": digest(values["Helpers/trace_streamer"])}).encode()
-        values["ArkTraceRuntime/manifest.json"] = json.dumps({"formatVersion": 1, "contractSHA256": (ROOT / "contracts/ffi-v1.sha256").read_text().strip(),
+        values["ArkTraceRuntime/manifest.json"] = json.dumps({"formatVersion": 1, "contractSHA256": (ROOT / "contracts/ffi-v2.sha256").read_text().strip(),
             "helperSHA256": digest(values["Helpers/arktrace-host-process"]), "publisher": None}).encode()
         rows = []
         for name, data in values.items():

@@ -1,6 +1,6 @@
 # Rust host boundary (AT-RUST-012 in progress)
 
-`contracts/ffi-v1.json` is the provisional v1 ABI source. Run
+`contracts/ffi-v2.json` is the ABI 2 source (`abiVersion` 2, snapshot format 2). Run
 `python3 scripts/generate_ffi_bindings.py` after intentional changes; `--check`
 verifies C declarations, Rust records, C# `LibraryImport` declarations, layouts
 and the exact contract SHA256. Version 1 is not yet a published SDK artifact.
