@@ -29,6 +29,9 @@ name: CI
 #   benchmark-slow - nightly/manual only; restores or downloads the approved
 #                parser asset, fetches the locked medium fixture, and fails
 #                closed on any identity drift. Never a merge gate.
+#   scheduled-failure-alert - scheduled runs only. Opens or updates one
+#                tracking issue when a lane fails, and closes it after a
+#                later scheduled run is green. Never a merge gate.
 #
 # Toolchain policy: compile runners are pinned to xcode-27 with Xcode 27.0. If the
 # pinned toolchain is missing the job fails immediately instead of silently
@@ -436,6 +439,7 @@ jobs:
           python3 scripts/test_stage_macos_rust_sdk.py
           python3 scripts/verify_migration_contracts.py
           python3 scripts/test_migration_contracts.py
+          sh scripts/test_scheduled_ci_alert.sh
           python3 -m unittest discover -s scripts/rollback_conformance -p 'test_*.py'
 
   rust-macos:
@@ -703,3 +707,75 @@ jobs:
 
       - name: Run medium benchmark
         run: scripts/benchmark.sh phase4 medium
+
+  # Scheduled runs can fail in benchmark-slow while CI required stays green,
+  # because that lane is not a merge gate. This job is the alert for that
+  # gap and for any other red lane on the nightly cron. It does not run on
+  # pull requests.
+  scheduled-failure-alert:
+    name: Alert on scheduled failure
+    needs: [plan, swiftpm, app, contracts, rust-macos, rust-windows, benchmark-slow, ci-required]
+    if: always() && github.event_name == 'schedule' && !cancelled()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Open, update, or close the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ALERT_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ALERT_HEAD_SHA: ${{ github.sha }}
+          ALERT_PLAN: ${{ needs.plan.result }}
+          ALERT_SWIFTPM: ${{ needs.swiftpm.result }}
+          ALERT_APP: ${{ needs.app.result }}
+          ALERT_CONTRACTS: ${{ needs.contracts.result }}
+          ALERT_RUST_MACOS: ${{ needs.rust-macos.result }}
+          ALERT_RUST_WINDOWS: ${{ needs.rust-windows.result }}
+          ALERT_BENCHMARK: ${{ needs.benchmark-slow.result }}
+          ALERT_REQUIRED: ${{ needs.ci-required.result }}
+          ALERT_LANE_SWIFTPM: ${{ needs.plan.outputs.lane_swiftpm }}
+          ALERT_LANE_APP: ${{ needs.plan.outputs.lane_app }}
+          ALERT_LANE_CONTRACTS: ${{ needs.plan.outputs.lane_contracts }}
+          ALERT_LANE_RUST_MACOS: ${{ needs.plan.outputs.lane_rust_macos }}
+          ALERT_LANE_RUST_WINDOWS: ${{ needs.plan.outputs.lane_rust_windows }}
+        run: |
+          set -eu
+          failed=""
+          add() {
+            if [ -n "$failed" ]; then
+              failed="$failed,$1"
+            else
+              failed="$1"
+            fi
+          }
+          consider() {
+            result=$1
+            planned=$2
+            id=$3
+            if [ "$planned" != "true" ]; then
+              return 0
+            fi
+            case "$result" in
+              success) ;;
+              *) add "$id" ;;
+            esac
+          }
+          consider "$ALERT_PLAN" true plan
+          consider "$ALERT_SWIFTPM" "$ALERT_LANE_SWIFTPM" swiftpm
+          consider "$ALERT_APP" "$ALERT_LANE_APP" app
+          consider "$ALERT_CONTRACTS" "$ALERT_LANE_CONTRACTS" contracts
+          consider "$ALERT_RUST_MACOS" "$ALERT_LANE_RUST_MACOS" rust-macos
+          consider "$ALERT_RUST_WINDOWS" "$ALERT_LANE_RUST_WINDOWS" rust-windows
+          case "$ALERT_BENCHMARK" in
+            success) ;;
+            *) add benchmark-slow ;;
+          esac
+          case "$ALERT_REQUIRED" in
+            success) ;;
+            *) add ci-required ;;
+          esac
+          export ALERT_FAILED_JOBS="$failed"
+          sh scripts/scheduled_ci_alert.sh

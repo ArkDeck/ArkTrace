@@ -341,12 +341,54 @@ jq -e -f "$script_directory/verify_phase3_query_plans.jq" \
 jq -e -f "$script_directory/verify_phase4_workloads.jq" \
     "$partial_evidence" >/dev/null \
     || fail "benchmark Context or analysis workload drifted from the reviewed default"
+# Permitted names are the full index-definition closure, including optional
+# schema-4 args and dictionary indexes. verify_migration_contracts.py checks
+# these arrays against contracts/index-definitions.json.
+permitted_index_names='[
+  "arktrace_v1_callstack_callid_ts","arktrace_v1_measure_filter_id_ts",
+  "arktrace_v1_process_ipid","arktrace_v1_process_pid",
+  "arktrace_v1_sched_slice_itid_ts","arktrace_v1_sched_slice_ts_cpu",
+  "arktrace_v1_thread_itid","arktrace_v1_thread_state_itid_ts",
+  "arktrace_v1_thread_state_ts_cpu","arktrace_v1_thread_tid_ipid",
+  "arktrace_v2_callstack_callid_ts_cover_optional",
+  "arktrace_v2_callstack_callid_ts_id_dur","arktrace_v3_callstack_ts_id_dur_callid",
+  "arktrace_v2_cpu_measure_filter_id",
+  "arktrace_v2_process_ipid_pid_name","arktrace_v2_process_measure_filter_id",
+  "arktrace_v2_sched_slice_cpu_ts_cover_optional",
+  "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+  "arktrace_v3_sched_slice_cpu_ts_dur",
+  "arktrace_v2_thread_itid_tid_name_ipid",
+  "arktrace_v2_thread_state_itid_ts_cover_cpu",
+  "arktrace_v2_thread_state_itid_ts_id_dur",
+  "arktrace_v3_thread_state_itid_ts_dur",
+  "arktrace_v3_callstack_callid_ts_dur",
+  "arktrace_v4_args_argset_id_values","arktrace_v4_args_argset_values",
+  "arktrace_v4_data_dict_id_data","arktrace_v4_data_type_id_desc"
+]'
+required_index_names='[
+  "arktrace_v1_process_ipid","arktrace_v2_process_ipid_pid_name",
+  "arktrace_v1_thread_itid","arktrace_v2_thread_itid_tid_name_ipid",
+  "arktrace_v1_sched_slice_ts_cpu","arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
+  "arktrace_v1_thread_state_itid_ts","arktrace_v2_thread_state_itid_ts_id_dur",
+  "arktrace_v1_callstack_callid_ts","arktrace_v2_callstack_callid_ts_id_dur",
+  "arktrace_v3_callstack_ts_id_dur_callid","arktrace_v3_callstack_callid_ts_dur",
+  "arktrace_v3_sched_slice_cpu_ts_dur","arktrace_v3_thread_state_itid_ts_dur"
+]'
+# The locked medium pbreader.htrace has args, data_dict and data_type, so the
+# schema-4 optional indexes are part of that fixture's Ready closure.
+medium_index_names='[
+  "arktrace_v4_args_argset_id_values","arktrace_v4_args_argset_values",
+  "arktrace_v4_data_dict_id_data","arktrace_v4_data_type_id_desc"
+]'
 jq -e \
     --arg class "$fixture_class" --arg base "$base_revision" \
     --arg sourceTreeSHA "$source_tree_sha" \
     --arg parserSHA "$parser_sha" --arg provenanceSHA "$provenance_sha" \
     --arg provenanceSource "$provenance_source" --arg licenseSHA "$license_sha" \
-    --argjson dirty "$worktree_dirty" '
+    --argjson dirty "$worktree_dirty" \
+    --argjson permitted "$permitted_index_names" \
+    --argjson required "$required_index_names" \
+    --argjson medium_indexes "$medium_index_names" '
     .formatVersion == 5
     and ((keys | sort) == ["analysisWorkload","arkTraceBaseRevision","arkTraceSourceTreeSHA256","arkTraceTestBinarySHA256","arkTraceVersion","bottlenecks","cacheOpenP50Ms","cacheOpenP95Ms","capabilities","coldOpenMs","contextP50Ms","contextP95Ms","contextWorkload","databaseByteCount","deterministicAnalysisP50Ms","deterministicAnalysisP95Ms","diagnostics","fixtureClass","fixtureLicenseSHA256","fixtureProvenanceSHA256","fixtureProvenanceSource","formatVersion","frameP50Ms","frameP95Ms","indexMs","iterations","machine","maximumPrimitives","measuredRows","metadataDirectoryP50Ms","metadataDirectoryP95Ms","panFrameP50Ms","panFrameP95Ms","parseMs","parserBinarySHA256","parserUpstreamRevision","parserVersion","peakRSSBytes","performanceMetrics","rebuildFrameP50Ms","rebuildFrameP95Ms","selectionFrameP50Ms","selectionFrameP95Ms","storage","traceByteCount","traceDurationNs","traceSHA256","validationMs","viewportLatency","viewportP50Ms","viewportP95Ms","workingTreeDirty"])
     and .fixtureClass == $class
@@ -392,7 +434,11 @@ jq -e \
     and .contextP95Ms <= (if $class == "large" then 2000 else 1000 end)
     and .deterministicAnalysisP95Ms <= (if $class == "large" then 5000 else 3000 end)
     and .peakRSSBytes <= 1610612736
-    and (.performanceMetrics | type == "array" and length >= 8 and length <= 64)
+    # Cold open records one databasePreparation metric per applicable index.
+    # Schema 4 defines 28 indexes; the previous cap of 64 had no room for that
+    # closure plus the open/context/loader names. 72 stays bounded. The XCTest
+    # still rejects evidence above 32 KiB.
+    and (.performanceMetrics | type == "array" and length >= 8 and length <= 72)
     and ([.performanceMetrics[] |
         ((keys | sort) == ["maximumMs","operation","p50Ms","p95Ms","sampleCount","scope","totalWorkUnits","workUnit"])
         and (.scope | test("^[A-Za-z][A-Za-z0-9.]{0,63}$"))
@@ -427,36 +473,25 @@ jq -e \
     and ([.diagnostics.relationshipProbeSteps[] | type == "number" and . > 0 and . < 250000] | all)
     and (.diagnostics.applicableIndexNames | type == "array" and length >= 10)
     and (.diagnostics.applicableIndexNames == (.diagnostics.applicableIndexNames | sort | unique))
-    and ((.diagnostics.applicableIndexNames - [
-      "arktrace_v1_callstack_callid_ts","arktrace_v1_measure_filter_id_ts",
-      "arktrace_v1_process_ipid","arktrace_v1_process_pid",
-      "arktrace_v1_sched_slice_itid_ts","arktrace_v1_sched_slice_ts_cpu",
-      "arktrace_v1_thread_itid","arktrace_v1_thread_state_itid_ts",
-      "arktrace_v1_thread_state_ts_cpu","arktrace_v1_thread_tid_ipid",
-      "arktrace_v2_callstack_callid_ts_cover_optional",
-      "arktrace_v2_callstack_callid_ts_id_dur","arktrace_v3_callstack_ts_id_dur_callid",
-      "arktrace_v2_cpu_measure_filter_id",
-      "arktrace_v2_process_ipid_pid_name","arktrace_v2_process_measure_filter_id",
-      "arktrace_v2_sched_slice_cpu_ts_cover_optional",
-      "arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
-      "arktrace_v3_sched_slice_cpu_ts_dur",
-      "arktrace_v2_thread_itid_tid_name_ipid",
-      "arktrace_v2_thread_state_itid_ts_cover_cpu",
-      "arktrace_v2_thread_state_itid_ts_id_dur",
-      "arktrace_v3_thread_state_itid_ts_dur",
-      "arktrace_v3_callstack_callid_ts_dur"
-    ]) == [])
-    and ([
-      "arktrace_v1_process_ipid","arktrace_v2_process_ipid_pid_name",
-      "arktrace_v1_thread_itid","arktrace_v2_thread_itid_tid_name_ipid",
-      "arktrace_v1_sched_slice_ts_cpu","arktrace_v2_sched_slice_cpu_ts_id_dur_itid",
-      "arktrace_v1_thread_state_itid_ts","arktrace_v2_thread_state_itid_ts_id_dur",
-      "arktrace_v1_callstack_callid_ts","arktrace_v2_callstack_callid_ts_id_dur",
-      "arktrace_v3_callstack_ts_id_dur_callid","arktrace_v3_callstack_callid_ts_dur",
-      "arktrace_v3_sched_slice_cpu_ts_dur","arktrace_v3_thread_state_itid_ts_dur"
-    ] - .diagnostics.applicableIndexNames == [])
+    and ((.diagnostics.applicableIndexNames - $permitted) == [])
+    and (($required - .diagnostics.applicableIndexNames) == [])
+    and (if $class == "medium" then (($medium_indexes - .diagnostics.applicableIndexNames) == []) else true end)
     and (.diagnostics.persistentIndexNames == .diagnostics.applicableIndexNames)
-' "$partial_evidence" >/dev/null || fail "benchmark evidence does not satisfy Phase 3 budgets"
+' "$partial_evidence" >/dev/null || {
+    budget_hint=$(jq -r \
+        --argjson permitted "$permitted_index_names" \
+        --argjson required "$required_index_names" \
+        --argjson medium_indexes "$medium_index_names" \
+        --arg class "$fixture_class" '
+        def flag($name; $ok): if $ok then empty else $name end;
+        flag("performanceMetricCount"; (.performanceMetrics | type == "array" and (length >= 8 and length <= 72))),
+        flag("unexpectedIndexes"; ((.diagnostics.applicableIndexNames - $permitted) == [])),
+        flag("missingRequiredIndexes"; (($required - .diagnostics.applicableIndexNames) == [])),
+        flag("missingMediumIndexes"; (if $class == "medium" then (($medium_indexes - .diagnostics.applicableIndexNames) == []) else true end))
+    ' "$partial_evidence" 2>/dev/null | tr '\n' ',' || true)
+    [ -z "$budget_hint" ] || printf 'benchmark budget checks failed: %s\n' "$budget_hint" >&2
+    fail "benchmark evidence does not satisfy Phase 3 budgets"
+}
 
 if [ "$fixture_class" = medium ]; then
     jq -e --slurpfile lock "$fixture_lock" '
