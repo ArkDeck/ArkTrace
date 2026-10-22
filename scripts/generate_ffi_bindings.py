@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / 'contracts/ffi-v1.json'
+SOURCE = ROOT / 'contracts/ffi-v2.json'
 WIRE = {'ViewportRecord', 'TrackRecord', 'PrimitiveRecord', 'QualityRecord'}
 SCALARS = {'u8': 'uint8_t', 'u32': 'uint32_t', 'u64': 'uint64_t', 'i64': 'int64_t', 'f64': 'double'}
 CS = {'u8': 'byte', 'u32': 'uint', 'u64': 'ulong', 'i64': 'long', 'f64': 'double'}
@@ -122,7 +122,7 @@ def main():
             swift.append(f'        precondition(MemoryLayout<ArkTrace{name}>.offset(of: \\ArkTrace{name}.{n}) == {o})')
     header += declarations + ['#undef ARKTRACE_LAYOUT_ASSERT', '#ifdef __cplusplus', '}', '#endif', '#endif']
     swift += ['    }', '}']
-    outputs = {ROOT / 'bindings/c/arktrace_ffi.h': '\n'.join(header)+'\n', ROOT / 'bindings/c/module.modulemap': 'module CArkTrace {\n    header "arktrace_ffi.h"\n    export *\n}\n', ROOT / 'bindings/csharp/NativeMethods.cs': '\n'.join(cs)+'\n', ROOT / 'bindings/ffi-layouts.json': json.dumps(layouts, indent=2)+'\n', ROOT / 'rust/crates/arktrace-ffi/src/abi_records.rs': '\n'.join(rust)+'\n', ROOT / 'rust/crates/arktrace-viewer/src/wire_records.rs': '\n'.join(wire)+'\n', ROOT / 'contracts/ffi-v1.sha256': digest+'\n'}
+    outputs = {ROOT / 'bindings/c/arktrace_ffi.h': '\n'.join(header)+'\n', ROOT / 'bindings/c/module.modulemap': 'module CArkTrace {\n    header "arktrace_ffi.h"\n    export *\n}\n', ROOT / 'bindings/csharp/NativeMethods.cs': '\n'.join(cs)+'\n', ROOT / 'bindings/ffi-layouts.json': json.dumps(layouts, indent=2)+'\n', ROOT / 'rust/crates/arktrace-ffi/src/abi_records.rs': '\n'.join(rust)+'\n', ROOT / 'rust/crates/arktrace-viewer/src/wire_records.rs': '\n'.join(wire)+'\n', ROOT / 'contracts/ffi-v2.sha256': digest+'\n'}
     outputs[ROOT / 'bindings/swift/GeneratedLayouts.swift'] = '\n'.join(swift)+'\n'
     outputs[ROOT / 'scripts/swift-sdk-conformance/GeneratedRecords.swift'] = '\n'.join(probe)+'\n'
     for p in outputs:

@@ -45,7 +45,7 @@ def main():
     obj = cache / 'empty.o'; archive = cache / 'empty.a'
     subprocess.run(['xcrun', 'clang', '-arch', 'arm64', '-mmacosx-version-min=26.0', '-c', str(empty), '-o', str(obj)], check=True)
     subprocess.run(['xcrun', 'ar', 'rcs', str(archive), str(obj)], check=True)
-    current = (ROOT / 'contracts/ffi-v1.sha256').read_text().strip()
+    current = (ROOT / 'contracts/ffi-v2.sha256').read_text().strip()
     sdks = {}
     for name, digest in [('old', '0' * 64), ('new', current)]:
         sdk = cache / 'synthetic-sdks' / name / 'CArkTrace.xcframework'

@@ -50,9 +50,10 @@ the same identity; T1 explicitly selected semantic comparison with actual
 provenance verified separately; T2 host/presentation differences. Never discard
 whole provenance, quality or truncation sections to obtain parity.
 
-`ffi-v1.json` retains its original filename; its current contract is ABI 2 and
-snapshot format 2. Consumers must rebuild against the generated C, Swift and C#
-records and the matching SDK. Format 1 is rejected. The 288-byte primitive record
+`ffi-v2.json` is the ABI contract. Its `abiVersion` and `snapshotFormatVersion`
+are both 2. The previous filename `ffi-v1.json` was only historical; format 1
+is rejected. CI checks `ffi-v2.sha256` against the contract bytes. Consumers must rebuild against the generated C, Swift and C#
+records and the matching SDK. The 288-byte primitive record
 now transports Rust presentation colors, labels and the complete typed Inspector
 projection. Explicit presence bits distinguish nil from zero and empty strings.
 Viewport requests preserve the original host continuous-clock deadline in addition

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import time
 ROOT = Path(__file__).resolve().parent.parent
-CONTRACT = json.loads((ROOT/'contracts/ffi-v1.json').read_text())
+CONTRACT = json.loads((ROOT/'contracts/ffi-v2.json').read_text())
 TYPES = {'u8':C.c_uint8,'u32':C.c_uint32,'u64':C.c_uint64,'i64':C.c_int64,'f64':C.c_double}
 
 def type_for(t):

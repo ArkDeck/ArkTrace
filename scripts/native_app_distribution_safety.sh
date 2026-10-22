@@ -30,7 +30,7 @@ arktrace_verify_native_app_closure() {
             || fail "$arktrace_native_label native manifest exceeds its byte bound"
     done
     arktrace_native_sha=$(shasum -a 256 "$arktrace_native_helper" | awk '{print $1}')
-    arktrace_native_contract=$(cat "$repository_root/contracts/ffi-v1.sha256")
+    arktrace_native_contract=$(cat "$repository_root/contracts/ffi-v2.sha256")
     jq -e --arg sha "$arktrace_native_sha" --arg contract "$arktrace_native_contract" --arg team "$team" '
         .formatVersion == 1
         and ((keys | sort) == ["contractSHA256","formatVersion","helperSHA256","publisher"])

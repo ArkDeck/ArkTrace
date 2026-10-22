@@ -68,8 +68,8 @@ def main():
     (base / 'inputs.json').write_text(json.dumps(pins, indent=2) + '\n')
     abi = ABI(tools / 'library.dylib')
     identity = abi.out('abi_identity', 'AbiIdentity')
-    contract = sha(ROOT / 'contracts/ffi-v1.json')
-    assert identity.abi_version == json.loads((ROOT/'contracts/ffi-v1.json').read_text())['abiVersion'] and identity.capabilities == 191
+    contract = sha(ROOT / 'contracts/ffi-v2.json')
+    assert identity.abi_version == json.loads((ROOT/'contracts/ffi-v2.json').read_text())['abiVersion'] and identity.capabilities == 191
     assert bytes(identity.contract_digest).hex() == contract
     manifest = json.loads((ROOT / 'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
     assert sha(tools / 'parser') == manifest['binarySHA256']
@@ -94,7 +94,7 @@ def main():
             self.label, self.backup = label, backup
             namespace = base / ('namespace-' + label)
             namespace.mkdir(mode=0o700)
-            config = dict(abiVersion=json.loads((ROOT/'contracts/ffi-v1.json').read_text())['abiVersion'], contractDigest=contract, cachePolicy='contentAddressed',
+            config = dict(abiVersion=json.loads((ROOT/'contracts/ffi-v2.json').read_text())['abiVersion'], contractDigest=contract, cachePolicy='contentAddressed',
                 cacheDirectory=str(cache), namespace=str(namespace), helper=str(tools / 'helper'),
                 parser=str(tools / 'parser'), helperSHA256=sha(tools / 'helper'), parserIdentity=parser_identity,
                 viewStateBackup=dict(backupDirectory=str(backup)),

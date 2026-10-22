@@ -22,7 +22,7 @@ mkdir -p "$repository/scripts" "$repository/ArkTrace.xcodeproj" \
     "$repository/ThirdParty/TraceStreamer/macx" \
     "$repository/ThirdParty/TraceStreamer/LICENSES" \
     "$repository/Fixtures/release-evidence" "$repository/contracts" "$fake_bin"
-cp "$source_scripts/../contracts/ffi-v1.sha256" "$repository/contracts/"
+cp "$source_scripts/../contracts/ffi-v2.sha256" "$repository/contracts/"
 cp "$source_scripts/build_phase3_distribution_candidate.sh" \
     "$source_scripts/package_phase3.sh" \
     "$source_scripts/verify_phase3_notarized_artifact.sh" \
@@ -239,7 +239,7 @@ for name,data in [('arktrace-host-process',helper),('trace_streamer',parser)]:
  target.chmod(0o555)
 manifest=json.loads((root/'ThirdParty/TraceStreamer/macx/manifest.json').read_text())
 manifest['binarySHA256']=digest((inputs/'Helpers/trace_streamer').read_bytes())
-runtime={'formatVersion':1,'contractSHA256':(root/'contracts/ffi-v1.sha256').read_text().strip(),'helperSHA256':digest((inputs/'Helpers/arktrace-host-process').read_bytes()),'publisher':publisher}
+runtime={'formatVersion':1,'contractSHA256':(root/'contracts/ffi-v2.sha256').read_text().strip(),'helperSHA256':digest((inputs/'Helpers/arktrace-host-process').read_bytes()),'publisher':publisher}
 for name,value in [('TraceStreamer/manifest.json',manifest),('ArkTraceRuntime/manifest.json',runtime),('receipt.json',{'inputs':{'unsignedHelperSHA256':digest(helper)}})]:
  target=inputs/name;target.parent.mkdir(parents=True,exist_ok=True)
  target.write_text(json.dumps(value))
