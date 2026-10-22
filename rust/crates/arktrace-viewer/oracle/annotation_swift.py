@@ -25,7 +25,7 @@ def main():
  original=original.replace(persist,persist+'        if AnnotationOracleProbe.enabled { AnnotationOracleProbe.persistCount += 1 }\n',1)
  original=original.replace(reveal,reveal+'        if AnnotationOracleProbe.enabled { AnnotationOracleProbe.reveals.append(eventRange); return }\n',1)
  access=(CRATE/'oracle/annotation_access.swift').read_text(encoding='utf-8')
- ui=ROOT/'Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift';body=re.search(r'rename: \{ label in\n(.*?)\n\s*\},',ui.read_text(encoding='utf-8'),re.S).group(1)
+ ui=ROOT/'apple/Apps/ArkTraceApp/Viewer/TraceTimelinePane.swift';body=re.search(r'rename: \{ label in\n(.*?)\n\s*\},',ui.read_text(encoding='utf-8'),re.S).group(1)
  assert 'guard selection.sessionID == controller.annotationSessionID else { return }'in body and 'controller.updateFlag(id: flag.id, label: label)'in body
  access=access.replace('        // ANNOTATION_DEFERRED_RENAME_BODY',body)
  controller.write_text(original+'\n'+access, encoding='utf-8')
@@ -41,7 +41,7 @@ def main():
  if regressions:print(log.read_text(encoding='utf-8')[-1700:]);return 0
  def digest(p):
   data=p.read_bytes();return {'path':str(p.relative_to(ROOT))if p.is_relative_to(ROOT)else str(p),'byteCount':len(data),'sha256':hashlib.sha256(data).hexdigest()}
- paths=[p for target in targets for p in(ROOT/'Sources'/target).rglob('*.swift')]+[ROOT/p for p in testpaths]+[ui,ROOT/'Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift',CRATE/'oracle/annotation_access.swift',CRATE/'oracle/annotation_harness.swift',CRATE/'oracle/annotation_swift.py',inp,out]
+ paths=[p for target in targets for p in(ROOT/'Sources'/target).rglob('*.swift')]+[ROOT/p for p in testpaths]+[ui,ROOT/'apple/Apps/ArkTraceApp/Inspector/AnnotationInspectorView.swift',CRATE/'oracle/annotation_access.swift',CRATE/'oracle/annotation_harness.swift',CRATE/'oracle/annotation_swift.py',inp,out]
  result=json.loads(out.read_text(encoding='utf-8'));receipt={'oracle':'actual TimelineAnnotations, TraceDocumentController and TraceViewStateStore; reveal interception only before generic revealRange','xcode':xcode.strip(),'swift':swift.strip(),'cases':len(result['cases']),'states':sum(len(c['states'])for c in result['cases']),'actions':sum(len(c['states'])-1 for c in result['cases']),'sourceDigests':[digest(p)for p in sorted(paths)],'cacheOnlyAugmentedSources':[digest(controller),digest(test),digest(source/'Package.swift')],'deferredRenameCompiledOriginalBlock':{'source':str(ui.relative_to(ROOT)),'utf8':body,'sha256':hashlib.sha256(body.encode()).hexdigest()},'copiedExpectedStateAlgorithms':False}
  (CRATE/'tests/fixtures/annotation-swift-receipt.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n', encoding='utf-8');print(receipt['cases'],'cases',receipt['actions'],'actions',receipt['states'],'states')
  return 0

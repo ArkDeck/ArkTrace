@@ -144,7 +144,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let configuration = try String(
-            contentsOf: root.appending(path: "Config/ArkTraceProduct.xcconfig"),
+            contentsOf: root.appending(path: "apple/Config/ArkTraceProduct.xcconfig"),
             encoding: .utf8
         )
         let values = Dictionary(uniqueKeysWithValues: configuration
@@ -164,7 +164,7 @@ final class AppDistributionTests: XCTestCase {
         )
 
         let data = try Data(
-            contentsOf: root.appending(path: "Apps/ArkTraceApp/Info.plist")
+            contentsOf: root.appending(path: "apple/Apps/ArkTraceApp/Info.plist")
         )
         let plist = try XCTUnwrap(
             PropertyListSerialization.propertyList(from: data, format: nil)
@@ -196,7 +196,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
         let catalog = try JSONSerialization.jsonObject(
             with: try Data(
-                contentsOf: root.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
+                contentsOf: root.appending(path: "apple/Apps/ArkTraceApp/Localizable.xcstrings")
             )
         ) as? [String: Any]
         let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])
@@ -271,7 +271,7 @@ final class AppDistributionTests: XCTestCase {
             .deletingLastPathComponent()
         let catalog = try JSONSerialization.jsonObject(
             with: try Data(
-                contentsOf: root.appending(path: "Apps/ArkTraceApp/Localizable.xcstrings")
+                contentsOf: root.appending(path: "apple/Apps/ArkTraceApp/Localizable.xcstrings")
             )
         ) as? [String: Any]
         let strings = try XCTUnwrap(catalog?["strings"] as? [String: Any])

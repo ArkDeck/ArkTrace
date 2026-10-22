@@ -63,7 +63,7 @@ capture/inspect/export 对等、Viewer 后置，因此 Windows Viewer 不是 Ark
 | ArkTraceSignalShim（C target） | 1 `.c` + 1 header / 132 | replace：SIGINT/SIGTERM self-pipe 进入 Rust CLI；Windows 语义见 §10.1 |
 | ArkTraceCLIResourceFixtures | 仅测试资源 | retain：测试资源来源，不进入生产依赖闭包 |
 
-表外还有两类迁移面：`Apps/ArkTraceApp/`（43 个 Swift 文件 / 3,182 行，另含 xcstrings、
+表外还有两类迁移面：`apple/Apps/ArkTraceApp/`（43 个 Swift 文件 / 3,182 行，另含 xcstrings、
 Assets）保留为 macOS 原生 UI；`Tests/` 的 44 个文件 / 29,633 行是 001 提取行为向量的主要来源。
 
 依赖事实源为 [Package.swift](../../Package.swift)。对外 API 已有独立包的

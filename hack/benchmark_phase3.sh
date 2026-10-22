@@ -162,14 +162,14 @@ else
               .review.manifestPath,.review.signaturePath,.review.reviewerPublicKeyPath] |
              all(contains("..") | not))
     ' "$provenance" >/dev/null || fail "locked large provenance schema is invalid"
-    trust_configuration="$repository_root/Config/ArkTraceReleaseReviewers.json"
+    trust_configuration="$repository_root/apple/Config/ArkTraceReleaseReviewers.json"
     arktrace_assert_physical_file_within \
         "$repository_root" "$trust_configuration" "release reviewer trust configuration"
     git -C "$repository_root" cat-file -e \
-        'HEAD:Config/ArkTraceReleaseReviewers.json' 2>/dev/null \
+        'HEAD:apple/Config/ArkTraceReleaseReviewers.json' 2>/dev/null \
         || fail "release reviewer trust configuration is absent from HEAD"
     trust_head_sha=$(git -C "$repository_root" show \
-        'HEAD:Config/ArkTraceReleaseReviewers.json' 2>/dev/null \
+        'HEAD:apple/Config/ArkTraceReleaseReviewers.json' 2>/dev/null \
         | shasum -a 256 | awk '{print $1}')
     [ "$trust_head_sha" = "$(shasum -a 256 "$trust_configuration" | awk '{print $1}')" ] \
         || fail "release reviewer trust configuration differs from HEAD"

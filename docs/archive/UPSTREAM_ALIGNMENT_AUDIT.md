@@ -66,7 +66,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 - **上游**：`database/sql/ProcessThread.sql.ts:544-560` `queryProcessMemData` —— `from process_measure c, trace_range tb where filter_id = $id`；`:535` `queryProcessMemDataCount` 同样 `from process_measure c left join process_measure_filter f on f.id = c.filter_id`。上游 process counter 样本来自 **`process_measure`**。
 - **对照**：`database/sql/Cpu.sql.ts:127-134` 显示上游 **CPU** counter 来自 `measure` + `cpu_measure_filter` —— 与 ArkTrace 一致，错的只有 process 一路。
 - **ArkTrace**：`Sources/ArkTraceStore/SQLiteTraceRepository.swift:1977`（`counterRows`）、`:1533`（`density(_:)` 的 process 分支）、`:2374`（`boundedCounterSeriesCount`）与 `Sources/ArkTraceStore/TraceSchemaAdapter.swift:303/317`（capability 探针）全部从 `measure` 读。`grep -rn "process_measure" Sources/ | grep -v _filter` 无命中 → 无 fallback。
-- **用户可见后果**：capability 探针恒返回空 → `capabilities.processCounters = false` → `counters()`（`SQLiteTraceRepository.swift:1237-1238`）返回 `.unavailable` → Sidebar "Process Counters" 组显示 "Not available in this trace"（`Apps/ArkTraceApp/ArkTraceApp.swift:318-321`）。丢失的是 `H:VSync-app`（16 343 样本）、`H:FrameBuffer`（5 312）、`H:settings0`（3 615）、`H:PreferredFrameRate`（2 987）、`H:VSync-rs`（2 762）等 66 条命名 series —— 正是看掉帧与渲染节奏最需要的几条。
+- **用户可见后果**：capability 探针恒返回空 → `capabilities.processCounters = false` → `counters()`（`SQLiteTraceRepository.swift:1237-1238`）返回 `.unavailable` → Sidebar "Process Counters" 组显示 "Not available in this trace"（`apple/Apps/ArkTraceApp/ArkTraceApp.swift:318-321`）。丢失的是 `H:VSync-app`（16 343 样本）、`H:FrameBuffer`（5 312）、`H:settings0`（3 615）、`H:PreferredFrameRate`（2 987）、`H:VSync-rs`（2 762）等 66 条命名 series —— 正是看掉帧与渲染节奏最需要的几条。
 - **旁证**：`test/fixtures/databases/trace_streamer_4.3.7.schema-evidence.json` 两个 fixture 的 `capabilities.processCounters` 也都是 `false`，说明该路径可能从未在任何真实 trace 上成立过。README:14 明写支持 counter 泳道。
 - **实证命令**：
 
@@ -93,7 +93,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T05，2026-08-18）。** reduction 版；受限时显式标注为下界。
 
 - **上游**：`component/trace/sheet/process/TabPaneSlices.ts:395-398` 列 `Name` / `Wall duration(ms)` / `Avg Wall duration(ms)` / `Occurrences` / `selfTime(ms)`（`:197-234` 计算 selfTime 与合计）；`component/trace/base/TraceSheet.ts:334-336` 给 `box-slices` 绑 `td-click`，`:1673-1697` `tdSliceClickHandler` 用 `SliceBoxJumpParam` 下钻到 `box-slice-child` 列出全部 occurrence。
-- **ArkTrace**：`Apps/ArkTraceApp/ArkTraceApp.swift:772-800` `RangeInspectorView` 只渲染 `TraceRangeAnalysis` 的三段 `cpuUtilization` / `topThreads` / `longSlices`（`Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`）。`longSlices` 是**单条**最长 slice 列表（`:271-281`），不是按名汇总。
+- **ArkTrace**：`apple/Apps/ArkTraceApp/ArkTraceApp.swift:772-800` `RangeInspectorView` 只渲染 `TraceRangeAnalysis` 的三段 `cpuUtilization` / `topThreads` / `longSlices`（`Sources/ArkTraceAnalysis/TraceViewerAnalysis.swift:310-320`）。`longSlices` 是**单条**最长 slice 列表（`:271-281`），不是按名汇总。
 - **用户可见后果**：答不了「这段区间里某函数一共花了多少、调了几次」，看不出「调 1 万次、每次很短、总和最贵」这类真正热点。
 - **落地成本**：repository 只有一处 `GROUP BY`（`SQLiteTraceRepository.swift:1550`，density 用），其余分析都是 Swift 侧对 bounded page 做 reduction（范式见 `Sources/ArkTraceAnalysis/TraceDeterministicAnalysis.swift:765-800` `stateDistribution`）。可照同一模式实现，但聚合范围受 page limit 约束。→ P7-T05
 
@@ -148,7 +148,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 
 - **上游 flag**：`component/trace/timer-shaft/SportRuler.ts:75` `flagList`；`:763-789` ruler 上点击即新建随机色 Flag；`:142-155` `modifyFlagList` 增删改；`component/trace/timer-shaft/TabPaneFlag.ts` 表格列 `TimeStamp` / `Color` / `Remarks` / `Operate(Remove)`，可改名改色删除；`component/SpSystemTrace.event.ts:945/950` `Ctrl+,` / `Ctrl+.` 经 `MarkJump` 跳上/下一个 flag；`RangeRuler.ts:773-774` 裸 `,` / `.` 走 `scrollFlagIntoView` 把当前 flag 滚回视野。
 - **上游 A/B mark**：`SpSystemTrace.event.ts:656-670` `m` 键调 `setSLiceMark(ev.shiftKey)`；`SpSystemTrace.ts:1093-1115` 从当前选中 struct（含 `TraceRow.rangeSelectObject`）取时间；`component/SpKeyboard.html.ts` 说明 `m` = 临时、`Shift+m` = 持久；`component/trace/sheet/TabPaneCurrent.html.ts` 列 `StartTime` / `EndTime` / `Color` / `Remarks` / `Operate`；`SpSystemTrace.event.ts:942/947` `Ctrl+[` / `Ctrl+]` 在标记间跳转。
-- **ArkTrace**：不存在。`grep -rni "bookmark|flagList|marker" Sources/ArkTraceRendering Sources/ArkTraceAppSupport Apps/` 只命中 `TraceRecentDocuments.swift` 的 macOS security-scoped bookmark（文件书签，与时间轴无关）；`TimelineNSView.swift:286-323` keyDown 无 `,`/`.`/`m` 分支；`TimelineSnapshot`（`TimelineModels.swift:354`）无 annotation 层；`selection` 是单一 transient `TraceTimeRange?`（`:230`），`Escape` 即清（`:380-393`）。
+- **ArkTrace**：不存在。`grep -rni "bookmark|flagList|marker" Sources/ArkTraceRendering Sources/ArkTraceAppSupport apple/Apps/` 只命中 `TraceRecentDocuments.swift` 的 macOS security-scoped bookmark（文件书签，与时间轴无关）；`TimelineNSView.swift:286-323` keyDown 无 `,`/`.`/`m` 分支；`TimelineSnapshot`（`TimelineModels.swift:354`）无 annotation 层；`selection` 是单一 transient `TraceTimeRange?`（`:230`），`Escape` 即清（`:380-393`）。
 - **用户可见后果**：看长 trace 无法标记「这里有问题」再跳回；无法留住多个关注区间做对比。→ P7-T07
 
 ### G10 — 无泳道收藏 / 置顶
@@ -156,7 +156,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T08，2026-08-18）。** 置顶区与标注共用同一 sidecar。
 
 - **上游**：`component/trace/base/TraceRow.ts:451-459` `get/set collect`；`:1306-1321` 点收藏图标派发 `collect` 事件；`:1336-1367` 收藏区内拖拽重排；`:129` `ROW_TYPE_COLLECT_GROUP`；`:45` 模块级 `collectList`；`component/trace/SpChartList.ts:146` 裸 `b` 键折叠/展开收藏区（`SpKeyboard.html.ts` 记为 "Expand/Fold Collection Area"）。
-- **ArkTrace**：不存在。`grep -rni "favorite|collect" Sources/ArkTraceRendering Sources/ArkTraceAppSupport Apps/` 无相关命中。
+- **ArkTrace**：不存在。`grep -rni "favorite|collect" Sources/ArkTraceRendering Sources/ArkTraceAppSupport apple/Apps/` 无相关命中。
 - **用户可见后果**：199 线程下想把「这 4 条泳道」并排盯着看，只能靠关掉其他所有泳道近似。→ P7-T08
 
 ### G11 — 无 canvas hover tooltip
@@ -194,7 +194,7 @@ raw 文件 URL（gitcode / gitee / raw.githubusercontent）对该仓库取不到
 **已对齐（P7-T12，2026-08-18）。** 键位表单一来源 `TraceShortcutCatalog`，两份 README 由它生成，双向断言；挂在 Help 菜单，未占用 `/`。
 
 - **上游**：`component/SpKeyboard.html.ts` 自列 `/` → "Show Keyboard shortcuts"；面板本体 `component/SpKeyboard.ts`。
-- **ArkTrace**：`Apps/ArkTraceApp/ArkTraceApp.swift:21/23` 只有 ⌘O 与 ⌘R；键位表只存在于 `README.md:75-88`。`W/A/S/D`、`[`/`]`、`0`、`F` 都不是 macOS 惯例，不打开 README 无从发现。→ P7-T12
+- **ArkTrace**：`apple/Apps/ArkTraceApp/ArkTraceApp.swift:21/23` 只有 ⌘O 与 ⌘R；键位表只存在于 `README.md:75-88`。`W/A/S/D`、`[`/`]`、`0`、`F` 都不是 macOS 惯例，不打开 README 无从发现。→ P7-T12
 
 ## 4. PARTIAL
 

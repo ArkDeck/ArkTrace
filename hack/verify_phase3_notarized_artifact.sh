@@ -374,7 +374,7 @@ run_external "reviewed App nested signatures are invalid" \
 [ "$(signature_cdhash "$candidate_app" reviewed-app)" = "$candidate_cdhash" ] \
     || fail "reviewed App CodeDirectory differs from notarization evidence"
 
-configuration="$repository_root/Config/ArkTraceProduct.xcconfig"
+configuration="$repository_root/apple/Config/ArkTraceProduct.xcconfig"
 canonical_version=$(awk -F= '/^ARKTRACE_PRODUCT_VERSION[[:space:]]*=/{gsub(/[[:space:]]/,"",$2);print $2}' "$configuration")
 canonical_build=$(awk -F= '/^ARKTRACE_PRODUCT_BUILD[[:space:]]*=/{gsub(/[[:space:]]/,"",$2);print $2}' "$configuration")
 canonical_bundle_id=$(awk -F= '/^ARKTRACE_BUNDLE_IDENTIFIER[[:space:]]*=/{gsub(/[[:space:]]/,"",$2);print $2}' "$configuration")

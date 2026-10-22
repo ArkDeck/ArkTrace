@@ -892,7 +892,7 @@ repository/App 接线与完整 macOS 验收仍待办，见
 - 平台/输入：macOS 26+ arm64 图形会话、真实 medium/large；Capture 此时可保留 Swift。
 - 需求：AT-APP-*、AT-RENDER-*、AT-LOD-005/006、AT-SYS-004、AT-SEC-008、AT-CACHE-006、
   AT-PERF-002/007；现有功能不回退。
-- 路径：`Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`ArkTraceRendering/`、
+- 路径：`apple/Apps/ArkTraceApp/`、`Sources/ArkTraceAppSupport/`、`ArkTraceRendering/`、
   Swift compatibility targets、Xcode project 与原生 tests。
 
 交付：

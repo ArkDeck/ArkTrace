@@ -9,7 +9,7 @@
 DerivedData/
 xcuserdata/
 *.xcresult
-# `xcodebuild -project ArkTrace.xcodeproj` writes ArkTrace.app here
+# `xcodebuild -project apple/ArkTrace.xcodeproj` writes ArkTrace.app here
 /build
 
 # Profiling / scratch

@@ -1,4 +1,4 @@
-<img src="Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" alt="ArkTrace" width="128" height="128">
+<img src="apple/Apps/ArkTraceApp/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" alt="ArkTrace" width="128" height="128">
 
 # ArkTrace
 
@@ -83,7 +83,7 @@ PARSER="$PWD/third_party/TraceStreamer/macx/trace_streamer"
 
 ### 4. 运行 Viewer
 
-用 Xcode 打开 `ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过 **File → Open**、Finder「打开方式」、拖放或 Recents 打开 `.htrace` / `.ftrace` / `.systrace`；**Reload** 会从原始文件重新打开当前 Trace。
+用 Xcode 打开 `apple/ArkTrace.xcodeproj`，选择 `ArkTraceApp` scheme 后运行。可通过 **File → Open**、Finder「打开方式」、拖放或 Recents 打开 `.htrace` / `.ftrace` / `.systrace`；**Reload** 会从原始文件重新打开当前 Trace。
 
 要采集新 Trace，请先通过 USB 或网络调试连接 OpenHarmony 设备，再选择 **File → Capture Trace…**（<kbd>⌘N</kbd>）。ArkTrace 会从已配置的 SDK/PATH 查找 `hdc`，也允许直接选择其位置；随后选择设备、预设、时长与缓冲区，指定本地保存位置并开始采集。完成的文件会自动打开。完整行为与故障恢复见 [docs/design/CAPTURE.md](docs/design/CAPTURE.md)。
 

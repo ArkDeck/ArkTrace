@@ -16,9 +16,9 @@ operation_log="$temporary_root/operations.log"
 identity='Developer ID Application: ArkTrace Test (TEAMTEST01)'
 team=TEAMTEST01
 
-mkdir -p "$repository/scripts" "$repository/ArkTrace.xcodeproj" \
-    "$repository/Apps/ArkTraceApp" \
-    "$repository/Config" \
+mkdir -p "$repository/scripts" "$repository/apple/ArkTrace.xcodeproj" \
+    "$repository/apple/Apps/ArkTraceApp" \
+    "$repository/apple/Config" \
     "$repository/third_party/TraceStreamer/macx" \
     "$repository/third_party/TraceStreamer/LICENSES" \
     "$repository/test/fixtures/release-evidence" "$repository/contracts" "$fake_bin"
@@ -53,8 +53,8 @@ printf 'third-party notice\n' >"$repository/THIRD_PARTY_NOTICES.md"
 printf '{}\n' >"$repository/third_party/TraceStreamer/license-inventory.json"
 printf 'component license\n' >"$repository/third_party/TraceStreamer/LICENSES/component.txt"
 printf '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict/></plist>\n' \
-    >"$repository/Apps/ArkTraceApp/ArkTraceApp.entitlements"
-cat >"$repository/Config/ArkTraceProduct.xcconfig" <<'CONFIG'
+    >"$repository/apple/Apps/ArkTraceApp/ArkTraceApp.entitlements"
+cat >"$repository/apple/Config/ArkTraceProduct.xcconfig" <<'CONFIG'
 ARKTRACE_PRODUCT_VERSION = 0.1.0
 ARKTRACE_PRODUCT_BUILD = 1
 ARKTRACE_BUNDLE_IDENTIFIER = com.arktrace.ArkTrace

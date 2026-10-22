@@ -21,7 +21,7 @@ struct AppSource {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let appDirectory = repositoryRoot.appending(path: "Apps/ArkTraceApp")
+        let appDirectory = repositoryRoot.appending(path: "apple/Apps/ArkTraceApp")
         let urls = try swiftFiles(in: appDirectory)
         guard !urls.isEmpty else { throw ReadError.noSwiftSources(appDirectory) }
         return try AppSource(files: urls.map { url in
